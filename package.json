@@ -1,0 +1,63 @@
+{
+  "name": "spica",
+  "version": "0.0.0",
+  "description": "Utils.",
+  "private": true,
+  "homepage": "https://github.com/falsandtru/spica",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/falsandtru/spica"
+  },
+  "keywords": [
+    "supervisor",
+    "maybe",
+    "either"
+  ],
+  "main": "./dist/spica.js",
+  "files": [
+    "dist",
+    "index.*",
+    "typings",
+    "src",
+    "test",
+    "*.ts",
+    "*.js",
+    "*.json",
+    "*.md",
+    "LICENSE"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "benchmark": "^2.1.0",
+    "del": "^2.2.0",
+    "extend": "^3.0.0",
+    "gulp": "^3.9.1",
+    "gulp-footer": "^1.0.5",
+    "gulp-header": "^1.8.2",
+    "gulp-load-plugins": "^1.2.4",
+    "gulp-mocha": "^2.2.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-typescript": "2.13.5",
+    "gulp-uglify": "^1.5.3",
+    "gulp-unassert": "^1.0.0",
+    "karma": "0.13.22",
+    "karma-chrome-launcher": "^1.0.1",
+    "karma-coverage": "^1.0.0",
+    "karma-coveralls": "^1.1.2",
+    "karma-espower-preprocessor": "1.1.0",
+    "karma-firefox-launcher": "^1.0.0",
+    "karma-mocha": "^1.0.1",
+    "lodash": "^4.13.1",
+    "mocha": "^2.5.3",
+    "npm-check-updates": "^2.6.5",
+    "power-assert": "^1.4.1",
+    "run-sequence": "^1.2.1",
+    "tsd": "^0.6.5",
+    "typescript": "^1.8.10"
+  },
+  "scripts": {
+    "test": "gulp server"
+  },
+  "author": "falsandtru",
+  "license": "MIT"
+}

@@ -1,0 +1,44 @@
+﻿# binary
+coverage
+dist/**/*
+
+# temp
+*.swp
+*.tmp
+*.temp
+tmp
+temp
+src/**/*.js
+src/**/*.map
+test/**/*.js
+benchmark/**/*.js
+**/*.espowered.js
+
+# secret
+.coveralls.yml
+
+# vm
+.vagrant
+
+# vs
+.vs
+*.sln
+*.suo
+bin
+obj
+
+# eclipse
+.project
+.metadata
+.settings
+
+# adobe
+_notes
+
+# node
+node_modules
+bower_components
+
+# gh-pages
+gh-pages/coverage
+gh-pages/test

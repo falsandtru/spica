@@ -1,0 +1,34 @@
+sudo: required
+dist: trusty
+language: node_js
+node_js:
+- stable
+addons:
+  firefox: latest
+  apt:
+    sources:
+    - google-chrome
+    packages:
+    - google-chrome-stable
+before_install:
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+before_deploy:
+- sed -i 's/"private":\ true/"private":\ false/' package.json
+- sed -i -E 's/^dist\/?.*$//' .gitignore
+deploy:
+  provider: npm
+  email:
+    secure: c/u3dsMFxB/JwNNUa3G+aotltA08al8k4SfpJGe3g3/yiNeDz1YSJw9N+2DK8USWrfDK8YB1cZIFscGbrjD6OU37IKzovZooAcmtDyopRB7dGMeajoFtCT2TtBX38mwp3LNqR84iKRPwLlpV+Lv5qpyzQpaqyzcD5TeKObCd85RdSR3AqkDVi7BgkewRpU3M/J1EXZ6a5VbPky4cskRNbQDK/LPFr8AQflO21bwLkciDgRrPvx5Bbp+w/KXukQIOeMVGnygY/j9M/kesXIPDqXQKGnLxKo0H5hZs4u+74F+JshlS4x3FPBX/NemPpAKTD3fZ3MvQqpMLsYdLF4VUO4FizJkPLOaJB/ZJ+JCPJexbI/duj3BpvhPpp/8MP3n0jCH6w9hLqhRBvLkwDYwY/xp6KVLhvWfdqhMFHwJC1nyLmtBc4OHSNhgdqddYaVOUj1q9xzvWyp/LhsqKNguKSn1EnAar4N/+uJ3kwdOHapQLV1Wxk7KBGfD3vawTzlUlpBRP/yrqgVl7mdCEMuj1xpx4EDy/5HXYlGyvmk1/avKia4KpwCowJzIQzHUSigfOOfnaP0+J74b1OhENeeQ9Gg2VwZ7tw5j2MN5FKnE42d9CilrheRYZNm2D25mFoHosHpgEu1/YyK2//ll6bsTfr2pk6YR+3WfwjCR4kgNGEV0=
+  api_key:
+    secure: LUw5ZZaooMuV571/AvRGqG6+jw9OTBWjPbniE2hRmKkpzYwRT0gcxYojwL1sJis7+CkoMCQzZNBwmarnnqjaFkiM8Me0RENI941lM2pdOnxj2g07Ay9gmMrYYY9ER09MMrgng2J3Yw9ZDVvGIbagcgvII6n+G9jwJq3PxH5PVYjYbnd+++n60YSNtPLnrCMjU3WiisI87nVA4YxIOLeBBQHco6mACc5vBKtdlM1OSurQja1DpqWx85yJxwfS40ZjxTnVwj0YcvD6BtIjOn2iR6kwZMcb/aSYfjhowOOJx/eT465ijsPzXsqEKmfwbpyAA5wyVObC5oiVjogw9lf/XeYIhX9yfvGTiKTKJRMMVidQquq1UAMSCLulzuNHLmQeLNd1Fil4I3cnsFOL38mwOVmGezVZaa0NTK8RWM9GgzeHOyl2kFsjRWDkwsC1qDzyqMOeVRWup2ykJuNCX01lBYdU3RnDs8aMSCyuMev54JsoOXJnsSFUBV2yGNAwzcbn6qDRl52cgQAS8JqX8Vzz6U1Oqo7mY+keiAJ1Ok37NjjOr0n8uz6e5/hT1pkb4niUh0ViDXEGfPxPlchReZkaCtnJe3tu21S6zRiL9jyU1dt/xSNovmg2KEEmCtqvthJoMZwl8mcfcKf8kzWWBgSWnkzal4YtOEOljF5/qrTE+W4=
+  on:
+    branch: master
+    node: stable
+  skip_cleanup: true
+notifications:
+  email:
+    recipients:
+      secure: c/u3dsMFxB/JwNNUa3G+aotltA08al8k4SfpJGe3g3/yiNeDz1YSJw9N+2DK8USWrfDK8YB1cZIFscGbrjD6OU37IKzovZooAcmtDyopRB7dGMeajoFtCT2TtBX38mwp3LNqR84iKRPwLlpV+Lv5qpyzQpaqyzcD5TeKObCd85RdSR3AqkDVi7BgkewRpU3M/J1EXZ6a5VbPky4cskRNbQDK/LPFr8AQflO21bwLkciDgRrPvx5Bbp+w/KXukQIOeMVGnygY/j9M/kesXIPDqXQKGnLxKo0H5hZs4u+74F+JshlS4x3FPBX/NemPpAKTD3fZ3MvQqpMLsYdLF4VUO4FizJkPLOaJB/ZJ+JCPJexbI/duj3BpvhPpp/8MP3n0jCH6w9hLqhRBvLkwDYwY/xp6KVLhvWfdqhMFHwJC1nyLmtBc4OHSNhgdqddYaVOUj1q9xzvWyp/LhsqKNguKSn1EnAar4N/+uJ3kwdOHapQLV1Wxk7KBGfD3vawTzlUlpBRP/yrqgVl7mdCEMuj1xpx4EDy/5HXYlGyvmk1/avKia4KpwCowJzIQzHUSigfOOfnaP0+J74b1OhENeeQ9Gg2VwZ7tw5j2MN5FKnE42d9CilrheRYZNm2D25mFoHosHpgEu1/YyK2//ll6bsTfr2pk6YR+3WfwjCR4kgNGEV0=
+    on_success: change
+    on_failure: always
