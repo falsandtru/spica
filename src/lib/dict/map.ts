@@ -17,8 +17,8 @@ export class Map<K, V> {
   constructor() {
     void this.reset_();
   }
-  private pstore: { [index: string]: [K, V] } = Object.create(null);
-  private ostore: { [index: number]: [K, V, number] } = Object.create(null);
+  private pstore: { [index: string]: [K, V]; } = Object.create(null);
+  private ostore: { [index: number]: [K, V, number]; } = Object.create(null);
   private weakstore = new WeakMap<K, [number, V]>();
   public get(key: K): V {
     return isPrimitive(key)

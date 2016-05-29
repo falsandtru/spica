@@ -13,7 +13,7 @@ export class DataMap<K extends Array<string | number>, V> {
   constructor() {
     void this.reset_();
   }
-  private store: { [index: string]: [K, V] } = Object.create(null);
+  private store: { [index: string]: [K, V]; } = Object.create(null);
   public get(key: K): V {
     return (this.store[serialize(key)] || <[void, V]>[])[1];
   }
