@@ -102,14 +102,17 @@ describe('Unit: lib/map', () => {
       assert.deepStrictEqual(map.entries(), [
       ]);
       assert(map.set(1, '') === '');
+      assert(map.set('0', '') === '');
       assert(map.set(0, '') === '');
       assert.deepStrictEqual(map.entries(), [
         [0, ''],
-        [1, '']
+        [1, ''],
+        ['0', '']
       ]);
-      assert(map.delete(1) === void 0);
+      assert(map.delete('0') === void 0);
       assert.deepStrictEqual(map.entries(), [
-        [0, '']
+        [0, ''],
+        [1, '']
       ]);
       assert(map.clear() === void 0);
       assert.deepStrictEqual(map.entries(), [

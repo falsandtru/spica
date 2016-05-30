@@ -88,8 +88,7 @@ export class Map<K, V> {
     return this.entries_
       ? this.entries_
       : this.entries_ = concat(
-        Object.keys(this.pstore).map(key => <[K, V]>[this.pstore[key][0], this.pstore[key][1]]),
-        Object.keys(this.ostore).map(key => <[K, V]>[this.ostore[key][0], this.ostore[key][1]]))
-        .sort();
+        Object.keys(this.pstore).sort().map(key => <[K, V]>[this.pstore[key][0], this.pstore[key][1]]),
+        Object.keys(this.ostore).map(key => <[K, V]>[this.ostore[key][0], this.ostore[key][1]]));
   }
 }
