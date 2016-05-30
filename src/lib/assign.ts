@@ -1,3 +1,5 @@
+import {type} from './type';
+
 export const assign = template((key, target, source) => {
   return target[key] = source[key];
 });
@@ -60,8 +62,4 @@ function template(cb: (key: string, target: {}, source: {}) => any) {
     }
     return <T>Object(target);
   };
-}
-
-function type(target: any): string {
-  return (<string>Object.prototype.toString.call(target)).split(' ').pop().slice(0, -1);
 }

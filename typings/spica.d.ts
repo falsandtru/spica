@@ -169,7 +169,7 @@ declare module 'spica' {
     size: number;
     entries(): [K, V][];
   }
-  export class DataMap<K extends Array<string | number>, V> {
+  export class DataMap<K, V> {
     get(key: K): V;
     set(key: K, val: V): V;
     has(key: K): boolean;
@@ -206,7 +206,7 @@ declare module 'spica' {
     size: number;
     entries(): [K, V][];
   }
-  export class DataSet<K extends Array<string | number>, V> {
+  export class DataSet<K, V> {
     constructor(replacer?: (oldVal: V, newVal: V) => V)
     get(key: K): V;
     add(key: K, val: V): V;

@@ -1,6 +1,6 @@
 import {DataMap} from './datamap';
 
-export class DataSet<K extends Array<string | number>, V> {
+export class DataSet<K, V> {
   constructor(private replacer?: (oldVal: V, newVal: V) => V) {
   }
   private store = new DataMap<K, V>();

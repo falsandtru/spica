@@ -36,31 +36,47 @@ describe('Unit: lib/map', () => {
     });
 
     it('has', () => {
-      const map = new Map<number, string>();
+      const map = new Map<number | {}, string>();
       assert(map.has(0) === false);
       assert(map.set(0, '') === '');
       assert(map.has(0) === true);
       assert(map.has(1) === false);
+      const o = {};
+      assert(map.has(o) === false);
+      assert(map.set(o, '') === '');
+      assert(map.has(o) === true);
+      assert(map.has({}) === false);
     });
 
     it('delete', () => {
-      const map = new Map<number, string>();
+      const map = new Map<number | {}, string>();
       assert(map.set(0, '') === '');
       assert(map.delete(0) === void 0);
       assert(map.has(0) === false);
+      const o = {};
+      assert(map.set(o, '') === '');
+      assert(map.delete(o) === void 0);
+      assert(map.has(o) === false);
     });
 
     it('clear', () => {
-      const map = new Map<number, string>();
+      const map = new Map<number | {}, string>();
       assert(map.set(0, '') === '');
       assert(map.set(1, '') === '');
       assert(map.clear() === void 0);
       assert(map.has(0) === false);
       assert(map.has(1) === false);
+      const o = {};
+      assert(map.set(o, '') === '');
+      assert(map.set({}, '') === '');
+      assert(map.clear() === void 0);
+      assert(map.has(o) === false);
+      assert(map.has({}) === false);
     });
 
     it('size', () => {
-      const map = new Map<number, string>();
+      const map = new Map<number | {}, string>();
+      const o = {};
       assert(map.size === 0);
       assert(map.size === 0);
       assert(map.set(0, '') === '');
@@ -71,6 +87,12 @@ describe('Unit: lib/map', () => {
       assert(map.size === 2);
       assert(map.delete(0) === void 0);
       assert(map.size === 1);
+      assert(map.set(o, '') === '');
+      assert(map.size === 2);
+      assert(map.set({}, '') === '');
+      assert(map.size === 3);
+      assert(map.delete(o) === void 0);
+      assert(map.size === 2);
       assert(map.clear() === void 0);
       assert(map.size === 0);
     });
@@ -79,8 +101,8 @@ describe('Unit: lib/map', () => {
       const map = new Map<number | Object, string>();
       assert.deepStrictEqual(map.entries(), [
       ]);
-      assert(map.set(0, '') === '');
       assert(map.set(1, '') === '');
+      assert(map.set(0, '') === '');
       assert.deepStrictEqual(map.entries(), [
         [0, ''],
         [1, '']

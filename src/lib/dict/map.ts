@@ -2,15 +2,8 @@ import {WeakMap} from './weakmap';
 import {concat} from '../concat';
 import {sqid} from '../sqid';
 
-const PrimitiveTypes: { [type: string]: boolean; } = {
-  [typeof void 0]: true,
-  [typeof true]: true,
-  [typeof 0]: true,
-  [typeof '']: true
-};
-function isPrimitive(target: any): boolean {
-  return PrimitiveTypes[typeof target]
-      || target instanceof Object === false;
+export function isPrimitive(target: any): boolean {
+  return target instanceof Object === false;
 }
 
 export class Map<K, V> {
@@ -19,33 +12,53 @@ export class Map<K, V> {
   }
   private pstore: { [index: string]: [K, V]; } = Object.create(null);
   private ostore: { [index: number]: [K, V, number]; } = Object.create(null);
-  private weakstore = new WeakMap<K, [number, V]>();
+  private weakstore = new WeakMap<K, [string, V]>();
+  private stringify(key: any): string {
+    switch (typeof key) {
+      case 'undefined':
+        return `0:${key}`;
+      case 'boolean':
+        return `1:${key}`;
+      case 'number':
+        return `2:${1e3 + ('' + key).length}:${key}`;
+      case 'string':
+        return `3:${1e14 + key.length}:${key}`;
+      default: {
+        if (isPrimitive(key)) return `8:${key}`;
+        return `9:${
+          this.weakstore.has(key)
+            ? this.weakstore.get(key)[0]
+            : sqid()
+          }`;
+      }
+    }
+  }
   public get(key: K): V {
     return isPrimitive(key)
-      ? (this.pstore[typeof key + key] || <[void, V]>[])[1]
+      ? (this.pstore[this.stringify(key)] || <[void, V]>[])[1]
       : (this.weakstore.get(key) || <[void, V]>[])[1];
   }
   public set(key: K, val: V): V {
     void this.reset_();
     if (isPrimitive(key)) {
-      this.pstore[typeof key + key] = [key, val];
+      this.pstore[this.stringify(key)] = [key, val];
     }
     else {
-      const id = +sqid();
-      void this.weakstore.set(key, [id, val])[1];
+      const id = this.stringify(key);
+      void this.weakstore.set(key, [id, val]);
       this.ostore[id] = [key, val, id];
     }
     return val;
   }
   public has(key: K): boolean {
     return isPrimitive(key)
-      ? !!this.pstore[typeof key + key]
+      ? !!this.pstore[this.stringify(key)]
       : this.weakstore.has(key);
   }
   public delete(key: K): void {
     void this.reset_();
     if (isPrimitive(key)) {
-      void delete this.pstore[typeof key + key];
+      void delete this.pstore[this.stringify(key)];
     }
     else {
       void delete this.ostore[(this.weakstore.get(key) || <[number, V]>[])[0]];
@@ -56,7 +69,7 @@ export class Map<K, V> {
     void this.reset_();
     void Object.keys(this.ostore)
       .forEach(id => void this.delete(this.ostore[id][0]));
-    this.weakstore = new WeakMap<K, [number, V]>();
+    this.weakstore = new WeakMap<K, [string, V]>();
     this.pstore = Object.create(null);
     this.ostore = Object.create(null);
   }
@@ -76,7 +89,7 @@ export class Map<K, V> {
       ? this.entries_
       : this.entries_ = concat(
         Object.keys(this.pstore).map(key => <[K, V]>[this.pstore[key][0], this.pstore[key][1]]),
-        Object.keys(this.ostore).map(key => <[K, V]>[this.ostore[key][0], this.ostore[key][1]])
-      );
+        Object.keys(this.ostore).map(key => <[K, V]>[this.ostore[key][0], this.ostore[key][1]]))
+        .sort();
   }
 }

@@ -21,13 +21,15 @@ describe('Benchmark:', function () {
   describe('DataMap', function () {
     it('get', function (done) {
       const map = new DataMap<string[], number>();
-      map.set(['a', 'b'], 0);
-      benchmark('DataMap get', () => map.get(['a', 'b']), done);
+      const key = ['a', 'b'];
+      map.set(key, 0);
+      benchmark('DataMap get', () => map.get(key), done);
     });
 
     it('set', function (done) {
       const map = new DataMap<string[], number>();
-      benchmark('DataMap set', () => map.set(['a', 'b'], 0), done);
+      const key = ['a', 'b'];
+      benchmark('DataMap set', () => map.set(key, 0), done);
     });
 
   });
