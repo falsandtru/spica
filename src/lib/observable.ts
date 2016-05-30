@@ -47,7 +47,6 @@ export class Observable<T extends Array<string | number>, D, R>
                 return !void registers.splice(i, 1);
               }
             }
-            assert(false);
           });
         return;
       }
@@ -62,7 +61,6 @@ export class Observable<T extends Array<string | number>, D, R>
         throw this.throwTypeErrorIfInvalidSubscriber_(subscriber, namespace);
       }
     }
-    assert(false);
   }
   public once(namespace: T, subscriber: Subscriber<D, R>): () => void {
     void this.throwTypeErrorIfInvalidSubscriber_(subscriber, namespace);

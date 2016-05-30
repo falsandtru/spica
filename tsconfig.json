@@ -8,7 +8,6 @@
     "suppressImplicitAnyIndexErrors": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "allowUnreachableCode": true,
     "allowUnusedLabels": true,
     "preserveConstEnums": true,
     "rootDir": "./",

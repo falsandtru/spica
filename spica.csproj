@@ -38,7 +38,6 @@
     <TypeScriptSuppressImplicitAnyIndexErrors>True</TypeScriptSuppressImplicitAnyIndexErrors>
     <TypeScriptNoImplicitReturns>True</TypeScriptNoImplicitReturns>
     <TypeScriptNoFallthroughCasesInSwitch>True</TypeScriptNoFallthroughCasesInSwitch>
-    <TypeScriptAllowUnreachableCode>True</TypeScriptAllowUnreachableCode>
     <TypeScriptAllowUnusedLabels>True</TypeScriptAllowUnusedLabels>
     <TypeScriptForceConsistentCasingInFileNames>True</TypeScriptForceConsistentCasingInFileNames>
     <TypeScriptOutFile />
