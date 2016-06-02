@@ -106,7 +106,7 @@ export abstract class Supervisor<T extends string[], D, R> implements ISuperviso
   }
   public cast(namespace: T, data: D, retry = this.retry): R[] {
     void this.checkState();
-    const results = this.procs.reflect(namespace, new WorkerCommand_$Call(data));
+    const results = this.procs.reflect(namespace, new WorkerCommand.Call(data));
     if (results.length === 0) {
       void this.events.fail.emit(namespace, [namespace, void 0, data]);
     }
@@ -131,7 +131,7 @@ export abstract class Supervisor<T extends string[], D, R> implements ISuperviso
       this.registerable = false;
     }
     void this.procs
-      .emit(namespace || <T>[], new WorkerCommand_$Exit(reason));
+      .emit(namespace || <T>[], new WorkerCommand.Exit(reason));
     void this.procs
       .off(namespace || <T>[]);
     if (namespace === void 0) {
@@ -147,7 +147,7 @@ export abstract class Supervisor<T extends string[], D, R> implements ISuperviso
     for (let i = 0; i < this.queue.length; ++i) {
       const [namespace, data, callback, timeout, since] = this.queue[i];
       const results = target.every((n, i) => n === namespace[i])
-        ? this.procs.reflect(namespace, new WorkerCommand_$Call(data))
+        ? this.procs.reflect(namespace, new WorkerCommand.Call(data))
         : [];
       if (results.length === 0) {
         void this.events.fail.emit(namespace, [namespace, void 0, data]);
@@ -172,29 +172,31 @@ export abstract class Supervisor<T extends string[], D, R> implements ISuperviso
 }
 
 type WorkerCommand<T, D>
-  = WorkerCommand_$Deps<T>
-  | WorkerCommand_$Call<D>
-  | WorkerCommand_$Exit;
+  = WorkerCommand.Deps<T>
+  | WorkerCommand.Call<D>
+  | WorkerCommand.Exit;
 
-abstract class AbstractWorkerCommand {
-  private WORKER_COMMAND: void;
-}
-class WorkerCommand_$Deps<T> extends AbstractWorkerCommand {
-  private COMMAND: this;
-  constructor(public namespace: T) {
-    super();
+namespace WorkerCommand {
+  abstract class AbstractCommand {
+    private WORKER_COMMAND: void;
   }
-}
-class WorkerCommand_$Call<D> extends AbstractWorkerCommand {
-  private COMMAND: this;
-  constructor(public data: D) {
-    super();
+  export class Deps<T> extends AbstractCommand {
+    private COMMAND: this;
+    constructor(public namespace: T) {
+      super();
+    }
   }
-}
-class WorkerCommand_$Exit extends AbstractWorkerCommand {
-  private COMMAND: this;
-  constructor(public reason: any) {
-    super();
+  export class Call<D> extends AbstractCommand {
+    private COMMAND: this;
+    constructor(public data: D) {
+      super();
+    }
+  }
+  export class Exit extends AbstractCommand {
+    private COMMAND: this;
+    constructor(public reason: any) {
+      super();
+    }
   }
 }
 
@@ -228,8 +230,8 @@ class Worker<T extends string[], D, R> {
   private alive = true;
   private called = false;
   private concurrency: number = 1;
-  private tryDependencyResolving(cmd: WorkerCommand_$Call<D>): void {
-    if (this.receive(new WorkerCommand_$Deps(this.namespace))) {
+  private tryDependencyResolving(cmd: WorkerCommand.Call<D>): void {
+    if (this.receive(new WorkerCommand.Deps(this.namespace))) {
       this.sharedResource.dependenciesStack = [];
       return;
     }
@@ -239,14 +241,14 @@ class Worker<T extends string[], D, R> {
     }
   }
   public receive(): Worker<T, D, R>
-  public receive(cmd: WorkerCommand_$Deps<T>): boolean
+  public receive(cmd: WorkerCommand.Deps<T>): boolean
   public receive(cmd: WorkerCommand<T, D>): R
   public receive(cmd?: WorkerCommand<T, D>): any {
     void this.checkState();
     if (cmd === void 0) {
       return this;
     }
-    if (cmd instanceof WorkerCommand_$Deps) {
+    if (cmd instanceof WorkerCommand.Deps) {
       if (cmd.namespace.length !== this.namespace.length) return false;
       if (this.concurrency === 0) return false;
       for (const stacked of this.sharedResource.dependenciesStack) {
@@ -256,10 +258,10 @@ class Worker<T extends string[], D, R> {
       return this.dependencies
         .every(dep =>
           (this.sharedResource.allRefsCache = this.sharedResource.allRefsCache || this.sharedResource.procs.refs(<T>[]))
-            .some(([ns, proc]) => equal(ns, dep) && !!proc(new WorkerCommand_$Deps(dep)))
+            .some(([ns, proc]) => equal(ns, dep) && !!proc(new WorkerCommand.Deps(dep)))
         );
     }
-    if (cmd instanceof WorkerCommand_$Call) {
+    if (cmd instanceof WorkerCommand.Call) {
       if (this.concurrency === 0) throw void 0; // cancel
       void this.tryDependencyResolving(cmd);
       if (!this.called) {
@@ -293,7 +295,7 @@ class Worker<T extends string[], D, R> {
         throw void 0;
       }
     }
-    if (cmd instanceof WorkerCommand_$Exit) {
+    if (cmd instanceof WorkerCommand.Exit) {
       void this.terminate(cmd.reason);
       throw void 0;
     }
