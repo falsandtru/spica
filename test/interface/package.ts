@@ -3,8 +3,7 @@ import {
   Observable,
   Maybe, Just, Nothing,
   Either, Left, Right,
-  Map, DataMap, WeakMap, AttrMap, RelationMap,
-  Set, DataSet, WeakSet, AttrSet, RelationSet,
+  DataMap, AttrMap, RelationMap,
   Tick,
   FINGERPRINT,
   uuid,
@@ -73,16 +72,8 @@ describe('Interface: Package', function () {
   });
 
   describe('Map', function () {
-    it('Map', function () {
-      assert(typeof Map === 'function');
-    });
-
     it('DataMap', function () {
       assert(typeof DataMap === 'function');
-    });
-
-    it('WeakMap', function () {
-      assert(typeof WeakMap === 'function');
     });
 
     it('AttrMap', function () {
@@ -91,29 +82,6 @@ describe('Interface: Package', function () {
 
     it('RelationMap', function () {
       assert(typeof RelationMap === 'function');
-    });
-
-  });
-
-  describe('Set', function () {
-    it('Set', function () {
-      assert(typeof Set === 'function');
-    });
-
-    it('DataSet', function () {
-      assert(typeof DataSet === 'function');
-    });
-
-    it('WeakSet', function () {
-      assert(typeof WeakSet === 'function');
-    });
-
-    it('AttrSet', function () {
-      assert(typeof AttrSet === 'function');
-    });
-
-    it('RelationSet', function () {
-      assert(typeof RelationSet === 'function');
     });
 
   });

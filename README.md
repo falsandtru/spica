@@ -18,11 +18,9 @@ $ npm i spica
 
 - Supervisor
 - Observable
-- Map/Set
-- DataMap/DataSet
-- WeakMap/WeakSet
-- AttrMap/AttrSet
-- RelationMap/RelationSet
+- DataMap
+- AttrMap
+- RelationMap
 - Tick
 - FINGERPRINT
 - uuid

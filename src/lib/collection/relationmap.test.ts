@@ -7,13 +7,13 @@ describe('Unit: lib/relationmap', () => {
       const o1 = {};
       const o2 = {};
       assert(map.get(o1, o2) === void 0);
-      assert(map.set(o1, o2, '') === '');
+      map.set(o1, o2, '');
       assert(map.get(o1, o2) === '');
       assert(map.get(o2, o1) === void 0);
-      assert(map.set(o2, o1, ' ') === ' ');
+      map.set(o2, o1, ' ');
       assert(map.get(o2, o1) === ' ');
       assert(map.get(o1, o2) === '');
-      assert(map.set(o1, o2, ' ') === ' ');
+      map.set(o1, o2, ' ');
       assert(map.get(o1, o2) === ' ');
     });
 
@@ -22,7 +22,7 @@ describe('Unit: lib/relationmap', () => {
       const o1 = {};
       const o2 = {};
       assert(map.has(o1, o2) === false);
-      assert(map.set(o1, o2, '') === '');
+      map.set(o1, o2, '');
       assert(map.has(o1, o2) === true);
       assert(map.has(o2, o1) === false);
       assert.deepStrictEqual(Object.keys(o1), []);
@@ -33,11 +33,13 @@ describe('Unit: lib/relationmap', () => {
       const map = new RelationMap<{}, {}, string>();
       const o1 = {};
       const o2 = {};
-      assert(map.set(o1, o2, '') === '');
-      assert(map.delete(o1, o2) === void 0);
+      map.set(o1, o2, '');
+      assert(map.delete(o1, o2) === true);
       assert(map.has(o1, o2) === false);
-      assert(map.delete(o1) === void 0);
+      assert(map.delete(o1, o2) === false);
+      assert(map.delete(o1) === true);
       assert(map.has(o1, o2) === false);
+      assert(map.delete(o1) === false);
     });
 
   });

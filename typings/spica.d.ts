@@ -160,82 +160,25 @@ declare module 'spica' {
   export type Right<R> = Either.Right<R>;
   export const Right: typeof Either.Right;
 
-  export class Map<K, V> {
-    get(key: K): V;
-    set(key: K, val: V): V;
-    has(key: K): boolean;
-    delete(key: K): void;
-    clear(): void;
-    size: number;
-    entries(): [K, V][];
-  }
   export class DataMap<K, V> {
     get(key: K): V;
-    set(key: K, val: V): V;
+    set(key: K, val: V): this;
     has(key: K): boolean;
-    delete(key: K): void;
+    delete(key: K): boolean;
     clear(): void;
     size: number;
-    entries(): [K, V][];
   }
-  export class WeakMap<K extends Object, V> {
-    get(key: K): V;
-    set(key: K, val: V): V;
-    has(key: K): boolean;
-    delete(key: K): void;
-  }
-  export class AttrMap<O extends Object, K extends string | number, V> {
+  export class AttrMap<O extends Object, K, V> {
     get(obj: O, key: K): V;
-    set(obj: O, key: K, val: V): V;
+    set(obj: O, key: K, val: V): this;
     has(obj: O, key: K): boolean;
-    delete(obj: O, key?: K): void;
+    delete(obj: O, key?: K): boolean;
   }
   export class RelationMap<S extends Object, T extends Object, V> {
     get(source: S, target: T): V;
-    set(source: S, target: T, val: V): V;
+    set(source: S, target: T, val: V): this;
     has(source: S, target: T): boolean;
-    delete(source: S, target?: T): void;
-  }
-  export class Set<K, V> {
-    constructor(replacer?: (oldVal: V, newVal: V) => V)
-    get(key: K): V;
-    add(key: K, val: V): V;
-    has(key: K): boolean;
-    delete(key: K): void;
-    clear(): void;
-    size: number;
-    entries(): [K, V][];
-  }
-  export class DataSet<K, V> {
-    constructor(replacer?: (oldVal: V, newVal: V) => V)
-    get(key: K): V;
-    add(key: K, val: V): V;
-    has(key: K): boolean;
-    delete(key: K): void;
-    clear(): void;
-    size: number;
-    entries(): [K, V][];
-  }
-  export class WeakSet<K extends Object, V> {
-    constructor(replacer?: (oldVal: V, newVal: V) => V)
-    get(key: K): V;
-    add(key: K, val: V): V;
-    has(key: K): boolean;
-    delete(key: K): void;
-  }
-  export class AttrSet<O extends Object, K extends string | number, V> {
-    constructor(replacer?: (oldVal: V, newVal: V) => V)
-    get(obj: O, key: K): V;
-    add(obj: O, key: K, val: V): V;
-    has(obj: O, key: K): boolean;
-    delete(obj: O, key?: K): void;
-  }
-  export class RelationSet<S extends Object, T extends Object, V> {
-    constructor(replacer?: (oldVal: V, newVal: V) => V)
-    get(source: S, target: T): V;
-    add(source: S, target: T, val: V): V;
-    has(source: S, target: T): boolean;
-    delete(source: S, target?: T): void;
+    delete(source: S, target?: T): boolean;
   }
 
   export function Tick(fn: (_?: void) => any): void

@@ -1,6 +1,6 @@
 import {Supervisor as ISupervisor, SupervisorSettings} from 'spica';
 import {Observable} from './observable';
-import {DataSet} from './dict/dataset';
+import {DataMap} from './collection/datamap';
 import {Tick} from './tick';
 import {isThenable} from './thenable';
 import {concat} from './concat';
@@ -35,7 +35,7 @@ export abstract class Supervisor<T extends string[], D, R> implements ISuperviso
   }: SupervisorSettings<T> = {}) {
     if (this.constructor === Supervisor) throw new Error('spica: Supervisor: Cannot instantiate abstract classes.');
     this.name = name;
-    void dependencies.reduce((_, [namespace, deps]) => void this.deps.add(namespace, deps), void 0);
+    void dependencies.reduce((_, [namespace, deps]) => void this.deps.set(namespace, deps), void 0);
     this.retry = retry;
     this.timeout = timeout;
     this.destructor_ = destructor;
@@ -61,7 +61,7 @@ export abstract class Supervisor<T extends string[], D, R> implements ISuperviso
     void Object.freeze(this);
   }
   public name: string;
-  private deps: DataSet<T, T[]> = new DataSet<T, T[]>();
+  private deps: DataMap<T, T[]> = new DataMap<T, T[]>();
   private retry: boolean;
   private timeout: number;
   private destructor_: (reason?: any) => any;
