@@ -45,7 +45,7 @@ export const extend = template((key, target, source): any => {
 function template(cb: (key: string, target: {}, source: {}) => any) {
   return function walk<T extends Object>(target: T | {}, ...sources: T[]): T {
     if (target === undefined || target === null) {
-      throw new TypeError(`spica: assign: Cannot walk on ${target}.`);
+      throw new TypeError(`Spica: assign: Cannot walk on ${target}.`);
     }
 
     for (const source of sources) {

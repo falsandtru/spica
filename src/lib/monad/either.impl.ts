@@ -19,7 +19,7 @@ export class Either<L, R> extends Monad<R> {
       if (m instanceof Either) {
         return m.bind(f);
       }
-      throw new TypeError(`spica: Either: Invalid monad value.\n\t${m}`);
+      throw new TypeError(`Spica: Either: Invalid monad value.\n\t${m}`);
     });
   }
   public fmap<RR>(f: (val: R) => RR): Either<L, RR> {

@@ -177,7 +177,7 @@ export class Observable<T extends Array<string | number>, D, R>
         return;
       }
       default: {
-        throw new TypeError(`spica: Observable: Invalid subscriber.\n\t${types, subscriber}`);
+        throw new TypeError(`Spica: Observable: Invalid subscriber.\n\t${types, subscriber}`);
       }
     }
   }

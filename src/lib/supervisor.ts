@@ -33,7 +33,7 @@ export abstract class Supervisor<T extends string[], D, R> implements ISuperviso
     timeout = 0,
     destructor = noop
   }: SupervisorSettings<T> = {}) {
-    if (this.constructor === Supervisor) throw new Error('spica: Supervisor: Cannot instantiate abstract classes.');
+    if (this.constructor === Supervisor) throw new Error('Spica: Supervisor: Cannot instantiate abstract classes.');
     this.name = name;
     void dependencies.reduce((_, [namespace, deps]) => void this.deps.set(namespace, deps), void 0);
     this.retry = retry;
@@ -91,7 +91,7 @@ export abstract class Supervisor<T extends string[], D, R> implements ISuperviso
   };
   public register(namespace: T, process: (data: D) => R): (reason?: any) => void {
     void this.checkState();
-    if (!this.registerable) throw new Error(`spica: Supervisor: Supervisor ${this.name} cannot register process during the exiting.`);
+    if (!this.registerable) throw new Error(`Spica: Supervisor: Supervisor ${this.name} cannot register process during the exiting.`);
     namespace = <T>concat([], namespace);
     void this.schedule();
     return new Worker<T, D, R>(this, this.workerSharedResource, namespace, process, this.deps.get(namespace) || []).terminate;
@@ -139,7 +139,7 @@ export abstract class Supervisor<T extends string[], D, R> implements ISuperviso
     }
   }
   private checkState(): void {
-    if (!this.alive) throw new Error(`spica: Supervisor: Supervisor ${this.name} already exited.`);
+    if (!this.alive) throw new Error(`Spica: Supervisor: Supervisor ${this.name} already exited.`);
   }
   private queue: [T, D, (data: D, results: R[]) => any, number, number][] = [];
   private drain(target: T = <T>[]): void {
@@ -299,13 +299,13 @@ class Worker<T extends string[], D, R> {
       void this.terminate(cmd.reason);
       throw void 0;
     }
-    throw new TypeError(`spica: Supervisor: Invalid command: ${cmd}`);
+    throw new TypeError(`Spica: Supervisor: Invalid command: ${cmd}`);
   }
   public terminate(reason: any): void {
     void this.destructor(reason);
   }
   private checkState(): void {
-    if (!this.alive) throw new Error(`spica: Supervisor: Process ${this.namespace}/${this.process} already exited.`);
+    if (!this.alive) throw new Error(`Spica: Supervisor: Process ${this.namespace}/${this.process} already exited.`);
   }
 }
 

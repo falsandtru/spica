@@ -19,7 +19,7 @@ export class Maybe<T> extends Monad<T> {
       if (m instanceof Maybe) {
         return m.bind(f);
       }
-      throw new TypeError(`spica: Maybe: Invalid monad value.\n\t${m}`);
+      throw new TypeError(`Spica: Maybe: Invalid monad value.\n\t${m}`);
     });
   }
   public fmap<U>(f: (val: T) => U): Maybe<U> {
