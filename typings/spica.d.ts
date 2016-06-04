@@ -77,7 +77,7 @@ declare module 'spica' {
     abstract bind<U>(f: (val: T) => Monad<U>): Monad<U>;
   }
 
-  namespace MAYBE {
+  namespace Monad {
     export abstract class Maybe<T> extends Monad<T> {
       protected MAYBE: Just<T> | Nothing;
       bind(f: (val: T) => Nothing): Nothing;
@@ -86,6 +86,10 @@ declare module 'spica' {
       extract(): T;
       extract<U>(transform: () => U): T | U;
       assert<S extends Maybe<T>>(type?: S): Maybe<T>;
+    }
+  }
+  namespace Monad.Maybe {
+    export class Maybe<T> extends Monad.Maybe<T> {
     }
     export class Just<T> extends Maybe<T> {
       protected MAYBE: Just<T>;
@@ -105,20 +109,20 @@ declare module 'spica' {
   }
 
   export namespace Maybe {
-    export type Just<T> = MAYBE.Just<T>;
+    export type Just<T> = Monad.Maybe.Just<T>;
     export function Just<T>(val: T): Just<T>;
-    export type Nothing = MAYBE.Nothing;
-    export const Nothing: MAYBE.Nothing;
+    export type Nothing = Monad.Maybe.Nothing;
+    export const Nothing: Monad.Maybe.Nothing;
     export const Return: typeof Just;
   }
 
-  export type Maybe<T> = MAYBE.Maybe<T>;
+  export type Maybe<T> = Monad.Maybe<T>;
   export type Just<T> = Maybe.Just<T>;
   export const Just: typeof Maybe.Just;
   export type Nothing = Maybe.Nothing;
   export const Nothing: typeof Maybe.Nothing;
 
-  namespace EITHER {
+  namespace Monad {
     export abstract class Either<L, R> extends Monad<R> {
       protected EITHER: Left<L> | Right<R>;
       bind(f: (val: R) => Left<L>): Left<L>
@@ -127,6 +131,10 @@ declare module 'spica' {
       extract(): R;
       extract<LL>(transform: (left: L) => LL): LL | R;
       assert<S extends Either<L, R>>(type?: S): Either<L, R>;
+    }
+  }
+  namespace Monad.Either {
+    export class Either<L, R> extends Monad.Either<L, R> {
     }
     export class Left<L> extends Either<L, any> {
       protected EITHER: Left<L>;
@@ -147,14 +155,14 @@ declare module 'spica' {
   }
 
   export namespace Either {
-    export type Left<L> = EITHER.Left<L>;
+    export type Left<L> = Monad.Either.Left<L>;
     export function Left<L>(val: L): Left<L>;
-    export type Right<R> = EITHER.Right<R>;
+    export type Right<R> = Monad.Either.Right<R>;
     export function Right<R>(val: R): Right<R>;
     export const Return: typeof Right;
   }
 
-  export type Either<L, R> = EITHER.Either<L, R>;
+  export type Either<L, R> = Monad.Either<L, R>;
   export type Left<L> = Either.Left<L>;
   export const Left: typeof Either.Left;
   export type Right<R> = Either.Right<R>;

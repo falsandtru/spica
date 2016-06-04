@@ -1,16 +1,16 @@
-import {Maybe as Maybe_, Just as Just_, Nothing as Nothing_} from './maybe.impl';
+import * as Monad from './maybe.impl';
 
 export namespace Maybe {
-  export type Just<T> = Just_<T>;
+  export type Just<T> = Monad.Just<T>;
   export function Just<T>(val: T): Just<T> {
-    return new Just_(val);
+    return new Monad.Just(val);
   }
-  export type Nothing = Nothing_;
-  export const Nothing = new Nothing_();
+  export type Nothing = Monad.Nothing;
+  export const Nothing = new Monad.Nothing();
   export const Return = Just;
 }
 
-export type Maybe<T> = Just<T> | Nothing | Maybe_<T>;
+export type Maybe<T> = Monad.Maybe<T>;
 export type Just<T> = Maybe.Just<T>;
 export const Just = Maybe.Just;
 export type Nothing = Maybe.Nothing;
