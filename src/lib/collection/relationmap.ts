@@ -7,9 +7,8 @@ export class RelationMap<S extends Object, T extends Object, V> {
     const store = this.store.has(source)
       ? this.store.get(source)
       : this.store.set(source, new WeakMap<T, V>()).get(source);
-    return (
-      void store.set(target, val),
-      this);
+    void store.set(target, val);
+    return this;
   }
   public has(source: S, target: T): boolean {
     return this.store.has(source) && this.store.get(source).has(target);

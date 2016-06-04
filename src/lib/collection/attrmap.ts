@@ -7,9 +7,8 @@ export class AttrMap<O extends Object, K, V> {
     const store = this.store.has(obj)
       ? this.store.get(obj)
       : this.store.set(obj, new Map<K, V>()).get(obj);
-    return (
-      void store.set(key, val),
-      this);
+    void store.set(key, val);
+    return this;
   }
   public has(obj: O, key: K): boolean {
     return this.store.has(obj) && this.store.get(obj).has(key);
