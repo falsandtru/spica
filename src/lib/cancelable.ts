@@ -7,7 +7,8 @@ export class Cancelable<L> {
     this.cancel = (reason: L) => (
       this.cancel = noop,
       this.canceled = true,
-      this.reason = reason);
+      this.reason = reason,
+      void 0);
   }
   private promise_: Promise<any>;
   private canceled = false;
