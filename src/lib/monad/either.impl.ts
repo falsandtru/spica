@@ -5,8 +5,6 @@ export class Either<L, R> extends Monad<R> {
   constructor(protected thunk?: () => Either<L, R>) {
     super(thunk);
   }
-  public bind(f: (val: R) => Left<L>): Left<L>
-  public bind<RR>(f: (val: R) => Either<L, RR>): Either<L, RR>
   public bind<RR>(f: (val: R) => Either<L, RR>): Either<L, RR> {
     return new Either<L, RR>(() => {
       const m: Either<L, R> = this.evaluate();
@@ -56,7 +54,6 @@ export class Right<R> extends Either<any, R> {
   constructor(private val_: R) {
     super();
   }
-  public bind<L>(f: (val: R) => Left<L>): Left<L>
   public bind<L>(f: (val: R) => Either<L, R>): Either<L, R>
   public bind<L, RR>(f: (val: R) => Either<L, RR>): Either<L, RR>
   public bind<L, RR>(f: (val: R) => Either<L, RR>): Either<L, RR> {

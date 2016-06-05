@@ -5,8 +5,6 @@ export class Maybe<T> extends Monad<T> {
   constructor(protected thunk?: () => Maybe<T>) {
     super(thunk);
   }
-  public bind(f: (val: T) => Nothing): Nothing
-  public bind<U>(f: (val: T) => Maybe<U>): Maybe<U>
   public bind<U>(f: (val: T) => Maybe<U>): Maybe<U> {
     return new Maybe<U>(() => {
       const m: Maybe<T> = this.evaluate();
@@ -37,8 +35,6 @@ export class Just<T> extends Maybe<T> {
   constructor(private val_: T) {
     super();
   }
-  public bind(f: (val: T) => Nothing): Nothing
-  public bind<U>(f: (val: T) => Maybe<U>): Maybe<U>
   public bind<U>(f: (val: T) => Maybe<U>): Maybe<U> {
     return new Maybe(() => this).bind(f);
   }
