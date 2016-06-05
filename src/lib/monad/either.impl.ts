@@ -30,10 +30,6 @@ export class Either<L, R> extends Monad<R> {
   public extract<LL>(transform?: (left: L) => LL): LL | R {
     return this.evaluate().extract(transform);
   }
-  public assert<S extends Either<L, R>>(type?: S): Either<L, R>
-  public assert<S>(type?: S): Either<L, R> {
-    return this;
-  }
 }
 
 export class Left<L> extends Either<L, any> {
@@ -53,9 +49,6 @@ export class Left<L> extends Either<L, any> {
     if (!transform) throw this.val_;
     return transform(this.val_);
   }
-  public assert<S extends Left<L>>(type?: S): Left<L> {
-    return this;
-  }
 }
 
 export class Right<R> extends Either<any, R> {
@@ -71,8 +64,5 @@ export class Right<R> extends Either<any, R> {
   }
   public extract(transform?: (left: any) => any): R {
     return this.val_;
-  }
-  public assert<S extends Right<R>>(type?: S): Right<R> {
-    return this;
   }
 }

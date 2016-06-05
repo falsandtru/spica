@@ -30,9 +30,6 @@ export class Maybe<T> extends Monad<T> {
   public extract<U>(transform?: () => U): T | U {
     return this.evaluate().extract(transform);
   }
-  public assert<S extends Maybe<T>>(type?: S): Maybe<T> {
-    return this;
-  }
 }
 
 export class Just<T> extends Maybe<T> {
@@ -47,9 +44,6 @@ export class Just<T> extends Maybe<T> {
   }
   public extract<U>(transform?: () => U): T {
     return this.val_;
-  }
-  public assert<S extends Just<T>>(type?: S): Just<T> {
-    return this;
   }
 }
 
@@ -66,8 +60,5 @@ export class Nothing extends Maybe<any> {
   public extract<U>(transform?: () => U): U {
     if (!transform) throw void 0;
     return transform();
-  }
-  public assert<S extends Nothing>(type?: S): Nothing {
-    return this;
   }
 }

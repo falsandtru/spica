@@ -85,7 +85,6 @@ declare module 'spica' {
       fmap<U>(f: (val: T) => U): Maybe<U>;
       extract(): T;
       extract<U>(transform: () => U): T | U;
-      assert<S extends Maybe<T>>(type?: S): Maybe<T>;
     }
   }
   namespace Monad.Maybe {
@@ -96,7 +95,6 @@ declare module 'spica' {
       bind(f: (val: T) => Nothing): Nothing;
       bind<U>(f: (val: T) => Maybe<U>): Maybe<U>;
       extract<U>(transform?: () => U): T;
-      assert<S extends Just<T>>(type?: S): Just<T>;
     }
     export class Nothing extends Maybe<any> {
       protected MAYBE: Nothing;
@@ -104,7 +102,6 @@ declare module 'spica' {
       fmap(f: (val: any) => any): Nothing;
       extract(): any;
       extract<U>(transform: () => U): U;
-      assert<S extends Nothing>(type?: S): Nothing;
     }
   }
 
@@ -130,7 +127,6 @@ declare module 'spica' {
       fmap<RR>(f: (val: R) => RR): Either<L, RR>;
       extract(): R;
       extract<LL>(transform: (left: L) => LL): LL | R;
-      assert<S extends Either<L, R>>(type?: S): Either<L, R>;
     }
   }
   namespace Monad.Either {
@@ -142,7 +138,6 @@ declare module 'spica' {
       fmap(f: (val: any) => any): Left<L>;
       extract(): any;
       extract<LL>(transform: (left: L) => LL): LL;
-      assert<S extends Left<L>>(type?: S): Left<L>;
     }
     export class Right<R> extends Either<any, R> {
       protected EITHER: Right<R>;
@@ -150,7 +145,6 @@ declare module 'spica' {
       bind<L>(f: (val: R) => Either<L, R>): Either<L, R>;
       bind<L, RR>(f: (val: R) => Either<L, RR>): Either<L, RR>;
       extract(transform?: (left: any) => any): R;
-      assert<S extends Right<R>>(type?: S): Right<R>;
     }
   }
 

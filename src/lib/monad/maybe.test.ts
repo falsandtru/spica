@@ -34,7 +34,6 @@ describe('Unit: lib/maybe', () => {
       const result = Return(Return(0))
         .bind(m => Just(m))
         .bind(m => m.bind(n => Just(n + 1)).bind(n => Just(`Just ${n}`)))
-        .assert<Just<string>>()
         .extract(() => 'Nothing');
       assert(result === 'Just 1');
     });
@@ -56,7 +55,6 @@ describe('Unit: lib/maybe', () => {
       const result = Return(Return(0))
         .bind(m => m.bind(n => Nothing).bind(throwError))
         .bind(throwError)
-        .assert<Nothing>()
         .extract(() => 'Nothing');
       assert(result === 'Nothing');
     });

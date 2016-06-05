@@ -35,7 +35,6 @@ describe('Unit: lib/either', () => {
       const result = Return(Return(0))
         .bind(m => m.bind(n => Left(NaN)).bind(throwError))
         .bind(throwError)
-        .assert<Left<number>>()
         .extract(_ => 'Nothing');
       assert(result === 'Nothing');
     });
@@ -56,7 +55,6 @@ describe('Unit: lib/either', () => {
       const result = Return(Return(0))
         .bind(m => Right(m))
         .bind(m => m.bind(n => Right(n + 1)).bind(n => Right(`Right ${n}`)))
-        .assert<Right<string>>()
         .extract(_ => 'Nothing');
       assert(result === 'Right 1');
     });
