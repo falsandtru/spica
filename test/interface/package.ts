@@ -1,6 +1,7 @@
 import {
   Supervisor, SupervisorSettings,
   Observable,
+  Cancelable,
   Maybe, Just, Nothing,
   Either, Left, Right,
   DataMap, AttrMap, RelationMap,
@@ -25,6 +26,13 @@ describe('Interface: Package', function () {
   describe('Observable', function () {
     it('Observable', function () {
       assert(typeof Observable === 'function');
+    });
+
+  });
+
+  describe('Cancelable', function () {
+    it('Cancelable', function () {
+      assert(typeof Cancelable === 'function');
     });
 
   });

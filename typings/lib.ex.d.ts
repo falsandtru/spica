@@ -8,11 +8,14 @@ interface Array<T> {
 
 interface PromiseLike<T> {
   _?: T;
+  catch(cb: (reason: any) => any): Promise<T>;
 }
 
 declare const Promise: PromiseConstructorLike & {
   all<T>(ps: (T | Promise<T>)[]): Promise<T[]>;
   race<T>(ps: (T | Promise<T>)[]): Promise<T>;
+  resolve(): Promise<void>;
+  resolve<T>(val: T): Promise<T>;
 };
 interface Promise<T> extends PromiseLike<T> {
 }

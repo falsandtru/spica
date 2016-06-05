@@ -65,6 +65,13 @@ declare module 'spica' {
     (data: D): R;
   }
 
+  export class Cancelable<L> {
+    cancel: (reason: L) => void;
+    promise: <T>(val: T) => Promise<T>;
+    maybe: <T>(val: T) => Maybe<T>;
+    either: <R>(val: R) => Either<L, R>;
+  }
+
   abstract class Lazy<T> {
     private LAZY: T;
   }
