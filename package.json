@@ -10,6 +10,9 @@
   },
   "keywords": [
     "supervisor",
+    "sequence",
+    "generator",
+    "iterator",
     "maybe",
     "either"
   ],

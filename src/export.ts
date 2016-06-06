@@ -1,6 +1,7 @@
 export {Supervisor} from './lib/supervisor';
 export {Observable} from './lib/observable';
 export {Cancelable} from './lib/cancelable';
+export {Sequence} from './lib/monad/sequence';
 export {Maybe, Just, Nothing} from './lib/monad/maybe';
 export {Either, Left, Right} from './lib/monad/either';
 export {DataMap} from './lib/collection/datamap';

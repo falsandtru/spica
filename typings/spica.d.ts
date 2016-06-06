@@ -40,7 +40,7 @@ declare module 'spica' {
     timeout?: number;
     destructor?: (reason?: any) => any;
   }
-  
+
   export class Observable<T extends Array<string | number>, D, R>
     implements Observer<T, D, R>, Publisher<T, D, R> {
     monitor(type: T, subscriber: Subscriber<D, R>): () => void;
@@ -73,15 +73,44 @@ declare module 'spica' {
   }
 
   abstract class Lazy<T> {
-    private LAZY: T;
   }
   abstract class Functor<T> extends Lazy<T> {
-    private FUNCTOR: T;
     abstract fmap<U>(f: (val: T) => U): Functor<U>;
   }
   abstract class Monad<T> extends Functor<T> {
-    private MONAD: T;
     abstract bind<U>(f: (val: T) => Monad<U>): Monad<U>;
+  }
+
+  export class Sequence<T, S> extends Monad<T> {
+    static from<T>(as: T[]): Sequence<T, T>;
+    static write<T>(as: T[]): Sequence<T, T[]>;
+    static random(): Sequence<number, number>;
+    static random<T>(gen: () => T): Sequence<T, number>;
+    static random<T>(as: T[]): Sequence<T, Sequence.Iterator<number>>;
+    static zip<T, U>(a: Sequence<T, any>, b: Sequence<U, any>): Sequence<[T, U], [Sequence.Iterator<T>, Sequence.Iterator<U>]>;
+    static union<T>(cmp: (a: T, b: T) => number, ss: Sequence<T, any>[]): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>;
+    static intersect<T>(cmp: (a: T, b: T) => number, ss: Sequence<T, any>): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>;
+    constructor(cons: (p: S, cons: (value?: T, next?: S) => Sequence.Data<T, S>) => Sequence.Data<T, S>);
+    read(): T[];
+    until(f: (p: T) => boolean): Sequence<T, Sequence.Iterator<T>>;
+    take(n: number): Sequence<T, Sequence.Iterator<T>>;
+    drop(n: number): Sequence<T, Sequence.Iterator<T>>;
+    takeWhile(f: (p: T) => boolean, i: number): Sequence<T, Sequence.Iterator<T>>;
+    dropWhile(f: (p: T) => boolean, i: number): Sequence<T, Sequence.Iterator<T>>;
+    map<U>(f: (p: T, i: number) => U): Sequence<U, Sequence.Iterator<T>>;
+    filter(f: (p: T, i: number) => boolean): Sequence<T, Sequence.Iterator<T>>;
+    scan<U>(f: (b: U, a: T) => U, z: U): Sequence<U, [U, Sequence.Iterator<T>]>;
+    memoize(memory?: Map<number, Sequence.Data<T, S>>): Sequence<T, S>;
+    iterate(): Sequence.Thunk<T>;
+    fmap<U>(f: (p: T) => U): Sequence<U, Sequence.Iterator<T>>;
+    bind<U>(f: (p: T) => Sequence<U, any>): Sequence<U, [Sequence.Iterator<T>, Sequence.Iterator<U>]>;
+    filterM(f: (p: T) => Sequence<boolean, any>): Sequence<T[], [Sequence.Iterator<T>, Sequence.Iterator<T[]>]>;
+    mapM<U>(f: (p: T) => Sequence<U, any>): Sequence<U[], [Sequence.Iterator<T>, Sequence.Iterator<U[]>]>;
+  }
+  export namespace Sequence {
+    export type Data<T, S> = [T, S];
+    export type Thunk<T> = [T, Iterator<T>, number];
+    export type Iterator<T> = () => Thunk<T>;
   }
 
   namespace Monad {

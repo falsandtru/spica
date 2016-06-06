@@ -1,6 +1,7 @@
 import {
   Supervisor, SupervisorSettings,
   Observable,
+  Sequence,
   Cancelable,
   Maybe, Just, Nothing,
   Either, Left, Right,
@@ -26,6 +27,13 @@ describe('Interface: Package', function () {
   describe('Observable', function () {
     it('Observable', function () {
       assert(typeof Observable === 'function');
+    });
+
+  });
+
+  describe('Sequence', function () {
+    it('Sequence', function () {
+      assert(typeof Sequence === 'function');
     });
 
   });

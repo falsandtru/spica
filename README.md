@@ -19,6 +19,7 @@ $ npm i spica
 - Supervisor
 - Observable
 - Cancelable
+- Sequence
 - Maybe, Just, Nothing
 - Either, Left, Right
 - DataMap
