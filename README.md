@@ -18,6 +18,9 @@ $ npm i spica
 
 - Supervisor
 - Observable
+- Cancelable
+- Maybe, Just, Nothing
+- Either, Left, Right
 - DataMap
 - AttrMap
 - RelationMap
@@ -25,8 +28,6 @@ $ npm i spica
 - FINGERPRINT
 - uuid
 - sqid
-- Maybe, Just, Nothing
-- Either, Left, Right
 
 ## Browser
 
