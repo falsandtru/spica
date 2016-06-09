@@ -211,7 +211,6 @@ gulp.task('server', ['clean'], function (done) {
     'ts:test',
     'karma:server',
     //'bench',
-    'dist',
     function () {
       done();
     }
