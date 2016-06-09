@@ -1,7 +1,7 @@
 {
   "name": "spica",
   "version": "0.0.5",
-  "description": "Utils.",
+  "description": "Supervisor, Observable, Sequence, Maybe, Either and some utils.",
   "private": true,
   "homepage": "https://github.com/falsandtru/spica",
   "repository": {
@@ -10,6 +10,7 @@
   },
   "keywords": [
     "supervisor",
+    "observable",
     "sequence",
     "generator",
     "iterator",
