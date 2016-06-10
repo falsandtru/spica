@@ -1,4 +1,4 @@
-import {Sequence as ISequence} from 'spica';
+//import {Sequence as ISequence} from 'spica';
 import {Monad} from './monad';
 import {concat} from '../concat';
 
@@ -15,7 +15,7 @@ function cons<T, S>(value?: T, next?: S): Sequence.Data<T, S> {
   }
 }
 
-export class Sequence<T, S> extends Monad<T> implements ISequence<T, S> {
+export class Sequence<T, S> extends Monad<T> /*implements ISequence<T, S>*/ {
   public static from<T>(as: T[]): Sequence<T, number> {
     return new Sequence<T, number>((i = 0, cons) => i < as.length ? cons(as[i], ++i) : cons());
   }
