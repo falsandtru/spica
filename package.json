@@ -60,7 +60,7 @@
     "typescript": "^1.8.10"
   },
   "scripts": {
-    "test": "gulp server && gulp bench && gulp dist"
+    "test": "gulp server"
   },
   "author": "falsandtru",
   "license": "MIT"
