@@ -141,97 +141,6 @@ export class Sequence<T, S> extends Monad<T> /*implements ISequence<T, S>*/ {
       iter = Sequence.Thunk.iterator(thunk);
     }
   }
-  public fmap<U>(f: (p: T) => U): Sequence<U, Sequence.Iterator<T>> {
-    return new Sequence<U, Sequence.Iterator<T>>((iter = () => this.iterate()) =>
-      Sequence.Iterator.when(
-        iter(),
-        () => cons<U, Sequence.Iterator<T>>(),
-        thunk => cons<U, Sequence.Iterator<T>>(f(Sequence.Thunk.value(thunk)), Sequence.Thunk.iterator(thunk))));
-  }
-  public bind<U>(f: (p: T) => Sequence<U, any>): Sequence<U, [Sequence.Iterator<T>, Sequence.Iterator<U>]> {
-    return new Sequence<U, [Sequence.Iterator<T>, Sequence.Iterator<U>]>(([ai, bi] = [() => this.iterate(), Sequence.Iterator.done], cons) =>
-      Sequence.Iterator.when(
-        ai(),
-        () => cons(),
-        (at, recur) => {
-          bi = bi === Sequence.Iterator.done
-            ? () => f(Sequence.Thunk.value(at)).iterate()
-            : bi;
-          return Sequence.Iterator.when(
-            bi(),
-            () => (bi = Sequence.Iterator.done, recur()),
-            bt => cons(Sequence.Thunk.value(bt), [() => at, Sequence.Thunk.iterator(bt)]));
-        }));
-  }
-  public filterM(f: (p: T) => Sequence<boolean, any>): Sequence<T[], [Sequence.Iterator<T>, Sequence.Iterator<T[]>]> {
-    return this
-      .take(1)
-      .bind(() => {
-        const xs = this.read();
-        switch (xs.length) {
-          case 0:
-            return Sequence.from<T[]>([[]]);
-          default: {
-            const x = xs.shift();
-            return f(x)
-              .bind(b =>
-                b
-                  ? xs.length === 0
-                    ? Sequence.from<T[]>([[x]])
-                    : Sequence.from(xs).filterM(f).fmap(ys => concat([x], ys))
-                  : xs.length === 0
-                    ? Sequence.from<T[]>([[]])
-                    : Sequence.from(xs).filterM(f));
-          }
-        }
-      });
-  }
-  public mapM<U>(f: (p: T) => Sequence<U, any>): Sequence<U[], [Sequence.Iterator<T>, Sequence.Iterator<U[]>]> {
-    return this
-      .take(1)
-      .bind(() => {
-        const xs = this.read();
-        switch (xs.length) {
-          case 0:
-            return Sequence.from<U[]>([]);
-          default: {
-            const x = xs.shift();
-            return f(x)
-              .bind(y =>
-                xs.length === 0
-                  ? Sequence.from<U[]>([[y]])
-                  : Sequence.from(xs).mapM(f).fmap(ys => concat([y], ys)));
-          }
-        }
-      });
-  }
-  public map<U>(f: (p: T, i: number) => U): Sequence<U, Sequence.Iterator<T>> {
-    return new Sequence<U, Sequence.Iterator<T>>((iter = () => this.iterate()) =>
-      Sequence.Iterator.when(
-        iter(),
-        () => cons<U, Sequence.Iterator<T>>(),
-        thunk => cons<U, Sequence.Iterator<T>>(f(Sequence.Thunk.value(thunk), Sequence.Thunk.index(thunk)), Sequence.Thunk.iterator(thunk))));
-  }
-  public scan<U>(f: (b: U, a: T) => U, z: U): Sequence<U, [U, Sequence.Iterator<T>]> {
-    return new Sequence<U, [U, Sequence.Iterator<T>]>(([prev = z, iter = () => this.iterate()] = [void 0, void 0]) =>
-      Sequence.Iterator.when(
-        iter(),
-        () => cons<U, [U, Sequence.Iterator<T>]>(),
-        thunk =>
-          cons<U, [U, Sequence.Iterator<T>]>(
-            prev = f(prev, Sequence.Thunk.value(thunk)),
-            [prev, Sequence.Thunk.iterator(thunk)])));
-  }
-  public until(f: (p: T) => boolean): Sequence<T, Sequence.Iterator<T>> {
-    return new Sequence<T, Sequence.Iterator<T>>((iter = () => this.iterate(), cons) =>
-      Sequence.Iterator.when(
-        iter(),
-        () => cons(),
-        thunk =>
-          f(Sequence.Thunk.value(thunk))
-            ? cons(Sequence.Thunk.value(thunk))
-            : cons(Sequence.Thunk.value(thunk), Sequence.Thunk.iterator(thunk))));
-  }
   public take(n: number): Sequence<T, Sequence.Iterator<T>> {
     return this.takeWhile((_, i) => i < n);
   }
@@ -258,6 +167,87 @@ export class Sequence<T, S> extends Monad<T> /*implements ISequence<T, S>*/ {
             ? recur()
             : cons(Sequence.Thunk.value(thunk), Sequence.Thunk.iterator(thunk))));
   }
+  public until(f: (p: T) => boolean): Sequence<T, Sequence.Iterator<T>> {
+    return new Sequence<T, Sequence.Iterator<T>>((iter = () => this.iterate(), cons) =>
+      Sequence.Iterator.when(
+        iter(),
+        () => cons(),
+        thunk =>
+          f(Sequence.Thunk.value(thunk))
+            ? cons(Sequence.Thunk.value(thunk))
+            : cons(Sequence.Thunk.value(thunk), Sequence.Thunk.iterator(thunk))));
+  }
+  public fmap<U>(f: (p: T) => U): Sequence<U, Sequence.Iterator<T>> {
+    return new Sequence<U, Sequence.Iterator<T>>((iter = () => this.iterate()) =>
+      Sequence.Iterator.when(
+        iter(),
+        () => cons<U, Sequence.Iterator<T>>(),
+        thunk => cons<U, Sequence.Iterator<T>>(f(Sequence.Thunk.value(thunk)), Sequence.Thunk.iterator(thunk))));
+  }
+  public bind<U>(f: (p: T) => Sequence<U, any>): Sequence<U, [Sequence.Iterator<T>, Sequence.Iterator<U>]> {
+    return new Sequence<U, [Sequence.Iterator<T>, Sequence.Iterator<U>]>(([ai, bi] = [() => this.iterate(), Sequence.Iterator.done], cons) =>
+      Sequence.Iterator.when(
+        ai(),
+        () => cons(),
+        (at, recur) => {
+          bi = bi === Sequence.Iterator.done
+            ? () => f(Sequence.Thunk.value(at)).iterate()
+            : bi;
+          return Sequence.Iterator.when(
+            bi(),
+            () => (bi = Sequence.Iterator.done, recur()),
+            bt => cons(Sequence.Thunk.value(bt), [() => at, Sequence.Thunk.iterator(bt)]));
+        }));
+  }
+  public mapM<U>(f: (p: T) => Sequence<U, any>): Sequence<U[], [Sequence.Iterator<T>, Sequence.Iterator<U[]>]> {
+    return this
+      .take(1)
+      .bind(() => {
+        const xs = this.read();
+        switch (xs.length) {
+          case 0:
+            return Sequence.from<U[]>([]);
+          default: {
+            const x = xs.shift();
+            return f(x)
+              .bind(y =>
+                xs.length === 0
+                  ? Sequence.from<U[]>([[y]])
+                  : Sequence.from(xs).mapM(f).fmap(ys => concat([y], ys)));
+          }
+        }
+      });
+  }
+  public filterM(f: (p: T) => Sequence<boolean, any>): Sequence<T[], [Sequence.Iterator<T>, Sequence.Iterator<T[]>]> {
+    return this
+      .take(1)
+      .bind(() => {
+        const xs = this.read();
+        switch (xs.length) {
+          case 0:
+            return Sequence.from<T[]>([[]]);
+          default: {
+            const x = xs.shift();
+            return f(x)
+              .bind(b =>
+                b
+                  ? xs.length === 0
+                    ? Sequence.from<T[]>([[x]])
+                    : Sequence.from(xs).filterM(f).fmap(ys => concat([x], ys))
+                  : xs.length === 0
+                    ? Sequence.from<T[]>([[]])
+                    : Sequence.from(xs).filterM(f));
+          }
+        }
+      });
+  }
+  public map<U>(f: (p: T, i: number) => U): Sequence<U, Sequence.Iterator<T>> {
+    return new Sequence<U, Sequence.Iterator<T>>((iter = () => this.iterate()) =>
+      Sequence.Iterator.when(
+        iter(),
+        () => cons<U, Sequence.Iterator<T>>(),
+        thunk => cons<U, Sequence.Iterator<T>>(f(Sequence.Thunk.value(thunk), Sequence.Thunk.index(thunk)), Sequence.Thunk.iterator(thunk))));
+  }
   public filter(f: (p: T, i: number) => boolean): Sequence<T, Sequence.Iterator<T>> {
     return new Sequence<T, Sequence.Iterator<T>>((iter = () => this.iterate(), cons) =>
       Sequence.Iterator.when(
@@ -267,6 +257,16 @@ export class Sequence<T, S> extends Monad<T> /*implements ISequence<T, S>*/ {
           f(Sequence.Thunk.value(thunk), Sequence.Thunk.index(thunk))
             ? cons(Sequence.Thunk.value(thunk), Sequence.Thunk.iterator(thunk))
             : recur()));
+  }
+  public scan<U>(f: (b: U, a: T) => U, z: U): Sequence<U, [U, Sequence.Iterator<T>]> {
+    return new Sequence<U, [U, Sequence.Iterator<T>]>(([prev = z, iter = () => this.iterate()] = [void 0, void 0]) =>
+      Sequence.Iterator.when(
+        iter(),
+        () => cons<U, [U, Sequence.Iterator<T>]>(),
+        thunk =>
+          cons<U, [U, Sequence.Iterator<T>]>(
+            prev = f(prev, Sequence.Thunk.value(thunk)),
+            [prev, Sequence.Thunk.iterator(thunk)])));
   }
 }
 export namespace Sequence {

@@ -92,20 +92,20 @@ declare module 'spica' {
     static intersect<T>(cmp: (a: T, b: T) => number, ss: Sequence<T, any>): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>;
     constructor(cons: (p: S, cons: (value?: T, next?: S) => Sequence.Data<T, S>) => Sequence.Data<T, S>);
     read(): T[];
-    until(f: (p: T) => boolean): Sequence<T, Sequence.Iterator<T>>;
+    iterate(): Sequence.Thunk<T>;
+    fmap<U>(f: (p: T) => U): Sequence<U, Sequence.Iterator<T>>;
+    bind<U>(f: (p: T) => Sequence<U, any>): Sequence<U, [Sequence.Iterator<T>, Sequence.Iterator<U>]>;
+    mapM<U>(f: (p: T) => Sequence<U, any>): Sequence<U[], [Sequence.Iterator<T>, Sequence.Iterator<U[]>]>;
+    filterM(f: (p: T) => Sequence<boolean, any>): Sequence<T[], [Sequence.Iterator<T>, Sequence.Iterator<T[]>]>;
+    map<U>(f: (p: T, i: number) => U): Sequence<U, Sequence.Iterator<T>>;
+    filter(f: (p: T, i: number) => boolean): Sequence<T, Sequence.Iterator<T>>;
+    scan<U>(f: (b: U, a: T) => U, z: U): Sequence<U, [U, Sequence.Iterator<T>]>;
     take(n: number): Sequence<T, Sequence.Iterator<T>>;
     drop(n: number): Sequence<T, Sequence.Iterator<T>>;
     takeWhile(f: (p: T) => boolean, i: number): Sequence<T, Sequence.Iterator<T>>;
     dropWhile(f: (p: T) => boolean, i: number): Sequence<T, Sequence.Iterator<T>>;
-    map<U>(f: (p: T, i: number) => U): Sequence<U, Sequence.Iterator<T>>;
-    filter(f: (p: T, i: number) => boolean): Sequence<T, Sequence.Iterator<T>>;
-    scan<U>(f: (b: U, a: T) => U, z: U): Sequence<U, [U, Sequence.Iterator<T>]>;
+    until(f: (p: T) => boolean): Sequence<T, Sequence.Iterator<T>>;
     memoize(memory?: Map<number, Sequence.Data<T, S>>): Sequence<T, S>;
-    iterate(): Sequence.Thunk<T>;
-    fmap<U>(f: (p: T) => U): Sequence<U, Sequence.Iterator<T>>;
-    bind<U>(f: (p: T) => Sequence<U, any>): Sequence<U, [Sequence.Iterator<T>, Sequence.Iterator<U>]>;
-    filterM(f: (p: T) => Sequence<boolean, any>): Sequence<T[], [Sequence.Iterator<T>, Sequence.Iterator<T[]>]>;
-    mapM<U>(f: (p: T) => Sequence<U, any>): Sequence<U[], [Sequence.Iterator<T>, Sequence.Iterator<U[]>]>;
   }
   export namespace Sequence {
     export type Data<T, S> = [T, S];

@@ -32,55 +32,6 @@ describe('Unit: lib/monad/sequence', () => {
       assert.deepStrictEqual(mem.read(), [0, 1, 2]);
     });
 
-    it('until', () => {
-      assert.deepStrictEqual(
-        new Sequence<number, number>((n = 0, cons) => cons())
-          .until(() => false)
-          .read(),
-        []);
-      assert.deepStrictEqual(
-        new Sequence<number, number>((n = 0, cons) => cons(n))
-          .until(() => false)
-          .read(),
-        [0]);
-      assert.deepStrictEqual(
-        new Sequence<number, number>((n = 0, cons) => n < 1 ? cons(n, n + 1) : cons())
-          .until(() => false)
-          .read(),
-        [0]);
-      assert.deepStrictEqual(
-        new Sequence<number, number>((n = 0, cons) => n < 1 ? cons(n, n + 1) : cons(n))
-          .until(() => false)
-          .read(),
-        [0, 1]);
-      assert.deepStrictEqual(
-        new Sequence<number, number>((n = 0, cons) => n < 2 ? cons(n, n + 1) : cons())
-          .until(() => false)
-          .read(),
-        [0, 1]);
-      assert.deepStrictEqual(
-        new Sequence<number, number>((n = 0, cons) => n < 2 ? cons(n, n + 1) : cons(n))
-          .until(() => false)
-          .read(),
-        [0, 1, 2]);
-
-      assert.deepStrictEqual(
-        nat
-          .until(n => n === 0)
-          .read(),
-        [0]);
-      assert.deepStrictEqual(
-        nat
-          .until(n => n === 1)
-          .read(),
-        [0, 1]);
-      assert.deepStrictEqual(
-        nat
-          .until(n => n === 2)
-          .read(),
-        [0, 1, 2]);
-    });
-
     it('take', () => {
       assert.deepStrictEqual(
         nat
@@ -251,6 +202,55 @@ describe('Unit: lib/monad/sequence', () => {
         [3, 4, 5]);
     });
 
+    it('until', () => {
+      assert.deepStrictEqual(
+        new Sequence<number, number>((n = 0, cons) => cons())
+          .until(() => false)
+          .read(),
+        []);
+      assert.deepStrictEqual(
+        new Sequence<number, number>((n = 0, cons) => cons(n))
+          .until(() => false)
+          .read(),
+        [0]);
+      assert.deepStrictEqual(
+        new Sequence<number, number>((n = 0, cons) => n < 1 ? cons(n, n + 1) : cons())
+          .until(() => false)
+          .read(),
+        [0]);
+      assert.deepStrictEqual(
+        new Sequence<number, number>((n = 0, cons) => n < 1 ? cons(n, n + 1) : cons(n))
+          .until(() => false)
+          .read(),
+        [0, 1]);
+      assert.deepStrictEqual(
+        new Sequence<number, number>((n = 0, cons) => n < 2 ? cons(n, n + 1) : cons())
+          .until(() => false)
+          .read(),
+        [0, 1]);
+      assert.deepStrictEqual(
+        new Sequence<number, number>((n = 0, cons) => n < 2 ? cons(n, n + 1) : cons(n))
+          .until(() => false)
+          .read(),
+        [0, 1, 2]);
+
+      assert.deepStrictEqual(
+        nat
+          .until(n => n === 0)
+          .read(),
+        [0]);
+      assert.deepStrictEqual(
+        nat
+          .until(n => n === 1)
+          .read(),
+        [0, 1]);
+      assert.deepStrictEqual(
+        nat
+          .until(n => n === 2)
+          .read(),
+        [0, 1, 2]);
+    });
+
     it('fmap', () => {
       assert.deepStrictEqual(
         nat
@@ -317,67 +317,6 @@ describe('Unit: lib/monad/sequence', () => {
           .take(Infinity)
           .read(),
         [0, 0, 1, -1, 2, -2]);
-    });
-
-    it('filterM', () => {
-      assert.deepStrictEqual(
-        nat
-          .take(1)
-          .filterM(() => Sequence.from([false]))
-          .take(0)
-          .read(),
-        []);
-      assert.deepStrictEqual(
-        nat
-          .take(1)
-          .filterM(() => Sequence.from([true]))
-          .take(0)
-          .read(),
-        []);
-      assert.deepStrictEqual(
-        nat
-          .take(1)
-          .filterM(() => Sequence.from([true, false]))
-          .take(0)
-          .read(),
-        []);
-      assert.deepStrictEqual(
-        nat
-          .take(1)
-          .filterM(() => Sequence.from([false]))
-          .read(),
-        [[]]);
-      assert.deepStrictEqual(
-        nat
-          .take(1)
-          .filterM(() => Sequence.from([true]))
-          .read(),
-        [[0]]);
-      assert.deepStrictEqual(
-        nat
-          .take(1)
-          .filterM(() => Sequence.from([true, false]))
-          .read(),
-        [[0], []]);
-      assert.deepStrictEqual(
-        nat
-          .take(2)
-          .filterM(() => Sequence.from([true, false]))
-          .take(1)
-          .read(),
-        [[0, 1]]);
-      assert.deepStrictEqual(
-        nat
-          .take(2)
-          .filterM(() => Sequence.from([true, false]))
-          .read(),
-        [[0, 1], [0], [1], []]);
-      assert.deepStrictEqual(
-        nat
-          .take(3)
-          .filterM(() => Sequence.from([true, false]))
-          .read(),
-        [[0, 1, 2], [0, 1], [0, 2], [0], [1, 2], [1], [2], []]);
     });
 
     it('mapM', () => {
@@ -451,6 +390,67 @@ describe('Unit: lib/monad/sequence', () => {
           [1, 2, 3], [1, 2, -3], [1, -2, 3], [1, -2, -3],
           [-1, 2, 3], [-1, 2, -3], [-1, -2, 3], [-1, -2, -3]
         ]);
+    });
+
+    it('filterM', () => {
+      assert.deepStrictEqual(
+        nat
+          .take(1)
+          .filterM(() => Sequence.from([false]))
+          .take(0)
+          .read(),
+        []);
+      assert.deepStrictEqual(
+        nat
+          .take(1)
+          .filterM(() => Sequence.from([true]))
+          .take(0)
+          .read(),
+        []);
+      assert.deepStrictEqual(
+        nat
+          .take(1)
+          .filterM(() => Sequence.from([true, false]))
+          .take(0)
+          .read(),
+        []);
+      assert.deepStrictEqual(
+        nat
+          .take(1)
+          .filterM(() => Sequence.from([false]))
+          .read(),
+        [[]]);
+      assert.deepStrictEqual(
+        nat
+          .take(1)
+          .filterM(() => Sequence.from([true]))
+          .read(),
+        [[0]]);
+      assert.deepStrictEqual(
+        nat
+          .take(1)
+          .filterM(() => Sequence.from([true, false]))
+          .read(),
+        [[0], []]);
+      assert.deepStrictEqual(
+        nat
+          .take(2)
+          .filterM(() => Sequence.from([true, false]))
+          .take(1)
+          .read(),
+        [[0, 1]]);
+      assert.deepStrictEqual(
+        nat
+          .take(2)
+          .filterM(() => Sequence.from([true, false]))
+          .read(),
+        [[0, 1], [0], [1], []]);
+      assert.deepStrictEqual(
+        nat
+          .take(3)
+          .filterM(() => Sequence.from([true, false]))
+          .read(),
+        [[0, 1, 2], [0, 1], [0, 2], [0], [1, 2], [1], [2], []]);
     });
 
     it('map', () => {
