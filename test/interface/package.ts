@@ -6,6 +6,7 @@ import {
   Maybe, Just, Nothing,
   Either, Left, Right,
   DataMap, AttrMap, RelationMap,
+  Mixin,
   Tick,
   FINGERPRINT,
   uuid,
@@ -98,6 +99,13 @@ describe('Interface: Package', function () {
 
     it('RelationMap', function () {
       assert(typeof RelationMap === 'function');
+    });
+
+  });
+
+  describe('Mixin', function () {
+    it('Mixin', function () {
+      assert(typeof Mixin === 'function');
     });
 
   });

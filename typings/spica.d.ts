@@ -215,6 +215,8 @@ declare module 'spica' {
     delete(source: S, target?: T): boolean;
   }
 
+  export function Mixin<T>(...mixins: Array<new (...args: any[]) => any>): new (...args: any[]) => T;
+
   export function Tick(fn: (_?: void) => any): void
 
   export const FINGERPRINT: number;

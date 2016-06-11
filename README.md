@@ -25,6 +25,7 @@ $ npm i spica
 - DataMap
 - AttrMap
 - RelationMap
+- Mixin
 - Tick
 - FINGERPRINT
 - uuid
