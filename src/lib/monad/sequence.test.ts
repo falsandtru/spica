@@ -92,6 +92,10 @@ describe('Unit: lib/monad/sequence', () => {
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => cons())
           .takeWhile(() => true)
+          .read(),
+        []);
+      assert.deepStrictEqual(
+        new Sequence<number, number>((n = 0, cons) => cons())
           .takeWhile(() => false)
           .read(),
         []);
@@ -101,15 +105,30 @@ describe('Unit: lib/monad/sequence', () => {
           .read(),
         [0]);
       assert.deepStrictEqual(
+        new Sequence<number, number>((n = 0, cons) => cons(n))
+          .takeWhile(() => false)
+          .read(),
+        []);
+      assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => n < 1 ? cons(n, n + 1) : cons())
           .takeWhile(() => true)
           .read(),
         [0]);
       assert.deepStrictEqual(
+        new Sequence<number, number>((n = 0, cons) => n < 1 ? cons(n, n + 1) : cons())
+          .takeWhile(() => false)
+          .read(),
+        []);
+      assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => n < 1 ? cons(n, n + 1) : cons(n))
           .takeWhile(() => true)
           .read(),
         [0, 1]);
+      assert.deepStrictEqual(
+        new Sequence<number, number>((n = 0, cons) => n < 1 ? cons(n, n + 1) : cons(n))
+          .takeWhile(() => false)
+          .read(),
+        []);
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => n < 2 ? cons(n, n + 1) : cons())
           .takeWhile(() => true)
@@ -120,7 +139,6 @@ describe('Unit: lib/monad/sequence', () => {
           .takeWhile(() => true)
           .read(),
         [0, 1, 2]);
-
       assert.deepStrictEqual(
         nat
           .takeWhile(n => n < 0)
@@ -147,6 +165,10 @@ describe('Unit: lib/monad/sequence', () => {
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => cons())
           .dropWhile(() => false)
+          .read(),
+        []);
+      assert.deepStrictEqual(
+        new Sequence<number, number>((n = 0, cons) => cons())
           .dropWhile(() => true)
           .read(),
         []);
@@ -156,26 +178,50 @@ describe('Unit: lib/monad/sequence', () => {
           .read(),
         [0]);
       assert.deepStrictEqual(
+        new Sequence<number, number>((n = 0, cons) => cons(n))
+          .dropWhile(() => true)
+          .read(),
+        []);
+      assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => n < 1 ? cons(n, n + 1) : cons())
           .dropWhile(() => false)
           .read(),
         [0]);
+      assert.deepStrictEqual(
+        new Sequence<number, number>((n = 0, cons) => n < 1 ? cons(n, n + 1) : cons())
+          .dropWhile(() => true)
+          .read(),
+        []);
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => n < 1 ? cons(n, n + 1) : cons(n))
           .dropWhile(() => false)
           .read(),
         [0, 1]);
       assert.deepStrictEqual(
+        new Sequence<number, number>((n = 0, cons) => n < 1 ? cons(n, n + 1) : cons(n))
+          .dropWhile(() => true)
+          .read(),
+        []);
+      assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => n < 2 ? cons(n, n + 1) : cons())
           .dropWhile(() => false)
           .read(),
         [0, 1]);
       assert.deepStrictEqual(
+        new Sequence<number, number>((n = 0, cons) => n < 2 ? cons(n, n + 1) : cons())
+          .dropWhile(() => true)
+          .read(),
+        []);
+      assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => n < 2 ? cons(n, n + 1) : cons(n))
           .dropWhile(() => false)
           .read(),
         [0, 1, 2]);
-
+      assert.deepStrictEqual(
+        new Sequence<number, number>((n = 0, cons) => n < 2 ? cons(n, n + 1) : cons(n))
+          .dropWhile(() => true)
+          .read(),
+        []);
       assert.deepStrictEqual(
         nat
           .dropWhile(n => n < 0)
@@ -205,9 +251,19 @@ describe('Unit: lib/monad/sequence', () => {
     it('until', () => {
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => cons())
+          .until(() => true)
+          .read(),
+        []);
+      assert.deepStrictEqual(
+        new Sequence<number, number>((n = 0, cons) => cons())
           .until(() => false)
           .read(),
         []);
+      assert.deepStrictEqual(
+        new Sequence<number, number>((n = 0, cons) => cons(n))
+          .until(() => true)
+          .read(),
+        [0]);
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => cons(n))
           .until(() => false)
