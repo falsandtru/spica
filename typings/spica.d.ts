@@ -89,7 +89,7 @@ declare module 'spica' {
     static random<T>(as: T[]): Sequence<T, Sequence.Iterator<number>>;
     static zip<T, U>(a: Sequence<T, any>, b: Sequence<U, any>): Sequence<[T, U], [Sequence.Iterator<T>, Sequence.Iterator<U>]>;
     static union<T>(cmp: (a: T, b: T) => number, ss: Sequence<T, any>[]): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>;
-    static intersect<T>(cmp: (a: T, b: T) => number, ss: Sequence<T, any>): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>;
+    static intersect<T>(cmp: (a: T, b: T) => number, ss: Sequence<T, any>[]): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>;
     constructor(cons: (p: S, cons: (value?: T, next?: S) => Sequence.Data<T, S>) => Sequence.Data<T, S>);
     read(): T[];
     iterate(): Sequence.Thunk<T>;
@@ -102,8 +102,8 @@ declare module 'spica' {
     scan<U>(f: (b: U, a: T) => U, z: U): Sequence<U, [U, Sequence.Iterator<T>]>;
     take(n: number): Sequence<T, Sequence.Iterator<T>>;
     drop(n: number): Sequence<T, Sequence.Iterator<T>>;
-    takeWhile(f: (p: T) => boolean, i: number): Sequence<T, Sequence.Iterator<T>>;
-    dropWhile(f: (p: T) => boolean, i: number): Sequence<T, Sequence.Iterator<T>>;
+    takeWhile(f: (p: T, i: number) => boolean): Sequence<T, Sequence.Iterator<T>>;
+    dropWhile(f: (p: T, i: number) => boolean): Sequence<T, Sequence.Iterator<T>>;
     until(f: (p: T) => boolean): Sequence<T, Sequence.Iterator<T>>;
     memoize(memory?: Map<number, Sequence.Data<T, S>>): Sequence<T, S>;
   }
