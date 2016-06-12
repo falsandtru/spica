@@ -1,5 +1,4 @@
 import {Sequence} from '../../core';
-import {compose} from '../../../../compose';
 
 export default class <T, S> extends Sequence<T, S> {
   public scan<U>(f: (b: U, a: T) => U, z: U): Sequence<U, [U, Sequence.Iterator<T>]> {

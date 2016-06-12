@@ -1,5 +1,4 @@
 import {Sequence} from '../../core';
-import {compose} from '../../../../compose';
 import {concat} from '../../../../concat';
 
 export default class <T, S> extends Sequence<T, S> {

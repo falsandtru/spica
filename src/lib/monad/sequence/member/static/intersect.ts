@@ -1,5 +1,4 @@
 import {Sequence} from '../../core';
-import {compose} from '../../../../compose';
 
 export default class <T, S> extends Sequence<T, S> {
   public static intersect<T>(cmp: (a: T, b: T) => number, ss: Sequence<T, any>[]): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]> {

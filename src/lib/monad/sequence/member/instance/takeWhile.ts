@@ -1,5 +1,4 @@
 import {Sequence} from '../../core';
-import {compose} from '../../../../compose';
 
 export default class <T, S> extends Sequence<T, S> {
   public takeWhile(f: (p: T, i: number) => boolean): Sequence<T, Sequence.Iterator<T>> {

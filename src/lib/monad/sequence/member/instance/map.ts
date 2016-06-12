@@ -1,5 +1,4 @@
 import {Sequence} from '../../core';
-import {compose} from '../../../../compose';
 
 export default class <T, S> extends Sequence<T, S> {
   public map<U>(f: (p: T, i: number) => U): Sequence<U, Sequence.Iterator<T>> {
