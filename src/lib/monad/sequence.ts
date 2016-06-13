@@ -2,6 +2,7 @@ import {Sequence} from './sequence/core';
 import from from './sequence/member/static/from';
 import write from './sequence/member/static/write';
 import random from './sequence/member/static/random';
+import concat from './sequence/member/static/concat';
 import zip from './sequence/member/static/zip';
 import union from './sequence/member/static/union';
 import intersect from './sequence/member/static/intersect';
@@ -27,6 +28,7 @@ compose(
   from,
   write,
   random,
+  concat,
   zip,
   union,
   intersect,

@@ -14,6 +14,7 @@ export namespace Sequence {
   export declare function random(): Sequence<number, number>;
   export declare function random<T>(gen: () => T): Sequence<T, number>;
   export declare function random<T>(as: T[]): Sequence<T, Sequence.Iterator<number>>;
+  export declare function concat<T>(ss: Sequence<T, any>[]): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>;
   export declare function zip<T, U>(a: Sequence<T, any>, b: Sequence<U, any>): Sequence<[T, U], [Sequence.Iterator<T>, Sequence.Iterator<U>]>;
   export declare function union<T>(cmp: (a: T, b: T) => number, ss: Sequence<T, any>[]): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>;
   export declare function intersect<T>(cmp: (a: T, b: T) => number, ss: Sequence<T, any>[]): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>;
