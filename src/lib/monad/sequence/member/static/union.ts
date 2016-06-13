@@ -19,8 +19,8 @@ export default class <T, S> extends Sequence<T, S> {
               () => cons(Sequence.Thunk.value(at), [Sequence.Thunk.iterator(at), Sequence.Iterator.done]),
               bt => {
                 const result = cmp(Sequence.Thunk.value(at), Sequence.Thunk.value(bt));
-                if (result < 0) return cons(Sequence.Thunk.value(at), [Sequence.Thunk.iterator(at), () => bt]);
-                if (result > 0) return cons(Sequence.Thunk.value(bt), [() => at, Sequence.Thunk.iterator(bt)]);
+                if (result < 0) return cons(Sequence.Thunk.value(at), [Sequence.Thunk.iterator(at), bi]);
+                if (result > 0) return cons(Sequence.Thunk.value(bt), [ai, Sequence.Thunk.iterator(bt)]);
                 return cons(Sequence.Thunk.value(at), [Sequence.Thunk.iterator(at), Sequence.Thunk.iterator(bt)]);
               })));
     }
