@@ -15,9 +15,5 @@ function concat<T>(a: Sequence<T, any>, b: Sequence<T, any>): Sequence<T, [Seque
           bi(),
           () => cons(),
           bt => cons(Sequence.Thunk.value(bt), [Sequence.Iterator.done, Sequence.Thunk.iterator(bt)])),
-      at =>
-        Sequence.Iterator.when(
-          bi(),
-          () => cons(Sequence.Thunk.value(at), [Sequence.Thunk.iterator(at), bi]),
-          bt => cons(Sequence.Thunk.value(at), [Sequence.Thunk.iterator(at), bi]))));
+      at => cons(Sequence.Thunk.value(at), [Sequence.Thunk.iterator(at), bi])));
 }
