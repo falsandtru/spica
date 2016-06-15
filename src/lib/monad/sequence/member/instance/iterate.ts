@@ -8,8 +8,8 @@ export default class <T, S> extends Sequence<T, S> {
     const data = this.memory
       ? this.memory.has(i)
         ? this.memory.get(i)
-        : this.memory.set(i, this.cons(p, Sequence.cons)).get(i)
-      : this.cons(p, Sequence.cons);
+        : this.memory.set(i, this.cons(p, Sequence.Data.cons)).get(i)
+      : this.cons(p, Sequence.Data.cons);
     switch (data.length) {
       case 0:
         return <Sequence.Thunk<T>>[

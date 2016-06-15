@@ -5,7 +5,7 @@ export default class <T, S> extends Sequence<T, S> {
     return new Sequence<U, Sequence.Iterator<T>>((iter = () => this.iterate()) =>
       Sequence.Iterator.when(
         iter(),
-        () => Sequence.cons<U, Sequence.Iterator<T>>(),
-        thunk => Sequence.cons<U, Sequence.Iterator<T>>(f(Sequence.Thunk.value(thunk)), Sequence.Thunk.iterator(thunk))));
+        () => Sequence.Data.cons<U, Sequence.Iterator<T>>(),
+        thunk => Sequence.Data.cons<U, Sequence.Iterator<T>>(f(Sequence.Thunk.value(thunk)), Sequence.Thunk.iterator(thunk))));
   }
 }

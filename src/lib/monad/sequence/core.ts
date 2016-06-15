@@ -38,20 +38,21 @@ export interface Sequence<T, S> {
 }
 
 export namespace Sequence {
-  export function cons<T, S>(value?: T, next?: S): Sequence.Data<T, S> {
-    switch (arguments.length) {
-      case 0:
-        return <Sequence.Data<T, S>>[];
-      case 1:
-        return <Sequence.Data<T, S>><[]>[value];
-      case 2:
-        return <Sequence.Data<T, S>>[value, next];
-      default:
-        throw Sequence.Exception.invalidConsError(arguments);
+  export type Data<T, S> = [T, S];
+  export namespace Data {
+    export function cons<T, S>(value?: T, next?: S): Sequence.Data<T, S> {
+      switch (arguments.length) {
+        case 0:
+          return <Sequence.Data<T, S>>[];
+        case 1:
+          return <Sequence.Data<T, S>><[]>[value];
+        case 2:
+          return <Sequence.Data<T, S>>[value, next];
+        default:
+          throw Sequence.Exception.invalidConsError(arguments);
+      }
     }
   }
-
-  export type Data<T, S> = [T, S];
   export type Thunk<T> = [T, Iterator<T>, number];
   export namespace Thunk {
     export function value<T>(thunk: Thunk<T>): T {
