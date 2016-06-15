@@ -9,7 +9,7 @@ export class Sequence<T, S> extends Monad<T> {
   }
 }
 export namespace Sequence {
-  export declare function from<T>(as: T[]): Sequence<T, T>;
+  export declare function from<T>(as: T[]): Sequence<T, number>;
   export declare function write<T>(as: T[]): Sequence<T, T[]>;
   export declare function random(): Sequence<number, number>;
   export declare function random<T>(gen: () => T): Sequence<T, number>;

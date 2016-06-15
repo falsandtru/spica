@@ -82,7 +82,7 @@ declare module 'spica' {
   }
 
   export class Sequence<T, S> extends Monad<T> {
-    static from<T>(as: T[]): Sequence<T, T>;
+    static from<T>(as: T[]): Sequence<T, number>;
     static write<T>(as: T[]): Sequence<T, T[]>;
     static random(): Sequence<number, number>;
     static random<T>(gen: () => T): Sequence<T, number>;
