@@ -20,8 +20,8 @@ export namespace Sequence {
   export declare function intersect<T>(cmp: (a: T, b: T) => number, ss: Sequence<T, any>[]): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>;
 }
 export interface Sequence<T, S> {
-  read(): T[];
   iterate(): Sequence.Thunk<T>;
+  read(): T[];
   fmap<U>(f: (p: T) => U): Sequence<U, Sequence.Iterator<T>>;
   bind<U>(f: (p: T) => Sequence<U, any>): Sequence<U, [Sequence.Iterator<T>, Sequence.Iterator<U>]>;
   mapM<U>(f: (p: T) => Sequence<U, any>): Sequence<U[], [Sequence.Iterator<T>, Sequence.Iterator<U[]>]>;
