@@ -89,6 +89,22 @@ describe('Unit: lib/monad/sequence/member/static/concat', () => {
         [0, 1, 2]);
     });
 
+    it('Sequence<T[], S>', () => {
+      assert.deepStrictEqual(
+        Sequence.concat(Sequence.from([[0, 1, 2]]))
+          .take(2)
+          .read(),
+        [0, 1]);
+    });
+
+    it('Sequence<Sequence<T, S>, S>', () => {
+      assert.deepStrictEqual(
+        Sequence.concat(Sequence.from([Sequence.from([0, 1, 2])]))
+          .take(2)
+          .read(),
+        [0, 1]);
+    });
+
   });
 
 });
