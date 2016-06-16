@@ -12,6 +12,7 @@ addons:
     - google-chrome-stable
 before_install:
 - export DISPLAY=:99.0
+- export CHROME_BIN=/usr/bin/google-chrome
 - sh -e /etc/init.d/xvfb start
 before_deploy:
 - sed -i 's/"private":\ true/"private":\ false/' package.json
