@@ -13,7 +13,7 @@ import take from './sequence/member/instance/take';
 import drop from './sequence/member/instance/drop';
 import takeWhile from './sequence/member/instance/takeWhile';
 import dropWhile from './sequence/member/instance/dropWhile';
-import until from './sequence/member/instance/until';
+import takeUntil from './sequence/member/instance/takeUntil';
 import fmap from './sequence/member/instance/fmap';
 import bind from './sequence/member/instance/bind';
 import mapM from './sequence/member/instance/mapM';
@@ -39,7 +39,7 @@ compose(
   drop,
   takeWhile,
   dropWhile,
-  until,
+  takeUntil,
   fmap,
   bind,
   mapM,

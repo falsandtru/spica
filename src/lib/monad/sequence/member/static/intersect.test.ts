@@ -26,10 +26,10 @@ describe('Unit: lib/monad/sequence/member/intersect/', () => {
 
     it('mismatch', () => {
       assert.deepStrictEqual(
-        Sequence.intersect((a, b) => a - b, [double.dropWhile(n => n < 6).until(n => n === 12), triple]).take(2).read(),
+        Sequence.intersect((a, b) => a - b, [double.dropWhile(n => n < 6).takeUntil(n => n === 12), triple]).take(2).read(),
         [6, 12]);
       assert.deepStrictEqual(
-        Sequence.intersect((a, b) => a - b, [triple, double.dropWhile(n => n < 6).until(n => n === 12)]).take(2).read(),
+        Sequence.intersect((a, b) => a - b, [triple, double.dropWhile(n => n < 6).takeUntil(n => n === 12)]).take(2).read(),
         [6, 12]);
     });
 

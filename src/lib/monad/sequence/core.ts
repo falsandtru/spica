@@ -35,7 +35,7 @@ export interface Sequence<T, S> {
   drop(n: number): Sequence<T, Sequence.Iterator<T>>;
   takeWhile(f: (p: T, i: number) => boolean): Sequence<T, Sequence.Iterator<T>>;
   dropWhile(f: (p: T, i: number) => boolean): Sequence<T, Sequence.Iterator<T>>;
-  until(f: (p: T) => boolean): Sequence<T, Sequence.Iterator<T>>;
+  takeUntil(f: (p: T) => boolean): Sequence<T, Sequence.Iterator<T>>;
   memoize(memory?: Map<number, Sequence.Data<T, S>>): Sequence<T, S>;
 }
 

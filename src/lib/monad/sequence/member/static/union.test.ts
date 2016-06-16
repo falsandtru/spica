@@ -26,10 +26,10 @@ describe('Unit: lib/monad/sequence/member/static/union', () => {
 
     it('mismatch', () => {
       assert.deepStrictEqual(
-        Sequence.union((a, b) => a - b, [double.dropWhile(n => n < 6).until(n => n === 12), triple]).take(8).read(),
+        Sequence.union((a, b) => a - b, [double.dropWhile(n => n < 6).takeUntil(n => n === 12), triple]).take(8).read(),
         [0, 3, 6, 8, 9, 10, 12, 15]);
       assert.deepStrictEqual(
-        Sequence.union((a, b) => a - b, [triple, double.dropWhile(n => n < 6).until(n => n === 12)]).take(8).read(),
+        Sequence.union((a, b) => a - b, [triple, double.dropWhile(n => n < 6).takeUntil(n => n === 12)]).take(8).read(),
         [0, 3, 6, 8, 9, 10, 12, 15]);
     });
 

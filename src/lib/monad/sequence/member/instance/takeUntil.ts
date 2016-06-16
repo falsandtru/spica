@@ -1,7 +1,7 @@
 import {Sequence} from '../../core';
 
 export default class <T, S> extends Sequence<T, S> {
-  public until(f: (p: T) => boolean): Sequence<T, Sequence.Iterator<T>> {
+  public takeUntil(f: (p: T) => boolean): Sequence<T, Sequence.Iterator<T>> {
     return new Sequence<T, Sequence.Iterator<T>>((iter = () => this.iterate(), cons) =>
       Sequence.Iterator.when(
         iter(),
