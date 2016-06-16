@@ -14,6 +14,7 @@ import drop from './sequence/member/instance/drop';
 import takeWhile from './sequence/member/instance/takeWhile';
 import dropWhile from './sequence/member/instance/dropWhile';
 import takeUntil from './sequence/member/instance/takeUntil';
+import dropUntil from './sequence/member/instance/dropUntil';
 import fmap from './sequence/member/instance/fmap';
 import bind from './sequence/member/instance/bind';
 import mapM from './sequence/member/instance/mapM';
@@ -40,6 +41,7 @@ compose(
   takeWhile,
   dropWhile,
   takeUntil,
+  dropUntil,
   fmap,
   bind,
   mapM,
