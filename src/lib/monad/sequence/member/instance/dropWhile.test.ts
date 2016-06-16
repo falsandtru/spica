@@ -52,7 +52,7 @@ describe('Unit: lib/monad/sequence/member/dropWhile', () => {
         []);
     });
 
-    it('0 take', () => {
+    it('0', () => {
       assert.deepStrictEqual(
         nat
           .dropWhile(n => n < 0)
@@ -61,7 +61,7 @@ describe('Unit: lib/monad/sequence/member/dropWhile', () => {
         [0, 1, 2]);
     });
 
-    it('1 take', () => {
+    it('1', () => {
       assert.deepStrictEqual(
         nat
           .dropWhile(n => n < 1)
@@ -70,7 +70,7 @@ describe('Unit: lib/monad/sequence/member/dropWhile', () => {
         [1, 2, 3]);
     });
 
-    it('2 take', () => {
+    it('2', () => {
       assert.deepStrictEqual(
         nat
           .dropWhile(n => n < 2)

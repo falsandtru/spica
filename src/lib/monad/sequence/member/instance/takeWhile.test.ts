@@ -60,7 +60,7 @@ describe('Unit: lib/monad/sequence/member/takeWhile', () => {
         []);
     });
 
-    it('1 take', () => {
+    it('1', () => {
       assert.deepStrictEqual(
         nat
           .takeWhile(n => n < 1)
@@ -68,7 +68,7 @@ describe('Unit: lib/monad/sequence/member/takeWhile', () => {
         [0]);
     });
 
-    it('2 take', () => {
+    it('2', () => {
       assert.deepStrictEqual(
         nat
           .takeWhile(n => n < 2)
@@ -76,7 +76,7 @@ describe('Unit: lib/monad/sequence/member/takeWhile', () => {
         [0, 1]);
     });
 
-    it('1 all', () => {
+    it('3', () => {
       assert.deepStrictEqual(
         nat
           .takeWhile(n => n < 3)

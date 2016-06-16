@@ -52,7 +52,7 @@ describe('Unit: lib/monad/sequence/member/takeUntil', () => {
         [0, 1]);
     });
 
-    it('0', () => {
+    it('1', () => {
       assert.deepStrictEqual(
         nat
           .takeUntil(n => n === 0)
@@ -60,7 +60,7 @@ describe('Unit: lib/monad/sequence/member/takeUntil', () => {
         [0]);
     });
 
-    it('1', () => {
+    it('2', () => {
       assert.deepStrictEqual(
         nat
           .takeUntil(n => n === 1)
@@ -68,7 +68,7 @@ describe('Unit: lib/monad/sequence/member/takeUntil', () => {
         [0, 1]);
     });
 
-    it('2', () => {
+    it('3', () => {
       assert.deepStrictEqual(
         nat
           .takeUntil(n => n === 2)
