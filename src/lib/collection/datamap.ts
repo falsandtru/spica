@@ -22,7 +22,7 @@ export class DataMap<K, V> {
         if (isPrimitive(key)) {
           return `8:${key}`;
         }
-        if (key instanceof Array) {
+        if (Array.isArray(key)) {
           return `9:[ ${this.stringifyArray(<any[]>key)} ]`;
         }
         return `9:{ ${

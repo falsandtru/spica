@@ -75,7 +75,7 @@ export class Observable<T extends Array<string | number>, D, R>
   public reflect(namespace: T, data: D): R[] {
     let results: R[];
     void this.emit(namespace, <D>data, (_, r) => results = r);
-    assert(results instanceof Array);
+    assert(Array.isArray(results));
     return results;
   }
   private drain_(types: T, data: D, tracker?: (data: D, results: R[]) => any): void {
