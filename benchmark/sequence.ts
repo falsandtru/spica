@@ -11,6 +11,13 @@ describe('Benchmark:', function () {
       return (<void[]>Array.apply([], Array(n))).map((_, i) => i);
     }
 
+    function take(n: number) {
+      return Promise.all([
+        new Promise(resolve => arrTake(n, resolve)),
+        new Promise(resolve => seqTake(n, resolve)),
+        new Promise(resolve => memTake(n, resolve))
+      ]);
+    }
     function arrTake(n: number, done: () => void) {
       const arr = array(n);
       benchmark(`Sequence take arr ${n}`, () => arr.slice(0, n), done);
@@ -24,54 +31,28 @@ describe('Benchmark:', function () {
       benchmark(`Sequence take mem ${n}`, () => seq.read(), done);
     }
 
-    it('take arr 1', function (done) {
-      arrTake(1, done);
+    it('take 1', function (done) {
+      take(1).then(() => done());
     });
 
-    it('take seq 1', function (done) {
-      seqTake(1, done);
+    it('take 10', function (done) {
+      take(10).then(() => done());
     });
 
-    it('take mem 1', function (done) {
-      memTake(1, done);
+    it('take 100', function (done) {
+      take(100).then(() => done());
     });
 
-    it('take arr 10', function (done) {
-      arrTake(10, done);
+    it('take 1000', function (done) {
+      take(1000).then(() => done());
     });
 
-    it('take seq 10', function (done) {
-      seqTake(10, done);
-    });
-
-    it('take mem 10', function (done) {
-      memTake(10, done);
-    });
-
-    it('take arr 100', function (done) {
-      arrTake(100, done);
-    });
-
-    it('take seq 100', function (done) {
-      seqTake(100, done);
-    });
-
-    it('take mem 100', function (done) {
-      memTake(100, done);
-    });
-
-    it('take arr 1000', function (done) {
-      arrTake(1000, done);
-    });
-
-    it('take seq 1000', function (done) {
-      seqTake(1000, done);
-    });
-
-    it('take mem 1000', function (done) {
-      memTake(1000, done);
-    });
-
+    function mapfilter(n: number) {
+      return Promise.all([
+        new Promise(resolve => arrMapFilter(n, resolve)),
+        new Promise(resolve => seqMapFilter(n, resolve))
+      ]);
+    }
     function arrMapFilter(n: number, done: () => void) {
       const arr = array(n);
       const f = <T>(n: T) => n;
@@ -86,36 +67,20 @@ describe('Benchmark:', function () {
       benchmark(`Sequence map filter seq ${n}`, () => seq.read(), done);
     }
 
-    it('map filter arr 1', function (done) {
-      arrMapFilter(1, done);
+    it('map filter 1', function (done) {
+      mapfilter(1).then(() => done());
     });
 
-    it('map filter seq 1', function (done) {
-      seqMapFilter(1, done);
+    it('map filter 10', function (done) {
+      mapfilter(10).then(() => done());
     });
 
-    it('map filter arr 10', function (done) {
-      arrMapFilter(10, done);
+    it('map filter 100', function (done) {
+      mapfilter(100).then(() => done());
     });
 
-    it('map filter seq 10', function (done) {
-      seqMapFilter(10, done);
-    });
-
-    it('map filter arr 100', function (done) {
-      arrMapFilter(100, done);
-    });
-
-    it('map filter seq 100', function (done) {
-      seqMapFilter(100, done);
-    });
-
-    it('map filter arr 1000', function (done) {
-      arrMapFilter(1000, done);
-    });
-
-    it('map filter seq 1000', function (done) {
-      seqMapFilter(1000, done);
+    it('map filter 1000', function (done) {
+      mapfilter(1000).then(() => done());
     });
 
   });
