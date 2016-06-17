@@ -32,6 +32,7 @@ module.exports = function (config) {
       ]
     },
     autoWatch: true,
-    browsers: ['Chrome']
+    browsers: ['Chrome'],
+    browserNoActivityTimeout: 100 * 1e3
   });
 };

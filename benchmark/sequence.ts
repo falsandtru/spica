@@ -7,16 +7,20 @@ describe('Benchmark:', function () {
   describe('Sequence', function () {
     this.timeout(100 * 1e3);
 
+    function array(n: number) {
+      return (<void[]>Array.apply([], Array(n))).map((_, i) => i);
+    }
+
     function arrTake(n: number, done: () => void) {
-      const arr = (<void[]>Array.apply([], Array(n))).map((_, i) => i);
-      benchmark(`Sequence take arr ${n}`, () => arr.slice(0, n / 2 || 1), done);
+      const arr = array(n);
+      benchmark(`Sequence take arr ${n}`, () => arr.slice(0, n), done);
     }
     function seqTake(n: number, done: () => void) {
-      const seq = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1)).take(n / 2 || 1);
+      const seq = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1)).take(n);
       benchmark(`Sequence take seq ${n}`, () => seq.read(), done);
     }
     function memTake(n: number, done: () => void) {
-      const seq = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1)).take(n / 2 || 1).memoize();
+      const seq = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1)).take(n).memoize();
       benchmark(`Sequence take mem ${n}`, () => seq.read(), done);
     }
     it('take arr 1', function (done) {
@@ -68,23 +72,23 @@ describe('Benchmark:', function () {
     });
 
     function arrMapFilter(n: number, done: () => void) {
-      const arr = (<void[]>Array.apply([], Array(n))).map((_, i) => i);
+      const arr = array(n);
       const f = <T>(n: T) => n;
       const g = () => true;
-      benchmark(`Sequence map filter arr ${n}`, () => arr.map(f).filter(g).slice(0, n / 2 || 1), done);
+      benchmark(`Sequence map filter arr ${n}`, () => arr.map(f).filter(g).slice(0, n), done);
     }
     function seqMapFilter(n: number, done: () => void) {
       const seq = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1))
         .map(n => n)
         .filter(n => true)
-        .take(n / 2 || 1);
+        .take(n);
       benchmark(`Sequence map filter seq ${n}`, () => seq.read(), done);
     }
     function memMapFilter(n: number, done: () => void) {
       const seq = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1))
         .map(n => n)
         .filter(n => true)
-        .take(n / 2 || 1)
+        .take(n)
         .memoize();
       benchmark(`Sequence map filter mem ${n}`, () => seq.read(), done);
     }
