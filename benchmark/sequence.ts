@@ -12,11 +12,10 @@ describe('Benchmark:', function () {
     }
 
     function take(n: number) {
-      return Promise.all([
-        new Promise(resolve => arrTake(n, resolve)),
-        new Promise(resolve => seqTake(n, resolve)),
-        new Promise(resolve => memTake(n, resolve))
-      ]);
+      return Promise.resolve()
+        .then(() => new Promise(resolve => arrTake(n, resolve)))
+        .then(() => new Promise(resolve => seqTake(n, resolve)))
+        .then(() => new Promise(resolve => memTake(n, resolve)));
     }
     function arrTake(n: number, done: () => void) {
       const arr = array(n);
@@ -48,10 +47,9 @@ describe('Benchmark:', function () {
     });
 
     function mapfilter(n: number) {
-      return Promise.all([
-        new Promise(resolve => arrMapFilter(n, resolve)),
-        new Promise(resolve => seqMapFilter(n, resolve))
-      ]);
+      return Promise.resolve()
+        .then(() => new Promise(resolve => arrMapFilter(n, resolve)))
+        .then(() => new Promise(resolve => seqMapFilter(n, resolve)));
     }
     function arrMapFilter(n: number, done: () => void) {
       const arr = array(n);
