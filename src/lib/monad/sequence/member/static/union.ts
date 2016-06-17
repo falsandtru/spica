@@ -1,8 +1,8 @@
 import {Sequence} from '../../core';
 
 export default class <T, S> extends Sequence<T, S> {
-  public static union<T>(cmp: (a: T, b: T) => number, ss: Sequence<T, any>[]): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]> {
-    return ss.reduce((a, b) => union(cmp, a, b));
+  public static union<T>(cmp: (a: T, b: T) => number, as: Sequence<T, any>[]): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]> {
+    return as.reduce((a, b) => union(cmp, a, b));
   }
 }
 
