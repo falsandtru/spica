@@ -23,6 +23,7 @@ describe('Benchmark:', function () {
       const seq = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1)).take(n).memoize();
       benchmark(`Sequence take mem ${n}`, () => seq.read(), done);
     }
+
     it('take arr 1', function (done) {
       arrTake(1, done);
     });
@@ -84,24 +85,13 @@ describe('Benchmark:', function () {
         .take(n);
       benchmark(`Sequence map filter seq ${n}`, () => seq.read(), done);
     }
-    function memMapFilter(n: number, done: () => void) {
-      const seq = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1))
-        .map(n => n)
-        .filter(n => true)
-        .take(n)
-        .memoize();
-      benchmark(`Sequence map filter mem ${n}`, () => seq.read(), done);
-    }
+
     it('map filter arr 1', function (done) {
       arrMapFilter(1, done);
     });
 
     it('map filter seq 1', function (done) {
       seqMapFilter(1, done);
-    });
-
-    it('map filter mem 1', function (done) {
-      memMapFilter(1, done);
     });
 
     it('map filter arr 10', function (done) {
@@ -112,10 +102,6 @@ describe('Benchmark:', function () {
       seqMapFilter(10, done);
     });
 
-    it('map filter mem 10', function (done) {
-      memMapFilter(10, done);
-    });
-
     it('map filter arr 100', function (done) {
       arrMapFilter(100, done);
     });
@@ -124,20 +110,12 @@ describe('Benchmark:', function () {
       seqMapFilter(100, done);
     });
 
-    it('map filter mem 100', function (done) {
-      memMapFilter(100, done);
-    });
-
     it('map filter arr 1000', function (done) {
       arrMapFilter(1000, done);
     });
 
     it('map filter seq 1000', function (done) {
       seqMapFilter(1000, done);
-    });
-
-    it('map filter mem 1000', function (done) {
-      memMapFilter(1000, done);
     });
 
   });
