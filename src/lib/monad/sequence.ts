@@ -6,6 +6,7 @@ import concat from './sequence/member/static/concat';
 import zip from './sequence/member/static/zip';
 import union from './sequence/member/static/union';
 import intersect from './sequence/member/static/intersect';
+import Return from './sequence/member/static/return';
 import iterate from './sequence/member/instance/iterate';
 import memoize from './sequence/member/instance/memoize';
 import read from './sequence/member/instance/read';
@@ -33,6 +34,7 @@ compose(
   zip,
   union,
   intersect,
+  Return,
   iterate,
   memoize,
   read,
