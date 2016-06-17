@@ -4,11 +4,11 @@ export default class <T, S> extends Sequence<T, S> {
   public take(n: number): Sequence<T, Sequence.Iterator<T>> {
     return new Sequence<T, Sequence.Iterator<T>>((iter = () => this.iterate(), cons) =>
       Sequence.Iterator.when(
-        iter(),
+        n > 0 ? iter() : <Sequence.Thunk<T>>Sequence.Iterator.done(),
         () => cons(),
         thunk =>
-          Sequence.Thunk.index(thunk) < n
+          Sequence.Thunk.index(thunk) + 1 < n
             ? cons(Sequence.Thunk.value(thunk), Sequence.Thunk.iterator(thunk))
-            : cons()));
+            : cons(Sequence.Thunk.value(thunk))));
   }
 }
