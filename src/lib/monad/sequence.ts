@@ -7,6 +7,9 @@ import zip from './sequence/member/static/zip';
 import union from './sequence/member/static/union';
 import intersect from './sequence/member/static/intersect';
 import Return from './sequence/member/static/return';
+import mempty from './sequence/member/static/mempty';
+import mconcat from './sequence/member/static/mconcat';
+import mappend from './sequence/member/static/mappend';
 import iterate from './sequence/member/instance/iterate';
 import memoize from './sequence/member/instance/memoize';
 import read from './sequence/member/instance/read';
@@ -35,6 +38,9 @@ compose(
   union,
   intersect,
   Return,
+  mempty,
+  mconcat,
+  mappend,
   iterate,
   memoize,
   read,

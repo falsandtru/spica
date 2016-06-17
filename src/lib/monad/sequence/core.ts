@@ -21,6 +21,9 @@ export namespace Sequence {
   export declare function union<T>(cmp: (a: T, b: T) => number, ss: Sequence<T, any>[]): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>;
   export declare function intersect<T>(cmp: (a: T, b: T) => number, ss: Sequence<T, any>[]): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>;
   export declare function Return<T>(a: T): Sequence<T, number>;
+  export declare const mempty: Sequence<any, any>;
+  export declare function mappend<T>(a: Sequence<T, any>, b: Sequence<T, any>): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>;
+  export declare function mconcat<T>(ss: Sequence<T, any>[]): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>;
 }
 export interface Sequence<T, S> {
   iterate(): Sequence.Thunk<T>;

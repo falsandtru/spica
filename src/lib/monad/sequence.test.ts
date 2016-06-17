@@ -2,6 +2,27 @@ import {Sequence} from './sequence';
 
 describe('Unit: lib/monad/sequence', () => {
   describe('Sequence', () => {
+    it('Monoid law 1', () => {
+      const x = Sequence.Return(0);
+      const ma = Sequence.mappend(Sequence.mempty, x);
+      assert.deepStrictEqual(ma.read(), x.read());
+    });
+
+    it('Monoid law 2', () => {
+      const x = Sequence.Return(0);
+      const ma = Sequence.mappend(x, Sequence.mempty);
+      assert.deepStrictEqual(ma.read(), x.read());
+    });
+
+    it('Monoid law 3', () => {
+      const x = Sequence.Return(0);
+      const y = Sequence.Return(1);
+      const z = Sequence.Return(2);
+      const ma = Sequence.mappend(Sequence.mappend(x, y), z);
+      const mb = Sequence.mappend(x, Sequence.mappend(y, z));
+      assert.deepStrictEqual(ma.read(), mb.read());
+    });
+
     it('Functor law 1', () => {
       const f = <T>(n: T) => n;
       const x = 0;
