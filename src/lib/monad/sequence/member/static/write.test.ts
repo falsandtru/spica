@@ -7,12 +7,10 @@ describe('Unit: lib/monad/sequence/member/static/write', () => {
       const seq = Sequence.write(stream);
       assert.deepStrictEqual(
         seq
-          .takeWhile(() => true)
           .read(),
         [0, 1, 2]);
       assert.deepStrictEqual(
         seq
-          .takeWhile(() => true)
           .read(),
         []);
       stream.push(3, 4);
