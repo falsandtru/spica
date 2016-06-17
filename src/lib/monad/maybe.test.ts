@@ -68,51 +68,50 @@ describe('Unit: lib/maybe', () => {
     });
 
     it('Functor law 1', () => {
-      const f = (n: number) => n,
-            x = 0;
+      const f = <T>(n: T) => n;
+      const x = 0;
       const fa = Return(x).fmap(f);
-      assert(fa.extract() === 0);
+      const fb = f(Return(x));
+      assert(fa.extract() === fb.extract());
     });
 
     it('Functor law 2', () => {
-      const f = (n: number) => n + 2,
-            g = (n: number) => n * 3,
-            x = 1;
-      const fa = Return(x).fmap(n => g(f(n))),
-            fb = Return(x).fmap(f).fmap(g);
+      const f = (n: number) => n + 2;
+      const g = (n: number) => n * 3;
+      const x = 1;
+      const fa = Return(x).fmap(n => g(f(n)));
+      const fb = Return(x).fmap(f).fmap(g);
       assert(fa.extract() === fb.extract());
     });
 
     it('Monad law 1', () => {
-      const f = (n: number) => Just(n + 1),
-            x = 0;
+      const f = (n: number) => Just(n + 1);
+      const x = 0;
       const ma = Return(x).bind(f);
       const mb = f(x);
       assert(ma.extract() === mb.extract());
     });
 
     it('Monad law 2', () => {
-      const f = (n: number) => Just(n + 1),
-            x = 0;
+      const f = (n: number) => Just(n + 1);
+      const x = 0;
       const ma = Return(x);
       const mb = ma.bind(Return);
       assert(ma.extract() === mb.extract());
     });
 
     it('Monad law 3', () => {
-      let ord1 = 0,
-          ord2 = 0;
-      const m1 = Return(1),
-            m2 = Return(2),
-            m3 = Return(4);
+      const m1 = Return(1);
+      const m2 = Return(2);
+      const m3 = Return(4);
       const ma = m1
-        .bind(v1 => m2.bind(v2 => Just(+assert(++ord1 === 1) || v1 + v2)))
-        .bind(n => m3.bind(v3 => Just(+assert(++ord1 === 2) || n + v3)));
+        .bind(v1 => m2.bind(v2 => Just(v1 + v2)))
+        .bind(n => m3.bind(v3 => Just(n + v3)));
       const mb = m1
         .bind(v1 => m2.bind(v2 => m3.bind(v3 =>
-          Just(+assert(++ord2 === 1) || v2 + v3)))
+          Just(v2 + v3)))
             .bind(n =>
-              Just(+assert(++ord2 === 2) || v1 + n)));
+              Just(v1 + n)));
       assert(ma.extract() === mb.extract());
     });
 
