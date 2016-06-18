@@ -30,6 +30,10 @@ $ npm i spica
 - FINGERPRINT
 - uuid
 - sqid
+- assign
+- clone
+- extend
+- concat
 
 ## Browser
 
