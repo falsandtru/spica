@@ -234,5 +234,6 @@ declare module 'spica' {
   export function extend<T extends Object>(target: T | {}, ...sources: T[]): T
   export function concat<T>(target: T[], source: T[]): T[]
   export function concat<T>(target: T[], source: { [index: number]: T; length: number; }): T[]
+  export function sort<T>(as: T[], cmp: (a: T, b: T) => number, times: number): T[];
 
 }

@@ -14,7 +14,8 @@ import {
   assign,
   clone,
   extend,
-  concat
+  concat,
+  sort
 } from 'spica';
 
 describe('Interface: Package', function () {
@@ -147,6 +148,10 @@ describe('Interface: Package', function () {
 
     it('concat', function () {
       assert(typeof concat === 'function');
+    });
+
+    it('sort', function () {
+      assert(typeof sort === 'function');
     });
 
   });

@@ -34,6 +34,7 @@ $ npm i spica
 - clone
 - extend
 - concat
+- sort
 
 ## Browser
 

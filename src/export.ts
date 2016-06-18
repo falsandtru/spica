@@ -14,3 +14,4 @@ export {v4 as uuid} from './lib/uuid';
 export {sqid} from './lib/sqid';
 export {assign, clone, extend} from './lib/assign';
 export {concat} from './lib/concat';
+export {sort} from './lib/sort';
