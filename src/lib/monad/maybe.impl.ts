@@ -5,6 +5,9 @@ export class Maybe<T> extends Monad<T> {
   constructor(protected thunk?: () => Maybe<T>) {
     super(thunk);
   }
+  public fmap<U>(f: (val: T) => U): Maybe<U> {
+    return this.bind(v => new Just(f(v)));
+  }
   public bind<U>(f: (val: T) => Maybe<U>): Maybe<U> {
     return new Maybe<U>(() => {
       const m: Maybe<T> = this.evaluate();
@@ -19,9 +22,6 @@ export class Maybe<T> extends Monad<T> {
       }
       throw new TypeError(`Spica: Maybe: Invalid monad value.\n\t${m}`);
     });
-  }
-  public fmap<U>(f: (val: T) => U): Maybe<U> {
-    return this.bind(v => new Just(f(v)));
   }
   public extract(): T
   public extract<U>(transform: () => U): T | U
@@ -45,10 +45,10 @@ export class Just<T> extends Maybe<T> {
 
 export class Nothing extends Maybe<any> {
   protected MAYBE: Nothing;
-  public bind(f: (val: any) => Maybe<any>): Nothing {
+  public fmap(f: (val: any) => any): Nothing {
     return this;
   }
-  public fmap(f: (val: any) => any): Nothing {
+  public bind(f: (val: any) => Maybe<any>): Nothing {
     return this;
   }
   public extract(): any

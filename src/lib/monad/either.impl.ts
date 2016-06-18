@@ -5,6 +5,9 @@ export class Either<L, R> extends Monad<R> {
   constructor(protected thunk?: () => Either<L, R>) {
     super(thunk);
   }
+  public fmap<RR>(f: (val: R) => RR): Either<L, RR> {
+    return this.bind(v => new Right(f(v)));
+  }
   public bind<RR>(f: (val: R) => Either<L, RR>): Either<L, RR> {
     return new Either<L, RR>(() => {
       const m: Either<L, R> = this.evaluate();
@@ -20,9 +23,6 @@ export class Either<L, R> extends Monad<R> {
       throw new TypeError(`Spica: Either: Invalid monad value.\n\t${m}`);
     });
   }
-  public fmap<RR>(f: (val: R) => RR): Either<L, RR> {
-    return this.bind(v => new Right(f(v)));
-  }
   public extract(): R
   public extract<LL>(transform: (left: L) => LL): LL | R
   public extract<LL>(transform?: (left: L) => LL): LL | R {
@@ -35,10 +35,10 @@ export class Left<L> extends Either<L, any> {
   constructor(private val_: L) {
     super();
   }
-  public bind(f: (val: any) => Either<L, any>): Left<L> {
+  public fmap(f: (val: any) => any): Left<L> {
     return this;
   }
-  public fmap(f: (val: any) => any): Left<L> {
+  public bind(f: (val: any) => Either<L, any>): Left<L> {
     return this;
   }
   public extract(): any
