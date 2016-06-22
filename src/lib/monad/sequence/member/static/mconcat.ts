@@ -2,11 +2,11 @@ import {Sequence} from '../../core';
 
 export default class <T, S> extends Sequence<T, S> {
   public static mconcat<T>(as: Sequence<T, any>[]): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]> {
-    return as.reduce((a, b) => concat(a, b), Sequence.from([]));
+    return as.reduce((a, b) => mconcat(a, b), Sequence.from([]));
   }
 }
 
-function concat<T>(a: Sequence<T, any>, b: Sequence<T, any>): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]> {
+function mconcat<T>(a: Sequence<T, any>, b: Sequence<T, any>): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]> {
   return new Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>(([ai, bi] = [() => a.iterate(), () => b.iterate()], cons) =>
     Sequence.Iterator.when(
       ai(),
