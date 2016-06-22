@@ -88,9 +88,7 @@ declare module 'spica' {
     static random<T>(gen: () => T): Sequence<T, number>;
     static random<T>(as: T[]): Sequence<T, Sequence.Iterator<number>>;
     static zip<T, U>(a: Sequence<T, any>, b: Sequence<U, any>): Sequence<[T, U], [Sequence.Iterator<T>, Sequence.Iterator<U>]>;
-    static concat<T>(as: Sequence<T, any>[]): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>;
-    static concat<T>(as: Sequence<Sequence<T, any>, any>): Sequence<T, [Sequence.Iterator<T[]>, Sequence.Iterator<T>]>;
-    static concat<T>(as: Sequence<T[], any>): Sequence<T, [Sequence.Iterator<T[]>, Sequence.Iterator<T>]>;
+    static concat<T>(as: Sequence<Sequence<T, any>, any>): Sequence<T, [Sequence.Iterator<Sequence<T, any>>, Sequence.Iterator<T>]>;
     static union<T>(cmp: (a: T, b: T) => number, as: Sequence<T, any>[]): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>;
     static intersect<T>(cmp: (a: T, b: T) => number, as: Sequence<T, any>[]): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>;
     static mempty: Sequence<any, any>;

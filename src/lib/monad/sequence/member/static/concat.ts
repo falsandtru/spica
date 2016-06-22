@@ -1,15 +1,18 @@
 import {Sequence} from '../../core';
 
 export default class <T, S> extends Sequence<T, S> {
-  public static concat<T>(as: Sequence<T, any>[]): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>
-  public static concat<T>(as: Sequence<Sequence<T, any>, any>): Sequence<T, [Sequence.Iterator<T[]>, Sequence.Iterator<T>]>
-  public static concat<T>(as: Sequence<T[], any>): Sequence<T, [Sequence.Iterator<T[]>, Sequence.Iterator<T>]>
-  public static concat<T>(as: Sequence<T, any>[] | Sequence<Sequence<T, any>, any> | Sequence<T[], any>): Sequence<T, [Sequence.Iterator<T> | Sequence.Iterator<T[]>, Sequence.Iterator<T>]> {
-    return Array.isArray(as)
-      ? Sequence.mconcat(as)
-      : (<Sequence<T[], any>>as).bind((s: Sequence<T, any> | T[]) =>
-        Array.isArray(s)
-          ? Sequence.from(s)
-          : s);
+  public static concat<T>(as: Sequence<Sequence<T, any>, any>): Sequence<T, [Sequence.Iterator<Sequence<T, any>>, Sequence.Iterator<T>]> {
+    return new Sequence<T, [Sequence.Iterator<Sequence<T, any>>, Sequence.Iterator<T>]>(([ai, bi] = [() => as.iterate(), Sequence.Iterator.done], cons) =>
+      Sequence.Iterator.when(
+        ai(),
+        () => cons(),
+        (at, recur) => (
+          bi = bi === Sequence.Iterator.done
+            ? () => Sequence.Thunk.value(at).iterate()
+            : bi,
+          Sequence.Iterator.when(
+            bi(),
+            () => (bi = Sequence.Iterator.done, recur()),
+            bt => cons(Sequence.Thunk.value(bt), [() => at, Sequence.Thunk.iterator(bt)])))));
   }
 }
