@@ -2,7 +2,7 @@ import {Sequence} from '../../core';
 import {concat} from '../../../../concat';
 
 export default class <T, S> extends Sequence<T, S> {
-  public mapM<U>(f: (p: T) => Sequence<U, any>): Sequence<U[], [Sequence.Iterator<T>, Sequence.Iterator<U[]>]> {
+  public mapM<U>(f: (p: T) => Sequence<U, any>): Sequence<U[], [Sequence.Iterator<Sequence<U[], any>>, Sequence.Iterator<U[]>]> {
     return this
       .take(1)
       .bind(() => {

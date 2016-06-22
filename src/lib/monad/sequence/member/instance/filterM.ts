@@ -2,7 +2,7 @@ import {Sequence} from '../../core';
 import {concat} from '../../../../concat';
 
 export default class <T, S> extends Sequence<T, S> {
-  public filterM(f: (p: T) => Sequence<boolean, any>): Sequence<T[], [Sequence.Iterator<T>, Sequence.Iterator<T[]>]> {
+  public filterM(f: (p: T) => Sequence<boolean, any>): Sequence<T[], [Sequence.Iterator<Sequence<T[], any>>, Sequence.Iterator<T[]>]> {
     return this
       .take(1)
       .bind(() => {

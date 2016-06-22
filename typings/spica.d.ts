@@ -98,9 +98,9 @@ declare module 'spica' {
     iterate(): Sequence.Thunk<T>;
     read(): T[];
     fmap<U>(f: (p: T) => U): Sequence<U, Sequence.Iterator<T>>;
-    bind<U>(f: (p: T) => Sequence<U, any>): Sequence<U, [Sequence.Iterator<T>, Sequence.Iterator<U>]>;
-    mapM<U>(f: (p: T) => Sequence<U, any>): Sequence<U[], [Sequence.Iterator<T>, Sequence.Iterator<U[]>]>;
-    filterM(f: (p: T) => Sequence<boolean, any>): Sequence<T[], [Sequence.Iterator<T>, Sequence.Iterator<T[]>]>;
+    bind<U>(f: (p: T) => Sequence<U, any>): Sequence<U, [Sequence.Iterator<Sequence<U, any>>, Sequence.Iterator<U>]>;
+    mapM<U>(f: (p: T) => Sequence<U, any>): Sequence<U[], [Sequence.Iterator<Sequence<U[], any>>, Sequence.Iterator<U[]>]>;
+    filterM(f: (p: T) => Sequence<boolean, any>): Sequence<T[], [Sequence.Iterator<Sequence<T[], any>>, Sequence.Iterator<T[]>]>;
     map<U>(f: (p: T, i: number) => U): Sequence<U, Sequence.Iterator<T>>;
     filter(f: (p: T, i: number) => boolean): Sequence<T, Sequence.Iterator<T>>;
     scan<U>(f: (b: U, a: T) => U, z: U): Sequence<U, [U, Sequence.Iterator<T>]>;
