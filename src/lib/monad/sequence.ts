@@ -10,6 +10,8 @@ import Return from './sequence/member/static/return';
 import mempty from './sequence/member/static/mempty';
 import mconcat from './sequence/member/static/mconcat';
 import mappend from './sequence/member/static/mappend';
+import mzero from './sequence/member/static/mzero';
+import mplus from './sequence/member/static/mplus';
 import iterate from './sequence/member/instance/iterate';
 import memoize from './sequence/member/instance/memoize';
 import read from './sequence/member/instance/read';
@@ -41,6 +43,8 @@ compose(
   mempty,
   mconcat,
   mappend,
+  mzero,
+  mplus,
   iterate,
   memoize,
   read,

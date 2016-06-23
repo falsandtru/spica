@@ -1,6 +1,6 @@
-import {Monad} from '../monad';
+import {MonadPlus} from '../monadplus';
 
-export class Sequence<T, S> extends Monad<T> {
+export class Sequence<T, S> extends MonadPlus<T> {
   constructor(
     protected cons: (p: S, cons: (value?: T, next?: S) => Sequence.Data<T, S>) => Sequence.Data<T, S>,
     protected memory?: Map<number, Sequence.Data<T, S>>
@@ -22,6 +22,8 @@ export namespace Sequence {
   export declare const mempty: Sequence<any, any>;
   export declare function mappend<T>(a: Sequence<T, any>, b: Sequence<T, any>): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>;
   export declare function mconcat<T>(as: Sequence<T, any>[]): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>;
+  export declare const mzero: Sequence<any, any>;
+  export declare function mplus<T>(a: Sequence<T, any>, b: Sequence<T, any>): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>;
 }
 export interface Sequence<T, S> {
   iterate(): Sequence.Thunk<T>;
