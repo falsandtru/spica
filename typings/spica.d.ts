@@ -80,8 +80,12 @@ declare module 'spica' {
   abstract class Monad<T> extends Functor<T> {
     abstract bind<U>(f: (val: T) => Monad<U>): Monad<U>;
   }
+  abstract class MonadPlus<T> extends Monad<T> {
+    static mzero: MonadPlus<any>;
+    static mplus<T>(a: MonadPlus<T>, b: MonadPlus<T>): MonadPlus<T>;
+  }
 
-  export class Sequence<T, S> extends Monad<T> {
+  export class Sequence<T, S> extends MonadPlus<T> {
     static from<T>(as: T[]): Sequence<T, number>;
     static write<T>(as: T[]): Sequence<T, T[]>;
     static random(): Sequence<number, number>;
@@ -94,6 +98,8 @@ declare module 'spica' {
     static mempty: Sequence<any, any>;
     static mappend<T>(a: Sequence<T, any>, b: Sequence<T, any>): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>;
     static mconcat<T>(as: Sequence<T, any>[]): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>;
+    static mzero: Sequence<any, any>;
+    static mplus<T>(a: Sequence<T, any>, b: Sequence<T, any>): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>;
     constructor(cons: (p: S, cons: (value?: T, next?: S) => Sequence.Data<T, S>) => Sequence.Data<T, S>);
     iterate(): Sequence.Thunk<T>;
     read(): T[];
@@ -119,7 +125,7 @@ declare module 'spica' {
   }
 
   namespace Monad {
-    export abstract class Maybe<T> extends Monad<T> {
+    export abstract class Maybe<T> extends MonadPlus<T> {
       protected MAYBE: Just<T> | Nothing;
       fmap<U>(f: (val: T) => U): Maybe<U>;
       bind<U>(f: (val: T) => Maybe<U>): Maybe<U>;
@@ -129,6 +135,10 @@ declare module 'spica' {
   }
   namespace Monad.Maybe {
     export class Maybe<T> extends Monad.Maybe<T> {
+    }
+    export namespace Maybe {
+      export const mzero: Maybe<any>;
+      export function mplus<T>(a: Maybe<T>, b: Maybe<T>): Maybe<T>;
     }
     export class Just<T> extends Maybe<T> {
       protected MAYBE: Just<T>;
@@ -150,6 +160,8 @@ declare module 'spica' {
     export type Nothing = Monad.Maybe.Nothing;
     export const Nothing: Monad.Maybe.Nothing;
     export const Return: typeof Just;
+    export const mzero: Maybe<any>;
+    export function mplus<T>(a: Maybe<T>, b: Maybe<T>): Maybe<T>;
   }
 
   export type Maybe<T> = Monad.Maybe<T>;

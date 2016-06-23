@@ -6,8 +6,10 @@ export namespace Maybe {
     return new Monad.Just(val);
   }
   export type Nothing = Monad.Nothing;
-  export const Nothing = new Monad.Nothing();
+  export const Nothing = <Nothing>Monad.Maybe.mzero;
   export const Return = Just;
+  export const mzero = Monad.Maybe.mzero;
+  export const mplus = Monad.Maybe.mplus;
 }
 
 export type Maybe<T> = Monad.Maybe<T>;

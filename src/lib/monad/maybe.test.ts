@@ -115,6 +115,22 @@ describe('Unit: lib/maybe', () => {
       assert(ma.extract() === mb.extract());
     });
 
+    it('mplus', () => {
+      assert(Maybe.mplus(Just(0), Just(1)).extract() === 0);
+      assert(Maybe.mplus(Just(0), Nothing).extract() === 0);
+      assert(Maybe.mplus(Nothing, Just(0)).extract() === 0);
+      assert(Maybe.mplus(Nothing, Nothing).extract(() => 0) === 0);
+      assert(Maybe.mplus(Just(0).fmap(n => n - 1), Just(1)).extract() === -1);
+    });
+
+    it('MonadPlus law 1', () => {
+      const f = (n: number) => Just(n + 1);
+      const x = 0;
+      const ma = Maybe.mzero;
+      const mb = Maybe.mzero.bind(f);
+      assert(ma.extract(() => -1) === mb.extract(() => -1));
+    });
+
   });
 
 });

@@ -1,6 +1,6 @@
-import {Monad} from './monad';
+import {MonadPlus} from './monadplus';
 
-export class Maybe<T> extends Monad<T> {
+export class Maybe<T> extends MonadPlus<T> {
   protected MAYBE: Just<T> | Nothing;
   constructor(protected thunk?: () => Maybe<T>) {
     super(thunk);
@@ -56,5 +56,25 @@ export class Nothing extends Maybe<any> {
   public extract<U>(transform?: () => U): U {
     if (!transform) throw void 0;
     return transform();
+  }
+}
+
+export namespace Maybe {
+  export const mzero: Maybe<any> = new Nothing();
+  export function mplus<T>(a: Maybe<T>, b: Maybe<T>): Maybe<T> {
+    return new Maybe<T>(() => {
+      if (a instanceof Just) {
+        return a;
+      }
+      if (a instanceof Nothing) {
+        return b;
+      }
+      if (a instanceof Maybe) {
+        return a
+          .fmap(() => a)
+          .extract(() => b);
+      }
+      throw new TypeError(`Spica: Maybe: Invalid monad value.\n\t${a}`);
+    });
   }
 }
