@@ -1,6 +1,8 @@
 import * as Monad from './maybe.impl';
 
 export namespace Maybe {
+  export const pure = Monad.Maybe.pure;
+  export const ap = Monad.Maybe.ap;
   export const Return = Monad.Maybe.Return;
   export const mzero = Monad.Maybe.mzero;
   export const mplus = Monad.Maybe.mplus;

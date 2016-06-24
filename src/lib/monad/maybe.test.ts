@@ -1,8 +1,9 @@
 import {Return, Just, Nothing, Maybe} from './maybe';
+import {curry} from '../curry';
 
 describe('Unit: lib/maybe', () => {
-  function throwError(): any {
-    throw new Error();
+  function throwError(msg: string): any {
+    throw new Error(msg);
   }
 
   describe('Maybe', () => {
@@ -65,6 +66,42 @@ describe('Unit: lib/maybe', () => {
         .bind(n => Just(n) || Nothing || Just(n).bind<number>(n => Just(n) || Nothing))
         .extract(() => 'Nothing');
       assert(result === 0);
+    });
+
+    it('ap 1', () => {
+      assert.strictEqual(
+        Maybe.ap(
+          Maybe.pure(curry((a: number) => a)))
+          (Just(1))
+          .extract(),
+        1);
+      assert.strictEqual(
+        Maybe.ap(
+          Maybe.pure(curry(throwError)))
+          (Nothing)
+          .extract(() => 0),
+        0);
+    });
+
+    it('ap 2', () => {
+      assert.strictEqual(
+        Maybe.ap(Maybe.ap(
+          Maybe.pure(curry((a: number, b: number) => a + b)))
+          (Just(1)))
+          (Just(2))
+          .extract(),
+        3);
+    });
+
+    it('ap 3', () => {
+      assert.strictEqual(
+        Maybe.ap(Maybe.ap(Maybe.ap(
+          Maybe.pure(curry((a: number, b: number, c: number) => a + b + c)))
+          (Just(1)))
+          (Just(2)))
+          (Just(3))
+          .extract(),
+        6);
     });
 
     it('Functor law 1', () => {

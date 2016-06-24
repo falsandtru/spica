@@ -30,6 +30,14 @@ export class Maybe<T> extends MonadPlus<T> {
   }
 }
 export namespace Maybe {
+  export function pure<T>(val: T): Maybe<T> {
+    return new Just(val);
+  }
+  export function ap<a, b>(f: Maybe<() => b>): () => Maybe<b>
+  export function ap<a, b>(f: Maybe<(a: a) => b>): (a: Maybe<a>) => Maybe<b>
+  export function ap<a, b>(f: Maybe<(a: a) => b>): (a: Maybe<a>) => Maybe<b> {
+    return (a: Maybe<a>) => f.bind(f => a.fmap(a => f(a)));
+  }
   export function Return<T>(val: T): Maybe<T> {
     return new Just(val);
   }
