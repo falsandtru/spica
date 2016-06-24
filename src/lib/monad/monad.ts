@@ -1,6 +1,6 @@
-import {Functor} from './functor';
+import {Applicative} from './applicative';
 
-export abstract class Monad<T> extends Functor<T> {
+export abstract class Monad<T> extends Applicative<T> {
   public abstract bind<U>(f: (val: T) => Monad<U>): Monad<U>;
 }
 export namespace Monad {

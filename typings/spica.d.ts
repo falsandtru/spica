@@ -77,7 +77,13 @@ declare module 'spica' {
   abstract class Functor<T> extends Lazy<T> {
     abstract fmap<U>(f: (val: T) => U): Functor<U>;
   }
-  abstract class Monad<T> extends Functor<T> {
+  export abstract class Applicative<T> extends Functor<T> {
+  }
+  export namespace Applicative {
+    export function pure<a>(a: a): Applicative<a>;
+    export function ap<a, b>(f: Applicative<(a: a) => b>): (a: Applicative<a>) => Applicative<b>;
+  }
+  abstract class Monad<T> extends Applicative<T> {
     abstract bind<U>(f: (val: T) => Monad<U>): Monad<U>;
   }
   namespace Monad {
