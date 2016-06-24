@@ -2,7 +2,7 @@ import {Monad} from './monad';
 
 export class Either<L, R> extends Monad<R> {
   protected EITHER: Left<L> | Right<R>;
-  constructor(protected thunk?: () => Either<L, R>) {
+  constructor(thunk: () => Either<L, R>) {
     super(thunk);
   }
   public fmap<RR>(f: (val: R) => RR): Either<L, RR> {
@@ -33,7 +33,7 @@ export class Either<L, R> extends Monad<R> {
 export class Left<L> extends Either<L, any> {
   protected EITHER: Left<L>;
   constructor(private val_: L) {
-    super();
+    super(throwCallError);
   }
   public fmap(f: (val: any) => any): Left<L> {
     return this;
@@ -52,7 +52,7 @@ export class Left<L> extends Either<L, any> {
 export class Right<R> extends Either<any, R> {
   protected EITHER: Right<R>;
   constructor(private val_: R) {
-    super();
+    super(throwCallError);
   }
   public bind<L>(f: (val: R) => Either<L, R>): Either<L, R>
   public bind<L, RR>(f: (val: R) => Either<L, RR>): Either<L, RR>
@@ -62,4 +62,8 @@ export class Right<R> extends Either<any, R> {
   public extract(transform?: (left: any) => any): R {
     return this.val_;
   }
+}
+
+function throwCallError<T>(): T {
+  throw new Error(`Spica: Either: Invalid thunk call.`);
 }
