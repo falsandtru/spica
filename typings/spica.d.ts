@@ -160,12 +160,12 @@ declare module 'spica' {
 
   export namespace Maybe {
     export const Return: typeof Monad.Maybe.Maybe.Return;
+    export const mzero: typeof Monad.Maybe.Maybe.mzero;
+    export const mplus: typeof Monad.Maybe.Maybe.mplus;
     export type Just<T> = Monad.Maybe.Just<T>;
     export function Just<T>(val: T): Just<T>;
     export type Nothing = Monad.Maybe.Nothing;
     export const Nothing: Monad.Maybe.Nothing;
-    export const mzero: Maybe<any>;
-    export function mplus<T>(a: Maybe<T>, b: Maybe<T>): Maybe<T>;
   }
 
   export type Maybe<T> = Monad.Maybe<T>;

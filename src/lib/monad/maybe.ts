@@ -2,14 +2,14 @@ import * as Monad from './maybe.impl';
 
 export namespace Maybe {
   export const Return = Monad.Maybe.Return;
+  export const mzero = Monad.Maybe.mzero;
+  export const mplus = Monad.Maybe.mplus;
   export type Just<T> = Monad.Just<T>;
   export function Just<T>(val: T): Just<T> {
     return new Monad.Just(val);
   }
   export type Nothing = Monad.Nothing;
   export const Nothing = <Nothing>Monad.Maybe.mzero;
-  export const mzero = Monad.Maybe.mzero;
-  export const mplus = Monad.Maybe.mplus;
 }
 
 export type Maybe<T> = Monad.Maybe<T>;
