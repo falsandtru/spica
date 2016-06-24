@@ -29,6 +29,11 @@ export class Either<L, R> extends Monad<R> {
     return this.evaluate().extract(transform);
   }
 }
+export namespace Either {
+  export function Return<R>(val: R): Right<R> {
+    return new Right(val);
+  }
+}
 
 export class Left<L> extends Either<L, any> {
   protected EITHER: Left<L>;
