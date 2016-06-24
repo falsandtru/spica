@@ -4,6 +4,7 @@ export {Cancelable} from './lib/cancelable';
 export {Sequence} from './lib/monad/sequence';
 export {Maybe, Just, Nothing} from './lib/monad/maybe';
 export {Either, Left, Right} from './lib/monad/either';
+export {curry} from './lib/curry';
 export {DataMap} from './lib/collection/datamap';
 export {AttrMap} from './lib/collection/attrmap';
 export {RelationMap} from './lib/collection/relationmap';

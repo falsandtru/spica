@@ -5,6 +5,7 @@ import {
   Cancelable,
   Maybe, Just, Nothing,
   Either, Left, Right,
+  curry,
   DataMap, AttrMap, RelationMap,
   Mixin,
   Tick,
@@ -85,6 +86,13 @@ describe('Interface: Package', function () {
     it('Right', function () {
       assert(typeof Right === 'function');
       assert(Either.Right === Right);
+    });
+
+  });
+
+  describe('curry', function () {
+    it('curry', function () {
+      assert(typeof curry === 'function');
     });
 
   });
