@@ -1,6 +1,6 @@
 import {concat} from './concat';
 
-describe('Unit: lib/assign', () => {
+describe('Unit: lib/concat', () => {
   describe('concat', () => {
     it('shallow', () => {
       assert.deepStrictEqual(
