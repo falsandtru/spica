@@ -65,20 +65,10 @@ export class Nothing extends Maybe<any> {
 export namespace Maybe {
   export const mzero: Maybe<any> = new Nothing();
   export function mplus<T>(a: Maybe<T>, b: Maybe<T>): Maybe<T> {
-    return new Maybe<T>(() => {
-      if (a instanceof Just) {
-        return a;
-      }
-      if (a instanceof Nothing) {
-        return b;
-      }
-      if (a instanceof Maybe) {
-        return a
-          .fmap(() => a)
-          .extract(() => b);
-      }
-      throw new TypeError(`Spica: Maybe: Invalid monad value.\n\t${a}`);
-    });
+    return new Maybe<T>(() =>
+      a
+        .fmap(() => a)
+        .extract(() => b));
   }
 }
 
