@@ -141,6 +141,7 @@ declare module 'spica' {
     export class Maybe<T> extends Monad.Maybe<T> {
     }
     export namespace Maybe {
+      export function Return<T>(val: T): Maybe<T>;
       export const mzero: Maybe<any>;
       export function mplus<T>(a: Maybe<T>, b: Maybe<T>): Maybe<T>;
     }
@@ -158,11 +159,11 @@ declare module 'spica' {
   }
 
   export namespace Maybe {
+    export const Return: typeof Monad.Maybe.Maybe.Return;
     export type Just<T> = Monad.Maybe.Just<T>;
     export function Just<T>(val: T): Just<T>;
     export type Nothing = Monad.Maybe.Nothing;
     export const Nothing: Monad.Maybe.Nothing;
-    export const Return: typeof Just;
     export const mzero: Maybe<any>;
     export function mplus<T>(a: Maybe<T>, b: Maybe<T>): Maybe<T>;
   }

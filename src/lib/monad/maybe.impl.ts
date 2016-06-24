@@ -29,6 +29,11 @@ export class Maybe<T> extends MonadPlus<T> {
     return this.evaluate().extract(transform);
   }
 }
+export namespace Maybe {
+  export function Return<T>(val: T): Maybe<T> {
+    return new Just(val);
+  }
+}
 
 export class Just<T> extends Maybe<T> {
   protected MAYBE: Just<T>;
