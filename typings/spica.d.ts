@@ -165,7 +165,7 @@ declare module 'spica' {
     export type Just<T> = Monad.Maybe.Just<T>;
     export function Just<T>(val: T): Just<T>;
     export type Nothing = Monad.Maybe.Nothing;
-    export const Nothing: Monad.Maybe.Nothing;
+    export const Nothing: Nothing;
   }
 
   export type Maybe<T> = Monad.Maybe<T>;
