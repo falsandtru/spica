@@ -36,7 +36,7 @@ export class Just<T> extends Maybe<T> {
     super();
   }
   public bind<U>(f: (val: T) => Maybe<U>): Maybe<U> {
-    return new Maybe(() => this).bind(f);
+    return new Maybe(() => f(this.extract()));
   }
   public extract<U>(transform?: () => U): T {
     return this.val_;
