@@ -80,6 +80,9 @@ declare module 'spica' {
   abstract class Monad<T> extends Functor<T> {
     abstract bind<U>(f: (val: T) => Monad<U>): Monad<U>;
   }
+  namespace Monad {
+    export function Return<T>(val: T): Monad<T>;
+  }
   abstract class MonadPlus<T> extends Monad<T> {
     static mzero: MonadPlus<any>;
     static mplus<T>(a: MonadPlus<T>, b: MonadPlus<T>): MonadPlus<T>;
