@@ -57,7 +57,7 @@ export class Right<R> extends Either<any, R> {
   public bind<L>(f: (val: R) => Either<L, R>): Either<L, R>
   public bind<L, RR>(f: (val: R) => Either<L, RR>): Either<L, RR>
   public bind<L, RR>(f: (val: R) => Either<L, RR>): Either<L, RR> {
-    return new Either<L, R>(() => this).bind<RR>(f);
+    return new Either<L, RR>(() => f(this.extract()));
   }
   public extract(transform?: (left: any) => any): R {
     return this.val_;
