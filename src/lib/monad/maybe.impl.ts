@@ -48,9 +48,6 @@ export class Nothing extends Maybe<any> {
   constructor() {
     super(throwCallError);
   }
-  public fmap(f: (val: any) => any): Nothing {
-    return this;
-  }
   public bind(f: (val: any) => Maybe<any>): Nothing {
     return this;
   }

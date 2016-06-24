@@ -147,7 +147,6 @@ declare module 'spica' {
     }
     export class Nothing extends Maybe<any> {
       protected MAYBE: Nothing;
-      fmap(f: (val: any) => any): Nothing;
       bind(f: (val: any) => Maybe<any>): Nothing;
       extract(): any;
       extract<U>(transform: () => U): U;
@@ -184,7 +183,6 @@ declare module 'spica' {
     }
     export class Left<L> extends Either<L, any> {
       protected EITHER: Left<L>;
-      fmap(f: (val: any) => any): Left<L>;
       bind(f: (val: any) => Either<L, any>): Left<L>;
       extract(): any;
       extract<LL>(transform: (left: L) => LL): LL;

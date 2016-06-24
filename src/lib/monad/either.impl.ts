@@ -35,9 +35,6 @@ export class Left<L> extends Either<L, any> {
   constructor(private val_: L) {
     super(throwCallError);
   }
-  public fmap(f: (val: any) => any): Left<L> {
-    return this;
-  }
   public bind(f: (val: any) => Either<L, any>): Left<L> {
     return this;
   }
