@@ -2,7 +2,7 @@ import {MonadPlus} from './monadplus';
 
 export class Maybe<T> extends MonadPlus<T> {
   protected MAYBE: Just<T> | Nothing;
-  constructor(protected thunk?: () => Maybe<T>) {
+  constructor(thunk: () => Maybe<T>) {
     super(thunk);
   }
   public fmap<U>(f: (val: T) => U): Maybe<U> {
@@ -33,7 +33,7 @@ export class Maybe<T> extends MonadPlus<T> {
 export class Just<T> extends Maybe<T> {
   protected MAYBE: Just<T>;
   constructor(private val_: T) {
-    super();
+    super(throwCallError);
   }
   public bind<U>(f: (val: T) => Maybe<U>): Maybe<U> {
     return new Maybe(() => f(this.extract()));
@@ -45,6 +45,9 @@ export class Just<T> extends Maybe<T> {
 
 export class Nothing extends Maybe<any> {
   protected MAYBE: Nothing;
+  constructor() {
+    super(throwCallError);
+  }
   public fmap(f: (val: any) => any): Nothing {
     return this;
   }
@@ -77,4 +80,8 @@ export namespace Maybe {
       throw new TypeError(`Spica: Maybe: Invalid monad value.\n\t${a}`);
     });
   }
+}
+
+function throwCallError<T>(): T {
+  throw new Error(`Spica: Maybe: Invalid thunk call.`);
 }
