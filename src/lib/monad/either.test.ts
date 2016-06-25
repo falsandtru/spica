@@ -1,8 +1,9 @@
 import {Return, Left, Right, Either} from './either';
+import {curry} from '../curry';
 
 describe('Unit: lib/either', () => {
-  function throwError(): any {
-    throw new Error();
+  function throwError(msg: string): any {
+    throw new Error(msg);
   }
 
   describe('Either', () => {
@@ -65,6 +66,42 @@ describe('Unit: lib/either', () => {
         .bind<number>(n => Right(n) || Left(0) || Right(n).bind(n => Right(n) || Left(0)))
         .extract((n) => n + '');
       assert(result === 0);
+    });
+
+    it('ap 1', () => {
+      assert.strictEqual(
+        Either.ap(
+          Either.pure(curry((a: number) => a)))
+          (Right(1))
+          .extract(),
+        1);
+      assert.strictEqual(
+        Either.ap(
+          Either.pure(curry(throwError)))
+          (Left(0))
+          .extract(n => n + 1),
+        1);
+    });
+
+    it('ap 2', () => {
+      assert.strictEqual(
+        Either.ap(Either.ap(
+          Either.pure(curry((a: number, b: number) => a + b)))
+          (Right(1)))
+          (Right(2))
+          .extract(),
+        3);
+    });
+
+    it('ap 3', () => {
+      assert.strictEqual(
+        Either.ap(Either.ap(Either.ap(
+          Either.pure(curry((a: number, b: number, c: number) => a + b + c)))
+          (Right(1)))
+          (Right(2)))
+          (Right(3))
+          .extract(),
+        6);
     });
 
     it('Functor law 1', () => {

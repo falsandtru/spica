@@ -1,6 +1,8 @@
 import * as Monad from './either.impl';
 
 export namespace Either {
+  export const pure = Monad.Either.pure;
+  export const ap = Monad.Either.ap;
   export const Return = Monad.Either.Return;
   export type Left<L> = Monad.Left<L>;
   export function Left<L>(val: L): Left<L> {

@@ -30,6 +30,14 @@ export class Either<L, R> extends Monad<R> {
   }
 }
 export namespace Either {
+  export function pure<R>(val: R): Right<R> {
+    return new Right(val);
+  }
+  export function ap<e, a, b>(f: Either<e, () => b>): () => Either<e, b>
+  export function ap<e, a, b>(f: Either<e, (a: a) => b>): (a: Either<e, a>) => Either<e, b>
+  export function ap<e, a, b>(f: Either<e, (a: a) => b>): (a: Either<e, a>) => Either<e, b> {
+    return (a: Either<e, a>) => f.bind(f => a.fmap(a => f(a)));
+  }
   export function Return<R>(val: R): Right<R> {
     return new Right(val);
   }

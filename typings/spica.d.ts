@@ -198,7 +198,10 @@ declare module 'spica' {
     export class Either<L, R> extends Monad.Either<L, R> {
     }
     export namespace Either {
-      export function Return<R>(val: R): Right<R>;
+      export function pure<R>(val: R): Right<R>;
+      export function ap<e, a, b>(f: Either<e, () => b>): () => Either<e, b>;
+      export function ap<e, a, b>(f: Either<e, (a: a) => b>): (a: Either<e, a>) => Either<e, b>;
+      export const Return: typeof pure;
     }
     export class Left<L> extends Either<L, any> {
       protected EITHER: Left<L>;
@@ -215,6 +218,8 @@ declare module 'spica' {
   }
 
   export namespace Either {
+    export const pure: typeof Monad.Either.Either.pure;
+    export const ap: typeof Monad.Either.Either.ap;
     export const Return: typeof Monad.Either.Either.Return;
     export type Left<L> = Monad.Either.Left<L>;
     export function Left<L>(val: L): Left<L>;
