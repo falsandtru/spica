@@ -6,6 +6,8 @@ import concat from './sequence/member/static/concat';
 import zip from './sequence/member/static/zip';
 import union from './sequence/member/static/union';
 import intersect from './sequence/member/static/intersect';
+import pure from './sequence/member/static/pure';
+import ap from './sequence/member/static/ap';
 import Return from './sequence/member/static/return';
 import mempty from './sequence/member/static/mempty';
 import mconcat from './sequence/member/static/mconcat';
@@ -39,6 +41,8 @@ compose(
   zip,
   union,
   intersect,
+  pure,
+  ap,
   Return,
   mempty,
   mconcat,

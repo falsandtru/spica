@@ -1,4 +1,5 @@
 import {Sequence} from './sequence';
+import {curry} from '../curry';
 
 describe('Unit: lib/monad/sequence', () => {
   describe('Monoid', () => {
@@ -41,6 +42,39 @@ describe('Unit: lib/monad/sequence', () => {
       const fa = Sequence.Return(x).fmap(n => g(f(n)));
       const fb = Sequence.Return(x).fmap(f).fmap(g);
       assert.deepStrictEqual(fa.read(), fb.read());
+    });
+
+  });
+
+  describe('Applicative', () => {
+    it('ap 1', () => {
+      assert.deepStrictEqual(
+        Sequence.ap(
+          Sequence.pure(curry((a: number) => a)))
+          (Sequence.pure(1))
+          .read(),
+        [1]);
+    });
+
+    it('ap 2', () => {
+      assert.deepStrictEqual(
+        Sequence.ap(Sequence.ap(
+          Sequence.pure(curry((a: number, b: number) => a + b)))
+          (Sequence.pure(1)))
+          (Sequence.pure(2))
+          .read(),
+        [3]);
+    });
+
+    it('ap 3', () => {
+      assert.deepStrictEqual(
+        Sequence.ap(Sequence.ap(Sequence.ap(
+          Sequence.pure(curry((a: number, b: number, c: number) => a + b + c)))
+          (Sequence.pure(1)))
+          (Sequence.pure(2)))
+          (Sequence.pure(3))
+          .read(),
+        [6]);
     });
 
   });

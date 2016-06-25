@@ -18,7 +18,10 @@ export namespace Sequence {
   export declare function zip<a, b>(a: Sequence<a, any>, b: Sequence<b, any>): Sequence<[a, b], [Sequence.Iterator<a>, Sequence.Iterator<b>]>;
   export declare function union<a>(cmp: (l: a, r: a) => number, as: Sequence<a, any>[]): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
   export declare function intersect<a>(cmp: (l: a, r: a) => number, as: Sequence<a, any>[]): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
-  export declare function Return<a>(a: a): Sequence<a, number>;
+  export declare function pure<a>(a: a): Sequence<a, number>;
+  export declare function ap<a, b>(ff: Sequence<() => b, any>): () => Sequence<() => b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]>
+  export declare function ap<a, b>(ff: Sequence<(a: a) => b, any>): (fa: Sequence<a, any>) => Sequence<b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]>
+  export declare const Return: typeof pure;
   export declare const mempty: Sequence<any, any>;
   export declare function mappend<a>(l: Sequence<a, any>, r: Sequence<a, any>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
   export declare function mconcat<a>(as: Sequence<a, any>[]): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;

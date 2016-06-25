@@ -104,7 +104,10 @@ declare module 'spica' {
     static concat<a>(as: Sequence<Sequence<a, any>, any>): Sequence<a, [Sequence.Iterator<Sequence<a, any>>, Sequence.Iterator<a>]>;
     static union<a>(cmp: (l: a, r: a) => number, as: Sequence<a, any>[]): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
     static intersect<a>(cmp: (l: a, r: a) => number, as: Sequence<a, any>[]): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
-    static Return<a>(a: a): Sequence<a, number>;
+    static pure<a>(a: a): Sequence<a, number>;
+    static ap<a, b>(ff: Sequence<() => b, any>): () => Sequence<() => b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]>
+    static ap<a, b>(ff: Sequence<(a: a) => b, any>): (fa: Sequence<a, any>) => Sequence<b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]>
+    static Return: typeof Sequence.pure;
     static mempty: Sequence<any, any>;
     static mappend<a>(l: Sequence<a, any>, r: Sequence<a, any>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
     static mconcat<a>(as: Sequence<a, any>[]): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
