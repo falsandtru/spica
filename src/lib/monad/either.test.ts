@@ -116,11 +116,12 @@ describe('Unit: lib/either', () => {
     });
 
     it('Call-by-need and Memoize', () => {
-      let n = 0;
-      const m1 = Return(0)
+      let n = NaN;
+      const m1 = Return(NaN)
         .bind(_ => Right(++n));
       const m2 = m1
         .bind(_ => Right(++n));
+      n = 0;
       assert(m2.extract() === 2);
       assert(m2.extract() === 2);
       assert(m2.extract() === 2);

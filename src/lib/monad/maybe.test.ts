@@ -131,6 +131,21 @@ describe('Unit: lib/maybe', () => {
       assert(ma.extract(() => -1) === mb.extract(() => -1));
     });
 
+    it('Call-by-need and Memoize', () => {
+      let n = NaN;
+      const m1 = Return(NaN)
+        .bind(_ => Just(++n));
+      const m2 = m1
+        .bind(_ => Just(++n));
+      n = 0;
+      assert(m2.extract() === 2);
+      assert(m2.extract() === 2);
+      assert(m2.extract() === 2);
+      assert(m1.extract() === 1);
+      assert(m1.extract() === 1);
+      assert(m1.extract() === 1);
+    });
+
   });
 
 });
