@@ -68,6 +68,44 @@ describe('Unit: lib/either', () => {
       assert(result === 0);
     });
 
+    it('Call-by-need and Memoize', () => {
+      let n = NaN;
+      const m1 = Return(NaN)
+        .bind(_ => Right(++n));
+      const m2 = m1
+        .bind(_ => Right(++n));
+      n = 0;
+      assert(m2.extract() === 2);
+      assert(m2.extract() === 2);
+      assert(m2.extract() === 2);
+      assert(m1.extract() === 1);
+      assert(m1.extract() === 1);
+      assert(m1.extract() === 1);
+    });
+
+  });
+
+  describe('Functor', () => {
+    it('Functor law 1', () => {
+      const f = <T>(n: T) => n;
+      const x = 0;
+      const fa = Return(x).fmap(f);
+      const fb = f(Return(x));
+      assert(fa.extract() === fb.extract());
+    });
+
+    it('Functor law 2', () => {
+      const f = (n: number) => n + 2;
+      const g = (n: number) => n * 3;
+      const x = 1;
+      const fa = Return(x).fmap(n => g(f(n)));
+      const fb = Return(x).fmap(f).fmap(g);
+      assert(fa.extract() === fb.extract());
+    });
+
+  });
+
+  describe('Applicative', () => {
     it('ap 1', () => {
       assert.strictEqual(
         Either.ap(
@@ -104,23 +142,9 @@ describe('Unit: lib/either', () => {
         6);
     });
 
-    it('Functor law 1', () => {
-      const f = <T>(n: T) => n;
-      const x = 0;
-      const fa = Return(x).fmap(f);
-      const fb = f(Return(x));
-      assert(fa.extract() === fb.extract());
-    });
+  });
 
-    it('Functor law 2', () => {
-      const f = (n: number) => n + 2;
-      const g = (n: number) => n * 3;
-      const x = 1;
-      const fa = Return(x).fmap(n => g(f(n)));
-      const fb = Return(x).fmap(f).fmap(g);
-      assert(fa.extract() === fb.extract());
-    });
-
+  describe('Monad', () => {
     it('Monad law 1', () => {
       const f = (n: number) => Right(n + 1);
       const x = 0;
@@ -150,21 +174,6 @@ describe('Unit: lib/either', () => {
             .bind(n =>
               Right(v1 + n)));
       assert(ma.extract() === mb.extract());
-    });
-
-    it('Call-by-need and Memoize', () => {
-      let n = NaN;
-      const m1 = Return(NaN)
-        .bind(_ => Right(++n));
-      const m2 = m1
-        .bind(_ => Right(++n));
-      n = 0;
-      assert(m2.extract() === 2);
-      assert(m2.extract() === 2);
-      assert(m2.extract() === 2);
-      assert(m1.extract() === 1);
-      assert(m1.extract() === 1);
-      assert(m1.extract() === 1);
     });
 
   });

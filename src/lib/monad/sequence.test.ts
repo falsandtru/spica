@@ -1,7 +1,7 @@
 import {Sequence} from './sequence';
 
 describe('Unit: lib/monad/sequence', () => {
-  describe('Sequence', () => {
+  describe('Monoid', () => {
     it('Monoid law 1', () => {
       const x = Sequence.Return(0);
       const ma = Sequence.mappend(Sequence.mempty, x);
@@ -23,6 +23,9 @@ describe('Unit: lib/monad/sequence', () => {
       assert.deepStrictEqual(ma.read(), mb.read());
     });
 
+  });
+
+  describe('Functor', () => {
     it('Functor law 1', () => {
       const f = <T>(n: T) => n;
       const x = 0;
@@ -40,6 +43,9 @@ describe('Unit: lib/monad/sequence', () => {
       assert.deepStrictEqual(fa.read(), fb.read());
     });
 
+  });
+
+  describe('Monad', () => {
     it('Monad law 1', () => {
       const f = (n: number) => Sequence.Return(n + 1);
       const x = 0;
