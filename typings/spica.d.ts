@@ -251,6 +251,8 @@ declare module 'spica' {
     (a: a): Curried4<b, c, d, e, z>;
   }
   export const curry: Curry;
+  export function flip<a, b, c>(f: (a: a) => (b: b) => c): Curried2<b, a, c>
+  export function flip<a, b, c>(f: (a: a, b: b) => c): Curried2<b, a, c>
 
   export class DataMap<K, V> {
     get(key: K): V;

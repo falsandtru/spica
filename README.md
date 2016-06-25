@@ -23,6 +23,7 @@ $ npm i spica
 - Maybe, Just, Nothing
 - Either, Left, Right
 - curry
+- flip
 - DataMap
 - AttrMap
 - RelationMap

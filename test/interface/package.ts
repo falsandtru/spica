@@ -6,6 +6,7 @@ import {
   Maybe, Just, Nothing,
   Either, Left, Right,
   curry,
+  flip,
   DataMap, AttrMap, RelationMap,
   Mixin,
   Tick,
@@ -93,6 +94,10 @@ describe('Interface: Package', function () {
   describe('curry', function () {
     it('curry', function () {
       assert(typeof curry === 'function');
+    });
+
+    it('flip', function () {
+      assert(typeof flip === 'function');
     });
 
   });
