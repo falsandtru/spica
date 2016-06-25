@@ -1,7 +1,7 @@
 import {Sequence} from '../../core';
 
-export default class <T, S> extends Sequence<T, S> {
-  public static Return<T>(a: T): Sequence<T, number> {
-    return new Sequence<T, number>((_, cons) => cons(a));
+export default class <a, z> extends Sequence<a, z> {
+  public static Return<a>(a: a): Sequence<a, number> {
+    return new Sequence<a, number>((_, cons) => cons(a));
   }
 }

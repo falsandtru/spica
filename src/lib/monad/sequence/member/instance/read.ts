@@ -1,9 +1,9 @@
 import {Sequence} from '../../core';
 import {concat} from '../../../../concat';
 
-export default class <T, S> extends Sequence<T, S> {
-  public read(): T[] {
-    const acc: T[] = [];
+export default class <a, z> extends Sequence<a, z> {
+  public read(): a[] {
+    const acc: a[] = [];
     let iter = () => this.iterate();
     while (true) {
       const thunk = iter();

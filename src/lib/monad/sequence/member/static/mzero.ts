@@ -1,5 +1,5 @@
 import {Sequence} from '../../core';
 
-export default class <T, S> extends Sequence<T, S> {
+export default class <a, z> extends Sequence<a, z> {
   public static mzero = Sequence.mempty;
 }

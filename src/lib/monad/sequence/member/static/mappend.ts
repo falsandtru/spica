@@ -1,7 +1,7 @@
 import {Sequence} from '../../core';
 
-export default class <T, S> extends Sequence<T, S> {
-  public static mappend<T>(a: Sequence<T, any>, b: Sequence<T, any>): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]> {
-    return Sequence.mconcat([a, b]);
+export default class <a, z> extends Sequence<a, z> {
+  public static mappend<a>(l: Sequence<a, any>, r: Sequence<a, any>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]> {
+    return Sequence.mconcat([l, r]);
   }
 }

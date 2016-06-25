@@ -6,16 +6,16 @@ export namespace Maybe {
   export const Return = Monad.Maybe.Return;
   export const mzero = Monad.Maybe.mzero;
   export const mplus = Monad.Maybe.mplus;
-  export type Just<T> = Monad.Just<T>;
-  export function Just<T>(val: T): Just<T> {
-    return new Monad.Just(val);
+  export type Just<a> = Monad.Just<a>;
+  export function Just<a>(a: a): Just<a> {
+    return new Monad.Just(a);
   }
   export type Nothing = Monad.Nothing;
   export const Nothing = <Nothing>Monad.Maybe.mzero;
 }
 
-export type Maybe<T> = Monad.Maybe<T>;
-export type Just<T> = Maybe.Just<T>;
+export type Maybe<a> = Monad.Maybe<a>;
+export type Just<a> = Maybe.Just<a>;
 export const Just = Maybe.Just;
 export type Nothing = Maybe.Nothing;
 export const Nothing = Maybe.Nothing;

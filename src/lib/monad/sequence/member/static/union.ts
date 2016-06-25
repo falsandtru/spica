@@ -1,13 +1,13 @@
 import {Sequence} from '../../core';
 
-export default class <T, S> extends Sequence<T, S> {
-  public static union<T>(cmp: (a: T, b: T) => number, as: Sequence<T, any>[]): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]> {
+export default class <a, z> extends Sequence<a, z> {
+  public static union<a>(cmp: (a: a, b: a) => number, as: Sequence<a, any>[]): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]> {
     return as.reduce((a, b) => union(cmp, a, b));
   }
 }
 
-function union<T>(cmp: (a: T, b: T) => number, a: Sequence<T, any>, b: Sequence<T, any>): Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]> {
-  return new Sequence<T, [Sequence.Iterator<T>, Sequence.Iterator<T>]>(([ai, bi] = [() => a.iterate(), () => b.iterate()], cons) =>
+function union<a>(cmp: (a: a, b: a) => number, a: Sequence<a, any>, b: Sequence<a, any>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]> {
+  return new Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>(([ai, bi] = [() => a.iterate(), () => b.iterate()], cons) =>
     Sequence.Iterator.when(
       ai(),
       () =>

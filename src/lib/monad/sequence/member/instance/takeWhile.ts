@@ -1,8 +1,8 @@
 import {Sequence} from '../../core';
 
-export default class <T, S> extends Sequence<T, S> {
-  public takeWhile(f: (p: T) => boolean): Sequence<T, Sequence.Iterator<T>> {
-    return new Sequence<T, Sequence.Iterator<T>>((iter = () => this.iterate(), cons) =>
+export default class <a, z> extends Sequence<a, z> {
+  public takeWhile(f: (a: a) => boolean): Sequence<a, Sequence.Iterator<a>> {
+    return new Sequence<a, Sequence.Iterator<a>>((iter = () => this.iterate(), cons) =>
       Sequence.Iterator.when(
         iter(),
         () => cons(),

@@ -1,11 +1,11 @@
 import {Sequence} from '../../core';
 
-export default class <T, S> extends Sequence<T, S> {
-  public fmap<U>(f: (p: T) => U): Sequence<U, Sequence.Iterator<T>> {
-    return new Sequence<U, Sequence.Iterator<T>>((iter = () => this.iterate()) =>
+export default class <a, z> extends Sequence<a, z> {
+  public fmap<b>(f: (a: a) => b): Sequence<b, Sequence.Iterator<a>> {
+    return new Sequence<b, Sequence.Iterator<a>>((iter = () => this.iterate()) =>
       Sequence.Iterator.when(
         iter(),
-        () => Sequence.Data.cons<U, Sequence.Iterator<T>>(),
-        thunk => Sequence.Data.cons<U, Sequence.Iterator<T>>(f(Sequence.Thunk.value(thunk)), Sequence.Thunk.iterator(thunk))));
+        () => Sequence.Data.cons<b, Sequence.Iterator<a>>(),
+        thunk => Sequence.Data.cons<b, Sequence.Iterator<a>>(f(Sequence.Thunk.value(thunk)), Sequence.Thunk.iterator(thunk))));
   }
 }

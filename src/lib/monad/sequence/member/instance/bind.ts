@@ -1,7 +1,7 @@
 import {Sequence} from '../../core';
 
-export default class <T, S> extends Sequence<T, S> {
-  public bind<U>(f: (p: T) => Sequence<U, any>): Sequence<U, [Sequence.Iterator<Sequence<U, any>>, Sequence.Iterator<U>]> {
+export default class <a, z> extends Sequence<a, z> {
+  public bind<b>(f: (a: a) => Sequence<b, any>): Sequence<b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]> {
     return Sequence.concat(this.fmap(f));
   }
 }

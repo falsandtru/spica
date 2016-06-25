@@ -1,6 +1,6 @@
 import {Monad} from './monad';
 
-export abstract class MonadPlus<T> extends Monad<T> {
+export abstract class MonadPlus<a> extends Monad<a> {
   public static mzero: MonadPlus<any>;
-  public static mplus: <T>(a: MonadPlus<T>, b: MonadPlus<T>) => MonadPlus<T>;
+  public static mplus: <a>(ml: MonadPlus<a>, mr: MonadPlus<a>) => MonadPlus<a>;
 }

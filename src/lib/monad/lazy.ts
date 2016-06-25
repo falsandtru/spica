@@ -1,5 +1,5 @@
-export abstract class Lazy<T> {
-  constructor(protected thunk?: () => Lazy<T>) {
+export abstract class Lazy<a> {
+  constructor(protected thunk?: () => Lazy<a>) {
   }
   private memory_: this;
   protected evaluate(): this {

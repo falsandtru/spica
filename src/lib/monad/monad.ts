@@ -1,8 +1,8 @@
 import {Applicative} from './applicative';
 
-export abstract class Monad<T> extends Applicative<T> {
-  public abstract bind<U>(f: (val: T) => Monad<U>): Monad<U>;
+export abstract class Monad<a> extends Applicative<a> {
+  public abstract bind<b>(f: (a: a) => Monad<b>): Monad<b>;
 }
 export namespace Monad {
-  export declare function Return<T>(val: T): Monad<T>;
+  export declare function Return<a>(a: a): Monad<a>;
 }
