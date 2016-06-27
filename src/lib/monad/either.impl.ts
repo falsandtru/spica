@@ -30,17 +30,17 @@ export class Either<a, b> extends Monad<b> {
   }
 }
 export namespace Either {
+  export declare function fmap<e, a, b>(m: Either<e, a>, f: (a: a) => b): Either<e, b>
+  export declare function fmap<e, a>(m: Either<e, a>): <b>(f: (a: a) => b) => Either<e, b>
   export function pure<b>(b: b): Right<b> {
     return new Right(b);
   }
-  export function ap<e, a, b>(ff: Either<e, () => b>): () => Either<e, b>
-  export function ap<e, a, b>(ff: Either<e, (a: a) => b>): (fa: Either<e, a>) => Either<e, b>
-  export function ap<e, a, b>(ff: Either<e, (a: a) => b>): (fa: Either<e, a>) => Either<e, b> {
-    return (fa: Either<e, a>) => ff.bind(f => fa.fmap(a => f(a)));
-  }
-  export function Return<b>(b: b): Right<b> {
-    return new Right(b);
-  }
+  export declare function ap<e, _, b>(ff: Either<e, () => b>): () => Either<e, b>
+  export declare function ap<e, a, b>(ff: Either<e, (a: a) => b>, fa: Either<e, a>): Either<e, b>
+  export declare function ap<e, a, b>(ff: Either<e, (a: a) => b>): (fa: Either<e, a>) => Either<e, b>
+  export const Return = pure;
+  export declare function bind<e, a, b>(m: Either<e, a>, f: (a: a) => Either<e, b>): Either<e, b>
+  export declare function bind<e, a>(m: Either<e, a>): <b>(f: (a: a) => Either<e, b>) => Either<e, b>
 }
 
 export class Left<a> extends Either<a, any> {

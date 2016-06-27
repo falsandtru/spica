@@ -77,10 +77,16 @@ declare module 'spica' {
   abstract class Functor<a> extends Lazy<a> {
     abstract fmap<b>(f: (a: a) => b): Functor<b>;
   }
+  namespace Functor {
+    export function fmap<a, b>(m: Functor<a>, f: (a: a) => b): Functor<b>;
+    export function fmap<a>(m: Functor<a>): <b>(f: (a: a) => b) => Functor<b>;
+  }
   export abstract class Applicative<a> extends Functor<a> {
   }
   export namespace Applicative {
     export function pure<a>(a: a): Applicative<a>;
+    export function ap<_, b>(ff: Applicative<() => b>): () => Applicative<b>;
+    export function ap<a, b>(ff: Applicative<(a: a) => b>, fa: Applicative<a>): Applicative<b>;
     export function ap<a, b>(ff: Applicative<(a: a) => b>): (fa: Applicative<a>) => Applicative<b>;
   }
   abstract class Monad<a> extends Applicative<a> {
@@ -88,10 +94,14 @@ declare module 'spica' {
   }
   namespace Monad {
     export function Return<a>(a: a): Monad<a>;
+    export function bind<a, b>(m: Monad<a>, f: (a: a) => Monad<b>): Monad<b>;
+    export function bind<a>(m: Monad<a>): <b>(f: (a: a) => Monad<b>) => Monad<b>;
   }
   abstract class MonadPlus<a> extends Monad<a> {
-    static mzero: MonadPlus<any>;
-    static mplus<a>(ml: MonadPlus<a>, mr: MonadPlus<a>): MonadPlus<a>;
+  }
+  namespace MonadPlus {
+    export const mzero: MonadPlus<any>;
+    export function mplus<a>(ml: MonadPlus<a>, mr: MonadPlus<a>): MonadPlus<a>;
   }
 
   export class Sequence<a, z> extends MonadPlus<a> {
@@ -104,10 +114,15 @@ declare module 'spica' {
     static concat<a>(as: Sequence<Sequence<a, any>, any>): Sequence<a, [Sequence.Iterator<Sequence<a, any>>, Sequence.Iterator<a>]>;
     static union<a>(cmp: (l: a, r: a) => number, as: Sequence<a, any>[]): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
     static intersect<a>(cmp: (l: a, r: a) => number, as: Sequence<a, any>[]): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
+    static fmap<a, b>(m: Sequence<a, any>, f: (a: a) => b): Sequence<b, Sequence.Iterator<a>>;
+    static fmap<a>(m: Sequence<a, any>): <b>(f: (a: a) => b) => Sequence<b, Sequence.Iterator<a>>;
     static pure<a>(a: a): Sequence<a, number>;
-    static ap<a, b>(ff: Sequence<() => b, any>): () => Sequence<() => b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]>
+    static ap<_, b>(ff: Sequence<() => b, any>): () => Sequence<() => b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]>
+    static ap<a, b>(ff: Sequence<(a: a) => b, any>, fa: Sequence<a, any>): Sequence<b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]>
     static ap<a, b>(ff: Sequence<(a: a) => b, any>): (fa: Sequence<a, any>) => Sequence<b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]>
     static Return: typeof Sequence.pure;
+    static bind<a, b>(m: Sequence<a, any>, f: (a: a) => Sequence<b, any>): Sequence<b, Sequence.Iterator<a>>;
+    static bind<a>(m: Sequence<a, any>): <b>(f: (a: a) => Sequence<b, any>) => Sequence<b, Sequence.Iterator<a>>;
     static mempty: Sequence<any, any>;
     static mappend<a>(l: Sequence<a, any>, r: Sequence<a, any>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
     static mconcat<a>(as: Sequence<a, any>[]): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
@@ -150,10 +165,15 @@ declare module 'spica' {
     export class Maybe<a> extends Monad.Maybe<a> {
     }
     export namespace Maybe {
+      export function fmap<a, b>(m: Maybe<a>, f: (a: a) => b): Maybe<b>;
+      export function fmap<a>(m: Maybe<a>): <b>(f: (a: a) => b) => Maybe<b>;
       export function pure<a>(a: a): Maybe<a>;
-      export function ap<a, b>(ff: Maybe<() => b>): () => Maybe<b>;
+      export function ap<_, b>(ff: Maybe<() => b>): () => Maybe<b>;
+      export function ap<a, b>(ff: Maybe<(a: a) => b>, fa: Maybe<a>): Maybe<b>;
       export function ap<a, b>(ff: Maybe<(a: a) => b>): (fa: Maybe<a>) => Maybe<b>;
       export const Return: typeof pure;
+      export function bind<a, b>(m: Maybe<a>, f: (a: a) => Maybe<b>): Maybe<b>;
+      export function bind<a>(m: Maybe<a>): <b>(f: (a: a) => Maybe<b>) => Maybe<b>;
       export const mzero: Maybe<any>;
       export function mplus<a>(ml: Maybe<a>, mr: Maybe<a>): Maybe<a>;
     }
@@ -172,9 +192,11 @@ declare module 'spica' {
   }
 
   export namespace Maybe {
+    export const fmap: typeof Monad.Maybe.fmap;
     export const pure: typeof Monad.Maybe.Maybe.pure;
     export const ap: typeof Monad.Maybe.Maybe.ap;
     export const Return: typeof Monad.Maybe.Maybe.Return;
+    export const bind: typeof Monad.Maybe.Maybe.bind;
     export const mzero: typeof Monad.Maybe.Maybe.mzero;
     export const mplus: typeof Monad.Maybe.Maybe.mplus;
     export type Just<a> = Monad.Maybe.Just<a>;
@@ -202,10 +224,15 @@ declare module 'spica' {
     export class Either<a, b> extends Monad.Either<a, b> {
     }
     export namespace Either {
+      export function fmap<e, a, b>(m: Either<e, a>, f: (a: a) => b): Either<e, b>;
+      export function fmap<e, a>(m: Either<e, a>): <b>(f: (a: a) => b) => Either<e, b>;
       export function pure<b>(b: b): Right<b>;
-      export function ap<e, a, b>(ff: Either<e, () => b>): () => Either<e, b>;
+      export function ap<e, _, b>(ff: Either<e, () => b>): () => Either<e, b>;
+      export function ap<e, a, b>(ff: Either<e, (a: a) => b>, fa: Either<e, a>): Either<e, b>;
       export function ap<e, a, b>(ff: Either<e, (a: a) => b>): (fa: Either<e, a>) => Either<e, b>;
       export const Return: typeof pure;
+      export function bind<e, a, b>(m: Either<e, a>, f: (a: a) => Either<e, b>): Either<e, b>;
+      export function bind<e, a>(m: Either<e, a>): <b>(f: (a: a) => Either<e, b>) => Either<e, b>;
     }
     export class Left<a> extends Either<a, any> {
       protected EITHER: Left<a>;
@@ -224,9 +251,11 @@ declare module 'spica' {
   }
 
   export namespace Either {
+    export const fmap: typeof Monad.Either.fmap;
     export const pure: typeof Monad.Either.Either.pure;
     export const ap: typeof Monad.Either.Either.ap;
     export const Return: typeof Monad.Either.Either.Return;
+    export const bind: typeof Monad.Either.Either.bind;
     export type Left<a> = Monad.Either.Left<a>;
     export function Left<a>(a: a): Left<a>;
     export type Right<b> = Monad.Either.Right<b>;

@@ -1,4 +1,5 @@
 import {MonadPlus} from './monadplus';
+import {curry} from '../curry';
 
 export class Maybe<a> extends MonadPlus<a> {
   protected MAYBE: Just<a> | Nothing;
@@ -30,17 +31,17 @@ export class Maybe<a> extends MonadPlus<a> {
   }
 }
 export namespace Maybe {
+  export declare function fmap<a, b>(m: Maybe<a>, f: (a: a) => b): Maybe<b>
+  export declare function fmap<a>(m: Maybe<a>): <b>(f: (a: a) => b) => Maybe<b>
   export function pure<a>(a: a): Maybe<a> {
     return new Just(a);
   }
-  export function ap<a, b>(ff: Maybe<() => b>): () => Maybe<b>
-  export function ap<a, b>(ff: Maybe<(a: a) => b>): (fa: Maybe<a>) => Maybe<b>
-  export function ap<a, b>(ff: Maybe<(a: a) => b>): (fa: Maybe<a>) => Maybe<b> {
-    return (fa: Maybe<a>) => ff.bind(f => fa.fmap(a => f(a)));
-  }
-  export function Return<a>(a: a): Maybe<a> {
-    return new Just(a);
-  }
+  export declare function ap<_, b>(ff: Maybe<() => b>): () => Maybe<b>
+  export declare function ap<a, b>(ff: Maybe<(a: a) => b>, fa: Maybe<a>): Maybe<b>
+  export declare function ap<a, b>(ff: Maybe<(a: a) => b>): (fa: Maybe<a>) => Maybe<b>
+  export const Return = pure;
+  export declare function bind<a, b>(m: Maybe<a>, f: (a: a) => Maybe<b>): Maybe<b>
+  export declare function bind<a>(m: Maybe<a>): <b>(f: (a: a) => Maybe<b>) => Maybe<b>
 }
 
 export class Just<a> extends Maybe<a> {

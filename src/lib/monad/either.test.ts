@@ -86,6 +86,11 @@ describe('Unit: lib/either', () => {
   });
 
   describe('Functor', () => {
+    it('fmap', () => {
+      assert(Either.fmap(Return(0), n => n + 1).extract() === 1);
+      assert(Either.fmap(Return(0))(n => n + 1).extract() === 1);
+    });
+
     it('Functor law 1', () => {
       const f = <T>(n: T) => n;
       const x = 0;
@@ -145,6 +150,11 @@ describe('Unit: lib/either', () => {
   });
 
   describe('Monad', () => {
+    it('bind', () => {
+      assert(Either.bind(Return(0), n => Return(n + 1)).extract() === 1);
+      assert(Either.bind(Return(0))(n => Return(n + 1)).extract() === 1);
+    });
+
     it('Monad law 1', () => {
       const f = (n: number) => Right(n + 1);
       const x = 0;
