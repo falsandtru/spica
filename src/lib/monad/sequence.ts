@@ -1,6 +1,7 @@
 import {Sequence} from './sequence/core';
 import from from './sequence/member/static/from';
 import write from './sequence/member/static/write';
+import repeat from './sequence/member/static/repeat';
 import random from './sequence/member/static/random';
 import concat from './sequence/member/static/concat';
 import zip from './sequence/member/static/zip';
@@ -35,6 +36,7 @@ compose(
   Sequence,
   from,
   write,
+  repeat,
   random,
   concat,
   zip,
