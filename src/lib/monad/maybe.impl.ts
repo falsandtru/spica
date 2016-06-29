@@ -46,6 +46,7 @@ export namespace Maybe {
 
 export class Just<a> extends Maybe<a> {
   protected MAYBE: Just<a>;
+  protected JUST: a;
   constructor(private a: a) {
     super(throwCallError);
   }
@@ -61,6 +62,7 @@ export class Just<a> extends Maybe<a> {
 
 export class Nothing extends Maybe<any> {
   protected MAYBE: Nothing;
+  protected NOTHING: void;
   constructor() {
     super(throwCallError);
   }

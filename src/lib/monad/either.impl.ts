@@ -45,6 +45,7 @@ export namespace Either {
 
 export class Left<a> extends Either<a, any> {
   protected EITHER: Left<a>;
+  protected LEFT: a;
   constructor(private a: a) {
     super(throwCallError);
   }
@@ -63,6 +64,7 @@ export class Left<a> extends Either<a, any> {
 
 export class Right<b> extends Either<any, b> {
   protected EITHER: Right<b>;
+  protected RIGHT: b;
   constructor(private b: b) {
     super(throwCallError);
   }

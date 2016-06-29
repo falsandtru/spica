@@ -180,12 +180,14 @@ declare module 'spica' {
     }
     export class Just<a> extends Maybe<a> {
       protected MAYBE: Just<a>;
+      protected JUST: a;
       bind<b>(f: (a: a) => Maybe<b>): Maybe<b>;
       extract(): a;
       extract<b>(transform: () => b): a;
     }
     export class Nothing extends Maybe<any> {
       protected MAYBE: Nothing;
+      protected NOTHING: void;
       bind<b>(f: (a: any) => Maybe<b>): Maybe<b>;
       extract(): any;
       extract<b>(transform: () => b): b;
@@ -237,6 +239,7 @@ declare module 'spica' {
     }
     export class Left<a> extends Either<a, any> {
       protected EITHER: Left<a>;
+      protected LEFT: a;
       bind<_ extends a>(f: (b: any) => Either<a, any>): Either<a, any>;
       bind<_ extends a, b>(f: (b: b) => Either<a, b>): Either<a, b>;
       extract(): any;
@@ -244,6 +247,7 @@ declare module 'spica' {
     }
     export class Right<b> extends Either<any, b> {
       protected EITHER: Right<b>;
+      protected RIGHT: b;
       bind<a>(f: (b: b) => Either<a, b>): Either<a, b>;
       bind<a, c>(f: (b: b) => Either<a, c>): Either<a, c>;
       extract(): b;
