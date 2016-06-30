@@ -1,18 +1,14 @@
-import {Return, Left, Right, Either} from './either';
+import {Either, Left, Right} from './either';
 import {curry} from '../curry';
 
 describe('Unit: lib/either', () => {
+  const Return = Either.Return;
+
   function throwError(msg: string): any {
     throw new Error(msg);
   }
 
   describe('Either', () => {
-    it('Either object', () => {
-      assert(Either.Return === Return);
-      assert(Either.Left === Left);
-      assert(Either.Right === Right);
-    });
-
     it('Either type', () => {
       const left: Either<Error, number> = Left<Error>(new Error());
       const right: Either<Error, number> = Right<number>(0);

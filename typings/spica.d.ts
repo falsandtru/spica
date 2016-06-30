@@ -257,17 +257,13 @@ declare module 'spica' {
     export const ap: typeof Monad.Either.Either.ap;
     export const Return: typeof Monad.Either.Either.Return;
     export const bind: typeof Monad.Either.Either.bind;
-    export type Left<a> = Monad.Either.Left<a>;
-    export function Left<a>(a: a): Left<a>;
-    export type Right<b> = Monad.Either.Right<b>;
-    export function Right<b>(b: b): Right<b>;
   }
 
   export type Either<a, b> = Monad.Either<a, b>;
-  export type Left<a> = Either.Left<a>;
-  export const Left: typeof Either.Left;
-  export type Right<b> = Either.Right<b>;
-  export const Right: typeof Either.Right;
+  export type Left<a> = Monad.Either.Left<a>;
+  export function Left<a>(a: a): Left<a>;
+  export type Right<b> = Monad.Either.Right<b>;
+  export function Right<b>(b: b): Right<b>;
 
   interface Curry {
     <z>(f: () => z, ctx?: any): () => z;

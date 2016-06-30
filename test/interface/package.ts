@@ -79,12 +79,10 @@ describe('Interface: Package', function () {
 
     it('Left', function () {
       assert(typeof Left === 'function');
-      assert(Either.Left === Left);
     });
 
     it('Right', function () {
       assert(typeof Right === 'function');
-      assert(Either.Right === Right);
     });
 
   });
