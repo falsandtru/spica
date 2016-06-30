@@ -1,18 +1,14 @@
-import {Return, Just, Nothing, Maybe} from './maybe';
+import {Maybe, Just, Nothing} from './maybe';
 import {curry} from '../curry';
 
 describe('Unit: lib/maybe', () => {
+  const Return = Maybe.Return;
+
   function throwError(msg: string): any {
     throw new Error(msg);
   }
 
   describe('Maybe', () => {
-    it('Maybe object', () => {
-      assert(Maybe.Return === Return);
-      assert(Maybe.Just === Just);
-      assert(Maybe.Nothing === Nothing);
-    });
-
     it('Maybe type', () => {
       const just: Maybe<number> = Just(0);
       const nothing: Maybe<number> = Nothing;

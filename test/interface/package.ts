@@ -60,12 +60,10 @@ describe('Interface: Package', function () {
 
     it('Just', function () {
       assert(typeof Just === 'function');
-      assert(Maybe.Just === Just);
     });
 
     it('Nothing', function () {
       assert(typeof Nothing === 'object');
-      assert(Maybe.Nothing === Nothing);
     });
 
   });

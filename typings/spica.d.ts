@@ -202,17 +202,13 @@ declare module 'spica' {
     export const bind: typeof Monad.Maybe.Maybe.bind;
     export const mzero: typeof Monad.Maybe.Maybe.mzero;
     export const mplus: typeof Monad.Maybe.Maybe.mplus;
-    export type Just<a> = Monad.Maybe.Just<a>;
-    export function Just<a>(a: a): Just<a>;
-    export type Nothing = Monad.Maybe.Nothing;
-    export const Nothing: Nothing;
   }
 
   export type Maybe<a> = Monad.Maybe<a>;
-  export type Just<a> = Maybe.Just<a>;
-  export const Just: typeof Maybe.Just;
-  export type Nothing = Maybe.Nothing;
-  export const Nothing: typeof Maybe.Nothing;
+  export type Just<a> = Monad.Maybe.Just<a>;
+  export function Just<a>(a: a): Just<a>;
+  export type Nothing = Monad.Maybe.Nothing;
+  export const Nothing: Nothing;
 
   namespace Monad {
     export abstract class Either<a, b> extends Monad<b> {
