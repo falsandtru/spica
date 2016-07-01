@@ -25,6 +25,7 @@ $ npm i spica
 - curry
 - flip
 - List, Nil
+- HList, HNil
 - DataMap
 - AttrMap
 - RelationMap

@@ -318,6 +318,21 @@ declare module 'spica' {
     array(): a[];
   }
 
+  export interface HList<a, c extends HNil | HList<any, any>> extends HCons<a, c> { }
+  export class HNil {
+    private NIL: void;
+    push<b>(b: b): HCons<b, HNil>;
+  }
+  class HCons<a, c extends HNil | HCons<any, any>> {
+    private CONS: a;
+    push<b>(b: b): HCons<b, this>;
+    head(): a;
+    tail(): c;
+    walk(f: (a: a) => void): c;
+    modify<b>(f: (a: a) => b): HCons<b, c>;
+    update<b>(f: (a: a) => b): HCons<b, this>;
+  }
+
   export class DataMap<K, V> {
     get(key: K): V;
     set(key: K, val: V): this;

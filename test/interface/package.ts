@@ -8,6 +8,7 @@ import {
   curry,
   flip,
   List, Nil,
+  HList, HNil,
   DataMap, AttrMap, RelationMap,
   Mixin,
   Tick,
@@ -102,6 +103,13 @@ describe('Interface: Package', function () {
   describe('List', function () {
     it('Nil', function () {
       assert(typeof Nil === 'function');
+    });
+
+  });
+
+  describe('HList', function () {
+    it('HNil', function () {
+      assert(typeof HNil === 'function');
     });
 
   });

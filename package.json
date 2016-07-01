@@ -17,6 +17,7 @@
     "maybe",
     "either",
     "list",
+    "hlist"
   ],
   "main": "./dist/spica.js",
   "files": [
