@@ -7,6 +7,7 @@ import {
   Either, Left, Right,
   curry,
   flip,
+  List, Nil,
   DataMap, AttrMap, RelationMap,
   Mixin,
   Tick,
@@ -94,6 +95,13 @@ describe('Interface: Package', function () {
 
     it('flip', function () {
       assert(typeof flip === 'function');
+    });
+
+  });
+
+  describe('List', function () {
+    it('Nil', function () {
+      assert(typeof Nil === 'function');
     });
 
   });

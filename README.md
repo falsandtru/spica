@@ -24,6 +24,7 @@ $ npm i spica
 - Either, Left, Right
 - curry
 - flip
+- List, Nil
 - DataMap
 - AttrMap
 - RelationMap

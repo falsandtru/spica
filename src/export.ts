@@ -6,6 +6,7 @@ export {Maybe, Just, Nothing} from './lib/monad/maybe';
 export {Either, Left, Right} from './lib/monad/either';
 export {curry} from './lib/curry';
 export {flip} from './lib/flip';
+export {List, Nil} from './lib/list';
 export {DataMap} from './lib/collection/datamap';
 export {AttrMap} from './lib/collection/attrmap';
 export {RelationMap} from './lib/collection/relationmap';

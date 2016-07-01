@@ -15,7 +15,8 @@
     "generator",
     "iterator",
     "maybe",
-    "either"
+    "either",
+    "list",
   ],
   "main": "./dist/spica.js",
   "files": [

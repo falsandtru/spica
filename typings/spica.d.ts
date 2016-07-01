@@ -302,6 +302,22 @@ declare module 'spica' {
   export function flip<a, b, c>(f: (a: a) => (b: b) => c): Curried2<b, a, c>
   export function flip<a, b, c>(f: (a: a, b: b) => c): Curried2<b, a, c>
 
+  export interface List<a, c extends Nil | List<a, any>> extends Cons<a, c> { }
+  export class Nil {
+    private NIL: void;
+    push<a>(a: a): Cons<a, Nil>;
+  }
+  class Cons<a, c extends Nil | Cons<a, any>> {
+    private CONS: a;
+    push(a: a): Cons<a, this>;
+    head(): a;
+    tail(): c;
+    walk(f: (a: a) => void): c;
+    modify(f: (a: a) => a): Cons<a, c>;
+    update(f: (a: a) => a): Cons<a, this>;
+    array(): a[];
+  }
+
   export class DataMap<K, V> {
     get(key: K): V;
     set(key: K, val: V): this;
