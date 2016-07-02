@@ -1,7 +1,7 @@
 import {Cancelable} from './cancelable';
 
 describe('Unit: lib/cancelable', () => {
-  describe('cancelable', () => {
+  describe('Cancelable', () => {
     it('promise', done => {
       const cancelable = new Cancelable();
       Promise.resolve(0)
@@ -27,6 +27,14 @@ describe('Unit: lib/cancelable', () => {
       assert(cancelable.either(1).extract() === 1);
       cancelable.cancel(NaN);
       assert(cancelable.either(1).extract(n => (assert(isNaN(n)), 0)) === 0);
+    });
+
+    it('listeners', done => {
+      const cancelable = new Cancelable<number>();
+      cancelable.listeners.add(n => (
+        assert(n === 0),
+        done()));
+      cancelable.cancel(0);
     });
 
   });

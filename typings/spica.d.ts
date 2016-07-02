@@ -66,6 +66,7 @@ declare module 'spica' {
   }
 
   export class Cancelable<L> {
+    listeners: Set<(reason: L) => void>;
     cancel: (reason: L) => void;
     promise: <T>(val: T) => Promise<T>;
     maybe: <T>(val: T) => Maybe<T>;

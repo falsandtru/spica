@@ -8,11 +8,15 @@ export class Cancelable<L> {
       this.cancel = noop,
       this.canceled = true,
       this.reason = reason,
+      this.listeners
+        .forEach(cb => void cb(this.reason)),
+      this.listeners.clear(),
       void 0);
   }
   private promise_: Promise<any>;
   private canceled = false;
   private reason: L;
+  public listeners: Set<(reason: L) => void> = new Set();
   public cancel: (reason: L) => void;
   public promise = <T>(val: T): Promise<T> =>
     this.canceled
