@@ -27,7 +27,7 @@ class HCons<a, c extends HNil | HCons<any, any>> {
   public modify<b>(f: (a: a) => b): HCons<b, c> {
     return (<any>this.tail().push)(f(this.head()));
   }
-  public update<b>(f: (a: a) => b): HCons<b, this> {
+  public extend<b>(f: (a: a) => b): HCons<b, this> {
     return this.push(f(this.head()));
   }
 }

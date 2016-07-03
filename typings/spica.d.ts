@@ -331,7 +331,7 @@ declare module 'spica' {
     tail(): c;
     walk(f: (a: a) => void): c;
     modify<b>(f: (a: a) => b): HCons<b, c>;
-    update<b>(f: (a: a) => b): HCons<b, this>;
+    extend<b>(f: (a: a) => b): HCons<b, this>;
   }
 
   export class DataMap<K, V> {

@@ -40,9 +40,9 @@ describe('Unit: lib/hlist', () => {
       assert(new HNil().push(0).push(1).modify(n => n + '').tail().head() === 0);
     });
 
-    it('update', () => {
-      assert(new HNil().push(0).update(n => n + '').head() === '0');
-      assert(new HNil().push(0).update(n => n + '').tail().head() === 0);
+    it('extend', () => {
+      assert(new HNil().push(0).extend(n => n + '').head() === '0');
+      assert(new HNil().push(0).extend(n => n + '').tail().head() === 0);
     });
 
   });
