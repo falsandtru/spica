@@ -39,8 +39,8 @@ describe('Unit: lib/list', () => {
       assert.deepStrictEqual(new Nil().push(0).push(1).modify(n => ++n).array(), [2, 0]);
     });
 
-    it('update', () => {
-      assert.deepStrictEqual(new Nil().push(0).update(n => ++n).array(), [1, 0]);
+    it('extend', () => {
+      assert.deepStrictEqual(new Nil().push(0).extend(n => ++n).array(), [1, 0]);
     });
 
   });

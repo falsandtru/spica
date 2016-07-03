@@ -315,7 +315,7 @@ declare module 'spica' {
     tail(): c;
     walk(f: (a: a) => void): c;
     modify(f: (a: a) => a): Cons<a, c>;
-    update(f: (a: a) => a): Cons<a, this>;
+    extend(f: (a: a) => a): Cons<a, this>;
     array(): a[];
   }
 

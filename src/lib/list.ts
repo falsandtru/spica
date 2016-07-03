@@ -29,7 +29,7 @@ class Cons<a, c extends Nil | Cons<a, any>> {
   public modify(f: (a: a) => a): Cons<a, c> {
     return (<any>this.tail().push)(f(this.head()));
   }
-  public update(f: (a: a) => a): Cons<a, this> {
+  public extend(f: (a: a) => a): Cons<a, this> {
     return this.push(f(this.head()));
   }
   public array(): a[] {
