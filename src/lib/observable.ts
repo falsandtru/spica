@@ -32,24 +32,19 @@ export class Observable<T extends Array<string | number>, D, R>
   }
   public off(namespace: T, subscriber?: Subscriber<D, R>): void {
     switch (typeof subscriber) {
-      case 'function': {
-        void this.seekNode_(namespace).registers
+      case 'function':
+        return void this.seekNode_(namespace).registers
           .some(([, identifier], i, registers) => {
             if (subscriber !== identifier) return false;
             switch (i) {
-              case 0: {
+              case 0:
                 return !void registers.shift();
-              }
-              case registers.length - 1: {
+              case registers.length - 1:
                 return !void registers.pop();
-              }
-              default: {
+              default:
                 return !void registers.splice(i, 1);
-              }
             }
           });
-        return;
-      }
       case 'undefined': {
         const node = this.seekNode_(namespace);
         node.childrenMap = Object.create(null);
@@ -57,17 +52,19 @@ export class Observable<T extends Array<string | number>, D, R>
         node.registers = [];
         return;
       }
-      default: {
+      default:
         throw this.throwTypeErrorIfInvalidSubscriber_(subscriber, namespace);
-      }
     }
   }
   public once(namespace: T, subscriber: Subscriber<D, R>): () => void {
     void this.throwTypeErrorIfInvalidSubscriber_(subscriber, namespace);
-    return this.on(namespace, (data: D) => {
-      void this.off(namespace, subscriber);
-      return subscriber(data);
-    }, subscriber);
+    return this
+      .on(
+        namespace,
+        data => (
+          void this.off(namespace, subscriber),
+          subscriber(data)),
+        subscriber);
   }
   public emit(namespace: T, data: D, tracker?: (data: D, results: R[]) => any): void {
     void this.drain_(namespace, data, tracker);
@@ -79,7 +76,7 @@ export class Observable<T extends Array<string | number>, D, R>
     return results;
   }
   private drain_(types: T, data: D, tracker?: (data: D, results: R[]) => any): void {
-    const results: any[] = [];
+    const results: R[] = [];
     void this.refsBelow_(this.seekNode_(types))
       .reduce((_, sub) => {
         const [, , monitor, subscriber] = sub;
@@ -173,12 +170,10 @@ export class Observable<T extends Array<string | number>, D, R>
   }
   private throwTypeErrorIfInvalidSubscriber_(subscriber: Subscriber<D, R>, types: T): void {
     switch (typeof subscriber) {
-      case 'function': {
+      case 'function':
         return;
-      }
-      default: {
+      default:
         throw new TypeError(`Spica: Observable: Invalid subscriber.\n\t${types, subscriber}`);
-      }
     }
   }
 }
