@@ -17,8 +17,8 @@ export namespace Sequence {
   export declare function random<a>(as: a[]): Sequence<a, Sequence.Iterator<number>>;
   export declare function concat<a>(as: Sequence<Sequence<a, any>, any>): Sequence<a, [Sequence.Iterator<Sequence<a, any>>, Sequence.Iterator<a>]>;
   export declare function zip<a, b>(a: Sequence<a, any>, b: Sequence<b, any>): Sequence<[a, b], [Sequence.Iterator<a>, Sequence.Iterator<b>]>;
-  export declare function intersect<a>(cmp: (l: a, r: a) => number, as: Sequence<a, any>[]): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
   export declare function union<a>(as: Sequence<a, any>[], cmp: (l: a, r: a) => number): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
+  export declare function intersect<a>(as: Sequence<a, any>[], cmp: (l: a, r: a) => number): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
   export declare function fmap<a, b>(m: Sequence<a, any>, f: (a: a) => b): Sequence<b, Sequence.Iterator<a>>;
   export declare function fmap<a>(m: Sequence<a, any>): <b>(f: (a: a) => b) => Sequence<b, Sequence.Iterator<a>>;
   export declare function pure<a>(a: a): Sequence<a, number>;

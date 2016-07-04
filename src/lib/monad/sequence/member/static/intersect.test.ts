@@ -8,50 +8,50 @@ describe('Unit: lib/monad/sequence/member/intersect/', () => {
   describe('Sequence.intersect', () => {
     it('unlimited', () => {
       assert.deepStrictEqual(
-        Sequence.intersect((a, b) => a - b, [double, triple]).take(3).read(),
+        Sequence.intersect([double, triple], (a, b) => a - b).take(3).read(),
         [0, 6, 12]);
       assert.deepStrictEqual(
-        Sequence.intersect((a, b) => b - a, [double.map(n => -n), triple.map(n => -n)]).take(3).read(),
+        Sequence.intersect([double.map(n => -n), triple.map(n => -n)], (a, b) => b - a).take(3).read(),
         [0, 6, 12].map(n => -n));
     });
 
     it('same', () => {
       assert.deepStrictEqual(
-        Sequence.intersect((a, b) => a - b, [double, triple]).take(3).read(),
+        Sequence.intersect([double, triple], (a, b) => a - b).take(3).read(),
         [0, 6, 12]);
       assert.deepStrictEqual(
-        Sequence.intersect((a, b) => b - a, [double.map(n => -n), triple.map(n => -n)]).take(3).read(),
+        Sequence.intersect([double.map(n => -n), triple.map(n => -n)], (a, b) => b - a).take(3).read(),
         [0, 6, 12].map(n => -n));
     });
 
     it('mismatch', () => {
       assert.deepStrictEqual(
-        Sequence.intersect((a, b) => a - b, [double.dropWhile(n => n < 6).takeUntil(n => n === 12), triple]).take(2).read(),
+        Sequence.intersect([double.dropWhile(n => n < 6).takeUntil(n => n === 12), triple], (a, b) => a - b).take(2).read(),
         [6, 12]);
       assert.deepStrictEqual(
-        Sequence.intersect((a, b) => a - b, [triple, double.dropWhile(n => n < 6).takeUntil(n => n === 12)]).take(2).read(),
+        Sequence.intersect([triple, double.dropWhile(n => n < 6).takeUntil(n => n === 12)], (a, b) => a - b).take(2).read(),
         [6, 12]);
     });
 
     it('empty', () => {
       assert.deepStrictEqual(
-        Sequence.intersect((a, b) => a - b, [nat, Sequence.from([])]).take(3).read(),
+        Sequence.intersect([nat, Sequence.from([])], (a, b) => a - b).take(3).read(),
         []);
       assert.deepStrictEqual(
-        Sequence.intersect((a, b) => a - b, [Sequence.from([]), nat]).take(3).read(),
+        Sequence.intersect([Sequence.from([]), nat], (a, b) => a - b).take(3).read(),
         []);
       assert.deepStrictEqual(
-        Sequence.intersect((a, b) => a - b, [Sequence.from([]), Sequence.from([])]).take(3).read(),
+        Sequence.intersect([Sequence.from([]), Sequence.from([])], (a, b) => a - b).take(3).read(),
         []);
     });
 
     it('multiple', () => {
       assert.deepStrictEqual(
-        Sequence.intersect((a, b) => a - b, [
+        Sequence.intersect([
           new Sequence<number, number>((n = 0, cons) => cons(n, n + 2)),
           new Sequence<number, number>((n = 0, cons) => cons(n, n + 3)),
           new Sequence<number, number>((n = 0, cons) => cons(n, n + 5))
-        ])
+        ], (a, b) => a - b)
           .take(3).read(),
         [0, 30, 60]);
     });

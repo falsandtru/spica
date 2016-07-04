@@ -1,12 +1,12 @@
 import {Sequence} from '../../core';
 
 export default class <a, z> extends Sequence<a, z> {
-  public static intersect<a>(cmp: (l: a, r: a) => number, as: Sequence<a, any>[]): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]> {
-    return as.reduce((a, b) => intersect(cmp, a, b));
+  public static intersect<a>(as: Sequence<a, any>[], cmp: (l: a, r: a) => number): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]> {
+    return as.reduce((a, b) => intersect(a, b, cmp));
   }
 }
 
-function intersect<a>(cmp: (l: a, r: a) => number, a: Sequence<a, any>, b: Sequence<a, any>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]> {
+function intersect<a>(a: Sequence<a, any>, b: Sequence<a, any>, cmp: (l: a, r: a) => number): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]> {
   return new Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>(([ai, bi] = [() => a.iterate(), () => b.iterate()], cons) =>
     Sequence.Iterator.when(
       ai(),
