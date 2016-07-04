@@ -1,5 +1,6 @@
 import {Maybe, Just, Nothing} from './maybe';
 import {curry} from '../curry';
+import {Sequence} from './sequence';
 
 describe('Unit: lib/maybe', () => {
   const Return = Maybe.Return;
@@ -111,7 +112,7 @@ describe('Unit: lib/maybe', () => {
       assert.strictEqual(
         Maybe.ap(
           Maybe.pure(curry((a: number) => a)))
-          (Just(1))
+          (Maybe.pure(1))
           .extract(),
         1);
       assert.strictEqual(
@@ -126,8 +127,8 @@ describe('Unit: lib/maybe', () => {
       assert.strictEqual(
         Maybe.ap(Maybe.ap(
           Maybe.pure(curry((a: number, b: number) => a + b)))
-          (Just(1)))
-          (Just(2))
+          (Maybe.pure(1)))
+          (Maybe.pure(2))
           .extract(),
         3);
     });
@@ -136,9 +137,9 @@ describe('Unit: lib/maybe', () => {
       assert.strictEqual(
         Maybe.ap(Maybe.ap(Maybe.ap(
           Maybe.pure(curry((a: number, b: number, c: number) => a + b + c)))
-          (Just(1)))
-          (Just(2)))
-          (Just(3))
+          (Maybe.pure(1)))
+          (Maybe.pure(2)))
+          (Maybe.pure(3))
           .extract(),
         6);
     });
@@ -152,7 +153,7 @@ describe('Unit: lib/maybe', () => {
     });
 
     it('Monad law 1', () => {
-      const f = (n: number) => Just(n + 1);
+      const f = (n: number) => Return(n + 1);
       const x = 0;
       const ma = Return(x).bind(f);
       const mb = f(x);
@@ -160,7 +161,7 @@ describe('Unit: lib/maybe', () => {
     });
 
     it('Monad law 2', () => {
-      const f = (n: number) => Just(n + 1);
+      const f = (n: number) => Return(n + 1);
       const x = 0;
       const ma = Return(x);
       const mb = ma.bind(Return);
@@ -185,19 +186,46 @@ describe('Unit: lib/maybe', () => {
 
   describe('MonadPlus', () => {
     it('mplus', () => {
-      assert(Maybe.mplus(Just(0), Just(1)).extract() === 0);
-      assert(Maybe.mplus(Just(0), Nothing).extract() === 0);
-      assert(Maybe.mplus(Nothing, Just(0)).extract() === 0);
-      assert(Maybe.mplus(Nothing, Nothing).extract(() => 0) === 0);
-      assert(Maybe.mplus(Just(0).fmap(n => n - 1), Just(1)).extract() === -1);
+      const m = Return(0).bind(() => throwError(''));
+      Maybe.mplus(m, m);
     });
 
     it('MonadPlus law 1', () => {
-      const f = (n: number) => Just(n + 1);
-      const x = 0;
+      assert(Maybe.mplus(Maybe.mzero, Return(0)).extract() === 0);
+    });
+
+    it('MonadPlus law 2', () => {
+      assert(Maybe.mplus(Return(0), Maybe.mzero).extract() === 0);
+    });
+
+    it('MonadPlus law 3', () => {
+      Sequence.from([1, 2, 4])
+        .mapM(n => Sequence.from<Maybe<number>>([Return(n), Maybe.mzero]))
+        .read()
+        .forEach(([m, n, o]) => {
+          const ma = Maybe.mplus(m, Maybe.mplus(n, o));
+          const mb = Maybe.mplus(Maybe.mplus(m, n), o);
+          assert(ma.extract(() => -1) === mb.extract(() => -1));
+        });
+    });
+
+    it('MonadPlus law add 1', () => {
+      const f = (n: number) => Return(n + 1);
       const ma = Maybe.mzero;
       const mb = Maybe.mzero.bind(f);
       assert(ma.extract(() => -1) === mb.extract(() => -1));
+    });
+
+    it('MonadPlus law add 2', () => {
+      const k = (n: number) => Return(n * 10);
+      Sequence.from([1, 2])
+        .mapM(n => Sequence.from<Maybe<number>>([Return(n), Maybe.mzero]))
+        .read()
+        .forEach(([m, n]) => {
+          const ma = Maybe.mplus(m, n).bind(k);
+          const mb = Maybe.mplus(m.bind(k), n.bind(k));
+          assert(ma.extract(() => -1) === mb.extract(() => -1));
+        });
     });
 
   });

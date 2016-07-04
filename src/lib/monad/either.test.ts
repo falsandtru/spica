@@ -111,7 +111,7 @@ describe('Unit: lib/either', () => {
       assert.strictEqual(
         Either.ap(
           Either.pure(curry((a: number) => a)))
-          (Right(1))
+          (Either.pure(1))
           .extract(),
         1);
       assert.strictEqual(
@@ -126,8 +126,8 @@ describe('Unit: lib/either', () => {
       assert.strictEqual(
         Either.ap(Either.ap(
           Either.pure(curry((a: number, b: number) => a + b)))
-          (Right(1)))
-          (Right(2))
+          (Either.pure(1)))
+          (Either.pure(2))
           .extract(),
         3);
     });
@@ -136,9 +136,9 @@ describe('Unit: lib/either', () => {
       assert.strictEqual(
         Either.ap(Either.ap(Either.ap(
           Either.pure(curry((a: number, b: number, c: number) => a + b + c)))
-          (Right(1)))
-          (Right(2)))
-          (Right(3))
+          (Either.pure(1)))
+          (Either.pure(2)))
+          (Either.pure(3))
           .extract(),
         6);
     });
@@ -152,7 +152,7 @@ describe('Unit: lib/either', () => {
     });
 
     it('Monad law 1', () => {
-      const f = (n: number) => Right(n + 1);
+      const f = (n: number) => Return(n + 1);
       const x = 0;
       const ma = Return(x).bind(f);
       const mb = f(x);
@@ -160,7 +160,7 @@ describe('Unit: lib/either', () => {
     });
 
     it('Monad law 2', () => {
-      const f = (n: number) => Right(n + 1);
+      const f = (n: number) => Return(n + 1);
       const x = 0;
       const ma = Return(x);
       const mb = ma.bind(Return);
