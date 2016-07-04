@@ -6,13 +6,13 @@ export default class <a, z> extends Sequence<a, z> {
       Sequence.Iterator.when(
         ai(),
         () => cons(),
-        (at, recur) => (
+        (at, ar) => (
           bi = bi === Sequence.Iterator.done
             ? () => Sequence.Thunk.value(at).iterate()
             : bi,
           Sequence.Iterator.when(
             bi(),
-            () => (bi = Sequence.Iterator.done, recur()),
+            () => (bi = Sequence.Iterator.done, ar()),
             bt => cons(Sequence.Thunk.value(bt), [() => at, Sequence.Thunk.iterator(bt)])))));
   }
 }
