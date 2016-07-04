@@ -139,7 +139,7 @@ declare module 'spica' {
     filterM(f: (a: a) => Sequence<boolean, any>): Sequence<a[], [Sequence.Iterator<Sequence<a[], any>>, Sequence.Iterator<a[]>]>;
     map<b>(f: (a: a, i: number) => b): Sequence<b, Sequence.Iterator<a>>;
     filter(f: (a: a, i: number) => boolean): Sequence<a, Sequence.Iterator<a>>;
-    scan<b>(f: (b: b, a: a) => b, z: b): Sequence<b, [b, Sequence.Iterator<a>]>;
+    scan<b>(f: (b: b, a: a) => b, z: b): Sequence<b, [b, Sequence.Iterator<a>, number]>;
     take(n: number): Sequence<a, Sequence.Iterator<a>>;
     drop(n: number): Sequence<a, Sequence.Iterator<a>>;
     takeWhile(f: (a: a) => boolean): Sequence<a, Sequence.Iterator<a>>;
