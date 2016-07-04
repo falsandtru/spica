@@ -1,12 +1,12 @@
 import {Sequence} from '../../core';
 
 export default class <a, z> extends Sequence<a, z> {
-  public static union<a>(cmp: (a: a, b: a) => number, as: Sequence<a, any>[]): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]> {
-    return as.reduce((a, b) => union(cmp, a, b));
+  public static union<a>(as: Sequence<a, any>[], cmp: (a: a, b: a) => number): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]> {
+    return as.reduce((a, b) => union(a, b, cmp));
   }
 }
 
-function union<a>(cmp: (a: a, b: a) => number, a: Sequence<a, any>, b: Sequence<a, any>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]> {
+function union<a>(a: Sequence<a, any>, b: Sequence<a, any>, cmp: (a: a, b: a) => number): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]> {
   return new Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>(([ai, bi] = [() => a.iterate(), () => b.iterate()], cons) =>
     Sequence.Iterator.when(
       ai(),
