@@ -113,17 +113,16 @@ describe('Unit: lib/monad/sequence', () => {
     });
 
     it('Monad law 3', () => {
-      const m1 = Sequence.Return(1);
-      const m2 = Sequence.Return(2);
-      const m3 = Sequence.Return(4);
-      const ma = m1
-        .bind(v1 => m2.bind(v2 => Sequence.Return(v1 + v2)))
-        .bind(n => m3.bind(v3 => Sequence.Return(n + v3)));
-      const mb = m1
-        .bind(v1 => m2.bind(v2 => m3.bind(v3 =>
-          Sequence.Return(v2 + v3)))
-            .bind(n =>
-              Sequence.Return(v1 + n)));
+      const f = (n: number) => Sequence.Return(n + 2);
+      const g = (n: number) => Sequence.Return(n * 3);
+      const x = 1;
+      const ma = Sequence.Return(x)
+        .bind(f)
+        .bind(g);
+      const mb = Sequence.Return(x)
+        .bind(n =>
+          f(x)
+            .bind(g));
       assert.deepStrictEqual(ma.read(), mb.read());
     });
 

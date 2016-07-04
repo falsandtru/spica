@@ -168,17 +168,16 @@ describe('Unit: lib/maybe', () => {
     });
 
     it('Monad law 3', () => {
-      const m1 = Return(1);
-      const m2 = Return(2);
-      const m3 = Return(4);
-      const ma = m1
-        .bind(v1 => m2.bind(v2 => Just(v1 + v2)))
-        .bind(n => m3.bind(v3 => Just(n + v3)));
-      const mb = m1
-        .bind(v1 => m2.bind(v2 => m3.bind(v3 =>
-          Just(v2 + v3)))
-            .bind(n =>
-              Just(v1 + n)));
+      const f = (n: number) => Return(n + 2);
+      const g = (n: number) => Return(n * 3);
+      const x = 1;
+      const ma = Return(x)
+        .bind(f)
+        .bind(g);
+      const mb = Return(x)
+        .bind(n =>
+          f(x)
+            .bind(g));
       assert(ma.extract() === mb.extract());
     });
 
