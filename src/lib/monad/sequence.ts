@@ -5,6 +5,7 @@ import cycle from './sequence/member/static/cycle';
 import random from './sequence/member/static/random';
 import concat from './sequence/member/static/concat';
 import zip from './sequence/member/static/zip';
+import difference from './sequence/member/static/difference';
 import union from './sequence/member/static/union';
 import intersect from './sequence/member/static/intersect';
 import pure from './sequence/member/static/pure';
@@ -40,6 +41,7 @@ compose(
   random,
   concat,
   zip,
+  difference,
   union,
   intersect,
   pure,
