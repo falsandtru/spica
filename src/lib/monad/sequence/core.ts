@@ -62,7 +62,7 @@ export namespace Sequence {
         case 0:
           return <Sequence.Data<a, z>>[];
         case 1:
-          return <Sequence.Data<a, z>><[]>[a];
+          return <Sequence.Data<a, z>><any[]>[a];
         case 2:
           return <Sequence.Data<a, z>>[a, b];
         default:
