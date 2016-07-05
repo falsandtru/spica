@@ -30,11 +30,16 @@ describe('Unit: lib/cancelable', () => {
     });
 
     it('listeners', done => {
+      let cnt = 0;
       const cancelable = new Cancelable<number>();
       cancelable.listeners.add(n => (
+        assert(++cnt === 1),
+        assert(n === 0)));
+      cancelable.cancel(0);
+      cancelable.listeners.add(n => (
+        assert(++cnt === 2),
         assert(n === 0),
         done()));
-      cancelable.cancel(0);
     });
 
   });

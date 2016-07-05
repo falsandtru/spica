@@ -9,8 +9,11 @@ export class Cancelable<L> {
       this.canceled = true,
       this.reason = reason,
       this.listeners
-        .forEach(cb => void cb(this.reason)),
+        .forEach(cb => void cb(reason)),
       this.listeners.clear(),
+      this.listeners.add = cb => (
+        void cb(this.reason),
+        this.listeners),
       void 0);
   }
   private promise_: Promise<any>;
