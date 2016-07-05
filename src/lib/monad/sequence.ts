@@ -32,6 +32,7 @@ import filterM from './sequence/member/instance/filterM';
 import map from './sequence/member/instance/map';
 import filter from './sequence/member/instance/filter';
 import scan from './sequence/member/instance/scan';
+import fold from './sequence/member/instance/fold';
 import {compose} from '../compose';
 
 compose(
@@ -68,7 +69,8 @@ compose(
   filterM,
   map,
   filter,
-  scan
+  scan,
+  fold
 );
 
 export {Sequence}
