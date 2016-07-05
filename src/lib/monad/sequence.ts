@@ -33,6 +33,7 @@ import map from './sequence/member/instance/map';
 import filter from './sequence/member/instance/filter';
 import scan from './sequence/member/instance/scan';
 import fold from './sequence/member/instance/fold';
+import subsequences from './sequence/member/instance/subsequences';
 import {compose} from '../compose';
 
 compose(
@@ -70,7 +71,8 @@ compose(
   map,
   filter,
   scan,
-  fold
+  fold,
+  subsequences
 );
 
 export {Sequence}
