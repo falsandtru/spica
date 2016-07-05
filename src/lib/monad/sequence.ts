@@ -1,4 +1,5 @@
 import {Sequence} from './sequence/core';
+import resume from './sequence/member/static/resume';
 import from from './sequence/member/static/from';
 import write from './sequence/member/static/write';
 import cycle from './sequence/member/static/cycle';
@@ -35,6 +36,7 @@ import {compose} from '../compose';
 
 compose(
   Sequence,
+  resume,
   from,
   write,
   cycle,
