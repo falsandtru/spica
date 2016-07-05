@@ -34,39 +34,6 @@ describe('Unit: lib/monad/sequence/member/mapM', () => {
         []);
     });
 
-    it('1 [] 0', () => {
-      assert.deepStrictEqual(
-        nat
-          .drop(1)
-          .take(1)
-          .mapM(n => Sequence.from([]))
-          .take(0)
-          .read(),
-        []);
-    });
-
-    it('1 [n] 0', () => {
-      assert.deepStrictEqual(
-        nat
-          .drop(1)
-          .take(1)
-          .mapM(n => Sequence.from([n]))
-          .take(0)
-          .read(),
-        []);
-    });
-
-    it('1 [n, -n] 0', () => {
-      assert.deepStrictEqual(
-        nat
-          .drop(1)
-          .take(1)
-          .mapM(n => Sequence.from([n, -n]))
-          .take(0)
-          .read(),
-        []);
-    });
-
     it('1 []', () => {
       assert.deepStrictEqual(
         nat
