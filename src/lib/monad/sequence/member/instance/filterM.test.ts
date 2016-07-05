@@ -10,7 +10,7 @@ describe('Unit: lib/monad/sequence/member/filterM', () => {
           .take(0)
           .filterM(() => Sequence.from([false]))
           .read(),
-        []);
+        [[]]);
     });
 
     it('0 [true]', () => {
@@ -19,7 +19,7 @@ describe('Unit: lib/monad/sequence/member/filterM', () => {
           .take(0)
           .filterM(() => Sequence.from([true]))
           .read(),
-        []);
+        [[]]);
     });
 
     it('0 [true, false]', () => {
@@ -28,37 +28,7 @@ describe('Unit: lib/monad/sequence/member/filterM', () => {
           .take(0)
           .filterM(() => Sequence.from([true, false]))
           .read(),
-        []);
-    });
-
-    it('1 [false] 0', () => {
-      assert.deepStrictEqual(
-        nat
-          .take(1)
-          .filterM(() => Sequence.from([false]))
-          .take(0)
-          .read(),
-        []);
-    });
-
-    it('1 [true] 0', () => {
-      assert.deepStrictEqual(
-        nat
-          .take(1)
-          .filterM(() => Sequence.from([true]))
-          .take(0)
-          .read(),
-        []);
-    });
-
-    it('1 [true, false] 0', () => {
-      assert.deepStrictEqual(
-        nat
-          .take(1)
-          .filterM(() => Sequence.from([true, false]))
-          .take(0)
-          .read(),
-        []);
+        [[]]);
     });
 
     it('1 [false]', () => {

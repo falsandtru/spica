@@ -3,8 +3,7 @@ import {concat} from '../../../../concat';
 
 export default class <a, z> extends Sequence<a, z> {
   public filterM(f: (a: a) => Sequence<boolean, any>): Sequence<a[], [Sequence.Iterator<Sequence<a[], any>>, Sequence.Iterator<a[]>]> {
-    return this
-      .take(1)
+    return Sequence.from([0])
       .bind(() => {
         const xs = this.read();
         switch (xs.length) {
