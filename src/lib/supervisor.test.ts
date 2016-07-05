@@ -203,6 +203,7 @@ describe('Unit: lib/supervisor', function () {
           ]]
         ]
       });
+      sv.events.loss.monitor([], done);
 
       sv.register([], _ => ++cnt);
       assert.deepStrictEqual(sv.cast([], 0), []);
@@ -261,9 +262,11 @@ describe('Unit: lib/supervisor', function () {
       assert(TestSupervisor.count === 0);
       assert(TestSupervisor.procs === 0);
       const sv = new TestSupervisor();
-      sv.register([], _ => +assert(++cnt === 2) || cnt);
+      sv.events.loss.monitor([], done);
+      sv.events.fail.on([], ([, , data]) => assert(++cnt === 2 && data === 0));
+      sv.register([], _ => +assert(++cnt === 3) || cnt);
       sv.events.exit.on([], ([name, proc, reason]) => reason && sv.register(name, proc));
-      assert.deepStrictEqual(sv.cast([], 0, true), [2]);
+      assert.deepStrictEqual(sv.cast([], 0, true), [3]);
       sv.terminate();
       done();
     });
@@ -278,6 +281,7 @@ describe('Unit: lib/supervisor', function () {
     it('async', function (done) {
       let cnt = 0;
       const sv = new class TestSupervisor extends Supervisor<string[], number, number> { }();
+      sv.events.loss.monitor([], done);
       sv.register([], _ => ++cnt);
       sv.call([], 0, 0, r => assert(cnt === 1) || sv.terminate() || done());
       assert(cnt === 0);
@@ -286,8 +290,9 @@ describe('Unit: lib/supervisor', function () {
     it('block', function (done) {
       let cnt = 0;
       const sv = new class TestSupervisor extends Supervisor<string[], number, number> { }();
-      sv.register([], n => +assert.deepStrictEqual(sv.cast([], 2), []) || +assert(++cnt === 2 && n === 1) || +Tick(() => sv.terminate() || done()));
+      sv.events.loss.monitor([], done);
       sv.events.fail.on([], ([, , data]) => assert(++cnt === 1 && data === 2));
+      sv.register([], n => +assert.deepStrictEqual(sv.cast([], 2), []) || +assert(++cnt === 2 && n === 1) || +Tick(() => sv.terminate() || done()));
       sv.cast([], 1);
     });
 
@@ -298,7 +303,7 @@ describe('Unit: lib/supervisor', function () {
       sv.events.loss.on([], ([, , data]) => assert(++cnt === 2 && data === 2));
       sv.call([], 1, 0, r => assert(++cnt === 1 && r.length === 1) || r[0].then(n => assert(++cnt === 4 && n === 1)));
       sv.call([], 2, 0, r => assert(++cnt === 3 && r.length === 0));
-      sv.call([], 3, 1e2, r => assert(++cnt === 5 && r.length === 1) || sv.terminate() || done());
+      sv.call([], 3, 1e9, r => assert(++cnt === 5 && r.length === 1) || sv.terminate() || done());
     });
 
     it('block with dependencies', function (done) {
@@ -307,15 +312,26 @@ describe('Unit: lib/supervisor', function () {
         dependencies: [
           [['b'], [
             ['a']
+          ]],
+          [['c'], [
+            ['a']
           ]]
         ]
       });
-      sv.register(['a'], _ => new Promise<void>(resolve => void resolve(void 0)).then(_ => assert(++cnt === 4)));
-      sv.register(['b'], _ => assert(++cnt === 5));
-      sv.register(['c'], _ => assert(++cnt === 2));
-      sv.call(['a'], 0, 1e2, r => assert(++cnt === 1 && r.length === 1));
-      sv.call(['b'], 0, 1e2, r => assert(++cnt === 6 && r.length === 1) || sv.terminate() || done());
-      sv.call(['c'], 0, 1e2, r => assert(++cnt === 3 && r.length === 1));
+      sv.events.loss.monitor([], done);
+      sv.call(['a'], 0, 1e9, r => assert(++cnt === 2 && r.length === 1));
+      sv.call(['b'], 0, 1e9, r => assert(++cnt === 9 && r.length === 1));
+      sv.call(['c'], 0, 1e9, r => assert(++cnt === 11 && r.length === 1) || sv.terminate() || done());
+      sv.call(['d'], 0, 1e9, r => assert(++cnt === 4 && r.length === 1));
+      sv.call(['e'], 0, 1e9, r => assert(++cnt === 6 && r.length === 1));
+      sv.register(['a'], _ => {
+        sv.register(['d'], _ => assert(++cnt === 3));
+        sv.register(['b'], _ => assert(++cnt === 8));
+        assert(++cnt === 1);
+        return new Promise<void>(resolve => void resolve(void 0)).then(_ => assert(++cnt === 7));
+      });
+      sv.register(['c'], _ => assert(++cnt === 10));
+      sv.register(['e'], _ => assert(++cnt === 5));
     });
 
     it('terminate', function (done) {
