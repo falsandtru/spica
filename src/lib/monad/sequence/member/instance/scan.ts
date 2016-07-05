@@ -5,7 +5,7 @@ export default class <a, z> extends Sequence<a, z> {
     return new Sequence<b, [b, Sequence.Iterator<a>, number]>(([prev = z, iter = () => this.iterate(), i = 0] = [void 0, void 0, void 0]) =>
       Sequence.Iterator.when(
         iter(),
-        thunk =>
+        () =>
           i === 0
             ? Sequence.Data.cons<b, [b, Sequence.Iterator<a>, number]>(z)
             : Sequence.Data.cons<b, [b, Sequence.Iterator<a>, number]>(),
