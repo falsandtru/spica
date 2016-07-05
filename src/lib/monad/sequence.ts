@@ -34,6 +34,7 @@ import filter from './sequence/member/instance/filter';
 import scan from './sequence/member/instance/scan';
 import fold from './sequence/member/instance/fold';
 import subsequences from './sequence/member/instance/subsequences';
+import permutations from './sequence/member/instance/permutations';
 import {compose} from '../compose';
 
 compose(
@@ -72,7 +73,8 @@ compose(
   filter,
   scan,
   fold,
-  subsequences
+  subsequences,
+  permutations
 );
 
 export {Sequence}

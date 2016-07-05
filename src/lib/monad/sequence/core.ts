@@ -48,6 +48,7 @@ export interface Sequence<a, z> {
   scan<b>(f: (b: b, a: a) => b, z: b): Sequence<b, [b, Sequence.Iterator<a>, number]>;
   fold<b>(f: (a: a, b: Sequence<b, any>) => Sequence<b, any>, z: Sequence<b, any>): Sequence<b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]>;
   subsequences(): Sequence<a[], [Sequence.Iterator<a[]>, Sequence.Iterator<a[]>]>;
+  permutations(): Sequence<a[], [Sequence.Iterator<Sequence<a[], any>>, Sequence.Iterator<a[]>]>;
   take(n: number): Sequence<a, Sequence.Iterator<a>>;
   drop(n: number): Sequence<a, Sequence.Iterator<a>>;
   takeWhile(f: (a: a) => boolean): Sequence<a, Sequence.Iterator<a>>;
