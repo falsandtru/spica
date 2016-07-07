@@ -3,9 +3,11 @@ import {concat} from '../../../../concat';
 
 export default class <a, z> extends Sequence<a, z> {
   public subsequences(): Sequence<a[], [Sequence.Iterator<a[]>, Sequence.Iterator<a[]>]> {
-    return Sequence.mappend(
-      Sequence.from<a[]>([[]]),
-      nonEmptySubsequences(this));
+    return Sequence.mappend<a[]>(
+      Sequence.from([[]]),
+      Sequence.from([0])
+        .bind(() =>
+          nonEmptySubsequences(this)));
   }
 }
 
