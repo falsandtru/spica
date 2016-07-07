@@ -4,23 +4,23 @@ import {concat} from '../../../../concat';
 export default class <a, z> extends Sequence<a, z> {
   public permutations(): Sequence<a[], [Sequence.Iterator<Sequence<a[], any>>, Sequence.Iterator<a[]>]> {
     return Sequence.from([0])
-      .bind(() => {
+      .bind<a[]>(() => {
         const xs = this.read();
         return xs.length === 0
-          ? Sequence.from<a[]>([])
+          ? Sequence.from([])
           : Sequence.from([xs]);
       })
       .bind(xs =>
         Sequence.mappend(
           Sequence.from([xs]),
-          perms(Sequence.from(xs), Sequence.from<a>([]))));
+          perms<a>(Sequence.from(xs), Sequence.from([]))));
   }
 }
 
 function perms<a>(ts: Sequence<a, any>, is: Sequence<a, any>): Sequence<a[], any> {
   return Sequence.Iterator.when<a, Sequence<a[], any>>(
     ts.iterate(),
-    () => Sequence.from<a[]>([]),
+    () => Sequence.from([]),
     tt =>
       new Sequence<Sequence<a[], any>, any>((_, cons) =>
         Sequence.Iterator.when(

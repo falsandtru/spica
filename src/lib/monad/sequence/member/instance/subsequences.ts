@@ -14,10 +14,10 @@ export default class <a, z> extends Sequence<a, z> {
 function nonEmptySubsequences<a>(xs: Sequence<a, any>): Sequence<a[], any> {
   return Sequence.Iterator.when<a, Sequence<a[], any>>(
     xs.iterate(),
-    () => Sequence.from<a[]>([]),
+    () => Sequence.from([]),
     xt =>
-      Sequence.mappend(
-        Sequence.from<a[]>([[Sequence.Thunk.value(xt)]]),
+      Sequence.mappend<a[]>(
+        Sequence.from([[Sequence.Thunk.value(xt)]]),
         new Sequence<Sequence<a[], any>, any>((_, cons) =>
           Sequence.Iterator.when(
             xt,
@@ -32,6 +32,6 @@ function nonEmptySubsequences<a>(xs: Sequence<a, any>): Sequence<a[], any> {
                         Sequence.from([ys]),
                         Sequence.from([concat([Sequence.Thunk.value(xt)], ys)])),
                       r)
-                  , Sequence.from<a[]>([])))))
+                  , Sequence.from([])))))
           .bind(xs => xs)));
 }
