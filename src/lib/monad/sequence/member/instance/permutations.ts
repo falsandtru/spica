@@ -17,12 +17,12 @@ export default class <a, z> extends Sequence<a, z> {
   }
 }
 
-function perms<a>(ts: Sequence<a, any>, is: Sequence<a, any>): Sequence<a[], any> {
-  return Sequence.Iterator.when<a, Sequence<a[], any>>(
+function perms<a>(ts: Sequence<a, any>, is: Sequence<a, any>): Sequence<a[], [Sequence.Iterator<Sequence<a[], void>>, Sequence.Iterator<a[]>]> {
+  return Sequence.Iterator.when<a, Sequence<a[], [Sequence.Iterator<Sequence<a[], void>>, Sequence.Iterator<a[]>]>>(
     ts.iterate(),
     () => Sequence.mempty,
     tt =>
-      new Sequence<Sequence<a[], any>, any>((_, cons) =>
+      new Sequence<Sequence<a[], [Sequence.Iterator<Sequence<a[], void>>, Sequence.Iterator<a[]>]>, void>((_, cons) =>
         Sequence.Iterator.when(
           tt,
           () => cons(),
@@ -40,14 +40,14 @@ function perms<a>(ts: Sequence<a, any>, is: Sequence<a, any>): Sequence<a[], any
             function interleave(
               xs: Sequence<a, any>,
               r: Sequence<a[], any>
-            ): Sequence<a[], any> {
+            ): Sequence<a[], [Sequence.Iterator<a[]>, Sequence.Iterator<a[]>]> {
               return interleave_(as => as, xs, r)[1];
             }
             function interleave_(
               f: (as: Sequence<a, any>) => Sequence<a, any>,
               ys: Sequence<a, any>,
               r: Sequence<a[], any>
-            ): [Sequence<a, any>, Sequence<a[], any>] {
+            ): [Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a[]>]>, Sequence<a[], [Sequence.Iterator<a[]>, Sequence.Iterator<a[]>]>] {
               return Sequence.Iterator.when<a, [Sequence<a, any>, Sequence<a[], any>]>(
                 ys.iterate(),
                 () => [ts, r],
