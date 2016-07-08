@@ -7,20 +7,20 @@ export default class <a, z> extends Sequence<a, z> {
       .bind<a[]>(() => {
         const xs = this.read();
         return xs.length === 0
-          ? Sequence.from([])
+          ? Sequence.mempty
           : Sequence.from([xs]);
       })
       .bind(xs =>
         Sequence.mappend(
           Sequence.from([xs]),
-          perms<a>(Sequence.from(xs), Sequence.from([]))));
+          perms<a>(Sequence.from(xs), Sequence.mempty)));
   }
 }
 
 function perms<a>(ts: Sequence<a, any>, is: Sequence<a, any>): Sequence<a[], any> {
   return Sequence.Iterator.when<a, Sequence<a[], any>>(
     ts.iterate(),
-    () => Sequence.from([]),
+    () => Sequence.mempty,
     tt =>
       new Sequence<Sequence<a[], any>, any>((_, cons) =>
         Sequence.Iterator.when(

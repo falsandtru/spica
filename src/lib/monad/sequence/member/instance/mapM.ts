@@ -8,7 +8,7 @@ export default class <a, z> extends Sequence<a, z> {
         const xs = this.read();
         switch (xs.length) {
           case 0:
-            return Sequence.from([]);
+            return Sequence.mempty;
           default: {
             const x = xs.shift();
             return f(x)

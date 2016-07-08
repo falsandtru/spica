@@ -14,7 +14,7 @@ export default class <a, z> extends Sequence<a, z> {
 function nonEmptySubsequences<a>(xs: Sequence<a, any>): Sequence<a[], any> {
   return Sequence.Iterator.when<a, Sequence<a[], any>>(
     xs.iterate(),
-    () => Sequence.from([]),
+    () => Sequence.mempty,
     xt =>
       Sequence.mappend<a[]>(
         Sequence.from([[Sequence.Thunk.value(xt)]]),
@@ -32,6 +32,6 @@ function nonEmptySubsequences<a>(xs: Sequence<a, any>): Sequence<a[], any> {
                         Sequence.from([ys]),
                         Sequence.from([concat([Sequence.Thunk.value(xt)], ys)])),
                       r)
-                  , Sequence.from([])))))
+                  , Sequence.mempty))))
           .bind(xs => xs)));
 }
