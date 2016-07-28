@@ -366,7 +366,8 @@ declare module 'spica' {
 
   export const FINGERPRINT: number;
   export function uuid(): string
-  export function sqid(id?: number): string
+  export function sqid(): string
+  export function sqid(id: number): string
   export function assign<T extends Object>(target: T | {}, ...sources: T[]): T
   export function clone<T extends Object>(target: T | {}, ...sources: T[]): T
   export function extend<T extends Object>(target: T | {}, ...sources: T[]): T
