@@ -217,7 +217,7 @@ class Worker<T extends string[], D, R> {
       .on(namespace, this.receive);
   }
   private destructor(reason: any): void {
-    void this.checkState();
+    if (!this.alive) return;
     void this.sharedResource.procs
       .off(this.namespace, this.receive);
     this.alive = false;
