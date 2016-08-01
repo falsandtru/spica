@@ -40,7 +40,7 @@ const config = {
     }
   },
   banner: [
-    `/*! ${pkg.name} v${pkg.version} ${pkg.repository.url} | (c) 2016, ${pkg.author} | ${pkg.license.type} License (${pkg.license.url}) */`,
+    `/*! ${pkg.name} v${pkg.version} ${pkg.repository.url} | (c) 2016, ${pkg.author} | ${pkg.license} License */`,
     ''
   ].join('\n'),
   exporter:
