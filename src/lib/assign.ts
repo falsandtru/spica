@@ -1,29 +1,24 @@
 import {type} from './type';
 
-export const assign = template((key, target, source) => {
-  return target[key] = source[key];
-});
+export const assign = template((key, target, source) =>
+  target[key] = source[key]);
 
 export const clone = template((key, target, source): any => {
   switch (type(source[key])) {
-    case 'Array': {
+    case 'Array':
       return target[key] = clone([], source[key]);
-    }
     case 'Function':
-    case 'Object': {
+    case 'Object':
       return target[key] = clone({}, source[key]);
-    }
-    default: {
+    default:
       return target[key] = source[key];
-    }
   }
 });
 
 export const extend = template((key, target, source): any => {
   switch (type(source[key])) {
-    case 'Array': {
+    case 'Array':
       return target[key] = extend([], source[key]);
-    }
     case 'Function':
     case 'Object': {
       switch (type(target[key])) {
@@ -36,9 +31,8 @@ export const extend = template((key, target, source): any => {
         }
       }
     }
-    default: {
+    default:
       return target[key] = source[key];
-    }
   }
 });
 
