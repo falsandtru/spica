@@ -64,6 +64,11 @@ describe('Unit: lib/either', () => {
       assert(result === 0);
     });
 
+    it('either', () => {
+      assert(Right(0).either(() => -1, n => n + 1) === 1);
+      assert(Left(0).either(n => n -1, n => n + 1) === -1);
+    });
+
     it('Call-by-need and Memoize', () => {
       let n = NaN;
       const m1 = Return(NaN)
