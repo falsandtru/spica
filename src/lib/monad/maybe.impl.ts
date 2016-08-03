@@ -29,6 +29,11 @@ export class Maybe<a> extends MonadPlus<a> {
   public extract<b>(transform?: () => b): a | b {
     return this.evaluate().extract(transform);
   }
+  public maybe<b>(nothing: () => b, just: (a: a) => b): b {
+    return this
+      .fmap(just)
+      .extract(nothing);
+  }
 }
 export namespace Maybe {
   export declare function fmap<a, b>(m: Maybe<a>, f: (a: a) => b): Maybe<b>

@@ -65,6 +65,11 @@ describe('Unit: lib/maybe', () => {
       assert(result === 0);
     });
 
+    it('maybe', () => {
+      assert(Just(0).maybe(() => -1, n => n + 1) === 1);
+      assert(Nothing.maybe(() => -1, n => n + 1) === -1);
+    });
+
     it('Call-by-need and Memoize', () => {
       let n = NaN;
       const m1 = Return(NaN)

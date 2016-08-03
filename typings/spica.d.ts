@@ -166,6 +166,7 @@ declare module 'spica' {
       bind<b>(f: (a: a) => Maybe<b>): Maybe<b>;
       extract(): a;
       extract<b>(transform: () => b): a | b;
+      maybe<b>(nothing: () => b, just: (a: a) => b): b;
     }
   }
   namespace Monad.Maybe {
