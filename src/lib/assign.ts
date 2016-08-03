@@ -18,7 +18,6 @@ export const extend = template((key, target, source): any => {
   switch (type(source[key])) {
     case 'Array':
       return target[key] = extend([], source[key]);
-    case 'Function':
     case 'Object': {
       switch (type(target[key])) {
         case 'Function':
