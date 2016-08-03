@@ -7,7 +7,6 @@ export const clone = template((key, target, source): any => {
   switch (type(source[key])) {
     case 'Array':
       return target[key] = clone([], source[key]);
-    case 'Function':
     case 'Object':
       return target[key] = clone({}, source[key]);
     default:
