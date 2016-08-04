@@ -26,16 +26,11 @@ export class Maybe<a> extends MonadPlus<a> {
   }
   public extract(): a
   public extract<b>(transform: () => b): a | b
-  public extract<b>(transform?: () => b): a | b {
-    return this.evaluate().extract(transform);
-  }
-  public maybe<b>(nothing: () => b, just: (a: a) => b): Just<b> {
-    return <Just<b>>new Maybe<b>(
-      () =>
-        new Just<b>(
-          this
-            .fmap(just)
-            .extract(nothing)));
+  public extract<b>(nothing: () => b, just: (a: a) => b): b
+  public extract<b>(nothing?: () => b, just?: (a: a) => b): a | b {
+    return !just
+      ? this.evaluate().extract(nothing)
+      : this.fmap(just).extract(nothing);
   }
 }
 export namespace Maybe {
@@ -63,8 +58,11 @@ export class Just<a> extends Maybe<a> {
   }
   public extract(): a
   public extract<b>(transform: () => b): a
-  public extract<b>(transform?: () => b): a {
-    return this.a;
+  public extract<b>(nothing: () => b, just: (a: a) => b): b
+  public extract<b>(nothing?: () => b, just?: (a: a) => b): a | b {
+    return !just
+      ? this.a
+      : just(this.a);
   }
 }
 
@@ -79,9 +77,10 @@ export class Nothing extends Maybe<any> {
   }
   public extract(): any
   public extract<b>(transform: () => b): b
-  public extract<b>(transform?: () => b): b {
-    if (!transform) throw void 0;
-    return transform();
+  public extract<b>(nothing: () => b, just: (a: void) => b): b
+  public extract<b>(nothing?: () => b): b {
+    if (!nothing) throw void 0;
+    return nothing();
   }
 }
 

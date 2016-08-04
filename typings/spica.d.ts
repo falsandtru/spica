@@ -166,7 +166,7 @@ declare module 'spica' {
       bind<b>(f: (a: a) => Maybe<b>): Maybe<b>;
       extract(): a;
       extract<b>(transform: () => b): a | b;
-      maybe<b>(nothing: () => b, just: (a: a) => b): Just<b>;
+      extract<b>(nothing: () => b, just: (a: a) => b): b;
     }
   }
   namespace Monad.Maybe {
@@ -191,6 +191,7 @@ declare module 'spica' {
       bind<b>(f: (a: a) => Maybe<b>): Maybe<b>;
       extract(): a;
       extract<b>(transform: () => b): a;
+      extract<b>(nothing: () => b, just: (a: a) => b): b;
     }
     export class Nothing extends Maybe<any> {
       protected MAYBE: Nothing;
@@ -198,6 +199,7 @@ declare module 'spica' {
       bind<b>(f: (a: any) => Maybe<b>): Maybe<b>;
       extract(): any;
       extract<b>(transform: () => b): b;
+      extract<b>(nothing: () => b, just: (a: void) => b): b;
     }
   }
 

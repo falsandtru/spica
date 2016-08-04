@@ -66,8 +66,8 @@ describe('Unit: lib/maybe', () => {
     });
 
     it('maybe', () => {
-      assert(Just(0).maybe(() => -1, n => n + 1).extract() === 1);
-      assert(Nothing.maybe(() => -1, n => n + 1).extract() === -1);
+      assert(Just(0).extract(() => -1, n => n + 1) === 1);
+      assert(Nothing.extract(() => -1, _ => 0 + 1) === -1);
     });
 
     it('Call-by-need and Memoize', () => {
