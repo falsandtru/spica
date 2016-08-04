@@ -24,17 +24,12 @@ export class Either<a, b> extends Monad<b> {
     });
   }
   public extract(): b
-  public extract<c>(transform: (a: a) => c): c | b
-  public extract<c>(transform?: (a: a) => c): c | b {
-    return this.evaluate().extract(transform);
-  }
-  public either<c>(left: (a: a) => c, right: (b: b) => c): Right<c> {
-    return <Right<c>>new Either<c, c>(
-      () =>
-        new Right<c>(
-          this
-            .fmap(right)
-            .extract(left)));
+  public extract<c>(transform: (a: a) => c): b | c
+  public extract<c>(left: (a: a) => c, right: (b: b) => c): c
+  public extract<c>(left?: (a: a) => c, right?: (b: b) => c): b | c {
+    return !right
+      ? this.evaluate().extract(left)
+      : this.fmap(right).extract(left);
   }
 }
 export namespace Either {
@@ -64,9 +59,10 @@ export class Left<a> extends Either<a, any> {
   }
   public extract(): any
   public extract<c>(transform: (a: a) => c): c
-  public extract<c>(transform?: (a: a) => c): c {
-    if (!transform) throw this.a;
-    return transform(this.a);
+  public extract<c>(left: (a: a) => c, right: (b: void) => c): c
+  public extract<c>(left?: (a: a) => c): c {
+    if (!left) throw this.a;
+    return left(this.a);
   }
 }
 
@@ -82,9 +78,12 @@ export class Right<b> extends Either<any, b> {
     return new Either<a, c>(() => f(this.extract()));
   }
   public extract(): b
-  public extract<c>(transform: (a: c) => c): b
-  public extract<c>(transform?: (a: c) => c): b {
-    return this.b;
+  public extract<c>(transform: (a: void) => c): b
+  public extract<c>(left: (a: void) => c, right: (b: b) => c): c
+  public extract<c>(left?: (a: void) => c, right?: (b: b) => c): b | c {
+    return !right
+      ? this.b
+      : right(this.b);
   }
 }
 

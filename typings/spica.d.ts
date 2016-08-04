@@ -225,8 +225,8 @@ declare module 'spica' {
       fmap<c>(f: (b: b) => c): Either<a, c>;
       bind<c>(f: (b: b) => Either<a, c>): Either<a, c>;
       extract(): b;
-      extract<c>(transform: (a: a) => c): c | b;
-      either<c>(left: (a: a) => c, right: (b: b) => c): Right<c>;
+      extract<c>(transform: (a: a) => c): b | c;
+      extract<c>(left: (a: a) => c, right: (b: b) => c): c;
     }
   }
   namespace Monad.Either {
@@ -250,6 +250,7 @@ declare module 'spica' {
       bind<_ extends a, b>(f: (b: b) => Either<a, b>): Either<a, b>;
       extract(): any;
       extract<c>(transform: (a: a) => c): c;
+      extract<c>(left: (a: a) => c, right: (b: void) => c): c;
     }
     export class Right<b> extends Either<any, b> {
       protected EITHER: Right<b>;
@@ -257,7 +258,8 @@ declare module 'spica' {
       bind<a>(f: (b: b) => Either<a, b>): Either<a, b>;
       bind<a, c>(f: (b: b) => Either<a, c>): Either<a, c>;
       extract(): b;
-      extract<c>(transform: (a: c) => c): b;
+      extract<c>(transform: (a: void) => c): b;
+      extract<c>(left: (a: void) => c, right: (b: b) => c): c;
     }
   }
 

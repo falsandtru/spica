@@ -65,8 +65,8 @@ describe('Unit: lib/either', () => {
     });
 
     it('either', () => {
-      assert(Right(0).either(() => -1, n => n + 1).extract() === 1);
-      assert(Left(0).either(n => n -1, n => n + 1).extract() === -1);
+      assert(Right(0).extract(() => -1, n => n + 1) === 1);
+      assert(Left(0).extract(n => n -1, _ => 0 + 1) === -1);
     });
 
     it('Call-by-need and Memoize', () => {
