@@ -224,7 +224,7 @@ declare module 'spica' {
       bind<c>(f: (b: b) => Either<a, c>): Either<a, c>;
       extract(): b;
       extract<c>(transform: (a: a) => c): c | b;
-      either<c>(left: (a: a) => c, right: (b: b) => c): c;
+      either<c>(left: (a: a) => c, right: (b: b) => c): Right<c>;
     }
   }
   namespace Monad.Either {

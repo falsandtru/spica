@@ -28,10 +28,13 @@ export class Either<a, b> extends Monad<b> {
   public extract<c>(transform?: (a: a) => c): c | b {
     return this.evaluate().extract(transform);
   }
-  public either<c>(left: (a: a) => c, right: (b: b) => c): c {
-    return this
-      .fmap(right)
-      .extract(left);
+  public either<c>(left: (a: a) => c, right: (b: b) => c): Right<c> {
+    return <Right<c>>new Either<c, c>(
+      () =>
+        new Right<c>(
+          this
+            .fmap(right)
+            .extract(left)));
   }
 }
 export namespace Either {
