@@ -5,19 +5,19 @@ describe('Unit: lib/monad/sequence/member/static/from', () => {
     it('array', () => {
       assert.deepStrictEqual(
         Sequence.from([])
-          .read(),
+          .extract(),
         []);
       assert.deepStrictEqual(
         Sequence.from([0])
-          .read(),
+          .extract(),
         [0]);
       assert.deepStrictEqual(
         Sequence.from([0, 1])
-          .read(),
+          .extract(),
         [0, 1]);
       assert.deepStrictEqual(
         Sequence.from([0, 1, 2])
-          .read(),
+          .extract(),
         [0, 1, 2]);
     });
 

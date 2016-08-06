@@ -8,7 +8,7 @@ describe('Unit: lib/monad/sequence/member/static/resume', () => {
       assert.deepStrictEqual(
         Sequence.resume(Sequence.Thunk.iterator(nat.iterate()))
           .take(3)
-          .read(),
+          .extract(),
         [1, 2, 3]);
     });
 

@@ -23,11 +23,11 @@ describe('Benchmark:', function () {
     }
     function seqTake(n: number, done: () => void) {
       const seq = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1)).take(n);
-      benchmark(`Sequence take seq ${n}`, () => seq.read(), done);
+      benchmark(`Sequence take seq ${n}`, () => seq.extract(), done);
     }
     function memTake(n: number, done: () => void) {
       const seq = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1)).take(n).memoize();
-      benchmark(`Sequence take mem ${n}`, () => seq.read(), done);
+      benchmark(`Sequence take mem ${n}`, () => seq.extract(), done);
     }
 
     it('take 1', function (done) {
@@ -62,7 +62,7 @@ describe('Benchmark:', function () {
         .map(n => n)
         .filter(n => true)
         .take(n);
-      benchmark(`Sequence map filter seq ${n}`, () => seq.read(), done);
+      benchmark(`Sequence map filter seq ${n}`, () => seq.extract(), done);
     }
 
     it('map filter 1', function (done) {

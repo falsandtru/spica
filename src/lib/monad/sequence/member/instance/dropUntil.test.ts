@@ -8,7 +8,7 @@ describe('Unit: lib/monad/sequence/member/dropUntil', () => {
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => cons())
           .dropUntil(() => true)
-          .read(),
+          .extract(),
         []);
     });
 
@@ -16,7 +16,7 @@ describe('Unit: lib/monad/sequence/member/dropUntil', () => {
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => cons())
           .dropUntil(() => false)
-          .read(),
+          .extract(),
         []);
     });
 
@@ -24,7 +24,7 @@ describe('Unit: lib/monad/sequence/member/dropUntil', () => {
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => cons(n))
           .dropUntil(() => true)
-          .read(),
+          .extract(),
         []);
     });
 
@@ -32,7 +32,7 @@ describe('Unit: lib/monad/sequence/member/dropUntil', () => {
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => cons(n))
           .dropUntil(() => false)
-          .read(),
+          .extract(),
         [0]);
     });
 
@@ -40,7 +40,7 @@ describe('Unit: lib/monad/sequence/member/dropUntil', () => {
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => n < 1 ? cons(n, n + 1) : cons(n))
           .dropUntil(() => true)
-          .read(),
+          .extract(),
         []);
     });
 
@@ -48,7 +48,7 @@ describe('Unit: lib/monad/sequence/member/dropUntil', () => {
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => n < 1 ? cons(n, n + 1) : cons(n))
           .dropUntil(() => false)
-          .read(),
+          .extract(),
         [0, 1]);
     });
 
@@ -57,7 +57,7 @@ describe('Unit: lib/monad/sequence/member/dropUntil', () => {
         nat
           .dropUntil(n => n < 0)
           .take(3)
-          .read(),
+          .extract(),
         [0, 1, 2]);
     });
 
@@ -66,7 +66,7 @@ describe('Unit: lib/monad/sequence/member/dropUntil', () => {
         nat
           .dropUntil(n => n < 1)
           .take(3)
-          .read(),
+          .extract(),
         [1, 2, 3]);
     });
 
@@ -75,7 +75,7 @@ describe('Unit: lib/monad/sequence/member/dropUntil', () => {
         nat
           .dropUntil(n => n < 2)
           .take(3)
-          .read(),
+          .extract(),
         [2, 3, 4]);
     });
 

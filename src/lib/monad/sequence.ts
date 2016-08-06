@@ -16,9 +16,9 @@ import mconcat from './sequence/member/static/mconcat';
 import mappend from './sequence/member/static/mappend';
 import mzero from './sequence/member/static/mzero';
 import mplus from './sequence/member/static/mplus';
+import extract from './sequence/member/instance/extract';
 import iterate from './sequence/member/instance/iterate';
 import memoize from './sequence/member/instance/memoize';
-import read from './sequence/member/instance/read';
 import take from './sequence/member/instance/take';
 import drop from './sequence/member/instance/drop';
 import takeWhile from './sequence/member/instance/takeWhile';
@@ -57,9 +57,9 @@ compose(
   mappend,
   mzero,
   mplus,
+  extract,
   iterate,
   memoize,
-  read,
   take,
   drop,
   takeWhile,

@@ -206,7 +206,7 @@ describe('Unit: lib/maybe', () => {
     it('MonadPlus law 3', () => {
       Sequence.from([1, 2, 4])
         .mapM(n => Sequence.from<Maybe<number>>([Return(n), Maybe.mzero]))
-        .read()
+        .extract()
         .forEach(([m, n, o]) => {
           const ma = Maybe.mplus(m, Maybe.mplus(n, o));
           const mb = Maybe.mplus(Maybe.mplus(m, n), o);
@@ -225,7 +225,7 @@ describe('Unit: lib/maybe', () => {
       const k = (n: number) => Return(n * 10);
       Sequence.from([1, 2])
         .mapM(n => Sequence.from<Maybe<number>>([Return(n), Maybe.mzero]))
-        .read()
+        .extract()
         .forEach(([m, n]) => {
           const ma = Maybe.mplus(m, n).bind(k);
           const mb = Maybe.mplus(m.bind(k), n.bind(k));

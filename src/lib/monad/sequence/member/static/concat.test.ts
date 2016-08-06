@@ -6,7 +6,7 @@ describe('Unit: lib/monad/sequence/member/static/concat', () => {
       assert.deepStrictEqual(
         Sequence.concat(Sequence.from([Sequence.from([0, 1, 2])]))
           .take(2)
-          .read(),
+          .extract(),
         [0, 1]);
     });
 

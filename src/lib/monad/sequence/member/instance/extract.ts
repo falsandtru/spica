@@ -2,7 +2,7 @@ import {Sequence} from '../../core';
 import {concat} from '../../../../concat';
 
 export default class <a, z> extends Sequence<a, z> {
-  public read(): a[] {
+  public extract(): a[] {
     const acc: a[] = [];
     let iter = () => this.iterate();
     while (true) {

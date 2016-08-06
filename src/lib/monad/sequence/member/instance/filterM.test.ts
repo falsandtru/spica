@@ -9,7 +9,7 @@ describe('Unit: lib/monad/sequence/member/filterM', () => {
         nat
           .take(0)
           .filterM(() => Sequence.from([]))
-          .read(),
+          .extract(),
         [[]]);
     });
 
@@ -18,7 +18,7 @@ describe('Unit: lib/monad/sequence/member/filterM', () => {
         nat
           .take(0)
           .filterM(() => Sequence.from([false]))
-          .read(),
+          .extract(),
         [[]]);
     });
 
@@ -27,7 +27,7 @@ describe('Unit: lib/monad/sequence/member/filterM', () => {
         nat
           .take(0)
           .filterM(() => Sequence.from([true]))
-          .read(),
+          .extract(),
         [[]]);
     });
 
@@ -36,7 +36,7 @@ describe('Unit: lib/monad/sequence/member/filterM', () => {
         nat
           .take(0)
           .filterM(() => Sequence.from([true, false]))
-          .read(),
+          .extract(),
         [[]]);
     });
 
@@ -45,7 +45,7 @@ describe('Unit: lib/monad/sequence/member/filterM', () => {
         nat
           .take(1)
           .filterM(() => Sequence.from([]))
-          .read(),
+          .extract(),
         []);
     });
 
@@ -54,7 +54,7 @@ describe('Unit: lib/monad/sequence/member/filterM', () => {
         nat
           .take(1)
           .filterM(() => Sequence.from([false]))
-          .read(),
+          .extract(),
         [[]]);
     });
 
@@ -63,7 +63,7 @@ describe('Unit: lib/monad/sequence/member/filterM', () => {
         nat
           .take(1)
           .filterM(() => Sequence.from([true]))
-          .read(),
+          .extract(),
         [[0]]);
     });
 
@@ -72,7 +72,7 @@ describe('Unit: lib/monad/sequence/member/filterM', () => {
         nat
           .take(1)
           .filterM(() => Sequence.from([true, false]))
-          .read(),
+          .extract(),
         [[0], []]);
     });
 
@@ -81,7 +81,7 @@ describe('Unit: lib/monad/sequence/member/filterM', () => {
         nat
           .take(1)
           .filterM(() => Sequence.from([false, true]))
-          .read(),
+          .extract(),
         [[], [0]]);
     });
 
@@ -91,7 +91,7 @@ describe('Unit: lib/monad/sequence/member/filterM', () => {
           .take(2)
           .filterM(() => Sequence.from([]))
           .take(1)
-          .read(),
+          .extract(),
         []);
     });
 
@@ -100,7 +100,7 @@ describe('Unit: lib/monad/sequence/member/filterM', () => {
         nat
           .take(2)
           .filterM(() => Sequence.from([true]))
-          .read(),
+          .extract(),
         [[0, 1]]);
     });
 
@@ -109,7 +109,7 @@ describe('Unit: lib/monad/sequence/member/filterM', () => {
         nat
           .take(2)
           .filterM(() => Sequence.from([false]))
-          .read(),
+          .extract(),
         [[]]);
     });
 
@@ -118,7 +118,7 @@ describe('Unit: lib/monad/sequence/member/filterM', () => {
         nat
           .take(2)
           .filterM(() => Sequence.from([true, false]))
-          .read(),
+          .extract(),
         [[0, 1], [0], [1], []]);
     });
 
@@ -127,7 +127,7 @@ describe('Unit: lib/monad/sequence/member/filterM', () => {
         nat
           .take(2)
           .filterM(() => Sequence.from([false, true]))
-          .read(),
+          .extract(),
         [[], [1], [0], [0, 1]]);
     });
 
@@ -136,7 +136,7 @@ describe('Unit: lib/monad/sequence/member/filterM', () => {
         nat
           .take(3)
           .filterM(() => Sequence.from([true]))
-          .read(),
+          .extract(),
         [[0, 1, 2]]);
     });
 
@@ -145,7 +145,7 @@ describe('Unit: lib/monad/sequence/member/filterM', () => {
         nat
           .take(3)
           .filterM(() => Sequence.from([false]))
-          .read(),
+          .extract(),
         [[]]);
     });
 
@@ -154,7 +154,7 @@ describe('Unit: lib/monad/sequence/member/filterM', () => {
         nat
           .take(3)
           .filterM(() => Sequence.from([true, false]))
-          .read(),
+          .extract(),
         [[0, 1, 2], [0, 1], [0, 2], [0], [1, 2], [1], [2], []]);
     });
 
@@ -163,7 +163,7 @@ describe('Unit: lib/monad/sequence/member/filterM', () => {
         nat
           .take(3)
           .filterM(() => Sequence.from([false, true]))
-          .read(),
+          .extract(),
         [[], [2], [1], [1, 2], [0], [0, 2], [0, 1], [0, 1, 2]]);
     });
 

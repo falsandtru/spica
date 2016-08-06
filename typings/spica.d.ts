@@ -132,8 +132,8 @@ declare module 'spica' {
     static mzero: Sequence<any, any>;
     static mplus<a>(l: Sequence<a, any>, r: Sequence<a, any>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
     constructor(cons: (z: z, cons: (a?: a, z?: z) => Sequence.Data<a, z>) => Sequence.Data<a, z>);
+    extract(): a[];
     iterate(): Sequence.Thunk<a>;
-    read(): a[];
     fmap<b>(f: (a: a) => b): Sequence<b, Sequence.Iterator<a>>;
     bind<b>(f: (a: a) => Sequence<b, any>): Sequence<b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]>;
     mapM<b>(f: (a: a) => Sequence<b, any>): Sequence<b[], [Sequence.Iterator<Sequence<b[], any>>, Sequence.Iterator<b[]>]>;

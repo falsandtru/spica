@@ -9,7 +9,7 @@ describe('Unit: lib/monad/sequence/member/filter', () => {
         nat
           .filter(n => n % 2 === 0)
           .take(0)
-          .read(),
+          .extract(),
         []);
     });
 
@@ -18,7 +18,7 @@ describe('Unit: lib/monad/sequence/member/filter', () => {
         nat
           .filter(n => n % 2 === 0)
           .take(1)
-          .read(),
+          .extract(),
         [0]);
     });
 
@@ -27,7 +27,7 @@ describe('Unit: lib/monad/sequence/member/filter', () => {
         nat
           .filter(n => n % 2 === 0)
           .take(2)
-          .read(),
+          .extract(),
         [0, 2]);
     });
 
@@ -36,7 +36,7 @@ describe('Unit: lib/monad/sequence/member/filter', () => {
         nat
           .filter(n => n % 2 === 0)
           .take(3)
-          .read(),
+          .extract(),
         [0, 2, 4]);
     });
 

@@ -10,7 +10,7 @@ describe('Unit: lib/monad/sequence/member/fold', () => {
           .drop(1)
           .fold((a, b) => Sequence.mappend(Sequence.from([a]), b), Sequence.from<number>([0]))
           .take(0)
-          .read(),
+          .extract(),
         []);
     });
 
@@ -20,7 +20,7 @@ describe('Unit: lib/monad/sequence/member/fold', () => {
           .drop(1)
           .fold((a, b) => Sequence.mappend(Sequence.from([a]), b), Sequence.from<number>([0]))
           .take(1)
-          .read(),
+          .extract(),
         [1]);
     });
 
@@ -30,15 +30,15 @@ describe('Unit: lib/monad/sequence/member/fold', () => {
           .drop(1)
           .fold((a, b) => Sequence.mappend(Sequence.from([a]), b), Sequence.from<number>([0]))
           .take(2)
-          .read(),
+          .extract(),
         [1, 2]);
     });
 
     it('1..2', () => {
       assert.deepStrictEqual(
         Sequence.from([1, 2])
-          .fold((a, b) => Sequence.mappend(Sequence.from([a, b.take(1).read()[0]]), b), Sequence.from<number>([0]))
-          .read(),
+          .fold((a, b) => Sequence.mappend(Sequence.from([a, b.take(1).extract()[0]]), b), Sequence.from<number>([0]))
+          .extract(),
         [1, 2, 2, 0, 0]);
     });
 

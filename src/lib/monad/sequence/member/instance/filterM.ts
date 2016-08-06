@@ -5,7 +5,7 @@ export default class <a, z> extends Sequence<a, z> {
   public filterM(f: (a: a) => Sequence<boolean, any>): Sequence<a[], [Sequence.Iterator<Sequence<a[], any>>, Sequence.Iterator<a[]>]> {
     return Sequence.from([0])
       .bind<a[]>(() => {
-        const xs = this.read();
+        const xs = this.extract();
         switch (xs.length) {
           case 0:
             return Sequence.from([[]]);

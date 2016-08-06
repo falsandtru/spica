@@ -7,43 +7,43 @@ describe('Unit: lib/monad/sequence/member/static/write', () => {
       const seq = Sequence.write(stream);
       assert.deepStrictEqual(
         seq
-          .read(),
+          .extract(),
         [0, 1, 2]);
       assert.deepStrictEqual(
         seq
-          .read(),
+          .extract(),
         []);
       stream.push(3, 4);
       assert.deepStrictEqual(
         seq
           .drop(0)
           .take(1)
-          .read(),
+          .extract(),
         [3]);
       assert.deepStrictEqual(
         seq
           .drop(0)
           .take(1)
-          .read(),
+          .extract(),
         [4]);
       stream.push(5);
       assert.deepStrictEqual(
         seq
           .drop(0)
           .take(0)
-          .read(),
+          .extract(),
         []);
       assert.deepStrictEqual(
         seq
           .drop(0)
           .take(1)
-          .read(),
+          .extract(),
         [5]);
       stream.push(6);
       stream.length = 0;
       assert.deepStrictEqual(
         seq
-          .read(),
+          .extract(),
         []);
     });
 

@@ -5,7 +5,7 @@ export default class <a, z> extends Sequence<a, z> {
   public permutations(): Sequence<a[], [Sequence.Iterator<Sequence<a[], any>>, Sequence.Iterator<a[]>]> {
     return Sequence.from([0])
       .bind<a[]>(() => {
-        const xs = this.read();
+        const xs = this.extract();
         return xs.length === 0
           ? Sequence.mempty
           : Sequence.from([xs]);
@@ -61,7 +61,7 @@ function perms<a>(ts: Sequence<a, any>, is: Sequence<a, any>): Sequence<a[], [Se
                   return [
                     Sequence.mappend(Sequence.from([y]), us),
                     Sequence.mappend(
-                      Sequence.from([f(Sequence.mappend<a>(Sequence.from([t]), Sequence.mappend(Sequence.from([y]), us))).read()]),
+                      Sequence.from([f(Sequence.mappend<a>(Sequence.from([t]), Sequence.mappend(Sequence.from([y]), us))).extract()]),
                       zs)
                   ];
                 });

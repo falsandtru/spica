@@ -7,7 +7,7 @@ describe('Unit: lib/monad/sequence/member/static/random', () => {
         Sequence.random()
           .take(9)
           .map(n => n >= 0 && n < 1)
-          .read(),
+          .extract(),
         [true, true, true, true, true, true, true, true, true]);
     });
 
@@ -25,7 +25,7 @@ describe('Unit: lib/monad/sequence/member/static/random', () => {
                 return false;
             }
           })
-          .read(),
+          .extract(),
         [true, true, true, true, true, true, true, true, true]);
     });
 

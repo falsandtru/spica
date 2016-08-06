@@ -9,13 +9,13 @@ describe('Unit: lib/monad/sequence/member/group', () => {
         nat
           .take(0)
           .group(() => true)
-          .read(),
+          .extract(),
         []);
       assert.deepStrictEqual(
         nat
           .take(0)
           .group(() => false)
-          .read(),
+          .extract(),
         []);
     });
 
@@ -24,7 +24,7 @@ describe('Unit: lib/monad/sequence/member/group', () => {
         nat
           .take(3)
           .group(() => false)
-          .read(),
+          .extract(),
         [[0], [1], [2]]);
     });
 
@@ -33,7 +33,7 @@ describe('Unit: lib/monad/sequence/member/group', () => {
         nat
           .take(3)
           .group(() => true)
-          .read(),
+          .extract(),
         [[0, 1, 2]]);
     });
 
@@ -42,7 +42,7 @@ describe('Unit: lib/monad/sequence/member/group', () => {
         nat
           .take(5)
           .group((_, n) => n % 3 > 0)
-          .read(),
+          .extract(),
         [[0, 1, 2], [3, 4]]);
     });
 

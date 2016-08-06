@@ -8,7 +8,7 @@ describe('Unit: lib/monad/sequence/member/dropWhile', () => {
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => cons())
           .dropWhile(() => false)
-          .read(),
+          .extract(),
         []);
     });
 
@@ -16,7 +16,7 @@ describe('Unit: lib/monad/sequence/member/dropWhile', () => {
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => cons())
           .dropWhile(() => true)
-          .read(),
+          .extract(),
         []);
     });
 
@@ -24,7 +24,7 @@ describe('Unit: lib/monad/sequence/member/dropWhile', () => {
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => cons(n))
           .dropWhile(() => false)
-          .read(),
+          .extract(),
         [0]);
     });
 
@@ -32,7 +32,7 @@ describe('Unit: lib/monad/sequence/member/dropWhile', () => {
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => cons(n))
           .dropWhile(() => true)
-          .read(),
+          .extract(),
         []);
     });
 
@@ -40,7 +40,7 @@ describe('Unit: lib/monad/sequence/member/dropWhile', () => {
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => n < 1 ? cons(n, n + 1) : cons(n))
           .dropWhile(() => false)
-          .read(),
+          .extract(),
         [0, 1]);
     });
 
@@ -48,7 +48,7 @@ describe('Unit: lib/monad/sequence/member/dropWhile', () => {
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => n < 1 ? cons(n, n + 1) : cons(n))
           .dropWhile(() => true)
-          .read(),
+          .extract(),
         []);
     });
 
@@ -57,7 +57,7 @@ describe('Unit: lib/monad/sequence/member/dropWhile', () => {
         nat
           .dropWhile(n => n < 0)
           .take(3)
-          .read(),
+          .extract(),
         [0, 1, 2]);
     });
 
@@ -66,7 +66,7 @@ describe('Unit: lib/monad/sequence/member/dropWhile', () => {
         nat
           .dropWhile(n => n < 1)
           .take(3)
-          .read(),
+          .extract(),
         [1, 2, 3]);
     });
 
@@ -75,7 +75,7 @@ describe('Unit: lib/monad/sequence/member/dropWhile', () => {
         nat
           .dropWhile(n => n < 2)
           .take(3)
-          .read(),
+          .extract(),
         [2, 3, 4]);
     });
 

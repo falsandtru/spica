@@ -8,7 +8,7 @@ describe('Unit: lib/monad/sequence/member/takeWhile', () => {
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => cons())
           .takeWhile(() => true)
-          .read(),
+          .extract(),
         []);
     });
 
@@ -16,7 +16,7 @@ describe('Unit: lib/monad/sequence/member/takeWhile', () => {
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => cons())
           .takeWhile(() => false)
-          .read(),
+          .extract(),
         []);
     });
 
@@ -24,7 +24,7 @@ describe('Unit: lib/monad/sequence/member/takeWhile', () => {
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => cons(n))
           .takeWhile(() => true)
-          .read(),
+          .extract(),
         [0]);
     });
 
@@ -32,7 +32,7 @@ describe('Unit: lib/monad/sequence/member/takeWhile', () => {
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => cons(n))
           .takeWhile(() => false)
-          .read(),
+          .extract(),
         []);
     });
 
@@ -40,7 +40,7 @@ describe('Unit: lib/monad/sequence/member/takeWhile', () => {
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => n < 1 ? cons(n, n + 1) : cons(n))
           .takeWhile(() => true)
-          .read(),
+          .extract(),
         [0, 1]);
     });
 
@@ -48,7 +48,7 @@ describe('Unit: lib/monad/sequence/member/takeWhile', () => {
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => n < 1 ? cons(n, n + 1) : cons(n))
           .takeWhile(() => false)
-          .read(),
+          .extract(),
         []);
     });
 
@@ -56,7 +56,7 @@ describe('Unit: lib/monad/sequence/member/takeWhile', () => {
       assert.deepStrictEqual(
         nat
           .takeWhile(n => n < 0)
-          .read(),
+          .extract(),
         []);
     });
 
@@ -64,7 +64,7 @@ describe('Unit: lib/monad/sequence/member/takeWhile', () => {
       assert.deepStrictEqual(
         nat
           .takeWhile(n => n < 1)
-          .read(),
+          .extract(),
         [0]);
     });
 
@@ -72,7 +72,7 @@ describe('Unit: lib/monad/sequence/member/takeWhile', () => {
       assert.deepStrictEqual(
         nat
           .takeWhile(n => n < 2)
-          .read(),
+          .extract(),
         [0, 1]);
     });
 
@@ -80,7 +80,7 @@ describe('Unit: lib/monad/sequence/member/takeWhile', () => {
       assert.deepStrictEqual(
         nat
           .takeWhile(n => n < 3)
-          .read(),
+          .extract(),
         [0, 1, 2]);
     });
 

@@ -9,7 +9,7 @@ describe('Unit: lib/monad/sequence/member/map', () => {
         nat
           .map(String)
           .take(0)
-          .read(),
+          .extract(),
         [].map(String));
     });
 
@@ -18,7 +18,7 @@ describe('Unit: lib/monad/sequence/member/map', () => {
         nat
           .map(String)
           .take(1)
-          .read(),
+          .extract(),
         [0].map(String));
     });
 
@@ -27,7 +27,7 @@ describe('Unit: lib/monad/sequence/member/map', () => {
         nat
           .map(String)
           .take(2)
-          .read(),
+          .extract(),
         [0, 1].map(String));
     });
 
@@ -36,7 +36,7 @@ describe('Unit: lib/monad/sequence/member/map', () => {
         nat
           .map(String)
           .take(3)
-          .read(),
+          .extract(),
         [0, 1, 2].map(String));
     });
 

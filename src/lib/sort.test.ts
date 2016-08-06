@@ -66,7 +66,7 @@ describe('Unit: lib/sort', () => {
       const rnd = Sequence.random()
         .map(r => r * 1e3 | 0);
       for (let i = 0; i < 9; ++i) {
-        const as = rnd.take(Math.random() * i ** 3).read();
+        const as = rnd.take(Math.random() * i ** 3).extract();
         assert.deepStrictEqual(
           sort(as.slice(), cmp, Infinity, true),
           as.sort(cmp));

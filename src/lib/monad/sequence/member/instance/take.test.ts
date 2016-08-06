@@ -8,7 +8,7 @@ describe('Unit: lib/monad/sequence/member/take', () => {
       assert.deepStrictEqual(
         nat
           .take(0)
-          .read(),
+          .extract(),
         []);
     });
 
@@ -16,7 +16,7 @@ describe('Unit: lib/monad/sequence/member/take', () => {
       assert.deepStrictEqual(
         nat
           .take(1)
-          .read(),
+          .extract(),
         [0]);
     });
 
@@ -24,7 +24,7 @@ describe('Unit: lib/monad/sequence/member/take', () => {
       assert.deepStrictEqual(
         nat
           .take(2)
-          .read(),
+          .extract(),
         [0, 1]);
     });
 
@@ -32,7 +32,7 @@ describe('Unit: lib/monad/sequence/member/take', () => {
       assert.deepStrictEqual(
         nat
           .take(3)
-          .read(),
+          .extract(),
         [0, 1, 2]);
     });
 

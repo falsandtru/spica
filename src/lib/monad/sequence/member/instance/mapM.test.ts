@@ -10,7 +10,7 @@ describe('Unit: lib/monad/sequence/member/mapM', () => {
           .drop(1)
           .take(0)
           .mapM(n => Sequence.from([]))
-          .read(),
+          .extract(),
         []);
     });
 
@@ -20,7 +20,7 @@ describe('Unit: lib/monad/sequence/member/mapM', () => {
           .drop(1)
           .take(0)
           .mapM(n => Sequence.from([n]))
-          .read(),
+          .extract(),
         []);
     });
 
@@ -30,7 +30,7 @@ describe('Unit: lib/monad/sequence/member/mapM', () => {
           .drop(1)
           .take(0)
           .mapM(n => Sequence.from([n, -n]))
-          .read(),
+          .extract(),
         []);
     });
 
@@ -40,7 +40,7 @@ describe('Unit: lib/monad/sequence/member/mapM', () => {
           .drop(1)
           .take(1)
           .mapM(n => Sequence.from([]))
-          .read(),
+          .extract(),
         []);
     });
 
@@ -50,7 +50,7 @@ describe('Unit: lib/monad/sequence/member/mapM', () => {
           .drop(1)
           .take(1)
           .mapM(n => Sequence.from([n]))
-          .read(),
+          .extract(),
         [[1]]);
     });
 
@@ -60,7 +60,7 @@ describe('Unit: lib/monad/sequence/member/mapM', () => {
           .drop(1)
           .take(1)
           .mapM(n => Sequence.from([n, -n]))
-          .read(),
+          .extract(),
         [[1], [-1]]);
     });
 
@@ -71,7 +71,7 @@ describe('Unit: lib/monad/sequence/member/mapM', () => {
           .take(2)
           .mapM(n => Sequence.from([n, -n]))
           .take(1)
-          .read(),
+          .extract(),
         [[1, 2]]);
     });
 
@@ -81,7 +81,7 @@ describe('Unit: lib/monad/sequence/member/mapM', () => {
           .drop(1)
           .take(2)
           .mapM(n => Sequence.from([n, -n]))
-          .read(),
+          .extract(),
         [[1, 2], [1, -2], [-1, 2], [-1, -2]]);
     });
 
@@ -91,7 +91,7 @@ describe('Unit: lib/monad/sequence/member/mapM', () => {
           .drop(1)
           .take(3)
           .mapM(n => Sequence.from([n, -n]))
-          .read(),
+          .extract(),
         [
           [1, 2, 3], [1, 2, -3], [1, -2, 3], [1, -2, -3],
           [-1, 2, 3], [-1, 2, -3], [-1, -2, 3], [-1, -2, -3]

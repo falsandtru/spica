@@ -9,7 +9,7 @@ describe('Unit: lib/monad/sequence/member/permutations', () => {
         nat
           .take(0)
           .permutations()
-          .read(),
+          .extract(),
         []);
     });
 
@@ -18,7 +18,7 @@ describe('Unit: lib/monad/sequence/member/permutations', () => {
         nat
           .take(1)
           .permutations()
-          .read(),
+          .extract(),
         [[0]]);
     });
 
@@ -27,7 +27,7 @@ describe('Unit: lib/monad/sequence/member/permutations', () => {
         nat
           .take(2)
           .permutations()
-          .read(),
+          .extract(),
         [[0, 1], [1, 0]]);
     });
 
@@ -36,7 +36,7 @@ describe('Unit: lib/monad/sequence/member/permutations', () => {
         nat
           .take(3)
           .permutations()
-          .read(),
+          .extract(),
         [[0, 1, 2], [1, 0, 2], [2, 1, 0], [1, 2, 0], [2, 0, 1], [0, 2, 1]]);
     });
 

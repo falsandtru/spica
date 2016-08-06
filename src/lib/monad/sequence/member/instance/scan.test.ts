@@ -6,7 +6,7 @@ describe('Unit: lib/monad/sequence/member/scan', () => {
       assert.deepStrictEqual(
         Sequence.from([])
           .scan((a, b) => a + b, '')
-          .read(),
+          .extract(),
         ['']);
     });
 
@@ -15,7 +15,7 @@ describe('Unit: lib/monad/sequence/member/scan', () => {
         Sequence.from('abc'.split(''))
           .scan((a, b) => a + b, '')
           .take(0)
-          .read(),
+          .extract(),
         []);
     });
 
@@ -24,7 +24,7 @@ describe('Unit: lib/monad/sequence/member/scan', () => {
         Sequence.from('abc'.split(''))
           .scan((a, b) => a + b, '')
           .take(1)
-          .read(),
+          .extract(),
         ['a']);
     });
 
@@ -33,7 +33,7 @@ describe('Unit: lib/monad/sequence/member/scan', () => {
         Sequence.from('abc'.split(''))
           .scan((a, b) => a + b, '')
           .take(2)
-          .read(),
+          .extract(),
         ['a', 'ab']);
     });
 
@@ -42,7 +42,7 @@ describe('Unit: lib/monad/sequence/member/scan', () => {
         Sequence.from('abc'.split(''))
           .scan((a, b) => a + b, '')
           .take(3)
-          .read(),
+          .extract(),
         ['a', 'ab', 'abc']);
     });
 
@@ -51,7 +51,7 @@ describe('Unit: lib/monad/sequence/member/scan', () => {
         Sequence.from('abc'.split(''))
           .scan((a, b) => a + b, '')
           .take(4)
-          .read(),
+          .extract(),
         ['a', 'ab', 'abc']);
     });
 

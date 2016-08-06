@@ -9,7 +9,7 @@ describe('Unit: lib/monad/sequence/member/subsequences', () => {
         nat
           .take(0)
           .subsequences()
-          .read(),
+          .extract(),
         [[]]);
     });
 
@@ -18,7 +18,7 @@ describe('Unit: lib/monad/sequence/member/subsequences', () => {
         nat
           .take(1)
           .subsequences()
-          .read(),
+          .extract(),
         [[], [0]]);
     });
 
@@ -27,7 +27,7 @@ describe('Unit: lib/monad/sequence/member/subsequences', () => {
         nat
           .take(2)
           .subsequences()
-          .read(),
+          .extract(),
         [[], [0], [1], [0, 1]]);
     });
 
@@ -36,7 +36,7 @@ describe('Unit: lib/monad/sequence/member/subsequences', () => {
         nat
           .take(3)
           .subsequences()
-          .read(),
+          .extract(),
         [[], [0], [1], [0, 1], [2], [0, 2], [1, 2], [0, 1, 2]]);
     });
 

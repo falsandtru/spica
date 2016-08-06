@@ -37,8 +37,8 @@ export namespace Sequence {
   export declare function mplus<a>(l: Sequence<a, any>, r: Sequence<a, any>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
 }
 export interface Sequence<a, z> {
+  extract(): a[];
   iterate(): Sequence.Thunk<a>;
-  read(): a[];
   fmap<b>(f: (a: a) => b): Sequence<b, Sequence.Iterator<a>>;
   bind<b>(f: (a: a) => Sequence<b, any>): Sequence<b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]>;
   mapM<b>(f: (a: a) => Sequence<b, any>): Sequence<b[], [Sequence.Iterator<Sequence<b[], any>>, Sequence.Iterator<b[]>]>;

@@ -9,7 +9,7 @@ describe('Unit: lib/monad/sequence/member/bind', () => {
         nat
           .bind(n => new Sequence<number, number>((m = 0, cons) => m < n ? cons(m, m + 1) : cons()))
           .take(0)
-          .read(),
+          .extract(),
         []);
     });
 
@@ -18,7 +18,7 @@ describe('Unit: lib/monad/sequence/member/bind', () => {
         nat
           .bind(n => new Sequence<number, number>((m = 0, cons) => m < n ? cons(m, m + 1) : cons()))
           .take(1)
-          .read(),
+          .extract(),
         [0]);
     });
 
@@ -27,7 +27,7 @@ describe('Unit: lib/monad/sequence/member/bind', () => {
         nat
           .bind(n => new Sequence<number, number>((m = 0, cons) => m < n ? cons(m, m + 1) : cons()))
           .take(2)
-          .read(),
+          .extract(),
         [0, 0]);
     });
 
@@ -36,7 +36,7 @@ describe('Unit: lib/monad/sequence/member/bind', () => {
         nat
           .bind(n => new Sequence<number, number>((m = 0, cons) => m < n ? cons(m, m + 1) : cons()))
           .take(3)
-          .read(),
+          .extract(),
         [0, 0, 1]);
     });
 
@@ -45,7 +45,7 @@ describe('Unit: lib/monad/sequence/member/bind', () => {
         nat
           .bind(n => new Sequence<number, number>((m = 0, cons) => m < n ? cons(m, m + 1) : cons()))
           .take(7)
-          .read(),
+          .extract(),
         [0, 0, 1, 0, 1, 2, 0]);
     });
 
@@ -55,7 +55,7 @@ describe('Unit: lib/monad/sequence/member/bind', () => {
           .take(3)
           .bind(n => Sequence.from([]))
           .take(Infinity)
-          .read(),
+          .extract(),
         []);
     });
 
@@ -65,7 +65,7 @@ describe('Unit: lib/monad/sequence/member/bind', () => {
           .take(3)
           .bind(n => Sequence.from([n, -n]))
           .take(Infinity)
-          .read(),
+          .extract(),
         [0, 0, 1, -1, 2, -2]);
     });
 

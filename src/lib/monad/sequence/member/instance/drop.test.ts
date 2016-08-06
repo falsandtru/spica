@@ -9,7 +9,7 @@ describe('Unit: lib/monad/sequence/member/drop', () => {
         nat
           .drop(0)
           .take(0)
-          .read(),
+          .extract(),
         []);
     });
 
@@ -18,7 +18,7 @@ describe('Unit: lib/monad/sequence/member/drop', () => {
         nat
           .drop(0)
           .take(1)
-          .read(),
+          .extract(),
         [0]);
     });
 
@@ -27,7 +27,7 @@ describe('Unit: lib/monad/sequence/member/drop', () => {
         nat
           .drop(0)
           .take(2)
-          .read(),
+          .extract(),
         [0, 1]);
     });
 
@@ -36,7 +36,7 @@ describe('Unit: lib/monad/sequence/member/drop', () => {
         nat
           .drop(0)
           .take(3)
-          .read(),
+          .extract(),
         [0, 1, 2]);
     });
 
@@ -45,7 +45,7 @@ describe('Unit: lib/monad/sequence/member/drop', () => {
         nat
           .drop(1)
           .take(3)
-          .read(),
+          .extract(),
         [1, 2, 3]);
     });
 
@@ -54,7 +54,7 @@ describe('Unit: lib/monad/sequence/member/drop', () => {
         nat
           .drop(2)
           .take(3)
-          .read(),
+          .extract(),
         [2, 3, 4]);
     });
 
@@ -63,7 +63,7 @@ describe('Unit: lib/monad/sequence/member/drop', () => {
         nat
           .drop(3)
           .take(3)
-          .read(),
+          .extract(),
         [3, 4, 5]);
     });
 

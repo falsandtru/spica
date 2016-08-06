@@ -6,13 +6,13 @@ describe('Unit: lib/monad/sequence', () => {
     it('Monoid law 1', () => {
       const x = Sequence.Return(0);
       const ma = Sequence.mappend(Sequence.mempty, x);
-      assert.deepStrictEqual(ma.read(), x.read());
+      assert.deepStrictEqual(ma.extract(), x.extract());
     });
 
     it('Monoid law 2', () => {
       const x = Sequence.Return(0);
       const ma = Sequence.mappend(x, Sequence.mempty);
-      assert.deepStrictEqual(ma.read(), x.read());
+      assert.deepStrictEqual(ma.extract(), x.extract());
     });
 
     it('Monoid law 3', () => {
@@ -21,15 +21,15 @@ describe('Unit: lib/monad/sequence', () => {
       const z = Sequence.Return(2);
       const ma = Sequence.mappend(Sequence.mappend(x, y), z);
       const mb = Sequence.mappend(x, Sequence.mappend(y, z));
-      assert.deepStrictEqual(ma.read(), mb.read());
+      assert.deepStrictEqual(ma.extract(), mb.extract());
     });
 
   });
 
   describe('Functor', () => {
     it('fmap', () => {
-      assert.deepStrictEqual(Sequence.fmap(Sequence.Return(0), n => n + 1).read(), [1]);
-      assert.deepStrictEqual(Sequence.fmap(Sequence.Return(0))(n => n + 1).read(), [1]);
+      assert.deepStrictEqual(Sequence.fmap(Sequence.Return(0), n => n + 1).extract(), [1]);
+      assert.deepStrictEqual(Sequence.fmap(Sequence.Return(0))(n => n + 1).extract(), [1]);
     });
 
     it('Functor law 1', () => {
@@ -37,7 +37,7 @@ describe('Unit: lib/monad/sequence', () => {
       const x = 0;
       const fa = Sequence.Return(x).fmap(f);
       const fb = f(Sequence.Return(x));
-      assert.deepStrictEqual(fa.read(), fb.read());
+      assert.deepStrictEqual(fa.extract(), fb.extract());
     });
 
     it('Functor law 2', () => {
@@ -46,7 +46,7 @@ describe('Unit: lib/monad/sequence', () => {
       const x = 1;
       const fa = Sequence.Return(x).fmap(n => g(f(n)));
       const fb = Sequence.Return(x).fmap(f).fmap(g);
-      assert.deepStrictEqual(fa.read(), fb.read());
+      assert.deepStrictEqual(fa.extract(), fb.extract());
     });
 
   });
@@ -57,13 +57,13 @@ describe('Unit: lib/monad/sequence', () => {
         Sequence.ap(
           Sequence.pure(curry((a: number) => a)))
           (Sequence.pure(1))
-          .read(),
+          .extract(),
         [1]);
       assert.deepStrictEqual(
         Sequence.ap(
           Sequence.pure(curry((a: number) => a)),
           (Sequence.pure(1)))
-          .read(),
+          .extract(),
         [1]);
     });
 
@@ -73,7 +73,7 @@ describe('Unit: lib/monad/sequence', () => {
           Sequence.pure(curry((a: number, b: number) => a + b)))
           (Sequence.pure(1)))
           (Sequence.pure(2))
-          .read(),
+          .extract(),
         [3]);
     });
 
@@ -84,7 +84,7 @@ describe('Unit: lib/monad/sequence', () => {
           (Sequence.pure(1)))
           (Sequence.pure(2)))
           (Sequence.pure(3))
-          .read(),
+          .extract(),
         [6]);
     });
 
@@ -92,8 +92,8 @@ describe('Unit: lib/monad/sequence', () => {
 
   describe('Monad', () => {
     it('bind', () => {
-      assert.deepStrictEqual(Sequence.bind(Sequence.Return(0), n => Sequence.Return(n + 1)).read(), [1]);
-      assert.deepStrictEqual(Sequence.bind(Sequence.Return(0))(n => Sequence.Return(n + 1)).read(), [1]);
+      assert.deepStrictEqual(Sequence.bind(Sequence.Return(0), n => Sequence.Return(n + 1)).extract(), [1]);
+      assert.deepStrictEqual(Sequence.bind(Sequence.Return(0))(n => Sequence.Return(n + 1)).extract(), [1]);
     });
 
     it('Monad law 1', () => {
@@ -101,7 +101,7 @@ describe('Unit: lib/monad/sequence', () => {
       const x = 0;
       const ma = Sequence.Return(x).bind(f);
       const mb = f(x);
-      assert.deepStrictEqual(ma.read(), mb.read());
+      assert.deepStrictEqual(ma.extract(), mb.extract());
     });
 
     it('Monad law 2', () => {
@@ -109,7 +109,7 @@ describe('Unit: lib/monad/sequence', () => {
       const x = 0;
       const ma = Sequence.Return(x);
       const mb = ma.bind(Sequence.Return);
-      assert.deepStrictEqual(ma.read(), mb.read());
+      assert.deepStrictEqual(ma.extract(), mb.extract());
     });
 
     it('Monad law 3', () => {
@@ -123,7 +123,7 @@ describe('Unit: lib/monad/sequence', () => {
         .bind(n =>
           f(x)
             .bind(g));
-      assert.deepStrictEqual(ma.read(), mb.read());
+      assert.deepStrictEqual(ma.extract(), mb.extract());
     });
 
   });
