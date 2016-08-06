@@ -11,7 +11,7 @@ export class Sequence<a, z> extends MonadPlus<a> {
 export namespace Sequence {
   export declare function resume<a>(iterator: Sequence.Iterator<a>): Sequence<a, Sequence.Iterator<a>>;
   export declare function from<a>(as: a[]): Sequence<a, number>;
-  export declare function write<a>(as: a[]): Sequence<a, a[]>;
+  export declare function read<a>(as: a[]): Sequence<a, a[]>;
   export declare function cycle<a>(as: a[]): Sequence<a, number>;
   export declare function random(): Sequence<number, number>;
   export declare function random<a>(gen: () => a): Sequence<a, number>;

@@ -1,10 +1,10 @@
 import {Sequence} from '../../../sequence';
 
-describe('Unit: lib/monad/sequence/member/static/write', () => {
-  describe('Sequence.write', () => {
+describe('Unit: lib/monad/sequence/member/static/read', () => {
+  describe('Sequence.read', () => {
     it('array', () => {
       const stream = [0, 1, 2];
-      const seq = Sequence.write(stream);
+      const seq = Sequence.read(stream);
       assert.deepStrictEqual(
         seq
           .extract(),

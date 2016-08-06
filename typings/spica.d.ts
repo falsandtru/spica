@@ -107,7 +107,7 @@ declare module 'spica' {
 
   export class Sequence<a, z> extends MonadPlus<a> {
     static from<a>(as: a[]): Sequence<a, number>;
-    static write<a>(as: a[]): Sequence<a, a[]>;
+    static read<a>(as: a[]): Sequence<a, a[]>;
     static cycle<a>(as: a[]): Sequence<a, number>;
     static random(): Sequence<number, number>;
     static random<a>(gen: () => a): Sequence<a, number>;
