@@ -163,7 +163,8 @@ declare module 'spica' {
     export abstract class Maybe<a> extends MonadPlus<a> {
       protected MAYBE: Just<a> | Nothing;
       fmap<b>(f: (a: a) => b): Maybe<b>;
-      bind<b>(f: (a: a) => Maybe<b>): Maybe<b>;
+      bind<b>(f: (a: a) => Nothing): Maybe<a>;
+      bind<b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b>;
       extract(): a;
       extract<b>(transform: () => b): a | b;
       extract<b>(nothing: () => b, just: (a: a) => b): b;
@@ -180,15 +181,21 @@ declare module 'spica' {
       export function ap<a, b>(ff: Maybe<(a: a) => b>, fa: Maybe<a>): Maybe<b>;
       export function ap<a, b>(ff: Maybe<(a: a) => b>): (fa: Maybe<a>) => Maybe<b>;
       export const Return: typeof pure;
-      export function bind<a, b>(m: Maybe<a>, f: (a: a) => Maybe<b>): Maybe<b>;
-      export function bind<a>(m: Maybe<a>): <b>(f: (a: a) => Maybe<b>) => Maybe<b>;
+      export function bind<a, b>(m: Maybe<a>, f: (a: a) => Nothing): Maybe<a>;
+      export function bind<a, b>(m: Maybe<a>, f: (a: a) => Maybe<b> | Nothing): Maybe<b>;
+      export function bind<a>(m: Maybe<a>): PartialBind<a>
+      interface PartialBind<a> {
+        <b>(f: (a: a) => Nothing): Maybe<a>;
+        <b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b>;
+      }
       export const mzero: Maybe<any>;
       export function mplus<a>(ml: Maybe<a>, mr: Maybe<a>): Maybe<a>;
     }
     export class Just<a> extends Maybe<a> {
       protected MAYBE: Just<a>;
       protected JUST: a;
-      bind<b>(f: (a: a) => Maybe<b>): Maybe<b>;
+      bind<b>(f: (a: a) => Nothing): Maybe<a>;
+      bind<b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b>;
       extract(): a;
       extract<b>(transform: () => b): a;
       extract<b>(nothing: () => b, just: (a: a) => b): b;
@@ -196,7 +203,8 @@ declare module 'spica' {
     export class Nothing extends Maybe<any> {
       protected MAYBE: Nothing;
       protected NOTHING: void;
-      bind<b>(f: (a: any) => Maybe<b>): Maybe<b>;
+      bind<b>(f: (a: any) => Nothing): Maybe<any>;
+      bind<b>(f: (a: any) => Maybe<b> | Nothing): Maybe<b>;
       extract(): any;
       extract<b>(transform: () => b): b;
       extract<b>(nothing: () => b, just: (a: void) => b): b;

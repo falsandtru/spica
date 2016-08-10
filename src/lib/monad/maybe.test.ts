@@ -50,7 +50,7 @@ describe('Unit: lib/maybe', () => {
     });
 
     it('Nothing nest', () => {
-      const result = Return(Return(0))
+      const result = Return(Return(''))
         .bind(m => m.bind(n => Nothing).bind(throwError))
         .bind(throwError)
         .extract(() => 'Nothing');

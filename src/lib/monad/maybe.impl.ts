@@ -9,7 +9,9 @@ export class Maybe<a> extends MonadPlus<a> {
   public fmap<b>(f: (a: a) => b): Maybe<b> {
     return this.bind(a => new Just(f(a)));
   }
-  public bind<b>(f: (a: a) => Maybe<b>): Maybe<b> {
+  public bind<b>(f: (a: a) => Nothing): Maybe<a>
+  public bind<b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b>
+  public bind<b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b> {
     return new Maybe<b>(() => {
       const m: Maybe<a> = this.evaluate();
       if (m instanceof Just) {
@@ -43,8 +45,13 @@ export namespace Maybe {
   export declare function ap<a, b>(ff: Maybe<(a: a) => b>, fa: Maybe<a>): Maybe<b>
   export declare function ap<a, b>(ff: Maybe<(a: a) => b>): (fa: Maybe<a>) => Maybe<b>
   export const Return = pure;
-  export declare function bind<a, b>(m: Maybe<a>, f: (a: a) => Maybe<b>): Maybe<b>
-  export declare function bind<a>(m: Maybe<a>): <b>(f: (a: a) => Maybe<b>) => Maybe<b>
+  export declare function bind<a, b>(m: Maybe<a>, f: (a: a) => Nothing): Maybe<a>
+  export declare function bind<a, b>(m: Maybe<a>, f: (a: a) => Maybe<b> | Nothing): Maybe<b>
+  export declare function bind<a>(m: Maybe<a>): PartialBind<a>
+  interface PartialBind<a> {
+    <b>(f: (a: a) => Nothing): Maybe<a>;
+    <b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b>;
+  }
 }
 
 export class Just<a> extends Maybe<a> {
@@ -53,7 +60,9 @@ export class Just<a> extends Maybe<a> {
   constructor(private a: a) {
     super(throwCallError);
   }
-  public bind<b>(f: (a: a) => Maybe<b>): Maybe<b> {
+  public bind<b>(f: (a: a) => Nothing): Maybe<a>
+  public bind<b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b>
+  public bind<b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b> {
     return new Maybe(() => f(this.extract()));
   }
   public extract(): a
@@ -72,7 +81,9 @@ export class Nothing extends Maybe<any> {
   constructor() {
     super(throwCallError);
   }
-  public bind<b>(f: (a: any) => Maybe<b>): Maybe<b> {
+  public bind<b>(f: (a: any) => Nothing): Maybe<any>
+  public bind<b>(f: (a: any) => Maybe<b> | Nothing): Maybe<b>
+  public bind<b>(f: (a: any) => Maybe<b> | Nothing): Maybe<b> {
     return this;
   }
   public extract(): any
