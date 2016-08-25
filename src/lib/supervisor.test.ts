@@ -118,9 +118,8 @@ describe('Unit: lib/supervisor', function () {
           assert(++cnt === 1);
         });
       sv.events.fail
-        .monitor([], ([name, process, data]) => {
+        .monitor([], ([name, data]) => {
           assert.deepStrictEqual(name, []);
-          assert(process === void 0);
           switch (data) {
             case 3: {
               assert(++cnt === 7);
@@ -138,9 +137,8 @@ describe('Unit: lib/supervisor', function () {
           }
         });
       sv.events.loss
-        .monitor([], ([name, process, data]) => {
+        .monitor([], ([name, data]) => {
           assert.deepStrictEqual(name, []);
-          assert(process === void 0);
           switch (data) {
             case 3: {
               assert(++cnt === 8);
@@ -263,7 +261,7 @@ describe('Unit: lib/supervisor', function () {
       assert(TestSupervisor.procs === 0);
       const sv = new TestSupervisor();
       sv.events.loss.monitor([], done);
-      sv.events.fail.on([], ([, , data]) => assert(++cnt === 2 && data === 0));
+      sv.events.fail.on([], ([, data]) => assert(++cnt === 2 && data === 0));
       sv.register([], _ => +assert(++cnt === 3) || cnt);
       sv.events.exit.on([], ([name, proc, reason]) => reason && sv.register(name, proc));
       assert.deepStrictEqual(sv.cast([], 0, true), [3]);
@@ -283,7 +281,7 @@ describe('Unit: lib/supervisor', function () {
       const sv = new class TestSupervisor extends Supervisor<string[], number, number> { }();
       sv.events.loss.monitor([], done);
       sv.register([], _ => ++cnt);
-      sv.call([], 0, 0, r => assert(cnt === 1) || sv.terminate() || done());
+      sv.call([], 0, 0, _ => assert(cnt === 1) || sv.terminate() || done());
       assert(cnt === 0);
     });
 
@@ -291,7 +289,7 @@ describe('Unit: lib/supervisor', function () {
       let cnt = 0;
       const sv = new class TestSupervisor extends Supervisor<string[], number, number> { }();
       sv.events.loss.monitor([], done);
-      sv.events.fail.on([], ([, , data]) => assert(++cnt === 1 && data === 2));
+      sv.events.fail.on([], ([, data]) => assert(++cnt === 1 && data === 2));
       sv.register([], n => +assert.deepStrictEqual(sv.cast([], 2), []) || +assert(++cnt === 2 && n === 1) || +Tick(() => sv.terminate() || done()));
       sv.cast([], 1);
     });
@@ -300,7 +298,7 @@ describe('Unit: lib/supervisor', function () {
       let cnt = 0;
       const sv = new class TestSupervisor extends Supervisor<string[], number, Promise<number>> { }();
       sv.register([], n => new Promise<number>(resolve => void resolve(n)));
-      sv.events.loss.on([], ([, , data]) => assert(++cnt === 2 && data === 2));
+      sv.events.loss.on([], ([, data]) => assert(++cnt === 2 && data === 2));
       sv.call([], 1, 0, r => assert(++cnt === 1 && r.length === 1) || r[0].then(n => assert(++cnt === 4 && n === 1)));
       sv.call([], 2, 0, r => assert(++cnt === 3 && r.length === 0));
       sv.call([], 3, 1e9, r => assert(++cnt === 5 && r.length === 1) || sv.terminate() || done());

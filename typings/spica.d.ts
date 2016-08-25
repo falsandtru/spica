@@ -10,8 +10,8 @@ declare module 'spica' {
     export namespace Event {
       export namespace Data {
         export type Exec<T extends string[], D, R> = [T, (data: D) => R];
-        export type Fail<T extends string[], D, R> = [T, (data: D) => R, D];
-        export type Loss<T extends string[], D, R> = [T, (data: D) => R, D];
+        export type Fail<T extends string[], D> = [T, D];
+        export type Loss<T extends string[], D> = [T, D];
         export type Exit<T extends string[], D, R> = [T, (data: D) => R, any];
       }
     }
@@ -23,8 +23,8 @@ declare module 'spica' {
     name: string;
     events: {
       exec: Observer<T, Supervisor.Event.Data.Exec<T, D, R>, any>;
-      fail: Observer<T, Supervisor.Event.Data.Fail<T, D, R>, any>;
-      loss: Observer<T, Supervisor.Event.Data.Loss<T, D, R>, any>;
+      fail: Observer<T, Supervisor.Event.Data.Fail<T, D>, any>;
+      loss: Observer<T, Supervisor.Event.Data.Loss<T, D>, any>;
       exit: Observer<T, Supervisor.Event.Data.Exit<T, D, R>, any>;
     };
     register(namespace: T, process: (data: D) => R): (reason?: any) => void;

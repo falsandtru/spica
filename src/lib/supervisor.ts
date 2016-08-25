@@ -16,8 +16,8 @@ export namespace Supervisor {
   export namespace Event {
     export namespace Data {
       export type Exec<T extends string[], D, R> = ISupervisor.Event.Data.Exec<T, D, R>;
-      export type Fail<T extends string[], D, R> = ISupervisor.Event.Data.Fail<T, D, R>;
-      export type Loss<T extends string[], D, R> = ISupervisor.Event.Data.Loss<T, D, R>;
+      export type Fail<T extends string[], D> = ISupervisor.Event.Data.Fail<T, D>;
+      export type Loss<T extends string[], D> = ISupervisor.Event.Data.Loss<T, D>;
       export type Exit<T extends string[], D, R> = ISupervisor.Event.Data.Exit<T, D, R>;
     }
   }
@@ -48,7 +48,7 @@ export abstract class Supervisor<T extends string[], D, R> implements ISuperviso
     assert(this.procs.refs(<T>[]).length === 0);
     while (this.queue.length > 0) {
       const [namespace, data] = this.queue.shift();
-      void this.events.loss.emit(namespace, [namespace, void 0, data]);
+      void this.events.loss.emit(namespace, [namespace, data]);
     }
     try {
       void this.destructor_(reason);
@@ -67,8 +67,8 @@ export abstract class Supervisor<T extends string[], D, R> implements ISuperviso
   private destructor_: (reason?: any) => any;
   public events = {
     exec: new Observable<T, Supervisor.Event.Data.Exec<T, D, R>, any>(),
-    fail: new Observable<T, Supervisor.Event.Data.Fail<T, D, R>, any>(),
-    loss: new Observable<T, Supervisor.Event.Data.Loss<T, D, R>, any>(),
+    fail: new Observable<T, Supervisor.Event.Data.Fail<T, D>, any>(),
+    loss: new Observable<T, Supervisor.Event.Data.Loss<T, D>, any>(),
     exit: new Observable<T, Supervisor.Event.Data.Exit<T, D, R>, any>()
   };
   private procs: Observable<T, WorkerCommand<T, D>, R> = new Observable<T, WorkerCommand<T, D>, R>();
@@ -108,7 +108,7 @@ export abstract class Supervisor<T extends string[], D, R> implements ISuperviso
     void this.checkState();
     const results = this.procs.reflect(namespace, new WorkerCommand.Call(data));
     if (results.length === 0) {
-      void this.events.fail.emit(namespace, [namespace, void 0, data]);
+      void this.events.fail.emit(namespace, [namespace, data]);
     }
     return results.length > 0 || !retry ? results : this.cast(namespace, data, false);
   }
@@ -150,14 +150,14 @@ export abstract class Supervisor<T extends string[], D, R> implements ISuperviso
         ? this.procs.reflect(namespace, new WorkerCommand.Call(data))
         : [];
       if (results.length === 0) {
-        void this.events.fail.emit(namespace, [namespace, void 0, data]);
+        void this.events.fail.emit(namespace, [namespace, data]);
       }
       if (results.length === 0 && now < since + timeout) continue;
       i === 0 ? void this.queue.shift() : void this.queue.splice(i, 1);
       void --i;
 
       if (results.length === 0) {
-        void this.events.loss.emit(namespace, [namespace, void 0, data]);
+        void this.events.loss.emit(namespace, [namespace, data]);
       }
       if (!callback) continue;
       try {
