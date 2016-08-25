@@ -230,7 +230,7 @@ class Worker<T extends string[], D, R> {
   private alive = true;
   private called = false;
   private concurrency: number = 1;
-  private tryDependencyResolving(cmd: WorkerCommand.Call<D>): void {
+  private tryDependencyResolving(): void {
     if (this.receive(new WorkerCommand.Deps(this.namespace))) {
       this.sharedResource.dependenciesStack = [];
       return;
@@ -263,7 +263,7 @@ class Worker<T extends string[], D, R> {
     }
     if (cmd instanceof WorkerCommand.Call) {
       if (this.concurrency === 0) throw void 0; // cancel
-      void this.tryDependencyResolving(cmd);
+      void this.tryDependencyResolving();
       if (!this.called) {
         this.called = true;
         void this.sv.events.exec
