@@ -6,7 +6,7 @@ describe('Unit: lib/monad/sequence/member/takeUntil', () => {
   describe('takeUntil', () => {
     it('0 always', () => {
       assert.deepStrictEqual(
-        new Sequence<number, number>((n = 0, cons) => cons())
+        new Sequence<number, number>((_ = 0, cons) => cons())
           .takeUntil(() => true)
           .extract(),
         []);
@@ -14,7 +14,7 @@ describe('Unit: lib/monad/sequence/member/takeUntil', () => {
 
     it('0 never', () => {
       assert.deepStrictEqual(
-        new Sequence<number, number>((n = 0, cons) => cons())
+        new Sequence<number, number>((_ = 0, cons) => cons())
           .takeUntil(() => false)
           .extract(),
         []);

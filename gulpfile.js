@@ -15,14 +15,12 @@ const config = {
     }),
     dist: {
       src: [
-        'typings/*.d.ts',
         '*.ts'
       ],
       dest: 'dist'
     },
     test: {
       src: [
-        'typings/*.d.ts',
         '*.ts',
         'src/**/*.ts',
         'test/**/*.ts'
@@ -160,13 +158,11 @@ gulp.task('clean', function () {
 
 gulp.task('install', function () {
   shell('npm i');
-  shell('tsd install --save --overwrite');
 });
 
 gulp.task('update', function () {
   shell('npm-check-updates -u');
   shell('npm i');
-  //shell('tsd update --save --overwrite');
 });
 
 gulp.task('watch', ['clean'], function () {

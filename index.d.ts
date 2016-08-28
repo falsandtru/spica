@@ -1,2 +1,2 @@
-﻿import './typings/spica';
+﻿import './spica.d';
 export * from 'spica';

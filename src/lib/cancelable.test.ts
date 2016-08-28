@@ -9,9 +9,9 @@ describe('Unit: lib/cancelable', () => {
         .then(n => ++n)
         .then(cancelable.promise)
         .then(n => (cancelable.cancel(n), ++n))
-        .then(n => NaN)
-        .then(n => cancelable.promise(NaN))
-        .then(n => NaN)
+        .then(_ => NaN)
+        .then(_ => cancelable.promise(NaN))
+        .then(_ => NaN)
         .catch(n => assert(++n === 3) || done());
     });
 

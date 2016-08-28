@@ -32,7 +32,7 @@ export interface Curried5<a, b, c, d, e, z> {
   (a: a): Curried4<b, c, d, e, z>;
 }
 
-export const curry: Curry = <T>(f: () => T, ctx: any = this) =>
+export const curry: Curry = <T>(f: () => T, ctx?: any) =>
   f.length === 0
     ? () => f.call(ctx)
     : curry_(f, [], ctx);

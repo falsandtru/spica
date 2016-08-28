@@ -4,6 +4,9 @@ export interface List<a, c extends Nil | List<a, any>> extends Cons<a, c> { }
 
 export class Nil {
   private NIL: void;
+  constructor() {
+    void this.NIL;
+  }
   public push<a>(a: a): Cons<a, Nil> {
     return new Cons<a, Nil>(a, this);
   }
@@ -12,6 +15,7 @@ export class Nil {
 class Cons<a, c extends Nil | Cons<a, any>> {
   private CONS: a;
   constructor(private head_: a, private tail_: c) {
+    void this.CONS;
   }
   public push(a: a): Cons<a, this> {
     return new Cons<a, this>(a, this);

@@ -1,5 +1,4 @@
 import {Sequence} from '../../core';
-import {concat} from '../../../../concat';
 
 export default class <a, z> extends Sequence<a, z> {
   public permutations(): Sequence<a[], [Sequence.Iterator<Sequence<a[], any>>, Sequence.Iterator<a[]>]> {
@@ -53,7 +52,6 @@ function perms<a>(ts: Sequence<a, any>, is: Sequence<a, any>): Sequence<a[], [Se
                 () => [ts, r],
                 yt => {
                   const y = Sequence.Thunk.value(yt);
-                  const ys = Sequence.resume(Sequence.Thunk.iterator(yt));
                   const [us, zs] = interleave_(
                     as => f(Sequence.mappend(Sequence.from([y]), as)),
                     Sequence.resume(Sequence.Thunk.iterator(yt)),

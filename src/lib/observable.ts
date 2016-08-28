@@ -2,7 +2,7 @@ import {Observer, Publisher} from 'spica';
 import {concat} from './concat';
 
 interface SubscriberMapNode<T, D, R> {
-  parent: SubscriberMapNode<T, D, R>;
+  parent: SubscriberMapNode<T, D, R> | undefined;
   childrenMap: SubscriberMap<T, D, R>;
   childrenList: string[];
   registers: Register<T, D, R>[];
@@ -70,7 +70,7 @@ export class Observable<T extends Array<string | number>, D, R>
     void this.drain_(namespace, data, tracker);
   }
   public reflect(namespace: T, data: D): R[] {
-    let results: R[];
+    let results: R[] = [];
     void this.emit(namespace, <D>data, (_, r) => results = r);
     assert(Array.isArray(results));
     return results;
@@ -78,7 +78,7 @@ export class Observable<T extends Array<string | number>, D, R>
   private drain_(types: T, data: D, tracker?: (data: D, results: R[]) => any): void {
     const results: R[] = [];
     void this.refsBelow_(this.seekNode_(types))
-      .reduce((_, sub) => {
+      .reduce<void>((_, sub) => {
         const [, , monitor, subscriber] = sub;
         if (monitor) return;
         try {
@@ -95,7 +95,7 @@ export class Observable<T extends Array<string | number>, D, R>
         }
       }, void 0);
     void this.refsAbove_(this.seekNode_(types))
-      .reduce((_, sub) => {
+      .reduce<void>((_, sub) => {
         const [, , monitor, subscriber] = sub;
         if (!monitor) return;
         try {
@@ -168,7 +168,7 @@ export class Observable<T extends Array<string | number>, D, R>
     }
     return node;
   }
-  private throwTypeErrorIfInvalidSubscriber_(subscriber: Subscriber<D, R>, types: T): void {
+  private throwTypeErrorIfInvalidSubscriber_(subscriber: Subscriber<D, R> | undefined, types: T): void {
     switch (typeof subscriber) {
       case 'function':
         return;

@@ -105,7 +105,6 @@ describe('Unit: lib/monad/sequence', () => {
     });
 
     it('Monad law 2', () => {
-      const f = (n: number) => Sequence.Return(n + 1);
       const x = 0;
       const ma = Sequence.Return(x);
       const mb = ma.bind(Sequence.Return);
@@ -120,7 +119,7 @@ describe('Unit: lib/monad/sequence', () => {
         .bind(f)
         .bind(g);
       const mb = Sequence.Return(x)
-        .bind(n =>
+        .bind(x =>
           f(x)
             .bind(g));
       assert.deepStrictEqual(ma.extract(), mb.extract());

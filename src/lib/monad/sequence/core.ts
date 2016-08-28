@@ -1,11 +1,12 @@
+import {Sequence as ISequence} from 'spica';
 import {MonadPlus} from '../monadplus';
 
-export class Sequence<a, z> extends MonadPlus<a> {
+export class Sequence<a, z> extends MonadPlus<a> implements ISequence<a, z> {
   constructor(
     protected cons: (z: z, cons: (a?: a, z?: z) => Sequence.Data<a, z>) => Sequence.Data<a, z>,
     protected memory?: Map<number, Sequence.Data<a, z>>
   ) {
-    super();
+    super(throwCallError);
   }
 }
 export namespace Sequence {
@@ -24,7 +25,6 @@ export namespace Sequence {
   export declare function fmap<a, b>(m: Sequence<a, any>, f: (a: a) => b): Sequence<b, Sequence.Iterator<a>>;
   export declare function fmap<a>(m: Sequence<a, any>): <b>(f: (a: a) => b) => Sequence<b, Sequence.Iterator<a>>;
   export declare function pure<a>(a: a): Sequence<a, number>;
-  export declare function ap<a, b>(ff: Sequence<() => b, any>): () => Sequence<() => b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]>
   export declare function ap<a, b>(ff: Sequence<(a: a) => b, any>, fa: Sequence<a, any>): Sequence<b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]>
   export declare function ap<a, b>(ff: Sequence<(a: a) => b, any>): (fa: Sequence<a, any>) => Sequence<b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]>
   export declare const Return: typeof pure;
@@ -65,7 +65,7 @@ export namespace Sequence {
     export function cons<a, z>(a?: a, b?: z): Sequence.Data<a, z> {
       switch (arguments.length) {
         case 0:
-          return <Sequence.Data<a, z>>[];
+          return <Sequence.Data<a, z>><any[]>[];
         case 1:
           return <Sequence.Data<a, z>><any[]>[a];
         case 2:
@@ -89,7 +89,7 @@ export namespace Sequence {
   }
   export type Iterator<a> = () => Thunk<a>;
   export namespace Iterator {
-    export const done: Sequence.Iterator<any> = () => <Sequence.Thunk<any>>[void 0, done, -1];
+    export let /* const */ done: Sequence.Iterator<any> = () => <Sequence.Thunk<any>>[void 0, done, -1];
     export function when<a, b>(
       thunk: Thunk<a>,
       caseDone: (thunk: Thunk<a>) => b,
@@ -117,4 +117,8 @@ export namespace Sequence {
       return new TypeError(`Spica: Sequence: Invalid thunk.`);
     }
   }
+}
+
+function throwCallError(): never {
+  throw new Error(`Spica: Sequence: Invalid thunk call.`);
 }

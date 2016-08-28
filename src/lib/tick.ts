@@ -1,6 +1,3 @@
-declare let process: {};
-declare let Promise: { resolve: <T>(val?: T) => PromiseLike<T> };
-
 namespace TICK {
   export const queue = enqueue;
 
@@ -17,7 +14,7 @@ namespace TICK {
     void --Reservation;
     let task = Queue.length;
     while (task-- > 0) {
-      void Queue.shift()();
+      void Queue.shift()!();
     }
   }
 

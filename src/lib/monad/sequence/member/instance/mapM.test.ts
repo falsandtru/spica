@@ -9,7 +9,7 @@ describe('Unit: lib/monad/sequence/member/mapM', () => {
         nat
           .drop(1)
           .take(0)
-          .mapM(n => Sequence.from([]))
+          .mapM(_ => Sequence.from([]))
           .extract(),
         []);
     });
@@ -39,7 +39,7 @@ describe('Unit: lib/monad/sequence/member/mapM', () => {
         nat
           .drop(1)
           .take(1)
-          .mapM(n => Sequence.from([]))
+          .mapM(_ => Sequence.from([]))
           .extract(),
         []);
     });

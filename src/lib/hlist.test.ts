@@ -2,10 +2,6 @@ import {HList, HNil} from './hlist';
 
 describe('Unit: lib/hlist', () => {
   describe('HList', () => {
-    it('HNil', () => {
-      const nil = new HNil();
-    });
-
     it('HList 1', () => {
       const list: HList<number, HNil> = new HNil().push(0);
       assert(list.head() === 0);

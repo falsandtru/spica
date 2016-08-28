@@ -6,7 +6,6 @@ export abstract class Applicative<a> extends Functor<a> {
 }
 export namespace Applicative {
   export declare function pure<a>(a: a): Applicative<a>;
-  export function ap<_, b>(ff: Applicative<() => b>): () => Applicative<b>;
   export function ap<a, b>(ff: Applicative<(a: a) => b>, fa: Applicative<a>): Applicative<b>;
   export function ap<a, b>(ff: Applicative<(a: a) => b>): (fa: Applicative<a>) => Applicative<b>;
   export function ap<a, b>(ff: Applicative<(a: a) => b>, fa?: Applicative<a>): Applicative<b> | ((fa: Applicative<a>) => Applicative<b>) {

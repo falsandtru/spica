@@ -2,10 +2,6 @@ import {List, Nil} from './list';
 
 describe('Unit: lib/list', () => {
   describe('List', () => {
-    it('Nil', () => {
-      const nil = new Nil();
-    });
-
     it('List 1', () => {
       const list: List<number, Nil> = new Nil().push(0);
       assert.deepStrictEqual(list.array(), [0]);

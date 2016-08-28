@@ -6,7 +6,7 @@ describe('Unit: lib/monad/sequence/member/dropWhile', () => {
   describe('dropWhile', () => {
     it('0 nothing', () => {
       assert.deepStrictEqual(
-        new Sequence<number, number>((n = 0, cons) => cons())
+        new Sequence<number, number>((_ = 0, cons) => cons())
           .dropWhile(() => false)
           .extract(),
         []);
@@ -14,7 +14,7 @@ describe('Unit: lib/monad/sequence/member/dropWhile', () => {
 
     it('0 all', () => {
       assert.deepStrictEqual(
-        new Sequence<number, number>((n = 0, cons) => cons())
+        new Sequence<number, number>((_ = 0, cons) => cons())
           .dropWhile(() => true)
           .extract(),
         []);

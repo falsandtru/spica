@@ -1,5 +1,5 @@
 import {
-  Supervisor, SupervisorSettings,
+  Supervisor,
   Observable,
   Sequence,
   Cancelable,
@@ -101,6 +101,10 @@ describe('Interface: Package', function () {
   });
 
   describe('List', function () {
+    it('List', function () {
+      <List<number, Nil>>new Nil().push(0);
+    });
+
     it('Nil', function () {
       assert(typeof Nil === 'function');
     });
@@ -108,6 +112,10 @@ describe('Interface: Package', function () {
   });
 
   describe('HList', function () {
+    it('HList', function () {
+      <HList<number, HNil>>new HNil().push(0);
+    });
+
     it('HNil', function () {
       assert(typeof HNil === 'function');
     });
@@ -185,7 +193,7 @@ describe('Interface: Package', function () {
     it('assertion self-check', function (done) {
       setTimeout(function () {
         try {
-          console.log(assert(false === true), assert); // LOG: undefined, function powerAssert() { ... }
+          console.log(assert(!false === !true), assert); // LOG: undefined, function powerAssert() { ... }
         }
         catch (e) {
           done();

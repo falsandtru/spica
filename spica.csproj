@@ -15,8 +15,6 @@
     <IISExpressUseClassicPipelineMode />
   </PropertyGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="typings\*.d.ts" />
-    <TypeScriptCompile Include="typings\benchmark\*.d.ts" />
     <TypeScriptCompile Include="*.ts" />
     <TypeScriptCompile Include="src\**\*.ts" />
     <TypeScriptCompile Include="test\**\*.ts" />
@@ -26,20 +24,25 @@
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <TypeScriptRemoveComments>false</TypeScriptRemoveComments>
+    <TypeScriptCompileOnSaveEnabled>False</TypeScriptCompileOnSaveEnabled>
     <TypeScriptSourceMap>true</TypeScriptSourceMap>
     <TypeScriptModuleKind>AMD</TypeScriptModuleKind>
-    <TypeScriptModuleResolution>NodeJs</TypeScriptModuleResolution>
+    <TypeScriptModuleResolution>Node</TypeScriptModuleResolution>
     <TypeScriptAllowSyntheticDefaultImports>True</TypeScriptAllowSyntheticDefaultImports>
-    <TypeScriptCompileOnSaveEnabled>False</TypeScriptCompileOnSaveEnabled>
     <TypeScriptTarget>ES5</TypeScriptTarget>
+    <TypeScriptLib>dom,es6</TypeScriptLib>
     <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
+    <TypeScriptStrictNullChecks>True</TypeScriptStrictNullChecks>
     <TypeScriptNoImplicitAny>True</TypeScriptNoImplicitAny>
-    <TypeScriptSuppressImplicitAnyIndexErrors>True</TypeScriptSuppressImplicitAnyIndexErrors>
+    <TypeScriptNoImplicitThis>True</TypeScriptNoImplicitThis>
     <TypeScriptNoImplicitReturns>True</TypeScriptNoImplicitReturns>
+    <TypeScriptNoUnusedParameters>True</TypeScriptNoUnusedParameters>
+    <TypeScriptNoUnusedLocals>True</TypeScriptNoUnusedLocals>
     <TypeScriptNoFallthroughCasesInSwitch>True</TypeScriptNoFallthroughCasesInSwitch>
+    <TypeScriptSuppressImplicitAnyIndexErrors>True</TypeScriptSuppressImplicitAnyIndexErrors>
     <TypeScriptAllowUnusedLabels>True</TypeScriptAllowUnusedLabels>
     <TypeScriptForceConsistentCasingInFileNames>True</TypeScriptForceConsistentCasingInFileNames>
+    <TypeScriptRemoveComments>false</TypeScriptRemoveComments>
     <TypeScriptOutFile />
     <TypeScriptOutDir />
     <TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>

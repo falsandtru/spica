@@ -41,7 +41,7 @@ describe('Unit: lib/monad/sequence/member/static/difference', () => {
         Sequence.difference(Sequence.from([]), nat, (a, b) => a - b).take(3).extract(),
         [0, 1, 2]);
       assert.deepStrictEqual(
-        Sequence.difference(Sequence.from([]), Sequence.from([]), (a, b) => a - b).take(3).extract(),
+        Sequence.difference(Sequence.from([]), Sequence.from([]), () => 0).take(3).extract(),
         []);
     });
 

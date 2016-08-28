@@ -34,11 +34,13 @@
   ],
   "dependencies": {},
   "devDependencies": {
+    "@types/benchmark": "^1.0.29",
+    "@types/mocha": "^2.2.31",
+    "@types/power-assert": "0.0.27",
     "benchmark": "^2.1.1",
     "del": "^2.2.2",
     "extend": "^3.0.0",
     "gulp": "^3.9.1",
-    "gulp-footer": "^1.0.5",
     "gulp-header": "1.8.8",
     "gulp-load-plugins": "^1.2.4",
     "gulp-mocha": "^3.0.1",
@@ -58,8 +60,7 @@
     "npm-check-updates": "^2.8.0",
     "power-assert": "^1.4.1",
     "run-sequence": "^1.2.2",
-    "tsd": "^0.6.5",
-    "typescript": "^1.8.10"
+    "typescript": "2.1.0-dev.20160829"
   },
   "scripts": {
     "test": "gulp server"

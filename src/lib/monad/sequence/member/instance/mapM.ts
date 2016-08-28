@@ -10,7 +10,7 @@ export default class <a, z> extends Sequence<a, z> {
           case 0:
             return Sequence.mempty;
           default: {
-            const x = xs.shift();
+            const x = xs.shift()!;
             return f(x)
               .bind<b[]>(y =>
                 xs.length === 0

@@ -119,22 +119,21 @@ describe('Unit: lib/observable', function () {
     it('emit', function (done) {
       let cnt = 0;
       const ob = new Observable<string[], TestEvent, void>();
-      ob.on(['test'], data => ++cnt === 1 && done());
+      ob.on(['test'], () => assert(++cnt === 1) || done());
       ob.emit(['test'], new TestEvent('TEST'));
     });
 
     it('emit namespace', function (done) {
       let cnt = 0;
       const ob = new Observable<string[], TestEvent, void>();
-      ob.on(['test', '0'], data => ++cnt === 2 && done());
-      ob.emit(['test', '0'], new TestEvent('TEST'));
+      ob.on(['test', '0'], () => assert(++cnt === 1) || done());
       ob.emit(['test', '0'], new TestEvent('TEST'));
     });
 
     it('emit recursive', function (done) {
       let cnt = 0;
       const ob = new Observable<string[], number, void>();
-      ob.once(['test'], data => ob.emit(['test'], 1, data => assert(++cnt === 1 && data === 1)));
+      ob.once(['test'], () => ob.emit(['test'], 1, data => assert(++cnt === 1 && data === 1)));
       ob.emit(['test'], 0, data => assert(++cnt === 2 && data === 0) || done());
     });
 

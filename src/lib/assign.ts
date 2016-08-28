@@ -3,7 +3,7 @@ import {type} from './type';
 export const assign = template((key, target, source) =>
   target[key] = source[key]);
 
-export const clone = template((key, target, source): any => {
+export let clone = template((key, target, source): any => {
   switch (type(source[key])) {
     case 'Array':
       return target[key] = clone([], source[key]);
@@ -14,7 +14,7 @@ export const clone = template((key, target, source): any => {
   }
 });
 
-export const extend = template((key, target, source): any => {
+export let extend = template((key, target, source): any => {
   switch (type(source[key])) {
     case 'Array':
       return target[key] = extend([], source[key]);

@@ -3,7 +3,7 @@ import {Sequence} from '../../../sequence';
 describe('Unit: lib/monad/sequence/member/iterate', () => {
   describe('iterate', () => {
     it('', () => {
-      let thunk = new Sequence<number, number>((n = 0, cons) => cons()).iterate();
+      let thunk = new Sequence<number, number>((_ = 0, cons) => cons()).iterate();
       assert.deepStrictEqual(thunk, [void 0, Sequence.Iterator.done, -1]);
 
       thunk = new Sequence<number, number>((n = 0, cons) => cons(n)).iterate();

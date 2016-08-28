@@ -5,21 +5,11 @@ import {Sequence} from './sequence';
 describe('Unit: lib/maybe', () => {
   const Return = Maybe.Return;
 
-  function throwError(msg: string): any {
+  function throwError(msg: string): never {
     throw new Error(msg);
   }
 
   describe('Maybe', () => {
-    it('Maybe type', () => {
-      const just: Maybe<number> = Just(0);
-      const nothing: Maybe<number> = Nothing;
-      const maybe: Maybe<number> = Just(0).bind<number>(n => Just(n) || Nothing);
-    });
-
-    it('Just type', () => {
-      const just: Just<number> = Just(0);
-    });
-
     it('Just', () => {
       const result = Return(0)
         .bind(n => Just(n + 1))
@@ -36,10 +26,6 @@ describe('Unit: lib/maybe', () => {
       assert(result === 'Just 1');
     });
 
-    it('Nothing type', () => {
-      const nothing: Nothing = Nothing;
-    });
-
     it('Nothing', () => {
       const result = Return(0)
         .bind(n => Just(n + 1))
@@ -51,7 +37,7 @@ describe('Unit: lib/maybe', () => {
 
     it('Nothing nest', () => {
       const result = Return(Return(''))
-        .bind(m => m.bind(n => Nothing).bind(throwError))
+        .bind(m => m.bind(_ => Nothing).bind(throwError))
         .bind(throwError)
         .extract(() => 'Nothing');
       assert(result === 'Nothing');
@@ -59,8 +45,8 @@ describe('Unit: lib/maybe', () => {
 
     it('Maybe', () => {
       const result = Return(0)
-        .bind(n => Just(n) || Nothing || Just(n).bind<number>(n => Just(n) || Nothing))
-        .bind(n => Just(n) || Nothing || Just(n).bind<number>(n => Just(n) || Nothing))
+        .bind(n => <Just<number> | Nothing | Maybe<number>>Just(n).bind(n => <Just<number> | Nothing>Just(n) || Nothing))
+        .bind(n => <Just<number> | Nothing | Maybe<number>>Just(n).bind(n => <Just<number> | Nothing>Just(n) || Nothing))
         .extract(() => 'Nothing');
       assert(result === 0);
     });
@@ -166,7 +152,6 @@ describe('Unit: lib/maybe', () => {
     });
 
     it('Monad law 2', () => {
-      const f = (n: number) => Return(n + 1);
       const x = 0;
       const ma = Return(x);
       const mb = ma.bind(Return);
@@ -181,7 +166,7 @@ describe('Unit: lib/maybe', () => {
         .bind(f)
         .bind(g);
       const mb = Return(x)
-        .bind(n =>
+        .bind(x =>
           f(x)
             .bind(g));
       assert(ma.extract() === mb.extract());

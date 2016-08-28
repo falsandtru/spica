@@ -6,7 +6,7 @@ describe('Unit: lib/monad/sequence/member/takeWhile', () => {
   describe('takeWhile', () => {
     it('0 all', () => {
       assert.deepStrictEqual(
-        new Sequence<number, number>((n = 0, cons) => cons())
+        new Sequence<number, number>((_ = 0, cons) => cons())
           .takeWhile(() => true)
           .extract(),
         []);
@@ -14,7 +14,7 @@ describe('Unit: lib/monad/sequence/member/takeWhile', () => {
 
     it('0 nothing', () => {
       assert.deepStrictEqual(
-        new Sequence<number, number>((n = 0, cons) => cons())
+        new Sequence<number, number>((_ = 0, cons) => cons())
           .takeWhile(() => false)
           .extract(),
         []);

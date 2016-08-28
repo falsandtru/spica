@@ -10,7 +10,7 @@ export default class <a, z> extends Sequence<a, z> {
           case 0:
             return Sequence.from([[]]);
           default: {
-            const x = xs.shift();
+            const x = xs.shift()!;
             return f(x)
               .bind<a[]>(b =>
                 b

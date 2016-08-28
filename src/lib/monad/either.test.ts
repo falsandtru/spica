@@ -4,21 +4,11 @@ import {curry} from '../curry';
 describe('Unit: lib/either', () => {
   const Return = Either.Return;
 
-  function throwError(msg: string): any {
+  function throwError(msg: string): never {
     throw new Error(msg);
   }
 
   describe('Either', () => {
-    it('Either type', () => {
-      const left: Either<Error, number> = Left<Error>(new Error());
-      const right: Either<Error, number> = Right<number>(0);
-      const either: Either<Error, number> = Right(0).bind<Error>(n => Right(n) || Left(new Error()));
-    });
-
-    it('Left type', () => {
-      const left: Left<Error> = Left<Error>(new Error());
-    });
-
     it('Left', () => {
       const result = Return(0)
         .bind(n => Right(n + 1))
@@ -30,14 +20,10 @@ describe('Unit: lib/either', () => {
 
     it('Left nest', () => {
       const result = Return(Return(0))
-        .bind(m => m.bind(n => Left(NaN)).bind(throwError))
+        .bind(m => m.bind(_ => Left(NaN)).bind(throwError))
         .bind(throwError)
         .extract(_ => 'Nothing');
       assert(result === 'Nothing');
-    });
-
-    it('Right type', () => {
-      const right: Right<number> = Right(0);
     });
 
     it('Right', () => {
@@ -58,9 +44,9 @@ describe('Unit: lib/either', () => {
 
     it('Either', () => {
       const result = Return(0)
-        .bind<number>(n => Right(n) || Left(0) || Right(n).bind(n => Right(n) || Left(0)))
-        .bind<number>(n => Right(n) || Left(0) || Right(n).bind(n => Right(n) || Left(0)))
-        .extract((n) => n + '');
+        .bind<number, number>(n => <Right<number> | Left<number> | Either<number, number>>Right(n).bind(n => <Right<number> | Left<number>>Right(n) || Left(0)))
+        .bind(n => <Right<number> | Left<number> | Either<number, number>>Right(n).bind(n => <Right<number> | Left<number>>Right(n) || Left(0)))
+        .extract(n => n + '');
       assert(result === 0);
     });
 
@@ -165,7 +151,6 @@ describe('Unit: lib/either', () => {
     });
 
     it('Monad law 2', () => {
-      const f = (n: number) => Return(n + 1);
       const x = 0;
       const ma = Return(x);
       const mb = ma.bind(Return);
@@ -180,7 +165,7 @@ describe('Unit: lib/either', () => {
         .bind(f)
         .bind(g);
       const mb = Return(x)
-        .bind(n =>
+        .bind(x =>
           f(x)
             .bind(g));
       assert(ma.extract() === mb.extract());
