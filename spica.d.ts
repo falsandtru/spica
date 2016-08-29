@@ -324,16 +324,27 @@ declare module 'spica' {
   export interface List<a, c extends Nil | List<a, any>> extends Cons<a, c> { }
   export class Nil {
     private NIL: void;
-    push<a>(a: a): Cons<a, Nil>;
+    push<a>(a: a): List<a, Nil>;
   }
-  class Cons<a, c extends Nil | Cons<a, any>> {
+  class Cons<a, c extends Nil | List<a, any>> {
     private CONS: a;
-    push(a: a): Cons<a, this>;
+    push(a: a): List<a, this>;
     head(): a;
     tail(): c;
     walk(f: (a: a) => void): c;
-    modify(f: (a: a) => a): Cons<a, c>;
-    extend(f: (a: a) => a): Cons<a, this>;
+    modify(f: (a: a) => a): List<a, c>;
+    extend(f: (a: a) => a): List<a, this>;
+    compact<c extends Nil | List<a, any>>(this: List<a, List<a, c>>, f: (l: a, r: a) => a): List<a, c>;
+    reverse(): List<a, c>;
+    tuple(this: List<a, Nil>): [a];
+    tuple(this: List<a, List<a, Nil>>): [a, a];
+    tuple(this: List<a, List<a, List<a, Nil>>>): [a, a, a];
+    tuple(this: List<a, List<a, List<a, List<a, Nil>>>>): [a, a, a, a];
+    tuple(this: List<a, List<a, List<a, List<a, List<a, Nil>>>>>): [a, a, a, a, a];
+    tuple(this: List<a, List<a, List<a, List<a, List<a, List<a, Nil>>>>>>): [a, a, a, a, a, a];
+    tuple(this: List<a, List<a, List<a, List<a, List<a, List<a, List<a, Nil>>>>>>>): [a, a, a, a, a, a, a];
+    tuple(this: List<a, List<a, List<a, List<a, List<a, List<a, List<a, List<a, Nil>>>>>>>>): [a, a, a, a, a, a, a, a];
+    tuple(this: List<a, List<a, List<a, List<a, List<a, List<a, List<a, List<a, List<a, Nil>>>>>>>>>): [a, a, a, a, a, a, a, a, a];
     array(): a[];
   }
 

@@ -39,6 +39,36 @@ describe('Unit: lib/list', () => {
       assert.deepStrictEqual(new Nil().push(0).extend(n => ++n).array(), [1, 0]);
     });
 
+    it('compact', () => {
+      {
+        const l: List<number, Nil> = new Nil().push(1).push(2).compact((n, m) => n - m);
+        assert.deepStrictEqual(l.tuple(), [1]);
+      }
+      {
+        const l: List<number, List<number, Nil>> = new Nil().push(1).push(2).push(5).compact((n, m) => n - m);
+        assert.deepStrictEqual(l.tuple(), [3, 1]);
+      }
+    });
+
+    it('reverse', () => {
+      assert.deepStrictEqual(new Nil().push(0).push(1).push(2).reverse().array(), [0, 1, 2]);
+    });
+
+    it('tuple', () => {
+      {
+        const t: [number] = new Nil().push(1).tuple();
+        assert.deepStrictEqual(t, [1]);
+      }
+      {
+        const t: [number, number] = new Nil().push(2).push(1).tuple();
+        assert.deepStrictEqual(t, [1, 2]);
+      }
+      {
+        const t: [number, number, number] = new Nil().push(3).push(2).push(1).tuple();
+        assert.deepStrictEqual(t, [1, 2, 3]);
+      }
+    });
+
   });
 
 });

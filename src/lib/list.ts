@@ -7,17 +7,20 @@ export class Nil {
   constructor() {
     void this.NIL;
   }
-  public push<a>(a: a): Cons<a, Nil> {
+  public push<a>(a: a): List<a, Nil> {
     return new Cons<a, Nil>(a, this);
+  }
+  public array(): never[] {
+    return [];
   }
 }
 
-class Cons<a, c extends Nil | Cons<a, any>> {
+class Cons<a, c extends Nil | List<a, any>> {
   private CONS: a;
   constructor(private head_: a, private tail_: c) {
     void this.CONS;
   }
-  public push(a: a): Cons<a, this> {
+  public push(a: a): List<a, this> {
     return new Cons<a, this>(a, this);
   }
   public head(): a {
@@ -30,16 +33,32 @@ class Cons<a, c extends Nil | Cons<a, any>> {
     void f(this.head());
     return this.tail();
   }
-  public modify(f: (a: a) => a): Cons<a, c> {
+  public modify(f: (a: a) => a): List<a, c> {
     return (<any>this.tail().push)(f(this.head()));
   }
-  public extend(f: (a: a) => a): Cons<a, this> {
+  public extend(f: (a: a) => a): List<a, this> {
     return this.push(f(this.head()));
   }
+  public compact<c extends Nil | List<a, any>>(this: List<a, List<a, c>>, f: (l: a, r: a) => a): List<a, c> {
+    return this.tail().modify(r => f(this.head(), r));
+  }
+  public reverse(): List<a, c> {
+    return <this>this.array()
+      .reduce<Nil | List<a, any>>((l: Nil, e: a) => l.push(e), new Nil());
+  }
+  public tuple(this: List<a, Nil>): [a]
+  public tuple(this: List<a, List<a, Nil>>): [a, a]
+  public tuple(this: List<a, List<a, List<a, Nil>>>): [a, a, a]
+  public tuple(this: List<a, List<a, List<a, List<a, Nil>>>>): [a, a, a, a]
+  public tuple(this: List<a, List<a, List<a, List<a, List<a, Nil>>>>>): [a, a, a, a, a]
+  public tuple(this: List<a, List<a, List<a, List<a, List<a, List<a, Nil>>>>>>): [a, a, a, a, a, a]
+  public tuple(this: List<a, List<a, List<a, List<a, List<a, List<a, List<a, Nil>>>>>>>): [a, a, a, a, a, a, a]
+  public tuple(this: List<a, List<a, List<a, List<a, List<a, List<a, List<a, List<a, Nil>>>>>>>>): [a, a, a, a, a, a, a, a]
+  public tuple(this: List<a, List<a, List<a, List<a, List<a, List<a, List<a, List<a, List<a, Nil>>>>>>>>>): [a, a, a, a, a, a, a, a, a]
+  public tuple(): a[] {
+    return this.array();
+  }
   public array(): a[] {
-    return concat(
-      [this.head()],
-      (<Cons<a, any>><any>this.tail()).array ? (<Cons<a, any>><any>this.tail()).array() : []
-    );
+    return concat([this.head()], this.tail().array());
   }
 }
