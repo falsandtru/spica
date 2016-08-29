@@ -1,10 +1,11 @@
 import {benchmark} from './benchmark';
+import {IContextDefinition} from 'mocha';
 import {sort} from 'spica';
 
-describe('Benchmark:', function () {
+describe('Benchmark:', function (this: IContextDefinition) {
   this.timeout(10 * 1e3);
 
-  describe('sort', function () {
+  describe('sort', function (this: IContextDefinition) {
     this.timeout(100 * 1e3);
 
     function array(n: number) {

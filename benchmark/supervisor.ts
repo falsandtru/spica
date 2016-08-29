@@ -1,7 +1,8 @@
 import {benchmark} from './benchmark';
+import {IContextDefinition} from 'mocha';
 import {Supervisor} from 'spica';
 
-describe('Benchmark:', function () {
+describe('Benchmark:', function (this: IContextDefinition) {
   this.timeout(10 * 1e3);
 
   describe('Supervisor', function () {

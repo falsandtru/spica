@@ -1,10 +1,11 @@
 import {benchmark} from './benchmark';
+import {IContextDefinition} from 'mocha';
 import {Sequence} from 'spica';
 
-describe('Benchmark:', function () {
+describe('Benchmark:', function (this: IContextDefinition) {
   this.timeout(10 * 1e3);
 
-  describe('Sequence', function () {
+  describe('Sequence', function (this: IContextDefinition) {
     this.timeout(100 * 1e3);
 
     function array(n: number) {
@@ -60,7 +61,7 @@ describe('Benchmark:', function () {
     function seqMapFilter(n: number, done: () => void) {
       const seq = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1))
         .map(n => n)
-        .filter(n => true)
+        .filter(_ => true)
         .take(n);
       benchmark(`Sequence map filter seq ${n}`, () => seq.extract(), done);
     }

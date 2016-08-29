@@ -91,6 +91,9 @@ gulp.task('ts:test', function () {
 gulp.task('ts:bench', function () {
   return gulp.src(config.ts.bench.src)
     .pipe($.typescript(config.ts.options))
+    .once("error", function () {
+      this.once("finish", () => process.exit(1));
+    })
     .pipe($.header(config.exporter))
     .pipe(gulp.dest(config.ts.bench.dest));
 });
