@@ -351,16 +351,35 @@ declare module 'spica' {
   export interface HList<a, c extends HNil | HList<any, any>> extends HCons<a, c> { }
   export class HNil {
     private NIL: void;
-    push<b>(b: b): HCons<b, HNil>;
+    push<b>(b: b): HList<b, HNil>;
   }
-  class HCons<a, c extends HNil | HCons<any, any>> {
+  class HCons<a, c extends HNil | HList<any, any>> {
     private CONS: a;
-    push<b>(b: b): HCons<b, this>;
+    push<b>(b: b): HList<b, this>;
     head(): a;
     tail(): c;
     walk(f: (a: a) => void): c;
-    modify<b>(f: (a: a) => b): HCons<b, c>;
-    extend<b>(f: (a: a) => b): HCons<b, this>;
+    modify<b>(f: (a: a) => b): HList<b, c>;
+    extend<b>(f: (a: a) => b): HList<b, this>;
+    compact<b, c, d extends HNil | HList<any, any>>(this: HList<a, HList<b, d>>, f: (a: a, b: b) => c): HList<c, d>;
+    reverse<a>(this: HList<a, HNil>): HList<a, HNil>;
+    reverse<a, b>(this: HList<a, HList<b, HNil>>): HList<b, HList<a, HNil>>;
+    reverse<a, b, c>(this: HList<a, HList<b, HList<c, HNil>>>): HList<c, HList<b, HList<a, HNil>>>;
+    reverse<a, b, c, d>(this: HList<a, HList<b, HList<c, HList<d, HNil>>>>): HList<d, HList<c, HList<b, HList<a, HNil>>>>;
+    reverse<a, b, c, d, e>(this: HList<a, HList<b, HList<c, HList<d, HList<e, HNil>>>>>): HList<e, HList<d, HList<c, HList<b, HList<a, HNil>>>>>;
+    reverse<a, b, c, d, e, f>(this: HList<a, HList<b, HList<c, HList<d, HList<e, HList<f, HNil>>>>>>): HList<f, HList<e, HList<d, HList<c, HList<b, HList<a, HNil>>>>>>;
+    reverse<a, b, c, d, e, f, g>(this: HList<a, HList<b, HList<c, HList<d, HList<e, HList<f, HList<g, HNil>>>>>>>): HList<g, HList<f, HList<e, HList<d, HList<c, HList<b, HList<a, HNil>>>>>>>;
+    reverse<a, b, c, d, e, f, g, h>(this: HList<a, HList<b, HList<c, HList<d, HList<e, HList<f, HList<g, HList<h, HNil>>>>>>>>): HList<h, HList<g, HList<f, HList<e, HList<d, HList<c, HList<b, HList<a, HNil>>>>>>>>;
+    reverse<a, b, c, d, e, f, g, h, i>(this: HList<a, HList<b, HList<c, HList<d, HList<e, HList<f, HList<g, HList<h, HList<i, HNil>>>>>>>>>): HList<i, HList<h, HList<g, HList<f, HList<e, HList<d, HList<c, HList<b, HList<a, HNil>>>>>>>>>;
+    tuple<a>(this: HList<a, HNil>): [a];
+    tuple<a, b>(this: HList<a, HList<b, HNil>>): [a, b];
+    tuple<a, b, c>(this: HList<a, HList<b, HList<c, HNil>>>): [a, b, c];
+    tuple<a, b, c, d>(this: HList<a, HList<b, HList<c, HList<d, HNil>>>>): [a, b, c, d];
+    tuple<a, b, c, d, e>(this: HList<a, HList<b, HList<c, HList<d, HList<e, HNil>>>>>): [a, b, c, d, e];
+    tuple<a, b, c, d, e, f>(this: HList<a, HList<b, HList<c, HList<d, HList<e, HList<f, HNil>>>>>>): [a, b, c, d, e, f];
+    tuple<a, b, c, d, e, f, g>(this: HList<a, HList<b, HList<c, HList<d, HList<e, HList<f, HList<g, HNil>>>>>>>): [a, b, c, d, e, f, g];
+    tuple<a, b, c, d, e, f, g, h>(this: HList<a, HList<b, HList<c, HList<d, HList<e, HList<f, HList<g, HList<h, HNil>>>>>>>>): [a, b, c, d, e, f, g, h];
+    tuple<a, b, c, d, e, f, g, h, i>(this: HList<a, HList<b, HList<c, HList<d, HList<e, HList<f, HList<g, HList<h, HList<i, HNil>>>>>>>>>): [a, b, c, d, e, f, g, h, i];
   }
 
   export class DataMap<K, V> {

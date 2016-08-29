@@ -41,6 +41,37 @@ describe('Unit: lib/hlist', () => {
       assert(new HNil().push(0).extend(n => n + '').tail().head() === 0);
     });
 
+    it('compact', () => {
+      {
+        const l: HList<number[], HNil> = new HNil().push(1).push([2]).compact((ns, n) => ns.concat(n));
+        assert.deepStrictEqual(l.tuple(), [[2, 1]]);
+      }
+      {
+        const l: HList<number[], HList<string, HNil>> = new HNil().push('').push(2).push([5]).compact((ns, n) => ns.concat(n));
+        assert.deepStrictEqual(l.tuple(), [[5, 2], '']);
+      }
+    });
+
+    it('reverse', () => {
+        const t: [boolean, number, string] = new HNil().push(false).push(0).push('').reverse().tuple();
+        assert.deepStrictEqual(t, [false, 0, '']);
+    });
+
+    it('tuple', () => {
+      {
+        const t: [boolean] = new HNil().push(false).tuple();
+        assert.deepStrictEqual(t, [false]);
+      }
+      {
+        const t: [number, boolean] = new HNil().push(false).push(0).tuple();
+        assert.deepStrictEqual(t, [0, false]);
+      }
+      {
+        const t: [string, number, boolean] = new HNil().push(false).push(0).push('').tuple();
+        assert.deepStrictEqual(t, ['', 0, false]);
+      }
+    });
+
   });
 
 });
