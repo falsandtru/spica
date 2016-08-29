@@ -1,5 +1,4 @@
 import {Maybe, Just, Nothing} from './maybe';
-import {curry} from '../curry';
 import {Sequence} from './sequence';
 
 describe('Unit: lib/maybe', () => {
@@ -101,36 +100,32 @@ describe('Unit: lib/maybe', () => {
   describe('Applicative', () => {
     it('ap 1', () => {
       assert.strictEqual(
-        Maybe.ap(
-          Maybe.pure(curry((a: number) => a)))
-          (Maybe.pure(1))
+        Maybe.pure((a: number) => a)
+          .ap(Maybe.pure(1))
           .extract(),
         1);
       assert.strictEqual(
-        Maybe.ap(
-          Maybe.pure(curry(throwError)))
-          (Nothing)
+        Maybe.pure(throwError)
+          .ap(Nothing)
           .extract(() => 0),
         0);
     });
 
     it('ap 2', () => {
       assert.strictEqual(
-        Maybe.ap(Maybe.ap(
-          Maybe.pure(curry((a: number, b: number) => a + b)))
-          (Maybe.pure(1)))
-          (Maybe.pure(2))
+        Maybe.pure((a: number, b: number) => a + b)
+          .ap(Maybe.pure(1))
+          .ap(Maybe.pure(2))
           .extract(),
         3);
     });
 
     it('ap 3', () => {
       assert.strictEqual(
-        Maybe.ap(Maybe.ap(Maybe.ap(
-          Maybe.pure(curry((a: number, b: number, c: number) => a + b + c)))
-          (Maybe.pure(1)))
-          (Maybe.pure(2)))
-          (Maybe.pure(3))
+        Maybe.pure((a: number, b: number, c: number) => a + b + c)
+          .ap(Maybe.pure(1))
+          .ap(Maybe.pure(2))
+          .ap(Maybe.pure(3))
           .extract(),
         6);
     });

@@ -8,6 +8,14 @@ export class Maybe<a> extends MonadPlus<a> {
   public fmap<b>(f: (a: a) => b): Maybe<b> {
     return this.bind(a => new Just(f(a)));
   }
+  public ap<a, z>(this: Maybe<(a: a) => z>, a: Maybe<a>): Maybe<z>
+  public ap<a, b, z>(this: Maybe<(a: a, b: b) => z>, a: Maybe<a>): Maybe<(b: b) => z>
+  public ap<a, b, c, z>(this: Maybe<(a: a, b: b, c: c) => z>, a: Maybe<a>): Maybe<(b: b, c: c) => z>
+  public ap<a, b, c, d, z>(this: Maybe<(a: a, b: b, c: c, d: d) => z>, a: Maybe<a>): Maybe<(b: b, c: c, d: d) => z>
+  public ap<a, b, c, d, e, z>(this: Maybe<(a: a, b: b, c: c, d: d, e: e) => z>, a: Maybe<a>): Maybe<(b: b, c: c, d: d, e: e) => z>
+  public ap<a, z>(this: Maybe<(...as: any[]) => z>, a: Maybe<a>): Maybe<z> {
+    return Maybe.ap(this, a);
+  }
   public bind(f: (a: a) => Nothing): Maybe<a>
   public bind<b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b>
   public bind<b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b> {
@@ -40,8 +48,8 @@ export namespace Maybe {
   export function pure<a>(a: a): Maybe<a> {
     return new Just(a);
   }
-  export declare function ap<a, b>(ff: Maybe<(a: a) => b>, fa: Maybe<a>): Maybe<b>
-  export declare function ap<a, b>(ff: Maybe<(a: a) => b>): (fa: Maybe<a>) => Maybe<b>
+  export declare function ap<a, b>(mf: Maybe<(a: a) => b>, ma: Maybe<a>): Maybe<b>
+  export declare function ap<a, b>(mf: Maybe<(a: a) => b>): (ma: Maybe<a>) => Maybe<b>
   export const Return = pure;
   export declare function bind<a>(m: Maybe<a>, f: (a: a) => Nothing): Maybe<a>
   export declare function bind<a, b>(m: Maybe<a>, f: (a: a) => Maybe<b> | Nothing): Maybe<b>

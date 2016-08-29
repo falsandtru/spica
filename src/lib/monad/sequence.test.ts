@@ -1,5 +1,4 @@
 import {Sequence} from './sequence';
-import {curry} from '../curry';
 
 describe('Unit: lib/monad/sequence', () => {
   describe('Monoid', () => {
@@ -54,38 +53,51 @@ describe('Unit: lib/monad/sequence', () => {
   describe('Applicative', () => {
     it('ap 1', () => {
       assert.deepStrictEqual(
-        Sequence.ap(
-          Sequence.pure(curry((a: number) => a)))
-          (Sequence.pure(1))
+        Sequence.pure((a: number) => a)
+          .ap(Sequence.pure(1))
           .extract(),
         [1]);
       assert.deepStrictEqual(
-        Sequence.ap(
-          Sequence.pure(curry((a: number) => a)),
-          (Sequence.pure(1)))
+        Sequence.pure((a: number) => a)
+          .ap(Sequence.pure(1))
           .extract(),
         [1]);
     });
 
     it('ap 2', () => {
       assert.deepStrictEqual(
-        Sequence.ap(Sequence.ap(
-          Sequence.pure(curry((a: number, b: number) => a + b)))
-          (Sequence.pure(1)))
-          (Sequence.pure(2))
+        Sequence.pure((a: number, b: number) => a + b)
+          .ap(Sequence.pure(1))
+          .ap(Sequence.pure(2))
           .extract(),
         [3]);
     });
 
     it('ap 3', () => {
       assert.deepStrictEqual(
-        Sequence.ap(Sequence.ap(Sequence.ap(
-          Sequence.pure(curry((a: number, b: number, c: number) => a + b + c)))
-          (Sequence.pure(1)))
-          (Sequence.pure(2)))
-          (Sequence.pure(3))
+        Sequence.pure((a: number, b: number, c: number) => a + b + c)
+          .ap(Sequence.pure(1))
+          .ap(Sequence.pure(2))
+          .ap(Sequence.pure(3))
           .extract(),
         [6]);
+    });
+
+    it('combination 1', () => {
+      assert.deepStrictEqual(
+        Sequence.from([(n: number) => n, (n: number) => -n])
+          .ap(Sequence.from([1, 2]))
+          .extract(),
+        [1, 2, -1, -2]);
+    });
+
+    it('combination 2', () => {
+      assert.deepStrictEqual(
+        Sequence.from([(n: number, m: number) => n + m, (n: number, m: number) => n * m])
+          .ap(Sequence.from([1, 2]))
+          .ap(Sequence.from([3, 4]))
+          .extract(),
+        [4, 5, 5, 6, 3, 4, 6, 8]);
     });
 
   });

@@ -1,5 +1,4 @@
 import {Either, Left, Right} from './either';
-import {curry} from '../curry';
 
 describe('Unit: lib/either', () => {
   const Return = Either.Return;
@@ -100,36 +99,32 @@ describe('Unit: lib/either', () => {
   describe('Applicative', () => {
     it('ap 1', () => {
       assert.strictEqual(
-        Either.ap(
-          Either.pure(curry((a: number) => a)))
-          (Either.pure(1))
+        Either.pure((a: number) => a)
+          .ap(Either.pure(1))
           .extract(),
         1);
       assert.strictEqual(
-        Either.ap(
-          Either.pure(curry(throwError)))
-          (Left(0))
+        Either.pure(throwError)
+          .ap(Left(0))
           .extract(n => n + 1),
         1);
     });
 
     it('ap 2', () => {
       assert.strictEqual(
-        Either.ap(Either.ap(
-          Either.pure(curry((a: number, b: number) => a + b)))
-          (Either.pure(1)))
-          (Either.pure(2))
+        Either.pure((a: number, b: number) => a + b)
+          .ap(Either.pure(1))
+          .ap(Either.pure(2))
           .extract(),
         3);
     });
 
     it('ap 3', () => {
       assert.strictEqual(
-        Either.ap(Either.ap(Either.ap(
-          Either.pure(curry((a: number, b: number, c: number) => a + b + c)))
-          (Either.pure(1)))
-          (Either.pure(2)))
-          (Either.pure(3))
+        Either.pure((a: number, b: number, c: number) => a + b + c)
+          .ap(Either.pure(1))
+          .ap(Either.pure(2))
+          .ap(Either.pure(3))
           .extract(),
         6);
     });
