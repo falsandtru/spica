@@ -21,6 +21,7 @@ describe('Unit: lib/compose', () => {
       }
       compose(X, <any>A);
       const x = new X();
+      assert(x instanceof X);
       assert(X['a'] === 'A');
       assert(X.x === 'X');
       assert(x.xp === 'x');
@@ -54,6 +55,7 @@ describe('Unit: lib/compose', () => {
       }
       compose(X, <any>A, <any>B);
       const x = new X();
+      assert(x instanceof X);
       assert(X['a'] === 'A');
       assert(X['b'] === 'B');
       assert(X.x === 'X');
