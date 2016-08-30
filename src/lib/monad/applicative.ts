@@ -10,9 +10,13 @@ export namespace Applicative {
   export declare function pure<a>(a: a): Applicative<a>;
   export function ap<a, b>(af: Applicative<(a: a) => b>, aa: Applicative<a>): Applicative<b>;
   export function ap<a, b>(af: Applicative<(a: a) => b>): (aa: Applicative<a>) => Applicative<b>;
-  export function ap<a, b>(af: Applicative<(a: a) => b>, aa?: Applicative<a>): Applicative<b> | ((fa: Applicative<a>) => Applicative<b>) {
+  export function ap<a, b>(af: Applicative<(a: a) => b>, aa?: Applicative<a>): Applicative<b> | ((aa: Applicative<a>) => Applicative<b>) {
     return aa
-      ? af.bind(f => aa.fmap(a => f.length === 0 ? f(a) : curry(f)(a)))
-      : (aa: Applicative<a>) => af.bind(f => aa.fmap(a => f.length === 0 ? f(a) : curry(f)(a)));
+      ? af.bind(f =>
+          aa.fmap(a =>
+            f.length === 0
+              ? f(a)
+              : curry(f)(a)))
+      : (aa: Applicative<a>) => ap(af, aa);
   }
 }
