@@ -1,13 +1,13 @@
 import {assign} from './assign';
 
-export function Mixin<T>(...mixins: Array<new (...args: any[]) => any>): new (...args: any[]) => T {
-  return mixins.reduceRight((b, d) => __extends(d, b), class { });
+export function Mixin<T>(...mixins: Array<new () => Object>): new () => T {
+  return <new () => T>mixins.reduceRight((b, d) => __extends(d, b), class { });
 }
 
-function __extends(d: new () => any, b: new () => any): new () => any {
+function __extends(d: new () => Object, b: new () => Object): new () => Object {
   const __ = class {
     constructor() {
-      return d.apply(b.apply(this, arguments) || this, arguments);
+      return d.call(b.call(this) || this);
     }
   };
   void assign(__.prototype, d.prototype, b.prototype);

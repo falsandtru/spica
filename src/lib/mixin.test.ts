@@ -5,9 +5,8 @@ describe('Unit: lib/mixin', () => {
     it('1', () => {
       let cnt = 0;
       class A {
-        constructor(n: number) {
+        constructor() {
           assert(++cnt === 1);
-          assert(n === 0);
         }
         static a = 'A';
         ap = 'a';
@@ -16,10 +15,9 @@ describe('Unit: lib/mixin', () => {
         }
       }
       class X extends Mixin<A>(A) {
-        constructor(n: number) {
-          super(n);
+        constructor() {
+          super();
           assert(++cnt === 2);
-          assert(n === 0);
         }
         static x = 'X';
         xp = 'x';
@@ -27,7 +25,7 @@ describe('Unit: lib/mixin', () => {
           return this.xp;
         }
       }
-      const x = new X(0);
+      const x = new X();
       assert(x instanceof A === false);
       assert(x instanceof X);
       assert(++cnt === 3);
@@ -42,9 +40,8 @@ describe('Unit: lib/mixin', () => {
     it('2', () => {
       let cnt = 0;
       class A {
-        constructor(n: number) {
+        constructor() {
           assert(++cnt === 1);
-          assert(n === 0);
         }
         static a = 'A';
         ap = 'a';
@@ -53,9 +50,8 @@ describe('Unit: lib/mixin', () => {
         }
       }
       class B {
-        constructor(n: number) {
+        constructor() {
           assert(++cnt === 2);
-          assert(n === 0);
         }
         static b = 'B';
         bp = 'b';
@@ -66,10 +62,9 @@ describe('Unit: lib/mixin', () => {
       interface AB extends B, A {
       }
       class X extends Mixin<AB>(B, A) {
-        constructor(n: number) {
-          super(n);
+        constructor() {
+          super();
           assert(++cnt === 3);
-          assert(n === 0);
         }
         static x = 'X';
         xp = 'x';
@@ -77,7 +72,7 @@ describe('Unit: lib/mixin', () => {
           return this.xp;
         }
       }
-      const x = new X(0);
+      const x = new X();
       assert(++cnt === 4);
       assert(x instanceof A === false);
       assert(x instanceof B === false);
@@ -96,9 +91,8 @@ describe('Unit: lib/mixin', () => {
     it('3', () => {
       let cnt = 0;
       class A {
-        constructor(n: number) {
+        constructor() {
           assert(++cnt === 1);
-          assert(n === 0);
         }
         static a = 'A';
         ap = 'a';
@@ -107,9 +101,8 @@ describe('Unit: lib/mixin', () => {
         }
       }
       class B {
-        constructor(n: number) {
+        constructor() {
           assert(++cnt === 2);
-          assert(n === 0);
         }
         static b = 'B';
         bp = 'b';
@@ -118,9 +111,8 @@ describe('Unit: lib/mixin', () => {
         }
       }
       class C {
-        constructor(n: number) {
+        constructor() {
           assert(++cnt === 3);
-          assert(n === 0);
         }
         static c = 'C';
         cp = 'c';
@@ -131,8 +123,8 @@ describe('Unit: lib/mixin', () => {
       interface ABC extends C, B, A {
       }
       class X extends Mixin<ABC>(C, B, A) {
-        constructor(n: number) {
-          super(n);
+        constructor() {
+          super();
           assert(++cnt === 4);
         }
         static x = 'X';
@@ -141,7 +133,7 @@ describe('Unit: lib/mixin', () => {
           return this.xp;
         }
       }
-      const x = new X(0);
+      const x = new X();
       assert(++cnt === 5);
       assert(x instanceof A === false);
       assert(x instanceof B === false);
