@@ -1,6 +1,6 @@
 export class RelationMap<S extends Object, T extends Object, V> {
   private store = new WeakMap<S, WeakMap<T, V>>();
-  public get(source: S, target: T): V {
+  public get(source: S, target: T): V | undefined {
     return this.store.get(source)! && this.store.get(source)!.get(target)!;
   }
   public set(source: S, target: T, val: V): this {

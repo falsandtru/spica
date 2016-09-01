@@ -49,7 +49,7 @@ export class DataMap<K, V> {
     }
     return acc || ' ';
   }
-  public get(key: K): V {
+  public get(key: K): V | undefined {
     return (this.store.get(this.stringify(key)) || <[void, V]><any>[])[1];
   }
   public set(key: K, val: V): this {
