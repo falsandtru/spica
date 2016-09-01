@@ -26,10 +26,10 @@ export class DataMap<K, V> {
           return `9:[ ${this.stringifyArray(<any[]>key)} ]`;
         }
         return `9:{ ${
-          this.weakstore.has(key)
-            ? this.weakstore.get(key)
-            : this.stringifyObject(key) || this.weakstore.set(key, sqid())
-          } }`;
+          this.stringifyObject(key) ||
+          this.weakstore.get(key)! ||
+          this.weakstore.set(key, sqid()).get(key)!
+        } }`;
       }
     }
   }
