@@ -74,6 +74,7 @@ declare module 'spica' {
   }
 
   abstract class Lazy<a> {
+    abstract extract(): any;
   }
   abstract class Functor<a> extends Lazy<a> {
     abstract fmap<b>(f: (a: a) => b): Functor<b>;

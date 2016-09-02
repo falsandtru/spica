@@ -5,4 +5,5 @@ export abstract class Lazy<a> {
   protected evaluate(): this {
     return this.memory_ = this.memory_ || <this>this.thunk!();
   }
+  public abstract extract(): any;
 }
