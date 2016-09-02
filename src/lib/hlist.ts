@@ -3,7 +3,7 @@ import {concat} from './concat';
 export interface HList<a, c extends HNil | HList<any, any>> extends HCons<a, c> { }
 
 export class HNil {
-  private NIL: void;
+  private readonly NIL: void;
   constructor() {
     void this.NIL;
   }
@@ -16,7 +16,7 @@ export class HNil {
 }
 
 class HCons<a, c extends HNil | HList<any, any>> {
-  private CONS: a;
+  private readonly CONS: a;
   constructor(private head_: a, private tail_: c) {
     void this.CONS;
   }

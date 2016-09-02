@@ -3,7 +3,7 @@ import {concat} from './concat';
 export interface List<a, c extends Nil | List<a, any>> extends Cons<a, c> { }
 
 export class Nil {
-  private NIL: void;
+  private readonly NIL: void;
   constructor() {
     void this.NIL;
   }
@@ -16,7 +16,7 @@ export class Nil {
 }
 
 class Cons<a, c extends Nil | List<a, any>> {
-  private CONS: a;
+  private readonly CONS: a;
   constructor(private head_: a, private tail_: c) {
     void this.CONS;
   }

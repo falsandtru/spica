@@ -1,9 +1,10 @@
 import {Monad} from './monad';
 
 export class Either<a, b> extends Monad<b> {
-  protected EITHER: Left<a> | Right<b>;
+  private readonly EITHER: Left<a> | Right<b>;
   constructor(thunk: () => Either<a, b>) {
     super(thunk);
+    void this.EITHER;
   }
   public fmap<c>(f: (b: b) => c): Either<a, c> {
     return this.bind(b => new Right(f(b)));
@@ -56,10 +57,10 @@ export namespace Either {
 }
 
 export class Left<a> extends Either<a, any> {
-  protected EITHER: Left<a>;
-  protected LEFT: a;
+  private readonly LEFT: a;
   constructor(private a: a) {
     super(throwCallError);
+    void this.LEFT;
   }
   public bind(_: (b: any) => Left<a>): Left<a>
   public bind<c>(_: (b: any) => Either<a, c>): Either<a, c>
@@ -76,10 +77,10 @@ export class Left<a> extends Either<a, any> {
 }
 
 export class Right<b> extends Either<any, b> {
-  protected EITHER: Right<b>;
-  protected RIGHT: b;
-  constructor(private b: b) {
+  private readonly RIGHT: b;
+  constructor(private readonly b: b) {
     super(throwCallError);
+    void this.RIGHT;
   }
   public bind<c>(f: (b: b) => Right<c>): Right<c>
   public bind<a, c>(f: (b: b) => Either<a, c>): Either<a, c>

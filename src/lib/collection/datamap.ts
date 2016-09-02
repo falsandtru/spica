@@ -6,8 +6,8 @@ function isPrimitive(target: any): boolean {
 }
 
 export class DataMap<K, V> {
-  private store = new Map<string, [K, V]>();
-  private weakstore = new WeakMap<K, string>();
+  private readonly store = new Map<string, [K, V]>();
+  private readonly weakstore = new WeakMap<K, string>();
   private stringify(key: any): string {
     switch (typeof key) {
       case 'undefined':

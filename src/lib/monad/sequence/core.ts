@@ -5,8 +5,8 @@ type ESIterator<T> = Iterator<T>;
 
 export class Sequence<a, z> extends MonadPlus<a> implements Iterable<a> {
   constructor(
-    protected cons: (z: z, cons: (a?: a, z?: z) => Sequence.Data<a, z>) => Sequence.Data<a, z>,
-    protected memory?: Map<number, Sequence.Data<a, z>>
+    protected readonly cons: (z: z, cons: (a?: a, z?: z) => Sequence.Data<a, z>) => Sequence.Data<a, z>,
+    protected readonly memory?: Map<number, Sequence.Data<a, z>>
   ) {
     super(throwCallError);
   }

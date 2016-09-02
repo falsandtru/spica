@@ -1,9 +1,10 @@
 import {MonadPlus} from './monadplus';
 
 export class Maybe<a> extends MonadPlus<a> {
-  protected MAYBE: Just<a> | Nothing;
+  private readonly MAYBE: Just<a> | Nothing;
   constructor(thunk: () => Maybe<a>) {
     super(thunk);
+    void this.MAYBE;
   }
   public fmap<b>(f: (a: a) => b): Maybe<b> {
     return this.bind(a => new Just(f(a)));
@@ -60,10 +61,10 @@ export namespace Maybe {
 }
 
 export class Just<a> extends Maybe<a> {
-  protected MAYBE: Just<a>;
-  protected JUST: a;
-  constructor(private a: a) {
+  private readonly JUST: a;
+  constructor(private readonly a: a) {
     super(throwCallError);
+    void this.JUST;
   }
   public bind(f: (a: a) => Nothing): Maybe<a>
   public bind<b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b>
@@ -81,10 +82,10 @@ export class Just<a> extends Maybe<a> {
 }
 
 export class Nothing extends Maybe<any> {
-  protected MAYBE: Nothing;
-  protected NOTHING: void;
+  private readonly NOTHING: void;
   constructor() {
     super(throwCallError);
+    void this.NOTHING;
   }
   public bind(f: (a: any) => Nothing): Nothing
   public bind<b>(f: (a: any) => Maybe<b> | Nothing): Maybe<b>

@@ -17,15 +17,15 @@ declare module 'spica' {
     }
   }
   export abstract class Supervisor<T extends string[], D, R> {
-    static count: number;
-    static procs: number;
+    static readonly count: number;
+    static readonly procs: number;
     constructor(settings?: SupervisorSettings<T>)
-    name: string;
-    events: {
-      exec: Observer<T, Supervisor.Event.Data.Exec<T, D, R>, any>;
-      fail: Observer<T, Supervisor.Event.Data.Fail<T, D>, any>;
-      loss: Observer<T, Supervisor.Event.Data.Loss<T, D>, any>;
-      exit: Observer<T, Supervisor.Event.Data.Exit<T, D, R>, any>;
+    readonly name: string;
+    readonly events: {
+      readonly exec: Observer<T, Supervisor.Event.Data.Exec<T, D, R>, any>;
+      readonly fail: Observer<T, Supervisor.Event.Data.Fail<T, D>, any>;
+      readonly loss: Observer<T, Supervisor.Event.Data.Loss<T, D>, any>;
+      readonly exit: Observer<T, Supervisor.Event.Data.Exit<T, D, R>, any>;
     };
     register(namespace: T, process: (data: D) => R): (reason?: any) => void;
     call(namespace: T, data: D, timeout?: number): Promise<R[]>;
@@ -34,11 +34,11 @@ declare module 'spica' {
     terminate(namespace?: T, reason?: any): void;
   }
   export interface SupervisorSettings<T> {
-    name?: string;
-    dependencies?: [T, T[]][];
-    retry?: boolean;
-    timeout?: number;
-    destructor?: (reason?: any) => any;
+    readonly name?: string;
+    readonly dependencies?: [T, T[]][];
+    readonly retry?: boolean;
+    readonly timeout?: number;
+    readonly destructor?: (reason?: any) => any;
   }
 
   export class Observable<T extends Array<string | number>, D, R>
@@ -66,11 +66,11 @@ declare module 'spica' {
   }
 
   export class Cancelable<L> {
-    listeners: Set<(reason: L) => void>;
-    cancel: (reason: L) => void;
-    promise: <T>(val: T) => Promise<T>;
-    maybe: <T>(val: T) => Maybe<T>;
-    either: <R>(val: R) => Either<L, R>;
+    readonly listeners: Set<(reason: L) => void>;
+    readonly cancel: (reason: L) => void;
+    readonly promise: <T>(val: T) => Promise<T>;
+    readonly maybe: <T>(val: T) => Maybe<T>;
+    readonly either: <R>(val: R) => Either<L, R>;
   }
 
   abstract class Lazy<a> {
@@ -125,10 +125,10 @@ declare module 'spica' {
     static Return: typeof Sequence.pure;
     static bind<a, b>(m: Sequence<a, any>, f: (a: a) => Sequence<b, any>): Sequence<b, Sequence.Iterator<a>>;
     static bind<a>(m: Sequence<a, any>): <b>(f: (a: a) => Sequence<b, any>) => Sequence<b, Sequence.Iterator<a>>;
-    static mempty: Sequence<any, any>;
+    static readonly mempty: Sequence<any, any>;
     static mappend<a>(l: Sequence<a, any>, r: Sequence<a, any>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
     static mconcat<a>(as: Iterable<Sequence<a, any>>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
-    static mzero: Sequence<any, any>;
+    static readonly mzero: Sequence<any, any>;
     static mplus<a>(l: Sequence<a, any>, r: Sequence<a, any>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
     constructor(cons: (z: z, cons: (a?: a, z?: z) => Sequence.Data<a, z>) => Sequence.Data<a, z>);
     extract(): a[];
@@ -166,7 +166,7 @@ declare module 'spica' {
 
   namespace Monad {
     export abstract class Maybe<a> extends MonadPlus<a> {
-      protected MAYBE: Just<a> | Nothing;
+      private readonly MAYBE: Just<a> | Nothing;
       fmap<b>(f: (a: a) => b): Maybe<b>;
       ap<a, z>(this: Maybe<(a: a) => z>, a: Maybe<a>): Maybe<z>;
       ap<a, b, z>(this: Maybe<(a: a, b: b) => z>, a: Maybe<a>): Maybe<(b: b) => z>;
@@ -202,8 +202,7 @@ declare module 'spica' {
       export function mplus<a>(ml: Maybe<a>, mr: Maybe<a>): Maybe<a>;
     }
     export class Just<a> extends Maybe<a> {
-      protected MAYBE: Just<a>;
-      protected JUST: a;
+      private readonly JUST: a;
       bind(f: (a: a) => Nothing): Maybe<a>;
       bind<b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b>;
       extract(): a;
@@ -211,8 +210,7 @@ declare module 'spica' {
       extract<b>(nothing: () => b, just: (a: a) => b): b;
     }
     export class Nothing extends Maybe<any> {
-      protected MAYBE: Nothing;
-      protected NOTHING: void;
+      private readonly NOTHING: void;
       bind(f: (a: any) => Nothing): Nothing;
       bind<b>(f: (a: any) => Maybe<b> | Nothing): Maybe<b>;
       extract(): any;
@@ -239,7 +237,7 @@ declare module 'spica' {
 
   namespace Monad {
     export abstract class Either<a, b> extends Monad<b> {
-      protected EITHER: Left<a> | Right<b>;
+      private readonly EITHER: Left<a> | Right<b>;
       fmap<c>(f: (b: b) => c): Either<a, c>;
       ap<b, z>(this: Either<a, (b: b) => z>, b: Either<a, b>): Either<a, z>;
       ap<b, c, z>(this: Either<a, (b: b, c: c) => z>, b: Either<a, b>): Either<a, (c: c) => z>;
@@ -267,8 +265,7 @@ declare module 'spica' {
       export function bind<e, a>(m: Either<e, a>): <b>(f: (a: a) => Either<e, b>) => Either<e, b>;
     }
     export class Left<a> extends Either<a, any> {
-      protected EITHER: Left<a>;
-      protected LEFT: a;
+      private readonly LEFT: a;
       bind(_: (b: any) => Left<a>): Left<a>;
       bind<b>(f: (b: b) => Either<a, b>): Either<a, b>;
       extract(): any;
@@ -276,8 +273,7 @@ declare module 'spica' {
       extract<c>(left: (a: a) => c, right: (b: void) => c): c;
     }
     export class Right<b> extends Either<any, b> {
-      protected EITHER: Right<b>;
-      protected RIGHT: b;
+      private readonly RIGHT: b;
       bind<c>(f: (b: b) => Right<c>): Right<c>;
       bind<a, c>(f: (b: b) => Either<a, c>): Either<a, c>;
       extract(): b;
@@ -341,11 +337,11 @@ declare module 'spica' {
 
   export interface List<a, c extends Nil | List<a, any>> extends Cons<a, c> { }
   export class Nil {
-    private NIL: void;
+    private readonly NIL: void;
     push<a>(a: a): List<a, Nil>;
   }
   class Cons<a, c extends Nil | List<a, any>> {
-    private CONS: a;
+    private readonly CONS: a;
     push(a: a): List<a, this>;
     head(): a;
     tail(): c;
@@ -368,11 +364,11 @@ declare module 'spica' {
 
   export interface HList<a, c extends HNil | HList<any, any>> extends HCons<a, c> { }
   export class HNil {
-    private NIL: void;
+    private readonly NIL: void;
     push<b>(b: b): HList<b, HNil>;
   }
   class HCons<a, c extends HNil | HList<any, any>> {
-    private CONS: a;
+    private readonly CONS: a;
     push<b>(b: b): HList<b, this>;
     head(): a;
     tail(): c;

@@ -60,18 +60,18 @@ export abstract class Supervisor<T extends string[], D, R> implements ISuperviso
     void --(<typeof Supervisor>this.constructor).count;
     void Object.freeze(this);
   }
-  public name: string;
-  private deps: DataMap<T, T[]> = new DataMap<T, T[]>();
-  private retry: boolean;
-  private timeout: number;
-  private destructor_: (reason?: any) => any;
-  public events = {
+  public readonly name: string;
+  private readonly deps: DataMap<T, T[]> = new DataMap<T, T[]>();
+  private readonly retry: boolean;
+  private readonly timeout: number;
+  private readonly destructor_: (reason?: any) => any;
+  public readonly events = {
     exec: new Observable<T, Supervisor.Event.Data.Exec<T, D, R>, any>(),
     fail: new Observable<T, Supervisor.Event.Data.Fail<T, D>, any>(),
     loss: new Observable<T, Supervisor.Event.Data.Loss<T, D>, any>(),
     exit: new Observable<T, Supervisor.Event.Data.Exit<T, D, R>, any>()
   };
-  private procs: Observable<T, WorkerCommand<T, D>, R> = new Observable<T, WorkerCommand<T, D>, R>();
+  private readonly procs: Observable<T, WorkerCommand<T, D>, R> = new Observable<T, WorkerCommand<T, D>, R>();
   private alive = true;
   private registerable = true;
   private scheduled = false;
@@ -85,7 +85,7 @@ export abstract class Supervisor<T extends string[], D, R> implements ISuperviso
     });
     this.scheduled = true;
   }
-  private workerSharedResource: WorkerSharedResources<T, D, R> = {
+  private readonly workerSharedResource: WorkerSharedResources<T, D, R> = {
     procs: this.procs,
     dependenciesStack: []
   };
@@ -153,7 +153,7 @@ export abstract class Supervisor<T extends string[], D, R> implements ISuperviso
   private checkState(): void {
     if (!this.alive) throw new Error(`Spica: Supervisor: Supervisor ${this.name} already exited.`);
   }
-  private queue: [T, D, (results: R[]) => void, number, number][] = [];
+  private readonly queue: [T, D, (results: R[]) => void, number, number][] = [];
   private drain(target: T = <T><any[]>[]): void {
     const now = Date.now();
     for (let i = 0; i < this.queue.length; ++i) {
@@ -191,35 +191,35 @@ type WorkerCommand<T, D>
 
 namespace WorkerCommand {
   abstract class AbstractCommand {
-    private WORKER_COMMAND: void;
+    private readonly WORKER_COMMAND: void;
     constructor() {
       void this.WORKER_COMMAND;
     }
   }
   export class Self extends AbstractCommand {
-    private COMMAND: this;
+    private readonly COMMAND: this;
     constructor() {
       super();
       void this.COMMAND;
     }
   }
   export class Deps<T> extends AbstractCommand {
-    private COMMAND: this;
-    constructor(public namespace: T) {
+    private readonly COMMAND: this;
+    constructor(public readonly namespace: T) {
       super();
       void this.COMMAND;
     }
   }
   export class Call<D> extends AbstractCommand {
-    private COMMAND: this;
-    constructor(public data: D) {
+    private readonly COMMAND: this;
+    constructor(public readonly data: D) {
       super();
       void this.COMMAND;
     }
   }
   export class Exit extends AbstractCommand {
-    private COMMAND: this;
-    constructor(public reason: any) {
+    private readonly COMMAND: this;
+    constructor(public readonly reason: any) {
       super();
       void this.COMMAND;
     }
@@ -228,11 +228,11 @@ namespace WorkerCommand {
 
 class Worker<T extends string[], D, R> {
   constructor(
-    private sv: Supervisor<T, D, R>,
-    private sharedResource: WorkerSharedResources<T, D, R>,
-    public namespace: T,
-    public process: (data: D) => R,
-    private dependencies: T[]
+    private readonly sv: Supervisor<T, D, R>,
+    private readonly sharedResource: WorkerSharedResources<T, D, R>,
+    public readonly namespace: T,
+    public readonly process: (data: D) => R,
+    private readonly dependencies: T[]
   ) {
     this.receive = (cmd: WorkerCommand<T, D>) => Worker.prototype.receive.call(this, cmd); // identifier
     this.terminate = (reason: any) => Worker.prototype.terminate.call(this, reason);

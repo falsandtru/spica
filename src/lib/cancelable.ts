@@ -19,17 +19,17 @@ export class Cancelable<L> {
   private promise_: Promise<any>;
   private canceled = false;
   private reason: L;
-  public listeners: Set<(reason: L) => void> = new Set();
+  public readonly listeners: Set<(reason: L) => void> = new Set();
   public cancel: (reason: L) => void;
-  public promise = <T>(val: T): Promise<T> =>
+  public readonly promise = <T>(val: T): Promise<T> =>
     this.canceled
       ? this.promise_ = this.promise_ || new Promise((_, reject) => void reject(this.reason))
       : Promise.resolve(val);
-  public maybe = <T>(val: T): Maybe<T> =>
+  public readonly maybe = <T>(val: T): Maybe<T> =>
     this.canceled
       ? Nothing
       : Just(val);
-  public either = <R>(val: R): Either<L, R> =>
+  public readonly either = <R>(val: R): Either<L, R> =>
     this.canceled
       ? Left(this.reason)
       : Right(val);
