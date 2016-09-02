@@ -1,7 +1,27 @@
 import {Sequence} from '../../../sequence';
+import {sqid} from '../../../../sqid';
 
 describe('Unit: lib/monad/sequence/member/static/random', () => {
   describe('Sequence.random', () => {
+    it('validate', () => {
+      assert.deepStrictEqual(
+        Sequence.random(sqid)
+          .take(5)
+          .subsequences()
+          .filter(ns => ns.length === 2)
+          .extract()
+          .reduce((cnt, [n, m]) => n !== m ? ++cnt : cnt, 0),
+          10);
+
+      assert.notDeepStrictEqual(
+        Sequence.random()
+          .take(9)
+          .extract(),
+        Sequence.random()
+          .take(9)
+          .extract());
+    });
+
     it('number', () => {
       assert.deepStrictEqual(
         Sequence.random()

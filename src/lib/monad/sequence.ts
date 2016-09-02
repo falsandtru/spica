@@ -38,7 +38,7 @@ import subsequences from './sequence/member/instance/subsequences';
 import permutations from './sequence/member/instance/permutations';
 import {compose} from '../compose';
 
-compose(
+void compose(
   Sequence,
   resume,
   from,

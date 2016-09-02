@@ -1,6 +1,33 @@
 import {Sequence} from './sequence';
 
 describe('Unit: lib/monad/sequence', () => {
+  describe('Iterable', () => {
+    it('idempotence', () => {
+      const s = Sequence.from([0, 1, 2]);
+      assert.deepStrictEqual(Array.from(s), [0, 1, 2]);
+      assert.deepStrictEqual(Array.from(s), [0, 1, 2]);
+      assert.deepStrictEqual(Sequence.from(s).extract(), [0, 1, 2]);
+      assert.deepStrictEqual(Sequence.from(s).extract(), [0, 1, 2]);
+      assert.deepStrictEqual(Array.from(s), [0, 1, 2]);
+      assert.deepStrictEqual(Sequence.from(s).extract(), [0, 1, 2]);
+    });
+
+    it('to Sequence', () => {
+      assert.deepStrictEqual(Sequence.from(Sequence.from([])).extract(), []);
+      assert.deepStrictEqual(Sequence.from(Sequence.from([0])).extract(), [0]);
+      assert.deepStrictEqual(Sequence.from(Sequence.from([0, 1])).extract(), [0, 1]);
+      assert.deepStrictEqual(Sequence.from(Sequence.from([0, 1, 2])).extract(), [0, 1, 2]);
+    });
+
+    it('to Array', () => {
+      assert.deepStrictEqual(Array.from(Sequence.from([])), []);
+      assert.deepStrictEqual(Array.from(Sequence.from([0])), [0]);
+      assert.deepStrictEqual(Array.from(Sequence.from([0, 1])), [0, 1]);
+      assert.deepStrictEqual(Array.from(Sequence.from([0, 1, 2])), [0, 1, 2]);
+    });
+
+  });
+
   describe('Monoid', () => {
     it('Monoid law 1', () => {
       const x = Sequence.Return(0);

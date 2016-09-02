@@ -1,8 +1,9 @@
 import {Sequence} from '../../core';
 
 export default class <a, z> extends Sequence<a, z> {
-  public static mconcat<a>(as: Sequence<a, any>[]): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]> {
-    return as.reduce((a, b) => mconcat(a, b), Sequence.mempty);
+  public static mconcat<a>(as: Iterable<Sequence<a, any>>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]> {
+    return Array.from(as)
+      .reduce((a, b) => mconcat(a, b), Sequence.mempty);
   }
 }
 

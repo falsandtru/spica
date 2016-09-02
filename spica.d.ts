@@ -106,11 +106,11 @@ declare module 'spica' {
     export function mplus<a>(ml: MonadPlus<a>, mr: MonadPlus<a>): MonadPlus<a>;
   }
 
-  export class Sequence<a, z> extends MonadPlus<a> {
-    static from<a>(as: a[]): Sequence<a, number>;
-    static cycle<a>(as: a[]): Sequence<a, number>;
-    static random(): Sequence<number, number>;
-    static random<a>(gen: () => a): Sequence<a, number>;
+  export class Sequence<a, z> extends MonadPlus<a> implements Iterable<a> {
+    static from<a>(as: Iterable<a>): Sequence<a, [Iterator<a>, number, Map<number, IteratorResult<a>>]>;
+    static cycle<a>(as: Iterable<a>): Sequence<a, [Iterator<a>, number, Map<number, IteratorResult<a>>]>;
+    static random(): Sequence<number, [Iterator<number>, number, Map<number, IteratorResult<number>>]>;
+    static random<a>(gen: () => a): Sequence<a, [Iterator<a>, number, Map<number, IteratorResult<a>>]>;
     static random<a>(as: a[]): Sequence<a, Sequence.Iterator<number>>;
     static zip<a, b>(a: Sequence<a, any>, b: Sequence<b, any>): Sequence<[a, b], [Sequence.Iterator<a>, Sequence.Iterator<b>]>;
     static concat<a>(as: Sequence<Sequence<a, any>, any>): Sequence<a, [Sequence.Iterator<Sequence<a, any>>, Sequence.Iterator<a>]>;
@@ -127,11 +127,12 @@ declare module 'spica' {
     static bind<a>(m: Sequence<a, any>): <b>(f: (a: a) => Sequence<b, any>) => Sequence<b, Sequence.Iterator<a>>;
     static mempty: Sequence<any, any>;
     static mappend<a>(l: Sequence<a, any>, r: Sequence<a, any>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
-    static mconcat<a>(as: Sequence<a, any>[]): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
+    static mconcat<a>(as: Iterable<Sequence<a, any>>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
     static mzero: Sequence<any, any>;
     static mplus<a>(l: Sequence<a, any>, r: Sequence<a, any>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
     constructor(cons: (z: z, cons: (a?: a, z?: z) => Sequence.Data<a, z>) => Sequence.Data<a, z>);
     extract(): a[];
+    [Symbol.iterator](): Iterator<a>;
     iterate(): Sequence.Thunk<a>;
     fmap<b>(f: (a: a) => b): Sequence<b, Sequence.Iterator<a>>;
     ap<a, z>(this: Sequence<(a: a) => z, any>, a: Sequence<a, any>): Sequence<z, [Sequence.Iterator<Sequence<z, any>>, Sequence.Iterator<z>]>;

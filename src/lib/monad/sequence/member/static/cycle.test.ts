@@ -1,12 +1,26 @@
 import {Sequence} from '../../../sequence';
+import {sqid} from '../../../../sqid';
 
 describe('Unit: lib/monad/sequence/member/static/cycle', () => {
   describe('Sequence.cycle', () => {
-    it('array', () => {
+    it('side effect', () => {
+      const s = Sequence.cycle(Sequence.random(sqid).take(2)).take(5);
+      assert(s.extract().length === 5);
+      assert.notDeepStrictEqual(
+        s.extract(),
+        s.extract());
+    });
+
+    it('idempotence', () => {
       assert.deepStrictEqual(
-        Sequence.cycle([])
+        Sequence.cycle([1])
+          .take(2)
+          .fold((a, b) => Sequence.from([a].concat(b.extract()).concat(b.extract())), Sequence.from<number>([0]))
           .extract(),
-        []);
+        [1, 1, 0, 0, 1, 0, 0]);
+    });
+
+    it('array', () => {
       assert.deepStrictEqual(
         Sequence.cycle([0])
           .take(3)
