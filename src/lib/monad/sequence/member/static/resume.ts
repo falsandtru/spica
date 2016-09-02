@@ -6,6 +6,6 @@ export default class <a, z> extends Sequence<a, z> {
       Sequence.Iterator.when(
         iter(),
         () => cons(),
-        at => cons(Sequence.Thunk.value(at), Sequence.Thunk.iterator(at))));
+        thunk => cons(Sequence.Thunk.value(thunk), Sequence.Thunk.iterator(thunk))));
   }
 }
