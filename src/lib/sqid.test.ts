@@ -14,6 +14,13 @@ describe('Unit: lib/sqid', () => {
       assert(/^[0-9]{15}$/.test(sqid(1)));
     });
 
+    it('validation', () => {
+      assert.throws(() => sqid(<any>void 0));
+      assert.throws(() => sqid(NaN));
+      assert.throws(() => sqid(-1));
+      assert.throws(() => sqid(0.1));
+    });
+
     it('inequality', () => {
       assert(sqid() !== sqid());
     });
