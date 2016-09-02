@@ -1,7 +1,6 @@
 import {Sequence} from './sequence/core';
 import resume from './sequence/member/static/resume';
 import from from './sequence/member/static/from';
-import read from './sequence/member/static/read';
 import cycle from './sequence/member/static/cycle';
 import random from './sequence/member/static/random';
 import concat from './sequence/member/static/concat';
@@ -43,7 +42,6 @@ compose(
   Sequence,
   resume,
   from,
-  read,
   cycle,
   random,
   concat,
