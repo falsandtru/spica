@@ -60,7 +60,7 @@
     "npm-check-updates": "^2.8.0",
     "power-assert": "^1.4.1",
     "run-sequence": "^1.2.2",
-    "typescript": "2.1.0-dev.20160829"
+    "typescript": "2.1.0-dev.20160903"
   },
   "scripts": {
     "test": "gulp server"
