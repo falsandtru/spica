@@ -122,7 +122,7 @@ describe('Interface: Package', function () {
 
   });
 
-  describe('Map', function () {
+  describe('Collection', function () {
     it('DataMap', function () {
       assert(typeof DataMap === 'function');
     });
