@@ -6,7 +6,7 @@ export class AttrMap<O extends Object, K, V> {
   }
   private readonly store = new WeakMap<O, Map<K, V>>();
   public get(obj: O, key: K): V | undefined {
-    return this.store.get(obj)! && this.store.get(obj)!.get(key)!;
+    return this.store.get(obj) && this.store.get(obj)!.get(key)!;
   }
   public set(obj: O, key: K, val: V): this {
     const store = this.store.has(obj)

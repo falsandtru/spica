@@ -28,7 +28,7 @@ export class DataMap<K, V> {
           return `8:${key}`;
         }
         if (Array.isArray(key)) {
-          return `9:[ ${this.stringifyArray(<any[]>key)} ]`;
+          return `9:[ ${this.stringifyArray(key)} ]`;
         }
         return `9:{ ${
           this.stringifyObject(key) ||
