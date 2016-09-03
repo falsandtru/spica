@@ -1,6 +1,6 @@
 import {benchmark} from './benchmark';
 import {IContextDefinition} from 'mocha';
-import {DataMap, AttrMap, RelationMap} from 'spica';
+import {DataMap, AttrMap} from 'spica';
 
 describe('Benchmark:', function (this: IContextDefinition) {
   this.timeout(10 * 1e3);
@@ -33,24 +33,6 @@ describe('Benchmark:', function (this: IContextDefinition) {
       const map = new AttrMap<{}, string, number>();
       const obj = {};
       benchmark('AttrMap set', () => map.set(obj, 'abc', 0), done);
-    });
-
-  });
-
-  describe('RelationMap', function () {
-    it('get', function (done) {
-      const map = new RelationMap<{}, {}, number>();
-      const o1 = {};
-      const o2 = {};
-      map.set(o1, o2, 0);
-      benchmark('RelationMap get', () => map.get(o1, o2), done);
-    });
-
-    it('set', function (done) {
-      const map = new RelationMap<{}, {}, number>();
-      const o1 = {};
-      const o2 = {};
-      benchmark('RelationMap set', () => map.set(o1, o2, 0), done);
     });
 
   });
