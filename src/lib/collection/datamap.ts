@@ -1,3 +1,4 @@
+import {WeakMapLike} from 'spica';
 import {sqid} from '../sqid';
 import {type} from '../type';
 
@@ -5,7 +6,7 @@ function isPrimitive(target: any): boolean {
   return target instanceof Object === false;
 }
 
-export class DataMap<K, V> {
+export class DataMap<K, V> implements WeakMapLike<K, V> {
   constructor(entries: Iterable<[K, V]> = []) {
     void Array.from(entries)
       .forEach(([k, v]) =>

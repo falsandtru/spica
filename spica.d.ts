@@ -396,7 +396,13 @@ declare module 'spica' {
     tuple<a, b, c, d, e, f, g, h, i>(this: HList<a, HList<b, HList<c, HList<d, HList<e, HList<f, HList<g, HList<h, HList<i, HNil>>>>>>>>>): [a, b, c, d, e, f, g, h, i];
   }
 
-  export class DataMap<K, V> {
+  export interface WeakMapLike<K, V> {
+    delete(key: K): boolean;
+    get(key: K): V | undefined;
+    has(key: K): boolean;
+    set(key: K, value: V): this;
+  }
+  export class DataMap<K, V> implements WeakMapLike<K, V> {
     constructor(entries?: Iterable<[K, V]>);
     get(key: K): V | undefined;
     set(key: K, val: V): this;
@@ -405,12 +411,18 @@ declare module 'spica' {
     clear(): void;
     size: number;
   }
-  export class AttrMap<O extends Object, K, V> {
-    constructor(entries?: Iterable<[O, K, V]>);
-    get(obj: O, key: K): V | undefined;
-    set(obj: O, key: K, val: V): this;
-    has(obj: O, key: K): boolean;
-    delete(obj: O, key?: K): boolean;
+  export class AttrMap<C, K, V> {
+    constructor(
+      entries?: Iterable<[C, K, V]>,
+      KeyMap?: new <K, V>(entries?: Iterable<[K, V]>) => WeakMapLike<K, V>,
+      ValueMap?: new <K, V>(entries?: Iterable<[K, V]>) => WeakMapLike<K, V>
+    );
+    get(ctx: C, key: K): V | undefined;
+    set(ctx: C, key: K, val: V): this;
+    has(ctx: C): boolean;
+    has(ctx: C, key: K): boolean;
+    delete(ctx: C): boolean;
+    delete(ctx: C, key: K): boolean;
   }
 
   export function Mixin<T>(...mixins: Array<new () => Object>): new () => T

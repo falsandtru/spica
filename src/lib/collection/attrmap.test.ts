@@ -1,51 +1,49 @@
 import {AttrMap} from './attrmap';
+import {DataMap} from './datamap';
 
 describe('Unit: lib/attrmap', () => {
   describe('AttrMap', () => {
     it('initialize', () => {
-      const o = {};
-      const map = new AttrMap<{}, number, number>(<[{}, number, number][]>[[o, 1, -1]]);
-      assert(map.has(o, 0) === false);
-      assert(map.get(o, 1) === -1);
+      const map = new AttrMap<number, number, number>(<[number, number, number][]>[[1, 2, 3]], Map);
+      assert(map.get(1, 2) === 3);
     });
 
     it('get/set', () => {
-      const map = new AttrMap<{}, number, string>();
-      const o1 = {};
-      const o2 = {};
-      assert(map.get(o1, 0) === void 0);
-      map.set(o1, 0, '');
-      assert(map.get(o1, 0) === '');
-      assert(map.get(o2, 0) === void 0);
-      map.set(o2, 0, ' ');
-      assert(map.get(o2, 0) === ' ');
-      assert(map.get(o1, 0) === '');
-      map.set(o1, 0, ' ');
-      assert(map.get(o1, 0) === ' ');
+      const map = new AttrMap<number, number, string>([], Map);
+      assert(map.get(0, 0) === void 0);
+      map.set(0, 0, '');
+      assert(map.get(0, 0) === '');
+      assert(map.get(1, 0) === void 0);
+      map.set(1, 0, ' ');
+      assert(map.get(1, 0) === ' ');
+      assert(map.get(0, 0) === '');
+      map.set(0, 0, ' ');
+      assert(map.get(0, 0) === ' ');
     });
 
     it('has', () => {
-      const map = new AttrMap<{}, number, string>();
-      const o1 = {};
-      const o2 = {};
-      assert(map.has(o1, 0) === false);
-      map.set(o1, 0, '');
-      assert(map.has(o1, 0) === true);
-      assert(map.has(o2, 0) === false);
-      assert.deepStrictEqual(Object.keys(o1), []);
-      assert.deepStrictEqual(Object.keys(o2), []);
+      const map = new AttrMap<{}, number, string>([], Map);
+      assert(map.has(0, 0) === false);
+      map.set(0, 0, '');
+      assert(map.has(0, 0) === true);
+      assert(map.has(1, 0) === false);
     });
 
     it('delete', () => {
-      const map = new AttrMap<{}, number, string>();
-      const o1 = {};
-      map.set(o1, 0, '');
-      assert(map.delete(o1, 0) === true);
-      assert(map.has(o1, 0) === false);
-      assert(map.delete(o1, 0) === false);
-      assert(map.delete(o1) === true);
-      assert(map.has(o1, 0) === false);
-      assert(map.delete(o1) === false);
+      const map = new AttrMap<{}, number, string>([], Map);
+      map.set(0, 0, '');
+      assert(map.delete(0, 0) === true);
+      assert(map.has(0, 0) === false);
+      assert(map.delete(0, 0) === false);
+      assert(map.delete(0) === true);
+      assert(map.has(0, 0) === false);
+      assert(map.delete(0) === false);
+    });
+
+    it('injection', () => {
+      const map = new AttrMap<{}, number[], number>([], DataMap, DataMap);
+      map.set({}, [0], 0);
+      assert(map.get({}, [0]) === 0);
     });
 
   });
