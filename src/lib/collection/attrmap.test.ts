@@ -2,6 +2,13 @@ import {AttrMap} from './attrmap';
 
 describe('Unit: lib/attrmap', () => {
   describe('AttrMap', () => {
+    it('initialize', () => {
+      const o = {};
+      const map = new AttrMap<{}, number, number>(<[{}, number, number][]>[[o, 1, -1]]);
+      assert(map.has(o, 0) === false);
+      assert(map.get(o, 1) === -1);
+    });
+
     it('get/set', () => {
       const map = new AttrMap<{}, number, string>();
       const o1 = {};

@@ -1,4 +1,9 @@
 export class AttrMap<O extends Object, K, V> {
+  constructor(entries: Iterable<[O, K, V]> = []) {
+    void Array.from(entries)
+      .forEach(([o, k, v]) =>
+        void this.set(o, k, v));
+  }
   private readonly store = new WeakMap<O, Map<K, V>>();
   public get(obj: O, key: K): V | undefined {
     return this.store.get(obj)! && this.store.get(obj)!.get(key)!;

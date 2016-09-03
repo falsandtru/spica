@@ -6,6 +6,11 @@ function isPrimitive(target: any): boolean {
 }
 
 export class DataMap<K, V> {
+  constructor(entries: Iterable<[K, V]> = []) {
+    void Array.from(entries)
+      .forEach(([k, v]) =>
+        void this.set(k, v));
+  }
   private readonly store = new Map<string, [K, V]>();
   private readonly weakstore = new WeakMap<K, string>();
   private stringify(key: any): string {

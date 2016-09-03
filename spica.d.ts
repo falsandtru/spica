@@ -397,6 +397,7 @@ declare module 'spica' {
   }
 
   export class DataMap<K, V> {
+    constructor(entries?: Iterable<[K, V]>);
     get(key: K): V | undefined;
     set(key: K, val: V): this;
     has(key: K): boolean;
@@ -405,12 +406,14 @@ declare module 'spica' {
     size: number;
   }
   export class AttrMap<O extends Object, K, V> {
+    constructor(entries?: Iterable<[O, K, V]>);
     get(obj: O, key: K): V | undefined;
     set(obj: O, key: K, val: V): this;
     has(obj: O, key: K): boolean;
     delete(obj: O, key?: K): boolean;
   }
   export class RelationMap<S extends Object, T extends Object, V> {
+    constructor(entries?: Iterable<[S, T, V]>);
     get(source: S, target: T): V | undefined;
     set(source: S, target: T, val: V): this;
     has(source: S, target: T): boolean;

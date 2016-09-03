@@ -2,6 +2,13 @@ import {RelationMap} from './relationmap';
 
 describe('Unit: lib/relationmap', () => {
   describe('RelationMap', () => {
+    it('initialize', () => {
+      const o1 = {};
+      const o2 = {};
+      const map = new RelationMap<{}, {}, number>(<[{}, {}, number][]>[[o1, o2, 1]]);
+      assert(map.get(o1, o2) === 1);
+    });
+
     it('get/set', () => {
       const map = new RelationMap<{}, {}, string>();
       const o1 = {};

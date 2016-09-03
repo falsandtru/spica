@@ -2,6 +2,11 @@ import {DataMap} from './datamap';
 
 describe('Unit: lib/datamap', () => {
   describe('DataMap', () => {
+    it('initialize', () => {
+      const map = new DataMap<{}, number>(<[{}, number][]>[[{}, 1]]);
+      assert(map.get({}) === 1);
+    });
+
     it('get/set', () => {
       const map = new DataMap<Array<string | Array<string>> | {}, string>();
       assert(map.get([]) === void 0);

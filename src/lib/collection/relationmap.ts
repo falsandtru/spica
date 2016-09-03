@@ -1,4 +1,9 @@
 export class RelationMap<S extends Object, T extends Object, V> {
+  constructor(entries: Iterable<[S, T, V]> = []) {
+    void Array.from(entries)
+      .forEach(([s, t, v]) =>
+        void this.set(s, t, v));
+  }
   private readonly store = new WeakMap<S, WeakMap<T, V>>();
   public get(source: S, target: T): V | undefined {
     return this.store.get(source)! && this.store.get(source)!.get(target)!;
