@@ -28,7 +28,6 @@ $ npm i spica
 - HList, HNil
 - DataMap
 - AttrMap
-- RelationMap
 - Mixin
 - Tick
 - FINGERPRINT

@@ -412,13 +412,6 @@ declare module 'spica' {
     has(obj: O, key: K): boolean;
     delete(obj: O, key?: K): boolean;
   }
-  export class RelationMap<S extends Object, T extends Object, V> {
-    constructor(entries?: Iterable<[S, T, V]>);
-    get(source: S, target: T): V | undefined;
-    set(source: S, target: T, val: V): this;
-    has(source: S, target: T): boolean;
-    delete(source: S, target?: T): boolean;
-  }
 
   export function Mixin<T>(...mixins: Array<new () => Object>): new () => T
 

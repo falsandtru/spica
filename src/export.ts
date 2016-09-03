@@ -10,7 +10,6 @@ export {List, Nil} from './lib/list';
 export {HList, HNil} from './lib/hlist';
 export {DataMap} from './lib/collection/datamap';
 export {AttrMap} from './lib/collection/attrmap';
-export {RelationMap} from './lib/collection/relationmap';
 export {Mixin} from './lib/mixin';
 export {Tick} from './lib/tick';
 export {FINGERPRINT} from './lib/fingerprint';

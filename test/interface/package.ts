@@ -9,7 +9,7 @@ import {
   flip,
   List, Nil,
   HList, HNil,
-  DataMap, AttrMap, RelationMap,
+  DataMap, AttrMap,
   Mixin,
   Tick,
   FINGERPRINT,
@@ -129,10 +129,6 @@ describe('Interface: Package', function () {
 
     it('AttrMap', function () {
       assert(typeof AttrMap === 'function');
-    });
-
-    it('RelationMap', function () {
-      assert(typeof RelationMap === 'function');
     });
 
   });
