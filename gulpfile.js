@@ -94,6 +94,7 @@ gulp.task('ts:bench', function () {
     .once("error", function () {
       this.once("finish", () => process.exit(1));
     })
+    .pipe($.unassert())
     .pipe($.header(config.exporter))
     .pipe(gulp.dest(config.ts.bench.dest));
 });
