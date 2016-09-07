@@ -40,15 +40,17 @@ describe('Unit: lib/observable', function () {
       ob.on(['1'], id);
       ob.on(['z'], id);
       ob.on([''], id);
+      ob.on([], id);
       assert.deepStrictEqual(ob.refs([]).map(reg => reg.slice(0, 3)), [
         [[], id, false],
         [[], id, true],
+        [[], id, false],
         [[''], id, false],
         [[''], id, true],
         [[''], id, false],
         [['0'], id, false],
-        [['1'], id, false],
         [['a'], id, false],
+        [['1'], id, false],
         [['z'], id, false]
       ]);
 

@@ -156,7 +156,6 @@ export class Observable<T extends Array<string | number>, D, R>
       assert(childrenMap.constructor === void 0);
       if (!childrenMap[type + '']) {
         void node.childrenList.push(type + '');
-        node.childrenList = node.childrenList.sort();
         childrenMap[type + ''] = {
           parent: node,
           childrenMap: <SubscriberMap<T, D, R>>Object.create(null),

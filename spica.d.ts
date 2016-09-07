@@ -61,9 +61,7 @@ declare module 'spica' {
     emit(type: T, data: D, tracker?: (data: D, results: any[]) => any): void;
     reflect(type: T, data: D): R[];
   }
-  export interface Subscriber<D, R> {
-    (data: D): R;
-  }
+  export type Subscriber<D, R> = (data: D) => R;
 
   export class Cancelable<L> {
     readonly listeners: Set<(reason: L) => void>;
