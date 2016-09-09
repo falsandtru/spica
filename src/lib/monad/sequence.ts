@@ -18,6 +18,7 @@ import mplus from './sequence/member/static/mplus';
 import extract from './sequence/member/instance/extract';
 import iterate from './sequence/member/instance/iterate';
 import memoize from './sequence/member/instance/memoize';
+import reduce from './sequence/member/instance/reduce';
 import take from './sequence/member/instance/take';
 import drop from './sequence/member/instance/drop';
 import takeWhile from './sequence/member/instance/takeWhile';
@@ -59,6 +60,7 @@ void compose(
   extract,
   iterate,
   memoize,
+  reduce,
   take,
   drop,
   takeWhile,

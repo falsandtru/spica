@@ -26,10 +26,10 @@ export class Sequence<a, z> extends MonadPlus<a> implements Iterable<a> {
 }
 export namespace Sequence {
   export declare function resume<a>(iterator: Sequence.Iterator<a>): Sequence<a, Sequence.Iterator<a>>;
-  export declare function from<a>(as: Iterable<a>): Sequence<a, [ESIterator<a>, number, Map<number, IteratorResult<a>>]>;
-  export declare function cycle<a>(as: Iterable<a>): Sequence<a, [ESIterator<a>, number, Map<number, IteratorResult<a>>]>;
-  export declare function random(): Sequence<number, [ESIterator<number>, number, Map<number, IteratorResult<number>>]>;
-  export declare function random<a>(gen: () => a): Sequence<a, [ESIterator<a>, number, Map<number, IteratorResult<a>>]>;
+  export declare function from<a>(as: Iterable<a>): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]>;
+  export declare function cycle<a>(as: Iterable<a>): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]>;
+  export declare function random(): Sequence<number, [number, Map<number, Sequence.Thunk<number>>]>;
+  export declare function random<a>(gen: () => a): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]>;
   export declare function random<a>(as: a[]): Sequence<a, Sequence.Iterator<number>>;
   export declare function concat<a>(as: Sequence<Sequence<a, any>, any>): Sequence<a, [Sequence.Iterator<Sequence<a, any>>, Sequence.Iterator<a>]>;
   export declare function zip<a, b>(a: Sequence<a, any>, b: Sequence<b, any>): Sequence<[a, b], [Sequence.Iterator<a>, Sequence.Iterator<b>]>;
@@ -77,6 +77,7 @@ export interface Sequence<a, z> {
   takeUntil(f: (a: a) => boolean): Sequence<a, Sequence.Iterator<a>>;
   dropUntil(f: (a: a) => boolean): Sequence<a, Sequence.Iterator<a>>;
   memoize(memory?: Map<number, Sequence.Data<a, z>>): Sequence<a, z>;
+  reduce(): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]>;
 }
 
 export namespace Sequence {

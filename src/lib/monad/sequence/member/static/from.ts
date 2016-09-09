@@ -1,15 +1,14 @@
 import {Sequence} from '../../core';
 
 export default class <a, z> extends Sequence<a, z> {
-  public static from<a>(as: Iterable<a>): Sequence<a, [Iterator<a>, number, Map<number, IteratorResult<a>>]> {
-    return new Sequence<a, [Iterator<a>, number, Map<number, IteratorResult<a>>]>(
-      ([iter, i, cache] = [as[Symbol.iterator](), 0, new Map<number, IteratorResult<a>>()], cons) => {
-        const result = cache.has(i)
-          ? cache.get(i)!
-          : cache.set(i, iter.next()).get(i)!;
+  public static from<a>(as: Iterable<a>): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]> {
+    return new Sequence<a, [Iterator<a>, number]>(
+      ([iter, i] = [as[Symbol.iterator](), 0], cons) => {
+        const result = iter.next();
         return result.done
           ? cons()
-          : cons(result.value, [iter, i + 1, cache]);
-      });
+          : cons(result.value, [iter, i + 1]);
+      })
+      .reduce();
   }
 }
