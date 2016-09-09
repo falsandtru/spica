@@ -1,12 +1,9 @@
 import {Sequence as ISequence} from 'spica';
 import {MonadPlus} from '../monadplus';
 
-type ESIterator<T> = Iterator<T>;
-
 export class Sequence<a, z> extends MonadPlus<a> implements Iterable<a> {
   constructor(
-    protected readonly cons: (z: z, cons: (a?: a, z?: z) => Sequence.Data<a, z>) => Sequence.Data<a, z>,
-    protected readonly memory?: Map<number, Sequence.Data<a, z>>
+    protected readonly cons: (z: z, cons: (a?: a, z?: z) => Sequence.Data<a, z>) => Sequence.Data<a, z>
   ) {
     super(throwCallError);
   }
@@ -76,7 +73,7 @@ export interface Sequence<a, z> {
   dropWhile(f: (a: a) => boolean): Sequence<a, Sequence.Iterator<a>>;
   takeUntil(f: (a: a) => boolean): Sequence<a, Sequence.Iterator<a>>;
   dropUntil(f: (a: a) => boolean): Sequence<a, Sequence.Iterator<a>>;
-  memoize(memory?: Map<number, Sequence.Data<a, z>>): Sequence<a, z>;
+  memoize(): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]>;
   reduce(): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]>;
 }
 

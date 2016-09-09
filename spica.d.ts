@@ -156,7 +156,7 @@ declare module 'spica' {
     dropWhile(f: (a: a) => boolean): Sequence<a, Sequence.Iterator<a>>;
     takeUntil(f: (a: a) => boolean): Sequence<a, Sequence.Iterator<a>>;
     dropUntil(f: (a: a) => boolean): Sequence<a, Sequence.Iterator<a>>;
-    memoize(memory?: Map<number, Sequence.Data<a, z>>): Sequence<a, z>;
+    memoize(): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]>;
   }
   export namespace Sequence {
     export type Data<a, z> = [a, z];
