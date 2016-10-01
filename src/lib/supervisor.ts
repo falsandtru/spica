@@ -297,7 +297,7 @@ class Worker<T extends string[], D, R> {
       }
       try {
         void --this.concurrency;
-        const result = (0, this.process)(cmd.data);
+        const result = this.process(cmd.data);
         if (isThenable(result)) {
           void (<PromiseLike<R>><any>result)
             .then(_ => {
