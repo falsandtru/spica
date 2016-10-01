@@ -6,39 +6,46 @@
 */
 
 declare module 'spica' {
-  export namespace Supervisor {
-    export namespace Event {
-      export namespace Data {
-        export type Exec<T extends string[], D, R> = [T, (data: D) => R];
-        export type Fail<T extends string[], D> = [T, D];
-        export type Loss<T extends string[], D> = [T, D];
-        export type Exit<T extends string[], D, R> = [T, (data: D) => R, any];
-      }
-    }
-  }
-  export abstract class Supervisor<T extends string[], D, R> {
+  export abstract class Supervisor<N extends string, P, R, S> {
     static readonly count: number;
     static readonly procs: number;
-    constructor(settings?: SupervisorSettings<T>)
+    constructor(settings?: Supervisor.Settings<N>)
+    readonly id: string;
     readonly name: string;
     readonly events: {
-      readonly exec: Observer<T, Supervisor.Event.Data.Exec<T, D, R>, any>;
-      readonly fail: Observer<T, Supervisor.Event.Data.Fail<T, D>, any>;
-      readonly loss: Observer<T, Supervisor.Event.Data.Loss<T, D>, any>;
-      readonly exit: Observer<T, Supervisor.Event.Data.Exit<T, D, R>, any>;
+      readonly init: Observer<never[] | [N], Supervisor.Event.Data.Init<N, P, R, S>, any>;
+      readonly loss: Observer<never[] | [N], Supervisor.Event.Data.Loss<N, P>, any>;
+      readonly exit: Observer<never[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>;
     };
-    register(namespace: T, process: (data: D) => R): (reason?: any) => void;
-    call(namespace: T, data: D, timeout?: number): Promise<R[]>;
-    cast(namespace: T, data: D, retry?: boolean): R[];
-    refs(namespace: T): [T, (data: D) => R, (reason: any) => void][];
-    terminate(namespace?: T, reason?: any): void;
+    register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => void;
+    call(name: N, param: P, callback: (reply: R, error?: Error) => void, timeout?: number): void;
+    cast(name: N, param: P, timeout?: number): boolean;
+    refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason: any) => void][];
+    terminate(name?: N, reason?: any): void;
   }
-  export interface SupervisorSettings<T> {
-    readonly name?: string;
-    readonly dependencies?: [T, T[]][];
-    readonly retry?: boolean;
-    readonly timeout?: number;
-    readonly destructor?: (reason?: any) => any;
+  export namespace Supervisor {
+    export interface Settings<N extends string> {
+      readonly name?: string;
+      readonly timeout?: number;
+      readonly destructor?: (reason: any) => any;
+    }
+    export interface Process<P, R, S> {
+      readonly init: Process.Init<S>;
+      readonly call: Process.Call<P, R, S>;
+      readonly exit: Process.Exit<S>;
+    }
+    export namespace Process {
+      export type Init<S> = (state: S) => S;
+      export type Call<P, R, S> = (param: P, state: S) => [R, S] | PromiseLike<[R, S]>;
+      export type Exit<S> = (state: S, reason: any) => void;
+    }
+    export namespace Event {
+      export namespace Data {
+        export type Init<N extends string, P, R, S> = [N, Process<P, R, S>, S];
+        export type Loss<N extends string, P> = [N, P];
+        export type Exit<N extends string, P, R, S> = [N, Process<P, R, S>, S, any];
+      }
+    }
   }
 
   export class Observable<T extends Array<string | number>, D, R>

@@ -1,42 +1,20 @@
-import {Supervisor as ISupervisor, SupervisorSettings} from 'spica';
+import {Supervisor as ISupervisor} from 'spica';
 import {Observable} from './observable';
-import {DataMap} from './collection/datamap';
 import {Tick} from './tick';
 import {isThenable} from './thenable';
-import {concat} from './concat';
+import {sqid} from './sqid';
 import {noop} from './noop';
 
-interface WorkerSharedResources<T extends string[], D, R> {
-  procs: Observable<T, WorkerCommand<T, D>, R>;
-  dependenciesStack: T[];
-  allRefsCache?: [T, (data: WorkerCommand<T, D>) => R, boolean][];
-}
-
-export namespace Supervisor {
-  export namespace Event {
-    export namespace Data {
-      export type Exec<T extends string[], D, R> = ISupervisor.Event.Data.Exec<T, D, R>;
-      export type Fail<T extends string[], D> = ISupervisor.Event.Data.Fail<T, D>;
-      export type Loss<T extends string[], D> = ISupervisor.Event.Data.Loss<T, D>;
-      export type Exit<T extends string[], D, R> = ISupervisor.Event.Data.Exit<T, D, R>;
-    }
-  }
-}
-
-export abstract class Supervisor<T extends string[], D, R> implements ISupervisor<T, D, R> {
+export abstract class Supervisor<N extends string, P, R, S> implements ISupervisor<N, P, R, S> {
   public static count: number = 0;
   public static procs: number = 0;
   constructor({
     name = '',
-    dependencies = [],
-    retry = false,
     timeout = 0,
     destructor = noop
-  }: SupervisorSettings<T> = {}) {
-    if (this.constructor === Supervisor) throw new Error('Spica: Supervisor: Cannot instantiate abstract classes.');
+  }: Supervisor.Settings<N> = {}) {
+    if (this.constructor === Supervisor) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot instantiate abstract classes.`);
     this.name = name;
-    void dependencies.reduce<void>((_, [namespace, deps]) => void this.deps.set(namespace, deps), void 0);
-    this.retry = retry;
     this.timeout = timeout;
     this.destructor_ = destructor;
     void ++(<typeof Supervisor>this.constructor).count;
@@ -45,11 +23,8 @@ export abstract class Supervisor<T extends string[], D, R> implements ISuperviso
     void this.checkState();
     assert(this.registerable === false);
     this.alive = false;
-    assert(this.procs.refs(<T><any[]>[]).length === 0);
-    while (this.queue.length > 0) {
-      const [namespace, data] = this.queue.shift()!;
-      void this.events.loss.emit(namespace, [namespace, data]);
-    }
+    assert(this.procs.refs([]).length === 0);
+    void this.drain();
     try {
       void this.destructor_(reason);
     }
@@ -60,18 +35,16 @@ export abstract class Supervisor<T extends string[], D, R> implements ISuperviso
     void --(<typeof Supervisor>this.constructor).count;
     void Object.freeze(this);
   }
+  public readonly id: string = sqid();
   public readonly name: string;
-  private readonly deps: DataMap<T, T[]> = new DataMap<T, T[]>();
-  private readonly retry: boolean;
   private readonly timeout: number;
-  private readonly destructor_: (reason?: any) => any;
+  private readonly destructor_: (reason: any) => any;
   public readonly events = {
-    exec: new Observable<T, Supervisor.Event.Data.Exec<T, D, R>, any>(),
-    fail: new Observable<T, Supervisor.Event.Data.Fail<T, D>, any>(),
-    loss: new Observable<T, Supervisor.Event.Data.Loss<T, D>, any>(),
-    exit: new Observable<T, Supervisor.Event.Data.Exit<T, D, R>, any>()
+    init: new Observable<never[] | [N], Supervisor.Event.Data.Init<N, P, R, S>, any>(),
+    loss: new Observable<never[] | [N], Supervisor.Event.Data.Loss<N, P>, any>(),
+    exit: new Observable<never[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>()
   };
-  private readonly procs: Observable<T, WorkerCommand<T, D>, R> = new Observable<T, WorkerCommand<T, D>, R>();
+  private readonly procs: Observable<never[] | [N], WorkerCommand<P>, R | PromiseLike<R>> = new Observable<[N], WorkerCommand<P>, R | PromiseLike<R>>();
   private alive = true;
   private registerable = true;
   private scheduled = false;
@@ -85,236 +58,244 @@ export abstract class Supervisor<T extends string[], D, R> implements ISuperviso
     });
     this.scheduled = true;
   }
-  private readonly workerSharedResource: WorkerSharedResources<T, D, R> = {
-    procs: this.procs,
-    dependenciesStack: []
+  private readonly workerSharedResource: WorkerSharedResources<N, P, R> = {
+    procs: this.procs
   };
-  public register(namespace: T, process: (data: D) => R): (reason?: any) => void {
+  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => void {
     void this.checkState();
-    if (!this.registerable) throw new Error(`Spica: Supervisor: Supervisor ${this.name} cannot register process during the exiting.`);
-    namespace = <T>concat([], namespace);
+    if (!this.registerable) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: Cannot register a process after a supervisor is terminated.`);
+    if (this.procs.refs([name]).length > 0) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: Cannot register a process multiply using the same name.`);
     void this.schedule();
-    return new Worker<T, D, R>(this, this.workerSharedResource, namespace, process, this.deps.get(namespace) || []).terminate;
+    process = typeof process === 'function'
+      ? {
+        init: state => state,
+        call: process,
+        exit: _ => void 0
+      }
+      : process;
+    return new Worker<N, P, R, S>(this, this.workerSharedResource, name, process, state).terminate;
   }
-  public call(namespace: T, data: D, timeout = this.timeout): Promise<R[]> {
+  public call(name: N, param: P, callback: (reply: R, error?: Error) => void, timeout = this.timeout): void {
     void this.checkState();
-    namespace = <T>concat([], namespace);
-    return new Promise<R[]>((resolve, reject) => {
-      void this.queue.push([
-        namespace,
-        data,
-        results =>
-          results.length === 0
-            ? void reject(data)
-            : void resolve(results),
-        timeout,
-        Date.now()
-      ]);
-      void this.schedule();
-      if (timeout > 0 === false) return;
-      void setTimeout(() => void this.drain(namespace), timeout + 9);
-    });
+    void this.queue.push([
+      name,
+      param,
+      callback,
+      timeout,
+      Date.now()
+    ]);
+    void this.schedule();
+    if (timeout < Infinity === false) return;
+    if (timeout > 0 === false) return;
+    void setTimeout(() => void this.drain(name), timeout + 9);
   }
-  public cast(namespace: T, data: D, retry = this.retry): R[] {
+  public cast(name: N, param: P, timeout = this.timeout): boolean {
     void this.checkState();
-    const results = this.procs.reflect(namespace, new WorkerCommand.Call(data));
+    const results = this.procs.reflect([name], new WorkerCommand.Call(param, timeout));
+    assert(results.length <= 1);
     if (results.length === 0) {
-      void this.events.fail.emit(namespace, [namespace, data]);
+      void this.events.loss.emit([name], [name, param]);
     }
-    return results.length > 0 || !retry ? results : this.cast(namespace, data, false);
+    return results.length > 0;
   }
-  public refs(namespace: T): [T, (data: D) => R, (reason: any) => void][] {
+  public refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason: any) => void][] {
     void this.checkState();
-    return this.procs.refs(namespace)
-      .map<[T, (data: D) => R, (reason: any) => void]>(([, recv]) => {
-        const worker: Worker<T, D, R> = <any>recv(new WorkerCommand.Self());
+    return this.procs.refs(name === void 0 ? [] : [name])
+      .map<[N, Supervisor.Process<P, R, S>, S, (reason: any) => void]>(([, recv]) => {
+        const worker: Worker<N, P, R, S> = <any>recv(new WorkerCommand.Self());
         assert(worker instanceof Worker);
         return [
-          worker.namespace,
+          worker.name,
           worker.process,
+          worker.state,
           worker.terminate
         ];
       });
   }
-  public terminate(namespace?: T, reason?: any): void {
-    void this.checkState();
-    assert(this.registerable === true);
-    if (namespace === void 0) {
+  public terminate(name?: N, reason?: any): void {
+    if (!this.registerable) return;
+    if (name === void 0) {
       this.registerable = false;
     }
+    const namespace = name === void 0 ? [] : <[N]>[name];
     void this.procs
-      .emit(namespace || <T><any[]>[], new WorkerCommand.Exit(reason));
+      .emit(namespace, new WorkerCommand.Exit(reason));
     void this.procs
-      .off(namespace || <T><any[]>[]);
-    if (namespace === void 0) {
+      .off(namespace);
+    if (name === void 0) {
       void this.destructor(reason);
     }
   }
   private checkState(): void {
-    if (!this.alive) throw new Error(`Spica: Supervisor: Supervisor ${this.name} already exited.`);
+    if (!this.alive) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A supervisor is already terminated.`);
   }
-  private readonly queue: [T, D, (results: R[]) => void, number, number][] = [];
-  private drain(target: T = <T><any[]>[]): void {
+  private readonly queue: [N, P, (reply: R, error?: Error) => void, number, number][] = [];
+  private drain(target?: N): void {
     const now = Date.now();
     for (let i = 0; i < this.queue.length; ++i) {
-      const [namespace, data, callback, timeout, since] = this.queue[i];
-      const results = target.every((n, i) => n === namespace[i])
-        ? this.procs.reflect(namespace, new WorkerCommand.Call(data))
+      const [name, param, callback, timeout, since] = this.queue[i];
+      const replies: [R | PromiseLike<R>] | never[] = target === void 0 || target === name
+        ? <[R | PromiseLike<R>]>this.procs.reflect([name], new WorkerCommand.Call(param, since + timeout - now))
         : [];
-      if (results.length === 0) {
-        void this.events.fail.emit(namespace, [namespace, data]);
-      }
-      if (results.length === 0 && now < since + timeout) continue;
-      i === 0 ? void this.queue.shift() : void this.queue.splice(i, 1);
+      assert(replies.length <= 1);
+      if (this.alive && replies.length === 0 && now < since + timeout) continue;
+      i === 0
+        ? void this.queue.shift()
+        : void this.queue.splice(i, 1);
       void --i;
 
-      if (results.length === 0) {
-        void this.events.loss.emit(namespace, [namespace, data]);
+      if (replies.length === 0) {
+        void this.events.loss.emit([name], [name, param]);
       }
-      if (!callback) continue;
-      try {
-        void callback(results);
+      if (this.alive && replies.length > 0) {
+        const [reply] = replies;
+        if (isThenable(reply)) {
+          void Promise.resolve(reply)
+            .then(
+              reply =>
+                this.alive
+                  ? void callback(reply)
+                  : void callback(<any>void 0, new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: A request is expired.`)),
+              reason =>
+                void callback(<any>void 0, reason));
+        }
+        else {
+          try {
+            void callback(reply);
+          }
+          catch (reason) {
+            void console.error(reason);
+          }
+        }
       }
-      catch (err) {
-        void console.error(err);
-        assert(!console.info(err + ''));
+      else {
+        void callback(<any>void 0, new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: A request is expired.`));
       }
     }
   }
 }
+export namespace Supervisor {
+  export type Settings<N extends string> = ISupervisor.Settings<N>;
+  export type Process<P, R, S> = ISupervisor.Process<P, R, S>;
+  export namespace Process {
+    export type Init<S> = ISupervisor.Process.Init<S>;
+    export type Call<P, R, S> = ISupervisor.Process.Call<P, R, S>;
+    export type Exit<S> = ISupervisor.Process.Exit<S>;
+  }
+  export import Event = ISupervisor.Event;
+}
 
-type WorkerCommand<T, D>
+interface WorkerSharedResources<N extends string, P, R> {
+  procs: Observable<never[] | [N], WorkerCommand<P>, R | PromiseLike<R>>;
+}
+
+type WorkerCommand<P>
   = WorkerCommand.Self
-  | WorkerCommand.Deps<T>
-  | WorkerCommand.Call<D>
+  | WorkerCommand.Call<P>
   | WorkerCommand.Exit;
 
 namespace WorkerCommand {
-  abstract class AbstractCommand {
-    private readonly WORKER_COMMAND: void;
-    constructor() {
-      void this.WORKER_COMMAND;
-    }
-  }
-  export class Self extends AbstractCommand {
+  export class Self {
     private readonly COMMAND: this;
     constructor() {
-      super();
       void this.COMMAND;
     }
   }
-  export class Deps<T> extends AbstractCommand {
+  export class Call<P> {
     private readonly COMMAND: this;
-    constructor(public readonly namespace: T) {
-      super();
+    constructor(public readonly param: P, public readonly timeout: number) {
       void this.COMMAND;
     }
   }
-  export class Call<D> extends AbstractCommand {
-    private readonly COMMAND: this;
-    constructor(public readonly data: D) {
-      super();
-      void this.COMMAND;
-    }
-  }
-  export class Exit extends AbstractCommand {
+  export class Exit {
     private readonly COMMAND: this;
     constructor(public readonly reason: any) {
-      super();
       void this.COMMAND;
     }
   }
 }
 
-class Worker<T extends string[], D, R> {
+class Worker<N extends string, P, R, S> {
   constructor(
-    private readonly sv: Supervisor<T, D, R>,
-    private readonly sharedResource: WorkerSharedResources<T, D, R>,
-    public readonly namespace: T,
-    public readonly process: (data: D) => R,
-    private readonly dependencies: T[]
+    private readonly sv: Supervisor<N, P, R, S>,
+    private readonly sharedResource: WorkerSharedResources<N, P, R>,
+    public readonly name: N,
+    public readonly process: Supervisor.Process<P, R, S>,
+    public state: S
   ) {
-    this.receive = (cmd: WorkerCommand<T, D>) => Worker.prototype.receive.call(this, cmd); // identifier
+    assert(process.init && process.exit);
+    // fix the context, and that must be an immutable unique identifier.
+    this.receive = (cmd: WorkerCommand<P>) => Worker.prototype.receive.call(this, cmd);
     this.terminate = (reason: any) => Worker.prototype.terminate.call(this, reason);
 
-    this.sharedResource.allRefsCache = void 0;
     void ++(<typeof Supervisor>this.sv.constructor).procs;
     void this.sharedResource.procs
-      .on(namespace, this.receive);
+      .on([name], this.receive);
   }
   private destructor(reason: any): void {
     if (!this.alive) return;
     void this.sharedResource.procs
-      .off(this.namespace, this.receive);
+      .off([this.name], this.receive);
     this.alive = false;
     void --(<typeof Supervisor>this.sv.constructor).procs;
-    this.sharedResource.allRefsCache = void 0;
     void Object.freeze(this);
-    void this.sv.events.exit
-      .emit(this.namespace, [this.namespace, this.process, reason]);
+    try {
+      void this.process.exit(this.state, reason);
+      void this.sv.events.exit
+        .emit([this.name], [this.name, this.process, this.state, reason]);
+    }
+    catch (reason) {
+      void this.sv.events.exit
+        .emit([this.name], [this.name, this.process, this.state, reason]);
+      void this.sv.terminate(void 0, reason);
+    }
   }
   private alive = true;
   private called = false;
   private concurrency: number = 1;
-  private tryDependencyResolving(): void {
-    if (this.receive(new WorkerCommand.Deps(this.namespace))) {
-      this.sharedResource.dependenciesStack = [];
-      return;
-    }
-    else {
-      this.sharedResource.dependenciesStack = [];
-      throw void 0;
-    }
-  }
-  public receive(cmd: WorkerCommand.Self): Worker<T, D, R>
-  public receive(cmd: WorkerCommand.Deps<T>): boolean
-  public receive(cmd: WorkerCommand<T, D>): R
-  public receive(cmd: WorkerCommand<T, D>): any {
+  public receive(cmd: WorkerCommand.Self): Worker<N, P, R, S>
+  public receive(cmd: WorkerCommand<P>): R | PromiseLike<R>
+  public receive(cmd: WorkerCommand<P>): Worker<N, P, R, S> | boolean | R | PromiseLike<R> {
     void this.checkState();
-    if (cmd instanceof WorkerCommand.Self) {
-      return this;
-    }
-    if (cmd instanceof WorkerCommand.Deps) {
-      if (cmd.namespace.length !== this.namespace.length) return false;
-      if (this.concurrency === 0) return false;
-      for (const stacked of this.sharedResource.dependenciesStack) {
-        if (equal(this.namespace, stacked)) return true;
-      }
-      void this.sharedResource.dependenciesStack.push(this.namespace);
-      return this.dependencies
-        .every(dep =>
-          (this.sharedResource.allRefsCache = this.sharedResource.allRefsCache || this.sharedResource.procs.refs(<T><any[]>[]))
-            .some(([ns, proc]) => equal(ns, dep) && !!proc(new WorkerCommand.Deps(dep)))
-        );
-    }
     if (cmd instanceof WorkerCommand.Call) {
       if (this.concurrency === 0) throw void 0; // cancel
-      void this.tryDependencyResolving();
-      if (!this.called) {
-        this.called = true;
-        void this.sv.events.exec
-          .emit(this.namespace, [this.namespace, this.process]);
-      }
       try {
         void --this.concurrency;
-        const result = this.process(cmd.data);
+        if (!this.called) {
+          this.called = true;
+          void this.sv.events.init
+            .emit([this.name], [this.name, this.process, this.state]);
+          this.state = this.process.init(this.state);
+        }
+        const result = this.process.call(cmd.param, this.state);
         if (isThenable(result)) {
-          void (<PromiseLike<R>><any>result)
-            .then(_ => {
-              void this.sv.schedule();
-              if (!this.alive) return;
-              void ++this.concurrency;
-            }, reason => {
-              void this.sv.schedule();
-              if (!this.alive) return;
-              void ++this.concurrency;
-              void this.terminate(reason);
-            });
+          return new Promise<[R, S]>((resolve, reject) => {
+            void result.then(resolve, reject);
+            if (cmd.timeout < Infinity === false) return;
+            void setTimeout(() => void reject(new Error(`Spica: Supervisor: <${this.sv.id}/${this.sv.name}/${this.name}>: Timeout while processing.`)), cmd.timeout);
+          })
+            .then(
+              ([reply, state]) => {
+                void ++this.concurrency;
+                void this.sv.schedule();
+                if (!this.alive) throw void 0;
+                this.state = state;
+                return reply;
+              },
+              reason => {
+                void ++this.concurrency;
+                void this.sv.schedule();
+                if (!this.alive) throw reason;
+                void this.terminate(reason);
+                throw reason;
+              });
         }
         else {
           void ++this.concurrency;
+          const [reply, state] = result;
+          this.state = state;
+          return reply;
         }
-        return result;
       }
       catch (reason) {
         void this.terminate(reason);
@@ -325,21 +306,15 @@ class Worker<T extends string[], D, R> {
       void this.terminate(cmd.reason);
       throw void 0;
     }
-    throw new TypeError(`Spica: Supervisor: Invalid command: ${cmd}`);
+    if (cmd instanceof WorkerCommand.Self) {
+      return this;
+    }
+    throw new TypeError(`Spica: Supervisor: <${this.sv.id}/${this.sv.name}/${this.name}>: Invalid command: ${cmd}`);
   }
   public terminate(reason: any): void {
     void this.destructor(reason);
   }
   private checkState(): void {
-    if (!this.alive) throw new Error(`Spica: Supervisor: Process ${this.namespace}/${this.process} already exited.`);
+    if (!this.alive) throw new Error(`Spica: Supervisor: <${this.sv.id}/${this.sv.name}/${this.name}>: A process is already terminated:\n${this.process}`);
   }
-}
-
-function equal<T>(a: T[], b: T[]): boolean {
-  if (a === b) return true;
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; ++i) {
-    if (a[i] !== b[i]) return false;
-  }
-  return true;
 }
