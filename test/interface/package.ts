@@ -9,7 +9,7 @@ import {
   flip,
   List, Nil,
   HList, HNil,
-  DataMap, AttrMap,
+  DataMap, CacheMap, AttrMap,
   Mixin,
   Tick,
   FINGERPRINT,
@@ -125,6 +125,10 @@ describe('Interface: Package', function () {
   describe('Collection', function () {
     it('DataMap', function () {
       assert(typeof DataMap === 'function');
+    });
+
+    it('CacheMap', function () {
+      assert(typeof CacheMap === 'function');
     });
 
     it('AttrMap', function () {

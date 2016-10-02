@@ -27,6 +27,7 @@ $ npm i spica
 - List, Nil
 - HList, HNil
 - DataMap
+- CacheMap
 - AttrMap
 - Mixin
 - Tick
