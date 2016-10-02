@@ -1,37 +1,38 @@
-namespace TICK {
-  export const queue = enqueue;
+const Queue: ((...args: any[]) => any)[] = [];
 
-  const Queue: ((...args: any[]) => any)[] = [];
-  let Reservation = 0;
+let scheduled = false;
 
-  function enqueue(fn: (_?: void) => any): void {
-    assert(typeof fn === 'function');
-    void Queue.push(fn);
-    void schedule();
-  }
-  function dequeue(): void {
-    void schedule();
-    void --Reservation;
-    let task = Queue.length;
-    while (task-- > 0) {
-      void Queue.shift()!();
+function enqueue(fn: (_?: void) => any): void {
+  assert(typeof fn === 'function');
+  void Queue.push(fn);
+  void schedule();
+}
+function dequeue(): void {
+  let rem = Queue.length;
+  while (true) {
+    try {
+      while (rem > 0) {
+        void --rem;
+        void Queue.shift()!();
+      }
     }
-  }
-
-  const Delays = [0, 4, 10, 20, 25].reverse();
-  function schedule(): void {
-    if (Queue.length === 0) return;
-    assert(0 <= Reservation && Reservation <= Delays.length);
-    while (Reservation < Delays.length) {
-      void setTimeout(dequeue, Delays[Reservation % Delays.length]);
-      void ++Reservation;
+    catch (e) {
+      console.error(e);
+      continue;
     }
-    assert(0 <= Reservation && Reservation <= Delays.length);
+    break;
   }
+  scheduled = false;
+}
 
+function schedule(): void {
+  if (scheduled) return;
+  if (Queue.length === 0) return;
+  void Promise.resolve().then(dequeue);
+  scheduled = true;
 }
 
 const IS_NODE = Function("return typeof process === 'object' && typeof window !== 'object'")();
 export const Tick = IS_NODE
-  ? <typeof TICK.queue>Function('return fn => process.nextTick(fn)')()
-  : TICK.queue;
+  ? <typeof enqueue>Function('return fn => process.nextTick(fn)')()
+  : enqueue;
