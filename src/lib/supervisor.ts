@@ -75,7 +75,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
       : process;
     return new Worker<N, P, R, S>(this, this.workerSharedResource, name, process, state).terminate;
   }
-  public call(name: N, param: P, callback: (reply: R, error?: Error) => void, timeout = this.timeout): void {
+  public call(name: N, param: P, callback: Supervisor.Callback<R>, timeout = this.timeout): void {
     void this.checkState();
     void this.queue.push([
       name,
@@ -129,7 +129,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
   private checkState(): void {
     if (!this.alive) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A supervisor is already terminated.`);
   }
-  private readonly queue: [N, P, (reply: R, error?: Error) => void, number, number][] = [];
+  private readonly queue: [N, P, Supervisor.Callback<R>, number, number][] = [];
   private drain(target?: N): void {
     const now = Date.now();
     for (let i = 0; i < this.queue.length; ++i) {
@@ -182,6 +182,7 @@ export namespace Supervisor {
     export type Call<P, R, S> = ISupervisor.Process.Call<P, R, S>;
     export type Exit<S> = ISupervisor.Process.Exit<S>;
   }
+  export type Callback<R> = ISupervisor.Callback<R>;
   export import Event = ISupervisor.Event;
 }
 

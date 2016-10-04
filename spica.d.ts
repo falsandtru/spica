@@ -18,7 +18,7 @@ declare module 'spica' {
       readonly exit: Observer<never[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>;
     };
     register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => void;
-    call(name: N, param: P, callback: (reply: R, error?: Error) => void, timeout?: number): void;
+    call(name: N, param: P, callback: Supervisor.Callback<R>, timeout?: number): void;
     cast(name: N, param: P, timeout?: number): boolean;
     refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason: any) => void][];
     terminate(name?: N, reason?: any): void;
@@ -29,16 +29,19 @@ declare module 'spica' {
       readonly timeout?: number;
       readonly destructor?: (reason: any) => any;
     }
-    export interface Process<P, R, S> {
+    export type Process<P, R, S> = {
       readonly init: Process.Init<S>;
       readonly call: Process.Call<P, R, S>;
       readonly exit: Process.Exit<S>;
-    }
+    };
     export namespace Process {
       export type Init<S> = (state: S) => S;
       export type Call<P, R, S> = (param: P, state: S) => [R, S] | PromiseLike<[R, S]>;
       export type Exit<S> = (state: S, reason: any) => void;
     }
+    export type Callback<R> = {
+      (reply: R, error?: Error): void;
+    };
     export namespace Event {
       export namespace Data {
         export type Init<N extends string, P, R, S> = [N, Process<P, R, S>, S];
