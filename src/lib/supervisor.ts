@@ -146,8 +146,14 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
 
       if (replies.length === 0) {
         void this.events.loss.emit([name], [name, param]);
+        try {
+          void callback(<any>void 0, new Error(`Spica: Supervisor: Task: Failed.`));
+        }
+        catch (reason) {
+          void console.error(reason);
+        }
       }
-      if (this.alive && replies.length > 0) {
+      else {
         const [reply] = replies;
         if (isThenable(reply)) {
           void Promise.resolve(reply)
@@ -155,9 +161,12 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
               reply =>
                 this.alive
                   ? void callback(reply)
-                  : void callback(<any>void 0, new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: A request is expired.`)),
+                  : void callback(<any>void 0, new Error(`Spica: Supervisor: Task: Failed.`)),
+              () =>
+                void callback(<any>void 0, new Error(`Spica: Supervisor: Task: Failed.`)))
+            .catch(
               reason =>
-                void callback(<any>void 0, reason));
+                void console.error(reason));
         }
         else {
           try {
@@ -167,9 +176,6 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
             void console.error(reason);
           }
         }
-      }
-      else {
-        void callback(<any>void 0, new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: A request is expired.`));
       }
     }
   }
@@ -273,7 +279,7 @@ class Worker<N extends string, P, R, S> {
           return new Promise<[R, S]>((resolve, reject) => {
             void result.then(resolve, reject);
             if (cmd.timeout < Infinity === false) return;
-            void setTimeout(() => void reject(new Error(`Spica: Supervisor: <${this.sv.id}/${this.sv.name}/${this.name}>: Timeout while processing.`)), cmd.timeout);
+            void setTimeout(() => void reject(new Error(`Spica: Supervisor: Task: Timeout while processing.`)), cmd.timeout);
           })
             .then(
               ([reply, state]) => {
