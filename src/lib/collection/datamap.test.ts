@@ -10,51 +10,51 @@ describe('Unit: lib/datamap', () => {
     it('get/set', () => {
       const map = new DataMap<Array<string | Array<string>> | {}, string>();
       assert(map.get([]) === void 0);
-      map.set([], '');
+      assert(map.set([], '') === map);
       assert(map.get([]) === '');
       assert(map.get(['']) === void 0);
-      map.set([''], ' ');
+      assert(map.set([''], ' ') === map);
       assert(map.get(['']) === ' ');
       assert(map.get([]) === '');
-      map.set([], ' ');
+      assert(map.set([], ' ') === map);
       assert(map.get([]) === ' ');
 
       assert(map.get([[]]) === void 0);
-      map.set([[]], '');
+      assert(map.set([[]], '') === map);
       assert(map.get([[]]) === '');
       assert(map.get([['']]) === void 0);
-      map.set([['']], ' ');
+      assert(map.set([['']], ' ') === map);
       assert(map.get([['']]) === ' ');
       assert(map.get([[]]) === '');
-      map.set([[]], ' ');
+      assert(map.set([[]], ' ') === map);
       assert(map.get([[]]) === ' ');
 
       assert(map.get({}) === void 0);
-      map.set({}, '');
+      assert(map.set({}, '') === map);
       assert(map.get({}) === '');
       assert(map.get({ '': '' }) === void 0);
-      map.set({ '': '' }, ' ');
+      assert(map.set({ '': '' }, ' ') === map);
       assert(map.get({ '': '' }) === ' ');
       assert(map.get({}) === '');
-      map.set({}, ' ');
+      assert(map.set({}, ' ') === map);
       assert(map.get({}) === ' ');
     });
 
     it('has', () => {
       const map = new DataMap<Array<string | {}>, string>();
       assert(map.has([]) === false);
-      map.set([], '');
+      assert(map.set([], '') === map);
       assert(map.has([]) === true);
       assert(map.has(['']) === false);
     });
 
     it('delete', () => {
       const map = new DataMap<Array<string | {}>, string>();
-      map.set([], '');
+      assert(map.set([], '') === map);
       assert(map.delete([]) === true);
       assert(map.has([]) === false);
       assert(map.delete([]) === false);
-      map.set([{}], '');
+      assert(map.set([{}], '') === map);
       assert(map.delete([{}]) === true);
       assert(map.has([{}]) === false);
       assert(map.delete([{}]) === false);
@@ -62,7 +62,7 @@ describe('Unit: lib/datamap', () => {
 
     it('clear', () => {
       const map = new DataMap<string[], string>();
-      map.set([], '');
+      assert(map.set([], '') === map);
       assert(map.clear() === void 0);
       assert(map.has([]) === false);
     });
@@ -71,11 +71,11 @@ describe('Unit: lib/datamap', () => {
       const map = new DataMap<string[], string>();
       assert(map.size === 0);
       assert(map.size === 0);
-      map.set([], '');
+      assert(map.set([], '') === map);
       assert(map.size === 1);
-      map.set([], '');
+      assert(map.set([], '') === map);
       assert(map.size === 1);
-      map.set([''], '');
+      assert(map.set([''], '') === map);
       assert(map.size === 2);
       assert(map.delete([]) === true);
       assert(map.delete([]) === false);

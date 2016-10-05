@@ -10,20 +10,20 @@ describe('Unit: lib/cachemap', () => {
     it('get/set', () => {
       const map = new CacheMap<number, number>();
       assert(map.get(0) === void 0);
-      map.set(0, 1);
+      assert(map.set(0, 1) === map);
       assert(map.get(0) === 1);
     });
 
     it('has', () => {
       const map = new CacheMap<number, number>();
       assert(map.has(0) === false);
-      map.set(0, 1);
+      assert(map.set(0, 1) === map);
       assert(map.has(0) === true);
     });
 
     it('delete', () => {
       const map = new CacheMap<number, number>();
-      map.set(0, 1);
+      assert(map.set(0, 1) === map);
       assert(map.delete(0) === true);
       assert(map.has(0) === false);
       assert(map.delete(0) === false);
@@ -31,7 +31,7 @@ describe('Unit: lib/cachemap', () => {
 
     it('expiry', done => {
       const map = new CacheMap<number, number>();
-      map.set(0, 1, 1000);
+      assert(map.set(0, 1, 1000) === map);
       assert(map.get(0) === 1);
       setTimeout(function() {
         assert(map.has(0) === false);

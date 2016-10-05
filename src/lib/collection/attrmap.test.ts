@@ -11,27 +11,27 @@ describe('Unit: lib/attrmap', () => {
     it('get/set', () => {
       const map = new AttrMap<number, number, string>([], Map);
       assert(map.get(0, 0) === void 0);
-      map.set(0, 0, '');
+      assert(map.set(0, 0, '') === map);
       assert(map.get(0, 0) === '');
       assert(map.get(1, 0) === void 0);
-      map.set(1, 0, ' ');
+      assert(map.set(1, 0, ' ') === map);
       assert(map.get(1, 0) === ' ');
       assert(map.get(0, 0) === '');
-      map.set(0, 0, ' ');
+      assert(map.set(0, 0, ' ') === map);
       assert(map.get(0, 0) === ' ');
     });
 
     it('has', () => {
       const map = new AttrMap<{}, number, string>([], Map);
       assert(map.has(0, 0) === false);
-      map.set(0, 0, '');
+      assert(map.set(0, 0, '') === map);
       assert(map.has(0, 0) === true);
       assert(map.has(1, 0) === false);
     });
 
     it('delete', () => {
       const map = new AttrMap<{}, number, string>([], Map);
-      map.set(0, 0, '');
+      assert(map.set(0, 0, '') === map);
       assert(map.delete(0, 0) === true);
       assert(map.has(0, 0) === false);
       assert(map.delete(0, 0) === false);
@@ -42,7 +42,7 @@ describe('Unit: lib/attrmap', () => {
 
     it('injection', () => {
       const map = new AttrMap<{}, number[], number>([], DataMap, DataMap);
-      map.set({}, [0], 0);
+      assert(map.set({}, [0], 0) === map);
       assert(map.get({}, [0]) === 0);
     });
 
