@@ -1,7 +1,10 @@
 import {WeakMapLike} from 'spica';
 
 let time = Date.now();
-void setInterval(() => time = Date.now(), 100);
+void (function loop() {
+  time = Date.now();
+  void setTimeout(loop, 100);
+})();
 
 export class CacheMap<K, V> implements WeakMapLike<K, V> {
   constructor(entries: Iterable<[K, V]> = []) {
