@@ -55,12 +55,12 @@
     "karma-espower-preprocessor": "1.1.0",
     "karma-firefox-launcher": "^1.0.0",
     "karma-mocha": "^1.2.0",
-    "lodash": "^4.16.2",
+    "lodash": "^4.16.3",
     "mocha": "^3.1.0",
-    "npm-check-updates": "^2.8.1",
+    "npm-check-updates": "^2.8.2",
     "power-assert": "^1.4.1",
     "run-sequence": "^1.2.2",
-    "typescript": "2.1.0-dev.20161003"
+    "typescript": "2.1.0-dev.20161004"
   },
   "scripts": {
     "test": "gulp server"
