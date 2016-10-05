@@ -8,6 +8,7 @@ function enqueue(fn: (_?: void) => any): void {
   void schedule();
 }
 function dequeue(): void {
+  scheduled = false;
   let rem = Queue.length;
   while (true) {
     try {
@@ -22,7 +23,6 @@ function dequeue(): void {
     }
     break;
   }
-  scheduled = false;
 }
 
 function schedule(): void {

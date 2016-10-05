@@ -27,6 +27,10 @@ describe('Unit: lib/tick', function () {
       Tick(done);
     });
 
+    it('recursion', function (done) {
+      Tick(() => Tick(done));
+    });
+
     /*
     it.skip('recovery', function (done) {
       for (let i = 0; i < 100; i++) {
