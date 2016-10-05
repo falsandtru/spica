@@ -1,3 +1,8 @@
+declare const window: {
+  navigator: {};
+  screen: {};
+};
+
 export const FINGERPRINT = typeof window === 'object' ? browser() : server();
 
 export function browser(): number {
