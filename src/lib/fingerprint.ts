@@ -27,8 +27,7 @@ export function hash(digit: string): number {
 
 export function str2digit(str: string): string {
   return str.split('')
-    .map(c => c.charCodeAt(0))
-    .join('');
+    .reduce((s, c) => s + c.charCodeAt(0), '')
 }
 
 export function stringify(obj: {}, depth: number = 5): string {
