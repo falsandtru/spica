@@ -35,6 +35,7 @@ import filter from './sequence/member/instance/filter';
 import scan from './sequence/member/instance/scan';
 import fold from './sequence/member/instance/fold';
 import group from './sequence/member/instance/group';
+import sort from './sequence/member/instance/sort';
 import subsequences from './sequence/member/instance/subsequences';
 import permutations from './sequence/member/instance/permutations';
 import {compose} from '../compose';
@@ -77,6 +78,7 @@ void compose(
   scan,
   fold,
   group,
+  sort,
   subsequences,
   permutations
 );

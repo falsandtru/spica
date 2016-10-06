@@ -73,6 +73,7 @@ export interface Sequence<a, z> {
   dropWhile(f: (a: a) => boolean): Sequence<a, Sequence.Iterator<a>>;
   takeUntil(f: (a: a) => boolean): Sequence<a, Sequence.Iterator<a>>;
   dropUntil(f: (a: a) => boolean): Sequence<a, Sequence.Iterator<a>>;
+  sort(cmp?: (a: a, b: a) => number): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]>;
   memoize(): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]>;
   reduce(): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]>;
 }
