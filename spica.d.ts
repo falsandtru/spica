@@ -405,13 +405,14 @@ declare module 'spica' {
   }
 
   export interface WeakMapLike<K, V> {
-    delete(key: K): boolean;
     get(key: K): V | undefined;
-    has(key: K): boolean;
     set(key: K, value: V): this;
+    has(key: K): boolean;
+    delete(key: K): boolean;
   }
   export class DataMap<K, V> implements WeakMapLike<K, V> {
-    constructor(entries?: Iterable<[K, V]>);
+    constructor(
+      entries?: Iterable<[K, V]>);
     get(key: K): V | undefined;
     set(key: K, val: V): this;
     has(key: K): boolean;
@@ -432,8 +433,7 @@ declare module 'spica' {
     constructor(
       entries?: Iterable<[C, K, V]>,
       KeyMap?: new <K, V>(entries?: Iterable<[K, V]>) => WeakMapLike<K, V>,
-      ValueMap?: new <K, V>(entries?: Iterable<[K, V]>) => WeakMapLike<K, V>
-    );
+      ValueMap?: new <K, V>(entries?: Iterable<[K, V]>) => WeakMapLike<K, V>);
     get(ctx: C, key: K): V | undefined;
     set(ctx: C, key: K, val: V): this;
     has(ctx: C): boolean;
