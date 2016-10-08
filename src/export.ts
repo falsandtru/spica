@@ -9,7 +9,6 @@ export {flip} from './lib/flip';
 export {List, Nil} from './lib/list';
 export {HList, HNil} from './lib/hlist';
 export {DataMap} from './lib/collection/datamap';
-export {CacheMap} from './lib/collection/cachemap';
 export {AttrMap} from './lib/collection/attrmap';
 export {Mixin} from './lib/mixin';
 export {Tick} from './lib/tick';

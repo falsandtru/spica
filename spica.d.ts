@@ -421,15 +421,6 @@ declare module 'spica' {
     clear(): void;
     size: number;
   }
-  export class CacheMap<K, V> implements WeakMapLike<K, V> {
-    constructor(entries?: Iterable<[K, V]>);
-    get(key: K): V | undefined;
-    set(key: K, val: V, expiry?: number): this;
-    has(key: K): boolean;
-    delete(key: K): boolean;
-    clear(): void;
-    size: number;
-  }
   export class AttrMap<C, K, V> {
     constructor(
       entries?: Iterable<[C, K, V]>,
