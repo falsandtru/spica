@@ -434,6 +434,18 @@ declare module 'spica' {
     delete(ctx: C, key: K): boolean;
   }
 
+  export class Cache<K, V> {
+    constructor(
+      size: number,
+      callback?: (key: K, value: V) => any);
+    put(key: K, value: V): boolean;
+    get(key: K): V | undefined;
+    has(key: K): boolean;
+    delete(key: K): boolean;
+    clear(): void;
+    [Symbol.iterator](): Iterator<[K, V]>;
+  }
+
   export function Mixin<T>(...mixins: Array<new () => Object>): new () => T
 
   export function Tick(fn: (_?: void) => any): void

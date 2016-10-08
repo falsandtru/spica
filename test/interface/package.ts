@@ -10,6 +10,7 @@ import {
   List, Nil,
   HList, HNil,
   DataMap, AttrMap,
+  Cache,
   Mixin,
   Tick,
   FINGERPRINT,
@@ -129,6 +130,13 @@ describe('Interface: Package', function () {
 
     it('AttrMap', function () {
       assert(typeof AttrMap === 'function');
+    });
+
+  });
+
+  describe('Cache', function () {
+    it('Cache', function () {
+      assert(typeof Cache === 'function');
     });
 
   });
