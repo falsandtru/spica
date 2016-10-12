@@ -17,10 +17,10 @@ export class Cancelable<L> {
       void 0);
   }
   private promise_: Promise<any>;
-  private canceled = false;
   private reason: L;
   public readonly listeners: Set<(reason: L) => void> = new Set();
   public cancel: (reason: L) => void;
+  public canceled = false;
   public readonly promise = <T>(val: T): Promise<T> =>
     this.canceled
       ? this.promise_ = this.promise_ || new Promise((_, reject) => void reject(this.reason))
