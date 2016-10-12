@@ -66,9 +66,13 @@ export class Observable<T extends Array<string | number>, D, R>
           subscriber(data)),
         subscriber);
   }
+  public emit(this: Observable<T, void | undefined, R>, type: T, data?: D, tracker?: (data: D, results: R[]) => any): void
+  public emit(namespace: T, data: D, tracker?: (data: D, results: R[]) => any): void
   public emit(namespace: T, data: D, tracker?: (data: D, results: R[]) => any): void {
     void this.drain_(namespace, data, tracker);
   }
+  public reflect(this: Observable<T, void | undefined, R>, type: T, data: D): R[]
+  public reflect(namespace: T, data: D): R[]
   public reflect(namespace: T, data: D): R[] {
     let results: R[] = [];
     void this.emit(namespace, <D>data, (_, r) => results = r);
