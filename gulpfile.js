@@ -210,7 +210,6 @@ gulp.task('server', ['clean'], function (done) {
   seq(
     'ts:test',
     'karma:server',
-    'bench',
     'dist',
     function () {
       done();

@@ -17,6 +17,8 @@ before_install:
 before_deploy:
 - sed -i 's/"private":\ true/"private":\ false/' package.json
 - sed -i -E 's/^dist\/?.*$//' .gitignore
+after_deploy:
+- travis_retry gulp bench
 deploy:
   provider: npm
   email:
