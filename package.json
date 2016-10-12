@@ -57,11 +57,11 @@
     "karma-firefox-launcher": "^1.0.0",
     "karma-mocha": "^1.2.0",
     "lodash": "^4.16.4",
-    "mocha": "^3.1.0",
-    "npm-check-updates": "^2.8.4",
+    "mocha": "^3.1.2",
+    "npm-check-updates": "^2.8.5",
     "power-assert": "^1.4.1",
     "run-sequence": "^1.2.2",
-    "typescript": "2.1.0-dev.20161008"
+    "typescript": "2.1.0-dev.20161012"
   },
   "scripts": {
     "test": "gulp server"
