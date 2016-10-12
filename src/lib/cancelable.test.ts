@@ -26,7 +26,7 @@ describe('Unit: lib/cancelable', () => {
       const cancelable = new Cancelable<number>();
       assert(cancelable.either(1).extract() === 1);
       cancelable.cancel(NaN);
-      assert(cancelable.either(1).extract(n => (assert(isNaN(n)), 0)) === 0);
+      assert(cancelable.either(1).extract(n => (assert(Number.isNaN(n)), 0)) === 0);
     });
 
     it('listeners', done => {
