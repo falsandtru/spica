@@ -75,7 +75,10 @@ declare module 'spica' {
 
   export class Cancelable<L> {
     readonly listeners: Set<(reason: L) => void>;
-    readonly cancel: (reason: L) => void;
+    readonly cancel: {
+      (this: Cancelable<void | undefined>): void;
+      (reason: L): void;
+    };
     readonly canceled: boolean;
     readonly promise: <T>(val: T) => Promise<T>;
     readonly maybe: <T>(val: T) => Maybe<T>;

@@ -4,12 +4,12 @@ import {Either, Left, Right} from './monad/either';
 
 export class Cancelable<L> {
   constructor() {
-    this.cancel = (reason: L) => (
+    this.cancel = (reason?: L) => (
       this.cancel = noop,
       this.canceled = true,
-      this.reason = reason,
+      this.reason = reason!,
       this.listeners
-        .forEach(cb => void cb(reason)),
+        .forEach(cb => void cb(reason!)),
       this.listeners.clear(),
       this.listeners.add = cb => (
         void cb(this.reason),
@@ -19,7 +19,10 @@ export class Cancelable<L> {
   private promise_: Promise<any>;
   private reason: L;
   public readonly listeners: Set<(reason: L) => void> = new Set();
-  public cancel: (reason: L) => void;
+  public cancel: {
+    (this: Cancelable<void | undefined>): void;
+    (reason: L): void;
+  };
   public canceled = false;
   public readonly promise = <T>(val: T): Promise<T> =>
     this.canceled
