@@ -13,7 +13,7 @@ const config = {
       case 'Windows_NT':
         return ['Edge'];
       case 'Darwin':
-        return ['Safari'];
+        return [];
      default:
         return [];
     }
