@@ -44,4 +44,5 @@ $ npm i spica
 
 - Chrome
 - Firefox
+- Edge
 - https://cdn.polyfill.io
