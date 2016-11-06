@@ -3,12 +3,9 @@ import {concat} from './concat';
 
 interface SubscriberMapNode<T, D, R> {
   parent: SubscriberMapNode<T, D, R> | undefined;
-  childrenMap: SubscriberMap<T, D, R>;
+  childrenMap: Map<string | number | symbol, SubscriberMapNode<T, D, R>>;
   childrenList: Array<string | number | symbol>;
   registers: Register<T, D, R>[];
-}
-interface SubscriberMap<T, D, R> {
-  [ns: string]: SubscriberMapNode<T, D, R>;
 }
 type Register<T, D, R> = [
   T,
@@ -47,7 +44,7 @@ export class Observable<T extends Array<string | number | symbol>, D, R>
           });
       case 'undefined': {
         const node = this.seekNode_(namespace);
-        node.childrenMap = Object.create(null);
+        node.childrenMap = new Map();
         node.childrenList = [];
         node.registers = [];
         return;
@@ -137,11 +134,11 @@ export class Observable<T extends Array<string | number | symbol>, D, R>
     registers = concat([], registers);
     for (let i = 0; i < childrenList.length; ++i) {
       const name = childrenList[i];
-      const below = this.refsBelow_(childrenMap[name]);
+      const below = this.refsBelow_(childrenMap.get(name)!);
       registers = concat(registers, below);
       if (below.length === 0) {
-        void delete childrenMap[name];
-        void childrenList.splice(childrenList.indexOf(name), 1);
+        void childrenMap.delete(name);
+        void childrenList.splice(childrenList.findIndex(value => value === name || (name !== name && value !== value)), 1);
         void --i;
       }
     }
@@ -149,7 +146,7 @@ export class Observable<T extends Array<string | number | symbol>, D, R>
   }
   private node_: SubscriberMapNode<T, D, R> = {
     parent: void 0,
-    childrenMap: Object.create(null),
+    childrenMap: new Map(),
     childrenList: [],
     registers: []
   };
@@ -157,17 +154,16 @@ export class Observable<T extends Array<string | number | symbol>, D, R>
     let node = this.node_;
     for (const type of types) {
       const {childrenMap} = node;
-      assert(childrenMap.constructor === void 0);
-      if (!childrenMap[type]) {
+      if (!childrenMap.has(type)) {
         void node.childrenList.push(type);
-        childrenMap[type] = {
+        childrenMap.set(type, {
           parent: node,
-          childrenMap: <SubscriberMap<T, D, R>>Object.create(null),
+          childrenMap: new Map(),
           childrenList: [],
           registers: <Register<T, D, R>[]>[]
-        };
+        });
       }
-      node = childrenMap[type];
+      node = childrenMap.get(type)!;
     }
     return node;
   }

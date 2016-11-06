@@ -120,16 +120,18 @@ describe('Unit: lib/observable', function () {
 
     it('emit', function (done) {
       let cnt = 0;
-      const ob = new Observable<string[], TestEvent, void>();
-      ob.on(['test'], () => assert(++cnt === 1) || done());
-      ob.emit(['test'], new TestEvent('TEST'));
+      const ob = new Observable<number[], TestEvent, void>();
+      ob.on([<any>NaN.toString()], done);
+      ob.on([NaN], () => assert(++cnt === 1) || done());
+      ob.emit([NaN], new TestEvent('TEST'));
     });
 
     it('emit namespace', function (done) {
       let cnt = 0;
-      const ob = new Observable<string[], TestEvent, void>();
-      ob.on(['test', '0'], () => assert(++cnt === 1) || done());
-      ob.emit(['test', '0'], new TestEvent('TEST'));
+      const ob = new Observable<number[], TestEvent, void>();
+      ob.on([NaN, <any>NaN.toString()], done);
+      ob.on([NaN, NaN], () => assert(++cnt === 1) || done());
+      ob.emit([NaN, NaN], new TestEvent('TEST'));
     });
 
     it('emit recursive', function (done) {
