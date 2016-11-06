@@ -61,7 +61,7 @@ declare module 'spica' {
     emit(type: T, data: D, tracker?: (data: D, results: R[]) => any): void;
     reflect(this: Observable<T, void | undefined, R>, type: T, data?: D): R[];
     reflect(type: T, data: D): R[];
-    refs(type: T): [T, Subscriber<D, R>, boolean][];
+    refs(type: never[] | T): [T, Subscriber<D, R>, boolean][];
   }
   export interface Observer<T extends any[], D, R> {
     monitor(type: T, subscriber: Subscriber<D, R>): () => void;

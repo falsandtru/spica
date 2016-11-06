@@ -119,7 +119,7 @@ export class Observable<T extends any[], D, R>
       }
     }
   }
-  public refs(namespace: T): [T, Subscriber<D, R>, boolean][] {
+  public refs(namespace: never[] | T): [T, Subscriber<D, R>, boolean][] {
     return this.refsBelow_(this.seekNode_(namespace));
   }
   private refsAbove_({parent, registers}: SubscriberMapNode<T, D, R>): Register<T, D, R>[] {
@@ -150,7 +150,7 @@ export class Observable<T extends any[], D, R>
     childrenList: [],
     registers: []
   };
-  private seekNode_(types: T): SubscriberMapNode<T, D, R> {
+  private seekNode_(types: never[] | T): SubscriberMapNode<T, D, R> {
     let node = this.node_;
     for (const type of types) {
       const {children} = node;
