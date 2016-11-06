@@ -121,97 +121,97 @@ describe('Unit: lib/observable', function () {
     it('emit', function (done) {
       let cnt = 0;
       const ob = new Observable<string[], TestEvent, void>();
-      ob.on(['test'], () => assert(++cnt === 1) || done());
-      ob.emit(['test'], new TestEvent('TEST'));
+      ob.on([''], () => assert(++cnt === 1) || done());
+      ob.emit([''], new TestEvent('TEST'));
     });
 
     it('emit namespace', function (done) {
       let cnt = 0;
       const ob = new Observable<[string, number], TestEvent, void>();
-      ob.on(['test', 1], () => assert(++cnt === 1) || done());
-      ob.emit(['test', 1], new TestEvent('TEST'));
+      ob.on(['', 1], () => assert(++cnt === 1) || done());
+      ob.emit(['', 1], new TestEvent('TEST'));
     });
 
     it('emit recursive', function (done) {
       let cnt = 0;
       const ob = new Observable<string[], number, void>();
-      ob.once(['test'], () => ob.emit(['test'], 1, data => assert(++cnt === 1 && data === 1)));
-      ob.emit(['test'], 0, data => assert(++cnt === 2 && data === 0) || done());
+      ob.once([''], () => ob.emit([''], 1, data => assert(++cnt === 1 && data === 1)));
+      ob.emit([''], 0, data => assert(++cnt === 2 && data === 0) || done());
     });
 
     it('reflect', function (done) {
       const ob = new Observable<string[], void, void>();
-      ob.on(['test'], _ => 1);
-      ob.on(['test'], _ => 2);
-      assert.deepStrictEqual(ob.reflect(['test'], void 0), [1, 2]);
+      ob.on([''], _ => 1);
+      ob.on([''], _ => 2);
+      assert.deepStrictEqual(ob.reflect([''], void 0), [1, 2]);
       done();
     });
 
     it('monitor', function (done) {
       let cnt = 0;
       const ob = new Observable<string[], number, void>();
-      ob.monitor(['test'], data => assert(++cnt === 1 && data === 0));
-      ob.monitor(['test'], data => assert(++cnt === 2 && data === 0));
-      ob.emit(['test'], 0, data => assert(++cnt === 3 && data === 0) || done());
+      ob.monitor([''], data => assert(++cnt === 1 && data === 0));
+      ob.monitor([''], data => assert(++cnt === 2 && data === 0));
+      ob.emit([''], 0, data => assert(++cnt === 3 && data === 0) || done());
     });
 
     it('on', function (done) {
       let cnt = 0;
       const ob = new Observable<string[], number, void>();
-      ob.on(['test'], data => assert(++cnt === 1 && data === 0));
-      ob.on(['test'], data => assert(++cnt === 2 && data === 0));
-      ob.emit(['test'], 0, data => assert(++cnt === 3 && data === 0) || done());
+      ob.on([''], data => assert(++cnt === 1 && data === 0));
+      ob.on([''], data => assert(++cnt === 2 && data === 0));
+      ob.emit([''], 0, data => assert(++cnt === 3 && data === 0) || done());
     });
 
     it('off', function (done) {
       let cnt = 0;
       const ob = new Observable<string[], number, void>();
-      ob.monitor(['test'], data => assert(++cnt === 3 && data === 0))
-      ob.on(['test'], data => assert(++cnt === 1 && data === 0))
-      ob.monitor(['test'], throwError)
-      ob.on(['test'], throwError)
-      ob.on(['test'], data => assert(++cnt === 2 && data === 0))
-      ob.monitor(['test'], data => assert(++cnt === 4 && data === 0) || done())
-      ob.off(['test'], throwError)
-      ob.off(['test'], throwError)
-      ob.emit(['test'], 0);
+      ob.monitor([''], data => assert(++cnt === 3 && data === 0))
+      ob.on([''], data => assert(++cnt === 1 && data === 0))
+      ob.monitor([''], throwError)
+      ob.on([''], throwError)
+      ob.on([''], data => assert(++cnt === 2 && data === 0))
+      ob.monitor([''], data => assert(++cnt === 4 && data === 0) || done())
+      ob.off([''], throwError)
+      ob.off([''], throwError)
+      ob.emit([''], 0);
     });
 
     it('off type', function (done) {
       let cnt = 0;
       const ob = new Observable<string[], number, void>();
-      ob.on(['test'], throwError);
-      ob.monitor(['test'], throwError);
-      ob.on(['test'], throwError);
-      ob.off(['test']);
-      ob.on(['test'], data => assert(++cnt === 1 && data === 0) || done());
-      ob.emit(['test'], 0);
+      ob.on([''], throwError);
+      ob.monitor([''], throwError);
+      ob.on([''], throwError);
+      ob.off(['']);
+      ob.on([''], data => assert(++cnt === 1 && data === 0) || done());
+      ob.emit([''], 0);
     });
 
     it('once', function (done) {
       let cnt = 0;
       const ob = new Observable<string[], number, void>();
-      ob.once(['test'], data => assert(++cnt === 1 && data === 1));
-      ob.emit(['test'], 1, data => assert(++cnt === 2 && data === 1));
-      ob.once(['test'], data => assert(++cnt === 3 && data === 2));
-      ob.emit(['test'], 2, data => assert(++cnt === 4 && data === 2));
-      ob.once(['test'], throwError);
-      ob.off(['test'], throwError);
-      ob.emit(['test'], 3, data => assert(++cnt === 5 && data === 3) || done());
+      ob.once([''], data => assert(++cnt === 1 && data === 1));
+      ob.emit([''], 1, data => assert(++cnt === 2 && data === 1));
+      ob.once([''], data => assert(++cnt === 3 && data === 2));
+      ob.emit([''], 2, data => assert(++cnt === 4 && data === 2));
+      ob.once([''], throwError);
+      ob.off([''], throwError);
+      ob.emit([''], 3, data => assert(++cnt === 5 && data === 3) || done());
     });
 
     it('recovery', function (done) {
       let cnt = 0;
       try {
         const ob = new Observable<string[], void, void>();
-        ob.on(['test'], throwError);
-        ob.on(['test'], throwError);
-        ob.on(['test'], throwError);
-        ob.on(['test'], _ => assert(++cnt === 1));
-        ob.on(['test'], throwError);
-        ob.on(['test'], throwError);
-        ob.on(['test'], throwError);
-        ob.emit(['test'], void 0, _ => assert(++cnt === 2) || Tick(_ => assert(cnt === 2) || done()));
+        ob.on([''], throwError);
+        ob.on([''], throwError);
+        ob.on([''], throwError);
+        ob.on([''], _ => assert(++cnt === 1));
+        ob.on([''], throwError);
+        ob.on([''], throwError);
+        ob.on([''], throwError);
+        ob.emit([''], void 0, _ => assert(++cnt === 2) || Tick(_ => assert(cnt === 2) || done()));
       }
       catch (err) {
         ;
@@ -221,26 +221,26 @@ describe('Unit: lib/observable', function () {
     it('on namespace', function (done) {
       let cnt = 0;
       const ob = new Observable<string[], number, void>();
-      ob.on(['test'], throwError);
-      ob.on(['test', '0'], data => assert(++cnt === 1 && data === 0));
-      ob.on(['test', '0', '0'], data => assert(++cnt === 2 && data === 0));
-      ob.on(['test', '0', '0', '0'], data => assert(++cnt === 3 && data === 0) || done());
-      ob.emit(['test', '0'], 0);
+      ob.on([''], throwError);
+      ob.on(['', '0'], data => assert(++cnt === 1 && data === 0));
+      ob.on(['', '0', '0'], data => assert(++cnt === 2 && data === 0));
+      ob.on(['', '0', '0', '0'], data => assert(++cnt === 3 && data === 0) || done());
+      ob.emit(['', '0'], 0);
     });
 
     it('off namespace', function (done) {
       let cnt = 0;
       const ob = new Observable<string[], number, void>();
-      ob.monitor(['test'], data => assert(++cnt === 5 && data === 0) || Tick(done));
-      ob.on(['test'], throwError);
-      ob.monitor(['test', '0'], data => assert(++cnt === 4 && data === 0));
-      ob.on(['test', '0'], throwError);
-      ob.on(['test', '0'], data => assert(++cnt === 1 && data === 0));
-      ob.monitor(['test', '0', '0'], data => assert(++cnt === 0 && data === 0));
-      ob.on(['test', '0', '0'], data => assert(++cnt === 2 && data === 0));
-      ob.on(['test', '0', '0', '0'], data => assert(++cnt === 3 && data === 0));
-      ob.off(['test', '0'], throwError);
-      ob.emit(['test', '0'], 0);
+      ob.monitor([''], data => assert(++cnt === 5 && data === 0) || Tick(done));
+      ob.on([''], throwError);
+      ob.monitor(['', '0'], data => assert(++cnt === 4 && data === 0));
+      ob.on(['', '0'], throwError);
+      ob.on(['', '0'], data => assert(++cnt === 1 && data === 0));
+      ob.monitor(['', '0', '0'], data => assert(++cnt === 0 && data === 0));
+      ob.on(['', '0', '0'], data => assert(++cnt === 2 && data === 0));
+      ob.on(['', '0', '0', '0'], data => assert(++cnt === 3 && data === 0));
+      ob.off(['', '0'], throwError);
+      ob.emit(['', '0'], 0);
     });
 
     it('mixed type key', function (done) {
