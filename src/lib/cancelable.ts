@@ -14,9 +14,8 @@ export class Cancelable<L> {
       this.listeners.add = cb => (
         void cb(this.reason),
         this.listeners),
-      void 0);
+      void Object.freeze(this));
   }
-  private promise_: Promise<any>;
   private reason: L;
   public readonly listeners: Set<(reason: L) => void> = new Set();
   public cancel: {
@@ -26,7 +25,7 @@ export class Cancelable<L> {
   public canceled = false;
   public readonly promise = <T>(val: T): Promise<T> =>
     this.canceled
-      ? this.promise_ = this.promise_ || new Promise((_, reject) => void reject(this.reason))
+      ? new Promise<T>((_, reject) => void reject(this.reason))
       : Promise.resolve(val);
   public readonly maybe = <T>(val: T): Maybe<T> =>
     this.canceled
