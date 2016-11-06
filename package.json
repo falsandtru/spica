@@ -62,7 +62,7 @@
     "npm-check-updates": "^2.8.6",
     "power-assert": "^1.4.1",
     "run-sequence": "^1.2.2",
-    "typescript": "2.1.0-dev.20161030"
+    "typescript": "2.1.0-dev.20161106"
   },
   "scripts": {
     "test": "npm i && gulp test",
