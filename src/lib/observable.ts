@@ -3,8 +3,8 @@ import {concat} from './concat';
 
 interface SubscriberMapNode<T, D, R> {
   parent: SubscriberMapNode<T, D, R> | undefined;
-  children: Map<string | number | symbol, SubscriberMapNode<T, D, R>>;
-  childrenList: Array<string | number | symbol>;
+  children: Map<any, SubscriberMapNode<T, D, R>>;
+  childrenList: any[];
   registers: Register<T, D, R>[];
 }
 type Register<T, D, R> = [

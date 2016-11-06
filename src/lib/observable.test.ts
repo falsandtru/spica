@@ -120,18 +120,16 @@ describe('Unit: lib/observable', function () {
 
     it('emit', function (done) {
       let cnt = 0;
-      const ob = new Observable<number[], TestEvent, void>();
-      ob.on([<any>NaN.toString()], done);
-      ob.on([NaN], () => assert(++cnt === 1) || done());
-      ob.emit([NaN], new TestEvent('TEST'));
+      const ob = new Observable<string[], TestEvent, void>();
+      ob.on(['test'], () => assert(++cnt === 1) || done());
+      ob.emit(['test'], new TestEvent('TEST'));
     });
 
     it('emit namespace', function (done) {
       let cnt = 0;
-      const ob = new Observable<number[], TestEvent, void>();
-      ob.on([NaN, <any>NaN.toString()], done);
-      ob.on([NaN, NaN], () => assert(++cnt === 1) || done());
-      ob.emit([NaN, NaN], new TestEvent('TEST'));
+      const ob = new Observable<[string, number], TestEvent, void>();
+      ob.on(['test', 1], () => assert(++cnt === 1) || done());
+      ob.emit(['test', 1], new TestEvent('TEST'));
     });
 
     it('emit recursive', function (done) {
@@ -245,17 +243,18 @@ describe('Unit: lib/observable', function () {
       ob.emit(['test', '0'], 0);
     });
 
-    it('symbol', function (done) {
+    it('mixed type key', function (done) {
       let cnt = 0;
       const sym = Symbol();
-      const ob = new Observable<symbol[], number, void>();
-      ob.on([<any>Symbol().toString()], done);
-      ob.on([Symbol()], done);
-      ob.on([sym], data => assert(++cnt === 1 && data === 1));
-      ob.emit([sym], 1);
-      ob.off([sym]);
-      ob.monitor([sym], data => assert(++cnt === 2 && data === 2) || Tick(done));
-      ob.emit([sym], 2);
+      const ob = new Observable<[number, symbol], number, void>();
+      ob.on([NaN, sym], data => assert(++cnt === 1 && data === 1));
+      ob.emit([NaN, <any>Symbol().toString()], 0);
+      ob.emit([<any>'NaN', sym], 0);
+      ob.emit([NaN, Symbol()], 0);
+      ob.emit([NaN, sym], 1);
+      ob.off([NaN, sym]);
+      ob.monitor([NaN, sym], data => assert(++cnt === 2 && data === 2) || Tick(done));
+      ob.emit([NaN, sym], 2);
     });
 
   });
