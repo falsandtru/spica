@@ -3,7 +3,7 @@ import {concat} from './concat';
 
 interface SubscriberMapNode<T, D, R> {
   parent: SubscriberMapNode<T, D, R> | undefined;
-  childrenMap: Map<string | number | symbol, SubscriberMapNode<T, D, R>>;
+  children: Map<string | number | symbol, SubscriberMapNode<T, D, R>>;
   childrenList: Array<string | number | symbol>;
   registers: Register<T, D, R>[];
 }
@@ -15,7 +15,7 @@ type Register<T, D, R> = [
 ];
 type Subscriber<D, R> = (data: D) => R;
 
-export class Observable<T extends Array<string | number | symbol>, D, R>
+export class Observable<T extends any[], D, R>
   implements Observer<T, D, R>, Publisher<T, D, R> {
   public monitor(namespace: T, subscriber: Subscriber<D, R>, identifier: Subscriber<D, R> = subscriber): () => void {
     void this.throwTypeErrorIfInvalidSubscriber_(subscriber, namespace);
@@ -44,7 +44,7 @@ export class Observable<T extends Array<string | number | symbol>, D, R>
           });
       case 'undefined': {
         const node = this.seekNode_(namespace);
-        node.childrenMap = new Map();
+        node.children = new Map();
         node.childrenList = [];
         node.registers = [];
         return;
@@ -130,14 +130,14 @@ export class Observable<T extends Array<string | number | symbol>, D, R>
     }
     return registers;
   }
-  private refsBelow_({childrenList, childrenMap, registers}: SubscriberMapNode<T, D, R>): Register<T, D, R>[] {
+  private refsBelow_({childrenList, children, registers}: SubscriberMapNode<T, D, R>): Register<T, D, R>[] {
     registers = concat([], registers);
     for (let i = 0; i < childrenList.length; ++i) {
       const name = childrenList[i];
-      const below = this.refsBelow_(childrenMap.get(name)!);
+      const below = this.refsBelow_(children.get(name)!);
       registers = concat(registers, below);
       if (below.length === 0) {
-        void childrenMap.delete(name);
+        void children.delete(name);
         void childrenList.splice(childrenList.findIndex(value => value === name || (name !== name && value !== value)), 1);
         void --i;
       }
@@ -146,24 +146,24 @@ export class Observable<T extends Array<string | number | symbol>, D, R>
   }
   private node_: SubscriberMapNode<T, D, R> = {
     parent: void 0,
-    childrenMap: new Map(),
+    children: new Map(),
     childrenList: [],
     registers: []
   };
   private seekNode_(types: T): SubscriberMapNode<T, D, R> {
     let node = this.node_;
     for (const type of types) {
-      const {childrenMap} = node;
-      if (!childrenMap.has(type)) {
+      const {children} = node;
+      if (!children.has(type)) {
         void node.childrenList.push(type);
-        childrenMap.set(type, {
+        children.set(type, {
           parent: node,
-          childrenMap: new Map(),
+          children: new Map(),
           childrenList: [],
           registers: <Register<T, D, R>[]>[]
         });
       }
-      node = childrenMap.get(type)!;
+      node = children.get(type)!;
     }
     return node;
   }
