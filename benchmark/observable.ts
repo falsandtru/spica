@@ -9,20 +9,6 @@ describe('Benchmark:', function (this: IContextDefinition) {
   }
 
   describe('Observable', function () {
-    it('equal', function (done) {
-      const [a, b] = [[0, 1], [0, 1]];
-      benchmark('Observable equal', () => equal(a, b), done);
-
-      function equal<T>(a: T[], b: T[]): boolean {
-        if (a === b) return true;
-        if (a.length !== b.length) return false;
-        for (let i = 0; i < a.length; ++i) {
-          if (a[i] !== b[i]) return false;
-        }
-        return true;
-      }
-    });
-
     it('monitor', function (done) {
       const subject = new Observable();
       subject.monitor([], _ => 0);
