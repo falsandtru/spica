@@ -51,7 +51,7 @@ declare module 'spica' {
     }
   }
 
-  export class Observable<T extends Array<string | number>, D, R>
+  export class Observable<T extends Array<string | number | symbol>, D, R>
     implements Observer<T, D, R>, Publisher<T, D, R> {
     monitor(type: T, subscriber: Subscriber<D, R>): () => void;
     on(type: T, subscriber: Subscriber<D, R>): () => void;
@@ -63,13 +63,13 @@ declare module 'spica' {
     reflect(type: T, data: D): R[];
     refs(type: T): [T, Subscriber<D, R>, boolean][];
   }
-  export interface Observer<T extends Array<string | number>, D, R> {
+  export interface Observer<T extends Array<string | number | symbol>, D, R> {
     monitor(type: T, subscriber: Subscriber<D, R>): () => void;
     on(type: T, subscriber: Subscriber<D, R>): () => void;
     off(type: T, subscriber?: Subscriber<D, R>): void;
     once(type: T, subscriber: Subscriber<D, R>): () => void;
   }
-  export interface Publisher<T extends Array<string | number>, D, R> {
+  export interface Publisher<T extends Array<string | number | symbol>, D, R> {
     emit(this: Publisher<T, void | undefined, R>, type: T, data?: D, tracker?: (data: D, results: R[]) => any): void;
     emit(type: T, data: D, tracker?: (data: D, results: any[]) => any): void;
     reflect(this: Publisher<T, void | undefined, R>, type: T, data?: D): R[];

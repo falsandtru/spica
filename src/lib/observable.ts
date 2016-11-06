@@ -4,7 +4,7 @@ import {concat} from './concat';
 interface SubscriberMapNode<T, D, R> {
   parent: SubscriberMapNode<T, D, R> | undefined;
   childrenMap: SubscriberMap<T, D, R>;
-  childrenList: string[];
+  childrenList: Array<string | number | symbol>;
   registers: Register<T, D, R>[];
 }
 interface SubscriberMap<T, D, R> {
@@ -18,7 +18,7 @@ type Register<T, D, R> = [
 ];
 type Subscriber<D, R> = (data: D) => R;
 
-export class Observable<T extends Array<string | number>, D, R>
+export class Observable<T extends Array<string | number | symbol>, D, R>
   implements Observer<T, D, R>, Publisher<T, D, R> {
   public monitor(namespace: T, subscriber: Subscriber<D, R>, identifier: Subscriber<D, R> = subscriber): () => void {
     void this.throwTypeErrorIfInvalidSubscriber_(subscriber, namespace);
@@ -158,16 +158,16 @@ export class Observable<T extends Array<string | number>, D, R>
     for (const type of types) {
       const {childrenMap} = node;
       assert(childrenMap.constructor === void 0);
-      if (!childrenMap[type + '']) {
-        void node.childrenList.push(type + '');
-        childrenMap[type + ''] = {
+      if (!childrenMap[type]) {
+        void node.childrenList.push(type);
+        childrenMap[type] = {
           parent: node,
           childrenMap: <SubscriberMap<T, D, R>>Object.create(null),
           childrenList: [],
           registers: <Register<T, D, R>[]>[]
         };
       }
-      node = childrenMap[type + ''];
+      node = childrenMap[type];
     }
     return node;
   }

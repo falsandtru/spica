@@ -243,6 +243,19 @@ describe('Unit: lib/observable', function () {
       ob.emit(['test', '0'], 0);
     });
 
+    it('symbol', function (done) {
+      let cnt = 0;
+      const sym = Symbol();
+      const ob = new Observable<symbol[], number, void>();
+      ob.on([<any>Symbol().toString()], done);
+      ob.on([Symbol()], done);
+      ob.on([sym], data => assert(++cnt === 1 && data === 1));
+      ob.emit([sym], 1);
+      ob.off([sym]);
+      ob.monitor([sym], data => assert(++cnt === 2 && data === 2) || Tick(done));
+      ob.emit([sym], 2);
+    });
+
   });
 
 });
