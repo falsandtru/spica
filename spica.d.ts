@@ -456,7 +456,7 @@ declare module 'spica' {
 
   export function Mixin<T>(...mixins: Array<new () => Object>): new () => T;
 
-  export function Tick(fn: (_?: void) => any): void;
+  export function Tick(fn: () => any): void;
 
   export const FINGERPRINT: number;
   export function uuid(): string;
