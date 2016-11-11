@@ -349,8 +349,8 @@ declare module 'spica' {
     <a, b, c, d, e, z>(f: (a: a, b: b, c: c, d: d, e: e) => z, ctx?: any): Curried5<a, b, c, d, e, z>;
   }
   export const curry: Curry;
-  export function flip<a, b, c>(f: (a: a) => (b: b) => c): Curried2<b, a, c>
-  export function flip<a, b, c>(f: (a: a, b: b) => c): Curried2<b, a, c>
+  export function flip<a, b, c>(f: (a: a) => (b: b) => c): Curried2<b, a, c>;
+  export function flip<a, b, c>(f: (a: a, b: b) => c): Curried2<b, a, c>;
 
   export interface List<a, c extends Nil | List<a, any>> extends Cons<a, c> { }
   export class Nil {
@@ -454,22 +454,22 @@ declare module 'spica' {
     [Symbol.iterator](): Iterator<[K, V]>;
   }
 
-  export function Mixin<T>(...mixins: Array<new () => Object>): new () => T
+  export function Mixin<T>(...mixins: Array<new () => Object>): new () => T;
 
-  export function Tick(fn: (_?: void) => any): void
+  export function Tick(fn: (_?: void) => any): void;
 
   export const FINGERPRINT: number;
-  export function uuid(): string
-  export function sqid(): string
-  export function sqid(id: number): string
-  export function assign<T extends Object>(target: T, ...sources: T[]): T
-  export function assign<T extends Object, U extends Object>(target: T, ...sources: U[]): T & U
-  export function clone<T extends Object>(target: T, ...sources: T[]): T
-  export function clone<T extends Object, U extends Object>(target: T, ...sources: U[]): T & U
-  export function extend<T extends Object>(target: T, ...sources: T[]): T
-  export function extend<T extends Object, U extends Object>(target: T, ...sources: U[]): T & U
-  export function concat<T>(target: T[], source: T[]): T[]
-  export function concat<T>(target: T[], source: { [index: number]: T; length: number; }): T[]
+  export function uuid(): string;
+  export function sqid(): string;
+  export function sqid(id: number): string;
+  export function assign<T extends Object>(target: T, ...sources: T[]): T;
+  export function assign<T extends Object, U extends Object>(target: T, ...sources: U[]): T & U;
+  export function clone<T extends Object>(target: T, ...sources: T[]): T;
+  export function clone<T extends Object, U extends Object>(target: T, ...sources: U[]): T & U;
+  export function extend<T extends Object>(target: T, ...sources: T[]): T;
+  export function extend<T extends Object, U extends Object>(target: T, ...sources: U[]): T & U;
+  export function concat<T>(target: T[], source: T[]): T[];
+  export function concat<T>(target: T[], source: { [index: number]: T; length: number; }): T[];
   export function sort<T>(as: T[], cmp: (a: T, b: T) => number, times: number): T[];
 
 }
