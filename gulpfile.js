@@ -175,7 +175,7 @@ gulp.task('install', function () {
 });
 
 gulp.task('update', function () {
-  shell('npm-check-updates -u');
+  shell('ncu -ua');
   shell('npm i');
 });
 
