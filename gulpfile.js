@@ -61,6 +61,7 @@ function compile(paths) {
       basedir: '.',
       debug: false,
       entries: Object.values(paths).map(p => glob.sync(p)),
+      bundleExternal: false,
       cache: {},
       packageCache: {}
     })
