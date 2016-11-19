@@ -1,2 +1,1 @@
-﻿import './src/import';
-export * from './src/export';
+﻿export * from './src/export';
