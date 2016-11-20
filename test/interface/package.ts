@@ -20,10 +20,22 @@ import {
   clone,
   extend,
   concat,
-  sort
+  sort,
+  __esModule
 } from 'spica';
 
+declare module 'spica' {
+  export const __esModule: boolean | undefined;
+}
+
 describe('Interface: Package', function () {
+  describe('module', function () {
+    it('module', function () {
+      assert(__esModule === true);
+    });
+
+  });
+
   describe('Supervisor', function () {
     it('Supervisor', function () {
       assert(typeof Supervisor === 'function');
