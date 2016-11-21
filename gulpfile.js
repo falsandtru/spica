@@ -71,7 +71,6 @@ function compile(paths) {
     .on("error", err => done = console.log(err + ''))
     .pipe(source(`${pkg.name}.js`))
     .pipe(buffer())
-    .pipe($.derequire())
     .once("finish", () => done || process.exit(1));
 }
 
