@@ -1,8 +1,7 @@
 import {benchmark} from './benchmark';
-import {IContextDefinition} from 'mocha';
 import {Cache} from 'spica';
 
-describe('Benchmark:', function (this: IContextDefinition) {
+describe('Benchmark:', function () {
   this.timeout(10 * 1e3);
 
   const size = 1000;

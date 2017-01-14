@@ -1,8 +1,7 @@
 import {benchmark} from './benchmark';
-import {IContextDefinition} from 'mocha';
 import {DataMap, AttrMap} from 'spica';
 
-describe('Benchmark:', function (this: IContextDefinition) {
+describe('Benchmark:', function () {
   this.timeout(10 * 1e3);
 
   describe('DataMap', function () {
