@@ -25,6 +25,7 @@ import takeWhile from './sequence/member/instance/takeWhile';
 import dropWhile from './sequence/member/instance/dropWhile';
 import takeUntil from './sequence/member/instance/takeUntil';
 import dropUntil from './sequence/member/instance/dropUntil';
+import sort from './sequence/member/instance/sort';
 import fmap from './sequence/member/instance/fmap';
 import ap from './sequence/member/instance/ap';
 import bind from './sequence/member/instance/bind';
@@ -35,7 +36,6 @@ import filter from './sequence/member/instance/filter';
 import scan from './sequence/member/instance/scan';
 import fold from './sequence/member/instance/fold';
 import group from './sequence/member/instance/group';
-import sort from './sequence/member/instance/sort';
 import subsequences from './sequence/member/instance/subsequences';
 import permutations from './sequence/member/instance/permutations';
 import {compose} from '../compose';
@@ -68,6 +68,7 @@ void compose(
   dropWhile,
   takeUntil,
   dropUntil,
+  sort,
   fmap,
   ap,
   bind,
@@ -78,7 +79,6 @@ void compose(
   scan,
   fold,
   group,
-  sort,
   subsequences,
   permutations
 );
