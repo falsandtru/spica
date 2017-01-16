@@ -38,6 +38,7 @@ import fold from './sequence/member/instance/fold';
 import group from './sequence/member/instance/group';
 import inits from './sequence/member/instance/inits';
 import tails from './sequence/member/instance/tails';
+import segs from './sequence/member/instance/segs';
 import subsequences from './sequence/member/instance/subsequences';
 import permutations from './sequence/member/instance/permutations';
 import {compose} from '../compose';
@@ -83,6 +84,7 @@ void compose(
   group,
   inits,
   tails,
+  segs,
   subsequences,
   permutations
 );

@@ -67,6 +67,7 @@ export interface Sequence<a, z> {
   group(f: (x: a, y: a) => boolean): Sequence<a[], [Sequence.Iterator<a>, a[]]>;
   inits(): Sequence<a[], [Sequence.Iterator<a[]>, Sequence.Iterator<a[]>]>
   tails(): Sequence<a[], [Sequence.Iterator<a[]>, Sequence.Iterator<a[]>]>
+  segs(): Sequence<a[], [Sequence.Iterator<a[]>, Sequence.Iterator<a[]>]>;
   subsequences(): Sequence<a[], [Sequence.Iterator<a[]>, Sequence.Iterator<a[]>]>;
   permutations(): Sequence<a[], [Sequence.Iterator<Sequence<a[], any>>, Sequence.Iterator<a[]>]>;
   take(n: number): Sequence<a, Sequence.Iterator<a>>;
