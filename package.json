@@ -16,6 +16,7 @@
     "iterator",
     "maybe",
     "either",
+    "monad",
     "list",
     "hlist",
     "cache"
