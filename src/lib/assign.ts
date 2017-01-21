@@ -1,4 +1,4 @@
-import {type} from './type';
+import { type } from './type';
 
 export const assign = template((key, target, source) =>
   target[key] = source[key]);

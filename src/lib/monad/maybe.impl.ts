@@ -1,4 +1,4 @@
-import {MonadPlus} from './monadplus';
+import { MonadPlus } from './monadplus';
 
 export class Maybe<a> extends MonadPlus<a> {
   private readonly MAYBE: Just<a> | Nothing;

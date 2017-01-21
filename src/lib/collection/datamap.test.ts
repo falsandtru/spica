@@ -1,4 +1,4 @@
-import {DataMap} from './datamap';
+import { DataMap } from './datamap';
 
 describe('Unit: lib/datamap', () => {
   describe('DataMap', () => {

@@ -1,5 +1,5 @@
-import {Functor} from './functor';
-import {curry} from '../curry';
+import { Functor } from './functor';
+import { curry } from '../curry';
 
 export abstract class Applicative<a> extends Functor<a> {
   public abstract fmap<b>(f: (a: a) => b): Applicative<b>;

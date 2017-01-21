@@ -1,5 +1,5 @@
-import {Maybe, Just, Nothing} from './maybe';
-import {Sequence} from './sequence';
+import { Maybe, Just, Nothing } from './maybe';
+import { Sequence } from './sequence';
 
 describe('Unit: lib/maybe', () => {
   const Return = Maybe.Return;

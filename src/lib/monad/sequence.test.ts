@@ -1,4 +1,4 @@
-import {Sequence} from './sequence';
+import { Sequence } from './sequence';
 
 export const nat = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1)).memoize();
 

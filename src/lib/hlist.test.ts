@@ -1,4 +1,4 @@
-import {HList, HNil} from './hlist';
+import { HList, HNil } from './hlist';
 
 describe('Unit: lib/hlist', () => {
   describe('HList', () => {

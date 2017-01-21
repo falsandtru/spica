@@ -1,4 +1,4 @@
-import {Either, Left, Right} from './either';
+import { Either, Left, Right } from './either';
 
 describe('Unit: lib/either', () => {
   const Return = Either.Return;

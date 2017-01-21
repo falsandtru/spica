@@ -1,4 +1,4 @@
-import {assign} from './assign';
+import { assign } from './assign';
 
 export function compose<T extends new (...args: any[]) => Object>(target: T, ...sources: T[]): T {
   return sources

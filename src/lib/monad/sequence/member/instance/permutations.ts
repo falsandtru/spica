@@ -1,4 +1,4 @@
-import {Sequence} from '../../core';
+import { Sequence } from '../../core';
 
 export default class <a, z> extends Sequence<a, z> {
   public permutations(): Sequence<a[], [Sequence.Iterator<Sequence<a[], any>>, Sequence.Iterator<a[]>]> {

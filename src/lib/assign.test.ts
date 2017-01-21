@@ -1,4 +1,4 @@
-import {assign, clone, extend} from './assign';
+import { assign, clone, extend } from './assign';
 
 describe('Unit: lib/assign', () => {
   describe('assign', () => {

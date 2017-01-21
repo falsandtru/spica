@@ -1,4 +1,4 @@
-import {concat} from './concat';
+import { concat } from './concat';
 
 export interface List<a, c extends Nil | List<a, any>> extends Cons<a, c> { }
 

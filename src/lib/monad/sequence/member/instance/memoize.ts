@@ -1,4 +1,4 @@
-import {Sequence} from '../../core';
+import { Sequence } from '../../core';
 
 const memories = new WeakMap<Sequence<any, any>, Map<number, Sequence.Thunk<any>>>();
 

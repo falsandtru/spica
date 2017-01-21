@@ -1,4 +1,4 @@
-import {nat} from '../../../sequence.test';
+import { nat } from '../../../sequence.test';
 
 describe('Unit: lib/monad/sequence/member/subsequences', () => {
   describe('subsequences', () => {

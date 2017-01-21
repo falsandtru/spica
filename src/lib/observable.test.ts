@@ -1,5 +1,5 @@
-import {Observable} from './observable';
-import {Tick} from './tick';
+import { Observable } from './observable';
+import { Tick } from './tick';
 
 describe('Unit: lib/observable', function () {
   describe('Observable', function () {

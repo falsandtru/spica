@@ -1,4 +1,4 @@
-import {Tick} from './tick';
+import { Tick } from './tick';
 
 describe('Unit: lib/tick', function () {
   describe('Tick', function () {

@@ -1,5 +1,5 @@
-import {sort} from './sort';
-import {Sequence} from './monad/sequence';
+import { sort } from './sort';
+import { Sequence } from './monad/sequence';
 
 describe('Unit: lib/sort', () => {
   describe('sort', () => {

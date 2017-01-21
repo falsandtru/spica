@@ -1,5 +1,5 @@
-import {Sequence} from '../../../sequence';
-import {nat} from '../../../sequence.test';
+import { Sequence } from '../../../sequence';
+import { nat } from '../../../sequence.test';
 
 describe('Unit: lib/monad/sequence/member/intersect/', () => {
   const double = nat.map(n => n * 2);

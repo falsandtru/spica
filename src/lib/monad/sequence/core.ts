@@ -1,5 +1,5 @@
-import {Sequence as ISequence} from 'spica';
-import {MonadPlus} from '../monadplus';
+import { Sequence as ISequence } from 'spica';
+import { MonadPlus } from '../monadplus';
 
 export class Sequence<a, z> extends MonadPlus<a> implements Iterable<a> {
   constructor(

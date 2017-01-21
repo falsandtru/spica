@@ -1,4 +1,4 @@
-import {concat} from './concat';
+import { concat } from './concat';
 
 export interface HList<a, c extends HNil | HList<any, any>> extends HCons<a, c> { }
 

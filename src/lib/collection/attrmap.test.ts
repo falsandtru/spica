@@ -1,5 +1,5 @@
-import {AttrMap} from './attrmap';
-import {DataMap} from './datamap';
+import { AttrMap } from './attrmap';
+import { DataMap } from './datamap';
 
 describe('Unit: lib/attrmap', () => {
   describe('AttrMap', () => {

@@ -1,6 +1,6 @@
-import {WeakMapLike} from 'spica';
-import {sqid} from '../sqid';
-import {type} from '../type';
+import { WeakMapLike } from 'spica';
+import { sqid } from '../sqid';
+import { type } from '../type';
 
 function isPrimitive(target: any): boolean {
   return target instanceof Object === false;

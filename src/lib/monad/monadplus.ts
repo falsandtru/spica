@@ -1,4 +1,4 @@
-import {Monad} from './monad';
+import { Monad } from './monad';
 
 export abstract class MonadPlus<a> extends Monad<a> {
 }

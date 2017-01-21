@@ -1,5 +1,5 @@
-import {Sequence} from '../../../sequence';
-import {sqid} from '../../../../sqid';
+import { Sequence } from '../../../sequence';
+import { sqid } from '../../../../sqid';
 
 describe('Unit: lib/monad/sequence/member/static/from', () => {
   describe('Sequence.from', () => {

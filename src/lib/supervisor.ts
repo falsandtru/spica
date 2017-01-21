@@ -1,9 +1,9 @@
-import {Supervisor as ISupervisor} from 'spica';
-import {Observable} from './observable';
-import {Tick} from './tick';
-import {isThenable} from './thenable';
-import {sqid} from './sqid';
-import {noop} from './noop';
+import { Supervisor as ISupervisor } from 'spica';
+import { Observable } from './observable';
+import { Tick } from './tick';
+import { isThenable } from './thenable';
+import { sqid } from './sqid';
+import { noop } from './noop';
 
 export abstract class Supervisor<N extends string, P, R, S> implements ISupervisor<N, P, R, S> {
   public static count: number = 0;

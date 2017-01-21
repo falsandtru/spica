@@ -1,5 +1,5 @@
-import {Cache} from './cache';
-import {Sequence} from './monad/sequence';
+import { Cache } from './cache';
+import { Sequence } from './monad/sequence';
 
 describe('Unit: lib/cache', () => {
   describe('Cache', () => {

@@ -1,4 +1,4 @@
-import {Monad} from './monad';
+import { Monad } from './monad';
 
 export class Either<a, b> extends Monad<b> {
   private readonly EITHER: Left<a> | Right<b>;

@@ -1,4 +1,4 @@
-import {concat} from './concat';
+import { concat } from './concat';
 
 describe('Unit: lib/concat', () => {
   describe('concat', () => {

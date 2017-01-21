@@ -1,4 +1,4 @@
-import {Sequence} from '../../core';
+import { Sequence } from '../../core';
 
 export default class <a, z> extends Sequence<a, z> {
   public ap<a, z>(this: Sequence<(a: a) => z, any>, a: Sequence<a, any>): Sequence<z, [Sequence.Iterator<Sequence<z, any>>, Sequence.Iterator<z>]>

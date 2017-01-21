@@ -1,4 +1,4 @@
-import {Cancelable} from './cancelable';
+import { Cancelable } from './cancelable';
 
 describe('Unit: lib/cancelable', () => {
   describe('Cancelable', () => {

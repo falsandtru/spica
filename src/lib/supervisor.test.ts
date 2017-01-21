@@ -1,5 +1,5 @@
-import {Supervisor} from './supervisor';
-import {Tick} from './tick';
+import { Supervisor } from './supervisor';
+import { Tick } from './tick';
 
 describe('Unit: lib/supervisor', function () {
   describe('Supervisor', function () {

@@ -1,4 +1,4 @@
-import {assign} from './assign';
+import { assign } from './assign';
 
 export function Mixin<T>(...mixins: Array<new () => Object>): new () => T {
   return <new () => T>mixins.reduceRight((b, d) => __extends(d, b), class { });

@@ -1,4 +1,4 @@
-import {WeakMapLike} from 'spica';
+import { WeakMapLike } from 'spica';
 
 export class AttrMap<C, K, V> {
   constructor(

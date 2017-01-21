@@ -1,4 +1,4 @@
-import {Applicative} from './applicative';
+import { Applicative } from './applicative';
 
 export abstract class Monad<a> extends Applicative<a> {
   public abstract bind<b>(f: (a: a) => Monad<b>): Monad<b>;

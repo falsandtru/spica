@@ -1,4 +1,4 @@
-import {Sequence} from '../../../sequence';
+import { Sequence } from '../../../sequence';
 
 describe('Unit: lib/monad/sequence/member/memoize', () => {
   describe('memoize', () => {

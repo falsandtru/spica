@@ -1,4 +1,4 @@
-import {compose} from './compose';
+import { compose } from './compose';
 
 describe('Unit: lib/compose', () => {
   describe('compose', () => {

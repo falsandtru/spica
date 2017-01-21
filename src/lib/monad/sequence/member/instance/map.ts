@@ -1,4 +1,4 @@
-import {Sequence} from '../../core';
+import { Sequence } from '../../core';
 
 export default class <a, z> extends Sequence<a, z> {
   public map<b>(f: (a: a, i: number) => b): Sequence<b, Sequence.Iterator<a>> {

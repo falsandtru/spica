@@ -1,4 +1,4 @@
-import {Sequence} from '../../core';
+import { Sequence } from '../../core';
 
 export default class <a, z> extends Sequence<a, z> {
   public static random(): Sequence<number, [number, Map<number, Sequence.Thunk<number>>]>

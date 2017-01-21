@@ -1,4 +1,4 @@
-import {Sequence} from '../../core';
+import { Sequence } from '../../core';
 
 export default class <a, z> extends Sequence<a, z> {
   public takeUntil(f: (a: a) => boolean): Sequence<a, Sequence.Iterator<a>> {

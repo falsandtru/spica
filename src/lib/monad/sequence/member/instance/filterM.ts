@@ -1,5 +1,5 @@
-import {Sequence} from '../../core';
-import {concat} from '../../../../concat';
+import { Sequence } from '../../core';
+import { concat } from '../../../../concat';
 
 export default class <a, z> extends Sequence<a, z> {
   public filterM(f: (a: a) => Sequence<boolean, any>): Sequence<a[], [Sequence.Iterator<Sequence<a[], any>>, Sequence.Iterator<a[]>]> {

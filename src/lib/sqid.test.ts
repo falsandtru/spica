@@ -1,4 +1,4 @@
-import {sqid} from './sqid';
+import { sqid } from './sqid';
 
 describe('Unit: lib/sqid', () => {
   describe('sqid', () => {

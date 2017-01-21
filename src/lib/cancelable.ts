@@ -1,6 +1,6 @@
-import {noop} from './noop';
-import {Maybe, Just, Nothing} from './monad/maybe';
-import {Either, Left, Right} from './monad/either';
+import { noop } from './noop';
+import { Maybe, Just, Nothing } from './monad/maybe';
+import { Either, Left, Right } from './monad/either';
 
 export class Cancelable<L> {
   constructor() {

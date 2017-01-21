@@ -1,4 +1,4 @@
-import {List, Nil} from './list';
+import { List, Nil } from './list';
 
 describe('Unit: lib/list', () => {
   describe('List', () => {

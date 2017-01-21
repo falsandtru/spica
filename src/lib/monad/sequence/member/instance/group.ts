@@ -1,5 +1,5 @@
-import {Sequence} from '../../core';
-import {concat} from '../../../../concat';
+import { Sequence } from '../../core';
+import { concat } from '../../../../concat';
 
 export default class <a, z> extends Sequence<a, z> {
   public group(f: (x: a, y: a) => boolean): Sequence<a[], [Sequence.Iterator<a>, a[]]> {

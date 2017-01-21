@@ -1,5 +1,5 @@
-import {flip} from './flip';
-import {curry} from './curry';
+import { flip } from './flip';
+import { curry } from './curry';
 
 describe('Unit: lib/flip', () => {
   describe('flip', () => {

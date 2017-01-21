@@ -1,4 +1,4 @@
-import {Sequence} from './sequence/core';
+import { Sequence } from './sequence/core';
 import resume from './sequence/member/static/resume';
 import from from './sequence/member/static/from';
 import cycle from './sequence/member/static/cycle';
@@ -41,7 +41,7 @@ import tails from './sequence/member/instance/tails';
 import segs from './sequence/member/instance/segs';
 import subsequences from './sequence/member/instance/subsequences';
 import permutations from './sequence/member/instance/permutations';
-import {compose} from '../compose';
+import { compose } from '../compose';
 
 void compose(
   Sequence,
@@ -89,4 +89,4 @@ void compose(
   permutations
 );
 
-export {Sequence}
+export { Sequence }

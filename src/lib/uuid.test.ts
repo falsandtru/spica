@@ -1,4 +1,4 @@
-import {v4} from './uuid';
+import { v4 } from './uuid';
 
 describe('Unit: lib/uuid', () => {
   describe('v4', () => {

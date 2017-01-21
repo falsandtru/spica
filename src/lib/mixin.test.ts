@@ -1,4 +1,4 @@
-import {Mixin} from './mixin';
+import { Mixin } from './mixin';
 
 describe('Unit: lib/mixin', () => {
   describe('mixin', () => {

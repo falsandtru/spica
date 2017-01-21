@@ -1,5 +1,5 @@
-import {Observer, Publisher} from 'spica';
-import {concat} from './concat';
+import { Observer, Publisher } from 'spica';
+import { concat } from './concat';
 
 interface SubscriberMapNode<T, D, R> {
   parent: SubscriberMapNode<T, D, R> | undefined;
