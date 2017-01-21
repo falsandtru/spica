@@ -1,8 +1,6 @@
-import {Sequence} from '../../../sequence';
+import {nat} from '../../../sequence';
 
 describe('Unit: lib/monad/sequence/member/filter', () => {
-  const nat = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1));
-
   describe('filter', () => {
     it('0', () => {
       assert.deepStrictEqual(

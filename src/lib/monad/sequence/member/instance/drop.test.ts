@@ -1,8 +1,6 @@
-import {Sequence} from '../../../sequence';
+import {nat} from '../../../sequence';
 
 describe('Unit: lib/monad/sequence/member/drop', () => {
-  const nat = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1));
-
   describe('drop', () => {
     it('-0 +0', () => {
       assert.deepStrictEqual(

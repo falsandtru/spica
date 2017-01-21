@@ -1,8 +1,6 @@
-import {Sequence} from '../../../sequence';
+import {Sequence, nat} from '../../../sequence';
 
 describe('Unit: lib/monad/sequence/member/takeWhile', () => {
-  const nat = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1));
-
   describe('takeWhile', () => {
     it('0 all', () => {
       assert.deepStrictEqual(

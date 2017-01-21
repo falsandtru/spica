@@ -1,8 +1,6 @@
-import {Sequence} from '../../../sequence';
+import {Sequence, nat} from '../../../sequence';
 
 describe('Unit: lib/monad/sequence/member/static/zip', () => {
-  const nat = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1));
-
   describe('Sequence.zip', () => {
     it('unlimited', () => {
       const even = nat.filter(n => n % 2 === 0);
