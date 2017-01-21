@@ -90,4 +90,3 @@ void compose(
 );
 
 export {Sequence}
-export const nat = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1)).memoize();

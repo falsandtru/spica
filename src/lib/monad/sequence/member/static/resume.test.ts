@@ -1,4 +1,5 @@
-import {Sequence, nat} from '../../../sequence';
+import {Sequence} from '../../../sequence';
+import {nat} from '../../../sequence.test';
 
 describe('Unit: lib/monad/sequence/member/static/resume', () => {
   describe('Sequence.resume', () => {
