@@ -13,7 +13,6 @@ import {
   Cache,
   Mixin,
   Tick,
-  FINGERPRINT,
   uuid,
   sqid,
   assign,
@@ -168,13 +167,6 @@ describe('Interface: Package', function () {
   });
 
   describe('utils', function () {
-    it('FINGERPRINT', function () {
-      assert(typeof FINGERPRINT === 'number');
-      assert(!isNaN(FINGERPRINT));
-      assert(FINGERPRINT === parseInt(FINGERPRINT.toString()));
-      assert(0 < FINGERPRINT && FINGERPRINT < 1e15);
-    });
-
     it('uuid', function () {
       assert(typeof uuid === 'function');
     });

@@ -461,7 +461,6 @@ declare module 'spica' {
 
   export function Tick(fn: () => any): void;
 
-  export const FINGERPRINT: number;
   export function uuid(): string;
   export function sqid(): string;
   export function sqid(id: number): string;

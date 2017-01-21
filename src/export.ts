@@ -13,7 +13,6 @@ export {AttrMap} from './lib/collection/attrmap';
 export {Cache} from './lib/cache';
 export {Mixin} from './lib/mixin';
 export {Tick} from './lib/tick';
-export {FINGERPRINT} from './lib/fingerprint';
 export {v4 as uuid} from './lib/uuid';
 export {sqid} from './lib/sqid';
 export {assign, clone, extend} from './lib/assign';

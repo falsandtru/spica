@@ -31,7 +31,6 @@ $ npm i spica
 - Cache
 - Mixin
 - Tick
-- FINGERPRINT
 - uuid
 - sqid
 - assign
