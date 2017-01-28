@@ -1,3 +1,5 @@
+import { stringify } from './stringify';
+
 const Queue: ((...args: any[]) => any)[] = [];
 
 let scheduled = false;
@@ -18,7 +20,7 @@ function dequeue(): void {
       }
     }
     catch (e) {
-      console.error(e);
+      console.error(stringify(e));
       continue;
     }
     break;

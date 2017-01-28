@@ -3,6 +3,7 @@ import { Observable } from './observable';
 import { Tick } from './tick';
 import { isThenable } from './thenable';
 import { sqid } from './sqid';
+import { stringify } from './stringify';
 import { noop } from './noop';
 
 export abstract class Supervisor<N extends string, P, R, S> implements ISupervisor<N, P, R, S> {
@@ -28,9 +29,9 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     try {
       void this.destructor_(reason);
     }
-    catch (err) {
-      void console.error(err);
-      assert(!console.info(err + ''));
+    catch (reason) {
+      void console.error(stringify(reason));
+      assert(!console.info(reason + ''));
     }
     void --(<typeof Supervisor>this.constructor).count;
     void Object.freeze(this);
@@ -150,7 +151,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
           void callback(<any>void 0, new Error(`Spica: Supervisor: Task: Failed.`));
         }
         catch (reason) {
-          void console.error(reason);
+          void console.error(stringify(reason));
         }
       }
       else {
@@ -166,14 +167,14 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
                 void callback(<any>void 0, new Error(`Spica: Supervisor: Task: Failed.`)))
             .catch(
               reason =>
-                void console.error(reason));
+                void console.error(stringify(reason)));
         }
         else {
           try {
             void callback(reply);
           }
           catch (reason) {
-            void console.error(reason);
+            void console.error(stringify(reason));
           }
         }
       }

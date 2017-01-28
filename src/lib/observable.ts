@@ -1,10 +1,11 @@
 import { Observer, Publisher } from 'spica';
 import { concat } from './concat';
+import { stringify } from './stringify';
 
 interface SubscriberMapNode<T, D, R> {
   parent: SubscriberMapNode<T, D, R> | undefined;
-  children: Map<any, SubscriberMapNode<T, D, R>>;
-  childrenList: any[];
+  children: Map<keyof T, SubscriberMapNode<T, D, R>>;
+  childrenList: (keyof T)[];
   registers: Register<T, D, R>[];
 }
 type Register<T, D, R> = [
@@ -88,10 +89,10 @@ export class Observable<T extends any[], D, R>
             results[results.length] = result;
           }
         }
-        catch (err) {
-          if (err !== void 0 && err !== null) {
-            void console.error(err + '');
-            assert(!console.info(err + ''));
+        catch (reason) {
+          if (reason !== void 0 && reason !== null) {
+            void console.error(stringify(reason));
+            assert(!console.info(reason + ''));
           }
         }
       }, void 0);
@@ -102,10 +103,10 @@ export class Observable<T extends any[], D, R>
         try {
           void subscriber(data);
         }
-        catch (err) {
-          if (err !== void 0 && err !== null) {
-            void console.error(err);
-            assert(!console.info(err + ''));
+        catch (reason) {
+          if (reason !== void 0 && reason !== null) {
+            void console.error(stringify(reason));
+            assert(!console.info(reason + ''));
           }
         }
       }, void 0);
@@ -113,9 +114,9 @@ export class Observable<T extends any[], D, R>
       try {
         void tracker(data, results);
       }
-      catch (err) {
-        void console.error(err);
-        assert(!console.info(err + ''));
+      catch (reason) {
+        void console.error(stringify(reason));
+        assert(!console.info(reason + ''));
       }
     }
   }
