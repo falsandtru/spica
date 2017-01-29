@@ -14,7 +14,7 @@ $ npm i spica
 
 ## API
 
-[spica.d.ts](spica.d.ts)
+[index.d.ts](index.d.ts)
 
 - Supervisor
 - Observable

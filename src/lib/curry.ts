@@ -1,4 +1,4 @@
-import { Curry } from 'spica';
+import { Curry } from '../../index.d';
 
 export const curry: Curry = <T>(f: () => T, ctx?: any) =>
   f.length === 0

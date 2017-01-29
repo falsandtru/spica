@@ -1,4 +1,4 @@
-import { Curried2 } from 'spica';
+import { Curried2 } from '../../index.d';
 import { curry } from './curry';
 
 export function flip<a, b, c>(f: (a: a) => (b: b) => c): Curried2<b, a, c>

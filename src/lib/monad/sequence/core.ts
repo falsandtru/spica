@@ -1,4 +1,4 @@
-import { Sequence as ISequence } from 'spica';
+import { Sequence as ISequence } from '../../../../index.d';
 import { MonadPlus } from '../monadplus';
 
 export class Sequence<a, z> extends MonadPlus<a> implements Iterable<a> {

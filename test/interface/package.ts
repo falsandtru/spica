@@ -21,11 +21,7 @@ import {
   concat,
   sort,
   __esModule
-} from 'spica';
-
-declare module 'spica' {
-  export const __esModule: boolean | undefined;
-}
+} from '../../spica';
 
 describe('Interface: Package', function () {
   describe('module', function () {

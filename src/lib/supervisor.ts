@@ -1,4 +1,4 @@
-import { Supervisor as ISupervisor } from 'spica';
+import { Supervisor as ISupervisor } from '../../index.d';
 import { Observable } from './observable';
 import { Tick } from './tick';
 import { isThenable } from './thenable';

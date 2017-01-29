@@ -1,4 +1,4 @@
-import { Observer, Publisher } from 'spica';
+import { Observer, Publisher } from '../../index.d';
 import { concat } from './concat';
 import { stringify } from './stringify';
 

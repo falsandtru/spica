@@ -1,4 +1,4 @@
-import { WeakMapLike } from 'spica';
+import { WeakMapLike } from '../../../index.d';
 import { sqid } from '../sqid';
 import { type } from '../type';
 
