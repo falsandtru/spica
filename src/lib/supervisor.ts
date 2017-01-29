@@ -25,7 +25,6 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     assert(this.available === false);
     this.alive = false;
     assert(this.workers.size === 0);
-    assert(this.procs.refs([]).length === 0);
     void this.drain();
     try {
       void this.destructor_(reason);
@@ -47,7 +46,6 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     exit: new Observable<never[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>()
   };
   private readonly workers = new Map<N, Worker<N, P, R, S>>();
-  private readonly procs = new Observable<[N], Worker.Command<P>, R | Promise<R>>();
   private alive = true;
   private available = true;
   private validate(): void {
@@ -64,22 +62,23 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     });
     this.scheduled = true;
   }
-  private readonly sharedWorkerResources = new SharedWorkerResources<N, P, R, S>(this.workers, this.procs);
   public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => void {
     void this.validate();
     if (!this.available) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: Cannot register a process after a supervisor is terminated.`);
     if (this.workers.has(name)) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: Cannot register a process multiply using the same name.`);
-    assert(this.procs.refs([name]).length === 0);
     void this.schedule();
     process = typeof process === 'function'
       ? {
-        init: state => state,
-        call: process,
-        exit: _ => void 0
-      }
+          init: state => state,
+          call: process,
+          exit: _ => void 0
+        }
       : process;
+    void ++(<typeof Supervisor>this.constructor).procs;
     return this.workers
-      .set(name, new Worker<N, P, R, S>(this, this.sharedWorkerResources, name, process, state))
+      .set(name, new Worker<N, P, R, S>(this, name, process, state, () => (
+        void this.workers.delete(name),
+        void --(<typeof Supervisor>this.constructor).procs)))
       .get(name)!
       .terminate;
   }
@@ -99,12 +98,13 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
   }
   public cast(name: N, param: P, timeout = this.timeout): boolean {
     void this.validate();
-    const results = this.procs.reflect([name], [param, timeout]);
-    assert(results.length <= 1);
-    if (results.length === 0) {
+    const result = this.workers.has(name)
+      ? this.workers.get(name)!.call([param, timeout])
+      : void 0;
+    if (!result) {
       void this.events.loss.emit([name], [name, param]);
     }
-    return results.length > 0;
+    return !!result;
   }
   public refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason: any) => void][] {
     void this.validate();
@@ -141,17 +141,19 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     const now = Date.now();
     for (let i = 0; i < this.queue.length; ++i) {
       const [name, param, callback, timeout, since] = this.queue[i];
-      const replies: [R | Promise<R>] | never[] = target === void 0 || target === name
-        ? <[R | Promise<R>]>this.procs.reflect([name], [param, since + timeout - now])
-        : [];
-      assert(replies.length <= 1);
-      if (this.alive && replies.length === 0 && now < since + timeout) continue;
+      const result: [R | Promise<R>] | void =
+        target === void 0 || target === name
+          ? this.workers.has(name)
+            ? <[R | Promise<R>]>this.workers.get(name)!.call([param, since + timeout - now])
+            : void 0
+          : void 0;
+      if (this.alive && !result && now < since + timeout) continue;
       i === 0
         ? void this.queue.shift()
         : void this.queue.splice(i, 1);
       void --i;
 
-      if (replies.length === 0) {
+      if (!result) {
         void this.events.loss.emit([name], [name, param]);
         try {
           void callback(<any>void 0, new Error(`Spica: Supervisor: Task: Failed.`));
@@ -161,7 +163,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
         }
       }
       else {
-        const [reply] = replies;
+        const [reply] = result;
         if (!isThenable(reply)) {
           try {
             void callback(reply);
@@ -199,36 +201,21 @@ export namespace Supervisor {
   export import Event = ISupervisor.Event;
 }
 
-class SharedWorkerResources<N extends string, P, R, S> {
-  constructor(
-    public readonly workers: Map<N, Worker<N, P, R, S>>,
-    public readonly procs: Observable<never[] | [N], Worker.Command<P>, R | Promise<R>>
-  ) {
-  }
-}
-
 class Worker<N extends string, P, R, S> {
   constructor(
     private readonly sv: Supervisor<N, P, R, S>,
-    private readonly sharedResources: SharedWorkerResources<N, P, R, S>,
     public readonly name: N,
     public readonly process: Supervisor.Process<P, R, S>,
-    public state: S
+    public state: S,
+    private readonly destructor_: () => any
   ) {
     assert(process.init && process.exit);
-    void ++(<typeof Supervisor>this.sv.constructor).procs;
-    void this.sharedResources.procs
-      .on([name], this.receive);
   }
   private destructor(reason: any): void {
     if (!this.alive) return;
-    void this.sharedResources.workers
-      .delete(this.name);
-    void this.sharedResources.procs
-      .off([this.name], this.receive);
     this.alive = false;
     this.available = false;
-    void --(<typeof Supervisor>this.sv.constructor).procs;
+    void this.destructor_();
     void Object.freeze(this);
     try {
       void this.process.exit(this.state, reason);
@@ -244,9 +231,9 @@ class Worker<N extends string, P, R, S> {
   private alive = true;
   private available = true;
   private times = 0;
-  public readonly receive = ([param, timeout]: Worker.Command<P>): R | Promise<R> => {
-    if (!this.alive) throw new Error(`Spica: Supervisor: <${this.sv.id}/${this.sv.name}/${this.name}>: A process is already terminated:\n${this.process}`);
-    if (this.available === false) throw void 0; // cancel
+  public readonly call = ([param, timeout]: Worker.Command<P>): [R | Promise<R>] | void => {
+    if (!this.alive) return;
+    if (this.available === false) return;
     try {
       this.available = false;
       void ++this.times;
@@ -260,32 +247,34 @@ class Worker<N extends string, P, R, S> {
         const [reply, state] = result;
         this.state = state;
         this.available = true;
-        return reply;
+        return [reply];
       }
       else {
-        return new Promise<[R, S]>((resolve, reject) => (
-          void result.then(resolve, reject),
-          timeout < Infinity === false
-            ? void 0
-            : void setTimeout(() => void reject(new Error()), timeout)))
-          .then(
-            ([reply, state]): R | Promise<R> => {
-              void this.sv.schedule();
-              if (!this.alive) return Promise.reject(new Error());
-              this.state = state;
-              this.available = true;
-              return reply;
-            },
-            reason => {
-              void this.sv.schedule();
-              void this.terminate(reason);
-              throw reason;
-            });
+        return [
+          new Promise<[R, S]>((resolve, reject) => (
+            void result.then(resolve, reject),
+            timeout < Infinity === false
+              ? void 0
+              : void setTimeout(() => void reject(new Error()), timeout)))
+            .then(
+              ([reply, state]): R | Promise<R> => {
+                void this.sv.schedule();
+                if (!this.alive) return Promise.reject(new Error());
+                this.state = state;
+                this.available = true;
+                return reply;
+              },
+              reason => {
+                void this.sv.schedule();
+                void this.terminate(reason);
+                throw reason;
+              })
+        ];
       }
     }
     catch (reason) {
       void this.terminate(reason);
-      throw void 0;
+      return;
     }
   }
   public readonly terminate = (reason: any): void => {
