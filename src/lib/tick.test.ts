@@ -8,27 +8,40 @@ describe('Unit: lib/tick', function () {
 
     it('sequence', function (done) {
       let cnt = 0;
-      Tick(_ => ++cnt);
-      Tick(_ => assert(cnt === 1) || done());
+      Tick(() => ++cnt);
+      Tick(() => assert(cnt === 1) || done());
     });
 
     it('async', function (done) {
       let async = false;
-      Tick(_ => assert(async === true));
+      Tick(() => assert(async === true));
       Tick(done);
       async = true;
     });
 
     it('grouping', function (done) {
       let interrupt = true;
-      Tick(_ => _);
+      Tick(() => void 0);
       setTimeout(() => interrupt = false, 0);
-      Tick(_ => assert(interrupt === true));
+      Tick(() => assert(interrupt === true));
       Tick(done);
     });
 
     it('recursion', function (done) {
       Tick(() => Tick(done));
+    });
+
+    it('dedup', function (done) {
+      let cnt = 0;
+      function f() {
+        ++cnt;
+      }
+      Tick(f, true);
+      Tick(f, true);
+      Tick(() => {
+        assert(cnt === 1);
+        done();
+      });
     });
 
     /*

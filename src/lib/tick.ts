@@ -1,22 +1,30 @@
 import { stringify } from './stringify';
 
-const Queue: ((...args: any[]) => any)[] = [];
+export { enqueue as Tick };
+
+const queue: ((...args: any[]) => any)[] = [];
+const fs = new WeakSet<() => any>();
 
 let scheduled = false;
 
-function enqueue(fn: (_?: void) => any): void {
+function enqueue(fn: () => any, dedup = false): void {
   assert(typeof fn === 'function');
-  void Queue.push(fn);
+  if (dedup && fs.has(fn)) return;
+  void queue.push(fn);
+  dedup && void fs.add(fn);
   void schedule();
 }
 function dequeue(): void {
   scheduled = false;
-  let rem = Queue.length;
+  let rem = queue.length;
   while (true) {
     try {
       while (rem > 0) {
         void --rem;
-        void Queue.shift()!();
+        const fn = queue.shift()!;
+        assert(fn);
+        void fs.delete(fn);
+        void fn();
       }
     }
     catch (e) {
@@ -29,12 +37,7 @@ function dequeue(): void {
 
 function schedule(): void {
   if (scheduled) return;
-  if (Queue.length === 0) return;
+  if (queue.length === 0) return;
   void Promise.resolve().then(dequeue);
   scheduled = true;
 }
-
-const IS_NODE = Function("return typeof process === 'object' && typeof window !== 'object'")();
-export const Tick = IS_NODE
-  ? <typeof enqueue>Function('return fn => process.nextTick(fn)')()
-  : enqueue;

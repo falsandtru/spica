@@ -211,7 +211,7 @@ describe('Unit: lib/observable', function () {
         ob.on([''], throwError);
         ob.on([''], throwError);
         ob.on([''], throwError);
-        ob.emit([''], void 0, _ => assert(++cnt === 2) || Tick(_ => assert(cnt === 2) || done()));
+        ob.emit([''], void 0, _ => assert(++cnt === 2) || Tick(() => assert(cnt === 2) || done()));
       }
       catch (err) {
         ;
