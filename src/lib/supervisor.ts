@@ -11,7 +11,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
   public static procs: number = 0;
   constructor({
     name = '',
-    timeout = 0,
+    timeout = Infinity,
     destructor = noop
   }: Supervisor.Settings<N> = {}) {
     if (this.constructor === Supervisor) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot instantiate abstract classes.`);
