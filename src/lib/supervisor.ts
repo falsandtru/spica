@@ -21,11 +21,11 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     void ++(<typeof Supervisor>this.constructor).count;
   }
   private destructor(reason: any): void {
-    void this.validate();
+    assert(this.alive === true);
     assert(this.available === false);
-    this.alive = false;
     assert(this.workers.size === 0);
     void this.drain();
+    assert(this.queue.length === 0);
     try {
       void this.destructor_(reason);
     }
@@ -33,6 +33,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
       void console.error(stringify(reason));
       assert(!console.info(reason + ''));
     }
+    this.alive = false;
     void --(<typeof Supervisor>this.constructor).count;
     void Object.freeze(this);
   }
@@ -49,22 +50,10 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
   private alive = true;
   private available = true;
   private validate(): void {
-    if (!this.alive) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A supervisor is already terminated.`);
-  }
-  private scheduled = false;
-  public schedule(): void {
-    if (!this.alive) return;
-    if (this.scheduled) return;
-    void Tick(() => {
-      if (!this.alive) return;
-      this.scheduled = false;
-      void this.drain();
-    });
-    this.scheduled = true;
+    if (!this.available) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A supervisor is already terminated.`);
   }
   public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => void {
     void this.validate();
-    if (!this.available) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: Cannot register a process after a supervisor is terminated.`);
     if (this.workers.has(name)) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: Cannot register a process multiply using the same name.`);
     void this.schedule();
     process = typeof process === 'function'
@@ -92,9 +81,9 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
       Date.now()
     ]);
     void this.schedule();
-    if (timeout < Infinity === false) return;
-    if (timeout > 0 === false) return;
-    void setTimeout(() => void this.drain(name), timeout + 9);
+    if (timeout <= 0) return;
+    if (timeout === Infinity) return;
+    void setTimeout(() => void this.drain(), timeout + 9);
   }
   public cast(name: N, param: P, timeout = this.timeout): boolean {
     void this.validate();
@@ -126,15 +115,20 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
   }
   public terminate(name?: N, reason?: any): void {
     if (!this.available) return;
+    assert(this.alive === true);
     if (name === void 0) {
       this.available = false;
     }
-    void this.refs(name)
-      .forEach(([, , , terminate]) =>
-        void terminate(reason));
+    void Array.from(this.workers.values())
+      .forEach(worker =>
+        void worker.terminate(reason));
+    assert(this.workers.size === 0);
     if (name === void 0) {
       void this.destructor(reason);
     }
+  }
+  public schedule(): void {
+    void Tick(() => void this.drain(), true);
   }
   private readonly queue: [N, P, Supervisor.Callback<R>, number, number][] = [];
   private drain(target?: N): void {
@@ -176,7 +170,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
           void Promise.resolve(reply)
             .then(
               reply =>
-                this.alive
+                this.available
                   ? void callback(reply)
                   : void callback(<any>void 0, new Error(`Spica: Supervisor: Task: Failed.`)),
               () =>
@@ -212,7 +206,7 @@ class Worker<N extends string, P, R, S> {
     assert(process.init && process.exit);
   }
   private destructor(reason: any): void {
-    if (!this.alive) return;
+    assert(this.alive === true);
     this.alive = false;
     this.available = false;
     void this.destructor_();
@@ -232,8 +226,7 @@ class Worker<N extends string, P, R, S> {
   private available = true;
   private times = 0;
   public readonly call = ([param, timeout]: Worker.Command<P>): [R | Promise<R>] | void => {
-    if (!this.alive) return;
-    if (this.available === false) return;
+    if (!this.available) return;
     try {
       this.available = false;
       void ++this.times;
@@ -253,7 +246,7 @@ class Worker<N extends string, P, R, S> {
         return [
           new Promise<[R, S]>((resolve, reject) => (
             void result.then(resolve, reject),
-            timeout < Infinity === false
+            timeout === Infinity
               ? void 0
               : void setTimeout(() => void reject(new Error()), timeout)))
             .then(
@@ -278,6 +271,7 @@ class Worker<N extends string, P, R, S> {
     }
   }
   public readonly terminate = (reason: any): void => {
+    if (!this.alive) return;
     void this.destructor(reason);
   }
 }
