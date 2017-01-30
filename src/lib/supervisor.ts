@@ -130,22 +130,24 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
   public schedule(): void {
     void Tick(() => void this.drain(), true);
   }
+  private readonly resource: number = 10;
   private readonly queue: [N, P, Supervisor.Callback<R>, number, number][] = [];
-  private drain(target?: N): void {
-    const now = Date.now();
-    for (let i = 0; i < this.queue.length; ++i) {
-      const [name, param, callback, timeout, since] = this.queue[i];
-      const result: [R | Promise<R>] | void =
-        target === void 0 || target === name
-          ? this.workers.has(name)
-            ? <[R | Promise<R>]>this.workers.get(name)!.call([param, since + timeout - now])
-            : void 0
-          : void 0;
-      if (this.alive && !result && now < since + timeout) continue;
+  private drain(): void {
+    const since = Date.now();
+    let resource = this.resource;
+    for (let i = 0, len = this.queue.length; this.available && i < len && resource > 0; ++i) {
+      const now = Date.now();
+      resource -= now - since;
+      const [name, param, callback, timeout, registered] = this.queue[i];
+      const result: [R | Promise<R>] | void = this.workers.has(name)
+        ? <[R | Promise<R>]>this.workers.get(name)!.call([param, registered + timeout - now])
+        : void 0;
+      if (this.available && !result && now < registered + timeout) continue;
       i === 0
         ? void this.queue.shift()
         : void this.queue.splice(i, 1);
       void --i;
+      void --len;
 
       if (!result) {
         void this.events.loss.emit([name], [name, param]);
@@ -181,6 +183,16 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
         }
       }
     }
+    if (!this.available) {
+      while (this.queue.length > 0) {
+        const [name, param] = this.queue.shift()!;
+        void this.events.loss.emit([name], [name, param]);
+      }
+      void Object.freeze(this.queue);
+      return;
+    }
+    if (resource > 0) return;
+    void this.schedule();
   }
 }
 export namespace Supervisor {
