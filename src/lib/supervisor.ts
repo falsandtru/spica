@@ -54,7 +54,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
   }
   public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => void {
     void this.validate();
-    if (this.workers.has(name)) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: Cannot register a process multiply using the same name.`);
+    if (this.workers.has(name)) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: Cannot register a process multiply with the same name.`);
     void this.schedule();
     process = typeof process === 'function'
       ? {
@@ -152,7 +152,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
       if (!result) {
         void this.events.loss.emit([name], [name, param]);
         try {
-          void callback(<any>void 0, new Error(`Spica: Supervisor: Task: Failed.`));
+          void callback(<any>void 0, new Error(`Spica: Supervisor: A processing has failed.`));
         }
         catch (reason) {
           void console.error(stringify(reason));
@@ -174,9 +174,9 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
               reply =>
                 this.available
                   ? void callback(reply)
-                  : void callback(<any>void 0, new Error(`Spica: Supervisor: Task: Failed.`)),
+                  : void callback(<any>void 0, new Error(`Spica: Supervisor: A processing has failed.`)),
               () =>
-                void callback(<any>void 0, new Error(`Spica: Supervisor: Task: Failed.`)))
+                void callback(<any>void 0, new Error(`Spica: Supervisor: A processing has failed.`)))
             .catch(
               reason =>
                 void console.error(stringify(reason)));
