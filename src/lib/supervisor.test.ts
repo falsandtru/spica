@@ -190,7 +190,7 @@ describe('Unit: lib/supervisor', function () {
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({ timeout: 0 });
       sv.register('', (n, s) => Promise.resolve<[number, number]>([n + s, ++s]), 0);
       sv.call('', 1, n => assert(n === 1));
-      sv.call('', 2, n => assert(n === 3) || sv.terminate() || done(), 1e2);
+      sv.call('', 2, n => assert(n === 3) || done(), 1e2);
     });
 
     it('timeout of messaging', function (done) {
@@ -226,7 +226,7 @@ describe('Unit: lib/supervisor', function () {
       let cnt = 0;
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({ timeout: 0 });
       sv.register('', _ => [++cnt, 0], 0);
-      sv.call('', 0, _ => assert(cnt === 1) || sv.terminate() || done());
+      sv.call('', 0, _ => assert(cnt === 1) || done());
       assert(cnt === 0);
     });
 
@@ -234,7 +234,7 @@ describe('Unit: lib/supervisor', function () {
       let cnt = 1;
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({ timeout: 0 });
       sv.events.loss.on([''], ([, param]) => assert(cnt === 1 && param === 2 && ++cnt));
-      sv.register('', n => assert(sv.cast('', 2) === false) || assert(n === 1) && assert(cnt === 2 && ++cnt) || Tick(() => sv.terminate() || done()) || [0 , 0], 0);
+      sv.register('', n => assert(sv.cast('', 2) === false) || assert(n === 1) && assert(cnt === 2 && ++cnt) || Tick(() => done()) || [0 , 0], 0);
       assert(sv.cast('', 1) === true);
     });
 
@@ -245,7 +245,7 @@ describe('Unit: lib/supervisor', function () {
       sv.events.loss.on([''], ([, param]) => assert(cnt === 1 && param === 2 && ++cnt));
       sv.call('', 1, r => assert(r === 1) || assert(cnt === 3 && ++cnt));
       sv.call('', 2, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 2 && ++cnt));
-      sv.call('', 3, r => assert(r === 3) || assert(cnt === 4 && ++cnt) || sv.terminate() || done(), Infinity);
+      sv.call('', 3, r => assert(r === 3) || assert(cnt === 4 && ++cnt) || done(), Infinity);
     });
 
     it('terminate', function (done) {
