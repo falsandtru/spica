@@ -26,8 +26,8 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     assert(this.alive === true);
     assert(this.available === false);
     assert(this.workers.size === 0);
-    void this.drain();
-    assert(this.queue.length === 0);
+    void this.deliver();
+    assert(this.messages.length === 0);
     try {
       void this.destructor_(reason);
     }
@@ -79,8 +79,8 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
   }
   public call(name: N, param: P, callback: Supervisor.Callback<R>, timeout = this.timeout): void {
     void this.validate();
-    while (this.queue.length + 1 > this.size) {
-      const [name, param, callback] = this.queue.shift()!;
+    while (this.messages.length + 1 > this.size) {
+      const [name, param, callback] = this.messages.shift()!;
       void this.events.loss.emit([name], [name, param]);
       try {
         void callback(<any>void 0, new Error(`Spica: Supervisor: A message overflowed.`));
@@ -89,7 +89,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
         void console.error(stringify(reason));
       }
     }
-    void this.queue.push([
+    void this.messages.push([
       name,
       param,
       callback,
@@ -99,7 +99,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     void this.schedule();
     if (timeout <= 0) return;
     if (timeout === Infinity) return;
-    void setTimeout(() => void this.drain(), timeout + 9);
+    void setTimeout(() => void this.deliver(), timeout + 9);
   }
   public cast(name: N, param: P, timeout = this.timeout): boolean {
     void this.validate();
@@ -144,24 +144,24 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     }
   }
   public schedule(): void {
-    void Tick(() => void this.drain(), true);
+    void Tick(() => void this.deliver(), true);
   }
   private readonly resource: number = 10;
-  private readonly queue: [N, P, Supervisor.Callback<R>, number, number][] = [];
-  private drain(): void {
+  private readonly messages: [N, P, Supervisor.Callback<R>, number, number][] = [];
+  private deliver(): void {
     const since = Date.now();
     let resource = this.resource;
-    for (let i = 0, len = this.queue.length; this.available && i < len && resource > 0; ++i) {
+    for (let i = 0, len = this.messages.length; this.available && i < len && resource > 0; ++i) {
       const now = Date.now();
       resource -= now - since;
-      const [name, param, callback, timeout, registered] = this.queue[i];
+      const [name, param, callback, timeout, registered] = this.messages[i];
       const result: [R | Promise<R>] | void = this.workers.has(name)
         ? <[R | Promise<R>]>this.workers.get(name)!.call([param, registered + timeout - now])
         : void 0;
       if (this.available && !result && now < registered + timeout) continue;
       i === 0
-        ? void this.queue.shift()
-        : void this.queue.splice(i, 1);
+        ? void this.messages.shift()
+        : void this.messages.splice(i, 1);
       void --i;
       void --len;
 
@@ -200,11 +200,11 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
       }
     }
     if (!this.available) {
-      while (this.queue.length > 0) {
-        const [name, param] = this.queue.shift()!;
+      while (this.messages.length > 0) {
+        const [name, param] = this.messages.shift()!;
         void this.events.loss.emit([name], [name, param]);
       }
-      void Object.freeze(this.queue);
+      void Object.freeze(this.messages);
       return;
     }
     if (resource > 0) return;
