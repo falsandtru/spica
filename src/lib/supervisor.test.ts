@@ -171,11 +171,11 @@ describe('Unit: lib/supervisor', function () {
           ++cnt; // 4, 6
           return [-n, ++state];
         },
-        exit(state, reason) {
+        exit(reason, state) {
           assert(TestSupervisor.procs === 0);
           assert(cnt === 8 && ++cnt);
-          assert(state === 2);
           assert(reason instanceof Error);
+          assert(state === 2);
         }
       }, 0);
       assert(cnt === 1 && ++cnt);

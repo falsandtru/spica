@@ -38,7 +38,7 @@ export namespace Supervisor {
   export namespace Process {
     export type Init<S> = (state: S) => S;
     export type Call<P, R, S> = (param: P, state: S) => [R, S] | PromiseLike<[R, S]>;
-    export type Exit<S> = (state: S, reason: any) => void;
+    export type Exit<S> = (reason: any, state: S) => void;
   }
   export type Callback<R> = {
     (reply: R, error?: Error): void;

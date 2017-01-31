@@ -227,7 +227,7 @@ class Worker<N extends string, P, R, S> {
     void this.destructor_();
     void Object.freeze(this);
     try {
-      void this.process.exit(this.state, reason);
+      void this.process.exit(reason, this.state);
       void this.sv.events.exit
         .emit([this.name], [this.name, this.process, this.state, reason]);
     }
