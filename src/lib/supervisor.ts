@@ -52,6 +52,9 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
   private validate(): void {
     if (!this.available) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A supervisor is already terminated.`);
   }
+  public register(name: N, process: Supervisor.Process<P, R, S>, state: S): (reason?: any) => void;
+  public register(name: N, process: Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => void;
+  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => void;
   public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => void {
     void this.validate();
     if (this.workers.has(name)) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: Cannot register a process multiply with the same name.`);

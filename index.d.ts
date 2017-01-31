@@ -16,6 +16,8 @@ export abstract class Supervisor<N extends string, P, R, S> {
     readonly loss: Observer<never[] | [N], Supervisor.Event.Data.Loss<N, P>, any>;
     readonly exit: Observer<never[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>;
   };
+  register(name: N, process: Supervisor.Process<P, R, S>, state: S): (reason?: any) => void;
+  register(name: N, process: Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => void;
   register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => void;
   call(name: N, param: P, callback: Supervisor.Callback<R>, timeout?: number): void;
   cast(name: N, param: P, timeout?: number): boolean;
