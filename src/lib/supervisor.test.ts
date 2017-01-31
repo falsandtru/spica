@@ -222,6 +222,19 @@ describe('Unit: lib/supervisor', function () {
       sv.call('', 1, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 2 && ++cnt), 1e2);
     });
 
+    it('overflow', function (done) {
+      let cnt = 1;
+      const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({ size: 1 });
+      sv.events.loss.once([''], ([n, p]) => {
+        assert(n === '');
+        assert(p === 1);
+        assert(cnt === 1 && ++cnt);
+      });
+      sv.register('', _ => [0, 0], 0);
+      sv.call('', 1, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 2 && ++cnt), 1e2);
+      sv.call('', 2, (r, e) => assert(r === 0) || assert(e === void 0) || assert(cnt === 3 && ++cnt) || done(), 1e2);
+    });
+
     it('async', function (done) {
       let cnt = 0;
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({ timeout: 0 });

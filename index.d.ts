@@ -27,6 +27,7 @@ export abstract class Supervisor<N extends string, P, R, S> {
 export namespace Supervisor {
   export interface Settings<N extends string> {
     readonly name?: string;
+    readonly size?: number;
     readonly timeout?: number;
     readonly destructor?: (reason: any) => any;
   }

@@ -11,11 +11,13 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
   public static procs: number = 0;
   constructor({
     name = '',
+    size = Infinity,
     timeout = Infinity,
     destructor = noop
   }: Supervisor.Settings<N> = {}) {
     if (this.constructor === Supervisor) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot instantiate abstract classes.`);
     this.name = name;
+    this.size = size;
     this.timeout = timeout;
     this.destructor_ = destructor;
     void ++(<typeof Supervisor>this.constructor).count;
@@ -39,6 +41,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
   }
   public readonly id: string = sqid();
   public readonly name: string;
+  private readonly size: number;
   private readonly timeout: number;
   private readonly destructor_: (reason: any) => any;
   public readonly events = {
@@ -76,6 +79,16 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
   }
   public call(name: N, param: P, callback: Supervisor.Callback<R>, timeout = this.timeout): void {
     void this.validate();
+    while (this.queue.length + 1 > this.size) {
+      const [name, param, callback] = this.queue.shift()!;
+      void this.events.loss.emit([name], [name, param]);
+      try {
+        void callback(<any>void 0, new Error(`Spica: Supervisor: A message overflowed.`));
+      }
+      catch (reason) {
+        void console.error(stringify(reason));
+      }
+    }
     void this.queue.push([
       name,
       param,
