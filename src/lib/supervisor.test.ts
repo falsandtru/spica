@@ -104,11 +104,11 @@ describe('Unit: lib/supervisor', function () {
         timeout: 0,
         destructor: reason => {
           assert(reason === void 0);
-          assert(cnt === 14 && ++cnt);
+          assert(cnt === 13 && ++cnt);
           assert(TestSupervisor.count === 1);
           assert(TestSupervisor.procs === 0);
           Tick(() => {
-            assert(cnt === 15 && ++cnt);
+            assert(cnt === 14 && ++cnt);
             assert(TestSupervisor.count === 0);
             assert(TestSupervisor.procs === 0);
             done();
@@ -131,21 +131,8 @@ describe('Unit: lib/supervisor', function () {
         .monitor([], ([name, param]) => {
           assert(TestSupervisor.procs === 0);
           assert(name === '');
-          switch (param) {
-            case 3: {
-              assert(cnt === 10 && ++cnt);
-              assert(param === 3);
-              return;
-            }
-            case 4: {
-              assert(cnt === 12 && ++cnt);
-              assert(param === 4);
-              return;
-            }
-            default: {
-              throw new Error(param + '');
-            }
-          }
+          assert(cnt === 11 && ++cnt);
+          assert(param === 4);
         });
       sv.events.exit
         .monitor([], ([name, process, state, reason]) => {
@@ -181,8 +168,8 @@ describe('Unit: lib/supervisor', function () {
       assert(cnt === 1 && ++cnt);
       sv.call('', 1, r => assert(TestSupervisor.procs === 1) || assert(r === -1) || assert(cnt === 7 && ++cnt));
       assert(sv.cast('', 2) === true);
-      sv.call('', 3, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 11 && ++cnt));
-      sv.call('', 4, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 13 && ++cnt) || sv.terminate());
+      sv.call('', 3, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 10 && ++cnt));
+      sv.call('', 4, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 12 && ++cnt) || sv.terminate());
       assert(cnt === 5 && ++cnt);
     });
 

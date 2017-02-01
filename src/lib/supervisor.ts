@@ -106,10 +106,11 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     const result = this.workers.has(name)
       ? this.workers.get(name)!.call([param, timeout])
       : void 0;
-    if (!result) {
+    if (result === void 0) {
       void this.events.loss.emit([name], [name, param]);
     }
-    return !!result;
+    if (result === void 0 || result instanceof Error) return false;
+    return true;
   }
   public refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason: any) => void][] {
     void this.validate();
@@ -155,8 +156,8 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
       const now = Date.now();
       resource -= now - since;
       const [name, param, callback, timeout, registered] = this.messages[i];
-      const result: [R | Promise<R>] | void = this.workers.has(name)
-        ? <[R | Promise<R>]>this.workers.get(name)!.call([param, registered + timeout - now])
+      const result = this.workers.has(name)
+        ? this.workers.get(name)!.call([param, registered + timeout - now])
         : void 0;
       if (this.available && !result && now < registered + timeout) continue;
       i === 0
@@ -165,38 +166,39 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
       void --i;
       void --len;
 
-      if (!result) {
+      if (result === void 0) {
         void this.events.loss.emit([name], [name, param]);
+      }
+      if (result === void 0 || result instanceof Error) {
         try {
           void callback(<any>void 0, new Error(`Spica: Supervisor: A processing has failed.`));
         }
         catch (reason) {
           void console.error(stringify(reason));
         }
+        continue;
+      }
+      const [reply] = result;
+      if (!isThenable(reply)) {
+        try {
+          void callback(reply);
+        }
+        catch (reason) {
+          void console.error(stringify(reason));
+        }
       }
       else {
-        const [reply] = result;
-        if (!isThenable(reply)) {
-          try {
-            void callback(reply);
-          }
-          catch (reason) {
-            void console.error(stringify(reason));
-          }
-        }
-        else {
-          void Promise.resolve(reply)
-            .then(
-              reply =>
-                this.available
-                  ? void callback(reply)
-                  : void callback(<any>void 0, new Error(`Spica: Supervisor: A processing has failed.`)),
-              () =>
-                void callback(<any>void 0, new Error(`Spica: Supervisor: A processing has failed.`)))
-            .catch(
-              reason =>
-                void console.error(stringify(reason)));
-        }
+        void Promise.resolve(reply)
+          .then(
+            reply =>
+              this.available
+                ? void callback(reply)
+                : void callback(<any>void 0, new Error(`Spica: Supervisor: A processing has failed.`)),
+            () =>
+              void callback(<any>void 0, new Error(`Spica: Supervisor: A processing has failed.`)))
+          .catch(
+            reason =>
+              void console.error(stringify(reason)));
       }
     }
     if (!this.available) {
@@ -253,7 +255,7 @@ class Worker<N extends string, P, R, S> {
   private alive = true;
   private available = true;
   private times = 0;
-  public readonly call = ([param, timeout]: Worker.Command<P>): [R | Promise<R>] | void => {
+  public readonly call = ([param, timeout]: Worker.Command<P>): [R | Promise<R>] | Error | void => {
     if (!this.available) return;
     try {
       this.available = false;
@@ -295,7 +297,7 @@ class Worker<N extends string, P, R, S> {
     }
     catch (reason) {
       void this.terminate(reason);
-      return;
+      return new Error();
     }
   }
   public readonly terminate = (reason: any): void => {
