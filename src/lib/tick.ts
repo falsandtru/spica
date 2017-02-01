@@ -2,16 +2,14 @@ import { stringify } from './stringify';
 
 export { enqueue as Tick };
 
-const queue: ((...args: any[]) => any)[] = [];
-const fs = new WeakSet<() => any>();
+const queue: [(...args: any[]) => any, boolean][] = [];
+let fs = new WeakSet<() => any>();
 
 let scheduled = false;
 
 function enqueue(fn: () => any, dedup = false): void {
   assert(typeof fn === 'function');
-  if (dedup && fs.has(fn)) return;
-  void queue.push(fn);
-  dedup && void fs.add(fn);
+  void queue.push([fn, dedup]);
   void schedule();
 }
 function dequeue(): void {
@@ -21,9 +19,12 @@ function dequeue(): void {
     try {
       while (rem > 0) {
         void --rem;
-        const fn = queue.shift()!;
+        const [fn, dedup] = queue.shift()!;
+        if (dedup) {
+          if (fs.has(fn)) continue;
+          void fs.add(fn);
+        }
         assert(fn);
-        void fs.delete(fn);
         void fn();
       }
     }
@@ -31,6 +32,7 @@ function dequeue(): void {
       console.error(stringify(e));
       continue;
     }
+    fs = new WeakSet();
     break;
   }
 }

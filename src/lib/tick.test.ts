@@ -40,7 +40,12 @@ describe('Unit: lib/tick', function () {
       Tick(f, true);
       Tick(() => {
         assert(cnt === 1);
-        done();
+        Tick(f);
+        Tick(f);
+        Tick(() => {
+          assert(cnt === 3);
+          done();
+        });
       });
     });
 
