@@ -144,11 +144,11 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     }
   }
   public schedule(): void {
-    void Tick(() => void this.deliver(), true);
+    void Tick(this.deliver, true);
   }
   private readonly resource: number = 10;
   private readonly messages: [N, P, Supervisor.Callback<R>, number, number][] = [];
-  private deliver(): void {
+  private readonly deliver = (): void => {
     const since = Date.now();
     let resource = this.resource;
     for (let i = 0, len = this.messages.length; this.available && i < len && resource > 0; ++i) {
@@ -277,8 +277,8 @@ class Worker<N extends string, P, R, S> {
             timeout === Infinity
               ? void 0
               : void setTimeout(() => void reject(new Error()), timeout)))
-            .then(
-              ([reply, state]): R | Promise<R> => {
+            .then<R>(
+              ([reply, state]) => {
                 void this.sv.schedule();
                 if (!this.alive) return Promise.reject(new Error());
                 this.state = state;
