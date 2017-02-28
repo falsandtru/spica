@@ -3,26 +3,27 @@ import { Maybe, Just, Nothing } from './monad/maybe';
 import { Either, Left, Right } from './monad/either';
 
 export class Cancelable<L> {
-  constructor() {
-    this.cancel = (reason?: L) => (
-      this.cancel = noop,
-      this.canceled = true,
-      this.reason = reason!,
-      this.listeners
-        .forEach(cb => void cb(reason!)),
-      this.listeners.clear(),
-      this.listeners.add = cb => (
-        void cb(this.reason),
-        this.listeners),
-      void Object.freeze(this));
-  }
   private reason: L;
   public readonly listeners: Set<(reason: L) => void> = new Set();
+  public canceled = false;
   public cancel: {
     (this: Cancelable<void | undefined>): void;
     (reason: L): void;
+  } = (reason?: L) => {
+    this.cancel = noop;
+    this.canceled = true;
+    this.reason = reason!;
+    void Object.freeze(this);
+    while (this.listeners.size > 0) {
+      void this.listeners
+        .forEach(cb => (
+          void this.listeners.delete(cb),
+          void cb(reason!)));
+    }
+    this.listeners.add = cb => (
+      void cb(this.reason),
+      this.listeners);
   };
-  public canceled = false;
   public readonly promise = <T>(val: T): Promise<T> =>
     this.canceled
       ? new Promise<T>((_, reject) => void reject(this.reason))
