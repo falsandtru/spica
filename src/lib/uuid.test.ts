@@ -3,9 +3,9 @@ import { v4 } from './uuid';
 describe('Unit: lib/uuid', () => {
   describe('v4', () => {
     it('type', () => {
-      console.log('lib/uuid', v4());
-      console.log('lib/uuid', v4());
-      console.log('lib/uuid', v4());
+      console.debug('lib/uuid', v4());
+      console.debug('lib/uuid', v4());
+      console.debug('lib/uuid', v4());
       assert(typeof v4() === 'string');
     });
 

@@ -19,18 +19,10 @@ import {
   clone,
   extend,
   concat,
-  sort,
-  __esModule
+  sort
 } from '../../';
 
 describe('Interface: Package', function () {
-  describe('module', function () {
-    it('module', function () {
-      assert(__esModule === true);
-    });
-
-  });
-
   describe('Supervisor', function () {
     it('Supervisor', function () {
       assert(typeof Supervisor === 'function');

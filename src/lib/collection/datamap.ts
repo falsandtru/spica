@@ -13,7 +13,7 @@ export class DataMap<K, V> implements WeakMapLike<K, V> {
         void this.set(k, v));
   }
   private readonly store = new Map<string, [K, V]>();
-  private readonly weakstore = new WeakMap<K, string>();
+  private readonly weakstore = new WeakMap<K & object, string>();
   private stringify(key: any): string {
     switch (typeof key) {
       case 'undefined':

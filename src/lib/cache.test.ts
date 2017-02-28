@@ -205,8 +205,8 @@ describe('Unit: lib/cache', () => {
           LRU.length = size;
         }
       }
-      console.log('LRF cache hit rate', lrf / repeat * 100);
-      console.log('LRU cache hit rate', lru / repeat * 100);
+      console.debug('LRF cache hit rate', lrf / repeat * 100);
+      console.debug('LRU cache hit rate', lru / repeat * 100);
       assert(lrf / repeat * 100 > lru / repeat * 100);
       assert(lrf / repeat * 100 > 18 - 0.1);
     });
