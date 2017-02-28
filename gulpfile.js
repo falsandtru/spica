@@ -65,7 +65,7 @@ function compile(paths, force) {
       cache: {},
       packageCache: {}
     })
-    .require(`./${pkg.name}.ts`, { expose: pkg.name })
+    .require(`./index.ts`, { expose: pkg.name })
     .plugin(tsify, require('./tsconfig.json').compilerOptions)
     .bundle()
     .on("error", err => done = console.log(err + ''))

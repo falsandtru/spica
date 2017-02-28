@@ -1,5 +1,5 @@
 import { benchmark } from './benchmark';
-import { DataMap, AttrMap } from '../spica';
+import { DataMap, AttrMap } from '../';
 
 describe('Benchmark:', function () {
   this.timeout(10 * 1e3);

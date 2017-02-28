@@ -1,5 +1,5 @@
 import { benchmark } from './benchmark';
-import { sort } from '../spica';
+import { sort } from '../';
 
 describe('Benchmark:', function () {
   this.timeout(10 * 1e3);

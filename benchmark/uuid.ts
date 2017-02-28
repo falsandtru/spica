@@ -1,5 +1,5 @@
 import { benchmark } from './benchmark';
-import { uuid } from '../spica';
+import { uuid } from '../';
 
 describe('Benchmark:', function () {
   this.timeout(10 * 1e3);

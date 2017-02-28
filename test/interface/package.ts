@@ -21,7 +21,7 @@ import {
   concat,
   sort,
   __esModule
-} from '../../spica';
+} from '../../';
 
 describe('Interface: Package', function () {
   describe('module', function () {
