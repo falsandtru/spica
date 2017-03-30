@@ -20,7 +20,7 @@ import {
   extend,
   concat,
   sort
-} from '../../';
+} from '../../index';
 
 describe('Interface: Package', function () {
   describe('Supervisor', function () {
