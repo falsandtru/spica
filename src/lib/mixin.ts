@@ -1,10 +1,10 @@
 import { assign } from './assign';
 
-export function Mixin<T>(...mixins: Array<new () => Object>): new () => T {
+export function Mixin<T extends object>(...mixins: Array<new () => object>): new () => T {
   return <new () => T>mixins.reduceRight((b, d) => __extends(d, b), class { });
 }
 
-function __extends(d: new () => Object, b: new () => Object): new () => Object {
+function __extends(d: new () => object, b: new () => object): new () => object {
   const __ = class {
     constructor() {
       return d.call(b.call(this) || this);

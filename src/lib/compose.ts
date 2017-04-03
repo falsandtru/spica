@@ -1,6 +1,6 @@
 import { assign } from './assign';
 
-export function compose<T extends new (...args: any[]) => Object>(target: T, ...sources: T[]): T {
+export function compose<T extends new (...args: any[]) => object>(target: T, ...sources: T[]): T {
   return sources
     .reduce((b, d) => {
       void assign(b.prototype, d.prototype);

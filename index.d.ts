@@ -459,19 +459,22 @@ export class Cache<K, V> {
   [Symbol.iterator](): Iterator<[K, V]>;
 }
 
-export function Mixin<T>(...mixins: Array<new () => Object>): new () => T;
+export function Mixin<T extends object>(...mixins: Array<new () => object>): new () => T;
 
 export function Tick(fn: () => any, dedup?: boolean): void;
 
 export function uuid(): string;
 export function sqid(): string;
 export function sqid(id: number): string;
-export function assign<T extends Object>(target: T, ...sources: T[]): T;
-export function assign<T extends Object, U extends Object>(target: T, ...sources: U[]): T & U;
-export function clone<T extends Object>(target: T, ...sources: T[]): T;
-export function clone<T extends Object, U extends Object>(target: T, ...sources: U[]): T & U;
-export function extend<T extends Object>(target: T, ...sources: T[]): T;
-export function extend<T extends Object, U extends Object>(target: T, ...sources: U[]): T & U;
+export function assign<T extends U, U extends object>(target: T, ...sources: Partial<U>[]): T;
+export function assign<T extends object>(target: T, ...sources: Partial<T>[]): T;
+export function assign<T extends object>(target: {}, source: T, ...sources: Partial<T>[]): T;
+export function clone<T extends U, U extends object>(target: T, ...sources: Partial<U>[]): T;
+export function clone<T extends object>(target: T, ...sources: Partial<T>[]): T;
+export function clone<T extends object>(target: {}, source: T, ...sources: Partial<T>[]): T;
+export function extend<T extends U, U extends object>(target: T, ...sources: Partial<U>[]): T;
+export function extend<T extends object>(target: T, ...sources: Partial<T>[]): T;
+export function extend<T extends object>(target: {}, source: T, ...sources: Partial<T>[]): T;
 export function concat<T>(target: T[], source: T[]): T[];
 export function concat<T>(target: T[], source: { [index: number]: T; length: number; }): T[];
 export function sort<T>(as: T[], cmp: (a: T, b: T) => number, times: number): T[];
