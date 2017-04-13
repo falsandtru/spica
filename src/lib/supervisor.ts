@@ -34,16 +34,10 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     assert(this.messages.length === 0);
     this.alive = false;
     void --(<typeof Supervisor>this.constructor).count;
-    try {
-      void this.destructor_(reason);
-    }
-    catch (reason) {
-      void console.error(stringify(reason));
-      assert(!console.info(reason + ''));
-    }
     void Object.freeze(this);
     assert(this.alive === false);
     assert(this.available === false);
+    void this.destructor_(reason);
   }
   public readonly id: string = sqid();
   public readonly name: string;
@@ -241,10 +235,10 @@ class Worker<N extends string, P, R, S> {
     assert(this.alive === true);
     this.alive = false;
     this.available = false;
-    void this.destructor_();
     void Object.freeze(this);
     assert(this.alive === false);
     assert(this.available === false);
+    void this.destructor_();
     try {
       void this.process.exit(reason, this.state);
       void this.sv.events.exit
