@@ -24,8 +24,8 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
   }
   private destructor(reason: any): void {
     assert(this.alive === true);
+    assert(this.available === true);
     this.available = false;
-    assert(this.available === false);
     void Array.from(this.workers.values())
       .forEach(worker =>
         void worker.terminate(reason));
@@ -42,6 +42,8 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     this.alive = false;
     void --(<typeof Supervisor>this.constructor).count;
     void Object.freeze(this);
+    assert(this.alive === false);
+    assert(this.available === false);
   }
   public readonly id: string = sqid();
   public readonly name: string;
@@ -241,6 +243,8 @@ class Worker<N extends string, P, R, S> {
     this.available = false;
     void this.destructor_();
     void Object.freeze(this);
+    assert(this.alive === false);
+    assert(this.available === false);
     try {
       void this.process.exit(reason, this.state);
       void this.sv.events.exit
