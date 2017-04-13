@@ -24,7 +24,11 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
   }
   private destructor(reason: any): void {
     assert(this.alive === true);
+    this.available = false;
     assert(this.available === false);
+    void Array.from(this.workers.values())
+      .forEach(worker =>
+        void worker.terminate(reason));
     assert(this.workers.size === 0);
     void this.deliver();
     assert(this.messages.length === 0);
@@ -133,17 +137,12 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
   public terminate(name?: N, reason?: any): boolean {
     if (!this.available) return false;
     assert(this.alive === true);
-    if (name === void 0) {
-      this.available = false;
-    }
-    void Array.from(this.workers.values())
-      .forEach(worker =>
-        void worker.terminate(reason));
-    assert(this.workers.size === 0);
-    if (name === void 0) {
-      void this.destructor(reason);
-    }
-    return true;
+    return name === void 0
+      ? void this.destructor(reason) === void 0
+      : Array.from(this.workers.values())
+          .filter(worker => worker.name === name)
+          .filter(worker => worker.terminate(reason))
+          .length > 0;
   }
   public schedule(): void {
     void Tick(this.deliver, true);

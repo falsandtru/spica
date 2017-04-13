@@ -248,6 +248,29 @@ describe('Unit: lib/supervisor', function () {
       sv.call('', 3, r => assert(r === 3) || assert(cnt === 4 && ++cnt) || done(), Infinity);
     });
 
+    it('terminate process', function (done) {
+      class TestSupervisor extends Supervisor<string, number, number, number> {
+      }
+      assert(TestSupervisor.count === 0);
+      assert(TestSupervisor.procs === 0);
+      const sv = new TestSupervisor({});
+      assert(TestSupervisor.count === 1);
+      assert(TestSupervisor.procs === 0);
+      void sv.register(' ', _ => [0, 0], 0);
+      assert(TestSupervisor.count === 1);
+      assert(TestSupervisor.procs === 1);
+      assert(sv.terminate('') === false);
+      assert(TestSupervisor.count === 1);
+      assert(TestSupervisor.procs === 1);
+      assert(sv.terminate(' ') === true);
+      assert(TestSupervisor.count === 1);
+      assert(TestSupervisor.procs === 0);
+      assert(sv.terminate() === true);
+      assert(TestSupervisor.count === 0);
+      assert(TestSupervisor.procs === 0);
+      done();
+    });
+
     it('terminate', function (done) {
       let cnt = 0;
       class TestSupervisor extends Supervisor<string, number, number, number> {
