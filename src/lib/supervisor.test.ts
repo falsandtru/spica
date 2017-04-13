@@ -109,14 +109,9 @@ describe('Unit: lib/supervisor', function () {
           assert.throws(() => sv.cast('', 0));
           assert.throws(() => sv.call('', 0, () => void 0));
           assert(sv.terminate() === false);
-          assert(TestSupervisor.count === 1);
+          assert(TestSupervisor.count === 0);
           assert(TestSupervisor.procs === 0);
-          Tick(() => {
-            assert(cnt === 14 && ++cnt);
-            assert(TestSupervisor.count === 0);
-            assert(TestSupervisor.procs === 0);
-            done();
-          });
+          done();
         }
       });
       assert(+sv.id > 0);
@@ -289,7 +284,7 @@ describe('Unit: lib/supervisor', function () {
           assert.throws(() => sv.cast('', 0));
           assert.throws(() => sv.call('', 0, () => void 0));
           assert(sv.terminate() === false);
-          assert(TestSupervisor.count === 1);
+          assert(TestSupervisor.count === 0);
           assert(TestSupervisor.procs === 0);
           ++cnt;
         }

@@ -32,6 +32,8 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     assert(this.workers.size === 0);
     void this.deliver();
     assert(this.messages.length === 0);
+    this.alive = false;
+    void --(<typeof Supervisor>this.constructor).count;
     try {
       void this.destructor_(reason);
     }
@@ -39,8 +41,6 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
       void console.error(stringify(reason));
       assert(!console.info(reason + ''));
     }
-    this.alive = false;
-    void --(<typeof Supervisor>this.constructor).count;
     void Object.freeze(this);
     assert(this.alive === false);
     assert(this.available === false);
