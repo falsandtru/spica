@@ -38,9 +38,9 @@ function template(cb: (key: string, target: {}, source: {}) => any) {
   return walk;
 
   function walk<T extends U, U extends object>(target: T, ...sources: Partial<U>[]): T;
-  function walk<T extends U, U extends object>(target: {}, source: T, ...sources: Partial<U>[]): T;
+  function walk<T extends U, U extends object>(target: object, source: T, ...sources: Partial<U>[]): T;
   function walk<T extends object>(target: T, ...sources: Partial<T>[]): T;
-  function walk<T extends object>(target: {}, source: T, ...sources: Partial<T>[]): T;
+  function walk<T extends object>(target: object, source: T, ...sources: Partial<T>[]): T;
   function walk<T extends U, U extends object>(target: T, ...sources: Partial<U>[]): T {
     if (target === undefined || target === null) {
       throw new TypeError(`Spica: assign: Cannot walk on ${target}.`);
