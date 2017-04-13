@@ -16,13 +16,13 @@ export abstract class Supervisor<N extends string, P, R, S> {
     readonly loss: Observer<never[] | [N], Supervisor.Event.Data.Loss<N, P>, any>;
     readonly exit: Observer<never[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>;
   };
-  register(name: N, process: Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => void;
-  register(name: N, process: Supervisor.Process<P, R, S>, state: S): (reason?: any) => void;
-  register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => void;
+  register(name: N, process: Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => boolean;
+  register(name: N, process: Supervisor.Process<P, R, S>, state: S): (reason?: any) => boolean;
+  register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => boolean;
   call(name: N, param: P, callback: Supervisor.Callback<R>, timeout?: number): void;
   cast(name: N, param: P, timeout?: number): boolean;
-  refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason: any) => void][];
-  terminate(name?: N, reason?: any): void;
+  refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason: any) => boolean][];
+  terminate(name?: N, reason?: any): boolean;
 }
 export namespace Supervisor {
   export interface Settings<N extends string> {

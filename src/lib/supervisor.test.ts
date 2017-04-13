@@ -264,9 +264,9 @@ describe('Unit: lib/supervisor', function () {
         }
       });
       const terminate = sv.register('', _ => [0, 0], 0);
-      sv.terminate();
-      terminate();
-      sv.terminate();
+      assert(sv.terminate() === true);
+      assert(terminate() === false);
+      assert(sv.terminate() === false);
       assert(cnt === 1);
       try {
         sv.register('', _ => [0, 0], 0);

@@ -55,10 +55,10 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
   private validate(): void {
     if (!this.available) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A supervisor is already terminated.`);
   }
-  public register(name: N, process: Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => void;
-  public register(name: N, process: Supervisor.Process<P, R, S>, state: S): (reason?: any) => void;
-  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => void;
-  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => void {
+  public register(name: N, process: Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => boolean;
+  public register(name: N, process: Supervisor.Process<P, R, S>, state: S): (reason?: any) => boolean;
+  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => boolean;
+  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => boolean {
     void this.validate();
     if (this.workers.has(name)) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: Cannot register a process multiply with the same name.`);
     void this.schedule();
@@ -112,7 +112,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     if (result === void 0 || result instanceof Error) return false;
     return true;
   }
-  public refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason: any) => void][] {
+  public refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason: any) => boolean][] {
     void this.validate();
     return name === void 0
       ? Array.from(this.workers.values()).map(convert)
@@ -120,7 +120,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
         ? [convert(this.workers.get(name)!)]
         : [];
 
-    function convert(worker: Worker<N, P, R, S>): [N, Supervisor.Process<P, R, S>, S, (reason: any) => void] {
+    function convert(worker: Worker<N, P, R, S>): [N, Supervisor.Process<P, R, S>, S, (reason: any) => boolean] {
       assert(worker instanceof Worker);
       return [
         worker.name,
@@ -130,8 +130,8 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
       ];
     }
   }
-  public terminate(name?: N, reason?: any): void {
-    if (!this.available) return;
+  public terminate(name?: N, reason?: any): boolean {
+    if (!this.available) return false;
     assert(this.alive === true);
     if (name === void 0) {
       this.available = false;
@@ -143,6 +143,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     if (name === void 0) {
       void this.destructor(reason);
     }
+    return true;
   }
   public schedule(): void {
     void Tick(this.deliver, true);
@@ -300,9 +301,10 @@ class Worker<N extends string, P, R, S> {
       return new Error();
     }
   }
-  public readonly terminate = (reason: any): void => {
-    if (!this.alive) return;
+  public readonly terminate = (reason: any): boolean => {
+    if (!this.alive) return false;
     void this.destructor(reason);
+    return true;
   }
 }
 namespace Worker {
