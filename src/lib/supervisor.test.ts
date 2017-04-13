@@ -105,6 +105,10 @@ describe('Unit: lib/supervisor', function () {
         destructor: reason => {
           assert(reason === void 0);
           assert(cnt === 13 && ++cnt);
+          assert.throws(() => sv.register('', _ => [0, 0], 0));
+          assert.throws(() => sv.cast('', 0));
+          assert.throws(() => sv.call('', 0, () => void 0));
+          assert(sv.terminate() === false);
           assert(TestSupervisor.count === 1);
           assert(TestSupervisor.procs === 0);
           Tick(() => {
@@ -281,6 +285,10 @@ describe('Unit: lib/supervisor', function () {
         timeout: 0,
         destructor: reason => {
           assert(reason === void 0);
+          assert.throws(() => sv.register('', _ => [0, 0], 0));
+          assert.throws(() => sv.cast('', 0));
+          assert.throws(() => sv.call('', 0, () => void 0));
+          assert(sv.terminate() === false);
           assert(TestSupervisor.count === 1);
           assert(TestSupervisor.procs === 0);
           ++cnt;
