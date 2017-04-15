@@ -244,10 +244,10 @@ class Worker<N extends string, P, R, S> {
       void this.sv.events.exit
         .emit([this.name], [this.name, this.process, this.state, reason]);
     }
-    catch (reason) {
+    catch (reason_) {
       void this.sv.events.exit
         .emit([this.name], [this.name, this.process, this.state, reason]);
-      void this.sv.terminate(void 0, reason);
+      void this.sv.terminate(void 0, reason_);
     }
   }
   private alive = true;
