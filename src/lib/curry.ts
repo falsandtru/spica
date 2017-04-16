@@ -6,7 +6,7 @@ export const curry: Curry = <T>(f: () => T, ctx?: any) =>
     : curry_(f, [], ctx);
 
 function curry_(f: (...ys: any[]) => any, xs: any[], ctx: any) {
-  return f.length === xs.length
-    ? f.apply(ctx, xs)
+  return f.length <= xs.length
+    ? f.apply(ctx, xs.slice(0, f.length))
     : (...ys: any[]) => curry_(f, xs.concat(ys), ctx);
 }
