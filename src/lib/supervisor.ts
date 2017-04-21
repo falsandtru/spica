@@ -277,6 +277,8 @@ class Worker<N extends string, P, R, S> {
             timeout === Infinity
               ? void 0
               : void setTimeout(() => void reject(new Error()), timeout)))
+            .then<[R, S]>(
+              ([reply, state]) => [reply, state])
             .then<R>(
               ([reply, state]) => {
                 void this.sv.schedule();
