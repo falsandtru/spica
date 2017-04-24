@@ -192,6 +192,34 @@ describe('Unit: lib/supervisor', function () {
       sv.call('', 2, n => assert(n === 3) || done(), 1e2);
     });
 
+    it('exit', function (done) {
+      const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({ timeout: 0 });
+      let inits = 0;
+      let exits = 0;
+      sv.register('', {
+        init: () => ++inits,
+        call: (n, s) => [n + s, ++s],
+        exit: () => ++exits
+      }, 0);
+      assert(inits === exits);
+      assert(inits === 0);
+      sv.terminate('', 0);
+      assert(inits === exits);
+      assert(inits === 0);
+      sv.register('', {
+        init: () => ++inits,
+        call: (n, s) => [n + s, ++s],
+        exit: () => ++exits
+      }, 0);
+      sv.cast('', 1);
+      assert(inits === 1);
+      assert(exits === 0);
+      sv.terminate('', 0);
+      assert(inits === exits);
+      assert(inits === 1);
+      done();
+    });
+
     it('timeout of messaging', function (done) {
       let cnt = 1;
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({ timeout: 0 });

@@ -239,26 +239,28 @@ class Worker<N extends string, P, R, S> {
     assert(this.alive === false);
     assert(this.available === false);
     void this.destructor_();
-    try {
-      void this.process.exit(reason, this.state);
-      void this.sv.events.exit
-        .emit([this.name], [this.name, this.process, this.state, reason]);
-    }
-    catch (reason_) {
-      void this.sv.events.exit
-        .emit([this.name], [this.name, this.process, this.state, reason]);
-      void this.sv.terminate(void 0, reason_);
+    if (this.called) {
+      try {
+        void this.process.exit(reason, this.state);
+        void this.sv.events.exit
+          .emit([this.name], [this.name, this.process, this.state, reason]);
+      }
+      catch (reason_) {
+        void this.sv.events.exit
+          .emit([this.name], [this.name, this.process, this.state, reason]);
+        void this.sv.terminate(void 0, reason_);
+      }
     }
   }
   private alive = true;
   private available = true;
-  private times = 0;
+  private called = false;
   public readonly call = ([param, timeout]: Worker.Command<P>): [R | Promise<R>] | Error | void => {
     if (!this.available) return;
     try {
       this.available = false;
-      void ++this.times;
-      if (this.times === 1) {
+      if (!this.called) {
+        this.called = true;
         void this.sv.events.init
           .emit([this.name], [this.name, this.process, this.state]);
         this.state = this.process.init(this.state);
