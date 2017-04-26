@@ -17,7 +17,7 @@ export class Either<a, b> extends Monad<b> {
   public ap<b, z>(this: Either<a, (b: b) => z>, b: Either<a, b>): Either<a, z> {
     return Either.ap(this, b);
   }
-  public bind(f: (b: b) => Left<a>): Either<a, b>
+  public bind(f: (b: b) => Either<a, b> | Right<b>): Either<a, b>
   public bind<c>(f: (b: b) => Either<a, c>): Either<a, c>
   public bind<c>(f: (b: b) => Either<a, c>): Either<a, c> {
     return new Either<a, c>(() => {
@@ -46,51 +46,53 @@ export class Either<a, b> extends Monad<b> {
 export namespace Either {
   export declare function fmap<e, a, b>(m: Either<e, a>, f: (a: a) => b): Either<e, b>
   export declare function fmap<e, a>(m: Either<e, a>): <b>(f: (a: a) => b) => Either<e, b>
-  export function pure<b>(b: b): Right<b> {
+  export function pure<b>(b: b): Right<b>
+  export function pure<a, b>(b: b): Either<a, b>
+  export function pure<a, b>(b: b): Either<a, b> {
     return new Right(b);
   }
   export declare function ap<e, a, b>(mf: Either<e, (a: a) => b>, ma: Either<e, a>): Either<e, b>
   export declare function ap<e, a, b>(mf: Either<e, (a: a) => b>): (ma: Either<e, a>) => Either<e, b>
   export const Return = pure;
-  export declare function bind<e, a, b>(m: Either<e, a>, f: (a: a) => Either<e, b>): Either<e, b>
-  export declare function bind<e, a>(m: Either<e, a>): <b>(f: (a: a) => Either<e, b>) => Either<e, b>
+  export declare function bind<e, a, b>(m: Either<e, a>, f: (a: a) => Either<e, b> | Right<b>): Either<e, b>
+  export declare function bind<e, a>(m: Either<e, a>): <b>(f: (a: a) => Either<e, b> | Right<b>) => Either<e, b>
 }
 
-export class Left<a> extends Either<a, any> {
+export class Left<a> extends Either<a, never> {
   private readonly LEFT: a;
   constructor(private a: a) {
     super(throwCallError);
     void this.LEFT;
   }
-  public bind(_: (b: any) => Left<a>): Left<a>
-  public bind<c>(_: (b: any) => Either<a, c>): Either<a, c>
-  public bind<c>(_: (b: any) => Either<a, c>): Either<a, c> {
-    return <Either<a, c>>this;
+  public bind(_: (b: never) => Either<a, any>): Left<a> {
+    return this;
   }
-  public extract(): any
+  public extract(): never
   public extract<c>(transform: (a: a) => c): c
-  public extract<c>(left: (a: a) => c, right: (b: void) => c): c
+  public extract<c>(left: (a: a) => c, right: (b: never) => c): c
   public extract<c>(left?: (a: a) => c): c {
     if (!left) throw this.a;
     return left(this.a);
   }
 }
 
-export class Right<b> extends Either<any, b> {
+export class Right<b> extends Either<never, b> {
   private readonly RIGHT: b;
   constructor(private readonly b: b) {
     super(throwCallError);
     void this.RIGHT;
   }
   public bind<c>(f: (b: b) => Right<c>): Right<c>
+  public bind<a>(f: (b: b) => Left<a>): Left<a>
+  public bind<a>(f: (b: b) => Either<a, b> | Right<b>): Either<a, b>
   public bind<a, c>(f: (b: b) => Either<a, c>): Either<a, c>
   public bind<a, c>(f: (b: b) => Either<a, c>): Either<a, c> {
-    return new Either<a, c>(() => f(this.extract()));
+    return new Either(() => f(this.extract()));
   }
   public extract(): b
-  public extract<c>(transform: (a: void) => c): b
-  public extract<c>(left: (a: void) => c, right: (b: b) => c): c
-  public extract<c>(_?: (a: void) => c, right?: (b: b) => c): b | c {
+  public extract<c>(transform: (a: never) => c): b
+  public extract<c>(left: (a: never) => c, right: (b: b) => c): c
+  public extract<c>(_?: (a: never) => c, right?: (b: b) => c): b | c {
     return !right
       ? this.b
       : right(this.b);

@@ -195,7 +195,7 @@ declare namespace Monad {
     ap<a, b, c, z>(this: Maybe<(a: a, b: b, c: c) => z>, a: Maybe<a>): Maybe<(b: b, c: c) => z>;
     ap<a, b, c, d, z>(this: Maybe<(a: a, b: b, c: c, d: d) => z>, a: Maybe<a>): Maybe<(b: b, c: c, d: d) => z>;
     ap<a, b, c, d, e, z>(this: Maybe<(a: a, b: b, c: c, d: d, e: e) => z>, a: Maybe<a>): Maybe<(b: b, c: c, d: d, e: e) => z>;
-    bind(f: (a: a) => Nothing): Maybe<a>;
+    bind(f: (a: a) => Maybe<a> | Nothing): Maybe<a>;
     bind<b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b>;
     extract(): a;
     extract<b>(transform: () => b): a | b;
@@ -212,7 +212,7 @@ declare namespace Monad.Maybe {
     export function ap<a, b>(mf: Maybe<(a: a) => b>, ma: Maybe<a>): Maybe<b>;
     export function ap<a, b>(mf: Maybe<(a: a) => b>): (ma: Maybe<a>) => Maybe<b>;
     export const Return: typeof pure;
-    export function bind<a>(m: Maybe<a>, f: (a: a) => Nothing): Maybe<a>;
+    export function bind<a>(m: Maybe<a>, f: (a: a) => Maybe<a> | Nothing): Maybe<a>;
     export function bind<a, b>(m: Maybe<a>, f: (a: a) => Maybe<b> | Nothing): Maybe<b>;
     export function bind<a>(m: Maybe<a>): {
       (f: (a: a) => Nothing): Maybe<a>;
@@ -225,19 +225,18 @@ declare namespace Monad.Maybe {
   }
   export class Just<a> extends Maybe<a> {
     private readonly JUST: a;
-    bind(f: (a: a) => Nothing): Maybe<a>;
+    bind(f: (a: a) => Maybe<a> | Nothing): Maybe<a>;
     bind<b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b>;
     extract(): a;
     extract<b>(transform: () => b): a;
     extract<b>(nothing: () => b, just: (a: a) => b): b;
   }
-  export class Nothing extends Maybe<any> {
+  export class Nothing extends Maybe<never> {
     private readonly NOTHING: void;
-    bind(f: (a: any) => Nothing): Nothing;
-    bind<b>(f: (a: any) => Maybe<b> | Nothing): Maybe<b>;
-    extract(): any;
+    bind(_: (a: never) => Maybe<any>): Nothing;
+    extract(): never;
     extract<b>(transform: () => b): b;
-    extract<b>(nothing: () => b, just: (a: void) => b): b;
+    extract<b>(nothing: () => b, just: (a: never) => b): b;
   }
 }
 
@@ -266,7 +265,7 @@ declare namespace Monad {
     ap<b, c, d, z>(this: Either<a, (b: b, c: c, d: d) => z>, b: Either<a, b>): Either<a, (c: c, d: d) => z>;
     ap<b, c, d, e, z>(this: Either<a, (b: b, c: c, d: d, e: e) => z>, b: Either<a, b>): Either<a, (c: c, d: d, e: e) => z>;
     ap<b, c, d, e, f, z>(this: Either<a, (b: b, c: c, d: d, e: e, f: f) => z>, b: Either<a, b>): Either<a, (c: c, d: d, e: e, f: f) => z>;
-    bind(f: (b: b) => Left<a>): Either<a, b>;
+    bind(f: (b: b) => Either<a, b> | Right<b>): Either<a, b>;
     bind<c>(f: (b: b) => Either<a, c>): Either<a, c>;
     extract(): b;
     extract<c>(transform: (a: a) => c): b | c;
@@ -280,27 +279,29 @@ declare namespace Monad.Either {
     export function fmap<e, a, b>(m: Either<e, a>, f: (a: a) => b): Either<e, b>;
     export function fmap<e, a>(m: Either<e, a>): <b>(f: (a: a) => b) => Either<e, b>;
     export function pure<b>(b: b): Right<b>;
+    export function pure<a, b>(b: b): Either<a, b>;
     export function ap<e, a, b>(mf: Either<e, (a: a) => b>, ma: Either<e, a>): Either<e, b>;
     export function ap<e, a, b>(mf: Either<e, (a: a) => b>): (ma: Either<e, a>) => Either<e, b>;
     export const Return: typeof pure;
-    export function bind<e, a, b>(m: Either<e, a>, f: (a: a) => Either<e, b>): Either<e, b>;
-    export function bind<e, a>(m: Either<e, a>): <b>(f: (a: a) => Either<e, b>) => Either<e, b>;
+    export function bind<e, a, b>(m: Either<e, a>, f: (a: a) => Either<e, b> | Right<b>): Either<e, b>;
+    export function bind<e, a>(m: Either<e, a>): <b>(f: (a: a) => Either<e, b> | Right<b>) => Either<e, b>;
   }
-  export class Left<a> extends Either<a, any> {
+  export class Left<a> extends Either<a, never> {
     private readonly LEFT: a;
-    bind(_: (b: any) => Left<a>): Left<a>;
-    bind<b>(f: (b: b) => Either<a, b>): Either<a, b>;
-    extract(): any;
+    bind(_: (b: never) => Either<a, any>): Left<a>;
+    extract(): never;
     extract<c>(transform: (a: a) => c): c;
-    extract<c>(left: (a: a) => c, right: (b: void) => c): c;
+    extract<c>(left: (a: a) => c, right: (b: never) => c): c;
   }
-  export class Right<b> extends Either<any, b> {
+  export class Right<b> extends Either<never, b> {
     private readonly RIGHT: b;
     bind<c>(f: (b: b) => Right<c>): Right<c>;
+    bind<a>(f: (b: b) => Left<a>): Left<a>;
+    bind<a>(f: (b: b) => Either<a, b> | Right<b>): Either<a, b>;
     bind<a, c>(f: (b: b) => Either<a, c>): Either<a, c>;
     extract(): b;
-    extract<c>(transform: (a: void) => c): b;
-    extract<c>(left: (a: void) => c, right: (b: b) => c): c;
+    extract<c>(transform: (a: never) => c): b;
+    extract<c>(left: (a: never) => c, right: (b: b) => c): c;
   }
 }
 

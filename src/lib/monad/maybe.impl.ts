@@ -2,7 +2,7 @@ import { MonadPlus } from './monadplus';
 
 export class Maybe<a> extends MonadPlus<a> {
   private readonly MAYBE: Just<a> | Nothing;
-  constructor(thunk: () => Maybe<a>) {
+  constructor(thunk: () => Maybe<a> | Nothing) {
     super(thunk);
     void this.MAYBE;
   }
@@ -17,7 +17,7 @@ export class Maybe<a> extends MonadPlus<a> {
   public ap<a, z>(this: Maybe<(...as: any[]) => z>, a: Maybe<a>): Maybe<z> {
     return Maybe.ap(this, a);
   }
-  public bind(f: (a: a) => Nothing): Maybe<a>
+  public bind(f: (a: a) => Maybe<a> | Nothing): Maybe<a>
   public bind<b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b>
   public bind<b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b> {
     return new Maybe<b>(() => {
@@ -52,7 +52,7 @@ export namespace Maybe {
   export declare function ap<a, b>(mf: Maybe<(a: a) => b>, ma: Maybe<a>): Maybe<b>
   export declare function ap<a, b>(mf: Maybe<(a: a) => b>): (ma: Maybe<a>) => Maybe<b>
   export const Return = pure;
-  export declare function bind<a>(m: Maybe<a>, f: (a: a) => Nothing): Maybe<a>
+  export declare function bind<a>(m: Maybe<a>, f: (a: a) => Maybe<a> | Nothing): Maybe<a>
   export declare function bind<a, b>(m: Maybe<a>, f: (a: a) => Maybe<b> | Nothing): Maybe<b>
   export declare function bind<a>(m: Maybe<a>): {
     (f: (a: a) => Nothing): Maybe<a>;
@@ -66,7 +66,7 @@ export class Just<a> extends Maybe<a> {
     super(throwCallError);
     void this.JUST;
   }
-  public bind(f: (a: a) => Nothing): Maybe<a>
+  public bind(f: (a: a) => Maybe<a> | Nothing): Maybe<a>
   public bind<b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b>
   public bind<b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b> {
     return new Maybe(() => f(this.extract()));
@@ -81,20 +81,18 @@ export class Just<a> extends Maybe<a> {
   }
 }
 
-export class Nothing extends Maybe<any> {
+export class Nothing extends Maybe<never> {
   private readonly NOTHING: void;
   constructor() {
     super(throwCallError);
     void this.NOTHING;
   }
-  public bind(f: (a: any) => Nothing): Nothing
-  public bind<b>(f: (a: any) => Maybe<b> | Nothing): Maybe<b>
-  public bind<b>(_: (a: any) => Maybe<b> | Nothing): Maybe<b> {
+  public bind(_: (a: never) => Maybe<any>): Nothing {
     return this;
   }
-  public extract(): any
+  public extract(): never
   public extract<b>(transform: () => b): b
-  public extract<b>(nothing: () => b, just: (a: void) => b): b
+  public extract<b>(nothing: () => b, just: (a: never) => b): b
   public extract<b>(nothing?: () => b): b {
     if (!nothing) throw void 0;
     return nothing();

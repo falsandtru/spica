@@ -18,7 +18,7 @@ describe('Unit: lib/either', () => {
     });
 
     it('Left nest', () => {
-      const result = Return(Return(0))
+      const result = Return(Return(''))
         .bind(m => m.bind(_ => Left(NaN)).bind(throwError))
         .bind(throwError)
         .extract(_ => 'Nothing');
@@ -104,7 +104,7 @@ describe('Unit: lib/either', () => {
           .extract(),
         1);
       assert.strictEqual(
-        Either.pure(throwError)
+        Either.pure<number, typeof throwError>(throwError)
           .ap(Left(0))
           .extract(n => n + 1),
         1);
