@@ -47,7 +47,7 @@
     "gulp": "^3.9.1",
     "gulp-header": "1.8.8",
     "gulp-load-plugins": "^1.5.0",
-    "gulp-mocha": "^4.3.0",
+    "gulp-mocha": "^4.3.1",
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^2.1.2",
     "gulp-unassert": "^1.0.1",
@@ -65,7 +65,7 @@
     "power-assert": "^1.4.2",
     "run-sequence": "^1.2.2",
     "tsify": "^3.0.1",
-    "typescript": "2.3.0-dev.20170425",
+    "typescript": "2.4.0-dev.20170427",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
   },

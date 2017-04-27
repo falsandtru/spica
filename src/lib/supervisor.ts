@@ -26,7 +26,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     assert(this.alive === true);
     assert(this.available === true);
     this.available = false;
-    void Array.from(this.workers.values())
+    void this.workers
       .forEach(worker =>
         void worker.terminate(reason));
     assert(this.workers.size === 0);
