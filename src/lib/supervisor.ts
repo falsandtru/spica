@@ -110,6 +110,10 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
       void this.events.loss.emit([name], [name, param]);
     }
     if (result === void 0 || result instanceof Error) return false;
+    const [reply] = result;
+    if (isThenable(reply)) {
+      void reply.catch(() => void 0);
+    }
     return true;
   }
   public refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason: any) => boolean][] {
