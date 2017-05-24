@@ -7,20 +7,35 @@ import { stringify } from './stringify';
 import { noop } from './noop';
 
 export abstract class Supervisor<N extends string, P, R, S> implements ISupervisor<N, P, R, S> {
-  public static count: number = 0;
-  public static procs: number = 0;
+  private static readonly instances: Set<Supervisor<string, any, any, any>>;
+  public static get count(): number {
+    return this.instances
+      ? this.instances.size
+      : 0;
+  }
+  public static get procs(): number {
+    return this.instances
+      ? Array.from(this.instances)
+          .reduce((cnt, sv) =>
+            cnt + sv.workers.size
+          , 0)
+      : 0;
+  }
   constructor({
     name = '',
     size = Infinity,
     timeout = Infinity,
     destructor = noop
   }: Supervisor.Settings<N> = {}) {
+    if (!(<typeof Supervisor>this.constructor).hasOwnProperty('instances')) {
+      (<any>this.constructor).instances = new Set();
+    }
     if (this.constructor === Supervisor) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot instantiate abstract classes.`);
+    void (<typeof Supervisor>this.constructor).instances.add(this);
     this.name = name;
     this.size = size;
     this.timeout = timeout;
     this.destructor_ = destructor;
-    void ++(<typeof Supervisor>this.constructor).count;
   }
   private destructor(reason: any): void {
     assert(this.alive === true);
@@ -33,7 +48,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     void this.deliver();
     assert(this.messages.length === 0);
     this.alive = false;
-    void --(<typeof Supervisor>this.constructor).count;
+    void (<typeof Supervisor>this.constructor).instances.delete(this);
     void Object.freeze(this);
     assert(this.alive === false);
     assert(this.available === false);
@@ -69,11 +84,9 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
           exit: _ => void 0
         }
       : process;
-    void ++(<typeof Supervisor>this.constructor).procs;
     return this.workers
-      .set(name, new Worker<N, P, R, S>(this, name, process, state, () => (
-        void this.workers.delete(name),
-        void --(<typeof Supervisor>this.constructor).procs)))
+      .set(name, new Worker<N, P, R, S>(this, name, process, state, () =>
+        void this.workers.delete(name)))
       .get(name)!
       .terminate;
   }
