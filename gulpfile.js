@@ -90,11 +90,11 @@ gulp.task('ts:bench', function () {
 
 gulp.task('ts:dist', function (done) {
   pump([
-    compile(config.ts.dist.src)
-      .pipe($.unassert())
-      .pipe($.header(config.banner))
-      .pipe(gulp.dest(config.ts.dist.dest))
-      .pipe($.rename({ extname: '.min.js' })),
+    compile(config.ts.dist.src),
+    $.unassert(),
+    $.header(config.banner),
+    gulp.dest(config.ts.dist.dest),
+    $.rename({ extname: '.min.js' }),
     $.uglify({ output: { comments: 'all' } }),
     gulp.dest(config.ts.dist.dest)
   ], done);
