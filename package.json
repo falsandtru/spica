@@ -49,7 +49,7 @@
     "gulp-load-plugins": "^1.5.0",
     "gulp-mocha": "^4.3.1",
     "gulp-rename": "^1.2.2",
-    "gulp-uglify": "^3.0.0",
+    "gulp-uglify": "^2.1.2",
     "gulp-unassert": "^1.0.1",
     "karma": "^1.7.0",
     "karma-chrome-launcher": "^2.1.1",
