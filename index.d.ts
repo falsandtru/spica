@@ -453,6 +453,7 @@ export class Cache<K, V> {
     size: number,
     callback?: (key: K, value: V) => any);
   put(key: K, value: V): boolean;
+  put(this: Cache<K, undefined>, key: K, value?: V): boolean;
   get(key: K): V | undefined;
   has(key: K): boolean;
   delete(key: K): boolean;

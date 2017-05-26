@@ -5,6 +5,8 @@ export class Cache<K, V> {
   ) {
     if (size > 0 === false) throw new Error(`Spica: Cache: Cache size must be greater than 0.`);
   }
+  public put(key: K, value: V): boolean;
+  public put(this: Cache<K, undefined>, key: K, value?: V): boolean;
   public put(key: K, value: V): boolean {
     if (key !== key) throw new TypeError(`Spica: Cache: Cannot use NaN for key.`);
     if (this.access(key)) return void this.store.set(key, value), true;
