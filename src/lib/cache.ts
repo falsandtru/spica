@@ -79,8 +79,8 @@ export class Cache<K, V> {
     LFU: <K[]>[],
   };
   private access(key: K): boolean {
-    return this.accessLRU(key)
-        || this.accessLFU(key);
+    return this.accessLFU(key)
+        || this.accessLRU(key);
   }
   private accessLRU(key: K): boolean {
     const {LRU} = this.stats;
