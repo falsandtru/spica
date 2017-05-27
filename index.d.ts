@@ -451,7 +451,12 @@ export class AttrMap<C, K, V> {
 export class Cache<K, V> {
   constructor(
     size: number,
-    callback?: (key: K, value: V) => any);
+    callback?: (key: K, value: V) => any,
+    data?: {
+      stats?: [K[], K[]];
+      entries?: [K, V][];
+    },
+  );
   put(key: K, value: V): boolean;
   put(this: Cache<K, undefined>, key: K, value?: V): boolean;
   get(key: K): V | undefined;
@@ -459,6 +464,7 @@ export class Cache<K, V> {
   delete(key: K): boolean;
   clear(): void;
   [Symbol.iterator](): Iterator<[K, V]>;
+  export(): { stats: [K[], K[]]; entries: [K, V][]; };
 }
 
 export function Mixin<T extends object>(...mixins: Array<new () => object>): new () => T;
