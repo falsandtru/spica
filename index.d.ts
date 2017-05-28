@@ -59,6 +59,7 @@ export class Observable<T extends ReadonlyArray<any>, D, R>
   on(type: T, subscriber: Subscriber<T, D, R>): () => void;
   off(type: T, subscriber?: Subscriber<T, D, R>): void;
   once(type: T, subscriber: Subscriber<T, D, R>): () => void;
+  relay(source: Observer<T, D, any>): () => void;
   emit(this: Observable<T, void | undefined, R>, type: T, data?: D, tracker?: (data: D, results: R[]) => void): void;
   emit(type: T, data: D, tracker?: (data: D, results: R[]) => void): void;
   reflect(this: Observable<T, void | undefined, R>, type: T, data?: D): R[];
@@ -70,6 +71,7 @@ export interface Observer<T extends ReadonlyArray<any>, D, R> {
   on(type: T, subscriber: Subscriber<T, D, R>): () => void;
   off(type: T, subscriber?: Subscriber<T, D, R>): void;
   once(type: T, subscriber: Subscriber<T, D, R>): () => void;
+  relay(source: Observer<T, D, any>): () => void;
 }
 export interface Publisher<T extends ReadonlyArray<any>, D, R> {
   emit(this: Publisher<T, void | undefined, R>, type: T, data?: D, tracker?: (data: D, results: R[]) => void): void;

@@ -77,6 +77,10 @@ export class Observable<T extends ReadonlyArray<any>, D, R>
     assert(Array.isArray(results));
     return results;
   }
+  public relay(source: Observer<T, D, any>): () => void {
+    return source.monitor(<T><any>[], (data, namespace) =>
+      void this.emit(namespace, data));
+  }
   private drain_(namespace: T, data: D, tracker?: (data: D, results: R[]) => void): void {
     const results: R[] = [];
     void this.refsBelow_(this.seekNode_(namespace))

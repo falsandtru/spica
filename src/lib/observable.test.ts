@@ -257,6 +257,18 @@ describe('Unit: lib/observable', function () {
       ob.emit([NaN, sym], 2);
     });
 
+    it('relay', function (done) {
+      const ob = new Observable<string[], number, void>();
+      const source = new Observable<string[], number, void>();
+      ob.relay(source);
+      ob.once(['a'], (data, type) => {
+        assert(data === 0);
+        assert.deepStrictEqual(type, ['a']);
+        done();
+      });
+      source.emit(['a'], 0);
+    });
+
   });
 
 });
