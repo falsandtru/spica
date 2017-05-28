@@ -55,7 +55,7 @@ export namespace Supervisor {
 
 export class Observable<T extends ReadonlyArray<any>, D, R>
   implements Observer<T, D, R>, Publisher<T, D, R> {
-  monitor(type: T, subscriber: Subscriber<T, D, any>): () => void;
+  monitor(type: T, monitor: Monitor<T, D>): () => void;
   on(type: T, subscriber: Subscriber<T, D, R>): () => void;
   off(type: T, subscriber?: Subscriber<T, D, R>): void;
   once(type: T, subscriber: Subscriber<T, D, R>): () => void;
@@ -64,10 +64,10 @@ export class Observable<T extends ReadonlyArray<any>, D, R>
   emit(type: T, data: D, tracker?: (data: D, results: R[]) => void): void;
   reflect(this: Observable<T, void | undefined, R>, type: T, data?: D): R[];
   reflect(type: T, data: D): R[];
-  refs(type: never[] | T): [T, Subscriber<T, D, R>, boolean][];
+  refs(type: never[] | T): ([T, Subscriber<T, D, R>, false] | [T, Monitor<T, D>, true])[];
 }
 export interface Observer<T extends ReadonlyArray<any>, D, R> {
-  monitor(type: T, subscriber: Subscriber<T, D, any>): () => void;
+  monitor(type: T, monitor: Monitor<T, D>): () => void;
   on(type: T, subscriber: Subscriber<T, D, R>): () => void;
   off(type: T, subscriber?: Subscriber<T, D, R>): void;
   once(type: T, subscriber: Subscriber<T, D, R>): () => void;
@@ -78,7 +78,8 @@ export interface Publisher<T extends ReadonlyArray<any>, D, R> {
   reflect(this: Publisher<T, void | undefined, R>, type: T, data?: D): R[];
   reflect(type: T, data: D): R[];
 }
-export type Subscriber<T extends ReadonlyArray<any>, D, R> = (data: D, type: T) => R;
+type Monitor<T extends ReadonlyArray<any>, D> = (data: D, type: T) => any;
+type Subscriber<T extends ReadonlyArray<any>, D, R> = (data: D, type: T) => R;
 
 export class Cancelable<L> {
   readonly listeners: Set<(reason: L) => void>;

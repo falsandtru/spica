@@ -1,4 +1,4 @@
-import { Observer, Publisher } from '../../index.d';
+import { Observer, Publisher, Monitor, Subscriber } from '../../index.d';
 import { concat } from './concat';
 import { stringify } from './stringify';
 
@@ -11,10 +11,14 @@ interface SubscriberMapNode<T extends ReadonlyArray<any>, D, R> {
 type Register<T extends ReadonlyArray<any>, D, R> = [
   T,
   Subscriber<T, D, R>,
-  boolean,
+  false,
   Subscriber<T, D, R>
+] | [
+  T,
+  Monitor<T, D>,
+  true,
+  Monitor<T, D>
 ];
-type Subscriber<T extends ReadonlyArray<any>, D, R> = (data: D, type: T) => R;
 
 export class Observable<T extends ReadonlyArray<any>, D, R>
   implements Observer<T, D, R>, Publisher<T, D, R> {
@@ -88,7 +92,7 @@ export class Observable<T extends ReadonlyArray<any>, D, R>
         const [, , monitor, subscriber] = sub;
         if (monitor) return;
         try {
-          const result = subscriber(data, namespace);
+          const result: R = subscriber(data, namespace);
           if (tracker) {
             results[results.length] = result;
           }
@@ -124,7 +128,7 @@ export class Observable<T extends ReadonlyArray<any>, D, R>
       }
     }
   }
-  public refs(namespace: never[] | T): [T, Subscriber<T, D, R>, boolean][] {
+  public refs(namespace: never[] | T): Register<T, D, R>[] {
     return this.refsBelow_(this.seekNode_(namespace));
   }
   private refsAbove_({parent, registers}: SubscriberMapNode<T, D, R>): Register<T, D, R>[] {
