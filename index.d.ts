@@ -448,7 +448,7 @@ export class AttrMap<C, K, V> {
   delete(ctx: C, key: K): boolean;
 }
 
-export class Cache<K, V> {
+export class Cache<K, V = undefined> {
   constructor(
     size: number,
     callback?: (key: K, value: V) => any,

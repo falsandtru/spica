@@ -1,4 +1,4 @@
-export class Cache<K, V> {
+export class Cache<K, V = undefined> {
   constructor(
     private readonly size: number,
     private readonly callback: (key: K, value: V) => any = () => void 0,
