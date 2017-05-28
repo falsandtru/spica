@@ -43,7 +43,7 @@ describe('Unit: lib/monad/sequence/member/takeWhile', () => {
         [0, 1]);
     });
 
-    it('2 all', () => {
+    it('2 nothing', () => {
       assert.deepStrictEqual(
         new Sequence<number, number>((n = 0, cons) => n < 1 ? cons(n, n + 1) : cons(n))
           .takeWhile(() => false)
