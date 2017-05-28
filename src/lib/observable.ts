@@ -2,33 +2,33 @@ import { Observer, Publisher } from '../../index.d';
 import { concat } from './concat';
 import { stringify } from './stringify';
 
-interface SubscriberMapNode<T, D, R> {
+interface SubscriberMapNode<T extends ReadonlyArray<any>, D, R> {
   parent: SubscriberMapNode<T, D, R> | undefined;
   children: Map<keyof T, SubscriberMapNode<T, D, R>>;
   childrenNames: (keyof T)[];
   registers: Register<T, D, R>[];
 }
-type Register<T, D, R> = [
+type Register<T extends ReadonlyArray<any>, D, R> = [
   T,
-  Subscriber<D, R>,
+  Subscriber<T, D, R>,
   boolean,
-  Subscriber<D, R>
+  Subscriber<T, D, R>
 ];
-type Subscriber<D, R> = (data: D) => R;
+type Subscriber<T extends ReadonlyArray<any>, D, R> = (data: D, type: T) => R;
 
-export class Observable<T extends any[], D, R>
+export class Observable<T extends ReadonlyArray<any>, D, R>
   implements Observer<T, D, R>, Publisher<T, D, R> {
-  public monitor(namespace: T, subscriber: Subscriber<D, R>, identifier: Subscriber<D, R> = subscriber): () => void {
+  public monitor(namespace: T, subscriber: Subscriber<T, D, any>, identifier: Subscriber<T, D, R> = subscriber): () => void {
     void this.throwTypeErrorIfInvalidSubscriber_(subscriber, namespace);
     void this.seekNode_(namespace).registers.push([namespace, identifier, true, subscriber]);
     return () => this.off(namespace, identifier);
   }
-  public on(namespace: T, subscriber: Subscriber<D, R>, identifier: Subscriber<D, R> = subscriber): () => void {
+  public on(namespace: T, subscriber: Subscriber<T, D, R>, identifier: Subscriber<T, D, R> = subscriber): () => void {
     void this.throwTypeErrorIfInvalidSubscriber_(subscriber, namespace);
-    void this.seekNode_(namespace).registers.push([namespace, identifier, false, data => subscriber(data)]);
+    void this.seekNode_(namespace).registers.push([namespace, identifier, false, data => subscriber(data, namespace)]);
     return () => this.off(namespace, identifier);
   }
-  public off(namespace: T, subscriber?: Subscriber<D, R>): void {
+  public off(namespace: T, subscriber?: Subscriber<T, D, R>): void {
     switch (typeof subscriber) {
       case 'function':
         return void this.seekNode_(namespace).registers
@@ -54,22 +54,22 @@ export class Observable<T extends any[], D, R>
         throw this.throwTypeErrorIfInvalidSubscriber_(subscriber, namespace);
     }
   }
-  public once(namespace: T, subscriber: Subscriber<D, R>): () => void {
+  public once(namespace: T, subscriber: Subscriber<T, D, R>): () => void {
     void this.throwTypeErrorIfInvalidSubscriber_(subscriber, namespace);
     return this
       .on(
         namespace,
         data => (
           void this.off(namespace, subscriber),
-          subscriber(data)),
+          subscriber(data, namespace)),
         subscriber);
   }
-  public emit(this: Observable<T, void | undefined, R>, type: T, data?: D, tracker?: (data: D, results: R[]) => any): void
-  public emit(namespace: T, data: D, tracker?: (data: D, results: R[]) => any): void
-  public emit(namespace: T, data: D, tracker?: (data: D, results: R[]) => any): void {
+  public emit(this: Observable<T, void | undefined, R>, type: T, data?: D, tracker?: (data: D, results: R[]) => void): void
+  public emit(namespace: T, data: D, tracker?: (data: D, results: R[]) => void): void
+  public emit(namespace: T, data: D, tracker?: (data: D, results: R[]) => void): void {
     void this.drain_(namespace, data, tracker);
   }
-  public reflect(this: Observable<T, void | undefined, R>, type: T, data: D): R[]
+  public reflect(this: Observable<T, void | undefined, R>, type: T, data?: D): R[]
   public reflect(namespace: T, data: D): R[]
   public reflect(namespace: T, data: D): R[] {
     let results: R[] = [];
@@ -77,14 +77,14 @@ export class Observable<T extends any[], D, R>
     assert(Array.isArray(results));
     return results;
   }
-  private drain_(types: T, data: D, tracker?: (data: D, results: R[]) => any): void {
+  private drain_(namespace: T, data: D, tracker?: (data: D, results: R[]) => void): void {
     const results: R[] = [];
-    void this.refsBelow_(this.seekNode_(types))
+    void this.refsBelow_(this.seekNode_(namespace))
       .reduce<void>((_, sub) => {
         const [, , monitor, subscriber] = sub;
         if (monitor) return;
         try {
-          const result = subscriber(data);
+          const result = subscriber(data, namespace);
           if (tracker) {
             results[results.length] = result;
           }
@@ -96,12 +96,12 @@ export class Observable<T extends any[], D, R>
           }
         }
       }, void 0);
-    void this.refsAbove_(this.seekNode_(types))
+    void this.refsAbove_(this.seekNode_(namespace))
       .reduce<void>((_, sub) => {
         const [, , monitor, subscriber] = sub;
         if (!monitor) return;
         try {
-          void subscriber(data);
+          void subscriber(data, namespace);
         }
         catch (reason) {
           if (reason !== void 0 && reason !== null) {
@@ -120,7 +120,7 @@ export class Observable<T extends any[], D, R>
       }
     }
   }
-  public refs(namespace: never[] | T): [T, Subscriber<D, R>, boolean][] {
+  public refs(namespace: never[] | T): [T, Subscriber<T, D, R>, boolean][] {
     return this.refsBelow_(this.seekNode_(namespace));
   }
   private refsAbove_({parent, registers}: SubscriberMapNode<T, D, R>): Register<T, D, R>[] {
@@ -168,7 +168,7 @@ export class Observable<T extends any[], D, R>
     }
     return node;
   }
-  private throwTypeErrorIfInvalidSubscriber_(subscriber: Subscriber<D, R> | undefined, types: T): void {
+  private throwTypeErrorIfInvalidSubscriber_(subscriber: Subscriber<T, D, R> | undefined, types: T): void {
     switch (typeof subscriber) {
       case 'function':
         return;

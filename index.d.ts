@@ -53,31 +53,31 @@ export namespace Supervisor {
   }
 }
 
-export class Observable<T extends any[], D, R>
+export class Observable<T extends ReadonlyArray<any>, D, R>
   implements Observer<T, D, R>, Publisher<T, D, R> {
-  monitor(type: T, subscriber: Subscriber<D, R>): () => void;
-  on(type: T, subscriber: Subscriber<D, R>): () => void;
-  off(type: T, subscriber?: Subscriber<D, R>): void;
-  once(type: T, subscriber: Subscriber<D, R>): () => void;
-  emit(this: Observable<T, void | undefined, R>, type: T, data?: D, tracker?: (data: D, results: R[]) => any): void;
-  emit(type: T, data: D, tracker?: (data: D, results: R[]) => any): void;
+  monitor(type: T, subscriber: Subscriber<T, D, any>): () => void;
+  on(type: T, subscriber: Subscriber<T, D, R>): () => void;
+  off(type: T, subscriber?: Subscriber<T, D, R>): void;
+  once(type: T, subscriber: Subscriber<T, D, R>): () => void;
+  emit(this: Observable<T, void | undefined, R>, type: T, data?: D, tracker?: (data: D, results: R[]) => void): void;
+  emit(type: T, data: D, tracker?: (data: D, results: R[]) => void): void;
   reflect(this: Observable<T, void | undefined, R>, type: T, data?: D): R[];
   reflect(type: T, data: D): R[];
-  refs(type: never[] | T): [T, Subscriber<D, R>, boolean][];
+  refs(type: never[] | T): [T, Subscriber<T, D, R>, boolean][];
 }
-export interface Observer<T extends any[], D, R> {
-  monitor(type: T, subscriber: Subscriber<D, R>): () => void;
-  on(type: T, subscriber: Subscriber<D, R>): () => void;
-  off(type: T, subscriber?: Subscriber<D, R>): void;
-  once(type: T, subscriber: Subscriber<D, R>): () => void;
+export interface Observer<T extends ReadonlyArray<any>, D, R> {
+  monitor(type: T, subscriber: Subscriber<T, D, any>): () => void;
+  on(type: T, subscriber: Subscriber<T, D, R>): () => void;
+  off(type: T, subscriber?: Subscriber<T, D, R>): void;
+  once(type: T, subscriber: Subscriber<T, D, R>): () => void;
 }
-export interface Publisher<T extends any[], D, R> {
-  emit(this: Publisher<T, void | undefined, R>, type: T, data?: D, tracker?: (data: D, results: R[]) => any): void;
-  emit(type: T, data: D, tracker?: (data: D, results: any[]) => any): void;
+export interface Publisher<T extends ReadonlyArray<any>, D, R> {
+  emit(this: Publisher<T, void | undefined, R>, type: T, data?: D, tracker?: (data: D, results: R[]) => void): void;
+  emit(type: T, data: D, tracker?: (data: D, results: R[]) => void): void;
   reflect(this: Publisher<T, void | undefined, R>, type: T, data?: D): R[];
   reflect(type: T, data: D): R[];
 }
-export type Subscriber<D, R> = (data: D) => R;
+export type Subscriber<T extends ReadonlyArray<any>, D, R> = (data: D, type: T) => R;
 
 export class Cancelable<L> {
   readonly listeners: Set<(reason: L) => void>;
