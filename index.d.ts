@@ -450,7 +450,7 @@ export class AttrMap<C, K, V> {
   delete(ctx: C, key: K): boolean;
 }
 
-export class Cache<K, V = undefined> {
+export class Cache<K, V = void> {
   constructor(
     size: number,
     callback?: (key: K, value: V) => any,
@@ -460,7 +460,7 @@ export class Cache<K, V = undefined> {
     },
   );
   put(key: K, value: V): boolean;
-  put(this: Cache<K, undefined>, key: K, value?: V): boolean;
+  put(this: Cache<K, void>, key: K): boolean;
   get(key: K): V | undefined;
   has(key: K): boolean;
   delete(key: K): boolean;

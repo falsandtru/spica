@@ -1,4 +1,4 @@
-export class Cache<K, V = undefined> {
+export class Cache<K, V = void> {
   constructor(
     private readonly size: number,
     private readonly callback: (key: K, value: V) => any = () => void 0,
@@ -20,7 +20,7 @@ export class Cache<K, V = undefined> {
     this.store = new Map(entries.slice(0, size));
   }
   public put(key: K, value: V): boolean;
-  public put(this: Cache<K, undefined>, key: K, value?: V): boolean;
+  public put(this: Cache<K, void>, key: K, value?: V): boolean;
   public put(key: K, value: V): boolean {
     if (key !== key) throw new TypeError(`Spica: Cache: Cannot use NaN for keys.`);
     if (this.access(key)) return void this.store.set(key, value), true;
