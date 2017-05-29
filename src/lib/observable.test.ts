@@ -20,19 +20,19 @@ describe('Unit: lib/observable', function () {
       assert.deepStrictEqual(ob.refs([]), []);
 
       ob.on([], id);
-      ob.monitor([], id);
+      const m1 = ob.monitor([], id);
       assert.deepStrictEqual(ob.refs([]).map(reg => reg.slice(0, 3)), [
         [[], id, false],
-        [[], id, true]
+        [[], id, true],
       ]);
 
       ob.once([''], id);
-      ob.monitor([''], id);
+      const m2 = ob.monitor([''], id);
       assert.deepStrictEqual(ob.refs([]).map(reg => reg.slice(0, 3)), [
         [[], id, false],
         [[], id, true],
         [[''], id, false],
-        [[''], id, true]
+        [[''], id, true],
       ]);
 
       ob.on(['0'], id);
@@ -51,15 +51,22 @@ describe('Unit: lib/observable', function () {
         [['0'], id, false],
         [['a'], id, false],
         [['1'], id, false],
-        [['z'], id, false]
+        [['z'], id, false],
       ]);
 
       ob.off([]);
+      assert.deepStrictEqual(ob.refs([]).map(reg => reg.slice(0, 3)), [
+        [[], id, true],
+        [[''], id, true],
+      ]);
+
+      m1();
+      m2();
       assert.deepStrictEqual(ob.refs([]), []);
 
       ob.on([''], id);
       assert.deepStrictEqual(ob.refs([]).map(reg => reg.slice(0, 3)), [
-        [[''], id, false]
+        [[''], id, false],
       ]);
       ob.off([''], id);
       assert.deepStrictEqual(ob.refs([]), []);
@@ -75,18 +82,16 @@ describe('Unit: lib/observable', function () {
 
       assert(ob.refs([]).length === 0);
 
-      ob.monitor([], id);
-      assert(ob.refs([]).length === 1);
-
+      const m1 = ob.monitor([], id);
       ob.on([], id);
       assert(ob.refs([]).length === 2);
 
-      ob.monitor([''], id);
+      const m2 = ob.monitor([''], id);
       ob.on([''], id);
       assert(ob.refs([]).length === 4);
       assert(ob.refs(['']).length === 2);
 
-      ob.monitor(['', ''], id);
+      const m3 = ob.monitor(['', ''], id);
       ob.on(['', ''], id);
       assert(ob.refs([]).length === 6);
       assert(ob.refs(['']).length === 4);
@@ -97,22 +102,30 @@ describe('Unit: lib/observable', function () {
       assert(ob.refs(['']).length === 3);
       assert(ob.refs(['', '']).length === 2);
 
-      ob.off([''], id);
-      assert(ob.refs([]).length === 4);
-      assert(ob.refs(['']).length === 2);
-      assert(ob.refs(['', '']).length === 2);
-
-      ob.off([''], id);
-      assert(ob.refs([]).length === 4);
-      assert(ob.refs(['']).length === 2);
-      assert(ob.refs(['', '']).length === 2);
-
       ob.off(['']);
+      assert(ob.refs([]).length === 4);
+      assert(ob.refs(['']).length === 2);
+      assert(ob.refs(['', '']).length === 1);
+
+      ob.off([''], id);
+      assert(ob.refs([]).length === 4);
+      assert(ob.refs(['']).length === 2);
+      assert(ob.refs(['', '']).length === 1);
+
+      m3();
+      assert(ob.refs([]).length === 3);
+      assert(ob.refs(['']).length === 1);
+      assert(ob.refs(['', '']).length === 0);
+
+      m2();
       assert(ob.refs([]).length === 2);
       assert(ob.refs(['']).length === 0);
       assert(ob.refs(['', '']).length === 0);
 
       ob.off([]);
+      assert(ob.refs([]).length === 1);
+
+      m1();
       assert(ob.refs([]).length === 0);
 
       done();
@@ -166,14 +179,12 @@ describe('Unit: lib/observable', function () {
     it('off', function (done) {
       let cnt = 0;
       const ob = new Observable<string[], number, void>();
-      ob.monitor([''], data => assert(++cnt === 3 && data === 0))
-      ob.on([''], data => assert(++cnt === 1 && data === 0))
-      ob.monitor([''], throwError)
-      ob.on([''], throwError)
-      ob.on([''], data => assert(++cnt === 2 && data === 0))
-      ob.monitor([''], data => assert(++cnt === 4 && data === 0) || done())
-      ob.off([''], throwError)
-      ob.off([''], throwError)
+      ob.monitor([''], data => assert(++cnt === 3 && data === 0));
+      ob.on([''], data => assert(++cnt === 1 && data === 0));
+      ob.on([''], throwError);
+      ob.on([''], data => assert(++cnt === 2 && data === 0));
+      ob.monitor([''], data => assert(++cnt === 4 && data === 0) || done());
+      ob.off([''], throwError);
       ob.emit([''], 0);
     });
 
@@ -181,10 +192,11 @@ describe('Unit: lib/observable', function () {
       let cnt = 0;
       const ob = new Observable<string[], number, void>();
       ob.on([''], throwError);
-      ob.monitor([''], throwError);
+      ob.monitor([''], data => assert(++cnt === 2 && data === 0) || done());
       ob.on([''], throwError);
       ob.off(['']);
-      ob.on([''], data => assert(++cnt === 1 && data === 0) || done());
+      assert(ob.refs(['']).length === 1);
+      ob.on([''], data => assert(++cnt === 1 && data === 0));
       ob.emit([''], 0);
     });
 

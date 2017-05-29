@@ -25,19 +25,20 @@ export class Observable<T extends ReadonlyArray<any>, D, R>
   public monitor(namespace: T, subscriber: Subscriber<T, D, any>, identifier: Subscriber<T, D, R> = subscriber): () => void {
     void this.throwTypeErrorIfInvalidSubscriber_(subscriber, namespace);
     void this.seekNode_(namespace).registers.push([namespace, identifier, true, subscriber]);
-    return () => this.off(namespace, identifier);
+    return () => this.off(namespace, identifier, true);
   }
   public on(namespace: T, subscriber: Subscriber<T, D, R>, identifier: Subscriber<T, D, R> = subscriber): () => void {
     void this.throwTypeErrorIfInvalidSubscriber_(subscriber, namespace);
     void this.seekNode_(namespace).registers.push([namespace, identifier, false, data => subscriber(data, namespace)]);
     return () => this.off(namespace, identifier);
   }
-  public off(namespace: T, subscriber?: Subscriber<T, D, R>): void {
+  public off(namespace: T, subscriber?: Subscriber<T, D, R>, monitor: boolean = false): void {
     switch (typeof subscriber) {
       case 'function':
         return void this.seekNode_(namespace).registers
-          .some(([, identifier], i, registers) => {
+          .some(([, identifier, monitor_], i, registers) => {
             if (subscriber !== identifier) return false;
+            if (monitor_ !== monitor) return false;
             switch (i) {
               case 0:
                 return !void registers.shift();
@@ -49,9 +50,18 @@ export class Observable<T extends ReadonlyArray<any>, D, R>
           });
       case 'undefined': {
         const node = this.seekNode_(namespace);
-        node.children = new Map();
-        node.childrenNames = [];
-        node.registers = [];
+        void node.childrenNames.slice()
+          .forEach(name => {
+            void this.off(<T><any>namespace.concat([name]));
+            const child = node.children.get(name);
+            if (!child) return;
+            if (child.registers.length + child.childrenNames.length > 0) return;
+            void node.children.delete(name);
+            assert(node.childrenNames.findIndex(value => value === name || (name !== name && value !== value)) !== -1);
+            void node.childrenNames.splice(node.childrenNames.findIndex(value => value === name || (name !== name && value !== value)), 1);
+          });
+        node.registers = node.registers
+          .filter(([, , monitor]) => monitor);
         return;
       }
       default:
