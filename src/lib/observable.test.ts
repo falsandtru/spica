@@ -202,20 +202,15 @@ describe('Unit: lib/observable', function () {
 
     it('recovery', function (done) {
       let cnt = 0;
-      try {
-        const ob = new Observable<string[], void, void>();
-        ob.on([''], throwError);
-        ob.on([''], throwError);
-        ob.on([''], throwError);
-        ob.on([''], _ => assert(++cnt === 1));
-        ob.on([''], throwError);
-        ob.on([''], throwError);
-        ob.on([''], throwError);
-        ob.emit([''], void 0, _ => assert(++cnt === 2) || Tick(() => assert(cnt === 2) || done()));
-      }
-      catch (err) {
-        ;
-      }
+      const ob = new Observable<string[], void, void>();
+      ob.on([''], throwError);
+      ob.on([''], throwError);
+      ob.on([''], throwError);
+      ob.on([''], _ => assert(++cnt === 1));
+      ob.on([''], throwError);
+      ob.on([''], throwError);
+      ob.on([''], throwError);
+      ob.emit([''], void 0, _ => assert(++cnt === 2) || Tick(() => assert(cnt === 2) || done()));
     });
 
     it('on namespace', function (done) {
