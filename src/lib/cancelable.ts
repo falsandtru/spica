@@ -7,8 +7,8 @@ export class Cancelable<L> {
   public readonly listeners: Set<(reason: L) => void> = new Set();
   public canceled = false;
   public cancel: {
-    (this: Cancelable<void | undefined>): void;
     (reason: L): void;
+    (this: Cancelable<void>): void;
   } = (reason?: L) => {
     this.cancel = noop;
     this.canceled = true;

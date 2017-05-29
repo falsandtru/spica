@@ -84,8 +84,8 @@ type Subscriber<T extends ReadonlyArray<any>, D, R> = (data: D, type: T) => R;
 export class Cancelable<L> {
   readonly listeners: Set<(reason: L) => void>;
   readonly cancel: {
-    (this: Cancelable<void | undefined>): void;
     (reason: L): void;
+    (this: Cancelable<void>): void;
   };
   readonly canceled: boolean;
   readonly promise: <T>(val: T) => Promise<T>;
