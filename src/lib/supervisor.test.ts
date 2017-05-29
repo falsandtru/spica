@@ -1,6 +1,8 @@
 import { Supervisor } from './supervisor';
 import { Tick } from './tick';
 
+declare const requestAnimationFrame: (cb: () => void) => void;
+
 describe('Unit: lib/supervisor', function () {
   describe('Supervisor', function () {
     beforeEach(() => {
@@ -286,6 +288,14 @@ describe('Unit: lib/supervisor', function () {
       sv.call('', 1, r => assert(r === 1) || assert(cnt === 3 && ++cnt));
       sv.call('', 2, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 2 && ++cnt));
       sv.call('', 3, r => assert(r === 3) || assert(cnt === 4 && ++cnt) || done(), Infinity);
+    });
+
+    it('scheduler', function (done) {
+      let cnt = 0;
+      const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({ scheduler: requestAnimationFrame });
+      sv.register('', _ => [++cnt, 0], 0);
+      sv.call('', 0, _ => assert(cnt === 1) || done());
+      assert(cnt === 0);
     });
 
     it('terminate process', function (done) {
