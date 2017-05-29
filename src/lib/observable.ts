@@ -78,13 +78,13 @@ export class Observable<T extends ReadonlyArray<any>, D, R>
           subscriber(data, namespace)),
         subscriber);
   }
-  public emit(this: Observable<T, void | undefined, R>, type: T, data?: D, tracker?: (data: D, results: R[]) => void): void
   public emit(namespace: T, data: D, tracker?: (data: D, results: R[]) => void): void
+  public emit(this: Observable<T, void, R>, type: T, data?: D, tracker?: (data: D, results: R[]) => void): void
   public emit(namespace: T, data: D, tracker?: (data: D, results: R[]) => void): void {
     void this.drain_(namespace, data, tracker);
   }
-  public reflect(this: Observable<T, void | undefined, R>, type: T, data?: D): R[]
   public reflect(namespace: T, data: D): R[]
+  public reflect(this: Observable<T, void, R>, type: T, data?: D): R[]
   public reflect(namespace: T, data: D): R[] {
     let results: R[] = [];
     void this.emit(namespace, <D>data, (_, r) => results = r);

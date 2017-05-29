@@ -60,10 +60,10 @@ export class Observable<T extends ReadonlyArray<any>, D, R>
   off(type: T, subscriber?: Subscriber<T, D, R>): void;
   once(type: T, subscriber: Subscriber<T, D, R>): () => void;
   relay(source: Observer<T, D, any>): () => void;
-  emit(this: Observable<T, void | undefined, R>, type: T, data?: D, tracker?: (data: D, results: R[]) => void): void;
   emit(type: T, data: D, tracker?: (data: D, results: R[]) => void): void;
-  reflect(this: Observable<T, void | undefined, R>, type: T, data?: D): R[];
+  emit(this: Observable<T, void, R>, type: T, data?: D, tracker?: (data: D, results: R[]) => void): void;
   reflect(type: T, data: D): R[];
+  reflect(this: Observable<T, void, R>, type: T, data?: D): R[];
   refs(type: never[] | T): ([T, Subscriber<T, D, R>, false] | [T, Monitor<T, D>, true])[];
 }
 export interface Observer<T extends ReadonlyArray<any>, D, R> {
@@ -73,10 +73,10 @@ export interface Observer<T extends ReadonlyArray<any>, D, R> {
   once(type: T, subscriber: Subscriber<T, D, R>): () => void;
 }
 export interface Publisher<T extends ReadonlyArray<any>, D, R> {
-  emit(this: Publisher<T, void | undefined, R>, type: T, data?: D, tracker?: (data: D, results: R[]) => void): void;
   emit(type: T, data: D, tracker?: (data: D, results: R[]) => void): void;
-  reflect(this: Publisher<T, void | undefined, R>, type: T, data?: D): R[];
+  emit(this: Publisher<T, void, R>, type: T, data?: D, tracker?: (data: D, results: R[]) => void): void;
   reflect(type: T, data: D): R[];
+  reflect(this: Publisher<T, void, R>, type: T, data?: D): R[];
 }
 type Monitor<T extends ReadonlyArray<any>, D> = (data: D, type: T) => any;
 type Subscriber<T extends ReadonlyArray<any>, D, R> = (data: D, type: T) => R;
