@@ -2,7 +2,6 @@
   "compilerOptions": {
     "target": "es5",
     "lib": [
-      "webworker",
       "es6"
     ],
     "module": "commonjs",

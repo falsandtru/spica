@@ -30,7 +30,7 @@
     <TypeScriptModuleResolution>Node</TypeScriptModuleResolution>
     <TypeScriptAllowSyntheticDefaultImports>True</TypeScriptAllowSyntheticDefaultImports>
     <TypeScriptTarget>ES5</TypeScriptTarget>
-    <TypeScriptLib>dom,es6</TypeScriptLib>
+    <TypeScriptLib>es6</TypeScriptLib>
     <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
     <TypeScriptStrictNullChecks>True</TypeScriptStrictNullChecks>
     <TypeScriptNoImplicitAny>True</TypeScriptNoImplicitAny>
