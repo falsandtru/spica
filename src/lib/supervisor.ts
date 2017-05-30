@@ -63,7 +63,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
   public readonly name: string;
   private readonly size: number;
   private readonly timeout: number;
-  private readonly destructor_: (reason: any) => any;
+  private readonly destructor_: (reason: any) => void;
   private readonly scheduler: () => void;
   private readonly resource: number;
   public readonly events = {

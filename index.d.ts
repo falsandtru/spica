@@ -29,7 +29,7 @@ export namespace Supervisor {
     readonly name?: string;
     readonly size?: number;
     readonly timeout?: number;
-    readonly destructor?: (reason: any) => any;
+    readonly destructor?: (reason: any) => void;
     readonly scheduler?: (cb: () => void) => void;
     readonly resource?: number;
   }
