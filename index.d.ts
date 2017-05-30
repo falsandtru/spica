@@ -31,6 +31,7 @@ export namespace Supervisor {
     readonly timeout?: number;
     readonly destructor?: (reason: any) => any;
     readonly scheduler?: (cb: () => void) => void;
+    readonly resource?: number;
   }
   export type Process<P, R, S> = {
     readonly init: Process.Init<S>;

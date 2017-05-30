@@ -27,6 +27,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     timeout = Infinity,
     destructor = noop,
     scheduler = Tick,
+    resource = 10,
   }: Supervisor.Settings<N> = {}) {
     if (!(<typeof Supervisor>this.constructor).hasOwnProperty('instances')) {
       (<any>this.constructor).instances = new Set();
@@ -39,6 +40,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     this.destructor_ = destructor;
     this.scheduler = () =>
       void scheduler(this.deliver);
+    this.resource = resource;
   }
   private destructor(reason: any): void {
     assert(this.alive === true);
@@ -63,6 +65,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
   private readonly timeout: number;
   private readonly destructor_: (reason: any) => any;
   private readonly scheduler: () => void;
+  private readonly resource: number;
   public readonly events = {
     init: new Observable<never[] | [N], Supervisor.Event.Data.Init<N, P, R, S>, any>(),
     loss: new Observable<never[] | [N], Supervisor.Event.Data.Loss<N, P>, any>(),
@@ -164,7 +167,6 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
   public schedule(): void {
     void Tick(this.scheduler, true);
   }
-  private readonly resource: number = 10;
   private readonly messages: [N, P, Supervisor.Callback<R>, number, number][] = [];
   private readonly deliver = (): void => {
     const since = Date.now();
