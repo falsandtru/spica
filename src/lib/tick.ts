@@ -2,12 +2,12 @@ import { stringify } from './stringify';
 
 export { enqueue as tick };
 
-const queue: [(...args: any[]) => any, boolean][] = [];
-let fs = new WeakSet<() => any>();
+const queue: [() => void, boolean][] = [];
+let fs = new WeakSet<() => void>();
 
 let scheduled = false;
 
-function enqueue(fn: () => any, dedup = false): void {
+function enqueue(fn: () => void, dedup = false): void {
   assert(typeof fn === 'function');
   void queue.push([fn, dedup]);
   void schedule();
