@@ -119,7 +119,9 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     void this.schedule();
     if (timeout <= 0) return;
     if (timeout === Infinity) return;
-    void setTimeout(() => void this.deliver(), timeout + 9);
+    void setTimeout(() => (
+      void this.schedule()
+    ), timeout + 3);
   }
   public cast(name: N, param: P, timeout = this.timeout): boolean {
     void this.validate();
