@@ -455,7 +455,7 @@ export class AttrMap<C, K, V> {
 export class Cache<K, V = void> {
   constructor(
     size: number,
-    callback?: (key: K, value: V) => any,
+    callback?: (key: K, value: V) => void,
     data?: {
       stats?: [K[], K[]];
       entries?: [K, V][];

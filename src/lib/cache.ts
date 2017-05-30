@@ -1,7 +1,7 @@
 export class Cache<K, V = void> {
   constructor(
     private readonly size: number,
-    private readonly callback: (key: K, value: V) => any = () => void 0,
+    private readonly callback: (key: K, value: V) => void = () => void 0,
     {
       stats = [[], []],
       entries = [],
