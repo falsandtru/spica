@@ -169,7 +169,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
   }
   private readonly messages: [N, P, Supervisor.Callback<R>, number, number][] = [];
   private readonly deliver = (): void => {
-    const since = Date.now();
+    const started = Date.now();
     let resource = this.resource;
     for (let i = 0, len = this.messages.length; this.available && i < len && resource > 0; ++i) {
       const now = Date.now();
@@ -185,7 +185,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
       void --len;
 
       if (result) {
-        resource = since + this.resource - now;
+        resource = started + this.resource - now;
       }
       else {
         void this.events.loss.emit([name], [name, param]);
