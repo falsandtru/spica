@@ -109,8 +109,8 @@ export class Observable<T extends ReadonlyArray<any>, D, R>
         }
         catch (reason) {
           if (reason !== void 0 && reason !== null) {
-            void console.error(stringify(reason));
-            assert(!console.info(reason + ''));
+            assert(!console.debug(stringify(reason)));
+            void console.error(reason);
           }
         }
       }, void 0);
@@ -123,8 +123,8 @@ export class Observable<T extends ReadonlyArray<any>, D, R>
         }
         catch (reason) {
           if (reason !== void 0 && reason !== null) {
-            void console.error(stringify(reason));
-            assert(!console.info(reason + ''));
+            assert(!console.debug(stringify(reason)));
+            void console.error(reason);
           }
         }
       }, void 0);
@@ -133,8 +133,8 @@ export class Observable<T extends ReadonlyArray<any>, D, R>
         void tracker(data, results);
       }
       catch (reason) {
-        void console.error(stringify(reason));
-        assert(!console.info(reason + ''));
+        assert(!console.debug(stringify(reason)));
+        void console.error(reason);
       }
     }
   }

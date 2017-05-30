@@ -29,7 +29,8 @@ function dequeue(): void {
       }
     }
     catch (e) {
-      console.error(stringify(e));
+      assert(!console.debug(stringify(e)));
+      void console.error(e);
       continue;
     }
     fs = new WeakSet();

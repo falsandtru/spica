@@ -106,7 +106,8 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
         void callback(<any>void 0, new Error(`Spica: Supervisor: A message overflowed.`));
       }
       catch (reason) {
-        void console.error(stringify(reason));
+        assert(!console.debug(stringify(reason)));
+        void console.error(reason);
       }
     }
     void this.messages.push([
@@ -197,7 +198,8 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
           void callback(<any>void 0, new Error(`Spica: Supervisor: A processing has failed.`));
         }
         catch (reason) {
-          void console.error(stringify(reason));
+          assert(!console.debug(stringify(reason)));
+          void console.error(reason);
         }
         continue;
       }
@@ -207,7 +209,8 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
           void callback(reply);
         }
         catch (reason) {
-          void console.error(stringify(reason));
+          assert(!console.debug(stringify(reason)));
+          void console.error(reason);
         }
       }
       else {
@@ -221,7 +224,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
               void callback(<any>void 0, new Error(`Spica: Supervisor: A processing has failed.`)))
           .catch(
             reason =>
-              void console.error(stringify(reason)));
+              void console.error(reason));
       }
     }
     if (!this.available) {
