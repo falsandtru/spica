@@ -1,6 +1,6 @@
 import { Supervisor as ISupervisor } from '../../index.d';
 import { Observable } from './observable';
-import { Tick } from './tick';
+import { tick } from './tick';
 import { isThenable } from './thenable';
 import { sqid } from './sqid';
 import { stringify } from './stringify';
@@ -26,7 +26,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     size = Infinity,
     timeout = Infinity,
     destructor = noop,
-    scheduler = Tick,
+    scheduler = tick,
     resource = 10,
   }: Supervisor.Settings<N> = {}) {
     if (!(<typeof Supervisor>this.constructor).hasOwnProperty('instances')) {
@@ -168,7 +168,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
           .length > 0;
   }
   public schedule(): void {
-    void Tick(this.scheduler, true);
+    void tick(this.scheduler, true);
   }
   private readonly messages: [N, P, Supervisor.Callback<R>, number, number][] = [];
   private readonly deliver = (): void => {

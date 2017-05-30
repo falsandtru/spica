@@ -12,7 +12,7 @@ import {
   DataMap, AttrMap,
   Cache,
   Mixin,
-  Tick,
+  tick,
   uuid,
   sqid,
   assign,
@@ -147,9 +147,9 @@ describe('Interface: Package', function () {
 
   });
 
-  describe('Tick', function () {
-    it('Tick', function () {
-      assert(typeof Tick === 'function');
+  describe('tick', function () {
+    it('tick', function () {
+      assert(typeof tick === 'function');
     });
 
   });

@@ -473,7 +473,7 @@ export class Cache<K, V = void> {
 
 export function Mixin<T extends object>(...mixins: Array<new () => object>): new () => T;
 
-export function Tick(fn: () => any, dedup?: boolean): void;
+export function tick(fn: () => any, dedup?: boolean): void;
 
 export function uuid(): string;
 export function sqid(): string;

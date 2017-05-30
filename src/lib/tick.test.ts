@@ -1,34 +1,34 @@
-import { Tick } from './tick';
+import { tick } from './tick';
 
 describe('Unit: lib/tick', function () {
-  describe('Tick', function () {
+  describe('tick', function () {
     it('return', function (done) {
-      assert(Tick(done) === void 0);
+      assert(tick(done) === void 0);
     });
 
     it('sequence', function (done) {
       let cnt = 0;
-      Tick(() => ++cnt);
-      Tick(() => assert(cnt === 1) || done());
+      tick(() => ++cnt);
+      tick(() => assert(cnt === 1) || done());
     });
 
     it('async', function (done) {
       let async = false;
-      Tick(() => assert(async === true));
-      Tick(done);
+      tick(() => assert(async === true));
+      tick(done);
       async = true;
     });
 
     it('grouping', function (done) {
       let interrupt = true;
-      Tick(() => void 0);
+      tick(() => void 0);
       setTimeout(() => interrupt = false, 0);
-      Tick(() => assert(interrupt === true));
-      Tick(done);
+      tick(() => assert(interrupt === true));
+      tick(done);
     });
 
     it('recursion', function (done) {
-      Tick(() => Tick(done));
+      tick(() => tick(done));
     });
 
     it('dedup', function (done) {
@@ -36,13 +36,13 @@ describe('Unit: lib/tick', function () {
       function f() {
         ++cnt;
       }
-      Tick(f, true);
-      Tick(f, true);
-      Tick(() => {
+      tick(f, true);
+      tick(f, true);
+      tick(() => {
         assert(cnt === 1);
-        Tick(f);
-        Tick(f);
-        Tick(() => {
+        tick(f);
+        tick(f);
+        tick(() => {
           assert(cnt === 3);
           done();
         });

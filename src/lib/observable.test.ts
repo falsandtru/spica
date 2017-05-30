@@ -1,5 +1,5 @@
 import { Observable } from './observable';
-import { Tick } from './tick';
+import { tick } from './tick';
 
 describe('Unit: lib/observable', function () {
   describe('Observable', function () {
@@ -220,7 +220,7 @@ describe('Unit: lib/observable', function () {
       ob.on([''], throwError);
       ob.on([''], throwError);
       ob.on([''], throwError);
-      ob.emit([''], void 0, _ => assert(cnt === 1 && ++cnt) || Tick(() => assert(cnt === 2 && ++cnt) || done()));
+      ob.emit([''], void 0, _ => assert(cnt === 1 && ++cnt) || tick(() => assert(cnt === 2 && ++cnt) || done()));
     });
 
     it('on namespace', function (done) {
@@ -236,7 +236,7 @@ describe('Unit: lib/observable', function () {
     it('off namespace', function (done) {
       let cnt = 0;
       const ob = new Observable<string[], number, void>();
-      ob.monitor([''], data => assert(cnt === 4 && data === 0 && ++cnt) || Tick(done));
+      ob.monitor([''], data => assert(cnt === 4 && data === 0 && ++cnt) || tick(done));
       ob.on([''], throwError);
       ob.monitor(['', '0'], data => assert(cnt === 3 && data === 0 && ++cnt));
       ob.on(['', '0'], throwError);
@@ -258,7 +258,7 @@ describe('Unit: lib/observable', function () {
       ob.emit([NaN, Symbol()], 0);
       ob.emit([NaN, sym], 1);
       ob.off([NaN, sym]);
-      ob.monitor([NaN, sym], data => assert(cnt === 1 && data === 2 && ++cnt) || Tick(done));
+      ob.monitor([NaN, sym], data => assert(cnt === 1 && data === 2 && ++cnt) || tick(done));
       ob.emit([NaN, sym], 2);
     });
 

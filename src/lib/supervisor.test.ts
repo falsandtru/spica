@@ -1,5 +1,5 @@
 import { Supervisor } from './supervisor';
-import { Tick } from './tick';
+import { tick } from './tick';
 
 declare const requestAnimationFrame: (cb: () => void) => void;
 
@@ -292,7 +292,7 @@ describe('Unit: lib/supervisor', function () {
         timeout: 0
       });
       sv.events.loss.on([''], ([, param]) => assert(cnt === 0 && param === 2 && ++cnt));
-      sv.register('', n => assert(sv.cast('', 2) === false) || assert(n === 1) && assert(cnt === 1 && ++cnt) || Tick(() => done()) || [0 , 0], 0);
+      sv.register('', n => assert(sv.cast('', 2) === false) || assert(n === 1) && assert(cnt === 1 && ++cnt) || tick(() => done()) || [0 , 0], 0);
       assert(sv.cast('', 1) === true);
     });
 

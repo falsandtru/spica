@@ -1,6 +1,6 @@
 import { stringify } from './stringify';
 
-export { enqueue as Tick };
+export { enqueue as tick };
 
 const queue: [(...args: any[]) => any, boolean][] = [];
 let fs = new WeakSet<() => any>();
