@@ -173,7 +173,6 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     let resource = this.resource;
     for (let i = 0, len = this.messages.length; this.available && i < len && resource > 0; ++i) {
       const now = Date.now();
-      resource -= now - since;
       const [name, param, callback, timeout, registered] = this.messages[i];
       const result = this.workers.has(name)
         ? this.workers.get(name)!.call([param, registered + timeout - now])
@@ -185,10 +184,13 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
       void --i;
       void --len;
 
-      if (result === void 0) {
+      if (result) {
+        resource = since + this.resource - now;
+      }
+      else {
         void this.events.loss.emit([name], [name, param]);
       }
-      if (result === void 0 || result instanceof Error) {
+      if (!result || result instanceof Error) {
         try {
           void callback(<any>void 0, new Error(`Spica: Supervisor: A processing has failed.`));
         }
@@ -228,8 +230,9 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
       void Object.freeze(this.messages);
       return;
     }
-    if (resource > 0) return;
-    void this.schedule();
+    if (resource <= 0 && this.messages.length > 0) {
+      void this.schedule();
+    }
   }
 }
 export namespace Supervisor {
