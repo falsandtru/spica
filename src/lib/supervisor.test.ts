@@ -97,7 +97,7 @@ describe('Unit: lib/supervisor', function () {
     });
 
     it('lifecycle', function (done) {
-      let cnt = 1;
+      let cnt = 0;
       class TestSupervisor extends Supervisor<string, number, number, number> {
       }
       assert(TestSupervisor.count === 0);
@@ -107,7 +107,7 @@ describe('Unit: lib/supervisor', function () {
         timeout: 0,
         destructor: reason => {
           assert(reason === void 0);
-          assert(cnt === 13 && ++cnt);
+          assert(cnt === 12 && ++cnt);
           assert.throws(() => sv.register('', _ => [0, 0], 0));
           assert.throws(() => sv.cast('', 0));
           assert.throws(() => sv.call('', 0, () => void 0));
@@ -122,7 +122,7 @@ describe('Unit: lib/supervisor', function () {
       sv.events.init
         .monitor([], ([name, process, state]) => {
           assert(TestSupervisor.procs === 1);
-          assert(cnt === 2 && ++cnt);
+          assert(cnt === 1 && ++cnt);
           assert(name === '');
           assert(process.init instanceof Function);
           assert(process.call instanceof Function);
@@ -133,13 +133,13 @@ describe('Unit: lib/supervisor', function () {
         .monitor([], ([name, param]) => {
           assert(TestSupervisor.procs === 0);
           assert(name === '');
-          assert(cnt === 11 && ++cnt);
+          assert(cnt === 10 && ++cnt);
           assert(param === 4);
         });
       sv.events.exit
         .monitor([], ([name, process, state, reason]) => {
           assert(TestSupervisor.procs === 0);
-          assert(cnt === 9 && ++cnt);
+          assert(cnt === 8 && ++cnt);
           assert(name === '');
           assert(process.init instanceof Function);
           assert(process.call instanceof Function);
@@ -150,43 +150,43 @@ describe('Unit: lib/supervisor', function () {
       sv.register('', {
         init(state) {
           assert(TestSupervisor.procs === 1);
-          assert(cnt === 3 && ++cnt);
+          assert(cnt === 2 && ++cnt);
           assert(state === 0);
           return state;
         },
         call(n: number, state: number): [number, number] {
           assert(TestSupervisor.procs === 1);
           if (n >= 3) throw new Error();
-          ++cnt; // 4, 6
+          ++cnt; // 3, 5
           return [-n, ++state];
         },
         exit(reason, state) {
           assert(TestSupervisor.procs === 0);
-          assert(cnt === 8 && ++cnt);
+          assert(cnt === 7 && ++cnt);
           assert(reason instanceof Error);
           assert(state === 2);
         }
       }, 0);
-      assert(cnt === 1 && ++cnt);
-      sv.call('', 1, r => assert(TestSupervisor.procs === 1) || assert(r === -1) || assert(cnt === 7 && ++cnt));
+      assert(cnt === 0 && ++cnt);
+      sv.call('', 1, r => assert(TestSupervisor.procs === 1) || assert(r === -1) || assert(cnt === 6 && ++cnt));
       assert(sv.cast('', 2) === true);
-      sv.call('', 3, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 10 && ++cnt));
-      sv.call('', 4, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 12 && ++cnt) || sv.terminate());
-      assert(cnt === 5 && ++cnt);
+      sv.call('', 3, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 9 && ++cnt));
+      sv.call('', 4, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 11 && ++cnt) || sv.terminate());
+      assert(cnt === 4 && ++cnt);
     });
 
     it('validation for returned values', function (done) {
-      let cnt = 1;
+      let cnt = 0;
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> {
       }();
       sv.events.exit.once([''], ([, , s, r]) => {
         assert(s === 0);
         assert(r instanceof Error);
-        assert(cnt === 1 && ++cnt);
+        assert(cnt === 0 && ++cnt);
         done();
       });
       sv.register('', () => new Promise<[number, number]>(resolve => void resolve()), 0);
-      sv.call('', 1, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 2 && ++cnt), 1e2);
+      sv.call('', 1, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 1 && ++cnt), 1e2);
     });
 
     it('state', function (done) {
@@ -229,51 +229,51 @@ describe('Unit: lib/supervisor', function () {
     });
 
     it('timeout of messaging', function (done) {
-      let cnt = 1;
+      let cnt = 0;
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
         timeout: 0
       });
       sv.events.loss.once([''], ([, n]) => {
         assert(n === 2);
-        assert(cnt === 1 && ++cnt);
+        assert(cnt === 0 && ++cnt);
         sv.events.loss.once([''], ([, n]) => {
           assert(n === 1);
-          assert(cnt === 3 && ++cnt);
+          assert(cnt === 2 && ++cnt);
           done();
         });
       });
-      sv.call('', 1, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 4 && ++cnt), 1e2);
-      sv.call('', 2, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 2 && ++cnt));
+      sv.call('', 1, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 3 && ++cnt), 1e2);
+      sv.call('', 2, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 1 && ++cnt));
     });
 
     it('timeout of processing', function (done) {
-      let cnt = 1;
+      let cnt = 0;
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
         timeout: 0
       });
       sv.events.exit.once([''], ([, , s, r]) => {
         assert(s === 0);
         assert(r instanceof Error);
-        assert(cnt === 1 && ++cnt);
+        assert(cnt === 0 && ++cnt);
         done();
       });
       sv.register('', () => new Promise<[number, number]>(() => void 0), 0);
-      sv.call('', 1, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 2 && ++cnt), 1e2);
+      sv.call('', 1, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 1 && ++cnt), 1e2);
     });
 
     it('overflow', function (done) {
-      let cnt = 1;
+      let cnt = 0;
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
         size: 1
       });
       sv.events.loss.once([''], ([n, p]) => {
         assert(n === '');
         assert(p === 1);
-        assert(cnt === 1 && ++cnt);
+        assert(cnt === 0 && ++cnt);
       });
       sv.register('', _ => [0, 0], 0);
-      sv.call('', 1, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 2 && ++cnt), 1e2);
-      sv.call('', 2, (r, e) => assert(r === 0) || assert(e === void 0) || assert(cnt === 3 && ++cnt) || done(), 1e2);
+      sv.call('', 1, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 1 && ++cnt), 1e2);
+      sv.call('', 2, (r, e) => assert(r === 0) || assert(e === void 0) || assert(cnt === 2 && ++cnt) || done(), 1e2);
     });
 
     it('async', function (done) {
@@ -287,25 +287,25 @@ describe('Unit: lib/supervisor', function () {
     });
 
     it('block', function (done) {
-      let cnt = 1;
+      let cnt = 0;
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
         timeout: 0
       });
-      sv.events.loss.on([''], ([, param]) => assert(cnt === 1 && param === 2 && ++cnt));
-      sv.register('', n => assert(sv.cast('', 2) === false) || assert(n === 1) && assert(cnt === 2 && ++cnt) || Tick(() => done()) || [0 , 0], 0);
+      sv.events.loss.on([''], ([, param]) => assert(cnt === 0 && param === 2 && ++cnt));
+      sv.register('', n => assert(sv.cast('', 2) === false) || assert(n === 1) && assert(cnt === 1 && ++cnt) || Tick(() => done()) || [0 , 0], 0);
       assert(sv.cast('', 1) === true);
     });
 
     it('block async', function (done) {
-      let cnt = 1;
+      let cnt = 0;
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
         timeout: 0
       });
       sv.register('', n => new Promise<[number, number]>(resolve => void resolve([n, 0])), 0);
-      sv.events.loss.on([''], ([, param]) => assert(cnt === 1 && param === 2 && ++cnt));
-      sv.call('', 1, r => assert(r === 1) || assert(cnt === 3 && ++cnt));
-      sv.call('', 2, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 2 && ++cnt));
-      sv.call('', 3, r => assert(r === 3) || assert(cnt === 4 && ++cnt) || done(), Infinity);
+      sv.events.loss.on([''], ([, param]) => assert(cnt === 0 && param === 2 && ++cnt));
+      sv.call('', 1, r => assert(r === 1) || assert(cnt === 2 && ++cnt));
+      sv.call('', 2, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 1 && ++cnt));
+      sv.call('', 3, r => assert(r === 3) || assert(cnt === 3 && ++cnt) || done(), Infinity);
     });
 
     it('scheduler', function (done) {
