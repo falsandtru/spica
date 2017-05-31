@@ -77,12 +77,20 @@ export interface Publisher<T extends ReadonlyArray<any>, D, R> {
 type Monitor<T extends ReadonlyArray<any>, D> = (data: D, type: T) => any;
 type Subscriber<T extends ReadonlyArray<any>, D, R> = (data: D, type: T) => R;
 
-export class Cancellation<L> {
-  readonly listeners: Set<(reason: L) => void>;
+export class Cancellation<L = void> {
+}
+export interface Cancellation<L = void>
+  extends Cancellator<L>, Cancellatee<L> {
+}
+export interface Cancellator<L = void> {
   readonly cancel: {
     (reason: L): void;
     (this: Cancellation<void>): void;
   };
+  readonly close: () => void;
+}
+export interface Cancellatee<L = void> {
+  readonly register: (listener: (reason: L) => void) => () => void;
   readonly canceled: boolean;
   readonly promise: <T>(val: T) => Promise<T>;
   readonly maybe: <T>(val: T) => Maybe<T>;

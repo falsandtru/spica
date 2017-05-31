@@ -2,17 +2,30 @@ import { noop } from './noop';
 import { Maybe, Just, Nothing } from './monad/maybe';
 import { Either, Left, Right } from './monad/either';
 
-export class Cancellation<L> {
+export class Cancellation<L = void> {
   private reason: L;
-  public readonly listeners: Set<(reason: L) => void> = new Set();
-  public canceled = false;
+  private readonly listeners: Set<(reason: L) => void> = new Set();
+  public readonly register = (listener: (reason: L) => void): () => void =>
+    this.register_(listener);
+  private register_ = (listener: (reason: L) => void): () => void => {
+    void this.listeners.add(handler);
+    return () => void this.listeners.delete(handler);
+
+    function handler(reason: L): void {
+      void listener(reason);
+    }
+  };
   public cancel: {
     (reason: L): void;
     (this: Cancellation<void>): void;
   } = (reason?: L) => {
-    this.cancel = noop;
     this.canceled = true;
     this.reason = reason!;
+    this.register_ = cb => (
+      void cb(this.reason),
+      () => void 0);
+    this.cancel = noop;
+    this.close = noop;
     void Object.freeze(this);
     while (this.listeners.size > 0) {
       void this.listeners
@@ -20,10 +33,16 @@ export class Cancellation<L> {
           void this.listeners.delete(cb),
           void cb(reason!)));
     }
-    this.listeners.add = cb => (
-      void cb(this.reason),
-      this.listeners);
+    void Object.freeze(this.listeners);
   };
+  public close = (): void => (
+    this.register_ = () => () => void 0,
+    this.cancel = noop,
+    this.close = noop,
+    void this.listeners.clear(),
+    void Object.freeze(this),
+    void Object.freeze(this.listeners));
+  public canceled = false;
   public readonly promise = <T>(val: T): Promise<T> =>
     this.canceled
       ? new Promise<T>((_, reject) => void reject(this.reason))
