@@ -2,13 +2,13 @@ import { noop } from './noop';
 import { Maybe, Just, Nothing } from './monad/maybe';
 import { Either, Left, Right } from './monad/either';
 
-export class Cancelable<L> {
+export class Cancellation<L> {
   private reason: L;
   public readonly listeners: Set<(reason: L) => void> = new Set();
   public canceled = false;
   public cancel: {
     (reason: L): void;
-    (this: Cancelable<void>): void;
+    (this: Cancellation<void>): void;
   } = (reason?: L) => {
     this.cancel = noop;
     this.canceled = true;

@@ -12,6 +12,7 @@
     "supervisor",
     "actor",
     "observable",
+    "cancellation",
     "sequence",
     "generator",
     "iterator",

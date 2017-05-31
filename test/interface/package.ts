@@ -2,7 +2,7 @@ import {
   Supervisor,
   Observable,
   Sequence,
-  Cancelable,
+  Cancellation,
   Maybe, Just, Nothing,
   Either, Left, Right,
   curry,
@@ -44,9 +44,9 @@ describe('Interface: Package', function () {
 
   });
 
-  describe('Cancelable', function () {
-    it('Cancelable', function () {
-      assert(typeof Cancelable === 'function');
+  describe('Cancellation', function () {
+    it('Cancellation', function () {
+      assert(typeof Cancellation === 'function');
     });
 
   });
