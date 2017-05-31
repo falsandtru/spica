@@ -55,17 +55,11 @@ export namespace Supervisor {
   }
 }
 
-export class Observable<T extends ReadonlyArray<any>, D, R>
-  implements Observer<T, D, R>, Publisher<T, D, R> {
-  monitor(type: T, monitor: Monitor<T, D>): () => void;
-  on(type: T, subscriber: Subscriber<T, D, R>): () => void;
-  off(type: T, subscriber?: Subscriber<T, D, R>): void;
-  once(type: T, subscriber: Subscriber<T, D, R>): () => void;
+export class Observation<T extends ReadonlyArray<any>, D, R> {
+}
+export interface Observation<T extends ReadonlyArray<any>, D, R>
+  extends Observer< T, D, R >, Publisher < T, D, R > {
   relay(source: Observer<T, D, any>): () => void;
-  emit(type: T, data: D, tracker?: (data: D, results: R[]) => void): void;
-  emit(this: Observable<T, void, R>, type: T, data?: D, tracker?: (data: D, results: R[]) => void): void;
-  reflect(type: T, data: D): R[];
-  reflect(this: Observable<T, void, R>, type: T, data?: D): R[];
   refs(type: never[] | T): ([T, Subscriber<T, D, R>, false] | [T, Monitor<T, D>, true])[];
 }
 export interface Observer<T extends ReadonlyArray<any>, D, R> {

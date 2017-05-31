@@ -1,5 +1,5 @@
 import { Supervisor as ISupervisor } from '../../index.d';
-import { Observable } from './observable';
+import { Observation } from './observation';
 import { tick } from './tick';
 import { isThenable } from './thenable';
 import { sqid } from './sqid';
@@ -67,9 +67,9 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
   private readonly scheduler: () => void;
   private readonly resource: number;
   public readonly events = {
-    init: new Observable<never[] | [N], Supervisor.Event.Data.Init<N, P, R, S>, any>(),
-    loss: new Observable<never[] | [N], Supervisor.Event.Data.Loss<N, P>, any>(),
-    exit: new Observable<never[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>()
+    init: new Observation<never[] | [N], Supervisor.Event.Data.Init<N, P, R, S>, any>(),
+    loss: new Observation<never[] | [N], Supervisor.Event.Data.Loss<N, P>, any>(),
+    exit: new Observation<never[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>()
   };
   private readonly workers = new Map<N, Worker<N, P, R, S>>();
   private alive = true;

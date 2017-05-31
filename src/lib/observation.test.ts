@@ -1,8 +1,8 @@
-import { Observable } from './observable';
+import { Observation } from './observation';
 import { tick } from './tick';
 
-describe('Unit: lib/observable', function () {
-  describe('Observable', function () {
+describe('Unit: lib/observation', function () {
+  describe('Observation', function () {
     class TestEvent {
       constructor(public type: string, public namespace: string[] = []) {
       }
@@ -12,7 +12,7 @@ describe('Unit: lib/observable', function () {
     }
 
     it('refs', function (done) {
-      const ob = new Observable<string[], void, void>();
+      const ob = new Observation<string[], void, void>();
       function id<T>(a: T): T {
         return a;
       }
@@ -75,7 +75,7 @@ describe('Unit: lib/observable', function () {
     });
 
     it('count', function (done) {
-      const ob = new Observable<string[], void, void>();
+      const ob = new Observation<string[], void, void>();
       function id<T>(a: T): T {
         return a;
       }
@@ -132,26 +132,26 @@ describe('Unit: lib/observable', function () {
     });
 
     it('emit', function (done) {
-      const ob = new Observable<string[], TestEvent, void>();
+      const ob = new Observation<string[], TestEvent, void>();
       ob.on([''], () => done());
       ob.emit([''], new TestEvent('TEST'));
     });
 
     it('emit namespace', function (done) {
-      const ob = new Observable<[string, number], TestEvent, void>();
+      const ob = new Observation<[string, number], TestEvent, void>();
       ob.on(['', 1], () => done());
       ob.emit(['', 1], new TestEvent('TEST'));
     });
 
     it('emit recursive', function (done) {
       let cnt = 0;
-      const ob = new Observable<string[], number, void>();
+      const ob = new Observation<string[], number, void>();
       ob.once([''], () => ob.emit([''], 1, data => assert(cnt === 0 && data === 1 && ++cnt)));
       ob.emit([''], 0, data => assert(cnt === 1 && data === 0 && ++cnt) || done());
     });
 
     it('reflect', function (done) {
-      const ob = new Observable<string[], void, void>();
+      const ob = new Observation<string[], void, void>();
       ob.on([''], _ => 1);
       ob.on([''], _ => 2);
       assert.deepStrictEqual(ob.reflect([''], void 0), [1, 2]);
@@ -160,7 +160,7 @@ describe('Unit: lib/observable', function () {
 
     it('monitor', function (done) {
       let cnt = 0;
-      const ob = new Observable<string[], number, void>();
+      const ob = new Observation<string[], number, void>();
       ob.monitor([''], data => assert(cnt === 0 && data === 0 && ++cnt));
       ob.monitor([''], data => assert(cnt === 1 && data === 0 && ++cnt));
       ob.emit([''], 0, data => assert(cnt === 2 && data === 0 && ++cnt) || done());
@@ -168,7 +168,7 @@ describe('Unit: lib/observable', function () {
 
     it('on', function (done) {
       let cnt = 0;
-      const ob = new Observable<string[], number, void>();
+      const ob = new Observation<string[], number, void>();
       ob.on([''], data => assert(cnt === 0 && data === 0 && ++cnt));
       ob.on([''], data => assert(cnt === 1 && data === 0 && ++cnt));
       ob.emit([''], 0, data => assert(cnt === 2 && data === 0 && ++cnt) || done());
@@ -176,7 +176,7 @@ describe('Unit: lib/observable', function () {
 
     it('off', function (done) {
       let cnt = 0;
-      const ob = new Observable<string[], number, void>();
+      const ob = new Observation<string[], number, void>();
       ob.monitor([''], data => assert(cnt === 2 && data === 0 && ++cnt));
       ob.on([''], data => assert(cnt === 0 && data === 0 && ++cnt));
       ob.on([''], throwError);
@@ -188,7 +188,7 @@ describe('Unit: lib/observable', function () {
 
     it('off type', function (done) {
       let cnt = 0;
-      const ob = new Observable<string[], number, void>();
+      const ob = new Observation<string[], number, void>();
       ob.on([''], throwError);
       ob.monitor([''], data => assert(cnt === 1 && data === 0 && ++cnt) || done());
       ob.on([''], throwError);
@@ -200,7 +200,7 @@ describe('Unit: lib/observable', function () {
 
     it('once', function (done) {
       let cnt = 0;
-      const ob = new Observable<string[], number, void>();
+      const ob = new Observation<string[], number, void>();
       ob.once([''], data => assert(cnt === 0 && data === 1 && ++cnt));
       ob.emit([''], 1, data => assert(cnt === 1 && data === 1 && ++cnt));
       ob.once([''], data => assert(cnt === 2 && data === 2 && ++cnt));
@@ -212,7 +212,7 @@ describe('Unit: lib/observable', function () {
 
     it('recovery', function (done) {
       let cnt = 0;
-      const ob = new Observable<string[], void, void>();
+      const ob = new Observation<string[], void, void>();
       ob.on([''], throwError);
       ob.on([''], throwError);
       ob.on([''], throwError);
@@ -225,7 +225,7 @@ describe('Unit: lib/observable', function () {
 
     it('on namespace', function (done) {
       let cnt = 0;
-      const ob = new Observable<string[], number, void>();
+      const ob = new Observation<string[], number, void>();
       ob.on([''], throwError);
       ob.on(['', '0'], data => assert(cnt === 0 && data === 0 && ++cnt));
       ob.on(['', '0', '0'], data => assert(cnt === 1 && data === 0 && ++cnt));
@@ -235,7 +235,7 @@ describe('Unit: lib/observable', function () {
 
     it('off namespace', function (done) {
       let cnt = 0;
-      const ob = new Observable<string[], number, void>();
+      const ob = new Observation<string[], number, void>();
       ob.monitor([''], data => assert(cnt === 4 && data === 0 && ++cnt) || tick(done));
       ob.on([''], throwError);
       ob.monitor(['', '0'], data => assert(cnt === 3 && data === 0 && ++cnt));
@@ -251,7 +251,7 @@ describe('Unit: lib/observable', function () {
     it('mixed type key', function (done) {
       let cnt = 0;
       const sym = Symbol();
-      const ob = new Observable<[number, symbol], number, void>();
+      const ob = new Observation<[number, symbol], number, void>();
       ob.on([NaN, sym], data => assert(cnt === 0 && data === 1 && ++cnt));
       ob.emit([NaN, <any>Symbol().toString()], 0);
       ob.emit([<any>'NaN', sym], 0);
@@ -263,8 +263,8 @@ describe('Unit: lib/observable', function () {
     });
 
     it('relay', function (done) {
-      const ob = new Observable<string[], number, void>();
-      const source = new Observable<string[], number, void>();
+      const ob = new Observation<string[], number, void>();
+      const source = new Observation<string[], number, void>();
       ob.relay(source);
       ob.once(['a'], (data, type) => {
         assert(data === 0);

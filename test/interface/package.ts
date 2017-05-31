@@ -1,6 +1,6 @@
 import {
   Supervisor,
-  Observable,
+  Observation,
   Sequence,
   Cancellation,
   Maybe, Just, Nothing,
@@ -30,9 +30,9 @@ describe('Interface: Package', function () {
 
   });
 
-  describe('Observable', function () {
-    it('Observable', function () {
-      assert(typeof Observable === 'function');
+  describe('Observation', function () {
+    it('Observation', function () {
+      assert(typeof Observation === 'function');
     });
 
   });

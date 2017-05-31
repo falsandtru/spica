@@ -20,7 +20,7 @@ type Register<T extends ReadonlyArray<any>, D, R> = [
   Monitor<T, D>
 ];
 
-export class Observable<T extends ReadonlyArray<any>, D, R>
+export class Observation<T extends ReadonlyArray<any>, D, R>
   implements Observer<T, D, R>, Publisher<T, D, R> {
   public monitor(namespace: T, subscriber: Subscriber<T, D, any>, identifier: Subscriber<T, D, R> = subscriber): () => void {
     void this.throwTypeErrorIfInvalidSubscriber_(subscriber, namespace);
@@ -79,12 +79,12 @@ export class Observable<T extends ReadonlyArray<any>, D, R>
         subscriber);
   }
   public emit(namespace: T, data: D, tracker?: (data: D, results: R[]) => void): void
-  public emit(this: Observable<T, void, R>, type: T, data?: D, tracker?: (data: D, results: R[]) => void): void
+  public emit(this: Observation<T, void, R>, type: T, data?: D, tracker?: (data: D, results: R[]) => void): void
   public emit(namespace: T, data: D, tracker?: (data: D, results: R[]) => void): void {
     void this.drain_(namespace, data, tracker);
   }
   public reflect(namespace: T, data: D): R[]
-  public reflect(this: Observable<T, void, R>, type: T, data?: D): R[]
+  public reflect(this: Observation<T, void, R>, type: T, data?: D): R[]
   public reflect(namespace: T, data: D): R[] {
     let results: R[] = [];
     void this.emit(namespace, <D>data, (_, r) => results = r);
@@ -188,7 +188,7 @@ export class Observable<T extends ReadonlyArray<any>, D, R>
       case 'function':
         return;
       default:
-        throw new TypeError(`Spica: Observable: Invalid subscriber.\n\t${types} ${subscriber}`);
+        throw new TypeError(`Spica: Observation: Invalid subscriber.\n\t${types} ${subscriber}`);
     }
   }
 }
