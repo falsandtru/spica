@@ -1,4 +1,10 @@
-export function stringify(target: any): string {
+export function causeAsyncException(reason: any): void {
+  assert(!console.debug(stringify(reason)));
+  void new Promise((_, reject) =>
+    void reject(reason));
+}
+
+function stringify(target: any): string {
   try {
     return target instanceof Error && typeof target.stack === 'string'
       ? target.stack

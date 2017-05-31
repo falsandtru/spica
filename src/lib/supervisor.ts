@@ -3,7 +3,7 @@ import { Observable } from './observable';
 import { tick } from './tick';
 import { isThenable } from './thenable';
 import { sqid } from './sqid';
-import { stringify } from './stringify';
+import { causeAsyncException } from './exception';
 import { noop } from './noop';
 
 export abstract class Supervisor<N extends string, P, R, S> implements ISupervisor<N, P, R, S> {
@@ -106,8 +106,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
         void callback(<any>void 0, new Error(`Spica: Supervisor: A message overflowed.`));
       }
       catch (reason) {
-        assert(!console.debug(stringify(reason)));
-        void console.error(reason);
+        void causeAsyncException(reason);
       }
     }
     void this.messages.push([
@@ -198,8 +197,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
           void callback(<any>void 0, new Error(`Spica: Supervisor: A processing has failed.`));
         }
         catch (reason) {
-          assert(!console.debug(stringify(reason)));
-          void console.error(reason);
+          void causeAsyncException(reason);
         }
         continue;
       }
@@ -209,8 +207,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
           void callback(reply);
         }
         catch (reason) {
-          assert(!console.debug(stringify(reason)));
-          void console.error(reason);
+          void causeAsyncException(reason);
         }
       }
       else {
@@ -221,10 +218,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
                 ? void callback(reply)
                 : void callback(<any>void 0, new Error(`Spica: Supervisor: A processing has failed.`)),
             () =>
-              void callback(<any>void 0, new Error(`Spica: Supervisor: A processing has failed.`)))
-          .catch(
-            reason =>
-              void console.error(reason));
+              void callback(<any>void 0, new Error(`Spica: Supervisor: A processing has failed.`)));
       }
     }
     if (!this.available) {

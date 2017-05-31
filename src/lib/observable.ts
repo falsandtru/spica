@@ -1,6 +1,6 @@
 import { Observer, Publisher, Monitor, Subscriber } from '../../index.d';
 import { concat } from './concat';
-import { stringify } from './stringify';
+import { causeAsyncException } from './exception';
 
 interface SubscriberMapNode<T extends ReadonlyArray<any>, D, R> {
   parent: SubscriberMapNode<T, D, R> | undefined;
@@ -109,8 +109,7 @@ export class Observable<T extends ReadonlyArray<any>, D, R>
         }
         catch (reason) {
           if (reason !== void 0 && reason !== null) {
-            assert(!console.debug(stringify(reason)));
-            void console.error(reason);
+            void causeAsyncException(reason);
           }
         }
       }, void 0);
@@ -123,8 +122,7 @@ export class Observable<T extends ReadonlyArray<any>, D, R>
         }
         catch (reason) {
           if (reason !== void 0 && reason !== null) {
-            assert(!console.debug(stringify(reason)));
-            void console.error(reason);
+            void causeAsyncException(reason);
           }
         }
       }, void 0);
@@ -133,8 +131,7 @@ export class Observable<T extends ReadonlyArray<any>, D, R>
         void tracker(data, results);
       }
       catch (reason) {
-        assert(!console.debug(stringify(reason)));
-        void console.error(reason);
+        void causeAsyncException(reason);
       }
     }
   }

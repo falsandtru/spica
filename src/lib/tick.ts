@@ -1,4 +1,4 @@
-import { stringify } from './stringify';
+import { causeAsyncException } from './exception';
 
 type Callback = () => void;
 
@@ -35,9 +35,8 @@ function run(): void {
         void cbs.shift()!();
       }
     }
-    catch (e) {
-      assert(!console.debug(stringify(e)));
-      void console.error(e);
+    catch (reason) {
+      void causeAsyncException(reason);
       continue;
     }
     break;
