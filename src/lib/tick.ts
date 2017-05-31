@@ -1,31 +1,38 @@
 import { stringify } from './stringify';
 
-export { enqueue as tick };
+type Callback = () => void;
 
-const queue: [() => void, boolean][] = [];
-let fs = new WeakSet<() => void>();
+let queue: Callback[] = [];
+let register = new WeakSet<Callback>();
 
-let scheduled = false;
+function flush(): Callback[] {
+  const cbs = queue;
+  queue = [];
+  register = new WeakSet();
+  return cbs;
+}
 
-function enqueue(fn: () => void, dedup = false): void {
-  assert(typeof fn === 'function');
-  void queue.push([fn, dedup]);
+export function tick(cb: Callback, dedup = false): void {
+  if (dedup) {
+    if (register.has(cb)) return;
+    void register.add(cb);
+  }
+  void queue.push(cb);
   void schedule();
 }
-function dequeue(): void {
-  scheduled = false;
-  let rem = queue.length;
+
+function schedule(): void {
+  if (queue.length !== 1) return;
+  void Promise.resolve()
+    .then(run);
+}
+
+function run(): void {
+  const cbs = flush();
   while (true) {
     try {
-      while (rem > 0) {
-        void --rem;
-        const [fn, dedup] = queue.shift()!;
-        if (dedup) {
-          if (fs.has(fn)) continue;
-          void fs.add(fn);
-        }
-        assert(fn);
-        void fn();
+      while (cbs.length > 0) {
+        void cbs.shift()!();
       }
     }
     catch (e) {
@@ -33,14 +40,6 @@ function dequeue(): void {
       void console.error(e);
       continue;
     }
-    fs = new WeakSet();
     break;
   }
-}
-
-function schedule(): void {
-  if (scheduled) return;
-  if (queue.length === 0) return;
-  void Promise.resolve().then(dequeue);
-  scheduled = true;
 }
