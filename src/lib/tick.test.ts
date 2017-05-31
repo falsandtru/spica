@@ -2,33 +2,30 @@ import { tick } from './tick';
 
 describe('Unit: lib/tick', function () {
   describe('tick', function () {
-    it('return', function (done) {
-      assert(tick(done) === void 0);
-    });
-
-    it('sequence', function (done) {
-      let cnt = 0;
-      tick(() => ++cnt);
-      tick(() => assert(cnt === 1) || done());
-    });
-
     it('async', function (done) {
       let async = false;
-      tick(() => assert(async === true));
-      tick(done);
+      tick(() => assert(async === true) || done());
       async = true;
     });
 
-    it('grouping', function (done) {
-      let interrupt = true;
-      tick(() => void 0);
-      setTimeout(() => interrupt = false, 0);
-      tick(() => assert(interrupt === true));
-      tick(done);
+    it('serial', function (done) {
+      let cnt = 0;
+      let interrupt = false;
+      tick(() => ++cnt);
+      Promise.resolve().then(() => interrupt = true);
+      tick(() => assert(cnt === 1 && interrupt === false) || done());
     });
 
     it('recursion', function (done) {
       tick(() => tick(done));
+    });
+
+    it('separation', function (done) {
+      let cnt = 0;
+      tick(() => {
+        Promise.resolve().then(() => ++cnt);
+        tick(() => assert(cnt === 1) || done());
+      });
     });
 
     it('dedup', function (done) {
@@ -37,13 +34,18 @@ describe('Unit: lib/tick', function () {
         ++cnt;
       }
       tick(f, true);
+      tick(() => {
+        assert(cnt === 1);
+        tick(f);
+        tick(f, true);
+      });
       tick(f, true);
       tick(() => {
         assert(cnt === 1);
         tick(f);
-        tick(f);
+        tick(f, true);
         tick(() => {
-          assert(cnt === 3);
+          assert(cnt === 4);
           done();
         });
       });
