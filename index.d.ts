@@ -8,7 +8,7 @@
 export abstract class Supervisor<N extends string, P, R, S> {
   static readonly count: number;
   static readonly procs: number;
-  constructor(settings?: Supervisor.Settings<N>)
+  constructor(settings?: Supervisor.Settings<N>);
   readonly id: string;
   readonly name: string;
   readonly events: {
