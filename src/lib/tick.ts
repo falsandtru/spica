@@ -39,6 +39,6 @@ function run(): void {
       void causeAsyncException(reason);
       continue;
     }
-    break;
+    return;
   }
 }
