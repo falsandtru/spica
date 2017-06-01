@@ -151,6 +151,7 @@ gulp.task('install', function () {
 });
 
 gulp.task('update', function () {
+  shell('rm package-lock.json');
   shell('ncu -ua');
   shell('npm i');
 });
