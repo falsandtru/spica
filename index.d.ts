@@ -80,16 +80,16 @@ type Subscriber<T extends ReadonlyArray<any>, D, R> = (data: D, type: T) => R;
 export class Cancellation<L = void> {
 }
 export interface Cancellation<L = void>
-  extends Cancellator<L>, Cancellatee<L> {
+  extends Canceller<L>, Cancellee<L> {
 }
-export interface Cancellator<L = void> {
+export interface Canceller<L = void> {
   readonly cancel: {
     (reason: L): void;
     (this: Cancellation<void>): void;
   };
   readonly close: () => void;
 }
-export interface Cancellatee<L = void> {
+export interface Cancellee<L = void> {
   readonly register: (listener: (reason: L) => void) => () => void;
   readonly canceled: boolean;
   readonly promise: <T>(val: T) => Promise<T>;
