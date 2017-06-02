@@ -1,7 +1,14 @@
+import { Canceller, Cancellee } from '../../index.d';
 import { Maybe, Just, Nothing } from './monad/maybe';
 import { Either, Left, Right } from './monad/either';
 
-export class Cancellation<L = void> {
+export class Cancellation<L = void>
+  implements Canceller<L>, Cancellee<L> {
+  constructor(cancelees: Iterable<Cancellee<L>> = []) {
+    void Array.from(cancelees)
+      .forEach(cancellee =>
+        void cancellee.register(this.cancel));
+  }
   private done = false;
   private reason: L;
   private readonly listeners: Set<(reason: L) => void> = new Set();

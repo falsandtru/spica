@@ -30,6 +30,22 @@ describe('Unit: lib/cancellation', () => {
       done();
     });
 
+    it('link', done => {
+      let cnt = 0;
+      const a = new Cancellation();
+      const b = new Cancellation([a]);
+      const c = new Cancellation([b]);
+      a.register(() => done(false));
+      b.register(() => assert(cnt === 1 && ++cnt));
+      c.register(() => assert(cnt === 0 && ++cnt));
+      b.cancel();
+      assert(a.canceled === false);
+      assert(b.canceled === true);
+      assert(c.canceled === true);
+      assert(cnt === 2);
+      done();
+    });
+
     it('promise', done => {
       const cancellation = new Cancellation<number>();
       Promise.resolve(0)

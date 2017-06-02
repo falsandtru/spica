@@ -78,6 +78,7 @@ type Monitor<T extends ReadonlyArray<any>, D> = (data: D, type: T) => any;
 type Subscriber<T extends ReadonlyArray<any>, D, R> = (data: D, type: T) => R;
 
 export class Cancellation<L = void> {
+  constructor(cancelees?: Iterable<Cancellee<L>>);
 }
 export interface Cancellation<L = void>
   extends Canceller<L>, Cancellee<L> {
