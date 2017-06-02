@@ -1,10 +1,11 @@
+import { Either as IEither } from '../../../index.d';
 import { Monad } from './monad';
 
+export interface Either<a, b> extends IEither<a, b> {
+}
 export class Either<a, b> extends Monad<b> {
-  private readonly EITHER: Left<a> | Right<b>;
   constructor(thunk: () => Either<a, b>) {
     super(thunk);
-    void this.EITHER;
   }
   public fmap<c>(f: (b: b) => c): Either<a, c> {
     return this.bind(b => new Right(f(b)));
