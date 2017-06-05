@@ -1,4 +1,5 @@
 import { Canceller, Cancellee } from '../../index.d';
+import { causeAsyncException } from './exception';
 import { Maybe, Just, Nothing } from './monad/maybe';
 import { Either, Left, Right } from './monad/either';
 
@@ -13,7 +14,7 @@ export class Cancellation<L = void>
   private reason: L;
   private readonly listeners: Set<(reason: L) => void> = new Set();
   public readonly register = (listener: (reason: L) => void) => {
-    if (this.canceled) return void listener(this.reason), () => void 0;
+    if (this.canceled) return void handler(this.reason), () => void 0;
     if (this.done) return () => void 0;
     void this.listeners.add(handler);
     return () =>
@@ -22,7 +23,12 @@ export class Cancellation<L = void>
         : void this.listeners.delete(handler);
 
     function handler(reason: L): void {
-      void listener(reason);
+      try {
+        void listener(reason);
+      }
+      catch (reason) {
+        void causeAsyncException(reason);
+      }
     }
   };
   public readonly cancel = (reason?: L) => {
