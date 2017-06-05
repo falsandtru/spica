@@ -11,10 +11,9 @@ describe('Unit: lib/cancellation', () => {
       cancellation.cancel(0);
       cancellation.cancel(NaN);
       cancellation.register(n => (
-        assert(++cnt === 3),
+        assert(++cnt === 2),
         assert(n === 0),
         done()));
-      assert(++cnt === 2);
       cancellation.cancel(NaN);
     });
 
