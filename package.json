@@ -63,7 +63,7 @@
     "lodash": "^4.17.4",
     "mocha": "^3.4.2",
     "npm-check-updates": "^2.11.3",
-    "power-assert": "^1.4.2",
+    "power-assert": "^1.4.3",
     "pump": "^1.0.2",
     "run-sequence": "^1.2.2",
     "tsify": "^3.0.1",
