@@ -466,7 +466,8 @@ export class Cache<K, V = void> {
   );
   put(key: K, value: V): boolean;
   put(this: Cache<K, void>, key: K): boolean;
-  set(key: K, value: V): this;
+  set(key: K, value: V): V;
+  set(this: Cache<K, void>, key: K): V;
   get(key: K): V | undefined;
   has(key: K): boolean;
   delete(key: K): boolean;

@@ -48,9 +48,11 @@ export class Cache<K, V = void> {
     }
     return false;
   }
-  public set(key: K, value: V): this {
+  public set(key: K, value: V): V;
+  public set(this: Cache<K, void>, key: K, value?: V): V;
+  public set(key: K, value: V): V {
     void this.put(key, value);
-    return this;
+    return value;
   }
   public get(key: K): V | undefined {
     void this.access(key);
