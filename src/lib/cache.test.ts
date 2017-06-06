@@ -3,7 +3,7 @@ import { Sequence } from './monad/sequence';
 
 describe('Unit: lib/cache', () => {
   describe('Cache', () => {
-    it('add/has/delete', () => {
+    it('put/has/delete', () => {
       const cache = new Cache<number, number>(1);
 
       assert.deepStrictEqual(Array.from(cache), [
@@ -47,6 +47,10 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(cache.inspect(), [
         [], []
       ]);
+    });
+
+    it('set', () => {
+      assert(new Cache<number, number>(1).set(0, 1).get(0) === 1);
     });
 
     it('LRU', () => {
