@@ -1,6 +1,6 @@
 export { Supervisor } from './lib/supervisor';
-export { Observation, Observation as Observable } from './lib/observation';
-export { Cancellation, Cancellation as Cancelable } from './lib/cancellation';
+export { Observation } from './lib/observation';
+export { Cancellation } from './lib/cancellation';
 export { Sequence } from './lib/monad/sequence';
 export { Maybe, Just, Nothing } from './lib/monad/maybe';
 export { Either, Left, Right } from './lib/monad/either';
@@ -12,7 +12,7 @@ export { DataMap } from './lib/collection/datamap';
 export { AttrMap } from './lib/collection/attrmap';
 export { Cache } from './lib/cache';
 export { Mixin } from './lib/mixin';
-export { tick, tick as Tick } from './lib/tick';
+export { tick } from './lib/tick';
 export { v4 as uuid } from './lib/uuid';
 export { sqid } from './lib/sqid';
 export { assign, clone, extend } from './lib/assign';
