@@ -17,8 +17,8 @@ $ npm i spica
 [index.d.ts](index.d.ts)
 
 - Supervisor
-- Observable
-- Cancelable
+- Observation
+- Cancellation
 - Sequence
 - Maybe, Just, Nothing
 - Either, Left, Right
@@ -30,7 +30,7 @@ $ npm i spica
 - AttrMap
 - Cache
 - Mixin
-- Tick
+- tick
 - uuid
 - sqid
 - assign
