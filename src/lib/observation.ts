@@ -2,21 +2,21 @@ import { Observer, ObserverOptions, Publisher, Monitor, Subscriber } from '../..
 import { concat } from './concat';
 import { causeAsyncException } from './exception';
 
-interface RegisterNode<T extends ReadonlyArray<any>, D, R> {
-  parent: RegisterNode<T, D, R> | undefined;
-  children: Map<keyof T, RegisterNode<T, D, R>>;
-  childrenNames: (keyof T)[];
-  items: RegisterItem<T, D, R>[];
+interface RegisterNode<N extends ReadonlyArray<any>, D, R> {
+  parent: RegisterNode<N, D, R> | undefined;
+  children: Map<keyof N, RegisterNode<N, D, R>>;
+  childrenNames: (keyof N)[];
+  items: RegisterItem<N, D, R>[];
 }
-export type RegisterItem<T extends ReadonlyArray<any>, D, R> = {
+export type RegisterItem<N extends ReadonlyArray<any>, D, R> = {
   type: RegisterItemType.Monitor;
-  namespace: T;
-  listener: Monitor<T, D>;
+  namespace: N;
+  listener: Monitor<N, D>;
   options: ObserverOptions;
  } | {
   type: RegisterItemType.Subscriber;
-  namespace: T;
-  listener: Subscriber<T, D, R>;
+  namespace: N;
+  listener: Subscriber<N, D, R>;
   options: ObserverOptions;
 };
 export type RegisterItemType = RegisterItemType.Monitor | RegisterItemType.Subscriber;
@@ -27,9 +27,9 @@ export namespace RegisterItemType {
   export const subscriber = 'subscriber';
 }
 
-export class Observation<T extends ReadonlyArray<any>, D, R>
-  implements Observer<T, D, R>, Publisher<T, D, R> {
-  public monitor(namespace: T, listener: Monitor<T, D>, { once = false }: ObserverOptions = {}): () => void {
+export class Observation<N extends ReadonlyArray<any>, D, R>
+  implements Observer<N, D, R>, Publisher<N, D, R> {
+  public monitor(namespace: N, listener: Monitor<N, D>, { once = false }: ObserverOptions = {}): () => void {
     void throwTypeErrorIfInvalidListener(listener, namespace);
     const { items } = this.seekNode_(namespace);
     if (isRegistered(items, RegisterItemType.monitor, namespace, listener)) return () => void 0;
@@ -43,7 +43,7 @@ export class Observation<T extends ReadonlyArray<any>, D, R>
     });
     return () => this.off(namespace, listener, RegisterItemType.monitor);
   }
-  public on(namespace: T, listener: Subscriber<T, D, R>, { once = false }: ObserverOptions = {}): () => void {
+  public on(namespace: N, listener: Subscriber<N, D, R>, { once = false }: ObserverOptions = {}): () => void {
     void throwTypeErrorIfInvalidListener(listener, namespace);
     const { items } = this.seekNode_(namespace);
     if (isRegistered(items, RegisterItemType.subscriber, namespace, listener)) return () => void 0;
@@ -57,11 +57,11 @@ export class Observation<T extends ReadonlyArray<any>, D, R>
     });
     return () => this.off(namespace, listener);
   }
-  public once(namespace: T, listener: Subscriber<T, D, R>): () => void {
+  public once(namespace: N, listener: Subscriber<N, D, R>): () => void {
     void throwTypeErrorIfInvalidListener(listener, namespace);
     return this.on(namespace, listener, { once: true });
   }
-  public off(namespace: T, listener?: Monitor<T, D> | Subscriber<T, D, R>, type: RegisterItemType = RegisterItemType.subscriber): void {
+  public off(namespace: N, listener?: Monitor<N, D> | Subscriber<N, D, R>, type: RegisterItemType = RegisterItemType.subscriber): void {
     switch (typeof listener) {
       case 'function':
         return void this.seekNode_(namespace).items
@@ -81,7 +81,7 @@ export class Observation<T extends ReadonlyArray<any>, D, R>
         const node = this.seekNode_(namespace);
         void node.childrenNames.slice()
           .forEach(name => {
-            void this.off(<T><any>namespace.concat([name]));
+            void this.off(<N><any>namespace.concat([name]));
             const child = node.children.get(name);
             if (!child) return;
             if (child.items.length + child.childrenNames.length > 0) return;
@@ -97,28 +97,28 @@ export class Observation<T extends ReadonlyArray<any>, D, R>
         throw throwTypeErrorIfInvalidListener(listener, namespace);
     }
   }
-  public emit(namespace: T, data: D, tracker?: (data: D, results: R[]) => void): void
-  public emit(this: Observation<T, void, R>, type: T, data?: D, tracker?: (data: D, results: R[]) => void): void
-  public emit(namespace: T, data: D, tracker?: (data: D, results: R[]) => void): void {
+  public emit(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void
+  public emit(this: Observation<N, void, R>, type: N, data?: D, tracker?: (data: D, results: R[]) => void): void
+  public emit(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void {
     void this.drain_(namespace, data, tracker);
   }
-  public reflect(namespace: T, data: D): R[]
-  public reflect(this: Observation<T, void, R>, type: T, data?: D): R[]
-  public reflect(namespace: T, data: D): R[] {
+  public reflect(namespace: N, data: D): R[]
+  public reflect(this: Observation<N, void, R>, type: N, data?: D): R[]
+  public reflect(namespace: N, data: D): R[] {
     let results: R[] = [];
     void this.emit(namespace, <D>data, (_, r) => results = r);
     assert(Array.isArray(results));
     return results;
   }
-  private relaySources = new WeakSet<Observer<T, D, any>>();
-  public relay(source: Observer<T, D, any>): () => void {
+  private relaySources = new WeakSet<Observer<N, D, any>>();
+  public relay(source: Observer<N, D, any>): () => void {
     if (this.relaySources.has(source)) return () => void 0;
     void this.relaySources.add(source);
-    return source.monitor(<T><any>[], (data, namespace) => (
+    return source.monitor(<N><any>[], (data, namespace) => (
       void this.relaySources.delete(source),
       void this.emit(namespace, data)));
   }
-  private drain_(namespace: T, data: D, tracker?: (data: D, results: R[]) => void): void {
+  private drain_(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void {
     const results: R[] = [];
     void this.refsBelow_(this.seekNode_(namespace))
       .reduce<void>((_, { type, listener, options: { once } }) => {
@@ -162,10 +162,10 @@ export class Observation<T extends ReadonlyArray<any>, D, R>
       }
     }
   }
-  public refs(namespace: never[] | T): RegisterItem<T, D, R>[] {
+  public refs(namespace: never[] | N): RegisterItem<N, D, R>[] {
     return this.refsBelow_(this.seekNode_(namespace));
   }
-  private refsAbove_({parent, items}: RegisterNode<T, D, R>): RegisterItem<T, D, R>[] {
+  private refsAbove_({parent, items}: RegisterNode<N, D, R>): RegisterItem<N, D, R>[] {
     items = concat([], items);
     while (parent) {
       items = concat(items, parent.items);
@@ -173,7 +173,7 @@ export class Observation<T extends ReadonlyArray<any>, D, R>
     }
     return items;
   }
-  private refsBelow_({childrenNames, children, items}: RegisterNode<T, D, R>): RegisterItem<T, D, R>[] {
+  private refsBelow_({childrenNames, children, items}: RegisterNode<N, D, R>): RegisterItem<N, D, R>[] {
     items = concat([], items);
     for (let i = 0; i < childrenNames.length; ++i) {
       const name = childrenNames[i];
@@ -187,32 +187,32 @@ export class Observation<T extends ReadonlyArray<any>, D, R>
     }
     return items;
   }
-  private node_: RegisterNode<T, D, R> = {
+  private node_: RegisterNode<N, D, R> = {
     parent: void 0,
     children: new Map(),
     childrenNames: [],
     items: []
   };
-  private seekNode_(types: never[] | T): RegisterNode<T, D, R> {
+  private seekNode_(namespace: never[] | N): RegisterNode<N, D, R> {
     let node = this.node_;
-    for (const type of types) {
+    for (const name of namespace) {
       const {children} = node;
-      if (!children.has(type)) {
-        void node.childrenNames.push(type);
-        children.set(type, {
+      if (!children.has(name)) {
+        void node.childrenNames.push(name);
+        children.set(name, {
           parent: node,
           children: new Map(),
           childrenNames: [],
-          items: <RegisterItem<T, D, R>[]>[]
+          items: <RegisterItem<N, D, R>[]>[]
         });
       }
-      node = children.get(type)!;
+      node = children.get(name)!;
     }
     return node;
   }
 }
 
-function isRegistered<T extends ReadonlyArray<any>, D, R>(items: RegisterItem<T, D, R>[], type: RegisterItemType, namespace: T, listener: Monitor<T, D> | Subscriber<T, D, R>): boolean {
+function isRegistered<N extends ReadonlyArray<any>, D, R>(items: RegisterItem<N, D, R>[], type: RegisterItemType, namespace: N, listener: Monitor<N, D> | Subscriber<N, D, R>): boolean {
   return items.some(({ type: t, namespace: n, listener: l }) =>
     t === type &&
     n.length === namespace.length &&
