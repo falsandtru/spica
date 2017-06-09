@@ -183,7 +183,9 @@ export class Observation<N extends ReadonlyArray<any>, D, R>
       items = concat(items, below);
       if (below.length === 0) {
         void children.delete(name);
-        void childrenNames.splice(childrenNames.findIndex(value => value === name || (name !== name && value !== value)), 1);
+        void childrenNames.splice(
+          childrenNames.findIndex(value => value === name || Number.isNaN(value) && Number.isNaN(name)),
+          1);
         void --i;
       }
     }
@@ -205,7 +207,7 @@ export class Observation<N extends ReadonlyArray<any>, D, R>
           parent: node,
           children: new Map(),
           childrenNames: [],
-          items: <RegisterItem<N, D, R>[]>[]
+          items: []
         });
       }
       node = children.get(name)!;

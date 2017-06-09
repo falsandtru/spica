@@ -4,6 +4,9 @@ import _assert from 'power-assert';
 declare global {
   const assert: typeof _assert;
 
+  interface NumberConstructor {
+    isNaN(target: any): boolean;
+  }
   function setTimeout(cb: () => void, timeout?: number): number;
   var console: Console;
   interface Console {
