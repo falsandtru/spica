@@ -114,9 +114,11 @@ export class Observation<N extends ReadonlyArray<any>, D, R>
   public relay(source: Observer<N, D, any>): () => void {
     if (this.relaySources.has(source)) return () => void 0;
     void this.relaySources.add(source);
-    return source.monitor(<N><any>[], (data, namespace) => (
+    const unbind = source.monitor(<N><any>[], (data, namespace) =>
+      void this.emit(namespace, data));
+    return () => (
       void this.relaySources.delete(source),
-      void this.emit(namespace, data)));
+      unbind());
   }
   private drain_(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void {
     const results: R[] = [];
