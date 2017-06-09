@@ -1,4 +1,4 @@
-import { Observation } from './observation';
+import { Observation, RegisterItem, RegisterItemType } from './observation';
 import { tick } from './tick';
 
 describe('Unit: lib/observation', function () {
@@ -21,18 +21,18 @@ describe('Unit: lib/observation', function () {
 
       ob.on([], id);
       const m1 = ob.monitor([], id);
-      assert.deepStrictEqual(ob.refs([]).map(reg => reg.slice(0, 3)), [
-        [[], id, false],
-        [[], id, true],
+      assert.deepStrictEqual(ob.refs([]).map(convert), [
+        [[], id, RegisterItemType.subscriber],
+        [[], id, RegisterItemType.monitor],
       ]);
 
       ob.once([''], id);
       const m2 = ob.monitor([''], id);
-      assert.deepStrictEqual(ob.refs([]).map(reg => reg.slice(0, 3)), [
-        [[], id, false],
-        [[], id, true],
-        [[''], id, false],
-        [[''], id, true],
+      assert.deepStrictEqual(ob.refs([]).map(convert), [
+        [[], id, RegisterItemType.subscriber],
+        [[], id, RegisterItemType.monitor],
+        [[''], id, RegisterItemType.subscriber],
+        [[''], id, RegisterItemType.monitor],
       ]);
 
       ob.on(['0'], id);
@@ -41,23 +41,21 @@ describe('Unit: lib/observation', function () {
       ob.on(['z'], id);
       ob.on([''], id);
       ob.on([], id);
-      assert.deepStrictEqual(ob.refs([]).map(reg => reg.slice(0, 3)), [
-        [[], id, false],
-        [[], id, true],
-        [[], id, false],
-        [[''], id, false],
-        [[''], id, true],
-        [[''], id, false],
-        [['0'], id, false],
-        [['a'], id, false],
-        [['1'], id, false],
-        [['z'], id, false],
+      assert.deepStrictEqual(ob.refs([]).map(convert), [
+        [[], id, RegisterItemType.subscriber],
+        [[], id, RegisterItemType.monitor],
+        [[''], id, RegisterItemType.subscriber],
+        [[''], id, RegisterItemType.monitor],
+        [['0'], id, RegisterItemType.subscriber],
+        [['a'], id, RegisterItemType.subscriber],
+        [['1'], id, RegisterItemType.subscriber],
+        [['z'], id, RegisterItemType.subscriber],
       ]);
 
       ob.off([]);
-      assert.deepStrictEqual(ob.refs([]).map(reg => reg.slice(0, 3)), [
-        [[], id, true],
-        [[''], id, true],
+      assert.deepStrictEqual(ob.refs([]).map(convert), [
+        [[], id, RegisterItemType.monitor],
+        [[''], id, RegisterItemType.monitor],
       ]);
 
       m1();
@@ -65,13 +63,21 @@ describe('Unit: lib/observation', function () {
       assert.deepStrictEqual(ob.refs([]), []);
 
       ob.on([''], id);
-      assert.deepStrictEqual(ob.refs([]).map(reg => reg.slice(0, 3)), [
-        [[''], id, false],
+      assert.deepStrictEqual(ob.refs([]).map(convert), [
+        [[''], id, RegisterItemType.subscriber],
       ]);
       ob.off([''], id);
       assert.deepStrictEqual(ob.refs([]), []);
 
       done();
+
+      function convert(register: RegisterItem<any, any, any>) {
+        return [
+          register.namespace,
+          register.listener,
+          register.type,
+        ];
+      }
     });
 
     it('count', function (done) {
@@ -166,12 +172,46 @@ describe('Unit: lib/observation', function () {
       ob.emit([''], 0, data => assert(cnt === 2 && data === 0 && ++cnt) || done());
     });
 
+    it('monitor once', function (done) {
+      let cnt = 0;
+      const ob = new Observation<string[], number, void>();
+      ob.monitor([''], data => assert(cnt === 0 && data === 1 && ++cnt), { once: true });
+      ob.emit([''], 1, data => assert(cnt === 1 && data === 1 && ++cnt));
+      ob.monitor([''], data => assert(cnt === 2 && data === 2 && ++cnt), { once: true });
+      ob.emit([''], 2, data => assert(cnt === 3 && data === 2 && ++cnt));
+      ob.emit([''], 3, data => assert(cnt === 4 && data === 3 && ++cnt) || done());
+    });
+
     it('on', function (done) {
       let cnt = 0;
       const ob = new Observation<string[], number, void>();
       ob.on([''], data => assert(cnt === 0 && data === 0 && ++cnt));
       ob.on([''], data => assert(cnt === 1 && data === 0 && ++cnt));
       ob.emit([''], 0, data => assert(cnt === 2 && data === 0 && ++cnt) || done());
+    });
+
+    it('on once', function (done) {
+      let cnt = 0;
+      const ob = new Observation<string[], number, void>();
+      ob.on([''], data => assert(cnt === 0 && data === 1 && ++cnt), { once: true });
+      ob.emit([''], 1, data => assert(cnt === 1 && data === 1 && ++cnt));
+      ob.on([''], data => assert(cnt === 2 && data === 2 && ++cnt), { once: true });
+      ob.emit([''], 2, data => assert(cnt === 3 && data === 2 && ++cnt));
+      ob.on([''], throwError, { once: true });
+      ob.off([''], throwError);
+      ob.emit([''], 3, data => assert(cnt === 4 && data === 3 && ++cnt) || done());
+    });
+
+    it('once', function (done) {
+      let cnt = 0;
+      const ob = new Observation<string[], number, void>();
+      ob.once([''], data => assert(cnt === 0 && data === 1 && ++cnt));
+      ob.emit([''], 1, data => assert(cnt === 1 && data === 1 && ++cnt));
+      ob.once([''], data => assert(cnt === 2 && data === 2 && ++cnt));
+      ob.emit([''], 2, data => assert(cnt === 3 && data === 2 && ++cnt));
+      ob.once([''], throwError);
+      ob.off([''], throwError);
+      ob.emit([''], 3, data => assert(cnt === 4 && data === 3 && ++cnt) || done());
     });
 
     it('off', function (done) {
@@ -196,18 +236,6 @@ describe('Unit: lib/observation', function () {
       assert(ob.refs(['']).length === 1);
       ob.on([''], data => assert(cnt === 0 && data === 0 && ++cnt));
       ob.emit([''], 0);
-    });
-
-    it('once', function (done) {
-      let cnt = 0;
-      const ob = new Observation<string[], number, void>();
-      ob.once([''], data => assert(cnt === 0 && data === 1 && ++cnt));
-      ob.emit([''], 1, data => assert(cnt === 1 && data === 1 && ++cnt));
-      ob.once([''], data => assert(cnt === 2 && data === 2 && ++cnt));
-      ob.emit([''], 2, data => assert(cnt === 3 && data === 2 && ++cnt));
-      ob.once([''], throwError);
-      ob.off([''], throwError);
-      ob.emit([''], 3, data => assert(cnt === 4 && data === 3 && ++cnt) || done());
     });
 
     it('recovery', function (done) {
@@ -246,6 +274,21 @@ describe('Unit: lib/observation', function () {
       ob.on(['', '0', '0', '0'], data => assert(cnt === 2 && data === 0 && ++cnt));
       ob.off(['', '0'], throwError);
       ob.emit(['', '0'], 0);
+    });
+
+    it('dedup', function (done) {
+      let cnt = 0;
+      const ob = new Observation<string[], number, void>();
+      function inc() {
+        ++cnt;
+      }
+      ob.on([''], inc);
+      ob.on([''], inc);
+      ob.on(['', '0'], inc);
+      ob.on(['', '0'], inc);
+      ob.on(['', '0', '0'], inc);
+      ob.on(['', '0', '0'], inc);
+      ob.emit(['', '0'], 0, () => assert(cnt === 2 && ++cnt) || done());
     });
 
     it('mixed type key', function (done) {

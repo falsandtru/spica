@@ -1,51 +1,80 @@
-import { Observer, Publisher, Monitor, Subscriber } from '../../index.d';
+import { Observer, ObserverOptions, Publisher, Monitor, Subscriber } from '../../index.d';
 import { concat } from './concat';
 import { causeAsyncException } from './exception';
 
-interface SubscriberMapNode<T extends ReadonlyArray<any>, D, R> {
-  parent: SubscriberMapNode<T, D, R> | undefined;
-  children: Map<keyof T, SubscriberMapNode<T, D, R>>;
+interface RegisterNode<T extends ReadonlyArray<any>, D, R> {
+  parent: RegisterNode<T, D, R> | undefined;
+  children: Map<keyof T, RegisterNode<T, D, R>>;
   childrenNames: (keyof T)[];
-  registers: Register<T, D, R>[];
+  items: RegisterItem<T, D, R>[];
 }
-type Register<T extends ReadonlyArray<any>, D, R> = [
-  T,
-  Subscriber<T, D, R>,
-  false,
-  Subscriber<T, D, R>
-] | [
-  T,
-  Monitor<T, D>,
-  true,
-  Monitor<T, D>
-];
+export type RegisterItem<T extends ReadonlyArray<any>, D, R> = {
+  type: RegisterItemType.Monitor;
+  namespace: T;
+  listener: Monitor<T, D>;
+  options: ObserverOptions;
+ } | {
+  type: RegisterItemType.Subscriber;
+  namespace: T;
+  listener: Subscriber<T, D, R>;
+  options: ObserverOptions;
+};
+export type RegisterItemType = RegisterItemType.Monitor | RegisterItemType.Subscriber;
+export namespace RegisterItemType {
+  export type Monitor = typeof monitor;
+  export const monitor = 'monitor';
+  export type Subscriber = typeof subscriber;
+  export const subscriber = 'subscriber';
+}
 
 export class Observation<T extends ReadonlyArray<any>, D, R>
   implements Observer<T, D, R>, Publisher<T, D, R> {
-  public monitor(namespace: T, subscriber: Subscriber<T, D, any>, identifier: Subscriber<T, D, R> = subscriber): () => void {
-    void this.throwTypeErrorIfInvalidSubscriber_(subscriber, namespace);
-    void this.seekNode_(namespace).registers.push([namespace, identifier, true, subscriber]);
-    return () => this.off(namespace, identifier, true);
+  public monitor(namespace: T, listener: Monitor<T, D>, { once = false }: ObserverOptions = {}): () => void {
+    void throwTypeErrorIfInvalidListener(listener, namespace);
+    const { items } = this.seekNode_(namespace);
+    if (isRegistered(items, RegisterItemType.monitor, namespace, listener)) return () => void 0;
+    void items.push({
+      type: RegisterItemType.monitor,
+      namespace,
+      listener,
+      options: {
+        once
+      },
+    });
+    return () => this.off(namespace, listener, RegisterItemType.monitor);
   }
-  public on(namespace: T, subscriber: Subscriber<T, D, R>, identifier: Subscriber<T, D, R> = subscriber): () => void {
-    void this.throwTypeErrorIfInvalidSubscriber_(subscriber, namespace);
-    void this.seekNode_(namespace).registers.push([namespace, identifier, false, data => subscriber(data, namespace)]);
-    return () => this.off(namespace, identifier);
+  public on(namespace: T, listener: Subscriber<T, D, R>, { once = false }: ObserverOptions = {}): () => void {
+    void throwTypeErrorIfInvalidListener(listener, namespace);
+    const { items } = this.seekNode_(namespace);
+    if (isRegistered(items, RegisterItemType.subscriber, namespace, listener)) return () => void 0;
+    void items.push({
+      type: RegisterItemType.subscriber,
+      namespace,
+      listener,
+      options: {
+        once
+      },
+    });
+    return () => this.off(namespace, listener);
   }
-  public off(namespace: T, subscriber?: Subscriber<T, D, R>, monitor: boolean = false): void {
-    switch (typeof subscriber) {
+  public once(namespace: T, listener: Subscriber<T, D, R>): () => void {
+    void throwTypeErrorIfInvalidListener(listener, namespace);
+    return this.on(namespace, listener, { once: true });
+  }
+  public off(namespace: T, listener?: Monitor<T, D> | Subscriber<T, D, R>, type: RegisterItemType = RegisterItemType.subscriber): void {
+    switch (typeof listener) {
       case 'function':
-        return void this.seekNode_(namespace).registers
-          .some(([, identifier, monitor_], i, registers) => {
-            if (subscriber !== identifier) return false;
-            if (monitor_ !== monitor) return false;
+        return void this.seekNode_(namespace).items
+          .some(({ type: type_, listener: listener_ }, i, items) => {
+            if (listener_ !== listener) return false;
+            if (type_ !== type) return false;
             switch (i) {
               case 0:
-                return !void registers.shift();
-              case registers.length - 1:
-                return !void registers.pop();
+                return !void items.shift();
+              case items.length - 1:
+                return !void items.pop();
               default:
-                return !void registers.splice(i, 1);
+                return !void items.splice(i, 1);
             }
           });
       case 'undefined': {
@@ -55,28 +84,18 @@ export class Observation<T extends ReadonlyArray<any>, D, R>
             void this.off(<T><any>namespace.concat([name]));
             const child = node.children.get(name);
             if (!child) return;
-            if (child.registers.length + child.childrenNames.length > 0) return;
+            if (child.items.length + child.childrenNames.length > 0) return;
             void node.children.delete(name);
             assert(node.childrenNames.findIndex(value => value === name || (name !== name && value !== value)) !== -1);
             void node.childrenNames.splice(node.childrenNames.findIndex(value => value === name || (name !== name && value !== value)), 1);
           });
-        node.registers = node.registers
-          .filter(([, , monitor]) => monitor);
+        node.items = node.items
+          .filter(({ type }) => type === RegisterItemType.monitor);
         return;
       }
       default:
-        throw this.throwTypeErrorIfInvalidSubscriber_(subscriber, namespace);
+        throw throwTypeErrorIfInvalidListener(listener, namespace);
     }
-  }
-  public once(namespace: T, subscriber: Subscriber<T, D, R>): () => void {
-    void this.throwTypeErrorIfInvalidSubscriber_(subscriber, namespace);
-    return this
-      .on(
-        namespace,
-        data => (
-          void this.off(namespace, subscriber),
-          subscriber(data, namespace)),
-        subscriber);
   }
   public emit(namespace: T, data: D, tracker?: (data: D, results: R[]) => void): void
   public emit(this: Observation<T, void, R>, type: T, data?: D, tracker?: (data: D, results: R[]) => void): void
@@ -91,18 +110,24 @@ export class Observation<T extends ReadonlyArray<any>, D, R>
     assert(Array.isArray(results));
     return results;
   }
+  private relaySources = new WeakSet<Observer<T, D, any>>();
   public relay(source: Observer<T, D, any>): () => void {
-    return source.monitor(<T><any>[], (data, namespace) =>
-      void this.emit(namespace, data));
+    if (this.relaySources.has(source)) return () => void 0;
+    void this.relaySources.add(source);
+    return source.monitor(<T><any>[], (data, namespace) => (
+      void this.relaySources.delete(source),
+      void this.emit(namespace, data)));
   }
   private drain_(namespace: T, data: D, tracker?: (data: D, results: R[]) => void): void {
     const results: R[] = [];
     void this.refsBelow_(this.seekNode_(namespace))
-      .reduce<void>((_, sub) => {
-        const [, , monitor, subscriber] = sub;
-        if (monitor) return;
+      .reduce<void>((_, { type, listener, options: { once } }) => {
+        if (type !== RegisterItemType.subscriber) return;
+        if (once) {
+          void this.off(namespace, listener);
+        }
         try {
-          const result: R = subscriber(data, namespace);
+          const result: R = listener(data, namespace);
           if (tracker) {
             results[results.length] = result;
           }
@@ -114,11 +139,13 @@ export class Observation<T extends ReadonlyArray<any>, D, R>
         }
       }, void 0);
     void this.refsAbove_(this.seekNode_(namespace))
-      .reduce<void>((_, sub) => {
-        const [, , monitor, subscriber] = sub;
-        if (!monitor) return;
+      .reduce<void>((_, { type, listener, options: { once } }) => {
+        if (type !== RegisterItemType.monitor) return;
+        if (once) {
+          void this.off(namespace, listener, RegisterItemType.monitor);
+        }
         try {
-          void subscriber(data, namespace);
+          void listener(data, namespace);
         }
         catch (reason) {
           if (reason !== void 0 && reason !== null) {
@@ -135,38 +162,38 @@ export class Observation<T extends ReadonlyArray<any>, D, R>
       }
     }
   }
-  public refs(namespace: never[] | T): Register<T, D, R>[] {
+  public refs(namespace: never[] | T): RegisterItem<T, D, R>[] {
     return this.refsBelow_(this.seekNode_(namespace));
   }
-  private refsAbove_({parent, registers}: SubscriberMapNode<T, D, R>): Register<T, D, R>[] {
-    registers = concat([], registers);
+  private refsAbove_({parent, items}: RegisterNode<T, D, R>): RegisterItem<T, D, R>[] {
+    items = concat([], items);
     while (parent) {
-      registers = concat(registers, parent.registers);
+      items = concat(items, parent.items);
       parent = parent.parent;
     }
-    return registers;
+    return items;
   }
-  private refsBelow_({childrenNames, children, registers}: SubscriberMapNode<T, D, R>): Register<T, D, R>[] {
-    registers = concat([], registers);
+  private refsBelow_({childrenNames, children, items}: RegisterNode<T, D, R>): RegisterItem<T, D, R>[] {
+    items = concat([], items);
     for (let i = 0; i < childrenNames.length; ++i) {
       const name = childrenNames[i];
       const below = this.refsBelow_(children.get(name)!);
-      registers = concat(registers, below);
+      items = concat(items, below);
       if (below.length === 0) {
         void children.delete(name);
         void childrenNames.splice(childrenNames.findIndex(value => value === name || (name !== name && value !== value)), 1);
         void --i;
       }
     }
-    return registers;
+    return items;
   }
-  private node_: SubscriberMapNode<T, D, R> = {
+  private node_: RegisterNode<T, D, R> = {
     parent: void 0,
     children: new Map(),
     childrenNames: [],
-    registers: []
+    items: []
   };
-  private seekNode_(types: never[] | T): SubscriberMapNode<T, D, R> {
+  private seekNode_(types: never[] | T): RegisterNode<T, D, R> {
     let node = this.node_;
     for (const type of types) {
       const {children} = node;
@@ -176,19 +203,28 @@ export class Observation<T extends ReadonlyArray<any>, D, R>
           parent: node,
           children: new Map(),
           childrenNames: [],
-          registers: <Register<T, D, R>[]>[]
+          items: <RegisterItem<T, D, R>[]>[]
         });
       }
       node = children.get(type)!;
     }
     return node;
   }
-  private throwTypeErrorIfInvalidSubscriber_(subscriber: Subscriber<T, D, R> | undefined, types: T): void {
-    switch (typeof subscriber) {
-      case 'function':
-        return;
-      default:
-        throw new TypeError(`Spica: Observation: Invalid subscriber.\n\t${types} ${subscriber}`);
-    }
+}
+
+function isRegistered<T extends ReadonlyArray<any>, D, R>(items: RegisterItem<T, D, R>[], type: RegisterItemType, namespace: T, listener: Monitor<T, D> | Subscriber<T, D, R>): boolean {
+  return items.some(({ type: t, namespace: n, listener: l }) =>
+    t === type &&
+    n.length === namespace.length &&
+    n.every((_, i) => n[i] === namespace[i]) &&
+    l === listener);
+}
+
+function throwTypeErrorIfInvalidListener<T extends ReadonlyArray<any>, D, R>(listener: Monitor<T, D> | Subscriber<T, D, R> | undefined, types: T): void {
+  switch (typeof listener) {
+    case 'function':
+      return;
+    default:
+      throw new TypeError(`Spica: Observation: Invalid listener.\n\t${types} ${listener}`);
   }
 }
