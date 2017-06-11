@@ -238,7 +238,7 @@ describe('Unit: lib/observation', function () {
       ob.emit([''], 0);
     });
 
-    it('recovery', function (done) {
+    it.skip('recovery', function (done) {
       let cnt = 0;
       const ob = new Observation<string[], void, void>();
       ob.on([''], throwError);

@@ -135,9 +135,7 @@ export class Observation<N extends ReadonlyArray<any>, D, R>
           }
         }
         catch (reason) {
-          if (reason !== void 0 && reason !== null) {
-            void causeAsyncException(reason);
-          }
+          void causeAsyncException(reason);
         }
       }, void 0);
     void this.refsAbove_(this.seekNode_(namespace))
@@ -150,9 +148,7 @@ export class Observation<N extends ReadonlyArray<any>, D, R>
           void listener(data, namespace);
         }
         catch (reason) {
-          if (reason !== void 0 && reason !== null) {
-            void causeAsyncException(reason);
-          }
+          void causeAsyncException(reason);
         }
       }, void 0);
     if (tracker) {
