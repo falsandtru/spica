@@ -3,7 +3,7 @@ import { type } from './type';
 export const assign = template((key, target, source) =>
   target[key] = source[key]);
 
-export const clone = template((key, target, source): any => {
+export const clone = template((key, target, source): void => {
   switch (type(source[key])) {
     case 'Array':
       return target[key] = clone([], source[key]);
@@ -14,27 +14,24 @@ export const clone = template((key, target, source): any => {
   }
 });
 
-export const extend = template((key, target, source): any => {
+export const extend = template((key, target, source): void => {
   switch (type(source[key])) {
     case 'Array':
       return target[key] = extend([], source[key]);
-    case 'Object': {
+    case 'Object':
       switch (type(target[key])) {
         case 'Function':
-        case 'Object': {
+        case 'Object':
           return target[key] = extend(target[key], source[key]);
-        }
-        default: {
+        default:
           return target[key] = extend({}, source[key]);
-        }
       }
-    }
     default:
       return target[key] = source[key];
   }
 });
 
-function template(cb: (key: string, target: {}, source: {}) => any) {
+function template(strategy: (key: string, target: any, source: any) => void) {
   return walk;
 
   function walk<T extends U, U extends object>(target: T, ...sources: Partial<U>[]): T;
@@ -54,7 +51,7 @@ function template(cb: (key: string, target: {}, source: {}) => any) {
       for (const key of Object.keys(Object(source))) {
         const desc = Object.getOwnPropertyDescriptor(Object(source), key);
         if (desc !== undefined && desc.enumerable) {
-          void cb(key, Object(target), Object(source));
+          void strategy(key, Object(target), Object(source));
         }
       }
     }
