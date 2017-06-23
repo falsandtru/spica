@@ -36,19 +36,17 @@ export class Cancellation<L = void>
     this.done = true;
     this.canceled = true;
     this.reason = reason!;
-    const listeners = Array.from(this.listeners);
-    void Object.freeze(this);
     void Object.freeze(this.listeners);
-    void listeners
+    void Object.freeze(this);
+    void this.listeners
       .forEach(cb =>
         void cb(reason!));
   };
   public readonly close = () => {
     if (this.done) return;
     this.done = true;
-    void this.listeners.clear();
-    void Object.freeze(this);
     void Object.freeze(this.listeners);
+    void Object.freeze(this);
   };
   public canceled = false;
   public readonly promise = <T>(val: T): Promise<T> =>
