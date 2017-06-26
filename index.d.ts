@@ -96,13 +96,13 @@ export class Cancellation<L = void> {
 }
 export interface Cancellation<L = void>
   extends Canceller<L>, Cancellee<L> {
+  readonly close: () => void;
 }
 export interface Canceller<L = void> {
   readonly cancel: {
     (reason: L): void;
     (this: Cancellation<void>): void;
   };
-  readonly close: () => void;
 }
 export interface Cancellee<L = void> {
   readonly register: (listener: (reason: L) => void) => () => void;
