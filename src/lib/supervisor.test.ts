@@ -257,7 +257,7 @@ describe('Unit: lib/supervisor', function () {
         assert(cnt === 0 && ++cnt);
         done();
       });
-      sv.register('', () => new Promise<[number, number]>(() => void 0), 0);
+      sv.register('', () => new Promise<never>(() => void 0), 0);
       sv.call('', 1, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 1 && ++cnt), 1e2);
     });
 
