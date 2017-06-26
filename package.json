@@ -76,5 +76,5 @@
     "ci": "gulp ci"
   },
   "author": "falsandtru",
-  "license": "MIT"
+  "license": "(Apache-2.0 AND MPL-2.0)"
 }
