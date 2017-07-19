@@ -21,8 +21,8 @@ export type Subscriber<N extends ReadonlyArray<any>, D, R> = (data: D, namespace
 
 interface RegisterNode<N extends ReadonlyArray<any>, D, R> {
   parent: RegisterNode<N, D, R> | undefined;
-  children: Map<keyof N, RegisterNode<N, D, R>>;
-  childrenNames: (keyof N)[];
+  children: Map<N[keyof N], RegisterNode<N, D, R>>;
+  childrenNames: N[keyof N][];
   items: RegisterItem<N, D, R>[];
 }
 export type RegisterItem<N extends ReadonlyArray<any>, D, R> = {

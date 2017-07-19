@@ -23,15 +23,13 @@
     "hlist",
     "cache"
   ],
-  "types": "./index.d.ts",
-  "main": "./dist/spica.js",
   "files": [
     "dist",
     "index.*",
     "src",
+    "test",
     "collection",
     "monad",
-    "test",
     "*.ts",
     "*.js",
     "*.json",
