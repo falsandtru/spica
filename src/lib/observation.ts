@@ -16,8 +16,8 @@ export interface Publisher<N extends ReadonlyArray<any>, D, R> {
   reflect(namespace: N, data: D): R[];
   reflect(this: Publisher<N, void, R>, namespace: N, data?: D): R[];
 }
-type Monitor<N extends ReadonlyArray<any>, D> = (data: D, namespace: N) => any;
-type Subscriber<N extends ReadonlyArray<any>, D, R> = (data: D, namespace: N) => R;
+export type Monitor<N extends ReadonlyArray<any>, D> = (data: D, namespace: N) => any;
+export type Subscriber<N extends ReadonlyArray<any>, D, R> = (data: D, namespace: N) => R;
 
 interface RegisterNode<N extends ReadonlyArray<any>, D, R> {
   parent: RegisterNode<N, D, R> | undefined;
