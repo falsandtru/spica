@@ -5,7 +5,7 @@ export default class <a, z> extends Sequence<a, z> {
   public segs(): Sequence<a[], [Sequence.Iterator<a[]>, Sequence.Iterator<a[]>]> {
     return Sequence.mappend(
       this
-        .fold<Sequence<a[], any>>((a, bs) =>
+        .foldr<Sequence<a[], any>>((a, bs) =>
           bs.take(1)
             .bind(b =>
               Sequence.mappend(

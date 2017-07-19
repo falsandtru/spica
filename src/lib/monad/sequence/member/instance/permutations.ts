@@ -30,7 +30,7 @@ function perms<a>(ts: Sequence<a, any>, is: Sequence<a, any>): Sequence<a[], [Se
             const ts = Sequence.resume(Sequence.Thunk.iterator(tt)).memoize();
             return cons(
               is.permutations()
-                .fold<a[]>((ys, r) =>
+                .foldr<a[]>((ys, r) =>
                   interleave(Sequence.from(ys), r)
                 , perms(
                   ts,

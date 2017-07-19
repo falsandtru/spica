@@ -15,7 +15,7 @@ describe('Unit: lib/monad/sequence/member/static/cycle', () => {
       assert.deepStrictEqual(
         Sequence.cycle([1])
           .take(2)
-          .fold((a, b) => Sequence.from([a].concat(b.extract()).concat(b.extract())), Sequence.from<number>([0]))
+          .foldr((a, b) => Sequence.from([a].concat(b.extract()).concat(b.extract())), Sequence.from<number>([0]))
           .extract(),
         [1, 1, 0, 0, 1, 0, 0]);
     });

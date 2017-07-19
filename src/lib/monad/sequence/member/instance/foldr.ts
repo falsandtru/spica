@@ -1,7 +1,7 @@
 import { Sequence } from '../../core';
 
 export default class <a, z> extends Sequence<a, z> {
-  public fold<b>(f: (a: a, b: Sequence<b, any>) => Sequence<b, any>, z: Sequence<b, any>): Sequence<b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]> {
+  public foldr<b>(f: (a: a, b: Sequence<b, any>) => Sequence<b, any>, z: Sequence<b, any>): Sequence<b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]> {
     return new Sequence<Sequence<b, any>, Sequence.Iterator<a>>((iter = () => this.reduce().iterate()) =>
       Sequence.Iterator.when(
         iter(),
@@ -12,7 +12,7 @@ export default class <a, z> extends Sequence<a, z> {
             f(
               Sequence.Thunk.value(thunk),
               Sequence.resume(Sequence.Thunk.iterator(thunk))
-                .fold(f, z)))))
+                .foldr(f, z)))))
       .bind(s => s);
   }
 }

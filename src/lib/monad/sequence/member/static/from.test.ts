@@ -14,7 +14,7 @@ describe('Unit: lib/monad/sequence/member/static/from', () => {
     it('idempotence', () => {
       assert.deepStrictEqual(
         Sequence.from([0, 1])
-          .fold((a, b) => Sequence.from([a].concat(b.extract()).concat(b.extract())), Sequence.from<number>([]))
+          .foldr((a, b) => Sequence.from([a].concat(b.extract()).concat(b.extract())), Sequence.from<number>([]))
           .extract(),
         [0, 1, 1]);
     });

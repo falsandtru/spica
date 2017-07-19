@@ -10,13 +10,13 @@ describe('Unit: lib/monad/sequence/member/reduce', () => {
       assert.deepStrictEqual(
         mem
           .take(2)
-          .fold((a, b) => Sequence.from([a].concat(b.extract()).concat(b.extract())), Sequence.from<number>([]))
+          .foldr((a, b) => Sequence.from([a].concat(b.extract()).concat(b.extract())), Sequence.from<number>([]))
           .extract(),
         [1, 2, 2]);
       assert.deepStrictEqual(
         mem
           .take(2)
-          .fold((a, b) => Sequence.from([a].concat(b.extract()).concat(b.extract())), Sequence.from<number>([]))
+          .foldr((a, b) => Sequence.from([a].concat(b.extract()).concat(b.extract())), Sequence.from<number>([]))
           .extract(),
         [3, 4, 4]);
     });

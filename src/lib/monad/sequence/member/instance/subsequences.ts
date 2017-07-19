@@ -26,7 +26,7 @@ function nonEmptySubsequences<a, z>(xs: Sequence<a, z>): Sequence<a[], [Sequence
               cons(
                 nonEmptySubsequences(
                   Sequence.resume(Sequence.Thunk.iterator(xt)))
-                  .fold<a[]>((ys, r) =>
+                  .foldr<a[]>((ys, r) =>
                     Sequence.mappend(
                       Sequence.mappend(
                         Sequence.from([ys]),

@@ -185,7 +185,7 @@ export class Sequence<a, z> extends MonadPlus<a> implements Iterable<a> {
   map<b>(f: (a: a, i: number) => b): Sequence<b, Sequence.Iterator<a>>;
   filter(f: (a: a, i: number) => boolean): Sequence<a, Sequence.Iterator<a>>;
   scan<b>(f: (b: b, a: a) => b, z: b): Sequence<b, [b, Sequence.Iterator<a>, number]>;
-  fold<b>(f: (a: a, b: Sequence<b, any>) => Sequence<b, any>, z: Sequence<b, any>): Sequence<b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]>;
+  foldr<b>(f: (a: a, b: Sequence<b, any>) => Sequence<b, any>, z: Sequence<b, any>): Sequence<b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]>;
   group(f: (x: a, y: a) => boolean): Sequence<a[], [Sequence.Iterator<a>, a[]]>;
   inits(): Sequence<a[], [Sequence.Iterator<a[]>, Sequence.Iterator<a[]>]>;
   tails(): Sequence<a[], [Sequence.Iterator<a[]>, Sequence.Iterator<a[]>]>;
