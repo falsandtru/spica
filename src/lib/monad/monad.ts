@@ -10,6 +10,6 @@ export namespace Monad {
   export function bind<a, b>(m: Monad<a>, f?: (a: a) => Monad<b>): Monad<b> | (<b>(f: (a: a) => Monad<b>) => Monad<b>) {
     return f
       ? m.bind(f)
-      : (f: (a: a) => Monad<b>) => bind(m, f);
+      : <b>(f: (a: a) => Monad<b>) => bind(m, f);
   }
 }
