@@ -1,6 +1,12 @@
-import { WeakMapLike } from '../../../index.d';
 import { sqid } from '../sqid';
 import { type } from '../type';
+
+export interface WeakMapLike<K, V> {
+  get(key: K): V | undefined;
+  set(key: K, value: V): this;
+  has(key: K): boolean;
+  delete(key: K): boolean;
+}
 
 function isPrimitive(target: any): boolean {
   return target instanceof Object === false;

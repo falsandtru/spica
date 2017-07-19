@@ -1,4 +1,3 @@
-import { Supervisor as ISupervisor } from '../../index.d';
 import { Observation } from './observation';
 import { tick } from './tick';
 import { isThenable } from './thenable';
@@ -6,7 +5,7 @@ import { sqid } from './sqid';
 import { causeAsyncException } from './exception';
 import { noop } from './noop';
 
-export abstract class Supervisor<N extends string, P, R, S> implements ISupervisor<N, P, R, S> {
+export abstract class Supervisor<N extends string, P, R, S> {
   private static readonly instances: Set<Supervisor<string, any, any, any>>;
   public static get count(): number {
     return this.instances
@@ -28,7 +27,7 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
     destructor = noop,
     scheduler = tick,
     resource = 10,
-  }: Supervisor.Settings<N> = {}) {
+  }: Supervisor.Settings = {}) {
     if (!(<typeof Supervisor>this.constructor).hasOwnProperty('instances')) {
       (<any>this.constructor).instances = new Set();
     }
@@ -235,15 +234,34 @@ export abstract class Supervisor<N extends string, P, R, S> implements ISupervis
   }
 }
 export namespace Supervisor {
-  export type Settings<N extends string> = ISupervisor.Settings<N>;
-  export type Process<P, R, S> = ISupervisor.Process<P, R, S>;
-  export namespace Process {
-    export type Init<S> = ISupervisor.Process.Init<S>;
-    export type Call<P, R, S> = ISupervisor.Process.Call<P, R, S>;
-    export type Exit<S> = ISupervisor.Process.Exit<S>;
+  export interface Settings {
+    readonly name?: string;
+    readonly size?: number;
+    readonly timeout?: number;
+    readonly destructor?: (reason: any) => void;
+    readonly scheduler?: (cb: () => void) => void;
+    readonly resource?: number;
   }
-  export type Callback<R> = ISupervisor.Callback<R>;
-  export import Event = ISupervisor.Event;
+  export type Process<P, R, S> = {
+    readonly init: Process.Init<S>;
+    readonly call: Process.Call<P, R, S>;
+    readonly exit: Process.Exit<S>;
+  };
+  export namespace Process {
+    export type Init<S> = (state: S) => S;
+    export type Call<P, R, S> = (param: P, state: S) => [R, S] | PromiseLike<[R, S]>;
+    export type Exit<S> = (reason: any, state: S) => void;
+  }
+  export type Callback<R> = {
+    (reply: R, error?: Error): void;
+  };
+  export namespace Event {
+    export namespace Data {
+      export type Init<N extends string, P, R, S> = [N, Process<P, R, S>, S];
+      export type Loss<N extends string, P> = [N, P];
+      export type Exit<N extends string, P, R, S> = [N, Process<P, R, S>, S, any];
+    }
+  }
 }
 
 class Worker<N extends string, P, R, S> {

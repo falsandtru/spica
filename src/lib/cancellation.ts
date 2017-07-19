@@ -1,8 +1,20 @@
-import { Canceller, Cancellee } from '../../index.d';
-export { Canceller, Cancellee } from '../../index.d';
 import { causeAsyncException } from './exception';
 import { Maybe, Just, Nothing } from './monad/maybe';
 import { Either, Left, Right } from './monad/either';
+
+export interface Canceller<L = void> {
+  readonly cancel: {
+    (reason: L): void;
+    (this: Cancellation<void>): void;
+  };
+}
+export interface Cancellee<L = void> {
+  readonly register: (listener: (reason: L) => void) => () => void;
+  readonly canceled: boolean;
+  readonly promise: <T>(val: T) => Promise<T>;
+  readonly maybe: <T>(val: T) => Maybe<T>;
+  readonly either: <R>(val: R) => Either<L, R>;
+}
 
 export class Cancellation<L = void>
   implements Canceller<L>, Cancellee<L> {

@@ -1,11 +1,10 @@
-import { Maybe as IMaybe } from '../../../index.d';
 import { MonadPlus } from './monadplus';
 
-export interface Maybe<a> extends IMaybe<a> {
-}
 export class Maybe<a> extends MonadPlus<a> {
+  private readonly MAYBE: Just<a> | Nothing;
   constructor(thunk: () => Maybe<a> | Nothing) {
     super(thunk);
+    void this.MAYBE;
   }
   public fmap<b>(f: (a: a) => b): Maybe<b> {
     return this.bind(a => new Just(f(a)));

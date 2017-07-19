@@ -1,4 +1,3 @@
-import { Sequence as ISequence } from '../../../../index.d';
 import { MonadPlus } from '../monadplus';
 
 export class Sequence<a, z> extends MonadPlus<a> implements Iterable<a> {
@@ -82,7 +81,7 @@ export interface Sequence<a, z> {
 }
 
 export namespace Sequence {
-  export type Data<a, z> = ISequence.Data<a, z>;
+  export type Data<a, z> = [a, z];
   export namespace Data {
     export function cons<a, z>(a?: a, z?: z): Sequence.Data<a, z> {
       switch (arguments.length) {
@@ -97,7 +96,7 @@ export namespace Sequence {
       }
     }
   }
-  export type Thunk<a> = ISequence.Thunk<a>;
+  export type Thunk<a> = [a, Iterator<a>, number];
   export namespace Thunk {
     export function value<a>(thunk: Thunk<a>): a {
       return thunk[0];
@@ -109,7 +108,7 @@ export namespace Sequence {
       return thunk[2];
     }
   }
-  export type Iterator<a> = ISequence.Iterator<a>;
+  export type Iterator<a> = () => Thunk<a>;
   export namespace Iterator {
     export const done: Sequence.Iterator<any> = () => <Sequence.Thunk<any>>[void 0, done, -1];
     export function when<a, b>(
