@@ -1,24 +1,24 @@
-import { v4 } from './uuid';
+import { uuid } from './uuid';
 
 describe('Unit: lib/uuid', () => {
   describe('v4', () => {
     it('type', () => {
-      console.debug('lib/uuid', v4());
-      console.debug('lib/uuid', v4());
-      console.debug('lib/uuid', v4());
-      assert(typeof v4() === 'string');
+      console.debug('lib/uuid', uuid());
+      console.debug('lib/uuid', uuid());
+      console.debug('lib/uuid', uuid());
+      assert(typeof uuid() === 'string');
     });
 
     it('format', () => {
-      assert(/^[0-9a-f-]+$/.test(v4()));
+      assert(/^[0-9a-f-]+$/.test(uuid()));
     });
 
     it('size', () => {
-      assert(v4().length === 36);
+      assert(uuid().length === 36);
     });
 
     it('inequality', () => {
-      assert(v4() !== v4());
+      assert(uuid() !== uuid());
     });
 
   });

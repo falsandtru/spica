@@ -13,7 +13,7 @@ export { AttrMap } from './lib/attrmap';
 export { Cache } from './lib/cache';
 export { Mixin } from './lib/mixin';
 export { tick } from './lib/tick';
-export { v4 as uuid } from './lib/uuid';
+export { uuid } from './lib/uuid';
 export { sqid } from './lib/sqid';
 export { assign, clone, extend } from './lib/assign';
 export { concat } from './lib/concat';

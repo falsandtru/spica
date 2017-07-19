@@ -1,5 +1,5 @@
 const FORMAT_V4 = Object.freeze('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.split(''));
-export function v4(): string {
+export function uuid(): string {
   // version 4
   let acc = '';
   for (const c of FORMAT_V4) {
