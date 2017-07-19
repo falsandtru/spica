@@ -29,6 +29,8 @@
     "dist",
     "index.*",
     "src",
+    "collection",
+    "monad",
     "test",
     "*.ts",
     "*.js",
