@@ -1,4 +1,5 @@
 import { Observer, ObserverOptions, Publisher, Monitor, Subscriber } from '../../index.d';
+export { Observer, ObserverOptions, Publisher, Monitor, Subscriber } from '../../index.d';
 import { concat } from './concat';
 import { causeAsyncException } from './exception';
 

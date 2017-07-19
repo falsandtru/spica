@@ -1,4 +1,5 @@
 import { Canceller, Cancellee } from '../../index.d';
+export { Canceller, Cancellee } from '../../index.d';
 import { causeAsyncException } from './exception';
 import { Maybe, Just, Nothing } from './monad/maybe';
 import { Either, Left, Right } from './monad/either';

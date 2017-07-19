@@ -26,6 +26,7 @@ script:
 before_deploy:
 - sed -i 's/"private":\ true/"private":\ false/' package.json
 - sed -i -E 's/^dist\/?.*$//' .gitignore
+- cp -r src/lib/* .
 deploy:
   provider: npm
   email:
@@ -44,4 +45,5 @@ notifications:
     on_success: change
     on_failure: always
 after_deploy:
+- git clean -df
 - gulp bench
