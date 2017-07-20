@@ -1,3 +1,4 @@
+const zeros = '0'.repeat(15);
 let cnt = 0;
 
 export function sqid(): string
@@ -9,6 +10,6 @@ export function sqid(id?: number): string {
     if (id % 1 !== 0) throw new TypeError(`Spica: sqid: A parameter value must be an integer: ${id}`);
   }
   return id === void 0
-    ? (1e15 + ++cnt + '').slice(1)
-    : (1e15 + id + '').slice(1);
+    ? (zeros + ++cnt).slice(-15)
+    : (zeros + id).slice(-15);
 }
