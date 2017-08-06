@@ -1,3 +1,5 @@
+import { findIndex } from './equal';
+
 export class Cache<K, V = void> {
   constructor(
     private readonly size: number,
@@ -24,7 +26,6 @@ export class Cache<K, V = void> {
   public put(key: K, value: V): boolean;
   public put(this: Cache<K, void>, key: K, value?: V): boolean;
   public put(key: K, value: V): boolean {
-    if (key !== key) throw new TypeError(`Spica: Cache: Cannot use NaN for keys.`);
     if (this.access(key)) return void this.store.set(key, value), true;
 
     const {LRU, LFU} = this.stats;
@@ -64,11 +65,11 @@ export class Cache<K, V = void> {
     return this.store.has(key);
   }
   public delete(key: K): boolean {
+    if (!this.store.has(key)) return false;
     const {LRU, LFU} = this.stats;
     for (const log of [LFU, LRU]) {
-      const index = log.indexOf(key);
+      const index = findIndex(key, log);
       if (index === -1) continue;
-      if (!this.store.has(key)) return false;
       const val = this.store.get(key)!;
       void this.store.delete(log.splice(index, 1)[0]);
       void this.callback(key, val);
@@ -110,16 +111,18 @@ export class Cache<K, V = void> {
         || this.accessLRU(key);
   }
   private accessLRU(key: K): boolean {
+    if (!this.store.has(key)) return false;
     const {LRU} = this.stats;
-    const index = LRU.indexOf(key);
+    const index = findIndex(key, LRU);
     if (index === -1) return false;
     const {LFU} = this.stats;
     void LFU.unshift(...LRU.splice(index, 1));
     return true;
   }
   private accessLFU(key: K): boolean {
+    if (!this.store.has(key)) return false;
     const {LFU} = this.stats;
-    const index = LFU.indexOf(key);
+    const index = findIndex(key, LFU);
     if (index === -1) return false;
     void LFU.unshift(...LFU.splice(index, 1));
     return true;
