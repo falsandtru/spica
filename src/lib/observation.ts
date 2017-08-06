@@ -1,4 +1,5 @@
 import { concat } from './concat';
+import { findIndex } from './equal';
 import { causeAsyncException } from './exception';
 
 export interface Observer<N extends ReadonlyArray<any>, D, R> {
@@ -103,8 +104,8 @@ export class Observation<N extends ReadonlyArray<any>, D, R>
             if (!child) return;
             if (child.items.length + child.childrenNames.length > 0) return;
             void node.children.delete(name);
-            assert(node.childrenNames.findIndex(value => value === name || (name !== name && value !== value)) !== -1);
-            void node.childrenNames.splice(node.childrenNames.findIndex(value => value === name || (name !== name && value !== value)), 1);
+            assert(findIndex(name, node.childrenNames) !== -1);
+            void node.childrenNames.splice(findIndex(name, node.childrenNames), 1);
           });
         node.items = node.items
           .filter(({ type }) => type === RegisterItemType.monitor);
@@ -197,7 +198,7 @@ export class Observation<N extends ReadonlyArray<any>, D, R>
       if (below.length === 0) {
         void children.delete(name);
         void childrenNames.splice(
-          childrenNames.findIndex(value => value === name || Number.isNaN(value) && Number.isNaN(name)),
+          findIndex(name, childrenNames),
           1);
         void --i;
       }
