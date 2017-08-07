@@ -10,6 +10,9 @@ export class Nil {
   public push<a>(a: a): List<a, Nil> {
     return new Cons<a, Nil>(a, this);
   }
+  public extend<a>(f: () => a): List<a, Nil> {
+    return this.push(f());
+  }
   public array(): never[] {
     return [];
   }
