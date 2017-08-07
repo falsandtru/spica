@@ -20,30 +20,27 @@ export class Nil {
 
 class Cons<a, c extends Nil | List<a, any>> {
   private readonly CONS: a;
-  constructor(private head_: a, private tail_: c) {
+  constructor(
+    public readonly head: a,
+    public readonly tail: c,
+  ) {
     void this.CONS;
   }
   public push(a: a): List<a, List<a, c>> {
     return new Cons<a, this>(a, this);
   }
-  public head(): a {
-    return this.head_;
-  }
-  public tail(): c {
-    return this.tail_;
-  }
   public walk(f: (a: a) => void): c {
-    void f(this.head());
-    return this.tail();
+    void f(this.head);
+    return this.tail;
   }
   public modify(f: (a: a) => a): List<a, c> {
-    return (<any>this.tail().push)(f(this.head()));
+    return (<any>this.tail.push)(f(this.head));
   }
   public extend(f: (a: a) => a): List<a, List<a, c>> {
-    return this.push(f(this.head()));
+    return this.push(f(this.head));
   }
   public compact<c extends Nil | List<a, any>>(this: List<a, List<a, c>>, f: (l: a, r: a) => a): List<a, c> {
-    return this.tail().modify(r => f(this.head(), r));
+    return this.tail.modify(r => f(this.head, r));
   }
   public reverse(): List<a, c> {
     return <this>this.array()
@@ -62,6 +59,6 @@ class Cons<a, c extends Nil | List<a, any>> {
     return this.array();
   }
   public array(): a[] {
-    return concat([this.head()], this.tail().array());
+    return concat([this.head], this.tail.array());
   }
 }

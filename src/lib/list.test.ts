@@ -18,13 +18,13 @@ describe('Unit: lib/list', () => {
     });
 
     it('head', () => {
-      assert(new Nil().push(0).head() === 0);
-      assert(new Nil().push(0).push(1).head() === 1);
+      assert(new Nil().push(0).head === 0);
+      assert(new Nil().push(0).push(1).head === 1);
     });
 
     it('tail', () => {
-      assert.deepStrictEqual(new Nil().push(0).push(1).tail().array(), [0]);
-      assert.deepStrictEqual(new Nil().push(0).push(1).push(2).tail().array(), [1, 0]);
+      assert.deepStrictEqual(new Nil().push(0).push(1).tail.array(), [0]);
+      assert.deepStrictEqual(new Nil().push(0).push(1).push(2).tail.array(), [1, 0]);
     });
 
     it('walk', () => {
