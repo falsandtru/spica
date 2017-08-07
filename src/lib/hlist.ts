@@ -10,6 +10,9 @@ export class HNil {
   public push<a>(a: a): HList<a, HNil> {
     return new HCons<a, HNil>(a, this);
   }
+  public extend<a>(f: () => a): HList<a, HNil> {
+    return this.push(f());
+  }
   public array(): never[] {
     return [];
   }
