@@ -1,6 +1,6 @@
 {
   "name": "spica",
-  "version": "0.0.100",
+  "version": "0.0.101",
   "description": "Supervisor/Actor, Cancellation, Sequence, Maybe, Either and some utils.",
   "private": true,
   "homepage": "https://github.com/falsandtru/spica",
