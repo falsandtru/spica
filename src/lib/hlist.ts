@@ -20,30 +20,27 @@ export class HNil {
 
 class HCons<a, c extends HNil | HList<any, any>> {
   private readonly CONS: a;
-  constructor(private head_: a, private tail_: c) {
+  constructor(
+    public readonly head: a,
+    public readonly tail: c,
+  ) {
     void this.CONS;
   }
   public push<b>(b: b): HList<b, HList<a, c>> {
     return new HCons<b, this>(b, this);
   }
-  public head(): a {
-    return this.head_;
-  }
-  public tail(): c {
-    return this.tail_;
-  }
   public walk(f: (a: a) => void): c {
-    void f(this.head());
-    return this.tail();
+    void f(this.head);
+    return this.tail;
   }
   public modify<b>(f: (a: a) => b): HList<b, c> {
-    return (<any>this.tail().push)(f(this.head()));
+    return (<any>this.tail.push)(f(this.head));
   }
   public extend<b>(f: (a: a) => b): HList<b, HList<a, c>> {
-    return this.push(f(this.head()));
+    return this.push(f(this.head));
   }
   public compact<b, c, d extends HNil | HList<any, any>>(this: HList<a, HList<b, d>>, f: (a: a, b: b) => c): HList<c, d> {
-    return this.tail().modify(r => f(this.head(), r));
+    return this.tail.modify(r => f(this.head, r));
   }
   public reverse<a>(this: HList<a, HNil>): HList<a, HNil>
   public reverse<a, b>(this: HList<a, HList<b, HNil>>): HList<b, HList<a, HNil>>
@@ -71,6 +68,6 @@ class HCons<a, c extends HNil | HList<any, any>> {
     return this.array();
   }
   public array(): never[] {
-    return <never[]>concat([this.head()], this.tail().array());
+    return <never[]>concat([this.head], this.tail.array());
   }
 }
