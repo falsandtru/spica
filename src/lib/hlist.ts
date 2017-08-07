@@ -7,8 +7,8 @@ export class HNil {
   constructor() {
     void this.NIL;
   }
-  public push<b>(b: b): HList<b, HNil> {
-    return new HCons<b, HNil>(b, this);
+  public push<a>(a: a): HList<a, HNil> {
+    return new HCons<a, HNil>(a, this);
   }
   public array(): never[] {
     return [];
@@ -20,7 +20,7 @@ class HCons<a, c extends HNil | HList<any, any>> {
   constructor(private head_: a, private tail_: c) {
     void this.CONS;
   }
-  public push<b>(b: b): HList<b, this> {
+  public push<b>(b: b): HList<b, HList<a, c>> {
     return new HCons<b, this>(b, this);
   }
   public head(): a {
@@ -36,7 +36,7 @@ class HCons<a, c extends HNil | HList<any, any>> {
   public modify<b>(f: (a: a) => b): HList<b, c> {
     return (<any>this.tail().push)(f(this.head()));
   }
-  public extend<b>(f: (a: a) => b): HList<b, this> {
+  public extend<b>(f: (a: a) => b): HList<b, HList<a, c>> {
     return this.push(f(this.head()));
   }
   public compact<b, c, d extends HNil | HList<any, any>>(this: HList<a, HList<b, d>>, f: (a: a, b: b) => c): HList<c, d> {
