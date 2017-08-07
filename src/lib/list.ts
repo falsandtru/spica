@@ -20,7 +20,7 @@ class Cons<a, c extends Nil | List<a, any>> {
   constructor(private head_: a, private tail_: c) {
     void this.CONS;
   }
-  public push(a: a): List<a, this> {
+  public push(a: a): List<a, List<a, c>> {
     return new Cons<a, this>(a, this);
   }
   public head(): a {
@@ -36,7 +36,7 @@ class Cons<a, c extends Nil | List<a, any>> {
   public modify(f: (a: a) => a): List<a, c> {
     return (<any>this.tail().push)(f(this.head()));
   }
-  public extend(f: (a: a) => a): List<a, this> {
+  public extend(f: (a: a) => a): List<a, List<a, c>> {
     return this.push(f(this.head()));
   }
   public compact<c extends Nil | List<a, any>>(this: List<a, List<a, c>>, f: (l: a, r: a) => a): List<a, c> {
