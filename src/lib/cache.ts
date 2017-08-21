@@ -23,9 +23,10 @@ export class Cache<K, V = void> {
     if (this.store.size !== LFU.length + LRU.length) throw new Error(`Spica: Cache: Size of stats and entries is not matched.`);
     if (!LFU.concat(LRU).every(k => this.store.has(k))) throw new Error(`Spica: Cache: Keys of stats and entries is not matched.`);
   }
-  public put(key: K, value: V): boolean;
+  public put(key: K, value: V, log?: boolean): boolean;
   public put(this: Cache<K, void>, key: K, value?: V): boolean;
-  public put(key: K, value: V): boolean {
+  public put(key: K, value: V, log = true): boolean {
+    if (!log && this.store.has(key)) return void this.store.set(key, value), true;
     if (this.access(key)) return void this.store.set(key, value), true;
 
     const {LRU, LFU} = this.stats;
@@ -51,10 +52,10 @@ export class Cache<K, V = void> {
     }
     return false;
   }
-  public set(key: K, value: V): V;
+  public set(key: K, value: V, log?: boolean): V;
   public set(this: Cache<K, void>, key: K, value?: V): V;
-  public set(key: K, value: V): V {
-    void this.put(key, value);
+  public set(key: K, value: V, log?: boolean): V {
+    void this.put(key, value, log);
     return value;
   }
   public get(key: K): V | undefined {

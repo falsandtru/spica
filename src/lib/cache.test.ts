@@ -170,6 +170,23 @@ describe('Unit: lib/cache', () => {
       ]);
     });
 
+    it('log', () => {
+      const cache = new Cache<number, number>(2);
+
+      assert(!cache.put(1, 0));
+      assert(!cache.put(2, 2));
+      assert(cache.put(1, 1, false));
+      assert.deepStrictEqual(cache.export(), {
+        stats: [[2, 1], []],
+        entries: [[1, 1], [2, 2]],
+      });
+      assert(!cache.put(3, 3, false));
+      assert.deepStrictEqual(cache.export(), {
+        stats: [[3, 2], []],
+        entries: [[2, 2], [3, 3]],
+      });
+    });
+
     it('condition', () => {
       const size = 10;
       const cache = new Cache<number, number>(size);
