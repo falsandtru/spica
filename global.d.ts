@@ -1,9 +1,4 @@
-import 'mocha';
-import _assert from 'power-assert';
-
 declare global {
-  const assert: typeof _assert;
-
   interface NumberConstructor {
     isNaN(target: any): boolean;
   }
@@ -21,4 +16,12 @@ declare global {
     trace(message?: any, ...optionalParams: any[]): void;
     warn(message?: any, ...optionalParams: any[]): void;
   }
+}
+
+import assert from 'power-assert';
+
+type Assert = typeof assert;
+
+declare global {
+  const assert: Assert;
 }
