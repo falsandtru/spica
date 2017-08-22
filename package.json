@@ -40,7 +40,7 @@
   "dependencies": {},
   "devDependencies": {
     "@types/benchmark": "^1.0.30",
-    "@types/mocha": "^2.2.41",
+    "@types/mocha": "^2.2.42",
     "@types/power-assert": "1.4.29",
     "benchmark": "^2.1.4",
     "browserify": "^14.4.0",
@@ -68,7 +68,7 @@
     "pump": "^1.0.2",
     "run-sequence": "^2.1.0",
     "tsify": "^3.0.1",
-    "typescript": "2.6.0-dev.20170818",
+    "typescript": "2.6.0-dev.20170819",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
   },
