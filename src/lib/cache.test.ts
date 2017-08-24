@@ -107,29 +107,23 @@ describe('Unit: lib/cache', () => {
       assert(cache.put(1, 1) === false);
       assert(key === 0 && val === 0 && cnt === 1);
       assert(cache.put(1, 1) === true);
-      assert.deepStrictEqual(Array.from(cache), [
-        [1, 1]
-      ]);
-      assert.deepStrictEqual(cache.inspect(), [
-        [], [1]
-      ]);
+      assert.deepStrictEqual(cache.export(), {
+        stats: [[], [1]],
+        entries: [[1, 1]],
+      });
       assert(cache.put(0, 0) === false);
       assert(key === 1 && val === 1 && cnt === 2);
-      assert.deepStrictEqual(Array.from(cache), [
-        [0, 0]
-      ]);
-      assert.deepStrictEqual(cache.inspect(), [
-        [0], []
-      ]);
+      assert.deepStrictEqual(cache.export(), {
+        stats: [[0], []],
+        entries: [[0, 0]],
+      });
       assert(cache.put(2, 2) === false);
       assert(key === 0 && val === 0 && cnt === 3);
       assert(cache.put(2, 2) === true);
-      assert.deepStrictEqual(Array.from(cache), [
-        [2, 2]
-      ]);
-      assert.deepStrictEqual(cache.inspect(), [
-        [], [2]
-      ]);
+      assert.deepStrictEqual(cache.export(), {
+        stats: [[], [2]],
+        entries: [[2, 2]],
+      });
     });
 
     it('LRF', () => {
@@ -154,12 +148,10 @@ describe('Unit: lib/cache', () => {
       assert(key === 1 && val === 1 && cnt === 2);
       assert(cache.put(3, 3) === false);
       assert(key === 0 && val === 0 && cnt === 3);
-      assert.deepStrictEqual(Array.from(cache), [
-        [2, 2], [3, 3]
-      ]);
-      assert.deepStrictEqual(cache.inspect(), [
-        [3], [2]
-      ]);
+      assert.deepStrictEqual(cache.export(), {
+        stats: [[3], [2]],
+        entries: [[2, 2], [3, 3]],
+      });
 
       assert(cache.clear() === void 0);
       assert(key === 3 && val === 3 && cnt === 5);
