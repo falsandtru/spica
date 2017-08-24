@@ -8,6 +8,7 @@ const buffer = require('vinyl-buffer');
 const $ = require('gulp-load-plugins')();
 const seq = require('run-sequence');
 const browserify = require('browserify');
+const watchify = require('watchify');
 const tsify = require('tsify');
 const pump = require('pump');
 const Server = require('karma').Server;
@@ -56,46 +57,59 @@ const config = {
   }
 };
 
-function compile(paths, force) {
+function compile({src, dest}, cb, watch) {
   let done = true;
-  return browserify(Object.values(paths).map(p => glob.sync(p)))
+  const b = browserify(Object.values(src).map(p => glob.sync(p)), {
+    cache: {},
+    packageCache: {},
+    plugin: watch ? [watchify] : [],
+  })
     .require(`./index.ts`, { expose: pkg.name })
     .plugin(tsify, Object.assign({ global: true }, require('./tsconfig.json').compilerOptions))
-    .bundle()
-    .on("error", err => done = console.log(err + ''))
-    .pipe(source(`${pkg.name}.js`))
-    .pipe(buffer())
-    .once("finish", () => done || force || process.exit(1));
+    .on('update', () => cb(bundle()));
+  return cb(bundle());
+
+  function bundle() {
+    console.time('bundle');
+    return b
+      .bundle()
+      .on("error", err => done = console.log(err + ''))
+      .pipe(source(`${pkg.name}.js`))
+      .pipe(buffer())
+      .once('finish', () => console.timeEnd('bundle'))
+      .once("finish", () => done || force || process.exit(1))
+      .pipe(gulp.dest(dest));
+  }
 }
 
 gulp.task('ts:watch', function () {
-  gulp.watch(config.ts.test.src, () => {
-    return compile(config.ts.test.src, true)
-      .pipe(gulp.dest(config.ts.test.dest));
-  });
+  return compile(config.ts.test, b => b, true);
 });
 
 gulp.task('ts:test', function () {
-  return compile(config.ts.test.src)
-    .pipe(gulp.dest(config.ts.test.dest));
+  return compile(config.ts.test, b => b);
 });
 
 gulp.task('ts:bench', function () {
-  return compile(config.ts.bench.src)
-    .pipe($.unassert())
-    .pipe(gulp.dest(config.ts.bench.dest));
+  return compile(config.ts.bench, b =>
+    pump([
+      b,
+      $.unassert(),
+      gulp.dest(config.ts.bench.dest)
+    ]));
 });
 
-gulp.task('ts:dist', function (done) {
-  pump([
-    compile(config.ts.dist.src),
-    $.unassert(),
-    $.header(config.banner),
-    gulp.dest(config.ts.dist.dest),
-    $.rename({ extname: '.min.js' }),
-    $.uglify({ output: { comments: 'all' } }),
-    gulp.dest(config.ts.dist.dest)
-  ], done);
+gulp.task('ts:dist', function () {
+  return compile(config.ts.dist, b =>
+    pump([
+      b,
+      $.unassert(),
+      $.header(config.banner),
+      gulp.dest(config.ts.dist.dest),
+      $.rename({ extname: '.min.js' }),
+      $.uglify({ output: { comments: 'all' } }),
+      gulp.dest(config.ts.dist.dest)
+    ]));
 });
 
 gulp.task('karma:watch', function (done) {
@@ -155,50 +169,39 @@ gulp.task('update', function () {
 });
 
 gulp.task('watch', ['clean'], function () {
-  seq(
-    'ts:test',
+  return seq(
     [
       'ts:watch',
       'karma:watch'
-    ]
+    ],
   );
 });
 
-gulp.task('test', ['clean'], function (done) {
-  seq(
+gulp.task('test', ['clean'], function () {
+  return seq(
     'ts:test',
     'karma:test',
     'ts:dist',
-    function () {
-      done();
-    }
   );
 });
 
-gulp.task('bench', ['clean'], function (done) {
-  seq(
+gulp.task('bench', ['clean'], function () {
+  return seq(
     'ts:bench',
     'karma:bench',
-    function () {
-      done();
-    }
   );
 });
 
-gulp.task('dist', ['clean'], function (done) {
-  seq(
+gulp.task('dist', ['clean'], function () {
+  return seq(
     'ts:dist',
-    done
   );
 });
 
-gulp.task('ci', ['clean'], function (done) {
-  seq(
+gulp.task('ci', ['clean'], function () {
+  return seq(
     'ts:test',
     'karma:ci',
     'dist',
-    function () {
-      done();
-    }
   );
 });
