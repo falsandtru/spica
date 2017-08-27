@@ -58,33 +58,36 @@ export class Cache<K, V = void> {
     void this.put(key, value, log);
     return value;
   }
-  public get(key: K): V | undefined {
+  public get(key: K, log = true): V | undefined {
+    if (!log) return this.store.get(key);
     void this.access(key);
     return this.store.get(key);
   }
   public has(key: K): boolean {
     return this.store.has(key);
   }
-  public delete(key: K): boolean {
+  public delete(key: K, log = true): boolean {
     if (!this.store.has(key)) return false;
     const {LRU, LFU} = this.stats;
-    for (const log of [LFU, LRU]) {
-      const index = findIndex(key, log);
+    for (const stat of [LFU, LRU]) {
+      const index = findIndex(key, stat);
       if (index === -1) continue;
       const val = this.store.get(key)!;
-      void this.store.delete(log.splice(index, 1)[0]);
+      void this.store.delete(stat.splice(index, 1)[0]);
+      if (!log) return true;
       void this.callback(key, val);
       return true;
     }
     return false;
   }
-  public clear(): void {
+  public clear(log = true): void {
     const entries = Array.from(this);
     this.store = new Map();
     this.stats = {
       LRU: [],
       LFU: [],
     };
+    if (!log) return;
     return void entries
       .forEach(([key, val]) =>
         void this.callback(key, val));

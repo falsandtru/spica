@@ -482,10 +482,10 @@ export class Cache<K, V = void> {
   put(this: Cache<K, void>, key: K): boolean;
   set(key: K, value: V, log?: boolean): V;
   set(this: Cache<K, void>, key: K): V;
-  get(key: K): V | undefined;
+  get(key: K, log?: boolean): V | undefined;
   has(key: K): boolean;
-  delete(key: K): boolean;
-  clear(): void;
+  delete(key: K, log?: boolean): boolean;
+  clear(log?: boolean): void;
   [Symbol.iterator](): Iterator<[K, V]>;
   export(): { stats: [K[], K[]]; entries: [K, V][]; };
 }
