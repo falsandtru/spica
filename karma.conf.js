@@ -32,6 +32,7 @@ module.exports = function (config) {
     autoWatchBatchDelay: 500,
     browsers: ['Chrome'],
     browserNoActivityTimeout: 100 * 1e3,
+    concurrency: 1,
     client: {
       useIframe: false
     }
