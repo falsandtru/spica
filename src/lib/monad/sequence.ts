@@ -86,7 +86,7 @@ void compose(
   tails,
   segs,
   subsequences,
-  permutations
+  permutations,
 );
 
 export { Sequence }
