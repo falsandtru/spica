@@ -19,7 +19,10 @@ export class Cache<K, V = void> {
       LRU,
       LFU,
     };
-    this.store = new Map(entries.slice(0, size));
+    this.store = new Map(entries);
+    void stats[1].concat(stats[0]).slice(LFU.length + LRU.length)
+      .forEach(k =>
+        void this.store.delete(k));
     if (this.store.size !== LFU.length + LRU.length) throw new Error(`Spica: Cache: Size of stats and entries is not matched.`);
     if (!LFU.concat(LRU).every(k => this.store.has(k))) throw new Error(`Spica: Cache: Keys of stats and entries is not matched.`);
   }
