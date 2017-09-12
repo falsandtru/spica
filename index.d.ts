@@ -473,9 +473,15 @@ export class Cache<K, V = void> {
   constructor(
     size: number,
     callback?: (key: K, value: V) => void,
-    data?: {
-      stats?: [K[], K[]];
-      entries?: [K, V][];
+    opts?: {
+      ignore?: {
+        delete?: boolean;
+        clear?: boolean;
+      };
+      data?: {
+        stats: [K[], K[]];
+        entries: [K, V][];
+      };
     },
   );
   put(key: K, value: V, log?: boolean): boolean;
@@ -484,8 +490,8 @@ export class Cache<K, V = void> {
   set(this: Cache<K, void>, key: K): V;
   get(key: K, log?: boolean): V | undefined;
   has(key: K): boolean;
-  delete(key: K, log?: boolean): boolean;
-  clear(log?: boolean): void;
+  delete(key: K): boolean;
+  clear(): void;
   [Symbol.iterator](): Iterator<[K, V]>;
   export(): { stats: [K[], K[]]; entries: [K, V][]; };
 }

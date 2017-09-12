@@ -1,18 +1,30 @@
+import { extend } from './assign';
 import { findIndex } from './equal';
 
 export class Cache<K, V = void> {
   constructor(
     private readonly size: number,
     private readonly callback: (key: K, value: V) => void = () => void 0,
-    {
-      stats = [[], []],
-      entries = [],
-    }: {
-      stats?: [K[], K[]];
-      entries?: [K, V][];
+    opts: {
+      ignore?: {
+        delete?: boolean;
+        clear?: boolean;
+      };
+      data?: {
+        stats: [K[], K[]];
+        entries: [K, V][];
+      };
     } = {},
   ) {
     if (size > 0 === false) throw new Error(`Spica: Cache: Cache size must be greater than 0.`);
+    void Object.freeze(extend(this.opts, opts));
+    const {
+      stats,
+      entries,
+    } = opts.data || {
+      stats: [[], []],
+      entries: [],
+    };
     const LFU = stats[1].slice(0, size);
     const LRU = stats[0].slice(0, size - LFU.length);
     this.stats = {
@@ -26,6 +38,12 @@ export class Cache<K, V = void> {
     if (this.store.size !== LFU.length + LRU.length) throw new Error(`Spica: Cache: Size of stats and entries is not matched.`);
     if (!LFU.concat(LRU).every(k => this.store.has(k))) throw new Error(`Spica: Cache: Keys of stats and entries is not matched.`);
   }
+  private readonly opts = {
+    ignore: {
+      delete: false,
+      clear: false,
+    },
+  };
   public put(key: K, value: V, log?: boolean): boolean;
   public put(this: Cache<K, void>, key: K, value?: V): boolean;
   public put(key: K, value: V, log = true): boolean {
@@ -69,7 +87,7 @@ export class Cache<K, V = void> {
   public has(key: K): boolean {
     return this.store.has(key);
   }
-  public delete(key: K, log = true): boolean {
+  public delete(key: K): boolean {
     if (!this.store.has(key)) return false;
     const {LRU, LFU} = this.stats;
     for (const stat of [LFU, LRU]) {
@@ -77,21 +95,21 @@ export class Cache<K, V = void> {
       if (index === -1) continue;
       const val = this.store.get(key)!;
       void this.store.delete(stat.splice(index, 1)[0]);
-      if (!log) return true;
+      if (this.opts.ignore.delete) return true;
       void this.callback(key, val);
       return true;
     }
     return false;
   }
-  public clear(log = true): void {
-    const entries = Array.from(this);
+  public clear(): void {
+    const store = this.store;
     this.store = new Map();
     this.stats = {
       LRU: [],
       LFU: [],
     };
-    if (!log) return;
-    return void entries
+    if (this.opts.ignore.clear) return;
+    return void Array.from(store)
       .forEach(([key, val]) =>
         void this.callback(key, val));
   }
