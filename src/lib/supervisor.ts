@@ -155,15 +155,18 @@ export abstract class Supervisor<N extends string, P, R, S> {
       ];
     }
   }
-  public terminate(name?: N, reason?: any): boolean {
+  public kill(name: N, reason?: any): boolean {
     if (!this.available) return false;
     assert(this.alive === true);
-    return name === void 0
-      ? void this.destructor(reason) === void 0
-      : Array.from(this.workers.values())
-          .filter(worker => worker.name === name)
-          .filter(worker => worker.terminate(reason))
-          .length > 0;
+    return this.workers.has(name)
+      ? this.workers.get(name)!.terminate(reason)
+      : false;
+  }
+  public terminate(reason?: any): boolean {
+    if (!this.available) return false;
+    assert(this.alive === true);
+    void this.destructor(reason);
+    return true;
   }
   public schedule(): void {
     void tick(this.scheduler, true);
@@ -291,7 +294,7 @@ class Worker<N extends string, P, R, S> {
       catch (reason_) {
         void this.sv.events.exit
           .emit([this.name], [this.name, this.process, this.state, reason]);
-        void this.sv.terminate(void 0, reason_);
+        void this.sv.terminate(reason_);
       }
     }
   }

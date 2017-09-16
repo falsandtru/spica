@@ -22,7 +22,8 @@ export abstract class Supervisor<N extends string, P, R, S> {
   call(name: N, param: P, callback: Supervisor.Callback<R>, timeout?: number): void;
   cast(name: N, param: P, timeout?: number): boolean;
   refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason: any) => boolean][];
-  terminate(name?: N, reason?: any): boolean;
+  kill(name: N, reason?: any): boolean;
+  terminate(reason?: any): boolean;
 }
 export namespace Supervisor {
   export interface Settings {

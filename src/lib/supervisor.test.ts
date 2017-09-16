@@ -42,15 +42,15 @@ describe('Unit: lib/supervisor', function () {
         call: (n, s) => [n, ++s],
         exit: () => void 0
       };
-      const terminate = sv1.register('', process, 0);
+      const kill = sv1.register('', process, 0);
       assert.deepStrictEqual(sv1.refs(), [
-        ['', process, 0, terminate]
+        ['', process, 0, kill]
       ]);
       assert(Supervisor.count === 0);
       assert(Supervisor.procs === 0);
       assert(TestSupervisor.count === 1);
       assert(TestSupervisor.procs === 1);
-      sv1.terminate('');
+      sv1.kill('');
       assert(Supervisor.count === 0);
       assert(Supervisor.procs === 0);
       assert(TestSupervisor.count === 1);
@@ -81,13 +81,13 @@ describe('Unit: lib/supervisor', function () {
         call: (n, s) => [n, ++s],
         exit: () => void 0
       };
-      const terminate = sv.register('', process, 0);
+      const kill = sv.register('', process, 0);
       assert.deepStrictEqual(sv.refs(), [
-        ['', process, 0, terminate]
+        ['', process, 0, kill]
       ]);
       assert(TestSupervisor.count === 1);
       assert(TestSupervisor.procs === 1);
-      sv.terminate('');
+      sv.kill('');
       assert(TestSupervisor.count === 1);
       assert(TestSupervisor.procs === 0);
       sv.terminate();
@@ -211,7 +211,7 @@ describe('Unit: lib/supervisor', function () {
       }, 0);
       assert(inits === exits);
       assert(inits === 0);
-      sv.terminate('', 0);
+      sv.kill('', 0);
       assert(inits === exits);
       assert(inits === 0);
       sv.register('', {
@@ -222,7 +222,7 @@ describe('Unit: lib/supervisor', function () {
       sv.cast('', 1);
       assert(inits === 1);
       assert(exits === 0);
-      sv.terminate('', 0);
+      sv.kill('', 0);
       assert(inits === exits);
       assert(inits === 1);
       done();
@@ -318,7 +318,7 @@ describe('Unit: lib/supervisor', function () {
       assert(cnt === 0);
     });
 
-    it('terminate process', function (done) {
+    it('kill process', function (done) {
       class TestSupervisor extends Supervisor<string, number, number, number> {
       }
       assert(TestSupervisor.count === 0);
@@ -329,10 +329,10 @@ describe('Unit: lib/supervisor', function () {
       void sv.register(' ', _ => [0, 0], 0);
       assert(TestSupervisor.count === 1);
       assert(TestSupervisor.procs === 1);
-      assert(sv.terminate('') === false);
+      assert(sv.kill('') === false);
       assert(TestSupervisor.count === 1);
       assert(TestSupervisor.procs === 1);
-      assert(sv.terminate(' ') === true);
+      assert(sv.kill(' ') === true);
       assert(TestSupervisor.count === 1);
       assert(TestSupervisor.procs === 0);
       assert(sv.terminate() === true);
@@ -360,9 +360,9 @@ describe('Unit: lib/supervisor', function () {
           ++cnt;
         }
       });
-      const terminate = sv.register('', _ => [0, 0], 0);
+      const kill = sv.register('', _ => [0, 0], 0);
       assert(sv.terminate() === true);
-      assert(terminate() === false);
+      assert(kill() === false);
       assert(sv.terminate() === false);
       assert(cnt === 1);
       try {
