@@ -59,6 +59,7 @@ const config = {
 
 function compile({ src, dest }, opts = {}, cb = b => b) {
   let done = true;
+  const force = !!opts.plugin && opts.plugin.includes(watchify);
   const b = browserify(Object.values(src).map(p => glob.sync(p)), {
     cache: {},
     packageCache: {},
@@ -93,7 +94,7 @@ gulp.task('ts:test', function () {
 });
 
 gulp.task('ts:bench', function () {
-  return compile(config.ts.bench, b =>
+  return compile(config.ts.bench, {}, b =>
     pump([
       b,
       $.unassert(),
@@ -102,7 +103,7 @@ gulp.task('ts:bench', function () {
 });
 
 gulp.task('ts:dist', function () {
-  return compile(config.ts.dist, b =>
+  return compile(config.ts.dist, {}, b =>
     pump([
       b,
       $.unassert(),
@@ -170,40 +171,45 @@ gulp.task('update', function () {
   shell('npm i --no-shrinkwrap');
 });
 
-gulp.task('watch', ['clean'], function () {
-  return seq(
+gulp.task('watch', ['clean'], function (done) {
+  seq(
     [
       'ts:watch',
       'karma:watch'
     ],
+    done
   );
 });
 
-gulp.task('test', ['clean'], function () {
-  return seq(
+gulp.task('test', ['clean'], function (done) {
+  seq(
     'ts:test',
     'karma:test',
     'ts:dist',
+    done
   );
 });
 
-gulp.task('bench', ['clean'], function () {
-  return seq(
+gulp.task('bench', ['clean'], function (done) {
+  seq(
     'ts:bench',
     'karma:bench',
+    done
   );
 });
 
-gulp.task('dist', ['clean'], function () {
-  return seq(
+gulp.task('dist', ['clean'], function (done) {
+  seq(
     'ts:dist',
+    done
   );
 });
 
-gulp.task('ci', ['clean'], function () {
-  return seq(
+gulp.task('ci', ['clean'], function (done) {
+  seq(
     'ts:test',
     'karma:ci',
     'dist',
+    done
   );
 });
