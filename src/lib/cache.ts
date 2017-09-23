@@ -109,7 +109,7 @@ export class Cache<K, V = void> {
       LFU: [],
     };
     if (this.opts.ignore.clear) return;
-    return void Array.from(store)
+    return void [...store]
       .forEach(([key, val]) =>
         void this.callback(key, val));
   }
@@ -119,7 +119,7 @@ export class Cache<K, V = void> {
   public export(): { stats: [K[], K[]]; entries: [K, V][]; } {
     return {
       stats: [this.stats.LRU.slice(), this.stats.LFU.slice()],
-      entries: Array.from(this),
+      entries: [...this],
     };
   }
   public inspect(): [K[], K[]] {

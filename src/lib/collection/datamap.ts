@@ -14,7 +14,7 @@ function isPrimitive(target: any): boolean {
 
 export class DataMap<K, V> implements WeakMapLike<K, V> {
   constructor(entries: Iterable<[K, V]> = []) {
-    void Array.from(entries)
+    void [...entries]
       .forEach(([k, v]) =>
         void this.set(k, v));
   }

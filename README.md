@@ -29,7 +29,6 @@ $ npm i spica
 - DataMap
 - AttrMap
 - Cache
-- Mixin
 - tick
 - uuid
 - sqid
@@ -44,4 +43,3 @@ $ npm i spica
 - Chrome
 - Firefox
 - Edge
-- https://cdn.polyfill.io

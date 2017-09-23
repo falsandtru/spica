@@ -2,8 +2,9 @@
   "compilerOptions": {
     "target": "es5",
     "lib": [
-      "es6"
+      "es7"
     ],
+    "downlevelIteration": true,
     "module": "commonjs",
     "moduleResolution": "node",
     "alwaysStrict": true,

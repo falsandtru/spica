@@ -1,3 +1,3 @@
 export function type(target: any): string {
-  return (<string>Object.prototype.toString.call(target)).split(' ').pop()!.slice(0, -1);
+  return (Object.prototype.toString.call(target) as string).split(' ').pop()!.slice(0, -1);
 }

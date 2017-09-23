@@ -19,7 +19,7 @@ export interface Cancellee<L = void> {
 export class Cancellation<L = void>
   implements Canceller<L>, Cancellee<L> {
   constructor(cancelees: Iterable<Cancellee<L>> = []) {
-    void Array.from(cancelees)
+    void [...cancelees]
       .forEach(cancellee =>
         void cancellee.register(this.cancel));
   }

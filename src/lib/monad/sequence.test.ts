@@ -6,11 +6,11 @@ describe('Unit: lib/monad/sequence', () => {
   describe('Iterable', () => {
     it('idempotence', () => {
       const s = Sequence.from([0, 1, 2]);
-      assert.deepStrictEqual(Array.from(s), [0, 1, 2]);
-      assert.deepStrictEqual(Array.from(s), [0, 1, 2]);
+      assert.deepStrictEqual([...s], [0, 1, 2]);
+      assert.deepStrictEqual([...s], [0, 1, 2]);
       assert.deepStrictEqual(Sequence.from(s).extract(), [0, 1, 2]);
       assert.deepStrictEqual(Sequence.from(s).extract(), [0, 1, 2]);
-      assert.deepStrictEqual(Array.from(s), [0, 1, 2]);
+      assert.deepStrictEqual([...s], [0, 1, 2]);
       assert.deepStrictEqual(Sequence.from(s).extract(), [0, 1, 2]);
     });
 
@@ -22,10 +22,10 @@ describe('Unit: lib/monad/sequence', () => {
     });
 
     it('to Array', () => {
-      assert.deepStrictEqual(Array.from(Sequence.from([])), []);
-      assert.deepStrictEqual(Array.from(Sequence.from([0])), [0]);
-      assert.deepStrictEqual(Array.from(Sequence.from([0, 1])), [0, 1]);
-      assert.deepStrictEqual(Array.from(Sequence.from([0, 1, 2])), [0, 1, 2]);
+      assert.deepStrictEqual([...Sequence.from([])], []);
+      assert.deepStrictEqual([...Sequence.from([0])], [0]);
+      assert.deepStrictEqual([...Sequence.from([0, 1])], [0, 1]);
+      assert.deepStrictEqual([...Sequence.from([0, 1, 2])], [0, 1, 2]);
     });
 
   });

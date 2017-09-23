@@ -497,8 +497,6 @@ export class Cache<K, V = void> {
   export(): { stats: [K[], K[]]; entries: [K, V][]; };
 }
 
-export function Mixin<T extends object>(...mixins: Array<new () => object>): new () => T;
-
 export function tick(fn: () => void, dedup?: boolean): void;
 
 export function uuid(): string;

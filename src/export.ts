@@ -11,7 +11,6 @@ export { HList, HNil } from './lib/hlist';
 export { DataMap } from './lib/datamap';
 export { AttrMap } from './lib/attrmap';
 export { Cache } from './lib/cache';
-export { Mixin } from './lib/mixin';
 export { tick } from './lib/tick';
 export { uuid } from './lib/uuid';
 export { sqid } from './lib/sqid';

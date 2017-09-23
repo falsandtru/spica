@@ -6,7 +6,7 @@ export class AttrMap<C, K, V> {
     private readonly KeyMap: new <K, V>(entries?: Iterable<[K, V]>) => WeakMapLike<K, V> = WeakMap,
     private readonly ValueMap: new <K, V>(entries?: Iterable<[K, V]>) => WeakMapLike<K, V> = Map
   ) {
-    void Array.from(entries)
+    void [...entries]
       .forEach(([c, k, v]) =>
         void this.set(c, k, v));
   }

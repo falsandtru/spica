@@ -11,7 +11,6 @@ import {
   HList, HNil,
   DataMap, AttrMap,
   Cache,
-  Mixin,
   tick,
   uuid,
   sqid,
@@ -136,13 +135,6 @@ describe('Interface: Package', function () {
   describe('Cache', function () {
     it('Cache', function () {
       assert(typeof Cache === 'function');
-    });
-
-  });
-
-  describe('Mixin', function () {
-    it('Mixin', function () {
-      assert(typeof Mixin === 'function');
     });
 
   });

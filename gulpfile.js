@@ -49,7 +49,7 @@ const config = {
     }
   },
   banner: [
-    `/*! ${pkg.name} v${pkg.version} ${pkg.repository.url} | (c) 2016, ${pkg.author} | ${pkg.license} License */`,
+    `/*! ${pkg.name} v${pkg.version} ${pkg.repository.url} | (c) ${new Date().getUTCFullYear()}, ${pkg.author} | ${pkg.license} License */`,
     ''
   ].join('\n'),
   clean: {
@@ -57,16 +57,16 @@ const config = {
   }
 };
 
-function compile({src, dest}, cb, watch) {
+function compile({ src, dest }, opts = {}, cb = b => b) {
   let done = true;
   const b = browserify(Object.values(src).map(p => glob.sync(p)), {
     cache: {},
     packageCache: {},
-    plugin: watch ? [watchify] : [],
+    ...opts,
   })
     .require(`./index.ts`, { expose: pkg.name })
-    .plugin(tsify, Object.assign({ global: true }, require('./tsconfig.json').compilerOptions))
-    .on('update', () => cb(bundle()));
+    .plugin(tsify, { global: true, ...require('./tsconfig.json').compilerOptions })
+    .on('update', () => void cb(bundle()));
   return cb(bundle());
 
   function bundle() {
@@ -83,11 +83,13 @@ function compile({src, dest}, cb, watch) {
 }
 
 gulp.task('ts:watch', function () {
-  return compile(config.ts.test, b => b, true);
+  return compile(config.ts.test, {
+    plugin: [watchify],
+  });
 });
 
 gulp.task('ts:test', function () {
-  return compile(config.ts.test, b => b);
+  return compile(config.ts.test);
 });
 
 gulp.task('ts:bench', function () {
@@ -126,10 +128,10 @@ gulp.task('karma:test', function (done) {
   new Server({
     configFile: __dirname + '/karma.conf.js',
     browsers: config.browsers,
-    reporters: ['dots', 'coverage'],
     preprocessors: {
       'dist/*.js': ['coverage', 'espower']
     },
+    reporters: ['dots', 'coverage'],
     singleRun: true
   }, done).start();
 });
@@ -146,10 +148,10 @@ gulp.task('karma:ci', function (done) {
   new Server({
     configFile: __dirname + '/karma.conf.js',
     browsers: config.browsers,
-    reporters: ['dots', 'coverage', 'coveralls'],
     preprocessors: {
       'dist/*.js': ['coverage', 'espower']
     },
+    reporters: ['dots', 'coverage', 'coveralls'],
     singleRun: true
   }, done).start();
 });

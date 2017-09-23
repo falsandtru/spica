@@ -6,7 +6,7 @@ describe('Unit: lib/cache', () => {
     it('put/has/delete', () => {
       const cache = new Cache<number, number>(1);
 
-      assert.deepStrictEqual(Array.from(cache), [
+      assert.deepStrictEqual([...cache], [
       ]);
       assert.deepStrictEqual(cache.inspect(), [
         [], []
@@ -14,7 +14,7 @@ describe('Unit: lib/cache', () => {
 
       assert(cache.has(0) === false);
       assert(cache.put(0, 0) === false);
-      assert.deepStrictEqual(Array.from(cache), [
+      assert.deepStrictEqual([...cache], [
         [0, 0]
       ]);
       assert.deepStrictEqual(cache.inspect(), [
@@ -23,7 +23,7 @@ describe('Unit: lib/cache', () => {
 
       assert(cache.has(0) === true);
       assert(cache.put(0, 0) === true);
-      assert.deepStrictEqual(Array.from(cache), [
+      assert.deepStrictEqual([...cache], [
         [0, 0]
       ]);
       assert.deepStrictEqual(cache.inspect(), [
@@ -32,7 +32,7 @@ describe('Unit: lib/cache', () => {
 
       assert(cache.has(0) === true);
       assert(cache.put(0, 0) === true);
-      assert.deepStrictEqual(Array.from(cache), [
+      assert.deepStrictEqual([...cache], [
         [0, 0]
       ]);
       assert.deepStrictEqual(cache.inspect(), [
@@ -42,7 +42,7 @@ describe('Unit: lib/cache', () => {
       assert(cache.has(0) === true);
       assert(cache.delete(0) === true);
       assert(cache.delete(0) === false);
-      assert.deepStrictEqual(Array.from(cache), [
+      assert.deepStrictEqual([...cache], [
       ]);
       assert.deepStrictEqual(cache.inspect(), [
         [], []
@@ -67,7 +67,7 @@ describe('Unit: lib/cache', () => {
       assert(key === void 0 && val === void 0 && cnt === 0);
       assert(cache.put(1, 1) === false);
       assert(key === 0 && val === 0 && cnt === 1);
-      assert.deepStrictEqual(Array.from(cache), [
+      assert.deepStrictEqual([...cache], [
         [1, 1]
       ]);
       assert.deepStrictEqual(cache.inspect(), [
@@ -75,7 +75,7 @@ describe('Unit: lib/cache', () => {
       ]);
       assert(cache.put(0, 0) === false);
       assert(key === 1 && val === 1 && cnt === 2);
-      assert.deepStrictEqual(Array.from(cache), [
+      assert.deepStrictEqual([...cache], [
         [0, 0]
       ]);
       assert.deepStrictEqual(cache.inspect(), [
@@ -83,7 +83,7 @@ describe('Unit: lib/cache', () => {
       ]);
       assert(cache.put(2, 2) === false);
       assert(key === 0 && val === 0 && cnt === 3);
-      assert.deepStrictEqual(Array.from(cache), [
+      assert.deepStrictEqual([...cache], [
         [2, 2]
       ]);
       assert.deepStrictEqual(cache.inspect(), [
@@ -155,7 +155,7 @@ describe('Unit: lib/cache', () => {
 
       assert(cache.clear() === void 0);
       assert(key === 3 && val === 3 && cnt === 5);
-      assert.deepStrictEqual(Array.from(cache), [
+      assert.deepStrictEqual([...cache], [
       ]);
       assert.deepStrictEqual(cache.inspect(), [
         [], []
@@ -190,7 +190,7 @@ describe('Unit: lib/cache', () => {
       assert(LRU.every(k => cache.has(k)));
       assert(LFU.every(k => cache.has(k)));
       assert(LRU.length + LFU.length === size);
-      assert(Array.from(cache).length === size);
+      assert([...cache].length === size);
       assert(
         Sequence.union(Sequence.from(LRU).sort(), Sequence.from(LFU).sort(), (a, b) => a - b)
           .extract()

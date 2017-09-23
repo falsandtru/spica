@@ -14,7 +14,7 @@ export abstract class Supervisor<N extends string, P, R, S> {
   }
   public static get procs(): number {
     return this.instances
-      ? Array.from(this.instances)
+      ? [...this.instances]
           .reduce((cnt, sv) =>
             cnt + sv.workers.size
           , 0)
@@ -140,7 +140,7 @@ export abstract class Supervisor<N extends string, P, R, S> {
   public refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason: any) => boolean][] {
     void this.validate();
     return name === void 0
-      ? Array.from(this.workers.values()).map(convert)
+      ? [...this.workers.values()].map(convert)
       : this.workers.has(name)
         ? [convert(this.workers.get(name)!)]
         : [];
