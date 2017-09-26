@@ -177,7 +177,7 @@ export abstract class Supervisor<N extends string, P, R, S> {
     for (let i = 0, len = this.messages.length; this.available && i < len; ++i) {
       if (this.settings.resource - (Date.now() - since) > 0 === false) return void this.schedule();
       const [name, param, callback, expiry] = this.messages[i];
-      const result = this.workers.has(name)
+      const result = this.workers.has(name) && Date.now() <= expiry
         ? this.workers.get(name)!.call([param, expiry])
         : void 0;
       if (!result && Date.now() < expiry) continue;
