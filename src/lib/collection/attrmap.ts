@@ -1,4 +1,4 @@
-import { WeakMapLike } from './datamap';
+import { WeakMapLike } from '../../../index.d';
 
 export class AttrMap<C, K, V> {
   constructor(

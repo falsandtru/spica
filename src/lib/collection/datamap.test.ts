@@ -84,6 +84,12 @@ describe('Unit: lib/datamap', () => {
       assert(map.size === 0);
     });
 
+    it('injection', () => {
+      const map = new DataMap<string[], string>();
+      assert(map.set(['a', 'b'], '') === map);
+      assert(map.has(['a,3:b']) === false);
+    });
+
   });
 
 });
