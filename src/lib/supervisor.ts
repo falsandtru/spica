@@ -1,9 +1,9 @@
 import { Observation } from './observation';
+import { extend } from './assign';
 import { tick } from './tick';
 import { isThenable } from './thenable';
 import { sqid } from './sqid';
 import { causeAsyncException } from './exception';
-import { noop } from './noop';
 
 export abstract class Supervisor<N extends string, P, R, S> {
   private static readonly instances: Set<Supervisor<string, any, any, any>>;
@@ -20,26 +20,16 @@ export abstract class Supervisor<N extends string, P, R, S> {
           , 0)
       : 0;
   }
-  constructor({
-    name = '',
-    size = Infinity,
-    timeout = Infinity,
-    destructor = noop,
-    scheduler = tick,
-    resource = 10,
-  }: Supervisor.Settings = {}) {
+  constructor(opts: Supervisor.Options = {}) {
     if (!(<typeof Supervisor>this.constructor).hasOwnProperty('instances')) {
-      (<any>this.constructor).instances = new Set();
+      (this.constructor as any).instances = new Set();
     }
+    void extend(this.settings, opts);
+    this.name = this.settings.name;
     if (this.constructor === Supervisor) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot instantiate abstract classes.`);
     void (<typeof Supervisor>this.constructor).instances.add(this);
-    this.name = name;
-    this.size = size;
-    this.timeout = timeout;
-    this.destructor_ = destructor;
     this.scheduler = () =>
-      void scheduler(this.deliver);
-    this.resource = resource;
+      void (void 0, this.settings.scheduler)(this.deliver);
   }
   private destructor(reason: any): void {
     assert(this.alive === true);
@@ -49,22 +39,31 @@ export abstract class Supervisor<N extends string, P, R, S> {
       .forEach(worker =>
         void worker.terminate(reason));
     assert(this.workers.size === 0);
-    void this.deliver();
+    void Object.freeze(this.workers);
+    while (this.messages.length > 0) {
+      const [name, param] = this.messages.shift()!;
+      void this.events.loss.emit([name], [name, param]);
+    }
     assert(this.messages.length === 0);
+    void Object.freeze(this.messages);
     this.alive = false;
     void (<typeof Supervisor>this.constructor).instances.delete(this);
     void Object.freeze(this);
     assert(this.alive === false);
     assert(this.available === false);
-    void this.destructor_(reason);
+    void this.settings.destructor(reason);
   }
   public readonly id: string = sqid();
   public readonly name: string;
-  private readonly size: number;
-  private readonly timeout: number;
-  private readonly destructor_: (reason: any) => void;
+  public readonly settings = {
+    name: '',
+    size: Infinity,
+    timeout: Infinity,
+    destructor: (_: any) => void 0,
+    scheduler: tick,
+    resource: 10,
+  };
   private readonly scheduler: () => void;
-  private readonly resource: number;
   public readonly events = {
     init: new Observation<never[] | [N], Supervisor.Event.Data.Init<N, P, R, S>, any>(),
     loss: new Observation<never[] | [N], Supervisor.Event.Data.Loss<N, P>, any>(),
@@ -87,7 +86,7 @@ export abstract class Supervisor<N extends string, P, R, S> {
       ? {
           init: state => state,
           call: process,
-          exit: _ => void 0
+          exit: _ => void 0,
         }
       : process;
     return this.workers
@@ -96,33 +95,32 @@ export abstract class Supervisor<N extends string, P, R, S> {
       .get(name)!
       .terminate;
   }
-  public call(name: N, param: P, callback: Supervisor.Callback<R>, timeout = this.timeout): void {
+  public call(name: N, param: P, callback: Supervisor.Callback<R>, timeout = this.settings.timeout): void {
     void this.validate();
-    while (this.messages.length + 1 > this.size) {
+    void this.messages.push([
+      name,
+      param,
+      callback,
+      Date.now() + timeout,
+    ]);
+    while (this.messages.length > this.settings.size) {
       const [name, param, callback] = this.messages.shift()!;
       void this.events.loss.emit([name], [name, param]);
       try {
-        void callback(<any>void 0, new Error(`Spica: Supervisor: A message overflowed.`));
+        void callback(void 0 as any, new Error(`Spica: Supervisor: A message overflowed.`));
       }
       catch (reason) {
         void causeAsyncException(reason);
       }
     }
-    void this.messages.push([
-      name,
-      param,
-      callback,
-      timeout,
-      Date.now()
-    ]);
     void this.schedule();
     if (timeout <= 0) return;
     if (timeout === Infinity) return;
-    void setTimeout(() => (
+    void setTimeout(() =>
       void this.schedule()
-    ), timeout + 3);
+    , timeout + 3);
   }
-  public cast(name: N, param: P, timeout = this.timeout): boolean {
+  public cast(name: N, param: P, timeout = this.settings.timeout): boolean {
     void this.validate();
     const result = this.workers.has(name)
       ? this.workers.get(name)!.call([param, timeout])
@@ -151,7 +149,7 @@ export abstract class Supervisor<N extends string, P, R, S> {
         worker.name,
         worker.process,
         worker.state,
-        worker.terminate
+        worker.terminate,
       ];
     }
   }
@@ -169,34 +167,32 @@ export abstract class Supervisor<N extends string, P, R, S> {
     return true;
   }
   public schedule(): void {
+    if (this.messages.length === 0) return;
+    assert(this.available);
     void tick(this.scheduler, true);
   }
-  private readonly messages: [N, P, Supervisor.Callback<R>, number, number][] = [];
+  private readonly messages: [N, P, Supervisor.Callback<R>, number][] = [];
   private readonly deliver = (): void => {
-    const started = Date.now();
-    let resource = this.resource;
-    for (let i = 0, len = this.messages.length; this.available && i < len && resource > 0; ++i) {
-      const now = Date.now();
-      const [name, param, callback, timeout, registered] = this.messages[i];
+    const since = Date.now();
+    for (let i = 0, len = this.messages.length; this.available && i < len; ++i) {
+      if (this.settings.resource - (Date.now() - since) > 0 === false) return void this.schedule();
+      const [name, param, callback, expiry] = this.messages[i];
       const result = this.workers.has(name)
-        ? this.workers.get(name)!.call([param, registered + timeout - now])
+        ? this.workers.get(name)!.call([param, expiry])
         : void 0;
-      if (this.available && !result && now < registered + timeout) continue;
+      if (!result && Date.now() < expiry) continue;
       i === 0
         ? void this.messages.shift()
         : void this.messages.splice(i, 1);
       void --i;
       void --len;
 
-      if (result) {
-        resource = started + this.resource - now;
-      }
-      else {
+      if (!result) {
         void this.events.loss.emit([name], [name, param]);
       }
       if (!result || result instanceof Error) {
         try {
-          void callback(<any>void 0, new Error(`Spica: Supervisor: A processing has failed.`));
+          void callback(void 0 as any, new Error(`Spica: Supervisor: A processing has failed.`));
         }
         catch (reason) {
           void causeAsyncException(reason);
@@ -218,26 +214,15 @@ export abstract class Supervisor<N extends string, P, R, S> {
             reply =>
               this.available
                 ? void callback(reply)
-                : void callback(<any>void 0, new Error(`Spica: Supervisor: A processing has failed.`)),
+                : void callback(void 0 as any, new Error(`Spica: Supervisor: A processing has failed.`)),
             () =>
-              void callback(<any>void 0, new Error(`Spica: Supervisor: A processing has failed.`)));
+              void callback(void 0 as any, new Error(`Spica: Supervisor: A processing has failed.`)));
       }
-    }
-    if (!this.available) {
-      while (this.messages.length > 0) {
-        const [name, param] = this.messages.shift()!;
-        void this.events.loss.emit([name], [name, param]);
-      }
-      void Object.freeze(this.messages);
-      return;
-    }
-    if (resource <= 0 && this.messages.length > 0) {
-      void this.schedule();
     }
   }
 }
 export namespace Supervisor {
-  export interface Settings {
+  export interface Options {
     readonly name?: string;
     readonly size?: number;
     readonly timeout?: number;
@@ -273,7 +258,7 @@ class Worker<N extends string, P, R, S> {
     public readonly name: N,
     public readonly process: Supervisor.Process<P, R, S>,
     public state: S,
-    private readonly destructor_: () => any
+    private readonly destructor_: () => void
   ) {
     assert(process.init && process.exit);
   }
@@ -301,7 +286,7 @@ class Worker<N extends string, P, R, S> {
   private alive = true;
   private available = true;
   private called = false;
-  public readonly call = ([param, timeout]: Worker.Command<P>): [R | Promise<R>] | Error | void => {
+  public readonly call = ([param, expiry]: Worker.Command<P>): [R | Promise<R>] | Error | void => {
     if (!this.available) return;
     try {
       this.available = false;
@@ -322,9 +307,9 @@ class Worker<N extends string, P, R, S> {
         return [
           new Promise<[R, S]>((resolve, reject) => (
             void result.then(resolve, reject),
-            timeout === Infinity
+            expiry === Infinity
               ? void 0
-              : void setTimeout(() => void reject(new Error()), timeout)))
+              : void setTimeout(() => void reject(new Error()), expiry - Date.now())))
             .then<[R, S]>(
               ([reply, state]) => [reply, state])
             .then<R>(

@@ -8,7 +8,7 @@
 export abstract class Supervisor<N extends string, P, R, S> {
   static readonly count: number;
   static readonly procs: number;
-  constructor(settings?: Supervisor.Settings);
+  constructor(options?: Supervisor.Options);
   readonly id: string;
   readonly name: string;
   readonly events: {
@@ -26,7 +26,7 @@ export abstract class Supervisor<N extends string, P, R, S> {
   terminate(reason?: any): boolean;
 }
 export namespace Supervisor {
-  export interface Settings {
+  export interface Options {
     readonly name?: string;
     readonly size?: number;
     readonly timeout?: number;
