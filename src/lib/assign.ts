@@ -20,7 +20,6 @@ export const extend = template((key, target, source): void => {
       return target[key] = extend([], source[key]);
     case 'Object':
       switch (type(target[key])) {
-        case 'Function':
         case 'Object':
           return target[key] = extend(target[key], source[key]);
         default:
