@@ -23,7 +23,7 @@
     "hlist",
     "cache"
   ],
-  "browser": "./dist/spica.js",
+  "main": "./dist/spica.js",
   "files": [
     "dist",
     "index.*",
