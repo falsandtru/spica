@@ -5,13 +5,6 @@ type Callback = () => void;
 let queue: Callback[] = [];
 let register = new WeakSet<Callback>();
 
-function flush(): Callback[] {
-  const cbs = queue;
-  queue = [];
-  register = new WeakSet();
-  return cbs;
-}
-
 export function tick(cb: Callback, dedup = false): void {
   if (dedup) {
     if (register.has(cb)) return;
@@ -21,10 +14,11 @@ export function tick(cb: Callback, dedup = false): void {
   void schedule();
 }
 
+const scheduler = Promise.resolve();
+
 function schedule(): void {
   if (queue.length !== 1) return;
-  void Promise.resolve()
-    .then(run);
+  void scheduler.then(run);
 }
 
 function run(): void {
@@ -41,4 +35,11 @@ function run(): void {
     }
     return;
   }
+}
+
+function flush(): Callback[] {
+  const cbs = queue;
+  queue = [];
+  register = new WeakSet();
+  return cbs;
 }
