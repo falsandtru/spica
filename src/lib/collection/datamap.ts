@@ -2,10 +2,6 @@ import { WeakMapLike } from '../../../index.d';
 import { sqid } from '../sqid';
 import { type } from '../type';
 
-function isPrimitive(target: any): boolean {
-  return target instanceof Object === false;
-}
-
 export class DataMap<K, V> implements WeakMapLike<K, V> {
   constructor(entries: Iterable<[K, V]> = []) {
     void [...entries]
@@ -36,43 +32,43 @@ export class DataMap<K, V> implements WeakMapLike<K, V> {
 
 const oids = new WeakMap<object, string>();
 
-function stringify(key: any): string {
-  switch (typeof key) {
+function stringify(target: any): string {
+  switch (type(target)) {
     case 'undefined':
-      return `0:${key}`;
+    case 'null':
+      return `0:${target}`;
     case 'boolean':
-      return `1:${key}`;
+      return `1:${target}`;
     case 'number':
-      return `2:${key}`;
+      return `2:${target}`;
     case 'string':
-      return `3:${encodeURIComponent(key)}`;
+      return `3:${encodeURIComponent(target)}`;
     case 'symbol':
-      return `4:${encodeURIComponent(key.toString().replace(/^Symbol\((.*?)\)$/, '$1'))}`;
+      return `4:${encodeURIComponent(target.toString().replace(/^Symbol\((.*?)\)$/, '$1'))}`;
+    case 'Array':
+      return `9:${stringifyArray(target)}`;
     default:
-      return isPrimitive(key)
-        ? `8:${encodeURIComponent(key)}`
-        : `9:${
-            stringifyArray(key) ||
-            stringifyObject(key) ||
-            oids.get(key) || oids.set(key, sqid()).get(key)!
-          }`;
+      return `9:${
+        stringifyObject(target) ||
+        oids.get(target) || oids.set(target, sqid()).get(target)!
+      }`;
   }
 }
 
-function stringifyArray(key: any[]): string {
-  if (!Array.isArray(key)) return '';
+function stringifyArray(arr: any[]): string {
+  assert(Array.isArray(arr));
   let acc = '';
-  for (const k of key) {
+  for (const k of arr) {
     acc += `${stringify(k)},`;
   }
   return `[${acc}]`;
 }
 
-function stringifyObject(key: object): string {
-  if (type(key) !== 'Object') return '';
+function stringifyObject(obj: object): string {
+  assert(obj instanceof Object);
   let acc = '';
-  for (const k of Object.keys(key)) {
-    acc += `(${stringify(k)}:${stringify(key[k])}),`;
+  for (const k of Object.keys(obj)) {
+    acc += `${stringify(k)}:${stringify(obj[k])},`;
   }
   return `{${acc}}`;
 }
