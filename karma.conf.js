@@ -22,7 +22,7 @@ module.exports = function (config) {
       subdir: function (browser, platform) {
         return browser.toLowerCase().split(' ')[0];
       },
-			includeAllSources: true,
+      includeAllSources: true,
       instrumenters: {
         isparta: require('isparta')
       },
