@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "es5",
     "lib": [
-      "es7"
+      "es2017"
     ],
     "downlevelIteration": true,
     "module": "commonjs",

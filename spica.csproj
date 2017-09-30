@@ -30,7 +30,7 @@
     <TypeScriptModuleResolution>Node</TypeScriptModuleResolution>
     <TypeScriptAllowSyntheticDefaultImports>True</TypeScriptAllowSyntheticDefaultImports>
     <TypeScriptTarget>ES5</TypeScriptTarget>
-    <TypeScriptLib>es7</TypeScriptLib>
+    <TypeScriptLib>es2017</TypeScriptLib>
     <TypeScriptDownlevelIteration>True</TypeScriptDownlevelIteration>
     <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
     <TypeScriptStrictNullChecks>True</TypeScriptStrictNullChecks>
