@@ -5,6 +5,7 @@ export { Sequence } from './lib/sequence';
 export { Maybe, Just, Nothing } from './lib/maybe';
 export { Either, Left, Right } from './lib/either';
 export { curry } from './lib/curry';
+export { uncurry } from './lib/uncurry';
 export { flip } from './lib/flip';
 export { List, Nil } from './lib/list';
 export { HList, HNil } from './lib/hlist';

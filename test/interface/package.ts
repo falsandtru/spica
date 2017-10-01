@@ -6,6 +6,7 @@ import {
   Maybe, Just, Nothing,
   Either, Left, Right,
   curry,
+  uncurry,
   flip,
   List, Nil,
   HList, HNil,
@@ -91,6 +92,10 @@ describe('Interface: Package', function () {
   describe('curry', function () {
     it('curry', function () {
       assert(typeof curry === 'function');
+    });
+
+    it('uncurry', function () {
+      assert(typeof uncurry === 'function');
     });
 
     it('flip', function () {

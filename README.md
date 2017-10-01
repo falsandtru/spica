@@ -23,6 +23,7 @@ $ npm i spica
 - Maybe, Just, Nothing
 - Either, Left, Right
 - curry
+- uncurry
 - flip
 - List, Nil
 - HList, HNil

@@ -376,6 +376,17 @@ interface Curry {
   <a, b, c, d, e, z>(f: (a: a, b: b, c: c, d: d, e: e) => z, ctx?: any): Curried5<a, b, c, d, e, z>;
 }
 export const curry: Curry;
+
+interface Uncurry {
+  <a, z>(f: (a: a) => z): (a: [a]) => z;
+  <a, b, z>(f: (a: a, b: b) => z): (a: [a, b]) => z;
+  <a, b, c, z>(f: (a: a, b: b, c: c) => z): (a: [a, b, c]) => z;
+  <a, b, c, d, z>(f: (a: a, b: b, c: c, d: d) => z): (a: [a, b, c, d]) => z;
+  <a, b, c, d, e, z>(f: (a: a, b: b, c: c, d: d, e: e) => z): (a: [a, b, c, d, e]) => z;
+}
+
+export const uncurry: Uncurry;
+
 export function flip<a, b, c>(f: (a: a) => (b: b) => c): Curried2<b, a, c>;
 export function flip<a, b, c>(f: (a: a, b: b) => c): Curried2<b, a, c>;
 
