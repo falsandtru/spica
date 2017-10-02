@@ -26,6 +26,7 @@ import dropWhile from './sequence/member/instance/dropWhile';
 import takeUntil from './sequence/member/instance/takeUntil';
 import dropUntil from './sequence/member/instance/dropUntil';
 import sort from './sequence/member/instance/sort';
+import unique from './sequence/member/instance/unique';
 import fmap from './sequence/member/instance/fmap';
 import ap from './sequence/member/instance/ap';
 import bind from './sequence/member/instance/bind';
@@ -72,6 +73,7 @@ void compose(
   takeUntil,
   dropUntil,
   sort,
+  unique,
   fmap,
   ap,
   bind,

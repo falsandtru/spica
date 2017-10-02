@@ -200,6 +200,7 @@ export class Sequence<a, z> extends MonadPlus<a> implements Iterable<a> {
   takeUntil(f: (a: a) => boolean): Sequence<a, Sequence.Iterator<a>>;
   dropUntil(f: (a: a) => boolean): Sequence<a, Sequence.Iterator<a>>;
   sort(cmp?: (a: a, b: a) => number): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]>;
+  unique(): Sequence<a, Sequence.Iterator<a>>;
   memoize(): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]>;
 }
 export namespace Sequence {
