@@ -30,6 +30,7 @@ import unique from './sequence/member/instance/unique';
 import fmap from './sequence/member/instance/fmap';
 import ap from './sequence/member/instance/ap';
 import bind from './sequence/member/instance/bind';
+import join from './sequence/member/instance/join';
 import mapM from './sequence/member/instance/mapM';
 import filterM from './sequence/member/instance/filterM';
 import map from './sequence/member/instance/map';
@@ -77,6 +78,7 @@ void compose(
   fmap,
   ap,
   bind,
+  join,
   mapM,
   filterM,
   map,

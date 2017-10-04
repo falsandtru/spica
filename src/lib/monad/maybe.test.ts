@@ -138,6 +138,10 @@ describe('Unit: lib/maybe', () => {
       assert(Maybe.bind(Return(0))(n => Return(n + 1)).extract() === 1);
     });
 
+    it('join', () => {
+      assert(Return(Return(0)).join().extract() === 0);
+    });
+
     it('Monad law 1', () => {
       const f = (n: number) => Return(n + 1);
       const x = 0;

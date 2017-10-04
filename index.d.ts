@@ -133,6 +133,7 @@ export namespace Applicative {
 }
 declare abstract class Monad<a> extends Applicative<a> {
   abstract bind<b>(f: (a: a) => Monad<b>): Monad<b>;
+  abstract join(this: Monad<Monad<a>>): Monad<a>;
 }
 declare namespace Monad {
   export function Return<a>(a: a): Monad<a>;
@@ -181,6 +182,7 @@ export class Sequence<a, z> extends MonadPlus<a> implements Iterable<a> {
   ap<a, b, c, d, z>(this: Sequence<(a: a, b: b, c: c, d: d) => z, any>, a: Sequence<a, any>): Sequence<(b: b, c: c, d: d) => z, [Sequence.Iterator<Sequence<z, any>>, Sequence.Iterator<z>]>;
   ap<a, b, c, d, e, z>(this: Sequence<(a: a, b: b, c: c, d: d, e: e) => z, any>, a: Sequence<a, any>): Sequence<(b: b, c: c, d: d, e: e) => z, [Sequence.Iterator<Sequence<z, any>>, Sequence.Iterator<z>]>;
   bind<b>(f: (a: a) => Sequence<b, any>): Sequence<b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]>;
+  join<b>(this: Sequence<Sequence<b, any>, any>): Sequence<b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]>;
   mapM<b>(f: (a: a) => Sequence<b, any>): Sequence<b[], [Sequence.Iterator<Sequence<b[], any>>, Sequence.Iterator<b[]>]>;
   filterM(f: (a: a) => Sequence<boolean, any>): Sequence<a[], [Sequence.Iterator<Sequence<a[], any>>, Sequence.Iterator<a[]>]>;
   map<b>(f: (a: a, i: number) => b): Sequence<b, Sequence.Iterator<a>>;
@@ -220,6 +222,7 @@ declare namespace Monad {
     ap<a, b, c, d, e, z>(this: Maybe<(a: a, b: b, c: c, d: d, e: e) => z>, a: Maybe<a>): Maybe<(b: b, c: c, d: d, e: e) => z>;
     bind(f: (a: a) => Maybe<a> | Nothing): Maybe<a>;
     bind<b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b>;
+    join<b>(this: Maybe<Maybe<b>>): Maybe<b>;
     extract(): a;
     extract<b>(transform: () => b): a | b;
     extract<b>(nothing: () => b, just: (a: a) => b): b;
@@ -290,6 +293,7 @@ declare namespace Monad {
     ap<b, c, d, e, f, z>(this: Either<a, (b: b, c: c, d: d, e: e, f: f) => z>, b: Either<a, b>): Either<a, (c: c, d: d, e: e, f: f) => z>;
     bind(f: (b: b) => Either<a, b> | Right<b>): Either<a, b>;
     bind<c>(f: (b: b) => Either<a, c>): Either<a, c>;
+    join<c>(this: Either<a, Either<a, c>>): Either<a, c>;
     extract(): b;
     extract<c>(transform: (a: a) => c): b | c;
     extract<c>(left: (a: a) => c, right: (b: b) => c): c;

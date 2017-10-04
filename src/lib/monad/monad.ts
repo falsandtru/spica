@@ -2,6 +2,7 @@ import { Applicative } from './applicative';
 
 export abstract class Monad<a> extends Applicative<a> {
   public abstract bind<b>(f: (a: a) => Monad<b>): Monad<b>;
+  public abstract join(this: Monad<Monad<a>>): Monad<a>;
 }
 export namespace Monad {
   export declare function Return<a>(a: a): Monad<a>;

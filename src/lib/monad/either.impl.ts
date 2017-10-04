@@ -34,6 +34,9 @@ export class Either<a, b> extends Monad<b> {
       throw new TypeError(`Spica: Either: Invalid monad value.\n\t${m}`);
     });
   }
+  public join<c>(this: Either<a, Either<a, c>>): Either<a, c> {
+    return this.bind(m => m);
+  }
   public extract(): b
   public extract<c>(transform: (a: a) => c): b | c
   public extract<c>(left: (a: a) => c, right: (b: b) => c): c
