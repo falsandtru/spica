@@ -6,6 +6,7 @@ export namespace Either {
   export const ap = Monad.Either.ap;
   export const Return = Monad.Either.Return;
   export const bind = Monad.Either.bind;
+  export const sequence = Monad.Either.sequence;
 }
 
 export type Either<a, b> = Monad.Either<a, b>;

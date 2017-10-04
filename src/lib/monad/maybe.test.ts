@@ -142,6 +142,11 @@ describe('Unit: lib/maybe', () => {
       assert(Return(Return(0)).join().extract() === 0);
     });
 
+    it('sequence', () => {
+      assert.deepStrictEqual(Maybe.sequence([Just(0), Just(1)]).extract(), [0, 1]);
+      assert.deepStrictEqual(Maybe.sequence([Nothing, Just(1)]).extract(() => []), []);
+    });
+
     it('Monad law 1', () => {
       const f = (n: number) => Return(n + 1);
       const x = 0;

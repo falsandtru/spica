@@ -10,6 +10,7 @@ import union from './sequence/member/static/union';
 import intersect from './sequence/member/static/intersect';
 import pure from './sequence/member/static/pure';
 import Return from './sequence/member/static/return';
+import sequence from './sequence/member/static/sequence';
 import mempty from './sequence/member/static/mempty';
 import mconcat from './sequence/member/static/mconcat';
 import mappend from './sequence/member/static/mappend';
@@ -58,6 +59,7 @@ void compose(
   intersect,
   pure,
   Return,
+  sequence,
   mempty,
   mconcat,
   mappend,

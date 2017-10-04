@@ -40,6 +40,7 @@ export namespace Sequence {
   export declare const Return: typeof pure;
   export declare function bind<a, b>(m: Sequence<a, any>, f: (a: a) => Sequence<b, any>): Sequence<b, Sequence.Iterator<a>>;
   export declare function bind<a>(m: Sequence<a, any>): <b>(f: (a: a) => Sequence<b, any>) => Sequence<b, Sequence.Iterator<a>>;
+  export declare function sequence<b>(ms: Sequence<b, any>[]): Sequence<Sequence<b, [Sequence.Iterator<b>, Sequence.Iterator<b>]>, Sequence.Iterator<Sequence<b, [Sequence.Iterator<b>, Sequence.Iterator<b>]>>>;
   export declare const mempty: Sequence<any, any>;
   export declare function mappend<a>(l: Sequence<a, any>, r: Sequence<a, any>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
   export declare function mconcat<a>(as: Iterable<Sequence<a, any>>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;

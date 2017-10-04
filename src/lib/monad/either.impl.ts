@@ -59,6 +59,13 @@ export namespace Either {
   export const Return = pure;
   export declare function bind<e, a, b>(m: Either<e, a>, f: (a: a) => Either<e, b> | Right<b>): Either<e, b>
   export declare function bind<e, a>(m: Either<e, a>): <b>(f: (a: a) => Either<e, b> | Right<b>) => Either<e, b>
+  export function sequence<a, b>(ms: Either<a, b>[]): Either<a, b[]> {
+    return ms.reduce((acc, m) =>
+      acc.bind(bs =>
+        m.fmap(b =>
+          bs.concat([b])))
+    , Return<a, b[]>([]))
+  }
 }
 
 export class Left<a> extends Either<a, never> {

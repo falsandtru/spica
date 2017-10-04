@@ -13,4 +13,5 @@ export namespace Monad {
       ? m.bind(f)
       : <b>(f: (a: a) => Monad<b>) => bind(m, f);
   }
+  export declare function sequence<a>(ms: Monad<a>[]): Monad<Iterable<a>>;
 }

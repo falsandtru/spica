@@ -60,6 +60,13 @@ export namespace Maybe {
   export declare function bind<a>(m: Maybe<a>): {
     (f: (a: a) => Nothing): Maybe<a>;
     <b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b>;
+  };
+  export function sequence<a>(ms: Maybe<a>[]): Maybe<a[]> {
+    return ms.reduce((acc, m) =>
+      acc.bind(as =>
+        m.fmap(a =>
+          as.concat([a])))
+    , Return<a[]>([]))
   }
 }
 

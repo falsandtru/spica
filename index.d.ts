@@ -139,6 +139,7 @@ declare namespace Monad {
   export function Return<a>(a: a): Monad<a>;
   export function bind<a, b>(m: Monad<a>, f: (a: a) => Monad<b>): Monad<b>;
   export function bind<a>(m: Monad<a>): <b>(f: (a: a) => Monad<b>) => Monad<b>;
+  export function sequence<a>(ms: Monad<a>[]): Monad<Iterable<a>>;
 }
 declare abstract class MonadPlus<a> extends Monad<a> {
 }
@@ -166,6 +167,7 @@ export class Sequence<a, z> extends MonadPlus<a> implements Iterable<a> {
   static Return: typeof Sequence.pure;
   static bind<a, b>(m: Sequence<a, any>, f: (a: a) => Sequence<b, any>): Sequence<b, Sequence.Iterator<a>>;
   static bind<a>(m: Sequence<a, any>): <b>(f: (a: a) => Sequence<b, any>) => Sequence<b, Sequence.Iterator<a>>;
+  static sequence<b>(ms: Sequence<b, any>[]): Sequence<Sequence<b, [Sequence.Iterator<b>, Sequence.Iterator<b>]>, Sequence.Iterator<Sequence<b, [Sequence.Iterator<b>, Sequence.Iterator<b>]>>>;
   static readonly mempty: Sequence<any, any>;
   static mappend<a>(l: Sequence<a, any>, r: Sequence<a, any>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
   static mconcat<a>(as: Iterable<Sequence<a, any>>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
@@ -244,6 +246,7 @@ declare namespace Monad.Maybe {
       (f: (a: a) => Nothing): Maybe<a>;
       <b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b>;
     }
+    export function sequence<a>(ms: Maybe<a>[]): Maybe<a[]>;
     export const mzero: Nothing;
     export function mplus<a>(ml: Maybe<a>, mr: Nothing): Maybe<a>;
     export function mplus<a>(ml: Nothing, mr: Maybe<a>): Maybe<a>;
@@ -312,6 +315,7 @@ declare namespace Monad.Either {
     export const Return: typeof pure;
     export function bind<e, a, b>(m: Either<e, a>, f: (a: a) => Either<e, b> | Right<b>): Either<e, b>;
     export function bind<e, a>(m: Either<e, a>): <b>(f: (a: a) => Either<e, b> | Right<b>) => Either<e, b>;
+    export function sequence<a, b>(ms: Either<a, b>[]): Either<a, b[]>;
   }
   export class Left<a> extends Either<a, never> {
     private readonly LEFT: a;

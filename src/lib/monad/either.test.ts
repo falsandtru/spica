@@ -141,6 +141,11 @@ describe('Unit: lib/either', () => {
       assert(Return(Return(0)).join().extract() === 0);
     });
 
+    it('sequence', () => {
+      assert.deepStrictEqual(Either.sequence([Right(0), Right(1)]).extract(), [0, 1]);
+      assert.deepStrictEqual(Either.sequence([Left([]), Right(1)]).extract(a => a), []);
+    });
+
     it('Monad law 1', () => {
       const f = (n: number) => Return(n + 1);
       const x = 0;
