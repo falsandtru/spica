@@ -124,7 +124,7 @@ declare namespace Functor {
   export function fmap<a>(m: Functor<a>): <b>(f: (a: a) => b) => Functor<b>;
 }
 export abstract class Applicative<a> extends Functor<a> {
-  abstract ap<b>(this: Applicative<(a: a) => b>, a: Applicative<a>): Applicative<b>;
+  abstract ap<a, b>(this: Applicative<(a: a) => b>, a: Applicative<a>): Applicative<b>;
 }
 export namespace Applicative {
   export function pure<a>(a: a): Applicative<a>;
