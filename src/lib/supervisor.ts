@@ -6,24 +6,22 @@ import { sqid } from './sqid';
 import { causeAsyncException } from './exception';
 
 export abstract class Supervisor<N extends string, P, R, S> {
-  private static readonly instances: Set<Supervisor<string, any, any, any>>;
+  private static instances_: Set<Supervisor<string, any, any, any>>;
+  private static get instances(): typeof Supervisor.instances_ {
+    return this.hasOwnProperty('instances_')
+      ? this.instances_
+      : this.instances_ = new Set();
+  }
   public static get count(): number {
-    return this.instances
-      ? this.instances.size
-      : 0;
+    return this.instances.size;
   }
   public static get procs(): number {
-    return this.instances
-      ? [...this.instances]
-          .reduce((cnt, sv) =>
-            cnt + sv.workers.size
-          , 0)
-      : 0;
+    return [...this.instances]
+      .reduce((cnt, sv) =>
+        cnt + sv.workers.size
+      , 0);
   }
   constructor(opts: Supervisor.Options = {}) {
-    if (!(<typeof Supervisor>this.constructor).hasOwnProperty('instances')) {
-      (this.constructor as any).instances = new Set();
-    }
     void extend(this.settings, opts);
     this.name = this.settings.name;
     if (this.constructor === Supervisor) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot instantiate abstract classes.`);

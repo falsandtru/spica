@@ -37,6 +37,9 @@ describe('Unit: lib/supervisor', function () {
       assert(TestSupervisor.count === 1);
       assert(TestSupervisor.procs === 0);
 
+      assert(class extends TestSupervisor { }.count === 0);
+      assert(class extends TestSupervisor { }.procs === 0);
+
       const process: Supervisor.Process<number, number, number> = {
         init: (state) => state,
         call: (n, s) => [n, ++s],
