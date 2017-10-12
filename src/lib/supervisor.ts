@@ -17,8 +17,8 @@ export abstract class Supervisor<N extends string, P, R, S> {
   }
   public static get procs(): number {
     return [...this.instances]
-      .reduce((cnt, sv) =>
-        cnt + sv.workers.size
+      .reduce((acc, sv) =>
+        acc + sv.workers.size
       , 0);
   }
   constructor(opts: Supervisor.Options = {}) {
@@ -65,7 +65,7 @@ export abstract class Supervisor<N extends string, P, R, S> {
   public readonly events = {
     init: new Observation<never[] | [N], Supervisor.Event.Data.Init<N, P, R, S>, any>(),
     loss: new Observation<never[] | [N], Supervisor.Event.Data.Loss<N, P>, any>(),
-    exit: new Observation<never[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>()
+    exit: new Observation<never[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>(),
   };
   private readonly workers = new Map<N, Worker<N, P, R, S>>();
   private alive = true;
@@ -238,9 +238,7 @@ export namespace Supervisor {
     export type Call<P, R, S> = (param: P, state: S) => [R, S] | PromiseLike<[R, S]>;
     export type Exit<S> = (reason: any, state: S) => void;
   }
-  export type Callback<R> = {
-    (reply: R, error?: Error): void;
-  };
+  export type Callback<R> = (reply: R, error?: Error) => void;
   export namespace Event {
     export namespace Data {
       export type Init<N extends string, P, R, S> = [N, Process<P, R, S>, S];

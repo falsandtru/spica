@@ -44,9 +44,7 @@ export namespace Supervisor {
     export type Call<P, R, S> = (param: P, state: S) => [R, S] | PromiseLike<[R, S]>;
     export type Exit<S> = (reason: any, state: S) => void;
   }
-  export type Callback<R> = {
-    (reply: R, error?: Error): void;
-  };
+  export type Callback<R> = (reply: R, error?: Error) => void;
   export namespace Event {
     export namespace Data {
       export type Init<N extends string, P, R, S> = [N, Process<P, R, S>, S];
