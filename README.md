@@ -44,3 +44,7 @@ $ npm i spica
 - Chrome
 - Firefox
 - Edge
+
+## Dependency
+
+- unassert (in compiling source code)
