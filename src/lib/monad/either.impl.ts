@@ -17,7 +17,7 @@ export class Either<a, b> extends Monad<b> {
   public ap<b, z>(this: Either<a, (b: b) => z>, b: Either<a, b>): Either<a, z> {
     return Either.ap(this, b);
   }
-  public bind(f: (b: b) => Either<a, b> | Right<b>): Either<a, b>
+  public bind(f: (b: b) => Either<a, b>): Either<a, b>
   public bind<c>(f: (b: b) => Either<a, c>): Either<a, c>
   public bind<c>(f: (b: b) => Either<a, c>): Either<a, c> {
     return new Either<a, c>(() => {
@@ -57,8 +57,8 @@ export namespace Either {
   export declare function ap<e, a, b>(mf: Either<e, (a: a) => b>, ma: Either<e, a>): Either<e, b>
   export declare function ap<e, a, b>(mf: Either<e, (a: a) => b>): (ma: Either<e, a>) => Either<e, b>
   export const Return = pure;
-  export declare function bind<e, a, b>(m: Either<e, a>, f: (a: a) => Either<e, b> | Right<b>): Either<e, b>
-  export declare function bind<e, a>(m: Either<e, a>): <b>(f: (a: a) => Either<e, b> | Right<b>) => Either<e, b>
+  export declare function bind<e, a, b>(m: Either<e, a>, f: (a: a) => Either<e, b>): Either<e, b>
+  export declare function bind<e, a>(m: Either<e, a>): <b>(f: (a: a) => Either<e, b>) => Either<e, b>
   export function sequence<a, b>(ms: Either<a, b>[]): Either<a, b[]> {
     return ms.reduce((acc, m) =>
       acc.bind(bs =>
@@ -74,7 +74,9 @@ export class Left<a> extends Either<a, never> {
     super(throwCallError);
     void this.LEFT;
   }
-  public bind(_: (b: never) => Either<a, any>): Left<a> {
+  public bind<b>(_: (_: never) => Left<a>): Left<a>
+  public bind<b>(_: (_: never) => Either<a, b>): Either<a, b>
+  public bind<b>(_: (_: never) => Either<a, b>): Either<a, b> {
     return this;
   }
   public extract(): never
@@ -92,9 +94,8 @@ export class Right<b> extends Either<never, b> {
     super(throwCallError);
     void this.RIGHT;
   }
-  public bind<c>(f: (b: b) => Right<c>): Right<c>
-  public bind<a>(f: (b: b) => Left<a>): Left<a>
-  public bind<a>(f: (b: b) => Either<a, b> | Right<b>): Either<a, b>
+  public bind<a, c>(f: (b: b) => Right<c>): Right<c>
+  public bind<a>(f: (b: b) => Either<a, b>): Either<a, b>
   public bind<a, c>(f: (b: b) => Either<a, c>): Either<a, c>
   public bind<a, c>(f: (b: b) => Either<a, c>): Either<a, c> {
     return new Either(() => f(this.extract()));

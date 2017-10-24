@@ -106,8 +106,8 @@ describe('Unit: lib/either', () => {
       assert.strictEqual(
         Either.pure<number, typeof throwError>(throwError)
           .ap(Left(0))
-          .extract(n => n + 1),
-        1);
+          .extract(n => n),
+        0);
     });
 
     it('ap 2', () => {

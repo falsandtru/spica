@@ -291,7 +291,7 @@ declare namespace Monad {
     ap<b, c, d, z>(this: Either<a, (b: b, c: c, d: d) => z>, b: Either<a, b>): Either<a, (c: c, d: d) => z>;
     ap<b, c, d, e, z>(this: Either<a, (b: b, c: c, d: d, e: e) => z>, b: Either<a, b>): Either<a, (c: c, d: d, e: e) => z>;
     ap<b, c, d, e, f, z>(this: Either<a, (b: b, c: c, d: d, e: e, f: f) => z>, b: Either<a, b>): Either<a, (c: c, d: d, e: e, f: f) => z>;
-    bind(f: (b: b) => Either<a, b> | Right<b>): Either<a, b>;
+    bind(f: (b: b) => Either<a, b>): Either<a, b>;
     bind<c>(f: (b: b) => Either<a, c>): Either<a, c>;
     join<c>(this: Either<a, Either<a, c>>): Either<a, c>;
     extract(): b;
@@ -310,22 +310,22 @@ declare namespace Monad.Either {
     export function ap<e, a, b>(mf: Either<e, (a: a) => b>, ma: Either<e, a>): Either<e, b>;
     export function ap<e, a, b>(mf: Either<e, (a: a) => b>): (ma: Either<e, a>) => Either<e, b>;
     export const Return: typeof pure;
-    export function bind<e, a, b>(m: Either<e, a>, f: (a: a) => Either<e, b> | Right<b>): Either<e, b>;
-    export function bind<e, a>(m: Either<e, a>): <b>(f: (a: a) => Either<e, b> | Right<b>) => Either<e, b>;
+    export function bind<e, a, b>(m: Either<e, a>, f: (a: a) => Either<e, b>): Either<e, b>;
+    export function bind<e, a>(m: Either<e, a>): <b>(f: (a: a) => Either<e, b>) => Either<e, b>;
     export function sequence<a, b>(ms: Either<a, b>[]): Either<a, b[]>;
   }
   export class Left<a> extends Either<a, never> {
     private readonly LEFT: a;
-    bind(_: (b: never) => Either<a, any>): Left<a>;
+    bind<b>(_: (_: never) => Left<a>): Left<a>;
+    bind<b>(_: (_: never) => Either<a, b>): Either<a, b>;
     extract(): never;
     extract<c>(transform: (a: a) => c): c;
     extract<c>(left: (a: a) => c, right: (b: never) => c): c;
   }
   export class Right<b> extends Either<never, b> {
     private readonly RIGHT: b;
-    bind<c>(f: (b: b) => Right<c>): Right<c>;
-    bind<a>(f: (b: b) => Left<a>): Left<a>;
-    bind<a>(f: (b: b) => Either<a, b> | Right<b>): Either<a, b>;
+    bind<a, c>(f: (b: b) => Right<c>): Right<c>;
+    bind<a>(f: (b: b) => Either<a, b>): Either<a, b>;
     bind<a, c>(f: (b: b) => Either<a, c>): Either<a, c>;
     extract(): b;
     extract<c>(transform: (a: never) => c): b;
@@ -333,6 +333,7 @@ declare namespace Monad.Either {
   }
 }
 
+export type Either<a, b> = Monad.Either<a, b>;
 export namespace Either {
   export const fmap: typeof Monad.Either.fmap;
   export const pure: typeof Monad.Either.Either.pure;
@@ -341,7 +342,6 @@ export namespace Either {
   export const bind: typeof Monad.Either.Either.bind;
 }
 
-export type Either<a, b> = Monad.Either<a, b>;
 export type Left<a> = Monad.Either.Left<a>;
 export function Left<a>(a: a): Left<a>;
 export function Left<a, b>(a: a): Either<a, b>;
