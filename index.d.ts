@@ -213,15 +213,15 @@ export namespace Sequence {
 
 declare namespace Monad {
   export abstract class Maybe<a> extends MonadPlus<a> {
-    private readonly MAYBE: Just<a> | Nothing;
+    private readonly MAYBE: Monad.Maybe.Just<a> | Monad.Maybe.Nothing;
     fmap<b>(f: (a: a) => b): Maybe<b>;
     ap<a, z>(this: Maybe<(a: a) => z>, a: Maybe<a>): Maybe<z>;
     ap<a, b, z>(this: Maybe<(a: a, b: b) => z>, a: Maybe<a>): Maybe<(b: b) => z>;
     ap<a, b, c, z>(this: Maybe<(a: a, b: b, c: c) => z>, a: Maybe<a>): Maybe<(b: b, c: c) => z>;
     ap<a, b, c, d, z>(this: Maybe<(a: a, b: b, c: c, d: d) => z>, a: Maybe<a>): Maybe<(b: b, c: c, d: d) => z>;
     ap<a, b, c, d, e, z>(this: Maybe<(a: a, b: b, c: c, d: d, e: e) => z>, a: Maybe<a>): Maybe<(b: b, c: c, d: d, e: e) => z>;
-    bind(f: (a: a) => Maybe<a> | Nothing): Maybe<a>;
-    bind<b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b>;
+    bind(f: (a: a) => Maybe<a>): Maybe<a>;
+    bind<b>(f: (a: a) => Maybe<b>): Maybe<b>;
     join<b>(this: Maybe<Maybe<b>>): Maybe<b>;
     extract(): a;
     extract<b>(transform: () => b): a | b;
@@ -238,35 +238,37 @@ declare namespace Monad.Maybe {
     export function ap<a, b>(mf: Maybe<(a: a) => b>, ma: Maybe<a>): Maybe<b>;
     export function ap<a, b>(mf: Maybe<(a: a) => b>): (ma: Maybe<a>) => Maybe<b>;
     export const Return: typeof pure;
-    export function bind<a>(m: Maybe<a>, f: (a: a) => Maybe<a> | Nothing): Maybe<a>;
-    export function bind<a, b>(m: Maybe<a>, f: (a: a) => Maybe<b> | Nothing): Maybe<b>;
+    export function bind<a>(m: Maybe<a>, f: (a: a) => Maybe<a>): Maybe<a>;
+    export function bind<a, b>(m: Maybe<a>, f: (a: a) => Maybe<b>): Maybe<b>;
     export function bind<a>(m: Maybe<a>): {
       (f: (a: a) => Nothing): Maybe<a>;
-      <b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b>;
+      <b>(f: (a: a) => Maybe<b>): Maybe<b>;
     }
     export function sequence<a>(ms: Maybe<a>[]): Maybe<a[]>;
-    export const mzero: Nothing;
+    export const mzero: Maybe<never>;
     export function mplus<a>(ml: Maybe<a>, mr: Nothing): Maybe<a>;
     export function mplus<a>(ml: Nothing, mr: Maybe<a>): Maybe<a>;
     export function mplus<a>(ml: Maybe<a>, mr: Maybe<a>): Maybe<a>;
   }
   export class Just<a> extends Maybe<a> {
     private readonly JUST: a;
-    bind(f: (a: a) => Maybe<a> | Nothing): Maybe<a>;
-    bind<b>(f: (a: a) => Maybe<b> | Nothing): Maybe<b>;
+    bind(f: (a: a) => Maybe<a>): Maybe<a>;
+    bind<b>(f: (a: a) => Maybe<b>): Maybe<b>;
     extract(): a;
     extract<b>(transform: () => b): a;
     extract<b>(nothing: () => b, just: (a: a) => b): b;
   }
   export class Nothing extends Maybe<never> {
     private readonly NOTHING: void;
-    bind(_: (a: never) => Maybe<any>): Nothing;
+    bind(_: (_: never) => Nothing): Nothing;
+    bind<a>(_: (_: never) => Maybe<a>): Maybe<a>;
     extract(): never;
     extract<b>(transform: () => b): b;
     extract<b>(nothing: () => b, just: (a: never) => b): b;
   }
 }
 
+export type Maybe<a> = Monad.Maybe<a>;
 export namespace Maybe {
   export const fmap: typeof Monad.Maybe.fmap;
   export const pure: typeof Monad.Maybe.Maybe.pure;
@@ -277,11 +279,8 @@ export namespace Maybe {
   export const mplus: typeof Monad.Maybe.Maybe.mplus;
 }
 
-export type Maybe<a> = Monad.Maybe<a>;
-export type Just<a> = Monad.Maybe.Just<a>;
-export function Just<a>(a: a): Just<a>;
-export type Nothing = Monad.Maybe.Nothing;
-export const Nothing: Nothing;
+export function Just<a>(a: a): Maybe<a>;
+export const Nothing: Maybe<never>;
 
 declare namespace Monad {
   export abstract class Either<a, b> extends Monad<b> {

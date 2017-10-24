@@ -1,5 +1,6 @@
 import * as Monad from './maybe.impl';
 
+export type Maybe<a> = Monad.Maybe<a>;
 export namespace Maybe {
   export const fmap = Monad.Maybe.fmap;
   export const pure = Monad.Maybe.pure;
@@ -11,10 +12,7 @@ export namespace Maybe {
   export const mplus = Monad.Maybe.mplus;
 }
 
-export type Maybe<a> = Monad.Maybe<a>;
-export type Just<a> = Monad.Just<a>;
-export function Just<a>(a: a): Just<a> {
+export function Just<a>(a: a): Maybe<a> {
   return new Monad.Just(a);
 }
-export type Nothing = Monad.Nothing;
-export const Nothing = <Nothing>Monad.Maybe.mzero;
+export const Nothing: Maybe<never> = Monad.Maybe.mzero;

@@ -42,14 +42,6 @@ describe('Unit: lib/maybe', () => {
       assert(result === 'Nothing');
     });
 
-    it('Maybe', () => {
-      const result = Return(0)
-        .bind(n => <Just<number> | Nothing | Maybe<number>>Just(n).bind(n => <Just<number> | Nothing>Just(n) || Nothing))
-        .bind(n => <Just<number> | Nothing | Maybe<number>>Just(n).bind(n => <Just<number> | Nothing>Just(n) || Nothing))
-        .extract(() => 'Nothing');
-      assert(result === 0);
-    });
-
     it('maybe', () => {
       assert(Just(0).extract(() => -1, n => n + 1) === 1);
       assert(Nothing.extract(() => -1, _ => 0 + 1) === -1);
@@ -105,6 +97,11 @@ describe('Unit: lib/maybe', () => {
           .extract(),
         1);
       assert.strictEqual(
+        Maybe.pure((a: number) => a)
+          .ap(Nothing)
+          .extract(() => 0),
+        0);
+      assert.strictEqual(
         Maybe.pure(throwError)
           .ap(Nothing)
           .extract(() => 0),
@@ -144,7 +141,7 @@ describe('Unit: lib/maybe', () => {
 
     it('sequence', () => {
       assert.deepStrictEqual(Maybe.sequence([Just(0), Just(1)]).extract(), [0, 1]);
-      assert.deepStrictEqual(Maybe.sequence([Nothing, Just(1)]).extract(() => []), []);
+      assert.deepStrictEqual(Maybe.sequence([Nothing, Just(1)]).extract(() => [] as number[]), []);
     });
 
     it('Monad law 1', () => {
