@@ -260,7 +260,7 @@ declare namespace Monad.Maybe {
   }
   export class Nothing extends Maybe<never> {
     private readonly NOTHING: void;
-    bind(_: (_: never) => Nothing): Nothing;
+    bind<_>(_: (_: never) => Nothing): Nothing;
     bind<a>(_: (_: never) => Maybe<a>): Maybe<a>;
     extract(): never;
     extract<b>(transform: () => b): b;
@@ -316,7 +316,7 @@ declare namespace Monad.Either {
   }
   export class Left<a> extends Either<a, never> {
     private readonly LEFT: a;
-    bind<b>(_: (_: never) => Left<a>): Left<a>;
+    bind<_>(_: (_: never) => Left<a>): Left<a>;
     bind<b>(_: (_: never) => Either<a, b>): Either<a, b>;
     extract(): never;
     extract<c>(transform: (a: a) => c): c;
@@ -324,8 +324,9 @@ declare namespace Monad.Either {
   }
   export class Right<b> extends Either<never, b> {
     private readonly RIGHT: b;
-    bind<a, c>(f: (b: b) => Right<c>): Right<c>;
-    bind<a>(f: (b: b) => Either<a, b>): Either<a, b>;
+    bind<c, _ = never>(f: (b: b) => Right<c>): Right<c>
+    bind<_, a>(f: (b: b) => Either<a, b>): Either<a, b>;
+    bind<c, a>(f: (b: b) => Either<a, c>): Either<a, c>;
     bind<a, c>(f: (b: b) => Either<a, c>): Either<a, c>;
     extract(): b;
     extract<c>(transform: (a: never) => c): b;

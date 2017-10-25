@@ -74,7 +74,7 @@ export class Left<a> extends Either<a, never> {
     super(throwCallError);
     void this.LEFT;
   }
-  public bind<b>(_: (_: never) => Left<a>): Left<a>
+  public bind<_>(_: (_: never) => Left<a>): Left<a>
   public bind<b>(_: (_: never) => Either<a, b>): Either<a, b>
   public bind<b>(_: (_: never) => Either<a, b>): Either<a, b> {
     return this;
@@ -94,10 +94,10 @@ export class Right<b> extends Either<never, b> {
     super(throwCallError);
     void this.RIGHT;
   }
-  public bind<a, c>(f: (b: b) => Right<c>): Right<c>
-  public bind<a>(f: (b: b) => Either<a, b>): Either<a, b>
-  public bind<a, c>(f: (b: b) => Either<a, c>): Either<a, c>
-  public bind<a, c>(f: (b: b) => Either<a, c>): Either<a, c> {
+  public bind<c, _ = never>(f: (b: b) => Right<c>): Right<c>
+  public bind<_, a>(f: (b: b) => Either<a, b>): Either<a, b>
+  public bind<c, a>(f: (b: b) => Either<a, c>): Either<a, c>
+  public bind<c, a>(f: (b: b) => Either<a, c>): Either<a, c> {
     return new Either(() => f(this.extract()));
   }
   public extract(): b

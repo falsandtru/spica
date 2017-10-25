@@ -97,7 +97,7 @@ export class Nothing extends Maybe<never> {
     super(throwCallError);
     void this.NOTHING;
   }
-  public bind<a>(_: (_: never) => Nothing): Nothing
+  public bind<_>(_: (_: never) => Nothing): Nothing
   public bind<a>(_: (_: never) => Maybe<a>): Maybe<a>
   public bind<a>(_: (_: never) => Maybe<a>): Maybe<a> {
     return this;
