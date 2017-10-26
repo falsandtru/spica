@@ -1,7 +1,6 @@
 import { Observation, Observer, Publisher } from './observation';
 import { extend } from './assign';
 import { tick } from './tick';
-import { isThenable } from './thenable';
 import { sqid } from './sqid';
 import { causeAsyncException } from './exception';
 
@@ -133,10 +132,7 @@ export abstract class Supervisor<N extends string, P, R, S> {
       void this.events_.loss.emit([name], [name, param]);
     }
     if (result === void 0 || result instanceof Error) return false;
-    const [reply] = result;
-    if (isThenable(reply)) {
-      void reply.catch(() => void 0);
-    }
+    void result.catch(() => void 0);
     return true;
   }
   public refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason: any) => boolean][] {
@@ -203,25 +199,14 @@ export abstract class Supervisor<N extends string, P, R, S> {
         }
         continue;
       }
-      const [reply] = result;
-      if (!isThenable(reply)) {
-        try {
-          void callback(reply);
-        }
-        catch (reason) {
-          void causeAsyncException(reason);
-        }
-      }
-      else {
-        void Promise.resolve(reply)
-          .then(
-            reply =>
-              this.available
-                ? void callback(reply)
-                : void callback(void 0 as any, new Error(`Spica: Supervisor: A processing has failed.`)),
-            () =>
-              void callback(void 0 as any, new Error(`Spica: Supervisor: A processing has failed.`)));
-      }
+      void result
+        .then(
+          reply =>
+            this.available
+              ? void callback(reply)
+              : void callback(void 0 as any, new Error(`Spica: Supervisor: A processing has failed.`)),
+          () =>
+            void callback(void 0 as any, new Error(`Spica: Supervisor: A processing has failed.`)));
     }
   }
 }
@@ -292,7 +277,7 @@ class Worker<N extends string, P, R, S> {
   private alive = true;
   private available = true;
   private activated = false;
-  public readonly call = ([param, expiry]: Worker.Command<P>): [R | Promise<R>] | Error | void => {
+  public readonly call = ([param, expiry]: [P, number]): Promise<R> | Error | undefined => {
     if (!this.available) return;
     try {
       this.available = false;
@@ -302,37 +287,25 @@ class Worker<N extends string, P, R, S> {
           .emit([this.name], [this.name, this.process, this.state]);
         this.state = this.process.init(this.state);
       }
-      const result = this.process.call(param, this.state);
-      if (!isThenable(result)) {
-        const [reply, state] = result;
-        this.state = state;
-        this.available = true;
-        return [reply];
-      }
-      else {
-        return [
-          new Promise<[R, S]>((resolve, reject) => (
-            void result.then(resolve, reject),
-            expiry === Infinity
-              ? void 0
-              : void setTimeout(() => void reject(new Error()), expiry - Date.now())))
-            .then<[R, S]>(
-              ([reply, state]) => [reply, state])
-            .then<R>(
-              ([reply, state]) => {
-                void this.sv.schedule();
-                if (!this.alive) return Promise.reject(new Error());
-                this.state = state;
-                this.available = true;
-                return reply;
-              },
-              reason => {
-                void this.sv.schedule();
-                void this.terminate(reason);
-                throw reason;
-              })
-        ];
-      }
+      return new Promise<[R, S]>((resolve, reject) => (
+        isFinite(expiry) && void setTimeout(() => void reject(new Error()), expiry - Date.now()),
+        void Promise.resolve(this.process.call(param, this.state))
+          .then(resolve, reject)))
+        .then<[R, S]>(
+          ([reply, state]) => [reply, state])
+        .then<R>(
+          ([reply, state]) => {
+            void this.sv.schedule();
+            if (!this.alive) return Promise.reject(new Error());
+            this.state = state;
+            this.available = true;
+            return reply;
+          },
+          reason => {
+            void this.sv.schedule();
+            void this.terminate(reason);
+            throw reason;
+          });
     }
     catch (reason) {
       void this.terminate(reason);
@@ -344,7 +317,4 @@ class Worker<N extends string, P, R, S> {
     void this.destructor(reason);
     return true;
   }
-}
-namespace Worker {
-  export type Command<P> = [P, number];
 }
