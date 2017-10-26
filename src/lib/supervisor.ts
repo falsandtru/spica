@@ -1,4 +1,4 @@
-import { Observation } from './observation';
+import { Observation, Observer, Publisher } from './observation';
 import { extend } from './assign';
 import { tick } from './tick';
 import { isThenable } from './thenable';
@@ -22,10 +22,11 @@ export abstract class Supervisor<N extends string, P, R, S> {
       , 0);
   }
   constructor(opts: Supervisor.Options = {}) {
-    void extend(this.settings, opts);
+    void Object.freeze(extend(this.settings, opts));
+    assert(Object.isFrozen(this.settings));
     this.name = this.settings.name;
     if (this.constructor === Supervisor) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot instantiate abstract classes.`);
-    void (<typeof Supervisor>this.constructor).instances.add(this);
+    void (this.constructor as typeof Supervisor).instances.add(this);
     this.scheduler = () =>
       void (void 0, this.settings.scheduler)(this.deliver);
   }
@@ -40,12 +41,12 @@ export abstract class Supervisor<N extends string, P, R, S> {
     void Object.freeze(this.workers);
     while (this.messages.length > 0) {
       const [name, param] = this.messages.shift()!;
-      void this.events.loss.emit([name], [name, param]);
+      void this.events_.loss.emit([name], [name, param]);
     }
     assert(this.messages.length === 0);
     void Object.freeze(this.messages);
     this.alive = false;
-    void (<typeof Supervisor>this.constructor).instances.delete(this);
+    void (this.constructor as typeof Supervisor).instances.delete(this);
     void Object.freeze(this);
     assert(this.alive === false);
     assert(this.available === false);
@@ -62,11 +63,16 @@ export abstract class Supervisor<N extends string, P, R, S> {
     resource: 10,
   };
   private readonly scheduler: () => void;
-  public readonly events = {
+  private readonly events_ = {
     init: new Observation<never[] | [N], Supervisor.Event.Data.Init<N, P, R, S>, any>(),
     loss: new Observation<never[] | [N], Supervisor.Event.Data.Loss<N, P>, any>(),
     exit: new Observation<never[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>(),
   };
+  public readonly events: {
+    readonly init: Observer<never[] | [N], Supervisor.Event.Data.Init<N, P, R, S>, any>;
+    readonly loss: Observer<never[] | [N], Supervisor.Event.Data.Loss<N, P>, any>;
+    readonly exit: Observer<never[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>;
+  } = this.events_;
   private readonly workers = new Map<N, Worker<N, P, R, S>>();
   private alive = true;
   private available = true;
@@ -88,7 +94,7 @@ export abstract class Supervisor<N extends string, P, R, S> {
         }
       : process;
     return this.workers
-      .set(name, new Worker<N, P, R, S>(this, name, process, state, () =>
+      .set(name, new Worker<N, P, R, S>(this, name, process, state, this.events_, () =>
         void this.workers.delete(name)))
       .get(name)!
       .terminate;
@@ -103,7 +109,7 @@ export abstract class Supervisor<N extends string, P, R, S> {
     ]);
     while (this.messages.length > this.settings.size) {
       const [name, param, callback] = this.messages.shift()!;
-      void this.events.loss.emit([name], [name, param]);
+      void this.events_.loss.emit([name], [name, param]);
       try {
         void callback(void 0 as any, new Error(`Spica: Supervisor: A message overflowed.`));
       }
@@ -124,7 +130,7 @@ export abstract class Supervisor<N extends string, P, R, S> {
       ? this.workers.get(name)!.call([param, timeout])
       : void 0;
     if (result === void 0) {
-      void this.events.loss.emit([name], [name, param]);
+      void this.events_.loss.emit([name], [name, param]);
     }
     if (result === void 0 || result instanceof Error) return false;
     const [reply] = result;
@@ -186,7 +192,7 @@ export abstract class Supervisor<N extends string, P, R, S> {
       void --len;
 
       if (!result) {
-        void this.events.loss.emit([name], [name, param]);
+        void this.events_.loss.emit([name], [name, param]);
       }
       if (!result || result instanceof Error) {
         try {
@@ -254,6 +260,10 @@ class Worker<N extends string, P, R, S> {
     public readonly name: N,
     public readonly process: Supervisor.Process<P, R, S>,
     public state: S,
+    private readonly events: {
+      readonly init: Publisher<never[] | [N], Supervisor.Event.Data.Init<N, P, R, S>, any>;
+      readonly exit: Publisher<never[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>;
+    },
     private readonly destructor_: () => void
   ) {
     assert(process.init && process.exit);
@@ -266,14 +276,14 @@ class Worker<N extends string, P, R, S> {
     assert(this.alive === false);
     assert(this.available === false);
     void this.destructor_();
-    if (this.called) {
+    if (this.activated) {
       try {
         void this.process.exit(reason, this.state);
-        void this.sv.events.exit
+        void this.events.exit
           .emit([this.name], [this.name, this.process, this.state, reason]);
       }
       catch (reason_) {
-        void this.sv.events.exit
+        void this.events.exit
           .emit([this.name], [this.name, this.process, this.state, reason]);
         void this.sv.terminate(reason_);
       }
@@ -281,14 +291,14 @@ class Worker<N extends string, P, R, S> {
   }
   private alive = true;
   private available = true;
-  private called = false;
+  private activated = false;
   public readonly call = ([param, expiry]: Worker.Command<P>): [R | Promise<R>] | Error | void => {
     if (!this.available) return;
     try {
       this.available = false;
-      if (!this.called) {
-        this.called = true;
-        void this.sv.events.init
+      if (!this.activated) {
+        this.activated = true;
+        void this.events.init
           .emit([this.name], [this.name, this.process, this.state]);
         this.state = this.process.init(this.state);
       }
