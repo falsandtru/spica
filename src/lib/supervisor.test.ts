@@ -43,7 +43,7 @@ describe('Unit: lib/supervisor', function () {
       const process: Supervisor.Process<number, number, number> = {
         init: (state) => state,
         call: (n, s) => [n, ++s],
-        exit: () => void 0
+        exit: () => undefined
       };
       const kill = sv1.register('', process, 0);
       assert.deepStrictEqual(sv1.refs(), [
@@ -82,7 +82,7 @@ describe('Unit: lib/supervisor', function () {
       const process: Supervisor.Process<number, number, number> = {
         init: (state) => state,
         call: (n, s) => [n, ++s],
-        exit: () => void 0
+        exit: () => undefined
       };
       const kill = sv.register('', process, 0);
       assert.deepStrictEqual(sv.refs(), [
@@ -108,11 +108,11 @@ describe('Unit: lib/supervisor', function () {
       const sv = new TestSupervisor({
         name: '',
         destructor: reason => {
-          assert(reason === void 0);
+          assert(reason === undefined);
           assert(cnt === 12 && ++cnt);
           assert.throws(() => sv.register('', _ => [0, 0], 0));
           assert.throws(() => sv.cast('', 0));
-          assert.throws(() => sv.call('', 0, () => void 0));
+          assert.throws(() => sv.call('', 0, () => undefined));
           assert(sv.terminate() === false);
           assert(TestSupervisor.count === 0);
           assert(TestSupervisor.procs === 0);
@@ -172,8 +172,8 @@ describe('Unit: lib/supervisor', function () {
       assert(cnt === 0 && ++cnt);
       sv.call('', 1, r => assert(TestSupervisor.procs === 1) || assert(r === -1) || assert(cnt === 6 && ++cnt));
       assert(sv.cast('', 2) === true);
-      sv.call('', 3, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 9 && ++cnt));
-      sv.call('', 4, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 11 && ++cnt) || sv.terminate(), 100);
+      sv.call('', 3, (r, e) => assert(r === undefined) || assert(e instanceof Error) || assert(cnt === 9 && ++cnt));
+      sv.call('', 4, (r, e) => assert(r === undefined) || assert(e instanceof Error) || assert(cnt === 11 && ++cnt) || sv.terminate(), 100);
       assert(cnt === 4 && ++cnt);
     });
 
@@ -188,7 +188,7 @@ describe('Unit: lib/supervisor', function () {
         done();
       });
       sv.register('', () => new Promise<[number, number]>(resolve => void resolve()), 0);
-      sv.call('', 1, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 1 && ++cnt), 100);
+      sv.call('', 1, (r, e) => assert(r === undefined) || assert(e instanceof Error) || assert(cnt === 1 && ++cnt), 100);
     });
 
     it('state', function (done) {
@@ -242,8 +242,8 @@ describe('Unit: lib/supervisor', function () {
           done();
         });
       });
-      sv.call('', 1, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 3 && ++cnt), 100);
-      sv.call('', 2, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 1 && ++cnt));
+      sv.call('', 1, (r, e) => assert(r === undefined) || assert(e instanceof Error) || assert(cnt === 3 && ++cnt), 100);
+      sv.call('', 2, (r, e) => assert(r === undefined) || assert(e instanceof Error) || assert(cnt === 1 && ++cnt));
     });
 
     it('timeout of processing', function (done) {
@@ -257,8 +257,8 @@ describe('Unit: lib/supervisor', function () {
         assert(cnt === 0 && ++cnt);
         done();
       });
-      sv.register('', () => new Promise<never>(() => void 0), 0);
-      sv.call('', 1, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 1 && ++cnt));
+      sv.register('', () => new Promise<never>(() => undefined), 0);
+      sv.call('', 1, (r, e) => assert(r === undefined) || assert(e instanceof Error) || assert(cnt === 1 && ++cnt));
     });
 
     it('overflow', function (done) {
@@ -272,8 +272,8 @@ describe('Unit: lib/supervisor', function () {
         assert(cnt === 0 && ++cnt);
       });
       sv.register('', _ => [0, 0], 0);
-      sv.call('', 1, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 1 && ++cnt));
-      sv.call('', 2, (r, e) => assert(r === 0) || assert(e === void 0) || assert(cnt === 2 && ++cnt) || done(), 100);
+      sv.call('', 1, (r, e) => assert(r === undefined) || assert(e instanceof Error) || assert(cnt === 1 && ++cnt));
+      sv.call('', 2, (r, e) => assert(r === 0) || assert(e === undefined) || assert(cnt === 2 && ++cnt) || done(), 100);
     });
 
     it('async', function (done) {
@@ -301,7 +301,7 @@ describe('Unit: lib/supervisor', function () {
       sv.register('', n => new Promise<[number, number]>(resolve => void setTimeout(() => void resolve([n, 0]), 100)), 0);
       sv.events.loss.on([''], ([, param]) => assert(cnt === 0 && param === 2 && ++cnt));
       sv.call('', 1, r => assert(r === 1) || assert(cnt === 2 && ++cnt), 1000);
-      sv.call('', 2, (r, e) => assert(r === void 0) || assert(e instanceof Error) || assert(cnt === 1 && ++cnt), 0);
+      sv.call('', 2, (r, e) => assert(r === undefined) || assert(e instanceof Error) || assert(cnt === 1 && ++cnt), 0);
       sv.call('', 3, r => assert(r === 3) || assert(cnt === 3 && ++cnt) || done(), Infinity);
     });
 
@@ -346,10 +346,10 @@ describe('Unit: lib/supervisor', function () {
       assert(TestSupervisor.procs === 0);
       const sv = new TestSupervisor({
         destructor: reason => {
-          assert(reason === void 0);
+          assert(reason === undefined);
           assert.throws(() => sv.register('', _ => [0, 0], 0));
           assert.throws(() => sv.cast('', 0));
-          assert.throws(() => sv.call('', 0, () => void 0));
+          assert.throws(() => sv.call('', 0, () => undefined));
           assert(sv.terminate() === false);
           assert(TestSupervisor.count === 0);
           assert(TestSupervisor.procs === 0);

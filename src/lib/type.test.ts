@@ -3,7 +3,7 @@ import { type } from './type';
 describe('Unit: lib/type', () => {
   describe('type', () => {
     it('primitive', () => {
-      assert(type(void 0) === 'undefined');
+      assert(type(undefined) === 'undefined');
       assert(type(true) === 'boolean');
       assert(type(0) === 'number');
       assert(type('') === 'string');

@@ -106,7 +106,7 @@ export class Nothing extends Maybe<never> {
   public extract<b>(transform: () => b): b
   public extract<b>(nothing: () => b, just: (a: never) => b): b
   public extract<b>(nothing?: () => b): b {
-    if (!nothing) throw void 0;
+    if (!nothing) throw undefined;
     return nothing();
   }
 }

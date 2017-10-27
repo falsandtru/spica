@@ -160,7 +160,7 @@ describe('Unit: lib/observation', function () {
       const ob = new Observation<string[], void, void>();
       ob.on([''], _ => 1);
       ob.on([''], _ => 2);
-      assert.deepStrictEqual(ob.reflect([''], void 0), [1, 2]);
+      assert.deepStrictEqual(ob.reflect([''], undefined), [1, 2]);
       done();
     });
 
@@ -248,7 +248,7 @@ describe('Unit: lib/observation', function () {
       ob.on([''], throwError);
       ob.on([''], throwError);
       ob.on([''], throwError);
-      ob.emit([''], void 0, _ => assert(cnt === 1 && ++cnt) || tick(() => assert(cnt === 2 && ++cnt) || done()));
+      ob.emit([''], undefined, _ => assert(cnt === 1 && ++cnt) || tick(() => assert(cnt === 2 && ++cnt) || done()));
     });
 
     it('on namespace', function (done) {

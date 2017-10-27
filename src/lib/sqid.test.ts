@@ -17,7 +17,7 @@ describe('Unit: lib/sqid', () => {
     });
 
     it('validation', () => {
-      assert.throws(() => sqid(<any>void 0));
+      assert.throws(() => sqid(<any>undefined));
       assert.throws(() => sqid(NaN));
       assert.throws(() => sqid(-1));
       assert.throws(() => sqid(0.1));

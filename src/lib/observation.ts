@@ -50,7 +50,7 @@ export class Observation<N extends ReadonlyArray<any>, D, R>
   public monitor(namespace: N, listener: Monitor<N, D>, { once = false }: ObserverOptions = {}): () => void {
     void throwTypeErrorIfInvalidListener(listener, namespace);
     const { items } = this.seekNode_(namespace);
-    if (isRegistered(items, RegisterItemType.monitor, namespace, listener)) return () => void 0;
+    if (isRegistered(items, RegisterItemType.monitor, namespace, listener)) return () => undefined;
     void items.push({
       type: RegisterItemType.monitor,
       namespace,
@@ -64,7 +64,7 @@ export class Observation<N extends ReadonlyArray<any>, D, R>
   public on(namespace: N, listener: Subscriber<N, D, R>, { once = false }: ObserverOptions = {}): () => void {
     void throwTypeErrorIfInvalidListener(listener, namespace);
     const { items } = this.seekNode_(namespace);
-    if (isRegistered(items, RegisterItemType.subscriber, namespace, listener)) return () => void 0;
+    if (isRegistered(items, RegisterItemType.subscriber, namespace, listener)) return () => undefined;
     void items.push({
       type: RegisterItemType.subscriber,
       namespace,
@@ -130,7 +130,7 @@ export class Observation<N extends ReadonlyArray<any>, D, R>
   }
   private relaySources = new WeakSet<Observer<N, D, any>>();
   public relay(source: Observer<N, D, any>): () => void {
-    if (this.relaySources.has(source)) return () => void 0;
+    if (this.relaySources.has(source)) return () => undefined;
     void this.relaySources.add(source);
     const unbind = source.monitor(<N><any>[], (data, namespace) =>
       void this.emit(namespace, data));
@@ -155,7 +155,7 @@ export class Observation<N extends ReadonlyArray<any>, D, R>
         catch (reason) {
           void causeAsyncException(reason);
         }
-      }, void 0);
+      }, undefined);
     void this.refsAbove_(this.seekNode_(namespace))
       .reduce<void>((_, { type, listener, options: { once } }) => {
         if (type !== RegisterItemType.monitor) return;
@@ -168,7 +168,7 @@ export class Observation<N extends ReadonlyArray<any>, D, R>
         catch (reason) {
           void causeAsyncException(reason);
         }
-      }, void 0);
+      }, undefined);
     if (tracker) {
       try {
         void tracker(data, results);
@@ -206,7 +206,7 @@ export class Observation<N extends ReadonlyArray<any>, D, R>
     return items;
   }
   private node_: RegisterNode<N, D, R> = {
-    parent: void 0,
+    parent: undefined,
     children: new Map(),
     childrenNames: [],
     items: []

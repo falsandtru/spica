@@ -57,7 +57,7 @@ export abstract class Supervisor<N extends string, P, R, S> {
     name: '',
     size: Infinity,
     timeout: Infinity,
-    destructor: (_: any) => void 0,
+    destructor: (_: any) => undefined,
     scheduler: tick,
     resource: 10,
   };
@@ -89,7 +89,7 @@ export abstract class Supervisor<N extends string, P, R, S> {
       ? {
           init: state => state,
           call: process,
-          exit: _ => void 0,
+          exit: _ => undefined,
         }
       : process;
     return this.workers
@@ -110,7 +110,7 @@ export abstract class Supervisor<N extends string, P, R, S> {
       const [name, param, callback] = this.messages.shift()!;
       void this.events_.loss.emit([name], [name, param]);
       try {
-        void callback(void 0 as any, new Error(`Spica: Supervisor: A message overflowed.`));
+        void callback(undefined as any, new Error(`Spica: Supervisor: A message overflowed.`));
       }
       catch (reason) {
         void causeAsyncException(reason);
@@ -127,17 +127,17 @@ export abstract class Supervisor<N extends string, P, R, S> {
     void this.validate();
     const result = this.workers.has(name)
       ? this.workers.get(name)!.call([param, timeout])
-      : void 0;
-    if (result === void 0) {
+      : undefined;
+    if (result === undefined) {
       void this.events_.loss.emit([name], [name, param]);
     }
-    if (result === void 0 || result instanceof Error) return false;
-    void result.catch(() => void 0);
+    if (result === undefined || result instanceof Error) return false;
+    void result.catch(() => undefined);
     return true;
   }
   public refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason: any) => boolean][] {
     void this.validate();
-    return name === void 0
+    return name === undefined
       ? [...this.workers.values()].map(convert)
       : this.workers.has(name)
         ? [convert(this.workers.get(name)!)]
@@ -179,7 +179,7 @@ export abstract class Supervisor<N extends string, P, R, S> {
       const [name, param, callback, expiry] = this.messages[i];
       const result = this.workers.has(name) && Date.now() <= expiry
         ? this.workers.get(name)!.call([param, expiry])
-        : void 0;
+        : undefined;
       if (!result && Date.now() < expiry) continue;
       i === 0
         ? void this.messages.shift()
@@ -192,7 +192,7 @@ export abstract class Supervisor<N extends string, P, R, S> {
       }
       if (!result || result instanceof Error) {
         try {
-          void callback(void 0 as any, new Error(`Spica: Supervisor: A processing has failed.`));
+          void callback(undefined as any, new Error(`Spica: Supervisor: A processing has failed.`));
         }
         catch (reason) {
           void causeAsyncException(reason);
@@ -204,9 +204,9 @@ export abstract class Supervisor<N extends string, P, R, S> {
           reply =>
             this.available
               ? void callback(reply)
-              : void callback(void 0 as any, new Error(`Spica: Supervisor: A processing has failed.`)),
+              : void callback(undefined as any, new Error(`Spica: Supervisor: A processing has failed.`)),
           () =>
-            void callback(void 0 as any, new Error(`Spica: Supervisor: A processing has failed.`)));
+            void callback(undefined as any, new Error(`Spica: Supervisor: A processing has failed.`)));
     }
   }
 }

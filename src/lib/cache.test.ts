@@ -64,7 +64,7 @@ describe('Unit: lib/cache', () => {
       ]);
 
       assert(cache.put(0, 0) === false);
-      assert(key === void 0 && val === void 0 && cnt === 0);
+      assert(key === undefined && val === undefined && cnt === 0);
       assert(cache.put(1, 1) === false);
       assert(key === 0 && val === 0 && cnt === 1);
       assert.deepStrictEqual([...cache], [
@@ -102,7 +102,7 @@ describe('Unit: lib/cache', () => {
       ]);
 
       assert(cache.put(0, 0) === false);
-      assert(key === void 0 && val === void 0 && cnt === 0);
+      assert(key === undefined && val === undefined && cnt === 0);
       assert(cache.put(0, 0) === true);
       assert(cache.put(1, 1) === false);
       assert(key === 0 && val === 0 && cnt === 1);
@@ -137,9 +137,9 @@ describe('Unit: lib/cache', () => {
       ]);
 
       assert(cache.put(0, 0) === false);
-      assert(key === void 0 && val === void 0 && cnt === 0);
+      assert(key === undefined && val === undefined && cnt === 0);
       assert(cache.put(1, 1) === false);
-      assert(key === void 0 && val === void 0 && cnt === 0);
+      assert(key === undefined && val === undefined && cnt === 0);
       assert(cache.put(1, 1) === true);
       assert(cache.put(2, 2) === false);
       assert(key === 0 && val === 0 && cnt === 1);
@@ -153,7 +153,7 @@ describe('Unit: lib/cache', () => {
         entries: [[2, 2], [3, 3]],
       });
 
-      assert(cache.clear() === void 0);
+      assert(cache.clear() === undefined);
       assert(key === 3 && val === 3 && cnt === 5);
       assert.deepStrictEqual([...cache], [
       ]);

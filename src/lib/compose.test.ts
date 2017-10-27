@@ -25,7 +25,7 @@ describe('Unit: lib/compose', () => {
       assert(X['a'] === 'A');
       assert(X.x === 'X');
       assert(x.xp === 'x');
-      assert(x.am() === void 0);
+      assert(x.am() === undefined);
       assert(x.xm() === 'x');
     });
 
@@ -60,8 +60,8 @@ describe('Unit: lib/compose', () => {
       assert(X['b'] === 'B');
       assert(X.x === 'X');
       assert(x.xp === 'x');
-      assert(x.am() === void 0);
-      assert(x.bm() === void 0);
+      assert(x.am() === undefined);
+      assert(x.bm() === undefined);
       assert(x.xm() === 'x');
     });
 

@@ -4,7 +4,7 @@ describe('Unit: lib/monad/sequence/member/iterate', () => {
   describe('iterate', () => {
     it('', () => {
       let thunk = new Sequence<number, number>((_ = 0, cons) => cons()).iterate();
-      assert.deepStrictEqual(thunk, [void 0, Sequence.Iterator.done, -1]);
+      assert.deepStrictEqual(thunk, [undefined, Sequence.Iterator.done, -1]);
 
       thunk = new Sequence<number, number>((n = 0, cons) => cons(n)).iterate();
       assert.deepStrictEqual(thunk, [0, Sequence.Thunk.iterator(thunk), 0]);
@@ -16,7 +16,7 @@ describe('Unit: lib/monad/sequence/member/iterate', () => {
       thunk = Sequence.Thunk.iterator(thunk)();
       assert.deepStrictEqual(thunk, [4, Sequence.Thunk.iterator(thunk), 2]);
       thunk = Sequence.Thunk.iterator(thunk)();
-      assert.deepStrictEqual(thunk, [void 0, Sequence.Iterator.done, -1]);
+      assert.deepStrictEqual(thunk, [undefined, Sequence.Iterator.done, -1]);
     });
 
   });

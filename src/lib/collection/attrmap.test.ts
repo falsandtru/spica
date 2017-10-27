@@ -10,10 +10,10 @@ describe('Unit: lib/attrmap', () => {
 
     it('get/set', () => {
       const map = new AttrMap<number, number, string>([], Map);
-      assert(map.get(0, 0) === void 0);
+      assert(map.get(0, 0) === undefined);
       assert(map.set(0, 0, '') === map);
       assert(map.get(0, 0) === '');
-      assert(map.get(1, 0) === void 0);
+      assert(map.get(1, 0) === undefined);
       assert(map.set(1, 0, ' ') === map);
       assert(map.get(1, 0) === ' ');
       assert(map.get(0, 0) === '');

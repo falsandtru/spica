@@ -6,11 +6,11 @@ describe('Unit: lib/assign', () => {
       assert.deepStrictEqual(
         assign<{}>({
           a: 1,
-          b: void 0,
+          b: undefined,
           c: 0
         }, {
           b: 2,
-          c: void 0,
+          c: undefined,
           d: 3
         }, {
           d: 4,
@@ -18,7 +18,7 @@ describe('Unit: lib/assign', () => {
         }), {
           a: 1,
           b: 2,
-          c: void 0,
+          c: undefined,
           d: 4,
           e: 5
         }
@@ -79,8 +79,8 @@ describe('Unit: lib/assign', () => {
     it('object', () => {
       assert.deepStrictEqual(
         assign<{}>({
-          a: void 0,
-          b: void 0,
+          a: undefined,
+          b: undefined,
           c: null,
           d: null
         }, {
@@ -122,11 +122,11 @@ describe('Unit: lib/assign', () => {
       assert.deepStrictEqual(
         clone<{}>({
           a: 1,
-          b: void 0,
+          b: undefined,
           c: 0
         }, {
           b: 2,
-          c: void 0,
+          c: undefined,
           d: 3
         }, {
           d: 4,
@@ -134,7 +134,7 @@ describe('Unit: lib/assign', () => {
         }), {
           a: 1,
           b: 2,
-          c: void 0,
+          c: undefined,
           d: 4,
           e: 5
         }
@@ -195,8 +195,8 @@ describe('Unit: lib/assign', () => {
     it('object', () => {
       assert.deepStrictEqual(
         clone<{}>({
-          a: void 0,
-          b: void 0,
+          a: undefined,
+          b: undefined,
           c: null,
           d: null
         }, {
@@ -238,11 +238,11 @@ describe('Unit: lib/assign', () => {
       assert.deepStrictEqual(
         extend<{}>({
           a: 1,
-          b: void 0,
+          b: undefined,
           c: 0
         }, {
           b: 2,
-          c: void 0,
+          c: undefined,
           d: 3
         }, {
           d: 4,
@@ -250,7 +250,7 @@ describe('Unit: lib/assign', () => {
         }), {
           a: 1,
           b: 2,
-          c: void 0,
+          c: undefined,
           d: 4,
           e: 5
         }
@@ -312,8 +312,8 @@ describe('Unit: lib/assign', () => {
     it('object', () => {
       assert.deepStrictEqual(
         extend<{}>({
-          a: void 0,
-          b: void 0,
+          a: undefined,
+          b: undefined,
           c: null,
           d: null
         }, {

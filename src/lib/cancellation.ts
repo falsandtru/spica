@@ -27,12 +27,12 @@ export class Cancellation<L = void>
   private reason: L;
   private readonly listeners: Set<(reason: L) => void> = new Set();
   public readonly register = (listener: (reason: L) => void) => {
-    if (this.canceled) return void handler(this.reason), () => void 0;
-    if (this.done) return () => void 0;
+    if (this.canceled) return void handler(this.reason), () => undefined;
+    if (this.done) return () => undefined;
     void this.listeners.add(handler);
     return () =>
       this.done
-        ? void 0
+        ? undefined
         : void this.listeners.delete(handler);
 
     function handler(reason: L): void {
