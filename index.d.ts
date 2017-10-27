@@ -515,6 +515,8 @@ export class Cache<K, V = void> {
 }
 
 export function tick(fn: () => void, dedup?: boolean): void;
+export function throttle(interval: number, callback: (last: undefined, buffer: undefined[]) => void): (arg?: undefined) => void;
+export function throttle<T>(interval: number, callback: (last: T, buffer: T[]) => void): (arg: T) => void;
 
 export function uuid(): string;
 export function sqid(): string;

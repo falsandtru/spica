@@ -13,6 +13,7 @@ import {
   DataMap, AttrMap,
   Cache,
   tick,
+  throttle,
   uuid,
   sqid,
   assign,
@@ -144,14 +145,15 @@ describe('Interface: Package', function () {
 
   });
 
-  describe('tick', function () {
+  describe('utils', function () {
     it('tick', function () {
       assert(typeof tick === 'function');
     });
 
-  });
+    it('throttle', function () {
+      assert(typeof throttle === 'function');
+    });
 
-  describe('utils', function () {
     it('uuid', function () {
       assert(typeof uuid === 'function');
     });

@@ -13,6 +13,7 @@ export { DataMap } from './lib/datamap';
 export { AttrMap } from './lib/attrmap';
 export { Cache } from './lib/cache';
 export { tick } from './lib/tick';
+export { throttle } from './lib/throttle';
 export { uuid } from './lib/uuid';
 export { sqid } from './lib/sqid';
 export { assign, clone, extend } from './lib/assign';
