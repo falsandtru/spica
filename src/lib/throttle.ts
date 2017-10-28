@@ -1,5 +1,3 @@
-export function throttle(interval: number, callback: (last: undefined, buffer: undefined[]) => void): (arg?: undefined) => void
-export function throttle<T>(interval: number, callback: (last: T, buffer: T[]) => void): (arg: T) => void
 export function throttle<T>(interval: number, callback: (last: T, buffer: T[]) => void): (arg: T) => void {
   let timer = 0;
   let buffer: T[] = [];
