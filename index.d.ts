@@ -90,17 +90,17 @@ type RegisterItem<N extends ReadonlyArray<any>, D, R> = {
   options: ObserverOptions;
 };
 
-export class Cancellation<L = void> {
+export class Cancellation<L = undefined> {
   constructor(cancelees?: Iterable<Cancellee<L>>);
 }
-export interface Cancellation<L = void>
+export interface Cancellation<L = undefined>
   extends Canceller<L>, Cancellee<L> {
   readonly close: () => void;
 }
-export interface Canceller<L = void> {
+export interface Canceller<L = undefined> {
   readonly cancel: {
     (reason: L): void;
-    (this: Cancellation<void>): void;
+    (this: Cancellation<undefined>): void;
   };
 }
 export interface Cancellee<L = void> {

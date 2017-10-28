@@ -2,13 +2,13 @@ import { causeAsyncException } from './exception';
 import { Maybe, Just, Nothing } from './monad/maybe';
 import { Either, Left, Right } from './monad/either';
 
-export interface Canceller<L = void> {
+export interface Canceller<L = undefined> {
   readonly cancel: {
     (reason: L): void;
-    (this: Cancellation<void>): void;
+    (this: Cancellation<undefined>): void;
   };
 }
-export interface Cancellee<L = void> {
+export interface Cancellee<L = undefined> {
   readonly register: (listener: (reason: L) => void) => () => void;
   readonly canceled: boolean;
   readonly promise: <T>(val: T) => Promise<T>;
@@ -16,7 +16,7 @@ export interface Cancellee<L = void> {
   readonly either: <R>(val: R) => Either<L, R>;
 }
 
-export class Cancellation<L = void>
+export class Cancellation<L = undefined>
   implements Canceller<L>, Cancellee<L> {
   constructor(cancelees: Iterable<Cancellee<L>> = []) {
     void [...cancelees]
