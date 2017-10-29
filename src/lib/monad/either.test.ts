@@ -15,6 +15,13 @@ describe('Unit: lib/either', () => {
         .bind(n => Right(`Right ${n}`))
         .extract(l => `Left ${l}`);
       assert(result === 'Left Left 2');
+      try {
+        Left(0).extract();
+        throw 1;
+      }
+      catch (reason) {
+        assert(reason === 0);
+      }
     });
 
     it('Left nest', () => {

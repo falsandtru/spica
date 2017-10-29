@@ -32,6 +32,13 @@ describe('Unit: lib/maybe', () => {
         .bind(throwError)
         .extract(() => 'Nothing');
       assert(result === 'Nothing');
+      try {
+        Nothing.extract();
+        throw 1;
+      }
+      catch (reason) {
+        assert(reason === undefined);
+      }
     });
 
     it('Nothing nest', () => {
