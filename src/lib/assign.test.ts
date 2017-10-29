@@ -21,8 +21,7 @@ describe('Unit: lib/assign', () => {
           c: undefined,
           d: 4,
           e: 5
-        }
-      );
+        });
     });
 
     it('deep', () => {
@@ -40,8 +39,7 @@ describe('Unit: lib/assign', () => {
           a: {
             b: 2
           }
-        }
-      );
+        });
     });
 
     it('array', () => {
@@ -63,8 +61,7 @@ describe('Unit: lib/assign', () => {
           c: [3],
           d: [4],
           e: [5]
-        }
-      );
+        });
       assert.deepStrictEqual(
         assign({
           a: [0, 2]
@@ -72,8 +69,7 @@ describe('Unit: lib/assign', () => {
           a: [1]
         }), {
           a: [1]
-        }
-      );
+        });
     });
 
     it('object', () => {
@@ -111,8 +107,7 @@ describe('Unit: lib/assign', () => {
           d: [2],
           e: {2:2},
           f: [2]
-        }
-      );
+        });
       assert(assign({ a: null }, { a: Object.create(null) }).a as any instanceof Object === false);
       assert.deepStrictEqual(assign({ a: { 0: 0 } }, { a: Object.create(null) }), { a: Object.create(null) });
     });
@@ -139,8 +134,7 @@ describe('Unit: lib/assign', () => {
           c: undefined,
           d: 4,
           e: 5
-        }
-      );
+        });
     });
 
     it('deep', () => {
@@ -158,8 +152,7 @@ describe('Unit: lib/assign', () => {
           a: {
             b: 2
           }
-        }
-      );
+        });
     });
 
     it('array', () => {
@@ -181,8 +174,7 @@ describe('Unit: lib/assign', () => {
           c: [3],
           d: [4],
           e: [5]
-        }
-      );
+        });
       assert.deepStrictEqual(
         clone({
           a: [0, 2]
@@ -190,8 +182,7 @@ describe('Unit: lib/assign', () => {
           a: [1]
         }), {
           a: [1]
-        }
-      );
+        });
     });
 
     it('object', () => {
@@ -229,8 +220,7 @@ describe('Unit: lib/assign', () => {
           d: [2],
           e: {2:2},
           f: [2]
-        }
-      );
+        });
       assert(clone({ a: null }, { a: Object.create(null) }).a as any instanceof Object === false);
       assert.deepStrictEqual(clone({ a: { 0: 0 } }, { a: Object.create(null) }), { a: Object.create(null) });
     });
@@ -257,8 +247,7 @@ describe('Unit: lib/assign', () => {
           c: undefined,
           d: 4,
           e: 5
-        }
-      );
+        });
     });
 
     it('deep', () => {
@@ -277,8 +266,7 @@ describe('Unit: lib/assign', () => {
             a: 1,
             b: 2
           }
-        }
-      );
+        });
     });
 
     it('array', () => {
@@ -300,8 +288,7 @@ describe('Unit: lib/assign', () => {
           c: [3],
           d: [4],
           e: [5]
-        }
-      );
+        });
       assert.deepStrictEqual(
         extend({
           a: [0, 2]
@@ -309,8 +296,7 @@ describe('Unit: lib/assign', () => {
           a: [1]
         }), {
           a: [1]
-        }
-      );
+        });
     });
 
     it('object', () => {
@@ -348,8 +334,7 @@ describe('Unit: lib/assign', () => {
           d: [2],
           e: {2:2},
           f: [2]
-        }
-      );
+        });
       assert(extend({ a: null }, { a: Object.create(null) }).a as any instanceof Object === false);
       assert.deepStrictEqual(extend({ a: { 0: 0 } }, { a: Object.create(null) }), { a: Object.create(null) });
     });
