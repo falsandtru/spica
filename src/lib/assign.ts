@@ -17,18 +17,13 @@ export const clone = template((key, target, source): void => {
 export const extend = template((key, target, source): void => {
   switch (type(source[key])) {
     case 'Array':
-      switch (type(target[key])) {
-        case 'Array':
-          return target[key] = extend([], source[key]);
-        default:
-          return target[key] = source[key];
-      }
+      return target[key] = extend([], source[key]);
     case 'Object':
       switch (type(target[key])) {
         case 'Object':
           return target[key] = extend(target[key], source[key]);
         default:
-          return target[key] = source[key];
+          return target[key] = extend({}, source[key]);
       }
     default:
       return target[key] = source[key];

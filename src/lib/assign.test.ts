@@ -84,8 +84,8 @@ describe('Unit: lib/assign', () => {
           c: null,
           d: null
         }, {
-          a: [0],
-          b: {0:0},
+          a: Object.freeze([0]),
+          b: Object.freeze({0:0}),
           c: [0],
           d: {0:0},
           e: [0],
@@ -200,8 +200,8 @@ describe('Unit: lib/assign', () => {
           c: null,
           d: null
         }, {
-          a: [0],
-          b: {0:0},
+          a: Object.freeze([0]),
+          b: Object.freeze({0:0}),
           c: [0],
           d: {0:0},
           e: [0],
@@ -317,8 +317,8 @@ describe('Unit: lib/assign', () => {
           c: null,
           d: null
         }, {
-          a: [0],
-          b: {0:0},
+          a: Object.freeze([0]),
+          b: Object.freeze({0:0}),
           c: [0],
           d: {0:0},
           e: [0],
