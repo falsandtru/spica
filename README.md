@@ -31,7 +31,7 @@ $ npm i spica
 - AttrMap
 - Cache
 - tick
-- throttle
+- throttle, debounce
 - uuid
 - sqid
 - assign

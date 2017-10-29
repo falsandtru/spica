@@ -13,7 +13,7 @@ import {
   DataMap, AttrMap,
   Cache,
   tick,
-  throttle,
+  throttle, debounce,
   uuid,
   sqid,
   assign,
@@ -152,6 +152,10 @@ describe('Interface: Package', function () {
 
     it('throttle', function () {
       assert(typeof throttle === 'function');
+    });
+
+    it('debounce', function () {
+      assert(typeof debounce === 'function');
     });
 
     it('uuid', function () {
