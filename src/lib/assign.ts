@@ -8,7 +8,9 @@ export const clone = template((key, target, source): void => {
     case 'Array':
       return target[key] = clone([], source[key]);
     case 'Object':
-      return target[key] = clone({}, source[key]);
+      return target[key] = source[key] instanceof Object
+        ? clone({}, source[key])
+        : source[key];
     default:
       return target[key] = source[key];
   }
@@ -21,9 +23,13 @@ export const extend = template((key, target, source): void => {
     case 'Object':
       switch (type(target[key])) {
         case 'Object':
-          return target[key] = extend(target[key], source[key]);
+          return target[key] = source[key] instanceof Object
+            ? extend(target[key], source[key])
+            : source[key];
         default:
-          return target[key] = extend({}, source[key]);
+          return target[key] = source[key] instanceof Object
+            ? extend({}, source[key])
+            : source[key];
       }
     default:
       return target[key] = source[key];

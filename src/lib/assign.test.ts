@@ -113,6 +113,8 @@ describe('Unit: lib/assign', () => {
           f: [2]
         }
       );
+      assert(assign({ a: null }, { a: Object.create(null) }).a as any instanceof Object === false);
+      assert.deepStrictEqual(assign({ a: { 0: 0 } }, { a: Object.create(null) }), { a: Object.create(null) });
     });
 
   });
@@ -229,6 +231,8 @@ describe('Unit: lib/assign', () => {
           f: [2]
         }
       );
+      assert(clone({ a: null }, { a: Object.create(null) }).a as any instanceof Object === false);
+      assert.deepStrictEqual(clone({ a: { 0: 0 } }, { a: Object.create(null) }), { a: Object.create(null) });
     });
 
   });
@@ -346,6 +350,8 @@ describe('Unit: lib/assign', () => {
           f: [2]
         }
       );
+      assert(extend({ a: null }, { a: Object.create(null) }).a as any instanceof Object === false);
+      assert.deepStrictEqual(extend({ a: { 0: 0 } }, { a: Object.create(null) }), { a: Object.create(null) });
     });
 
   });
