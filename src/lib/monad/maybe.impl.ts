@@ -34,6 +34,11 @@ export class Maybe<a> extends MonadPlus<a> {
       throw new TypeError(`Spica: Maybe: Invalid monad value.\n\t${m}`);
     });
   }
+  public guard(cond: boolean): Maybe<a> {
+    return cond
+      ? this
+      : Maybe.mzero;
+  }
   public join<b>(this: Maybe<Maybe<b>>): Maybe<b> {
     return this.bind(m => m);
   }

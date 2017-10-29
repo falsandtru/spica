@@ -222,6 +222,7 @@ declare namespace Monad {
     ap<a, b, c, d, e, z>(this: Maybe<(a: a, b: b, c: c, d: d, e: e) => z>, a: Maybe<a>): Maybe<(b: b, c: c, d: d, e: e) => z>;
     bind(f: (a: a) => Maybe<a>): Maybe<a>;
     bind<b>(f: (a: a) => Maybe<b>): Maybe<b>;
+    guard(cond: boolean): Maybe<a>;
     join<b>(this: Maybe<Maybe<b>>): Maybe<b>;
     extract(): a;
     extract<b>(transform: () => b): a | b;
