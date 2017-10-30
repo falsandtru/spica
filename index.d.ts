@@ -54,14 +54,14 @@ export namespace Supervisor {
   }
 }
 
-export class Observation<N extends ReadonlyArray<any>, D, R> {
+export class Observation<N extends any[], D, R> {
 }
-export interface Observation<N extends ReadonlyArray<any>, D, R>
+export interface Observation<N extends any[], D, R>
   extends Observer< N, D, R >, Publisher < N, D, R > {
   relay(source: Observer<N, D, any>): () => void;
   refs(namespace: never[] | N): RegisterItem<N, D, R>[];
 }
-export interface Observer<N extends ReadonlyArray<any>, D, R> {
+export interface Observer<N extends any[], D, R> {
   monitor(namespace: N, listener: Monitor<N, D>, options?: ObserverOptions): () => void;
   on(namespace: N, listener: Subscriber<N, D, R>, options?: ObserverOptions): () => void;
   off(namespace: N, listener?: Subscriber<N, D, R>): void;
@@ -70,15 +70,15 @@ export interface Observer<N extends ReadonlyArray<any>, D, R> {
 export interface ObserverOptions {
   once?: boolean;
 }
-export interface Publisher<N extends ReadonlyArray<any>, D, R> {
+export interface Publisher<N extends any[], D, R> {
   emit(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void;
   emit(this: Publisher<N, void, R>, namespace: N, data?: D, tracker?: (data: D, results: R[]) => void): void;
   reflect(namespace: N, data: D): R[];
   reflect(this: Publisher<N, void, R>, namespace: N, data?: D): R[];
 }
-type Monitor<N extends ReadonlyArray<any>, D> = (data: D, namespace: N) => any;
-type Subscriber<N extends ReadonlyArray<any>, D, R> = (data: D, namespace: N) => R;
-type RegisterItem<N extends ReadonlyArray<any>, D, R> = {
+type Monitor<N extends any[], D> = (data: D, namespace: N) => any;
+type Subscriber<N extends any[], D, R> = (data: D, namespace: N) => R;
+type RegisterItem<N extends any[], D, R> = {
   type: 'monitor';
   namespace: N;
   listener: Monitor<N, D>;

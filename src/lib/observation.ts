@@ -2,7 +2,7 @@ import { concat } from './concat';
 import { findIndex } from './equal';
 import { causeAsyncException } from './exception';
 
-export interface Observer<N extends ReadonlyArray<any>, D, R> {
+export interface Observer<N extends any[], D, R> {
   monitor(namespace: N, listener: Monitor<N, D>, options?: ObserverOptions): () => void;
   on(namespace: N, listener: Subscriber<N, D, R>, options?: ObserverOptions): () => void;
   off(namespace: N, listener?: Subscriber<N, D, R>): void;
@@ -11,22 +11,22 @@ export interface Observer<N extends ReadonlyArray<any>, D, R> {
 export interface ObserverOptions {
   once?: boolean;
 }
-export interface Publisher<N extends ReadonlyArray<any>, D, R> {
+export interface Publisher<N extends any[], D, R> {
   emit(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void;
   emit(this: Publisher<N, void, R>, namespace: N, data?: D, tracker?: (data: D, results: R[]) => void): void;
   reflect(namespace: N, data: D): R[];
   reflect(this: Publisher<N, void, R>, namespace: N, data?: D): R[];
 }
-export type Monitor<N extends ReadonlyArray<any>, D> = (data: D, namespace: N) => any;
-export type Subscriber<N extends ReadonlyArray<any>, D, R> = (data: D, namespace: N) => R;
+export type Monitor<N extends any[], D> = (data: D, namespace: N) => any;
+export type Subscriber<N extends any[], D, R> = (data: D, namespace: N) => R;
 
-interface RegisterNode<N extends ReadonlyArray<any>, D, R> {
+interface RegisterNode<N extends any[], D, R> {
   parent: RegisterNode<N, D, R> | undefined;
   children: Map<N[keyof N], RegisterNode<N, D, R>>;
   childrenNames: N[keyof N][];
   items: RegisterItem<N, D, R>[];
 }
-export type RegisterItem<N extends ReadonlyArray<any>, D, R> = {
+export type RegisterItem<N extends any[], D, R> = {
   type: RegisterItemType.Monitor;
   namespace: N;
   listener: Monitor<N, D>;
@@ -45,7 +45,7 @@ export namespace RegisterItemType {
   export const subscriber = 'subscriber';
 }
 
-export class Observation<N extends ReadonlyArray<any>, D, R>
+export class Observation<N extends any[], D, R>
   implements Observer<N, D, R>, Publisher<N, D, R> {
   public monitor(namespace: N, listener: Monitor<N, D>, { once = false }: ObserverOptions = {}): () => void {
     void throwTypeErrorIfInvalidListener(listener, namespace);
@@ -230,7 +230,7 @@ export class Observation<N extends ReadonlyArray<any>, D, R>
   }
 }
 
-function isRegistered<N extends ReadonlyArray<any>, D, R>(items: RegisterItem<N, D, R>[], type: RegisterItemType, namespace: N, listener: Monitor<N, D> | Subscriber<N, D, R>): boolean {
+function isRegistered<N extends any[], D, R>(items: RegisterItem<N, D, R>[], type: RegisterItemType, namespace: N, listener: Monitor<N, D> | Subscriber<N, D, R>): boolean {
   return items.some(({ type: t, namespace: n, listener: l }) =>
     t === type &&
     n.length === namespace.length &&
@@ -238,7 +238,7 @@ function isRegistered<N extends ReadonlyArray<any>, D, R>(items: RegisterItem<N,
     l === listener);
 }
 
-function throwTypeErrorIfInvalidListener<T extends ReadonlyArray<any>, D, R>(listener: Monitor<T, D> | Subscriber<T, D, R> | undefined, types: T): void {
+function throwTypeErrorIfInvalidListener<T extends any[], D, R>(listener: Monitor<T, D> | Subscriber<T, D, R> | undefined, types: T): void {
   switch (typeof listener) {
     case 'function':
       return;
