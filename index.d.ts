@@ -5,7 +5,7 @@
 * @author falsandtru https://github.com/falsandtru/spica
 */
 
-export abstract class Supervisor<N extends string, P, R, S> {
+export abstract class Supervisor<N extends string, P = undefined, R = undefined, S = undefined> {
   static readonly count: number;
   static readonly procs: number;
   constructor(options?: Supervisor.Options);

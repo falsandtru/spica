@@ -4,7 +4,7 @@ import { tick } from './tick';
 import { sqid } from './sqid';
 import { causeAsyncException } from './exception';
 
-export abstract class Supervisor<N extends string, P, R, S> {
+export abstract class Supervisor<N extends string, P = undefined, R = undefined, S = undefined> {
   private static instances_: Set<Supervisor<string, any, any, any>>;
   private static get instances(): typeof Supervisor.instances_ {
     return this.hasOwnProperty('instances_')
