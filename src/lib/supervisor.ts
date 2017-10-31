@@ -200,9 +200,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
         void result
           .then(
             reply =>
-              this.available
-                ? void callback(reply)
-                : void callback(undefined as any, new Error(`Spica: Supervisor: A processing has failed.`)),
+              void callback(reply),
             () =>
               void callback(undefined as any, new Error(`Spica: Supervisor: A processing has failed.`)));
       }
