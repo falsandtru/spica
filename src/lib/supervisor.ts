@@ -26,8 +26,6 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
     this.name = this.settings.name;
     if (this.constructor === Supervisor) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot instantiate abstract classes.`);
     void (this.constructor as typeof Supervisor).instances.add(this);
-    this.scheduler = () =>
-      void (void 0, this.settings.scheduler)(this.deliver);
   }
   private destructor(reason: any): void {
     assert(this.alive === true);
@@ -61,7 +59,6 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
     scheduler: tick,
     resource: 10,
   };
-  private readonly scheduler: () => void;
   private readonly events_ = {
     init: new Observation<never[] | [N], Supervisor.Event.Data.Init<N, P, R, S>, any>(),
     loss: new Observation<never[] | [N], Supervisor.Event.Data.Loss<N, P>, any>(),
@@ -174,13 +171,14 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
     assert(this.available);
     void tick(this.scheduler, true);
   }
+  private readonly scheduler = () => void (void 0, this.settings.scheduler)(this.deliver);
   private readonly messages: [N, P, Supervisor.Callback<R>, number][] = [];
   private readonly deliver = (): void => {
     const since = Date.now();
     for (let i = 0, len = this.messages.length; this.available && i < len; ++i) {
-      if (this.settings.resource - (Date.now() - since) > 0 === false) return void this.schedule();
+      if (this.settings.resource - (Date.now() - since) <= 0) return void this.schedule();
       const [name, param, callback, expiry] = this.messages[i];
-      const result = this.workers.has(name) && Date.now() <= expiry
+      const result = this.workers.has(name)
         ? this.workers.get(name)!.call([param, expiry])
         : undefined;
       if (result === undefined && Date.now() < expiry) continue;
@@ -278,7 +276,8 @@ class Worker<N extends string, P, R, S> {
   private available = true;
   private initiated = false;
   public readonly call = ([param, expiry]: [P, number]): Promise<R> | undefined => {
-    if (!this.available) return;
+    const now = Date.now();
+    if (!this.available || now > expiry) return;
     return new Promise<[R, S]>((resolve, reject) => {
       this.available = false;
       if (!this.initiated) {
@@ -287,9 +286,8 @@ class Worker<N extends string, P, R, S> {
           .emit([this.name], [this.name, this.process, this.state]);
         this.state = this.process.init(this.state);
       }
-      isFinite(expiry) && void setTimeout(() => void reject(new Error()), expiry - Date.now());
-      void Promise.resolve(this.process.call(param, this.state))
-        .then(resolve, reject);
+      void Promise.resolve(this.process.call(param, this.state)).then(resolve, reject);
+      isFinite(expiry) && void setTimeout(() => void reject(new Error()), expiry - now);
     })
       .then<R>(
         ([reply, state]) => {

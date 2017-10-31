@@ -6,17 +6,9 @@ describe('Benchmark:', function () {
 
   describe('Supervisor', function () {
     it('cast', function (done) {
-      const sv = new class extends Supervisor<string, number, void, void> { }();
+      const sv = new class extends Supervisor<string, number> { }();
       sv.register('', _ => [undefined, undefined], undefined);
       benchmark('Supervisor cast', () => sv.cast('', 0), done);
-    });
-
-    it('crash', function (done) {
-      const sv = new class BenchSupervisor extends Supervisor<string, number, void, void> { }();
-      benchmark('Supervisor crash', () => {
-        sv.register('', (): any => { throw undefined }, undefined);
-        sv.cast('', 0);
-      }, done);
     });
 
   });
