@@ -75,14 +75,14 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
   private readonly workers = new Map<N, Worker<N, P, R, S>>();
   private alive = true;
   private available = true;
-  private validate(): void {
+  private throwIfNotAvailable(): void {
     if (!this.available) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A supervisor is already terminated.`);
   }
   public register(name: N, process: Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => boolean;
   public register(name: N, process: Supervisor.Process<P, R, S>, state: S): (reason?: any) => boolean;
   public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => boolean;
   public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => boolean {
-    void this.validate();
+    void this.throwIfNotAvailable();
     if (this.workers.has(name)) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: Cannot register a process multiply with the same name.`);
     void this.schedule();
     process = typeof process === 'function'
@@ -99,7 +99,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
       .terminate;
   }
   public call(name: N, param: P, callback: Supervisor.Callback<R>, timeout = this.settings.timeout): void {
-    void this.validate();
+    void this.throwIfNotAvailable();
     void this.messages.push([
       name,
       param,
@@ -124,19 +124,19 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
     , timeout + 3);
   }
   public cast(name: N, param: P, timeout = this.settings.timeout): boolean {
-    void this.validate();
+    void this.throwIfNotAvailable();
     const result = this.workers.has(name)
       ? this.workers.get(name)!.call([param, timeout])
       : undefined;
     if (result === undefined) {
       void this.events_.loss.emit([name], [name, param]);
     }
-    if (result === undefined || result instanceof Error) return false;
+    if (result === undefined) return false;
     void result.catch(() => undefined);
     return true;
   }
   public refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason: any) => boolean][] {
-    void this.validate();
+    void this.throwIfNotAvailable();
     return name === undefined
       ? [...this.workers.values()].map(convert)
       : this.workers.has(name)
@@ -180,33 +180,32 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
       const result = this.workers.has(name) && Date.now() <= expiry
         ? this.workers.get(name)!.call([param, expiry])
         : undefined;
-      if (!result && Date.now() < expiry) continue;
+      if (result === undefined && Date.now() < expiry) continue;
       i === 0
         ? void this.messages.shift()
         : void this.messages.splice(i, 1);
       void --i;
       void --len;
 
-      if (!result) {
+      if (result === undefined) {
         void this.events_.loss.emit([name], [name, param]);
-      }
-      if (!result || result instanceof Error) {
         try {
           void callback(undefined as any, new Error(`Spica: Supervisor: A processing has failed.`));
         }
         catch (reason) {
           void causeAsyncException(reason);
         }
-        continue;
       }
-      void result
-        .then(
-          reply =>
-            this.available
-              ? void callback(reply)
-              : void callback(undefined as any, new Error(`Spica: Supervisor: A processing has failed.`)),
-          () =>
-            void callback(undefined as any, new Error(`Spica: Supervisor: A processing has failed.`)));
+      else {
+        void result
+          .then(
+            reply =>
+              this.available
+                ? void callback(reply)
+                : void callback(undefined as any, new Error(`Spica: Supervisor: A processing has failed.`)),
+            () =>
+              void callback(undefined as any, new Error(`Spica: Supervisor: A processing has failed.`)));
+      }
     }
   }
 }
@@ -261,7 +260,7 @@ class Worker<N extends string, P, R, S> {
     assert(this.alive === false);
     assert(this.available === false);
     void this.destructor_();
-    if (this.activated) {
+    if (this.initiated) {
       try {
         void this.process.exit(reason, this.state);
         void this.events.exit
@@ -276,41 +275,34 @@ class Worker<N extends string, P, R, S> {
   }
   private alive = true;
   private available = true;
-  private activated = false;
-  public readonly call = ([param, expiry]: [P, number]): Promise<R> | Error | undefined => {
+  private initiated = false;
+  public readonly call = ([param, expiry]: [P, number]): Promise<R> | undefined => {
     if (!this.available) return;
-    try {
+    return new Promise<[R, S]>((resolve, reject) => {
       this.available = false;
-      if (!this.activated) {
-        this.activated = true;
+      if (!this.initiated) {
+        this.initiated = true;
         void this.events.init
           .emit([this.name], [this.name, this.process, this.state]);
         this.state = this.process.init(this.state);
       }
-      return new Promise<[R, S]>((resolve, reject) => (
-        isFinite(expiry) && void setTimeout(() => void reject(new Error()), expiry - Date.now()),
-        void Promise.resolve(this.process.call(param, this.state))
-          .then(resolve, reject)))
-        .then<[R, S]>(
-          ([reply, state]) => [reply, state])
-        .then<R>(
-          ([reply, state]) => {
-            void this.sv.schedule();
-            if (!this.alive) return Promise.reject(new Error());
-            this.state = state;
-            this.available = true;
-            return reply;
-          },
-          reason => {
-            void this.sv.schedule();
-            void this.terminate(reason);
-            throw reason;
-          });
-    }
-    catch (reason) {
-      void this.terminate(reason);
-      return new Error();
-    }
+      isFinite(expiry) && void setTimeout(() => void reject(new Error()), expiry - Date.now());
+      void Promise.resolve(this.process.call(param, this.state))
+        .then(resolve, reject);
+    })
+      .then<R>(
+        ([reply, state]) => {
+          void this.sv.schedule();
+          this.state = state;
+          this.available = true;
+          return reply;
+        })
+      .catch(
+        reason => {
+          void this.sv.schedule();
+          void this.terminate(reason);
+          throw reason;
+        });
   }
   public readonly terminate = (reason: any): boolean => {
     if (!this.alive) return false;
