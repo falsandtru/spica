@@ -293,7 +293,9 @@ class Worker<N extends string, P, R, S> {
     })
       .then<R>(
         ([reply, state]) => {
+          if (!this.alive) return reply;
           void this.sv.schedule();
+          assert(!Object.isFrozen(this));
           this.state = state;
           this.available = true;
           return reply;
