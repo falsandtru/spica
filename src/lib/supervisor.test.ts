@@ -177,6 +177,32 @@ describe('Unit: lib/supervisor', function () {
       assert(cnt === 4 && ++cnt);
     });
 
+    it('register', function (done) {
+      let cnt = 0;
+      const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
+      });
+      sv.events.exit.once([''], done);
+      sv.register('', (_, s) => [s, s], 1);
+      assert.throws(() => sv.register('', (_, s) => [s, s], 2));
+      sv.register('', {
+        init(s) {
+          assert(cnt === 0 && ++cnt);
+          assert(s === 3);
+          return s;
+        },
+        call(p, s) {
+          assert(cnt === 1 && ++cnt);
+          assert(p === 1);
+          assert(s === 3);
+          return [p, s];
+        },
+        exit() {
+          done(true);
+        },
+      }, 3, undefined);
+      sv.call('', 1, () => assert(cnt === 2) || done());
+    });
+
     it('validation for returned values', function (done) {
       let cnt = 0;
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> {

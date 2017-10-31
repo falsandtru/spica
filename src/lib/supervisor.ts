@@ -78,11 +78,15 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
   private throwIfNotAvailable(): void {
     if (!this.available) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A supervisor is already terminated.`);
   }
-  public register(name: N, process: Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => boolean;
-  public register(name: N, process: Supervisor.Process<P, R, S>, state: S): (reason?: any) => boolean;
-  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => boolean;
-  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => boolean {
+  public register(name: N, process: Supervisor.Process.Call<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
+  public register(name: N, process: Supervisor.Process<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
+  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
+  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S, reason?: any): (reason?: any) => boolean {
     void this.throwIfNotAvailable();
+    if (arguments.length > 3) {
+      void this.kill(name, reason);
+      return this.register(name, process, state);
+    }
     if (this.workers.has(name)) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: Cannot register a process multiply with the same name.`);
     void this.schedule();
     process = typeof process === 'function'
