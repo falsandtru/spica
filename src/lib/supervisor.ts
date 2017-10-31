@@ -31,8 +31,8 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
   }
   private destructor(reason: any): void {
     assert(this.alive === true);
-    assert(this.available === true);
-    this.available = false;
+    assert(this.available_ === true);
+    this.available_ = false;
     void this.workers
       .forEach(worker =>
         void worker.terminate(reason));
@@ -48,7 +48,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
     void (this.constructor as typeof Supervisor).instances.delete(this);
     void Object.freeze(this);
     assert(this.alive === false);
-    assert(this.available === false);
+    assert(this.available_ === false);
     void this.settings.destructor(reason);
   }
   public readonly id: string = sqid();
@@ -74,9 +74,12 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
   } = this.events_;
   private readonly workers = new Map<N, Worker<N, P, R, S>>();
   private alive = true;
-  private available = true;
+  private available_ = true;
+  public get available(): boolean {
+    return this.available_;
+  }
   private throwIfNotAvailable(): void {
-    if (!this.available) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A supervisor is already terminated.`);
+    if (!this.available_) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A supervisor is already terminated.`);
   }
   public register(name: N, process: Supervisor.Process.Call<P, R, S>, state: S): (reason?: any) => boolean;
   public register(name: N, process: Supervisor.Process<P, R, S>, state: S): (reason?: any) => boolean;
@@ -154,27 +157,27 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
     }
   }
   public kill(name: N, reason?: any): boolean {
-    if (!this.available) return false;
+    if (!this.available_) return false;
     assert(this.alive === true);
     return this.workers.has(name)
       ? this.workers.get(name)!.terminate(reason)
       : false;
   }
   public terminate(reason?: any): boolean {
-    if (!this.available) return false;
+    if (!this.available_) return false;
     assert(this.alive === true);
     void this.destructor(reason);
     return true;
   }
   public schedule(): void {
     if (this.messages.length === 0) return;
-    assert(this.available);
+    assert(this.available_);
     void tick(this.scheduler, true);
   }
   private readonly messages: [N, P, Supervisor.Callback<R>, number][] = [];
   private readonly deliver = (): void => {
     const since = Date.now();
-    for (let i = 0, len = this.messages.length; this.available && i < len; ++i) {
+    for (let i = 0, len = this.messages.length; this.available_ && i < len; ++i) {
       if (this.settings.resource - (Date.now() - since) > 0 === false) return void this.schedule();
       const [name, param, callback, expiry] = this.messages[i];
       const result = this.workers.has(name) && Date.now() <= expiry
