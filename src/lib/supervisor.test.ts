@@ -42,7 +42,7 @@ describe('Unit: lib/supervisor', function () {
 
       const process: Supervisor.Process<number, number, number> = {
         init: (state) => state,
-        call: (n, s) => [n, ++s],
+        main: (n, s) => [n, ++s],
         exit: () => undefined
       };
       const kill = sv1.register('', process, 0);
@@ -81,7 +81,7 @@ describe('Unit: lib/supervisor', function () {
       assert(TestSupervisor.procs === 0);
       const process: Supervisor.Process<number, number, number> = {
         init: (state) => state,
-        call: (n, s) => [n, ++s],
+        main: (n, s) => [n, ++s],
         exit: () => undefined
       };
       const kill = sv.register('', process, 0);
@@ -127,7 +127,7 @@ describe('Unit: lib/supervisor', function () {
           assert(cnt === 1 && ++cnt);
           assert(name === '');
           assert(process.init instanceof Function);
-          assert(process.call instanceof Function);
+          assert(process.main instanceof Function);
           assert(process.exit instanceof Function);
           assert(state === 0);
         });
@@ -144,7 +144,7 @@ describe('Unit: lib/supervisor', function () {
           assert(cnt === 8 && ++cnt);
           assert(name === '');
           assert(process.init instanceof Function);
-          assert(process.call instanceof Function);
+          assert(process.main instanceof Function);
           assert(process.exit instanceof Function);
           assert(state === 2);
           assert(reason instanceof Error);
@@ -156,7 +156,7 @@ describe('Unit: lib/supervisor', function () {
           assert(state === 0);
           return state;
         },
-        call(n: number, state: number): [number, number] {
+        main(n: number, state: number): [number, number] {
           assert(TestSupervisor.procs === 1);
           if (n >= 3) throw new Error();
           ++cnt; // 3, 5
@@ -190,7 +190,7 @@ describe('Unit: lib/supervisor', function () {
           assert(s === 3);
           return s;
         },
-        call(p, s) {
+        main(p, s) {
           assert(cnt === 1 && ++cnt);
           assert(p === 1);
           assert(s === 3);
@@ -232,7 +232,7 @@ describe('Unit: lib/supervisor', function () {
       let exits = 0;
       sv.register('', {
         init: () => ++inits,
-        call: (n, s) => [n + s, ++s],
+        main: (n, s) => [n + s, ++s],
         exit: () => ++exits
       }, 0);
       assert(inits === exits);
@@ -242,7 +242,7 @@ describe('Unit: lib/supervisor', function () {
       assert(inits === 0);
       sv.register('', {
         init: () => ++inits,
-        call: (n, s) => [n + s, ++s],
+        main: (n, s) => [n + s, ++s],
         exit: () => ++exits
       }, 0);
       sv.cast('', 1);

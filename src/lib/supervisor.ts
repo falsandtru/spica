@@ -78,10 +78,10 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
   private throwIfNotAvailable(): void {
     if (!this.available) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A supervisor is already terminated.`);
   }
-  public register(name: N, process: Supervisor.Process.Call<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
+  public register(name: N, process: Supervisor.Process.Main<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
   public register(name: N, process: Supervisor.Process<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
-  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
-  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S, reason?: any): (reason?: any) => boolean {
+  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
+  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S>, state: S, reason?: any): (reason?: any) => boolean {
     void this.throwIfNotAvailable();
     if (arguments.length > 3) {
       void this.kill(name, reason);
@@ -92,7 +92,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
     process = typeof process === 'function'
       ? {
           init: state => state,
-          call: process,
+          main: process,
           exit: _ => undefined,
         }
       : process;
@@ -223,12 +223,12 @@ export namespace Supervisor {
   }
   export type Process<P, R, S> = {
     readonly init: Process.Init<S>;
-    readonly call: Process.Call<P, R, S>;
+    readonly main: Process.Main<P, R, S>;
     readonly exit: Process.Exit<S>;
   };
   export namespace Process {
     export type Init<S> = (state: S) => S;
-    export type Call<P, R, S> = (param: P, state: S) => [R, S] | PromiseLike<[R, S]>;
+    export type Main<P, R, S> = (param: P, state: S) => [R, S] | PromiseLike<[R, S]>;
     export type Exit<S> = (reason: any, state: S) => void;
   }
   export type Callback<R> = (reply: R, error?: Error) => void;
@@ -290,7 +290,7 @@ class Worker<N extends string, P, R, S> {
           .emit([this.name], [this.name, this.process, this.state]);
         this.state = this.process.init(this.state);
       }
-      void Promise.resolve(this.process.call(param, this.state)).then(resolve, reject);
+      void Promise.resolve(this.process.main(param, this.state)).then(resolve, reject);
       isFinite(expiry) && void setTimeout(() => void reject(new Error()), expiry - now);
     })
       .then<R>(

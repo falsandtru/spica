@@ -17,9 +17,9 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
     readonly exit: Observer<never[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>;
   };
   readonly available: boolean;
-  register(name: N, process: Supervisor.Process.Call<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
+  register(name: N, process: Supervisor.Process.Main<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
   register(name: N, process: Supervisor.Process<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
-  register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Call<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
+  register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
   call(name: N, param: P, callback: Supervisor.Callback<R>, timeout?: number): void;
   cast(name: N, param: P, timeout?: number): boolean;
   refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason: any) => boolean][];
@@ -37,12 +37,12 @@ export namespace Supervisor {
   }
   export type Process<P, R, S> = {
     readonly init: Process.Init<S>;
-    readonly call: Process.Call<P, R, S>;
+    readonly main: Process.Main<P, R, S>;
     readonly exit: Process.Exit<S>;
   };
   export namespace Process {
     export type Init<S> = (state: S) => S;
-    export type Call<P, R, S> = (param: P, state: S) => [R, S] | PromiseLike<[R, S]>;
+    export type Main<P, R, S> = (param: P, state: S) => [R, S] | PromiseLike<[R, S]>;
     export type Exit<S> = (reason: any, state: S) => void;
   }
   export type Callback<R> = (reply: R, error?: Error) => void;
