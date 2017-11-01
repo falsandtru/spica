@@ -2,7 +2,7 @@ declare global {
   interface NumberConstructor {
     isNaN(target: any): boolean;
   }
-  function setTimeout(cb: () => void, timeout?: number): number;
+  function setTimeout(handler: (...args: any[]) => void, timeout?: number, ...args: any[]): number;
   var console: Console;
   interface Console {
     assert(value: any, message?: string, ...optionalParams: any[]): void;
