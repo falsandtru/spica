@@ -283,6 +283,7 @@ class Worker<N extends string, P, R, S> {
     const now = Date.now();
     if (!this.available || now > expiry) return;
     return new Promise<[R, S]>((resolve, reject) => {
+      isFinite(expiry) && void setTimeout(() => void reject(new Error()), expiry - now);
       this.available = false;
       if (!this.initiated) {
         this.initiated = true;
@@ -291,7 +292,6 @@ class Worker<N extends string, P, R, S> {
         this.state = this.process.init(this.state);
       }
       void Promise.resolve(this.process.main(param, this.state)).then(resolve, reject);
-      isFinite(expiry) && void setTimeout(() => void reject(new Error()), expiry - now);
     })
       .then<R>(
         ([reply, state]) => {
