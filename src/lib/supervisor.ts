@@ -228,8 +228,9 @@ export namespace Supervisor {
   };
   export namespace Process {
     export type Init<S> = (state: S) => S;
-    export type Main<P, R, S> = (param: P, state: S) => [R, S] | PromiseLike<[R, S]>;
+    export type Main<P, R, S> = (param: P, state: S) => Result<R, S> | PromiseLike<Result<R, S>>;
     export type Exit<S> = (reason: any, state: S) => void;
+    export type Result<R, S> = [R, S] | { reply: R; state: S; };
   }
   export type Callback<R> = (reply: R, error?: Error) => void;
   export namespace Event {
@@ -282,7 +283,7 @@ class Worker<N extends string, P, R, S> {
   public readonly call = ([param, expiry]: [P, number]): Promise<R> | undefined => {
     const now = Date.now();
     if (!this.available || now > expiry) return;
-    return new Promise<[R, S]>((resolve, reject) => {
+    return new Promise<Supervisor.Process.Result<R, S>>((resolve, reject) => {
       isFinite(expiry) && void setTimeout(() => void reject(new Error()), expiry - now);
       this.available = false;
       if (!this.initiated) {
@@ -293,8 +294,11 @@ class Worker<N extends string, P, R, S> {
       }
       void Promise.resolve(this.process.main(param, this.state)).then(resolve, reject);
     })
-      .then<R>(
-        ([reply, state]) => {
+      .then(
+        result => {
+          const [reply, state] = Array.isArray(result)
+            ? result
+            : [result.reply, result.state];
           if (!this.alive) return reply;
           void this.sv.schedule();
           assert(!Object.isFrozen(this));

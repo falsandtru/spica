@@ -207,14 +207,18 @@ describe('Unit: lib/supervisor', function () {
       let cnt = 0;
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> {
       }();
-      sv.events.exit.once([''], ([, , s, r]) => {
+      sv.register('tulpe', (p, s) => [p, s], 0);
+      sv.call('tulpe', 1, (r, e) => assert(r === 1) || assert(e === undefined) || assert(cnt === 1 && ++cnt));
+      sv.register('struct', (p, s) => ({ reply: p, state: s }), 0);
+      sv.call('struct', 2, (r, e) => assert(r === 2) || assert(e === undefined) || assert(cnt === 2 && ++cnt));
+      sv.events.exit.monitor([], ([n, , s, r]) => {
+        assert(n === 'invalid');
         assert(s === 0);
         assert(r instanceof Error);
         assert(cnt === 0 && ++cnt);
-        done();
       });
-      sv.register('', () => new Promise<[number, number]>(resolve => void resolve()), 0);
-      sv.call('', 1, (r, e) => assert(r === undefined) || assert(e instanceof Error) || assert(cnt === 1 && ++cnt), 100);
+      sv.register('invalid', () => new Promise<[number, number]>(resolve => void resolve()), 0);
+      sv.call('invalid', 3, (r, e) => assert(r === undefined) || assert(e instanceof Error) || assert(cnt === 3 && ++cnt) || done());
     });
 
     it('state', function (done) {
