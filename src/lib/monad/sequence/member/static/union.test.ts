@@ -38,10 +38,10 @@ describe('Unit: lib/monad/sequence/member/static/union', () => {
         Sequence.union(nat, Sequence.from([]), (a, b) => a - b).take(3).extract(),
         [0, 1, 2]);
       assert.deepStrictEqual(
-        Sequence.union(Sequence.from([]), nat, (a, b) => a - b).take(3).extract(),
+        Sequence.union(Sequence.from<never>([]), nat, (a, b) => a - b).take(3).extract(),
         [0, 1, 2]);
       assert.deepStrictEqual(
-        Sequence.union(Sequence.from([]), Sequence.from([]), () => 0).take(3).extract(),
+        Sequence.union(Sequence.from<never>([]), Sequence.from([]), () => 0).take(3).extract(),
         []);
     });
 

@@ -38,10 +38,10 @@ describe('Unit: lib/monad/sequence/member/intersect/', () => {
         Sequence.intersect(nat, Sequence.from([]), (a, b) => a - b).take(3).extract(),
         []);
       assert.deepStrictEqual(
-        Sequence.intersect(Sequence.from([]), nat, (a, b) => a - b).take(3).extract(),
+        Sequence.intersect(Sequence.from<never>([]), nat, (a, b) => a - b).take(3).extract(),
         []);
       assert.deepStrictEqual(
-        Sequence.intersect(Sequence.from([]), Sequence.from([]), () => 0).take(3).extract(),
+        Sequence.intersect(Sequence.from<never>([]), Sequence.from([]), () => 0).take(3).extract(),
         []);
     });
 
