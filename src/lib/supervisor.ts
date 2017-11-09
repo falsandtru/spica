@@ -280,7 +280,7 @@ class Worker<N extends string, P, R, S> {
   private alive = true;
   private available = true;
   private initiated = false;
-  public readonly call = ([param, expiry]: [P, number]): Promise<R> | undefined => {
+  public call([param, expiry]: [P, number]): Promise<R> | undefined {
     const now = Date.now();
     if (!this.available || now > expiry) return;
     return new Promise<Supervisor.Process.Result<R, S>>((resolve, reject) => {
