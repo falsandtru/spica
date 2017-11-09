@@ -84,16 +84,19 @@ export interface Sequence<a, z> {
 }
 
 export namespace Sequence {
-  export type Data<a, z> = [a, z];
+  export type Data<a, z> = never[] | [a] | [a, z];
   export namespace Data {
-    export function cons<a, z>(a?: a, z?: z): Sequence.Data<a, z> {
+    export function cons<a, z>(): never[];
+    export function cons<a, z>(a: a): [a];
+    export function cons<a, z>(a: a, z: z): [a, z];
+    export function cons<a, z>(a?: a, z?: z): Data<a, z> {
       switch (arguments.length) {
         case 0:
-          return <Sequence.Data<a, z>><any[]>[];
+          return [];
         case 1:
-          return <Sequence.Data<a, z>><any[]>[a];
+          return [a!];
         case 2:
-          return <Sequence.Data<a, z>>[a, z];
+          return [a!, z!];
         default:
           throw Sequence.Exception.invalidConsError(arguments);
       }
@@ -132,7 +135,7 @@ export namespace Sequence {
       console.error(args, args.length, args[0], args[1]);
       return new TypeError(`Spica: Sequence: Invalid parameters of cons.`);
     }
-    export function invalidDataError(data: Sequence.Data<any, any>): TypeError {
+    export function invalidDataError(data: any[]): TypeError {
       console.error(data);
       return new TypeError(`Spica: Sequence: Invalid data.`);
     }

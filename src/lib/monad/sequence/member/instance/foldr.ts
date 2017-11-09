@@ -6,9 +6,9 @@ export default class <a, z> extends Sequence<a, z> {
       Sequence.Iterator.when(
         iter(),
         () =>
-          Sequence.Data.cons<Sequence<b, any>, Sequence.Iterator<a>>(z),
+          Sequence.Data.cons(z),
         thunk =>
-          Sequence.Data.cons<Sequence<b, any>, Sequence.Iterator<a>>(
+          Sequence.Data.cons(
             f(
               Sequence.Thunk.value(thunk),
               Sequence.resume(Sequence.Thunk.iterator(thunk))

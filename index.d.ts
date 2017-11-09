@@ -208,7 +208,7 @@ export class Sequence<a, z> extends MonadPlus<a> implements Iterable<a> {
   memoize(): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]>;
 }
 export namespace Sequence {
-  export type Data<a, z> = [a, z];
+  export type Data<a, z> = never[] | [a] | [a, z];
   export type Thunk<a> = [a, Iterator<a>, number];
   export type Iterator<a> = () => Thunk<a>;
 }

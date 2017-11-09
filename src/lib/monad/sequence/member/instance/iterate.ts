@@ -22,7 +22,7 @@ export default class <a, z> extends Sequence<a, z> {
       case 2:
         return <Sequence.Thunk<a>>[
           data[0],
-          () => this.iterate_(data[1], i + 1),
+          () => this.iterate_(data[1] as z, i + 1),
           i
         ];
       default:
