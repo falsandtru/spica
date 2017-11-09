@@ -36,7 +36,7 @@ import mapM from './sequence/member/instance/mapM';
 import filterM from './sequence/member/instance/filterM';
 import map from './sequence/member/instance/map';
 import filter from './sequence/member/instance/filter';
-import scan from './sequence/member/instance/scan';
+import scanl from './sequence/member/instance/scanl';
 import foldr from './sequence/member/instance/foldr';
 import group from './sequence/member/instance/group';
 import inits from './sequence/member/instance/inits';
@@ -85,7 +85,7 @@ void compose(
   filterM,
   map,
   filter,
-  scan,
+  scanl,
   foldr,
   group,
   inits,

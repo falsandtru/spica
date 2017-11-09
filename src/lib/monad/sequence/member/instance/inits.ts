@@ -5,7 +5,7 @@ export default class <a, z> extends Sequence<a, z> {
     return Sequence.mappend(
       Sequence.from([[]]),
       this
-        .scan<a[]>(((b, a) => b.concat([a])), [])
+        .scanl<a[]>(((b, a) => b.concat([a])), [])
         .dropWhile(as => as.length === 0));
   }
 }

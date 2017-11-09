@@ -1,7 +1,7 @@
 import { Sequence } from '../../core';
 
 export default class <a, z> extends Sequence<a, z> {
-  public scan<b>(f: (b: b, a: a) => b, z: b): Sequence<b, [b, Sequence.Iterator<a>, number]> {
+  public scanl<b>(f: (b: b, a: a) => b, z: b): Sequence<b, [b, Sequence.Iterator<a>, number]> {
     return new Sequence<b, [b, Sequence.Iterator<a>, number]>(([prev, iter, i] = [z, () => this.iterate(), 0]) =>
       Sequence.Iterator.when<a, Sequence.Data<b, [b, Sequence.Iterator<a>, number]>>(
         iter(),
