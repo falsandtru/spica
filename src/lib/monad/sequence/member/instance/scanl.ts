@@ -10,8 +10,8 @@ export default class <a, z> extends Sequence<a, z> {
             ? Sequence.Data.cons(z)
             : Sequence.Data.cons(),
         thunk =>
-          Sequence.Data.cons(
+          Sequence.Data.cons<b, [b, Sequence.Iterator<a>, number]>(
             prev = f(prev, Sequence.Thunk.value(thunk)),
-            [prev, Sequence.Thunk.iterator(thunk), Sequence.Thunk.index(thunk) + 1] as [b, Sequence.Iterator<a>, number])));
+            [prev, Sequence.Thunk.iterator(thunk), Sequence.Thunk.index(thunk) + 1])));
   }
 }
