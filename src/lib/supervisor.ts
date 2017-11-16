@@ -102,7 +102,11 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
       .get(name)!
       .terminate;
   }
-  public call(name: N, param: P, callback: Supervisor.Callback<R>, timeout = this.settings.timeout): void {
+  public call(name: N, param: P, timeout?: number): Promise<R>;
+  public call(name: N, param: P, callback: Supervisor.Callback<R>, timeout?: number): void;
+  public call(name: N, param: P, callback: Supervisor.Callback<R> | number = this.settings.timeout, timeout = this.settings.timeout): Promise<R> | void {
+    if (typeof callback === 'number') return new Promise<R>((resolve, reject) =>
+      void this.call(name, param, (result, err) => err ? reject(err) : resolve(result), timeout));
     void this.throwErrorIfNotAvailable();
     void this.messages.push([
       name,

@@ -315,6 +315,21 @@ describe('Unit: lib/supervisor', function () {
       assert(cnt === 0);
     });
 
+    it('await', async function () {
+      let cnt = 0;
+      const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
+      });
+      sv.register('', async n => n ? { reply: ++cnt, state: 0 } : Promise.reject(undefined), 0);
+      assert(await sv.call('', 1) === 1);
+      try {
+        await sv.call('', 0);
+        throw 0;
+      }
+      catch (reason) {
+        assert(reason instanceof Error);
+      }
+    });
+
     it('block', function (done) {
       let cnt = 0;
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
