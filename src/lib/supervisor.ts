@@ -75,14 +75,14 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
   public get available(): boolean {
     return this.available_;
   }
-  private throwIfNotAvailable(): void {
+  private throwErrorIfNotAvailable(): void {
     if (!this.available) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A supervisor is already terminated.`);
   }
   public register(name: N, process: Supervisor.Process.Main<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
   public register(name: N, process: Supervisor.Process<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
   public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
   public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S>, state: S, reason?: any): (reason?: any) => boolean {
-    void this.throwIfNotAvailable();
+    void this.throwErrorIfNotAvailable();
     if (arguments.length > 3) {
       void this.kill(name, reason);
       return this.register(name, process, state);
@@ -103,7 +103,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
       .terminate;
   }
   public call(name: N, param: P, callback: Supervisor.Callback<R>, timeout = this.settings.timeout): void {
-    void this.throwIfNotAvailable();
+    void this.throwErrorIfNotAvailable();
     void this.messages.push([
       name,
       param,
@@ -128,7 +128,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
     , timeout + 3);
   }
   public cast(name: N, param: P, timeout = this.settings.timeout): boolean {
-    void this.throwIfNotAvailable();
+    void this.throwErrorIfNotAvailable();
     const result = this.workers.has(name)
       ? this.workers.get(name)!.call([param, timeout])
       : undefined;
@@ -140,7 +140,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
     return true;
   }
   public refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason: any) => boolean][] {
-    void this.throwIfNotAvailable();
+    void this.throwErrorIfNotAvailable();
     return name === undefined
       ? [...this.workers.values()].map(convert)
       : this.workers.has(name)
