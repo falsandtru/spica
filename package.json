@@ -39,7 +39,7 @@
   ],
   "dependencies": {},
   "devDependencies": {
-    "@types/benchmark": "^1.0.30",
+    "@types/benchmark": "^1.0.31",
     "@types/mocha": "^2.2.44",
     "@types/power-assert": "1.4.29",
     "benchmark": "^2.1.4",
@@ -65,10 +65,10 @@
     "mocha": "^4.0.1",
     "npm-check-updates": "^2.13.0",
     "power-assert": "^1.4.4",
-    "pump": "^1.0.2",
+    "pump": "^1.0.3",
     "run-sequence": "^2.2.0",
     "tsify": "^3.0.3",
-    "typescript": "2.7.0-dev.20171111",
+    "typescript": "2.7.0-dev.20171117",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.9.0"
