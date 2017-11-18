@@ -12,7 +12,7 @@ Supervisor/Actor, Cancellation, Sequence, Maybe, Either and some utils.
 $ npm i spica
 ```
 
-## API
+## APIs
 
 [index.d.ts](index.d.ts)
 
@@ -40,12 +40,12 @@ $ npm i spica
 - concat
 - sort
 
-## Browser
+## Browsers
 
 - Chrome
 - Firefox
 - Edge
 
-## Dependency
+## Dependencies
 
 - unassert (in compiling source code)
