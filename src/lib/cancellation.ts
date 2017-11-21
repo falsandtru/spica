@@ -24,10 +24,10 @@ export class Cancellation<L = undefined>
         void cancellee.register(this.cancel));
   }
   private done = false;
-  private reason: L;
+  private reason?: L;
   private readonly listeners: Set<(reason: L) => void> = new Set();
   public readonly register = (listener: (reason: L) => void) => {
-    if (this.canceled) return void handler(this.reason), () => undefined;
+    if (this.canceled) return void handler(this.reason!), () => undefined;
     if (this.done) return () => undefined;
     void this.listeners.add(handler);
     return () =>
@@ -72,6 +72,6 @@ export class Cancellation<L = undefined>
       : Just(val);
   public readonly either = <R>(val: R): Either<L, R> =>
     this.canceled
-      ? Left(this.reason)
+      ? Left(this.reason!)
       : Right(val);
 }
