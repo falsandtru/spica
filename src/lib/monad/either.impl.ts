@@ -1,7 +1,7 @@
 import { Monad } from './monad';
 
 export class Either<a, b> extends Monad<b> {
-  private readonly EITHER?: Left<a> | Right<b>;
+  private readonly EITHER!: Left<a> | Right<b>;
   constructor(thunk: () => Either<a, b>) {
     super(thunk);
     void this.EITHER;
@@ -69,7 +69,7 @@ export namespace Either {
 }
 
 export class Left<a> extends Either<a, never> {
-  private readonly LEFT?: a;
+  private readonly LEFT!: a;
   constructor(private a: a) {
     super(throwCallError);
     void this.LEFT;
@@ -89,7 +89,7 @@ export class Left<a> extends Either<a, never> {
 }
 
 export class Right<b> extends Either<never, b> {
-  private readonly RIGHT?: b;
+  private readonly RIGHT!: b;
   constructor(private readonly b: b) {
     super(throwCallError);
     void this.RIGHT;

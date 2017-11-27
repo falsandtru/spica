@@ -19,7 +19,7 @@ export class Nil {
 }
 
 class Cons<a, c extends Nil | List<a, any>> {
-  private readonly CONS?: a;
+  private readonly CONS!: a;
   constructor(
     public readonly head: a,
     public readonly tail: c,

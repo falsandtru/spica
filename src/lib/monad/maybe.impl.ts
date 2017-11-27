@@ -1,7 +1,7 @@
 import { MonadPlus } from './monadplus';
 
 export class Maybe<a> extends MonadPlus<a> {
-  private readonly MAYBE?: Just<a> | Nothing;
+  private readonly MAYBE!: Just<a> | Nothing;
   constructor(thunk: () => Maybe<a>) {
     super(thunk);
     void this.MAYBE;
@@ -76,7 +76,7 @@ export namespace Maybe {
 }
 
 export class Just<a> extends Maybe<a> {
-  private readonly JUST?: a;
+  private readonly JUST!: a;
   constructor(private readonly a: a) {
     super(throwCallError);
     void this.JUST;
@@ -97,7 +97,7 @@ export class Just<a> extends Maybe<a> {
 }
 
 export class Nothing extends Maybe<never> {
-  private readonly NOTHING?: void;
+  private readonly NOTHING!: void;
   constructor() {
     super(throwCallError);
     void this.NOTHING;

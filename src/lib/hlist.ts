@@ -19,7 +19,7 @@ export class HNil {
 }
 
 class HCons<a, c extends HNil | HList<any, any>> {
-  private readonly CONS?: a;
+  private readonly CONS!: a;
   constructor(
     public readonly head: a,
     public readonly tail: c,
