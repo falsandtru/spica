@@ -6,6 +6,8 @@ export class Either<a, b> extends Monad<b> {
     super(thunk);
     void this.EITHER;
   }
+  public fmap(f: (b: b) => b): Either<a, b>
+  public fmap<c>(f: (b: b) => c): Either<a, c>
   public fmap<c>(f: (b: b) => c): Either<a, c> {
     return this.bind(b => new Right(f(b)));
   }

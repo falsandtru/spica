@@ -217,6 +217,7 @@ export namespace Sequence {
 declare namespace Monad {
   export abstract class Maybe<a> extends MonadPlus<a> {
     private readonly MAYBE: Monad.Maybe.Just<a> | Monad.Maybe.Nothing;
+    fmap(f: (a: a) => a): Maybe<a>;
     fmap<b>(f: (a: a) => b): Maybe<b>;
     ap<a, z>(this: Maybe<(a: a) => z>, a: Maybe<a>): Maybe<z>;
     ap<a, b, z>(this: Maybe<(a: a, b: b) => z>, a: Maybe<a>): Maybe<(b: b) => z>;
@@ -291,6 +292,7 @@ export const Nothing: Maybe<never>;
 declare namespace Monad {
   export abstract class Either<a, b> extends Monad<b> {
     private readonly EITHER: Left<a> | Right<b>;
+    fmap(f: (b: b) => b): Either<a, b>;
     fmap<c>(f: (b: b) => c): Either<a, c>;
     ap<b, z>(this: Either<a, (b: b) => z>, b: Either<a, b>): Either<a, z>;
     ap<b, c, z>(this: Either<a, (b: b, c: c) => z>, b: Either<a, b>): Either<a, (c: c) => z>;

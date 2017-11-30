@@ -6,6 +6,8 @@ export class Maybe<a> extends MonadPlus<a> {
     super(thunk);
     void this.MAYBE;
   }
+  public fmap(f: (a: a) => a): Maybe<a>
+  public fmap<b>(f: (a: a) => b): Maybe<b>
   public fmap<b>(f: (a: a) => b): Maybe<b> {
     return this.bind(a => new Just(f(a)));
   }
