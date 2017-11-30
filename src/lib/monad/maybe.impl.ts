@@ -17,7 +17,7 @@ export class Maybe<a> extends MonadPlus<a> {
   public ap<a, z>(this: Maybe<(...as: any[]) => z>, a: Maybe<a>): Maybe<z> {
     return Maybe.ap(this, a);
   }
-  public bind<b extends a>(f: (a: a) => Maybe<b>): Maybe<b>
+  public bind(f: (a: a) => Maybe<a>): Maybe<a>
   public bind<b>(f: (a: a) => Maybe<b>): Maybe<b>
   public bind<b>(f: (a: a) => Maybe<b>): Maybe<b> {
     return new Maybe<b>(() => {
@@ -43,6 +43,7 @@ export class Maybe<a> extends MonadPlus<a> {
     return this.bind(m => m);
   }
   public extract(): a
+  public extract(transform: () => a): a
   public extract<b>(transform: () => b): a | b
   public extract<b>(nothing: () => b, just: (a: a) => b): b
   public extract<b>(nothing?: () => b, just?: (a: a) => b): a | b {
@@ -81,12 +82,13 @@ export class Just<a> extends Maybe<a> {
     super(throwCallError);
     void this.JUST;
   }
-  public bind<b extends a>(f: (a: a) => Maybe<b>): Maybe<b>
+  public bind(f: (a: a) => Maybe<a>): Maybe<a>
   public bind<b>(f: (a: a) => Maybe<b>): Maybe<b>
   public bind<b>(f: (a: a) => Maybe<b>): Maybe<b> {
     return new Maybe(() => f(this.extract()));
   }
   public extract(): a
+  public extract(transform: () => a): a
   public extract<b>(transform: () => b): a
   public extract<b>(nothing: () => b, just: (a: a) => b): b
   public extract<b>(_?: () => b, just?: (a: a) => b): a | b {

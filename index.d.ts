@@ -223,11 +223,12 @@ declare namespace Monad {
     ap<a, b, c, z>(this: Maybe<(a: a, b: b, c: c) => z>, a: Maybe<a>): Maybe<(b: b, c: c) => z>;
     ap<a, b, c, d, z>(this: Maybe<(a: a, b: b, c: c, d: d) => z>, a: Maybe<a>): Maybe<(b: b, c: c, d: d) => z>;
     ap<a, b, c, d, e, z>(this: Maybe<(a: a, b: b, c: c, d: d, e: e) => z>, a: Maybe<a>): Maybe<(b: b, c: c, d: d, e: e) => z>;
-    bind<b extends a>(f: (a: a) => Maybe<b>): Maybe<b>;
+    bind(f: (a: a) => Maybe<a>): Maybe<a>;
     bind<b>(f: (a: a) => Maybe<b>): Maybe<b>;
     guard(cond: boolean): Maybe<a>;
     join<b>(this: Maybe<Maybe<b>>): Maybe<b>;
     extract(): a;
+    extract(transform: () => a): a;
     extract<b>(transform: () => b): a | b;
     extract<b>(nothing: () => b, just: (a: a) => b): b;
   }
@@ -256,9 +257,10 @@ declare namespace Monad.Maybe {
   }
   export class Just<a> extends Maybe<a> {
     private readonly JUST: a;
-    bind<b extends a>(f: (a: a) => Maybe<b>): Maybe<b>;
+    bind(f: (a: a) => Maybe<a>): Maybe<a>;
     bind<b>(f: (a: a) => Maybe<b>): Maybe<b>;
     extract(): a;
+    extract(transform: () => a): a;
     extract<b>(transform: () => b): a;
     extract<b>(nothing: () => b, just: (a: a) => b): b;
   }
@@ -295,10 +297,11 @@ declare namespace Monad {
     ap<b, c, d, z>(this: Either<a, (b: b, c: c, d: d) => z>, b: Either<a, b>): Either<a, (c: c, d: d) => z>;
     ap<b, c, d, e, z>(this: Either<a, (b: b, c: c, d: d, e: e) => z>, b: Either<a, b>): Either<a, (c: c, d: d, e: e) => z>;
     ap<b, c, d, e, f, z>(this: Either<a, (b: b, c: c, d: d, e: e, f: f) => z>, b: Either<a, b>): Either<a, (c: c, d: d, e: e, f: f) => z>;
-    bind<c extends b>(f: (b: b) => Either<a, c>): Either<a, c>;
+    bind(f: (b: b) => Either<a, b>): Either<a, b>;
     bind<c>(f: (b: b) => Either<a, c>): Either<a, c>;
     join<c>(this: Either<a, Either<a, c>>): Either<a, c>;
     extract(): b;
+    extract(transform: (a: a) => b): b;
     extract<c>(transform: (a: a) => c): b | c;
     extract<c>(left: (a: a) => c, right: (b: b) => c): c;
   }
@@ -328,12 +331,12 @@ declare namespace Monad.Either {
   }
   export class Right<b> extends Either<never, b> {
     private readonly RIGHT: b;
-    bind<c extends b, _ = never>(f: (b: b) => Right<c>): Right<c>;
     bind<c, _ = never>(f: (b: b) => Right<c>): Right<c>
-    bind<c extends b, a>(f: (b: b) => Either<a, c>): Either<a, c>;
+    bind<_, a>(f: (b: b) => Either<a, b>): Either<a, b>;
     bind<c, a>(f: (b: b) => Either<a, c>): Either<a, c>;
     bind<a, c>(f: (b: b) => Either<a, c>): Either<a, c>;
     extract(): b;
+    extract(transform: (a: never) => b): b;
     extract<c>(transform: (a: never) => c): b;
     extract<c>(left: (a: never) => c, right: (b: b) => c): c;
   }

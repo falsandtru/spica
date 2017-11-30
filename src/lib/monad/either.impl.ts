@@ -17,7 +17,7 @@ export class Either<a, b> extends Monad<b> {
   public ap<b, z>(this: Either<a, (b: b) => z>, b: Either<a, b>): Either<a, z> {
     return Either.ap(this, b);
   }
-  public bind<c extends b>(f: (b: b) => Either<a, c>): Either<a, c>
+  public bind(f: (b: b) => Either<a, b>): Either<a, b>
   public bind<c>(f: (b: b) => Either<a, c>): Either<a, c>
   public bind<c>(f: (b: b) => Either<a, c>): Either<a, c> {
     return new Either<a, c>(() => {
@@ -38,6 +38,7 @@ export class Either<a, b> extends Monad<b> {
     return this.bind(m => m);
   }
   public extract(): b
+  public extract(transform: (a: a) => b): b
   public extract<c>(transform: (a: a) => c): b | c
   public extract<c>(left: (a: a) => c, right: (b: b) => c): c
   public extract<c>(left?: (a: a) => c, right?: (b: b) => c): b | c {
@@ -94,14 +95,14 @@ export class Right<b> extends Either<never, b> {
     super(throwCallError);
     void this.RIGHT;
   }
-  public bind<c extends b, _ = never>(f: (b: b) => Right<c>): Right<c>
   public bind<c, _ = never>(f: (b: b) => Right<c>): Right<c>
-  public bind<c extends b, a>(f: (b: b) => Either<a, c>): Either<a, c>
+  public bind<_, a>(f: (b: b) => Either<a, b>): Either<a, b>
   public bind<c, a>(f: (b: b) => Either<a, c>): Either<a, c>
   public bind<c, a>(f: (b: b) => Either<a, c>): Either<a, c> {
     return new Either(() => f(this.extract()));
   }
   public extract(): b
+  public extract(transform: (a: never) => b): b
   public extract<c>(transform: (a: never) => c): b
   public extract<c>(left: (a: never) => c, right: (b: b) => c): c
   public extract<c>(_?: (a: never) => c, right?: (b: b) => c): b | c {
