@@ -6,7 +6,7 @@ export class Maybe<a> extends MonadPlus<a> {
     super(thunk);
     void this.MAYBE;
   }
-  public fmap(f: (a: a) => a): Maybe<a>
+  public fmap<b extends a>(f: (a: a) => b): Maybe<b>
   public fmap<b>(f: (a: a) => b): Maybe<b>
   public fmap<b>(f: (a: a) => b): Maybe<b> {
     return this.bind(a => new Just(f(a)));
@@ -19,7 +19,7 @@ export class Maybe<a> extends MonadPlus<a> {
   public ap<a, z>(this: Maybe<(...as: any[]) => z>, a: Maybe<a>): Maybe<z> {
     return Maybe.ap(this, a);
   }
-  public bind(f: (a: a) => Maybe<a>): Maybe<a>
+  public bind<b extends a>(f: (a: a) => Maybe<b>): Maybe<b>
   public bind<b>(f: (a: a) => Maybe<b>): Maybe<b>
   public bind<b>(f: (a: a) => Maybe<b>): Maybe<b> {
     return new Maybe<b>(() => {
@@ -84,7 +84,7 @@ export class Just<a> extends Maybe<a> {
     super(throwCallError);
     void this.JUST;
   }
-  public bind(f: (a: a) => Maybe<a>): Maybe<a>
+  public bind<b extends a>(f: (a: a) => Maybe<b>): Maybe<b>
   public bind<b>(f: (a: a) => Maybe<b>): Maybe<b>
   public bind<b>(f: (a: a) => Maybe<b>): Maybe<b> {
     return new Maybe(() => f(this.extract()));
