@@ -25,6 +25,7 @@ $ npm i spica
 - curry
 - uncurry
 - flip
+- tuple
 - List, Nil
 - HList, HNil
 - DataMap

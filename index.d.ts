@@ -410,6 +410,12 @@ export const uncurry: Uncurry;
 export function flip<a, b, c>(f: (a: a) => (b: b) => c): Curried2<b, a, c>;
 export function flip<a, b, c>(f: (a: a, b: b) => c): Curried2<b, a, c>;
 
+export function tuple<a>(t: [a]): [a];
+export function tuple<a, b>(t: [a, b]): [a, b];
+export function tuple<a, b, c>(t: [a, b, c]): [a, b, c];
+export function tuple<a, b, c, d>(t: [a, b, c, d]): [a, b, c, d];
+export function tuple<a, b, c, d, e>(t: [a, b, c, d, e]): [a, b, c, d, e];
+
 export interface List<a, c extends Nil | List<a, any>> extends Cons<a, c> { }
 export class Nil {
   private readonly NIL: void;

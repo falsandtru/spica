@@ -8,6 +8,7 @@ export { Diff, Overwrite } from './lib/data';
 export { curry } from './lib/curry';
 export { uncurry } from './lib/uncurry';
 export { flip } from './lib/flip';
+export { tuple } from './lib/tuple';
 export { List, Nil } from './lib/list';
 export { HList, HNil } from './lib/hlist';
 export { DataMap } from './lib/datamap';

@@ -8,6 +8,7 @@ import {
   curry,
   uncurry,
   flip,
+  tuple,
   List, Nil,
   HList, HNil,
   DataMap, AttrMap,
@@ -101,6 +102,10 @@ describe('Interface: Package', function () {
 
     it('flip', function () {
       assert(typeof flip === 'function');
+    });
+
+    it('tuple', function () {
+      assert(typeof tuple === 'function');
     });
 
   });
