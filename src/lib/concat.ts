@@ -1,8 +1,6 @@
-export function concat<T>(target: T[], source: T[]): T[]
-export function concat<T>(target: T[], source: { [index: number]: T; length: number; }): T[]
-export function concat<T>(target: T[], source: T[] | { [index: number]: T; length: number; }): T[] {
-  for (let i = 0, len = source.length, offset = target.length; i < len; ++i) {
-    target[i + offset] = source[i];
+export function concat<T>(target: T[], source: T[]): T[] {
+  for (let i = 0, offset = target.length, len = source.length; i < len; ++i) {
+    target[offset + i] = source[i];
   }
   return target;
 }
