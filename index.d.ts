@@ -74,10 +74,10 @@ export interface ObserverOptions {
   once?: boolean;
 }
 export interface Publisher<N extends any[], D, R> {
-  emit(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void;
   emit(this: Publisher<N, void, R>, namespace: N, data?: D, tracker?: (data: D, results: R[]) => void): void;
-  reflect(namespace: N, data: D): R[];
+  emit(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void;
   reflect(this: Publisher<N, void, R>, namespace: N, data?: D): R[];
+  reflect(namespace: N, data: D): R[];
 }
 type Monitor<N extends any[], D> = (data: D, namespace: N) => any;
 type Subscriber<N extends any[], D, R> = (data: D, namespace: N) => R;
@@ -102,8 +102,8 @@ export interface Cancellation<L = undefined>
 }
 export interface Canceller<L = undefined> {
   readonly cancel: {
-    (reason: L): void;
     (this: Cancellation<undefined>): void;
+    (reason: L): void;
   };
 }
 export interface Cancellee<L = void> {
@@ -530,8 +530,8 @@ export class Cache<K, V = void> {
   );
   put(key: K, value: V, log?: boolean): boolean;
   put(this: Cache<K, void>, key: K): boolean;
-  set<W extends V>(key: K, value: W, log?: boolean): W;
   set<W extends V>(this: Cache<K, void>, key: K, value?: W): W;
+  set<W extends V>(key: K, value: W, log?: boolean): W;
   get(key: K, log?: boolean): V | undefined;
   has(key: K): boolean;
   delete(key: K): boolean;

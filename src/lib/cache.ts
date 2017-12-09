@@ -73,8 +73,8 @@ export class Cache<K, V = void> {
     }
     return false;
   }
-  public set<W extends V>(key: K, value: W, log?: boolean): W;
   public set<W extends V>(this: Cache<K, void>, key: K, value?: W): W;
+  public set<W extends V>(key: K, value: W, log?: boolean): W;
   public set<W extends V>(key: K, value: W, log?: boolean): W {
     void this.put(key, value, log);
     return value;

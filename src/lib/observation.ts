@@ -12,10 +12,10 @@ export interface ObserverOptions {
   once?: boolean;
 }
 export interface Publisher<N extends any[], D, R> {
-  emit(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void;
   emit(this: Publisher<N, void, R>, namespace: N, data?: D, tracker?: (data: D, results: R[]) => void): void;
-  reflect(namespace: N, data: D): R[];
+  emit(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void;
   reflect(this: Publisher<N, void, R>, namespace: N, data?: D): R[];
+  reflect(namespace: N, data: D): R[];
 }
 export type Monitor<N extends any[], D> = (data: D, namespace: N) => any;
 export type Subscriber<N extends any[], D, R> = (data: D, namespace: N) => R;
