@@ -530,8 +530,8 @@ export class Cache<K, V = void> {
   );
   put(key: K, value: V, log?: boolean): boolean;
   put(this: Cache<K, void>, key: K): boolean;
-  set(key: K, value: V, log?: boolean): V;
-  set(this: Cache<K, void>, key: K): V;
+  set<W extends V>(key: K, value: W, log?: boolean): W;
+  set<W extends V>(this: Cache<K, void>, key: K, value?: W): W;
   get(key: K, log?: boolean): V | undefined;
   has(key: K): boolean;
   delete(key: K): boolean;
