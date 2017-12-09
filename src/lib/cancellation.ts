@@ -44,7 +44,7 @@ export class Cancellation<L = undefined>
       }
     }
   };
-  public readonly cancel = (reason?: L) => {
+  public readonly cancel: Canceller<L>['cancel'] = (reason?: L) => {
     if (this.done) return;
     this.done = true;
     this.canceled = true;
