@@ -9,8 +9,8 @@ import {
   uncurry,
   flip,
   tuple,
-  List, Nil,
-  HList, HNil,
+  NonEmptyList, Nil,
+  NonEmptyHList, HNil,
   DataMap, AttrMap,
   Cache,
   tick,
@@ -112,22 +112,14 @@ describe('Interface: Package', function () {
 
   describe('List', function () {
     it('List', function () {
-      <List<number, Nil>>new Nil().push(0);
-    });
-
-    it('Nil', function () {
-      assert(typeof Nil === 'function');
+      <NonEmptyList<number, Nil>>new Nil().push(0);
     });
 
   });
 
   describe('HList', function () {
     it('HList', function () {
-      <HList<number, HNil>>new HNil().push(0);
-    });
-
-    it('HNil', function () {
-      assert(typeof HNil === 'function');
+      <NonEmptyHList<number, HNil>>new HNil().push(0);
     });
 
   });

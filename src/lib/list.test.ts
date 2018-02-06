@@ -1,19 +1,19 @@
-import { List, Nil } from './list';
+import { NonEmptyList, Nil } from './list';
 
 describe('Unit: lib/list', () => {
   describe('List', () => {
     it('List 1', () => {
-      const list: List<number, Nil> = new Nil().push(0);
+      const list: NonEmptyList<number, Nil> = new Nil().push(0);
       assert.deepStrictEqual(list.array(), [0]);
     });
 
     it('List 2', () => {
-      const list: List<number, List<number, Nil>> = new Nil().push(0).push(1);
+      const list: NonEmptyList<number, NonEmptyList<number, Nil>> = new Nil().push(0).push(1);
       assert.deepStrictEqual(list.array(), [1, 0]);
     });
 
     it('List 1+', () => {
-      const list: List<number, Nil | List<number, any>> = new Nil().push(0).push(1);
+      const list: NonEmptyList<number, Nil | NonEmptyList<number, any>> = new Nil().push(0).push(1);
       assert.deepStrictEqual(list.array(), [1, 0]);
     });
 
@@ -41,11 +41,11 @@ describe('Unit: lib/list', () => {
 
     it('compact', () => {
       {
-        const l: List<number, Nil> = new Nil().push(1).push(2).compact((n, m) => n - m);
+        const l: NonEmptyList<number, Nil> = new Nil().push(1).push(2).compact((n, m) => n - m);
         assert.deepStrictEqual(l.tuple(), [1]);
       }
       {
-        const l: List<number, List<number, Nil>> = new Nil().push(1).push(2).push(5).compact((n, m) => n - m);
+        const l: NonEmptyList<number, NonEmptyList<number, Nil>> = new Nil().push(1).push(2).push(5).compact((n, m) => n - m);
         assert.deepStrictEqual(l.tuple(), [3, 1]);
       }
     });

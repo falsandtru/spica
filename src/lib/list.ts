@@ -1,16 +1,17 @@
 import { concat } from './concat';
 
-export interface List<a, c extends Nil | List<a, any>> extends Cons<a, c> { }
+export type List<a, c extends Nil | NonEmptyList<a, any>> = Nil | NonEmptyList<a, c>;
+export type NonEmptyList<a, c extends Nil | NonEmptyList<a, any>> = Cons<a, c>;
 
 export class Nil {
   private readonly NIL: void;
   constructor() {
     void this.NIL;
   }
-  public push<a>(a: a): List<a, Nil> {
+  public push<a>(a: a): NonEmptyList<a, Nil> {
     return new Cons<a, Nil>(a, this);
   }
-  public extend<a>(f: () => a): List<a, Nil> {
+  public extend<a>(f: () => a): NonEmptyList<a, Nil> {
     return this.push(f());
   }
   public array(): never[] {
@@ -18,7 +19,7 @@ export class Nil {
   }
 }
 
-class Cons<a, c extends Nil | List<a, any>> {
+class Cons<a, c extends Nil | NonEmptyList<a, any>> {
   private readonly CONS!: a;
   constructor(
     public readonly head: a,
@@ -26,35 +27,35 @@ class Cons<a, c extends Nil | List<a, any>> {
   ) {
     void this.CONS;
   }
-  public push(a: a): List<a, List<a, c>> {
+  public push(a: a): NonEmptyList<a, NonEmptyList<a, c>> {
     return new Cons<a, this>(a, this);
   }
   public walk(f: (a: a) => void): c {
     void f(this.head);
     return this.tail;
   }
-  public modify(f: (a: a) => a): List<a, c> {
+  public modify(f: (a: a) => a): NonEmptyList<a, c> {
     return (<any>this.tail.push)(f(this.head));
   }
-  public extend(f: (a: a) => a): List<a, List<a, c>> {
+  public extend(f: (a: a) => a): NonEmptyList<a, NonEmptyList<a, c>> {
     return this.push(f(this.head));
   }
-  public compact<c extends Nil | List<a, any>>(this: List<a, List<a, c>>, f: (l: a, r: a) => a): List<a, c> {
+  public compact<c extends Nil | NonEmptyList<a, any>>(this: NonEmptyList<a, NonEmptyList<a, c>>, f: (l: a, r: a) => a): NonEmptyList<a, c> {
     return this.tail.modify(r => f(this.head, r));
   }
-  public reverse(): List<a, c> {
+  public reverse(): NonEmptyList<a, c> {
     return <this>this.array()
-      .reduce<Nil | List<a, any>>((l: Nil, e: a) => l.push(e), new Nil());
+      .reduce<Nil | NonEmptyList<a, any>>((l: Nil, e: a) => l.push(e), new Nil());
   }
-  public tuple(this: List<a, Nil>): [a]
-  public tuple(this: List<a, List<a, Nil>>): [a, a]
-  public tuple(this: List<a, List<a, List<a, Nil>>>): [a, a, a]
-  public tuple(this: List<a, List<a, List<a, List<a, Nil>>>>): [a, a, a, a]
-  public tuple(this: List<a, List<a, List<a, List<a, List<a, Nil>>>>>): [a, a, a, a, a]
-  public tuple(this: List<a, List<a, List<a, List<a, List<a, List<a, Nil>>>>>>): [a, a, a, a, a, a]
-  public tuple(this: List<a, List<a, List<a, List<a, List<a, List<a, List<a, Nil>>>>>>>): [a, a, a, a, a, a, a]
-  public tuple(this: List<a, List<a, List<a, List<a, List<a, List<a, List<a, List<a, Nil>>>>>>>>): [a, a, a, a, a, a, a, a]
-  public tuple(this: List<a, List<a, List<a, List<a, List<a, List<a, List<a, List<a, List<a, Nil>>>>>>>>>): [a, a, a, a, a, a, a, a, a]
+  public tuple(this: NonEmptyList<a, Nil>): [a]
+  public tuple(this: NonEmptyList<a, NonEmptyList<a, Nil>>): [a, a]
+  public tuple(this: NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, Nil>>>): [a, a, a]
+  public tuple(this: NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, Nil>>>>): [a, a, a, a]
+  public tuple(this: NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, Nil>>>>>): [a, a, a, a, a]
+  public tuple(this: NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, Nil>>>>>>): [a, a, a, a, a, a]
+  public tuple(this: NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, Nil>>>>>>>): [a, a, a, a, a, a, a]
+  public tuple(this: NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, Nil>>>>>>>>): [a, a, a, a, a, a, a, a]
+  public tuple(this: NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, Nil>>>>>>>>>): [a, a, a, a, a, a, a, a, a]
   public tuple(): a[] {
     return this.array();
   }
