@@ -4,7 +4,6 @@ export { Cancellation } from './lib/cancellation';
 export { Sequence } from './lib/sequence';
 export { Maybe, Just, Nothing } from './lib/maybe';
 export { Either, Left, Right } from './lib/either';
-export { Diff, Overwrite } from './lib/data';
 export { curry } from './lib/curry';
 export { uncurry } from './lib/uncurry';
 export { flip } from './lib/flip';
