@@ -145,8 +145,8 @@ describe('Unit: lib/type', () => {
 
   describe('Partial', () => {
     it('', () => {
-      type R = { a: number; b: { c: string; }; d: () => 0; };
-      type P = { a?: number; b?: { c: string; }; d?: () => 0; };
+      type R = { a: number; b: { c: string; }; d: () => 0; e: new () => object };
+      type P = { a?: number; b?: { c: string; }; d?: () => 0; e?: new () => object };
       assert((): P => ({}) as Partial<R>);
       assert((): Partial<R> => ({}) as P);
       assert((): P => ({}) as Partial<Required<R>>);
@@ -157,8 +157,8 @@ describe('Unit: lib/type', () => {
 
   describe('DeepPartial', () => {
     it('', () => {
-      type R = { a: number; b: { c: string; d: () => 0; }; };
-      type P = { a?: number; b?: { c?: string; d?: () => 0; }; };
+      type R = { a: number; b: { c: string; d: () => 0; e: new () => object }; };
+      type P = { a?: number; b?: { c?: string; d?: () => 0; e?: new () => object }; };
       assert((): P => ({}) as DeepPartial<R>);
       assert((): DeepPartial<R> => ({}) as P);
       assert((): P => ({}) as DeepPartial<R>);
@@ -171,8 +171,8 @@ describe('Unit: lib/type', () => {
 
   describe('Required', () => {
     it('', () => {
-      type R = { a: number; b: { c?: string; }; d: () => 0; };
-      type P = { a?: number; b?: { c?: string; }; d?: () => 0; };
+      type R = { a: number; b: { c?: string; }; d: () => 0; e: new () => object };
+      type P = { a?: number; b?: { c?: string; }; d?: () => 0; e?: new () => object };
       assert((): R => ({}) as Required<P>);
       assert((): Required<P> => ({}) as R);
       assert((): R => ({}) as Required<Partial<R>>);
@@ -183,8 +183,8 @@ describe('Unit: lib/type', () => {
 
   describe('DeepRequired', () => {
     it('', () => {
-      type R = { a: number; b: { c: string; d: () => 0; }; };
-      type P = { a?: number; b?: { c?: string; d?: () => 0; }; };
+      type R = { a: number; b: { c: string; d: () => 0; e: new () => object }; };
+      type P = { a?: number; b?: { c?: string; d?: () => 0; e?: new () => object }; };
       assert((): R => ({}) as DeepRequired<P>);
       assert((): DeepRequired<P> => ({}) as R);
       assert((): R => ({}) as DeepRequired<DeepPartial<R>>);
@@ -197,8 +197,8 @@ describe('Unit: lib/type', () => {
 
   describe('Readonly', () => {
     it('', () => {
-      type I = { readonly a?: number; readonly b: { c: string; }; readonly d: () => 0; };
-      type M = { a?: number; b: { c: string; }; d: () => 0; };
+      type I = { readonly a?: number; readonly b: { c: string; }; readonly d: () => 0; readonly e: new () => object };
+      type M = { a?: number; b: { c: string; }; d: () => 0; e: new () => object };
       assert((): I => ({}) as Readonly<M>);
       assert((): Readonly<M> => ({}) as I);
     });
@@ -207,8 +207,8 @@ describe('Unit: lib/type', () => {
 
   describe('DeepReadonly', () => {
     it('', () => {
-      type I = { readonly a?: number; readonly b: { readonly c: string; readonly d: () => 0; }; };
-      type M = { a?: number; b: { c: string; d: () => 0; }; };
+      type I = { readonly a?: number; readonly b: { readonly c: string; readonly d: () => 0; readonly e: new () => object }; };
+      type M = { a?: number; b: { c: string; d: () => 0; e: new () => object }; };
       assert((): I => ({}) as DeepReadonly<M>);
       assert((): DeepReadonly<M> => ({}) as I);
       assert((): Readonly<M> => ({}) as DeepReadonly<M, M['b']>);

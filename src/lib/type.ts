@@ -1,5 +1,6 @@
 type Falsy = undefined | false | 0 | '' | null | void;
 type Function = (...args: any[]) => any;
+type Class = new (...args: any[]) => any;
 
 export type Not<T extends boolean> =
   T extends true ? false :
@@ -35,7 +36,7 @@ export type Partial<T> =
     : T;
 export type DeepPartial<T, U extends object | undefined = undefined> =
   T extends object
-    ? { [P in keyof T]?: NonNullable<T[P]> extends NonNullable<U | Function> ? T[P] : DeepPartial<T[P], U>; }
+    ? { [P in keyof T]?: NonNullable<T[P]> extends NonNullable<U | Function | Class> ? T[P] : DeepPartial<T[P], U>; }
     : T;
 type Purify<T extends string> = { [P in T]: P; }[T];
 export type Required<T> =
@@ -44,7 +45,7 @@ export type Required<T> =
     : T;
 export type DeepRequired<T, U extends object | undefined = undefined> =
   T extends object
-    ? { [P in Purify<keyof T>]: NonNullable<T[P]> extends NonNullable<U | Function> ? NonNullable<T[P]> : DeepRequired<NonNullable<T[P]>, U>; }
+    ? { [P in Purify<keyof T>]: NonNullable<T[P]> extends NonNullable<U | Function | Class> ? NonNullable<T[P]> : DeepRequired<NonNullable<T[P]>, U>; }
     : T;
 export type Readonly<T> =
   T extends object
@@ -52,7 +53,7 @@ export type Readonly<T> =
     : T;
 export type DeepReadonly<T, U extends object | undefined = undefined> =
   T extends object
-    ? { readonly [P in keyof T]: NonNullable<T[P]> extends NonNullable<U | Function> ? T[P] : DeepReadonly<T[P], U>; }
+    ? { readonly [P in keyof T]: NonNullable<T[P]> extends NonNullable<U | Function | Class> ? T[P] : DeepReadonly<T[P], U>; }
     : T;
 
 export function type(target: any): string {
