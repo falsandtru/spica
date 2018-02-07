@@ -9,6 +9,7 @@ type True = typeof True;
 declare const False: unique symbol;
 type False = typeof False;
 
+export type DEq<T extends boolean, U extends boolean> = Cast<T> extends Cast<U> ? Cast<U> extends Cast<T> ? true : false : false;
 type Cast<T> = boolean extends T ? Cast_<{ [P in Str<T>]: void; }> : T;
 type Cast_<T> =
   T extends { true: void; false: void; } ? Bool :

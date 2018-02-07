@@ -1,5 +1,5 @@
 import {
-  Not, And, Or, Eq, If, Case,
+  Not, And, Or, Eq, If, Case, DEq,
   Type, Call, New, NonNullable, DiffProps, FilterProps, OverwriteProps,
   Partial, DeepPartial, Required, DeepRequired, Readonly, DeepReadonly,
   type
@@ -46,11 +46,11 @@ describe('Unit: lib/type', () => {
       assert((): false => true as Eq<true, false>);
       assert((): false => true as Eq<false, true>);
       assert((): true => true as Eq<false, false>);
-      assert((): false => true as Eq<true, boolean>);
-      assert((): false => true as Eq<false, boolean>);
-      assert((): false => true as Eq<boolean, true>);
-      assert((): false => true as Eq<boolean, false>);
-      assert((): true => true as Eq<boolean, boolean>);
+      assert((): Eq<true, boolean> => true as boolean);
+      assert((): Eq<false, boolean> => true as boolean);
+      assert((): Eq<boolean, true> => true as boolean);
+      assert((): Eq<boolean, false> => true as boolean);
+      assert((): Eq<boolean, boolean> => true as boolean);
       assert((): true => true as Eq<0, 0>);
       assert((): false => true as Eq<0, number>);
       assert((): true => true as Eq<number, number>);
@@ -76,6 +76,21 @@ describe('Unit: lib/type', () => {
       assert((): 1 => 0 as Case<'0', [1]>);
       assert((): 1 => 0 as Case<'0', { 0: 1 }>);
       assert((): number => 0 as Case<'1', { 0: 1, [otherwise: string]: number }>);
+    });
+
+  });
+
+  describe('DEq', () => {
+    it('', () => {
+      assert((): true => true as DEq<true, true>);
+      assert((): false => true as DEq<true, false>);
+      assert((): false => true as DEq<false, true>);
+      assert((): true => true as DEq<false, false>);
+      assert((): false => true as DEq<true, boolean>);
+      assert((): false => true as DEq<false, boolean>);
+      assert((): false => true as DEq<boolean, true>);
+      assert((): false => true as DEq<boolean, false>);
+      assert((): true => true as DEq<boolean, boolean>);
     });
 
   });
