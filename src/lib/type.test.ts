@@ -86,11 +86,11 @@ describe('Unit: lib/type', () => {
       assert((): false => true as DEq<true, false>);
       assert((): false => true as DEq<false, true>);
       assert((): true => true as DEq<false, false>);
-      assert((): false => true as DEq<true, boolean>);
-      assert((): false => true as DEq<false, boolean>);
-      assert((): false => true as DEq<boolean, true>);
-      assert((): false => true as DEq<boolean, false>);
-      assert((): true => true as DEq<boolean, boolean>);
+      assert((): undefined => undefined as DEq<true, boolean>);
+      assert((): undefined => undefined as DEq<false, boolean>);
+      assert((): undefined => undefined as DEq<boolean, true>);
+      assert((): undefined => undefined as DEq<boolean, false>);
+      assert((): undefined => undefined as DEq<boolean, boolean>);
     });
 
   });

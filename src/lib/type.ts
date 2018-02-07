@@ -2,8 +2,6 @@ type Falsy = undefined | false | 0 | '' | null | void;
 type Function = (...args: any[]) => any;
 type Class = new (...args: any[]) => any;
 
-declare const Bool: unique symbol;
-type Bool = typeof Bool;
 declare const True: unique symbol;
 type True = typeof True;
 declare const False: unique symbol;
@@ -19,13 +17,16 @@ export type Eq<T, U> = T extends U ? U extends T ? true : false : false;
 export type If<S, T, U> = S extends Falsy ? U : T;
 export type Case<T extends keyof U, U extends {}> = U[T];
 
-export type DEq<T extends boolean, U extends boolean> = Cast<T> extends Cast<U> ? Cast<U> extends Cast<T> ? true : false : false;
-type Cast<T> = boolean extends T ? Cast_<{ [P in Str<T>]: void; }> : T;
-type Cast_<T> =
-  T extends { true: void; false: void; } ? Bool :
+export type DEq<T extends boolean, U extends boolean> =
+  Determine<T> extends undefined ? undefined :
+  Determine<U> extends undefined ? undefined :
+  Eq<T, U>;
+type Determine<T extends boolean> = boolean extends T ? Cast<{ [P in Str<T>]: void; }> : T;
+type Cast<T extends object> =
+  T extends { true: void; false: void; } ? undefined :
   T extends { true: void; } ? True :
   False;
-type Str<T> =
+type Str<T extends boolean> =
   T extends true ? 'true' :
   T extends false ? 'false' :
   'other';
