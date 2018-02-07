@@ -21,6 +21,7 @@ export type Type<T> =
   T extends Function ? 'function' :
   'object';
 export type Call<T extends Function> = T extends (...args: any[]) => infer R ? R : never;
+export type New<T extends Class> = T extends new (...args: any[]) => infer R ? R : never;
 export type NonNullable<T> = Diff<T, null | undefined>;
 export type Diff<T, U> = T extends U ? never : T;
 export type Filter<T, U> = T extends U ? T : never;
