@@ -1,6 +1,6 @@
 import {
   Not, And, Or, Eq, If, Case,
-  Type, Return, NonNullable, DiffProps, FilterProps, OverwriteProps,
+  Type, Call, NonNullable, DiffProps, FilterProps, OverwriteProps,
   Partial, DeepPartial, Required, DeepRequired, Readonly, DeepReadonly,
   type
 } from './type';
@@ -92,11 +92,11 @@ describe('Unit: lib/type', () => {
 
   });
 
-  describe('Return', () => {
+  describe('Call', () => {
     it('', () => {
-      assert((): number => 0 as Return<() => number>);
-      assert((): number => 0 as Return<(arg: any) => number>);
-      assert((): number => 0 as Return<(...args: any[]) => number>);
+      assert((): number => 0 as Call<() => number>);
+      assert((): number => 0 as Call<(arg: any) => number>);
+      assert((): number => 0 as Call<(...args: any[]) => number>);
     });
 
   });
