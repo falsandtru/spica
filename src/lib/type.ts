@@ -9,6 +9,16 @@ type True = typeof True;
 declare const False: unique symbol;
 type False = typeof False;
 
+export type Not<T extends boolean> =
+  T extends true ? false :
+  T extends false ? true :
+  never;
+export type And<T, U> = T extends Falsy ? T : U;
+export type Or<T, U> = T extends Falsy ? U : T;
+export type Eq<T, U> = T extends U ? U extends T ? true : false : false;
+export type If<S, T, U> = S extends Falsy ? U : T;
+export type Case<T extends keyof U, U extends {}> = U[T];
+
 export type DEq<T extends boolean, U extends boolean> = Cast<T> extends Cast<U> ? Cast<U> extends Cast<T> ? true : false : false;
 type Cast<T> = boolean extends T ? Cast_<{ [P in Str<T>]: void; }> : T;
 type Cast_<T> =
@@ -19,16 +29,6 @@ type Str<T> =
   T extends true ? 'true' :
   T extends false ? 'false' :
   'other';
-
-export type Not<T extends boolean> =
-  T extends true ? false :
-  T extends false ? true :
-  never;
-export type And<T, U> = T extends Falsy ? T : U;
-export type Or<T, U> = T extends Falsy ? U : T;
-export type Eq<T, U> = Cast<T> extends Cast<U> ? Cast<U> extends Cast<T> ? true : false : false;
-export type If<S, T, U> = S extends Falsy ? U : T;
-export type Case<T extends keyof U, U extends {}> = U[T];
 
 export type Type<T> =
   T extends undefined ? 'undefined' :
