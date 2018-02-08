@@ -12,12 +12,18 @@ export type Eq<T, U> = T extends U ? U extends T ? true : false : false;
 export type If<S, T, U> = S extends Falsy ? U : T;
 export type Case<T extends keyof U, U extends {}> = U[T];
 
-export type DEq<T extends boolean, U extends boolean> =
+export type DEq<T extends valueof<NondeterminateTypeMap>, U extends valueof<NondeterminateTypeMap>> =
   Determine<T> extends undefined ? undefined :
   Determine<U> extends undefined ? undefined :
   Eq<T, U>;
-type Determine<T extends boolean> = boolean extends T ? undefined : T;
+type Determine<T extends valueof<NondeterminateTypeMap>> =
+  valueof<NondeterminateTypeMap> extends T ? undefined :
+  T;
+interface NondeterminateTypeMap {
+  boolean: boolean;
+}
 
+export type valueof<T> = T[keyof T];
 export type Type<T> =
   T extends undefined ? 'undefined' :
   T extends boolean ? 'boolean' :
