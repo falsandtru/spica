@@ -1,6 +1,6 @@
 type Falsy = undefined | false | 0 | '' | null | void;
 type Function = (...args: any[]) => any;
-type Class = new (...args: any[]) => any;
+type Constructor = new (...args: any[]) => any;
 
 export type Not<T extends boolean> =
   T extends true ? false :
@@ -23,7 +23,8 @@ interface NondeterminateTypeMap {
   boolean: boolean;
 }
 
-export type valueof<T> = T[keyof T];
+export type keyof<T, V = any> = { [P in keyof T]: If<Eq<T[P], V>, P, never>; }[keyof T];
+export type valueof<T, K = string> = { [P in keyof T]: P extends K ? T[P] : never; }[keyof T];
 export type Type<T> =
   T extends undefined ? 'undefined' :
   T extends boolean ? 'boolean' :
@@ -31,42 +32,48 @@ export type Type<T> =
   T extends string ? 'string' :
   T extends symbol ? 'symbol' :
   T extends Function ? 'function' :
+  T extends void ? null extends void ? 'object' | 'undefined' : 'undefined' :
   'object';
-export type Call<T extends Function> = T extends (...args: any[]) => infer R ? R : never;
-export type New<T extends Class> = T extends new (...args: any[]) => infer R ? R : never;
-export type NonNullable<T> = Diff<T, null | undefined>;
-export type Diff<T, U> = T extends U ? never : T;
-export type Filter<T, U> = T extends U ? T : never;
 
-export type DiffProps<T, U> = Pick<T, Diff<keyof T, keyof U>>;
-export type FilterProps<T, U> = Pick<T, Filter<keyof T, keyof U>>;
+export type DiffStruct<T, U> = Pick<T, Exclude<keyof T, keyof U>>;
 type Compose<T, U> = Pick<T & U, keyof T | keyof U>;
-export type OverwriteProps<T, U> = Compose<{ [P in Diff<keyof T, keyof U>]: T[P]; }, U>;
+export type OverwriteStruct<T, U> = Compose<{ [P in Exclude<keyof T, keyof U>]: T[P]; }, U>;
+
+export type ExtractProp<T, V> = { [Q in { [P in keyof T]: T[P] extends V ? P : never; }[keyof T]]: T[Q]; };
+export type DeepExtractProp<T, V> =
+  T extends object
+    ? { [Q in { [P in keyof T]: T[P] extends V ? P : never; }[keyof T]]: DeepExtractProp<T[Q], V>; }
+    : T;
+export type ExcludeProp<T, V> = { [Q in { [P in keyof T]: T[P] extends V ? never : P; }[keyof T]]: T[Q]; };
+export type DeepExcludeProp<T, V> =
+  T extends object
+    ? { [Q in { [P in keyof T]: T[P] extends V ? never : P; }[keyof T]]: DeepExcludeProp<T[Q], V>; }
+    : T;
 
 export type Partial<T> =
   T extends object
     ? { [P in keyof T]?: T[P]; }
     : T;
-export type DeepPartial<T, U extends object | undefined = undefined> =
+export type DeepPartial<T, E extends object | undefined = undefined> =
   T extends object
-    ? { [P in keyof T]?: NonNullable<T[P]> extends NonNullable<U | Function | Class> ? T[P] : DeepPartial<T[P], U>; }
+    ? { [P in keyof T]?: NonNullable<T[P]> extends NonNullable<E | Function | Constructor> ? T[P] : DeepPartial<T[P], E>; }
     : T;
 type Purify<T extends string> = { [P in T]: P; }[T];
 export type Required<T> =
   T extends object
     ? { [P in Purify<keyof T>]: NonNullable<T[P]>; }
     : T;
-export type DeepRequired<T, U extends object | undefined = undefined> =
+export type DeepRequired<T, E extends object | undefined = undefined> =
   T extends object
-    ? { [P in Purify<keyof T>]: NonNullable<T[P]> extends NonNullable<U | Function | Class> ? NonNullable<T[P]> : DeepRequired<NonNullable<T[P]>, U>; }
+    ? { [P in Purify<keyof T>]: NonNullable<T[P]> extends NonNullable<E | Function | Constructor> ? NonNullable<T[P]> : DeepRequired<NonNullable<T[P]>, E>; }
     : T;
 export type Readonly<T> =
   T extends object
     ? { readonly [P in keyof T]: T[P]; }
     : T;
-export type DeepReadonly<T, U extends object | undefined = undefined> =
+export type DeepReadonly<T, E extends object | undefined = undefined> =
   T extends object
-    ? { readonly [P in keyof T]: NonNullable<T[P]> extends NonNullable<U | Function | Class> ? T[P] : DeepReadonly<T[P], U>; }
+    ? { readonly [P in keyof T]: NonNullable<T[P]> extends NonNullable<E | Function | Constructor> ? T[P] : DeepReadonly<T[P], E>; }
     : T;
 
 export function type(target: any): string {

@@ -1,6 +1,8 @@
 import {
   Not, And, Or, Eq, If, Case, DEq,
-  Type, Call, New, NonNullable, DiffProps, FilterProps, OverwriteProps,
+  Type,
+  DiffStruct, OverwriteStruct,
+  ExtractProp, DeepExtractProp, ExcludeProp, DeepExcludeProp,
   Partial, DeepPartial, Required, DeepRequired, Readonly, DeepReadonly,
   type
 } from './type';
@@ -97,6 +99,7 @@ describe('Unit: lib/type', () => {
 
   describe('Type', () => {
     it('', () => {
+      assert((): 'undefined' => '' as Type<void>);
       assert((): 'undefined' => '' as Type<undefined>);
       assert((): 'boolean' => '' as Type<boolean>);
       assert((): 'number' => '' as Type<number>);
@@ -112,60 +115,65 @@ describe('Unit: lib/type', () => {
 
   });
 
-  describe('Call', () => {
+  describe('DiffStruct', () => {
     it('', () => {
-      assert((): number => 0 as Call<() => number>);
-      assert((): number => 0 as Call<(arg: any) => number>);
-      assert((): number => 0 as Call<(...args: any[]) => number>);
+      type AB = { a: boolean; b: boolean; };
+      type A = { a: boolean; };
+      type B = { b: boolean; };
+      assert((): DiffStruct<AB, B> => ({}) as A);
+      assert((): A => ({}) as DiffStruct<AB, B>);
     });
 
   });
 
-  describe('New', () => {
+  describe('OverwriteStruct', () => {
     it('', () => {
-      assert((): Array<any> => ({}) as New<typeof Array>);
-    });
-
-  });
-
-  describe('NonNullable', () => {
-    it('', () => {
-      assert((): number => 0 as NonNullable<number | undefined>);
-      assert((): NonNullable<number | undefined> => 0);
-      assert((): number => 0 as NonNullable<number | null>);
-      assert((): NonNullable<number | null> => 0);
-    });
-
-  });
-
-  describe('DiffProps', () => {
-    it('', () => {
-      type AB = { a: void; b: void; };
-      type A = { a: void; };
-      type B = { b: void; };
-      assert((): DiffProps<AB, B> => ({}) as A);
-      assert((): A => ({}) as DiffProps<AB, B>);
-    });
-
-  });
-
-  describe('FilterProps', () => {
-    it('', () => {
-      type AB = { a: void; b: void; };
-      type A = { a: void; };
-      assert((): FilterProps<AB, A> => ({}) as A);
-      assert((): A => ({}) as FilterProps<AB, A>);
-    });
-
-  });
-
-  describe('OverwriteProps', () => {
-    it('', () => {
-      type AB = { a: void; b: void; };
+      type AB = { a: boolean; b: boolean; };
       type B = { b: number; };
-      type Expected = { a: void; b: number; };
-      assert((): OverwriteProps<AB, B> => ({}) as Expected);
-      assert((): Expected => ({}) as OverwriteProps<AB, B>);
+      type Expected = { a: boolean; b: number; };
+      assert((): OverwriteStruct<AB, B> => ({}) as Expected);
+      assert((): Expected => ({}) as OverwriteStruct<AB, B>);
+    });
+
+  });
+
+  describe('ExtractProp', () => {
+    it('', () => {
+      type AB = { a: boolean; b: undefined; };
+      type A = { a: boolean; };
+      assert((): ExtractProp<AB, boolean> => ({}) as A);
+      assert((): A => ({}) as ExtractProp<AB, boolean>);
+    });
+
+  });
+
+  describe('DeepExtractProp', () => {
+    it('', () => {
+      type AD = { a: boolean; b: { c: boolean; d: undefined; }; };
+      type AC = { a: boolean; b: { c: boolean; }; };
+      assert((): DeepExtractProp<AD['b'], boolean | object> => ({}) as AC['b']);
+      assert((): DeepExtractProp<AD, boolean | object> => ({}) as AC);
+      assert((): AC => ({}) as DeepExtractProp<AD, boolean | object>);
+    });
+
+  });
+
+  describe('ExcludeProp', () => {
+    it('', () => {
+      type AB = { a: boolean; b: undefined; };
+      type A = { a: boolean; };
+      assert((): ExcludeProp<AB, undefined> => ({}) as A);
+      assert((): A => ({}) as ExcludeProp<AB, undefined>);
+    });
+
+  });
+
+  describe('DeepExcludeProp', () => {
+    it('', () => {
+      type AD = { a: boolean; b: { c: boolean; d: undefined; }; };
+      type AC = { a: boolean; b: { c: boolean; }; };
+      assert((): DeepExcludeProp<AD, undefined> => ({}) as AC);
+      assert((): AC => ({}) as DeepExcludeProp<AD, undefined>);
     });
 
   });
