@@ -56,11 +56,13 @@ describe('Unit: lib/type', () => {
       assert((): true => true as Eq<0, 0>);
       assert((): false => true as Eq<0, number>);
       assert((): true => true as Eq<number, number>);
-      assert((): true => true as Eq<undefined, undefined>);
+      assert((): true => true as Eq<void, void>);
       assert((): false => true as Eq<void, undefined>);
       assert((): false => true as Eq<void, null>);
       assert((): false => true as Eq<void, undefined | null>);
-      assert((): true => true as Eq<void, void>);
+      assert((): true => true as Eq<never, never>);
+      assert((): false => true as Eq<never, undefined>);
+      assert((): false => true as Eq<never, null>);
     });
 
   });
@@ -149,11 +151,10 @@ describe('Unit: lib/type', () => {
 
   describe('DeepExtractProp', () => {
     it('', () => {
-      type AD = { a: boolean; b: { c: boolean; d: undefined; }; };
+      type AD = { a: boolean; b: { c: boolean; d: undefined; }; e: { f: undefined; }; };
       type AC = { a: boolean; b: { c: boolean; }; };
-      assert((): DeepExtractProp<AD['b'], boolean | object> => ({}) as AC['b']);
-      assert((): DeepExtractProp<AD, boolean | object> => ({}) as AC);
-      assert((): AC => ({}) as DeepExtractProp<AD, boolean | object>);
+      assert((): DeepExtractProp<AD, boolean> => ({}) as AC);
+      assert((): AC => ({}) as DeepExtractProp<AD, boolean>);
     });
 
   });
@@ -170,7 +171,7 @@ describe('Unit: lib/type', () => {
 
   describe('DeepExcludeProp', () => {
     it('', () => {
-      type AD = { a: boolean; b: { c: boolean; d: undefined; }; };
+      type AD = { a: boolean; b: { c: boolean; d: undefined; }; e: { f: undefined; }; };
       type AC = { a: boolean; b: { c: boolean; }; };
       assert((): DeepExcludeProp<AD, undefined> => ({}) as AC);
       assert((): AC => ({}) as DeepExcludeProp<AD, undefined>);
@@ -196,10 +197,10 @@ describe('Unit: lib/type', () => {
       type P = { a?: number; b?: { c?: string; d?: () => 0; e?: new () => object }; };
       assert((): P => ({}) as DeepPartial<R>);
       assert((): DeepPartial<R> => ({}) as P);
-      assert((): P => ({}) as DeepPartial<R>);
-      assert((): DeepPartial<R> => ({}) as P);
+      assert((): P => ({}) as DeepPartial<DeepRequired<R>>);
+      assert((): DeepPartial<DeepRequired<R>> => ({}) as P);
       assert((): Partial<R> => ({}) as DeepPartial<R, R['b']>);
-      assert((): DeepPartial<R, R['b']> => ({}) as Required<R>);
+      assert((): DeepPartial<R, R['b']> => ({}) as Partial<R>);
     });
 
   });

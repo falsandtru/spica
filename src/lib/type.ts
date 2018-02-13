@@ -36,42 +36,42 @@ export type Type<T> =
   'object';
 
 export type DiffStruct<T, U> = Pick<T, Exclude<keyof T, keyof U>>;
-type Compose<T, U> = Pick<T & U, keyof T | keyof U>;
 export type OverwriteStruct<T, U> = Compose<{ [P in Exclude<keyof T, keyof U>]: T[P]; }, U>;
+type Compose<T, U> = Pick<T & U, keyof T | keyof U>;
 
 export type ExtractProp<T, V> = { [Q in { [P in keyof T]: T[P] extends V ? P : never; }[keyof T]]: T[Q]; };
-export type DeepExtractProp<T, V> =
+export type DeepExtractProp<T, V, E extends object | undefined | null = any[]> =
   T extends object
-    ? { [Q in { [P in keyof T]: T[P] extends V ? P : never; }[keyof T]]: DeepExtractProp<T[Q], V>; }
-    : T;
+    ? ExcludeEmptyObject<ExcludeProp<{ [Q in { [P in keyof T]: T[P] extends V ? P : P; }[keyof T]]: DeepExtractProp<T[Q], V, E>; }, never>>
+    : T extends V ? T : never;
 export type ExcludeProp<T, V> = { [Q in { [P in keyof T]: T[P] extends V ? never : P; }[keyof T]]: T[Q]; };
-export type DeepExcludeProp<T, V> =
+export type DeepExcludeProp<T, V, E extends object | undefined | null = any[]> =
   T extends object
-    ? { [Q in { [P in keyof T]: T[P] extends V ? never : P; }[keyof T]]: DeepExcludeProp<T[Q], V>; }
-    : T;
+    ? ExcludeEmptyObject<ExcludeProp<{ [Q in { [P in keyof T]: T[P] extends V ? never : P; }[keyof T]]: DeepExcludeProp<T[Q], V, E>; }, never>>
+    : T extends V ? never : T;
+type ExcludeEmptyObject<T> = { [Q in { [P in keyof T]: If<Eq<NonNullable<T[P]>, {}>, never, P>; }[keyof T]]: T[Q]; };
 
 export type Partial<T> =
   T extends object
-    ? { [P in keyof T]?: T[P]; }
+    ? { [P in keyof T]+?: T[P]; }
     : T;
-export type DeepPartial<T, E extends object | undefined = undefined> =
+export type DeepPartial<T, E extends object | undefined | null = any[]> =
   T extends object
-    ? { [P in keyof T]?: NonNullable<T[P]> extends NonNullable<E | Function | Constructor> ? T[P] : DeepPartial<T[P], E>; }
+    ? { [P in keyof T]+?: NonNullable<T[P]> extends NonNullable<E | Function | Constructor> ? T[P] : DeepPartial<T[P], E>; }
     : T;
-type Purify<T extends string> = { [P in T]: P; }[T];
 export type Required<T> =
   T extends object
-    ? { [P in Purify<keyof T>]: NonNullable<T[P]>; }
+    ? { [P in keyof T]-?: T[P]; }
     : T;
-export type DeepRequired<T, E extends object | undefined = undefined> =
+export type DeepRequired<T, E extends object | undefined | null = any[]> =
   T extends object
-    ? { [P in Purify<keyof T>]: NonNullable<T[P]> extends NonNullable<E | Function | Constructor> ? NonNullable<T[P]> : DeepRequired<NonNullable<T[P]>, E>; }
+    ? { [P in keyof T]-?: NonNullable<T[P]> extends NonNullable<E | Function | Constructor> ? T[P] : DeepRequired<T[P], E>; }
     : T;
 export type Readonly<T> =
   T extends object
     ? { readonly [P in keyof T]: T[P]; }
     : T;
-export type DeepReadonly<T, E extends object | undefined = undefined> =
+export type DeepReadonly<T, E extends object | undefined | null = any[]> =
   T extends object
     ? { readonly [P in keyof T]: NonNullable<T[P]> extends NonNullable<E | Function | Constructor> ? T[P] : DeepReadonly<T[P], E>; }
     : T;
