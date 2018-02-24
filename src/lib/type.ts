@@ -23,7 +23,7 @@ interface NondeterminateTypeMap {
   boolean: boolean;
 }
 
-export type indexof<T, V> = { [P in keyof T]: If<Eq<T[P], V>, P, never>; }[keyof T];
+export type indexof<T, V extends valueof<T>> = { [P in keyof T]: If<Eq<T[P], V>, P, never>; }[keyof T];
 export type valueof<T, K = string> = { [P in keyof T]: P extends K ? T[P] : never; }[keyof T];
 export type Type<T> =
   T extends undefined ? 'undefined' :
