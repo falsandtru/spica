@@ -49,7 +49,7 @@ const config = {
     }
   },
   banner: [
-    `/*! ${pkg.name} v${pkg.version} ${pkg.repository.url} | (c) ${new Date().getUTCFullYear()}, ${pkg.author} | ${pkg.license} License */`,
+    `/*! ${pkg.name} v${pkg.version} ${pkg.repository.url} | (c) 2017, ${pkg.author} | ${pkg.license} License */`,
     ''
   ].join('\n'),
   clean: {
