@@ -99,7 +99,7 @@ export class Observation<N extends any[], D, R>
         const node = this.seekNode_(namespace);
         void node.childrenNames.slice()
           .forEach(name => {
-            void this.off(<N><any>namespace.concat([name]));
+            void this.off(namespace.concat([name]) as N);
             const child = node.children.get(name);
             if (!child) return;
             if (child.items.length + child.childrenNames.length > 0) return;
@@ -124,7 +124,7 @@ export class Observation<N extends any[], D, R>
   public reflect(this: Observation<N, void, R>, type: N, data?: D): R[]
   public reflect(namespace: N, data: D): R[] {
     let results: R[] = [];
-    void this.emit(namespace, <D>data, (_, r) => results = r);
+    void this.emit(namespace, data, (_, r) => results = r);
     assert(Array.isArray(results));
     return results;
   }
@@ -132,7 +132,7 @@ export class Observation<N extends any[], D, R>
   public relay(source: Observer<N, D, any>): () => void {
     if (this.relaySources.has(source)) return () => undefined;
     void this.relaySources.add(source);
-    const unbind = source.monitor(<N><any>[], (data, namespace) =>
+    const unbind = source.monitor([] as any[] as N, (data, namespace) =>
       void this.emit(namespace, data));
     return () => (
       void this.relaySources.delete(source),
