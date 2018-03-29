@@ -197,7 +197,7 @@ describe('Unit: lib/cache', () => {
           .length === size);
     });
 
-    it('rate', function (this: any) {
+    it('rate', function () {
       this.timeout(10 * 1e3);
 
       const size = 10;
