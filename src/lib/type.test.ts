@@ -124,8 +124,12 @@ describe('Unit: lib/type', () => {
 
   describe('valueof', () => {
     it('', () => {
-      assert((): true => true as TEq<valueof<{ 0: 0; 1: -1 }>, 0 | -1>);
-      assert((): true => true as TEq<valueof<{ 0: 0; 1: -1 }, '1'>, -1>);
+      assert((): true => true as TEq<valueof<{ 0: 0; a: 1; }>, 0 | 1>);
+      assert((): true => true as TEq<valueof<{ 0: 0; a: 1; }, '0'>, 0>);
+      assert((): true => true as TEq<valueof<[0]>, 0>);
+      assert((): true => true as TEq<valueof<{ [i: number]: 0; }>, 0>);
+      assert((): true => true as TEq<valueof<Readonly<{ 0: 0; a: 1; }>>, 0 | 1>);
+      assert((): true => true as TEq<valueof<ReadonlyArray<0>>, 0>);
     });
 
   });
