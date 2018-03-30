@@ -1,6 +1,7 @@
 import {
   Not, And, Or, Eq, TEq, DEq, If, Case,
   Type,
+  valueof, indexof,
   DiffStruct, OverwriteStruct,
   ExtractProp, DeepExtractProp, ExcludeProp, DeepExcludeProp,
   Partial, DeepPartial, Required, DeepRequired, Readonly, DeepReadonly,
@@ -110,6 +111,21 @@ describe('Unit: lib/type', () => {
       assert((): 1 => 0 as Case<'0', [1]>);
       assert((): 1 => 0 as Case<'0', { 0: 1 }>);
       assert((): number => 0 as Case<'1', { 0: 1, [otherwise: string]: number }>);
+    });
+
+  });
+
+  describe('valueof', () => {
+    it('', () => {
+      assert((): 0 | -1 => 0 as valueof<{ 0: 0; 1: -1 }>);
+      assert((): -1 => 0 as valueof<{ 0: 0; 1: -1 }, '1'>);
+    });
+
+  });
+
+  describe('indexof', () => {
+    it('', () => {
+      assert((): '1' => '' as indexof<{ 0: 0; 1: -1 }, -1>);
     });
 
   });
