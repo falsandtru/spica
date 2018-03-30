@@ -33,6 +33,7 @@ export type Type<T> =
   T extends string ? 'string' :
   T extends symbol ? 'symbol' :
   T extends Function ? 'function' :
+  T extends Constructor ? 'function' :
   T extends void ? null extends void ? 'object' | 'undefined' : 'undefined' :
   'object';
 

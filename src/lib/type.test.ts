@@ -149,6 +149,9 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Type<(arg: any) => any>, 'function'>);
       assert((): true => true as TEq<Type<(...args: any[]) => any>, 'function'>);
       assert((): true => true as TEq<Type<() => any>, 'function'>);
+      assert((): true => true as TEq<Type<new () => any>, 'function'>);
+      assert((): true => true as TEq<Type<new (arg: any) => any>, 'function'>);
+      assert((): true => true as TEq<Type<new (...args: any[]) => any>, 'function'>);
       assert((): true => true as TEq<Type<any[]>, 'object'>);
       assert((): true => true as TEq<Type<object>, 'object'>);
       assert((): true => true as TEq<Type<null>, 'object'>);
