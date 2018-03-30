@@ -1,5 +1,5 @@
 import {
-  Not, And, Or, Eq, DEq, If, Case,
+  Not, And, Or, Eq, TEq, DEq, If, Case,
   Type,
   DiffStruct, OverwriteStruct,
   ExtractProp, DeepExtractProp, ExcludeProp, DeepExcludeProp,
@@ -63,6 +63,21 @@ describe('Unit: lib/type', () => {
       assert((): true => true as Eq<never, never>);
       assert((): false => true as Eq<never, undefined>);
       assert((): false => true as Eq<never, null>);
+    });
+
+  });
+
+  describe('TEq', () => {
+    it('', () => {
+      assert((): true => true as TEq<true, true>);
+      assert((): false => true as TEq<true, false>);
+      assert((): false => true as TEq<false, true>);
+      assert((): true => true as TEq<false, false>);
+      assert((): false => true as TEq<true, boolean>);
+      assert((): false => true as TEq<false, boolean>);
+      assert((): false => true as TEq<boolean, true>);
+      assert((): false => true as TEq<boolean, false>);
+      assert((): true => true as TEq<boolean, boolean>);
     });
 
   });
