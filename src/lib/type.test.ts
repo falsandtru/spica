@@ -11,59 +11,63 @@ import {
 describe('Unit: lib/type', () => {
   describe('Not', () => {
     it('', () => {
-      assert((): false => true as Not<true>);
-      assert((): true => true as Not<false>);
+      assert((): true => true as TEq<Not<true>, false>);
+      assert((): true => true as TEq<Not<false>, true>);
     });
 
   });
 
   describe('And', () => {
     it('', () => {
-      assert((): true => true as And<true, true>);
-      assert((): false => true as And<true, false>);
-      assert((): false => true as And<false, true>);
-      assert((): false => true as And<false, false>);
-      assert((): undefined => undefined as And<true, undefined>);
-      assert((): undefined => undefined as And<undefined, true>);
-      assert((): 0 => 0 as And<0, true>);
-      assert((): '' => '' as And<'', true>);
-      assert((): null => null as And<null, true>);
-      assert((): void => undefined as And<void, true>);
+      assert((): true => true as TEq<And<true, true>, true>);
+      assert((): true => true as TEq<And<true, false>, false>);
+      assert((): true => true as TEq<And<false, true>, false>);
+      assert((): true => true as TEq<And<false, false>, false>);
+      assert((): true => true as TEq<And<true, undefined>, undefined>);
+      assert((): true => true as TEq<And<false, undefined>, false>);
+      assert((): true => true as TEq<And<undefined, true>, undefined>);
+      assert((): true => true as TEq<And<undefined, false>, undefined>);
+      assert((): true => true as TEq<And<0, 1>, 0>);
+      assert((): true => true as TEq<And<'', 1>, ''>);
+      assert((): true => true as TEq<And<null, 1>, null>);
+      assert((): true => true as TEq<And<void, 1>, void>);
     });
 
   });
 
   describe('Or', () => {
     it('', () => {
-      assert((): true => true as Or<true, true>);
-      assert((): true => true as Or<true, false>);
-      assert((): true => true as Or<false, true>);
-      assert((): false => true as Or<false, false>);
+      assert((): true => true as TEq<Or<true, true>, true>);
+      assert((): true => true as TEq<Or<true, false>, true>);
+      assert((): true => true as TEq<Or<false, true>, true>);
+      assert((): true => true as TEq<Or<false, false>, false>);
     });
 
   });
 
   describe('Eq', () => {
     it('', () => {
-      assert((): true => true as Eq<true, true>);
-      assert((): false => true as Eq<true, false>);
-      assert((): false => true as Eq<false, true>);
-      assert((): true => true as Eq<false, false>);
-      assert((): Eq<true, boolean> => true as boolean);
-      assert((): Eq<false, boolean> => true as boolean);
-      assert((): Eq<boolean, true> => true as boolean);
-      assert((): Eq<boolean, false> => true as boolean);
-      assert((): Eq<boolean, boolean> => true as boolean);
-      assert((): true => true as Eq<0, 0>);
-      assert((): false => true as Eq<0, number>);
-      assert((): true => true as Eq<number, number>);
-      assert((): true => true as Eq<void, void>);
-      assert((): false => true as Eq<void, undefined>);
-      assert((): false => true as Eq<void, null>);
-      assert((): false => true as Eq<void, undefined | null>);
-      assert((): true => true as Eq<never, never>);
-      assert((): false => true as Eq<never, undefined>);
-      assert((): false => true as Eq<never, null>);
+      assert((): true => true as TEq<Eq<true, true>, true>);
+      assert((): true => true as TEq<Eq<true, false>, false>);
+      assert((): true => true as TEq<Eq<false, true>, false>);
+      assert((): true => true as TEq<Eq<false, false>, true>);
+      assert((): true => true as TEq<Eq<boolean, true>, boolean>);
+      assert((): true => true as TEq<Eq<boolean, false>, boolean>);
+      assert((): true => true as TEq<Eq<boolean, boolean>, boolean>);
+      assert((): true => true as TEq<Eq<0, 0>, true>);
+      assert((): true => true as TEq<Eq<0, number>, false>);
+      assert((): true => true as TEq<Eq<number, 0>, false>);
+      assert((): true => true as TEq<Eq<number, number>, true>);
+      assert((): true => true as TEq<Eq<void, void>, true>);
+      assert((): true => true as TEq<Eq<void, undefined>, false>);
+      assert((): true => true as TEq<Eq<void, null>, false>);
+      assert((): true => true as TEq<Eq<void, undefined | null>, false>);
+      assert((): true => true as TEq<Eq<void, never>, false>);
+      // nonintuitive
+      assert((): true => true as TEq<Eq<never, never>, never>);
+      assert((): true => true as TEq<Eq<never, void>, never>);
+      assert((): true => true as TEq<Eq<never, undefined>, never>);
+      assert((): true => true as TEq<Eq<never, null>, never>);
     });
 
   });
@@ -79,71 +83,75 @@ describe('Unit: lib/type', () => {
       assert((): false => true as TEq<boolean, true>);
       assert((): false => true as TEq<boolean, false>);
       assert((): true => true as TEq<boolean, boolean>);
+      assert((): false => true as TEq<boolean, never>);
+      assert((): false => true as TEq<never, boolean>);
+      assert((): true => true as TEq<never, never>);
     });
 
   });
 
   describe('DEq', () => {
     it('', () => {
-      assert((): true => true as DEq<true, true>);
-      assert((): false => true as DEq<true, false>);
-      assert((): false => true as DEq<false, true>);
-      assert((): true => true as DEq<false, false>);
-      assert((): undefined => undefined as DEq<true, boolean>);
-      assert((): undefined => undefined as DEq<false, boolean>);
-      assert((): undefined => undefined as DEq<boolean, true>);
-      assert((): undefined => undefined as DEq<boolean, false>);
-      assert((): undefined => undefined as DEq<boolean, boolean>);
+      assert((): true => true as TEq<DEq<true, true>, true>);
+      assert((): true => true as TEq<DEq<true, false>, false>);
+      assert((): true => true as TEq<DEq<true, boolean>, undefined>);
+      assert((): true => true as TEq<DEq<false, true>, false>);
+      assert((): true => true as TEq<DEq<false, false>, true>);
+      assert((): true => true as TEq<DEq<false, boolean>, undefined>);
+      assert((): true => true as TEq<DEq<boolean, boolean>, undefined>);
     });
 
   });
 
   describe('If', () => {
     it('', () => {
-      assert((): 1 => 0 as If<true | 1, 1, 0>);
-      assert((): 0 => 0 as If<false | 0, 1, 0>);
+      assert((): true => true as TEq<If<true, 1, 0>, 1>);
+      assert((): true => true as TEq<If<false, 1, 0>, 0>);
+      assert((): true => true as TEq<If<0, 1, 0>, 0>);
+      assert((): true => true as TEq<If<1, 1, 0>, 1>);
     });
 
   });
 
   describe('Case', () => {
     it('', () => {
-      assert((): 1 => 0 as Case<'0', [1]>);
-      assert((): 1 => 0 as Case<'0', { 0: 1 }>);
-      assert((): number => 0 as Case<'1', { 0: 1, [otherwise: string]: number }>);
+      assert((): true => true as TEq<Case<'0', [1]>, 1>);
+      assert((): true => true as TEq<Case<'0', { 0: 1 }>, 1>);
+      assert((): true => true as TEq<Case<'1', { 0: 1; [otherwise: string]: number; }>, number>);
     });
 
   });
 
   describe('valueof', () => {
     it('', () => {
-      assert((): 0 | -1 => 0 as valueof<{ 0: 0; 1: -1 }>);
-      assert((): -1 => 0 as valueof<{ 0: 0; 1: -1 }, '1'>);
+      assert((): true => true as TEq<valueof<{ 0: 0; 1: -1 }>, 0 | -1>);
+      assert((): true => true as TEq<valueof<{ 0: 0; 1: -1 }, '1'>, -1>);
     });
 
   });
 
   describe('indexof', () => {
     it('', () => {
-      assert((): '1' => '' as indexof<{ 0: 0; 1: -1 }, -1>);
+      assert((): true => true as TEq<indexof<{ 0: 0; 1: -1 }, -1>, '1'>);
     });
 
   });
 
   describe('Type', () => {
     it('', () => {
-      assert((): 'undefined' => '' as Type<void>);
-      assert((): 'undefined' => '' as Type<undefined>);
-      assert((): 'boolean' => '' as Type<boolean>);
-      assert((): 'number' => '' as Type<number>);
-      assert((): 'string' => '' as Type<string>);
-      assert((): 'symbol' => '' as Type<symbol>);
-      assert((): 'function' => '' as Type<() => void>);
-      assert((): 'function' => '' as Type<(arg: any) => void>);
-      assert((): 'function' => '' as Type<(...args: any[]) => void>);
-      assert((): 'object' => '' as Type<any[]>);
-      assert((): 'object' => '' as Type<object>);
-      assert((): 'object' => '' as Type<null>);
+      assert((): true => true as TEq<Type<void>, 'undefined'>);
+      assert((): true => true as TEq<Type<undefined>, 'undefined'>);
+      assert((): true => true as TEq<Type<boolean>, 'boolean'>);
+      assert((): true => true as TEq<Type<number>, 'number'>);
+      assert((): true => true as TEq<Type<string>, 'string'>);
+      assert((): true => true as TEq<Type<symbol>, 'symbol'>);
+      assert((): true => true as TEq<Type<() => any>, 'function'>);
+      assert((): true => true as TEq<Type<(arg: any) => any>, 'function'>);
+      assert((): true => true as TEq<Type<(...args: any[]) => any>, 'function'>);
+      assert((): true => true as TEq<Type<() => any>, 'function'>);
+      assert((): true => true as TEq<Type<any[]>, 'object'>);
+      assert((): true => true as TEq<Type<object>, 'object'>);
+      assert((): true => true as TEq<Type<null>, 'object'>);
     });
 
   });
@@ -153,8 +161,7 @@ describe('Unit: lib/type', () => {
       type AB = { a: boolean; b: boolean; };
       type A = { a: boolean; };
       type B = { b: boolean; };
-      assert((): DiffStruct<AB, B> => ({}) as A);
-      assert((): A => ({}) as DiffStruct<AB, B>);
+      assert((): true => true as TEq<DiffStruct<AB, B>, A>);
     });
 
   });
@@ -164,8 +171,7 @@ describe('Unit: lib/type', () => {
       type AB = { a: boolean; b: boolean; };
       type B = { b: number; };
       type Expected = { a: boolean; b: number; };
-      assert((): OverwriteStruct<AB, B> => ({}) as Expected);
-      assert((): Expected => ({}) as OverwriteStruct<AB, B>);
+      assert((): true => true as TEq<OverwriteStruct<AB, B>, Expected>);
     });
 
   });
@@ -174,8 +180,7 @@ describe('Unit: lib/type', () => {
     it('', () => {
       type AB = { a: boolean; b: undefined; };
       type A = { a: boolean; };
-      assert((): ExtractProp<AB, boolean> => ({}) as A);
-      assert((): A => ({}) as ExtractProp<AB, boolean>);
+      assert((): true => true as TEq<ExtractProp<AB, boolean>, A>);
     });
 
   });
@@ -184,8 +189,7 @@ describe('Unit: lib/type', () => {
     it('', () => {
       type AD = { a: boolean; b: { c: boolean; d: undefined; }; e: { f: undefined; }; };
       type AC = { a: boolean; b: { c: boolean; }; };
-      assert((): DeepExtractProp<AD, boolean> => ({}) as AC);
-      assert((): AC => ({}) as DeepExtractProp<AD, boolean>);
+      assert((): true => true as TEq<DeepExtractProp<AD, boolean>, AC>);
     });
 
   });
@@ -194,8 +198,7 @@ describe('Unit: lib/type', () => {
     it('', () => {
       type AB = { a: boolean; b: undefined; };
       type A = { a: boolean; };
-      assert((): ExcludeProp<AB, undefined> => ({}) as A);
-      assert((): A => ({}) as ExcludeProp<AB, undefined>);
+      assert((): true => true as TEq<ExcludeProp<AB, undefined>, A>);
     });
 
   });
@@ -204,8 +207,7 @@ describe('Unit: lib/type', () => {
     it('', () => {
       type AD = { a: boolean; b: { c: boolean; d: undefined; }; e: { f: undefined; }; };
       type AC = { a: boolean; b: { c: boolean; }; };
-      assert((): DeepExcludeProp<AD, undefined> => ({}) as AC);
-      assert((): AC => ({}) as DeepExcludeProp<AD, undefined>);
+      assert((): true => true as TEq<DeepExcludeProp<AD, undefined>, AC>);
     });
 
   });
@@ -214,10 +216,8 @@ describe('Unit: lib/type', () => {
     it('', () => {
       type R = { a: number[]; b: { c: string; }; d: () => 0; e: new () => object };
       type P = { a?: number[]; b?: { c: string; }; d?: () => 0; e?: new () => object };
-      assert((): P => ({}) as Partial<R>);
-      assert((): Partial<R> => ({}) as P);
-      assert((): P => ({}) as Partial<Required<R>>);
-      assert((): Partial<Required<R>> => ({}) as P);
+      assert((): TEq<Partial<R>, P> => true as true);
+      assert((): TEq<Partial<Required<R>>, P> => true as true);
     });
 
   });
@@ -226,12 +226,9 @@ describe('Unit: lib/type', () => {
     it('', () => {
       type R = { a: number; b: { c: string[]; d: () => 0; e: new () => object }; };
       type P = { a?: number; b?: { c?: string[]; d?: () => 0; e?: new () => object }; };
-      assert((): P => ({}) as DeepPartial<R>);
-      assert((): DeepPartial<R> => ({}) as P);
-      assert((): P => ({}) as DeepPartial<DeepRequired<R>>);
-      assert((): DeepPartial<DeepRequired<R>> => ({}) as P);
-      assert((): Partial<R> => ({}) as DeepPartial<R, R['b']>);
-      assert((): DeepPartial<R, R['b']> => ({}) as Partial<R>);
+      assert((): TEq<DeepPartial<R>, P> => true as true);
+      assert((): TEq<DeepPartial<DeepRequired<R>>, P> => true as true);
+      assert((): TEq<DeepPartial<R, R['b']>, Partial<R>> => true as true);
     });
 
   });
@@ -240,10 +237,8 @@ describe('Unit: lib/type', () => {
     it('', () => {
       type R = { a: number[]; b: { c?: string; }; d: () => 0; e: new () => object };
       type P = { a?: number[]; b?: { c?: string; }; d?: () => 0; e?: new () => object };
-      assert((): R => ({}) as Required<P>);
-      assert((): Required<P> => ({}) as R);
-      assert((): R => ({}) as Required<Partial<R>>);
-      assert((): Required<Partial<R>> => ({}) as R);
+      assert((): TEq<Required<P>, R> => true as true);
+      assert((): TEq<Required<Partial<R>>, R> => true as true);
     });
 
   });
@@ -252,12 +247,9 @@ describe('Unit: lib/type', () => {
     it('', () => {
       type R = { a: number; b: { c: string[]; d: () => 0; e: new () => object }; };
       type P = { a?: number; b?: { c?: string[]; d?: () => 0; e?: new () => object }; };
-      assert((): R => ({}) as DeepRequired<P>);
-      assert((): DeepRequired<P> => ({}) as R);
-      assert((): R => ({}) as DeepRequired<DeepPartial<R>>);
-      assert((): DeepRequired<DeepPartial<R>> => ({}) as R);
-      assert((): Required<P> => ({}) as DeepRequired<P, P['b']>);
-      assert((): DeepRequired<P, P['b']> => ({}) as Required<P>);
+      assert((): TEq<DeepRequired<P>, R> => true as true);
+      assert((): TEq<DeepRequired<DeepPartial<R>>, R> => true as true);
+      assert((): TEq<DeepRequired<P, P['b']>, Required<P>> => true as true);
     });
 
   });
@@ -266,8 +258,7 @@ describe('Unit: lib/type', () => {
     it('', () => {
       type I = { readonly a?: number[]; readonly b: { c: string; }; readonly d: () => 0; readonly e: new () => object };
       type M = { a?: number[]; b: { c: string; }; d: () => 0; e: new () => object };
-      assert((): I => ({}) as Readonly<M>);
-      assert((): Readonly<M> => ({}) as I);
+      assert((): TEq<Readonly<M>, I> => true as true);
     });
 
   });
@@ -276,10 +267,8 @@ describe('Unit: lib/type', () => {
     it('', () => {
       type I = { readonly a?: number; readonly b: { readonly c: string[]; readonly d: () => 0; readonly e: new () => object }; };
       type M = { a?: number; b: { c: string[]; d: () => 0; e: new () => object }; };
-      assert((): I => ({}) as DeepReadonly<M>);
-      assert((): DeepReadonly<M> => ({}) as I);
-      assert((): Readonly<M> => ({}) as DeepReadonly<M, M['b']>);
-      assert((): DeepReadonly<M, M['b']> => ({}) as Readonly<M>);
+      assert((): TEq<DeepReadonly<M>, I> => true as true);
+      assert((): TEq<DeepReadonly<M, M['b']>, Readonly<M>> => true as true);
     });
 
   });
