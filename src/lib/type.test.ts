@@ -223,8 +223,8 @@ describe('Unit: lib/type', () => {
     it('', () => {
       type R = { a: number[]; b: { c: string; }; d: () => 0; e: new () => object };
       type P = { a?: number[]; b?: { c: string; }; d?: () => 0; e?: new () => object };
-      assert((): TEq<Partial<R>, P> => true as true);
-      assert((): TEq<Partial<Required<R>>, P> => true as true);
+      assert((): true => true as TEq<Partial<R>, P>);
+      assert((): true => true as TEq<Partial<Required<R>>, P>);
     });
 
   });
@@ -233,9 +233,9 @@ describe('Unit: lib/type', () => {
     it('', () => {
       type R = { a: number; b: { c: string[]; d: () => 0; e: new () => object }; };
       type P = { a?: number; b?: { c?: string[]; d?: () => 0; e?: new () => object }; };
-      assert((): TEq<DeepPartial<R>, P> => true as true);
-      assert((): TEq<DeepPartial<DeepRequired<R>>, P> => true as true);
-      assert((): TEq<DeepPartial<R, R['b']>, Partial<R>> => true as true);
+      assert((): true => true as TEq<DeepPartial<R>, P>);
+      assert((): true => true as TEq<DeepPartial<DeepRequired<R>>, P>);
+      assert((): true => true as TEq<DeepPartial<R, R['b']>, Partial<R>>);
     });
 
   });
@@ -244,8 +244,8 @@ describe('Unit: lib/type', () => {
     it('', () => {
       type R = { a: number[]; b: { c?: string; }; d: () => 0; e: new () => object };
       type P = { a?: number[]; b?: { c?: string; }; d?: () => 0; e?: new () => object };
-      assert((): TEq<Required<P>, R> => true as true);
-      assert((): TEq<Required<Partial<R>>, R> => true as true);
+      assert((): true => true as TEq<Required<P>, R>);
+      assert((): true => true as TEq<Required<Partial<R>>, R>);
     });
 
   });
@@ -254,9 +254,9 @@ describe('Unit: lib/type', () => {
     it('', () => {
       type R = { a: number; b: { c: string[]; d: () => 0; e: new () => object }; };
       type P = { a?: number; b?: { c?: string[]; d?: () => 0; e?: new () => object }; };
-      assert((): TEq<DeepRequired<P>, R> => true as true);
-      assert((): TEq<DeepRequired<DeepPartial<R>>, R> => true as true);
-      assert((): TEq<DeepRequired<P, P['b']>, Required<P>> => true as true);
+      assert((): true => true as TEq<DeepRequired<P>, R>);
+      assert((): true => true as TEq<DeepRequired<DeepPartial<R>>, R>);
+      assert((): true => true as TEq<DeepRequired<P, P['b']>, Required<P>>);
     });
 
   });
@@ -265,7 +265,7 @@ describe('Unit: lib/type', () => {
     it('', () => {
       type I = { readonly a?: number[]; readonly b: { c: string; }; readonly d: () => 0; readonly e: new () => object };
       type M = { a?: number[]; b: { c: string; }; d: () => 0; e: new () => object };
-      assert((): TEq<Readonly<M>, I> => true as true);
+      assert((): true => true as TEq<Readonly<M>, I>);
     });
 
   });
@@ -274,8 +274,8 @@ describe('Unit: lib/type', () => {
     it('', () => {
       type I = { readonly a?: number; readonly b: { readonly c: string[]; readonly d: () => 0; readonly e: new () => object }; };
       type M = { a?: number; b: { c: string[]; d: () => 0; e: new () => object }; };
-      assert((): TEq<DeepReadonly<M>, I> => true as true);
-      assert((): TEq<DeepReadonly<M, M['b']>, Readonly<M>> => true as true);
+      assert((): true => true as TEq<DeepReadonly<M>, I>);
+      assert((): true => true as TEq<DeepReadonly<M, M['b']>, Readonly<M>>);
     });
 
   });
