@@ -188,6 +188,7 @@ describe('Unit: lib/type', () => {
       type AB = { a: boolean; b: undefined; };
       type A = { a: boolean; };
       assert((): true => true as TEq<ExtractProp<AB, boolean>, A>);
+      assert((): true => true as TEq<ExtractProp<Array<0 | 1>, 0>, Array<0 | 1>>);
     });
 
   });
@@ -206,6 +207,7 @@ describe('Unit: lib/type', () => {
       type AB = { a: boolean; b: undefined; };
       type A = { a: boolean; };
       assert((): true => true as TEq<ExcludeProp<AB, undefined>, A>);
+      assert((): true => true as TEq<ExcludeProp<Array<0 | 1>, 0>, Array<0 | 1>>);
     });
 
   });
