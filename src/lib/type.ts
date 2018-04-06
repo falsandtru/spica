@@ -42,17 +42,24 @@ export type DiffStruct<T, U> = Pick<T, Exclude<keyof T, keyof U>>;
 export type OverwriteStruct<T, U> = Compose<{ [P in Exclude<keyof T, keyof U>]: T[P]; }, U>;
 type Compose<T, U> = Pick<T & U, keyof T | keyof U>;
 
-export type ExtractProp<T, V> = { [Q in { [P in keyof T]: T[P] extends V ? P : never; }[keyof T]]: T[Q]; };
-export type DeepExtractProp<T, V, E extends object | undefined | null = any[]> =
-  T extends object
-    ? ExcludeEmptyObject<ExcludeProp<{ [Q in { [P in keyof T]: T[P] extends V ? P : P; }[keyof T]]: DeepExtractProp<T[Q], V, E>; }, never>>
-    : T extends V ? T : never;
-export type ExcludeProp<T, V> = { [Q in { [P in keyof T]: T[P] extends V ? never : P; }[keyof T]]: T[Q]; };
-export type DeepExcludeProp<T, V, E extends object | undefined | null = any[]> =
-  T extends object
-    ? ExcludeEmptyObject<ExcludeProp<{ [Q in { [P in keyof T]: T[P] extends V ? never : P; }[keyof T]]: DeepExcludeProp<T[Q], V, E>; }, never>>
-    : T extends V ? never : T;
-type ExcludeEmptyObject<T> = { [Q in { [P in keyof T]: If<Eq<NonNullable<T[P]>, {}>, never, P>; }[keyof T]]: T[Q]; };
+export type ExtractProp<T, V> =
+  { [Q in { [P in keyof T]: T[P] extends V ? P : never; }[keyof T]]: T[Q]; };
+export type DeepExtractProp<T, V, E extends object | undefined | null = never> =
+  T extends E ? never :
+  T extends V ? T :
+  T extends any[] ? never :
+  T extends object ? CleanObject<{ [Q in { [P in keyof T]: T[P] extends V | object ? T[P] extends E ? never : P : never; }[keyof T]]: DeepExtractProp<T[Q], V, E>; }> :
+  never;
+export type ExcludeProp<T, V> =
+  { [Q in { [P in keyof T]: If<TEq<T[P], V>, never, If<TEq<never, V>, P, V extends T[P] ? never : P>>; }[keyof T]]: T[Q]; };
+export type DeepExcludeProp<T, V, E extends object | undefined | null = never> =
+  T extends E ? T :
+  T extends V ? never :
+  T extends any[] ? never :
+  T extends object ? CleanObject<{ [Q in { [P in keyof T]: V extends T[P] ? E extends T[P] ? P : never : P; }[keyof T]]: DeepExcludeProp<T[Q], V, E>; }> :
+  T;
+type CleanObject<T> =
+  { [Q in { [P in keyof T]: If<Or<TEq<T[P], never>, TEq<NonNullable<T[P]>, {}>>, never, P>; }[keyof T]]: T[Q]; };
 
 export type Partial<T> =
   T extends (infer U)[] ? T :
