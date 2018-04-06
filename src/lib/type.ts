@@ -55,29 +55,30 @@ export type DeepExcludeProp<T, V, E extends object | undefined | null = any[]> =
 type ExcludeEmptyObject<T> = { [Q in { [P in keyof T]: If<Eq<NonNullable<T[P]>, {}>, never, P>; }[keyof T]]: T[Q]; };
 
 export type Partial<T> =
-  T extends object
-    ? { [P in keyof T]+?: T[P]; }
-    : T;
+  T extends (infer U)[] ? T :
+  T extends object ? { [P in keyof T]+?: T[P]; } :
+  T;
 export type DeepPartial<T, E extends object | undefined | null = any[]> =
-  T extends object
-    ? { [P in keyof T]+?: NonNullable<T[P]> extends NonNullable<E | Function | Constructor> ? T[P] : DeepPartial<T[P], E>; }
-    : T;
+  T extends E ? T :
+  T extends object ? { [P in keyof T]+?: NonNullable<T[P]> extends NonNullable<E | Function | Constructor> ? T[P] : DeepPartial<T[P], E>; } :
+  T;
 export type Required<T> =
-  T extends object
-    ? { [P in keyof T]-?: T[P]; }
-    : T;
+  T extends (infer U)[] ? T :
+  T extends object ? { [P in keyof T]-?: T[P]; } :
+  T;
 export type DeepRequired<T, E extends object | undefined | null = any[]> =
-  T extends object
-    ? { [P in keyof T]-?: NonNullable<T[P]> extends NonNullable<E | Function | Constructor> ? T[P] : DeepRequired<T[P], E>; }
-    : T;
+  T extends E ? T :
+  T extends object ? { [P in keyof T]-?: NonNullable<T[P]> extends NonNullable<E | Function | Constructor> ? T[P] : DeepRequired<T[P], E>; } :
+  T;
 export type Readonly<T> =
-  T extends object
-    ? { readonly [P in keyof T]: T[P]; }
-    : T;
-export type DeepReadonly<T, E extends object | undefined | null = any[]> =
-  T extends object
-    ? { readonly [P in keyof T]: NonNullable<T[P]> extends NonNullable<E | Function | Constructor> ? T[P] : DeepReadonly<T[P], E>; }
-    : T;
+  T extends (infer U)[] ? ReadonlyArray<U> :
+  T extends object ? { readonly [P in keyof T]: T[P]; } :
+  T;
+export type DeepReadonly<T, E extends object | undefined | null = never> =
+  T extends E ? T :
+  T extends (infer U)[] ? ReadonlyArray<U> :
+  T extends object ? { readonly [P in keyof T]: NonNullable<T[P]> extends NonNullable<E | Function | Constructor> ? T[P] : DeepReadonly<T[P], E>; } :
+  T;
 
 export function type(target: any): string {
   const type = (Object.prototype.toString.call(target) as string).split(' ').pop()!.slice(0, -1);

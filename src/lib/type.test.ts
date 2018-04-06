@@ -272,7 +272,7 @@ describe('Unit: lib/type', () => {
 
   describe('DeepReadonly', () => {
     it('', () => {
-      type I = { readonly a?: number; readonly b: { readonly c: string[]; readonly d: () => 0; readonly e: new () => object }; };
+      type I = { readonly a?: number; readonly b: { readonly c: ReadonlyArray<string>; readonly d: () => 0; readonly e: new () => object }; };
       type M = { a?: number; b: { c: string[]; d: () => 0; e: new () => object }; };
       assert((): true => true as TEq<DeepReadonly<M>, I>);
       assert((): true => true as TEq<DeepReadonly<M, M['b']>, Readonly<M>>);
