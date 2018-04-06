@@ -67,7 +67,7 @@
     "power-assert": "^1.5.0",
     "run-sequence": "^2.2.1",
     "tsify": "^3.0.4",
-    "typescript": "2.9.0-dev.20180330",
+    "typescript": "2.9.0-dev.20180406",
     "uglify-es": "^3.3.10",
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0",
