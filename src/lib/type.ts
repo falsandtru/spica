@@ -54,7 +54,7 @@ export type DeepExtractProp<T, V, E extends object | undefined | null = never> =
   T extends E ? never :
   T extends V ? T :
   T extends any[] ? never :
-  T extends object ? CleanObject<{ [Q in { [P in keyof T]: If<TEq<V, never>, T[P] extends never ? P : never, T[P] extends V | object ? T[P] extends E ? never : P : never>; }[keyof T]]: DeepExtractProp<T[Q], V, E>; }> :
+  T extends object ? ExcludeProp<{ [Q in { [P in keyof T]: If<TEq<V, never>, T[P] extends never ? P : never, T[P] extends V | object ? T[P] extends E ? never : P : never>; }[keyof T]]: StrictExclude<DeepExtractProp<T[Q], V, E>, {}>; }, never> :
   never;
 export type ExcludeProp<T, V> =
   { [Q in { [P in keyof T]: If<TEq<V, never>, T[P] extends never ? never : P, V extends T[P] ? never : P>; }[keyof T]]: T[Q]; };
@@ -62,10 +62,8 @@ export type DeepExcludeProp<T, V, E extends object | undefined | null = never> =
   T extends E ? T :
   T extends V ? never :
   T extends any[] ? never :
-  T extends object ? CleanObject<{ [Q in { [P in keyof T]: If<TEq<V, never>, T[P] extends never ? never : P, V extends T[P] ? E extends T[P] ? P : never : P>; }[keyof T]]: DeepExcludeProp<T[Q], V, E>; }> :
+  T extends object ? ExcludeProp<{ [Q in { [P in keyof T]: If<TEq<V, never>, T[P] extends never ? never : P, V extends T[P] ? E extends T[P] ? P : never : P>; }[keyof T]]: StrictExclude<DeepExcludeProp<T[Q], V, E>, {}>; }, never> :
   T;
-type CleanObject<T> =
-  { [Q in { [P in keyof T]: If<TEq<StrictExclude<T[P], {}>, never>, never, P>; }[keyof T]]: StrictExclude<T[Q], {}>; };
 
 export type Partial<T> =
   T extends (infer U)[] ? T :
