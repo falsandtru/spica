@@ -126,7 +126,7 @@ describe('Unit: lib/type', () => {
 
   describe('StrictExtract', () => {
     it('', () => {
-      assert((): true => true as TEq<StrictExtract<never[] | {}, {}>, {}>);
+      assert((): true => true as TEq<StrictExtract<never[] | {}, {} | null>, {}>);
       assert((): true => true as TEq<StrictExtract<0, never>, never>);
     });
 
@@ -134,7 +134,7 @@ describe('Unit: lib/type', () => {
 
   describe('StrictExclude', () => {
     it('', () => {
-      assert((): true => true as TEq<StrictExclude<never[] | {}, {}>, never[]>);
+      assert((): true => true as TEq<StrictExclude<never[] | {}, {} | null>, never[]>);
       assert((): true => true as TEq<StrictExclude<0, never>, 0>);
     });
 
