@@ -53,7 +53,7 @@ export type OverwriteStruct<T, U> = Unify<{ [P in Exclude<keyof T, keyof U>]: T[
 type Unify<T, U> = Pick<T & U, keyof T | keyof U>;
 
 export type ExtractProp<T, V> =
-  { [Q in { [P in keyof T]: If<TEq<T[P], never>, [V] extends [never] ? P : never, T[P] extends V ? P : never>; }[keyof T]]: T[Q]; };
+  { [Q in { [P in keyof T]: T[P] extends never ? If<TEq<V, never>, P, never> : T[P] extends V ? P : never; }[keyof T]]: T[Q]; };
 export type DeepExtractProp<T, V, E extends object | undefined | null = never> =
   T extends E ? never :
   T extends V ? T :
