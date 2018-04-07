@@ -1,7 +1,8 @@
 import {
   Not, And, Or, Eq, TEq, DEq, If, Case,
-  Type,
+  StrictExtract, StrictExclude,
   valueof, indexof,
+  Type,
   DiffStruct, OverwriteStruct,
   ExtractProp, DeepExtractProp, ExcludeProp, DeepExcludeProp,
   Partial, DeepPartial, Required, DeepRequired, Readonly, DeepReadonly,
@@ -67,6 +68,7 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Eq<never, void>, false>);
       assert((): true => true as TEq<Eq<never, undefined>, false>);
       assert((): true => true as TEq<Eq<never, null>, false>);
+      assert((): true => true as TEq<Eq<{}, never[]>, false>);
     });
 
   });
@@ -85,6 +87,7 @@ describe('Unit: lib/type', () => {
       assert((): false => true as TEq<boolean, never>);
       assert((): false => true as TEq<never, boolean>);
       assert((): true => true as TEq<never, never>);
+      assert((): false => true as TEq<{}, never[]>);
     });
 
   });
@@ -117,6 +120,22 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Case<'0', [1]>, 1>);
       assert((): true => true as TEq<Case<'0', { 0: 1 }>, 1>);
       assert((): true => true as TEq<Case<'1', { 0: 1; [otherwise: string]: number; }>, number>);
+    });
+
+  });
+
+  describe('StrictExtract', () => {
+    it('', () => {
+      assert((): true => true as TEq<StrictExtract<never[] | {}, {}>, {}>);
+      assert((): true => true as TEq<StrictExtract<0, never>, never>);
+    });
+
+  });
+
+  describe('StrictExclude', () => {
+    it('', () => {
+      assert((): true => true as TEq<StrictExclude<never[] | {}, {}>, never[]>);
+      assert((): true => true as TEq<StrictExclude<0, never>, 0>);
     });
 
   });

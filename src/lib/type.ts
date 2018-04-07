@@ -27,6 +27,9 @@ interface NondeterminateTypeMap {
   boolean: boolean;
 }
 
+export type StrictExtract<T, U> = T extends U ? U extends T ? T : never : never;
+export type StrictExclude<T, U> = T extends U ? If<TEq<U, never>, T, U extends T ? never : T> : T;
+
 export type indexof<T, V extends valueof<T>> = { [P in keyof T]: If<TEq<T[P], V>, P, never>; }[keyof T];
 export type valueof<T, K extends string | number | symbol = T extends { [n: number]: any; length: number; } ? number : string> = T[Extract<keyof T, K>];
 
