@@ -8,7 +8,10 @@ export type Not<T extends boolean> =
   never;
 export type And<T, U> = T extends Falsy ? T : U;
 export type Or<T, U> = T extends Falsy ? U : T;
-export type Eq<T, U> = T extends U ? U extends T ? true : false : false;
+export type Eq<T, U> =
+  [T] extends [never] ? [U] extends [never] ? true :
+  T extends U ? U extends T ? true : false : false :
+  T extends U ? U extends T ? true : false : false;
 export type TEq<T, U> = [T] extends [U] ? [U] extends [T] ? true : false : false;
 export type If<S, T, U> = S extends Falsy ? U : T;
 export type Case<T extends keyof U, U extends {}> = U[T];

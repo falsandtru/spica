@@ -63,11 +63,10 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Eq<void, null>, false>);
       assert((): true => true as TEq<Eq<void, undefined | null>, false>);
       assert((): true => true as TEq<Eq<void, never>, false>);
-      // nonintuitive
-      assert((): true => true as TEq<Eq<never, never>, never>);
-      assert((): true => true as TEq<Eq<never, void>, never>);
-      assert((): true => true as TEq<Eq<never, undefined>, never>);
-      assert((): true => true as TEq<Eq<never, null>, never>);
+      assert((): true => true as TEq<Eq<never, never>, true>);
+      assert((): true => true as TEq<Eq<never, void>, false>);
+      assert((): true => true as TEq<Eq<never, undefined>, false>);
+      assert((): true => true as TEq<Eq<never, null>, false>);
     });
 
   });
