@@ -39,8 +39,8 @@ export type Type<T> =
   'object';
 
 export type DiffStruct<T, U> = Pick<T, Exclude<keyof T, keyof U>>;
-export type OverwriteStruct<T, U> = Compose<{ [P in Exclude<keyof T, keyof U>]: T[P]; }, U>;
-type Compose<T, U> = Pick<T & U, keyof T | keyof U>;
+export type OverwriteStruct<T, U> = Unify<{ [P in Exclude<keyof T, keyof U>]: T[P]; }, U>;
+type Unify<T, U> = Pick<T & U, keyof T | keyof U>;
 
 export type ExtractProp<T, V> =
   { [Q in { [P in keyof T]: T[P] extends V ? P : never; }[keyof T]]: T[Q]; };
