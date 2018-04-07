@@ -2,10 +2,7 @@ type Falsy = undefined | false | 0 | '' | null | void;
 type Function = (...args: any[]) => any;
 type Constructor = new (...args: any[]) => any;
 
-export type Not<T extends boolean> =
-  T extends true ? false :
-  T extends false ? true :
-  never;
+export type Not<T extends boolean> = T extends true ? false : true;
 export type And<T, U> = T extends Falsy ? T : U;
 export type Or<T, U> = T extends Falsy ? U : T;
 export type Eq<T, U> =
