@@ -31,6 +31,22 @@ interface NondeterminateTypeMap {
   boolean: boolean;
 }
 
+export type Rewrite<T, R extends [any, any]> =
+  [T] extends [never]
+    ? true extends (R extends never ? never : R[0] extends never ? true : never)
+      ? R extends (R extends never ? never : R[0] extends never ? R : never) ? R[1] : never
+      : T :
+  T extends never ? never :
+  true extends (R extends never ? never : T extends R[0] ? true : never)
+    ? R extends (R extends never ? never : T extends R[0] ? R : never) ? R[1] : never
+    : T;
+export type StrictRewrite<T, R extends [any, any]> =
+  [T] extends [never] ? Rewrite<T, R> :
+  T extends never ? never :
+  true extends (R extends never ? never : If<Eq<T, R[0]>, true, never>)
+    ? R extends (R extends never ? never : If<Eq<T, R[0]>, R, never>) ? R[1] : never
+    : T;
+
 export type StrictExtract<T, U> = T extends U ? U extends T ? T : never : never;
 export type StrictExclude<T, U> = T extends U ? T extends StrictExtract<T, U> ? never : T : T;
 

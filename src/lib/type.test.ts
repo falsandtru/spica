@@ -1,6 +1,6 @@
 import {
   Not, And, Or, Eq, TEq, DEq, If, Case,
-  StrictExtract, StrictExclude,
+  Rewrite, StrictRewrite, StrictExtract, StrictExclude,
   valueof, indexof,
   Type,
   DiffStruct, OverwriteStruct,
@@ -122,6 +122,26 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Case<'0', [1]>, 1>);
       assert((): true => true as TEq<Case<'0', { 0: 1 }>, 1>);
       assert((): true => true as TEq<Case<'1', { 0: 1; [otherwise: string]: number; }>, number>);
+    });
+
+  });
+
+  describe('Rewrite', () => {
+    it('', () => {
+      assert((): true => true as TEq<Rewrite<1, [1, -1]>, -1>);
+      assert((): true => true as TEq<Rewrite<1, [1, -1] | [0, 0]>, -1>);
+      assert((): true => true as TEq<Rewrite<0 | 1, [1, -1]>, 0 | -1>);
+      assert((): true => true as TEq<Rewrite<0 | 1, [1, -1] | [0, void]>, void | -1>);
+      assert((): true => true as TEq<Rewrite<void, [void, never]>, never>);
+      assert((): true => true as TEq<Rewrite<never, [never, void]>, void>);
+    });
+
+  });
+
+  describe('StrictRewrite', () => {
+    it('', () => {
+      assert((): true => true as TEq<StrictRewrite<never[] | {}, [{}, void]>, never[] | void>);
+      assert((): true => true as TEq<StrictRewrite<0, [never, 1]>, 0>);
     });
 
   });
