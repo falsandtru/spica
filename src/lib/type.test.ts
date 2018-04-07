@@ -68,7 +68,8 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Eq<never, void>, false>);
       assert((): true => true as TEq<Eq<never, undefined>, false>);
       assert((): true => true as TEq<Eq<never, null>, false>);
-      assert((): true => true as TEq<Eq<{}, never[]>, false>);
+      assert((): true => true as TEq<Eq<{}, never[] | {}>, boolean>);
+      assert((): true => true as TEq<Eq<never[] | {}, {}>, boolean>);
     });
 
   });
@@ -87,7 +88,8 @@ describe('Unit: lib/type', () => {
       assert((): false => true as TEq<boolean, never>);
       assert((): false => true as TEq<never, boolean>);
       assert((): true => true as TEq<never, never>);
-      assert((): false => true as TEq<{}, never[]>);
+      assert((): true => true as TEq<{}, never[] | {}>);
+      assert((): true => true as TEq<never[] | {}, {}>);
     });
 
   });

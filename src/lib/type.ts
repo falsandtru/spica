@@ -6,8 +6,15 @@ export type Not<T extends boolean> = T extends true ? false : true;
 export type And<T, U> = T extends Falsy ? T : U;
 export type Or<T, U> = T extends Falsy ? U : T;
 export type Eq<T, U> =
-  [T] extends [never] ? [U] extends [never] ? true :
-  T extends U ? U extends T ? true : false : false :
+  // Exclude never type from T and U.
+  [T] extends [never]
+    ? [U] extends [never] ? true : false
+    : [U] extends [never] ? false :
+  // T and U below are a type except never.
+  // Distribute U.
+  U extends never
+    ? never : // Never reach here.
+  // Compare distributed T and U.
   T extends U ? U extends T ? true : false : false;
 export type TEq<T, U> = [T] extends [U] ? [U] extends [T] ? true : false : false;
 export type If<S, T, U> = S extends Falsy ? U : T;
