@@ -238,7 +238,7 @@ describe('Unit: lib/type', () => {
 
   describe('DeepExtractProp', () => {
     it('', () => {
-      type AD = { a: boolean; b: { a: boolean; b: boolean[]; c: undefined; d: undefined[]; f: boolean | undefined; g: Array<boolean | undefined>; }; c: { a: undefined; }; };
+      type AD = { a: boolean; b: { a: boolean; b: boolean[]; c: undefined; d: undefined[]; e: boolean | undefined; f: Array<boolean | undefined>; }; c: { a: undefined; }; };
       assert((): true => true as TEq<DeepExtractProp<AD, boolean>, { a: boolean; b: { a: boolean; }; }>);
       assert((): true => true as TEq<DeepExtractProp<AD, boolean | boolean[]>, { a: boolean; b: { a: boolean; b: boolean[]; }; }>);
       assert((): true => true as TEq<DeepExtractProp<AD, boolean, AD['b']>, { a: boolean; }>);
