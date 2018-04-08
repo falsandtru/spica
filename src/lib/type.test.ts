@@ -238,9 +238,9 @@ describe('Unit: lib/type', () => {
 
   describe('DeepExtractProp', () => {
     it('', () => {
-      type AD = { a: boolean; b: { c: boolean; d: boolean[]; e: undefined; f: undefined[]; g: boolean | undefined; h: Array<boolean | undefined>; }; _: { _: undefined; }; };
-      assert((): true => true as TEq<DeepExtractProp<AD, boolean>, { a: boolean; b: { c: boolean; }; }>);
-      assert((): true => true as TEq<DeepExtractProp<AD, boolean | boolean[]>, { a: boolean; b: { c: boolean; d: boolean[]; }; }>);
+      type AD = { a: boolean; b: { a: boolean; b: boolean[]; c: undefined; d: undefined[]; f: boolean | undefined; g: Array<boolean | undefined>; }; c: { a: undefined; }; };
+      assert((): true => true as TEq<DeepExtractProp<AD, boolean>, { a: boolean; b: { a: boolean; }; }>);
+      assert((): true => true as TEq<DeepExtractProp<AD, boolean | boolean[]>, { a: boolean; b: { a: boolean; b: boolean[]; }; }>);
       assert((): true => true as TEq<DeepExtractProp<AD, boolean, AD['b']>, { a: boolean; }>);
       assert((): true => true as TEq<DeepExtractProp<{ a: never; b: void; }, never>, {}>);
       assert((): true => true as TEq<DeepExtractProp<{ a: never; b: void; }, void>, { b: void; }>);
@@ -263,9 +263,9 @@ describe('Unit: lib/type', () => {
 
   describe('DeepExcludeProp', () => {
     it('', () => {
-      type AD = { a: boolean; b: { c: boolean; d: boolean[]; e: undefined; f: undefined[]; g: boolean | undefined; h: Array<boolean | undefined>; }; _: { _: undefined; }; };
-      assert((): true => true as TEq<DeepExcludeProp<AD, undefined>, { a: boolean; b: { c: boolean; }; }>);
-      assert((): true => true as TEq<DeepExcludeProp<AD, undefined, boolean[]>, { a: boolean; b: { c: boolean; d: boolean[]; }; }>);
+      type AD = { a: boolean; b: { a: boolean; b: boolean[]; c: undefined; d: undefined[]; e: boolean | undefined; f: Array<boolean | undefined>; }; c: { a: undefined; }; };
+      assert((): true => true as TEq<DeepExcludeProp<AD, undefined>, { a: boolean; b: { a: boolean; }; }>);
+      assert((): true => true as TEq<DeepExcludeProp<AD, undefined, boolean[]>, { a: boolean; b: { a: boolean; b: boolean[]; }; }>);
       assert((): true => true as TEq<DeepExcludeProp<{ a: never; b: void; }, never>, { b: void; }>);
       assert((): true => true as TEq<DeepExcludeProp<{ a: never; b: void; }, void>, {}>);
     });
