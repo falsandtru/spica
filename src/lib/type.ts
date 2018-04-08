@@ -84,6 +84,13 @@ export type DeepExcludeProp<T, V, E extends object | undefined | null = never> =
   T extends any[] ? never :
   T extends object ? ExcludeProp<{ [Q in { [P in keyof T]: If<TEq<V, never>, T[P] extends never ? never : P, V extends T[P] ? E extends T[P] ? P : never : P>; }[keyof T]]: StrictExclude<DeepExcludeProp<T[Q], V, E>, {}>; }, never> :
   T;
+export type RewriteProp<T, R extends [any, any]> =
+  { [P in keyof T]: Rewrite<T[P], R>; };
+export type DeepRewriteProp<T, R extends [any, any], E extends object | undefined | null = never> =
+  T extends E ? T :
+  T extends any[] ? never :
+  T extends object ? ExcludeProp<{ [P in keyof T]: DeepRewriteProp<Rewrite<T[P], R>, R, E>; }, never> :
+  T;
 
 export type Partial<T> =
   T extends (infer U)[] ? T :

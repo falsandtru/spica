@@ -4,7 +4,7 @@ import {
   valueof, indexof,
   Type,
   DiffStruct, OverwriteStruct,
-  ExtractProp, DeepExtractProp, ExcludeProp, DeepExcludeProp,
+  ExtractProp, DeepExtractProp, ExcludeProp, DeepExcludeProp, RewriteProp, DeepRewriteProp,
   Partial, DeepPartial, Required, DeepRequired, Readonly, DeepReadonly,
   type
 } from './type';
@@ -268,6 +268,34 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<DeepExcludeProp<AD, undefined, boolean[]>, { a: boolean; b: { c: boolean; d: boolean[]; }; }>);
       assert((): true => true as TEq<DeepExcludeProp<{ a: never; b: void; }, never>, { b: void; }>);
       assert((): true => true as TEq<DeepExcludeProp<{ a: never; b: void; }, void>, {}>);
+    });
+
+  });
+
+  describe('RewriteProp', () => {
+    it('', () => {
+      type A = { a: boolean; b: undefined; };
+      type B = { a: boolean; b: number; };
+      assert((): true => true as TEq<RewriteProp<A, [undefined, number]>, B>);
+      assert((): true => true as TEq<RewriteProp<A, [undefined | number, number]>, B>);
+      assert((): true => true as TEq<RewriteProp<A, [boolean, number] | [undefined, never]>, { a: number; b: never; }>);
+      assert((): true => true as TEq<RewriteProp<A, [never, never]>, A>);
+      assert((): true => true as TEq<RewriteProp<{ a: never; b: void; }, [never, null]>, { a: null; b: void; }>);
+      assert((): true => true as TEq<RewriteProp<{ a: never; b: void; }, [void, null]>, { a: never; b: null; }>);
+    });
+
+  });
+
+  describe('DeepRewriteProp', () => {
+    it('', () => {
+      type A = { a: { a: boolean; b: undefined; }; };
+      type B = { a: { a: boolean; b: number; }; };
+      assert((): true => true as TEq<DeepRewriteProp<A, [undefined, number]>, B>);
+      assert((): true => true as TEq<DeepRewriteProp<A, [undefined | number, number]>, B>);
+      assert((): true => true as TEq<DeepRewriteProp<A, [boolean, number] | [undefined, never]>, { a: { a: number; }; }>);
+      assert((): true => true as TEq<DeepRewriteProp<A, [never, never]>, A>);
+      assert((): true => true as TEq<DeepRewriteProp<{ a: never; b: void; }, [never, null]>, { a: null; b: void; }>);
+      assert((): true => true as TEq<DeepRewriteProp<{ a: never; b: void; }, [void, null]>, { b: null; }>);
     });
 
   });
