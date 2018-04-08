@@ -291,11 +291,11 @@ describe('Unit: lib/type', () => {
 
   describe('DeepRewriteProp', () => {
     it('', () => {
-      type A = { a: { a: boolean; b: undefined; }; };
-      type B = { a: { a: boolean; b: number; }; };
+      type A = { a: { a: boolean; b: undefined; c: undefined[]; }; };
+      type B = { a: { a: boolean; b: number; c: undefined[]; }; };
       assert((): true => true as TEq<DeepRewriteProp<A, [undefined, number]>, B>);
       assert((): true => true as TEq<DeepRewriteProp<A, [undefined | number, number]>, B>);
-      assert((): true => true as TEq<DeepRewriteProp<A, [boolean, number] | [undefined, never]>, { a: { a: number; }; }>);
+      assert((): true => true as TEq<DeepRewriteProp<A, [boolean, number] | [undefined, never]>, { a: { a: number; c: undefined[]; }; }>);
       assert((): true => true as TEq<DeepRewriteProp<A, [never, never]>, A>);
       assert((): true => true as TEq<DeepRewriteProp<{ a: { b: { c: 0; d: 0 | 1; e: 1; }; }; }, [1, -1]>, { a: { b: { c: 0; d: 0 | -1; e: -1; }; }; }>);
       assert((): true => true as TEq<DeepRewriteProp<{ a: never; b: void; }, [never, null]>, { a: null; b: void; }>);

@@ -88,7 +88,7 @@ export type RewriteProp<T, R extends [any, any]> =
   { [P in keyof T]: Rewrite<T[P], R>; };
 export type DeepRewriteProp<T, R extends [any, any], E extends object | undefined | null = never> =
   T extends E ? T :
-  T extends any[] ? never :
+  T extends any[] ? T :
   T extends object ? ExcludeProp<{ [P in keyof T]: DeepRewriteProp<Rewrite<T[P], R>, R, E>; }, never> :
   T;
 type Includes<T, U> = true extends (T extends U ? true : never) ? true : false;
