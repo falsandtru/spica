@@ -1,6 +1,4 @@
 type Falsy = undefined | false | 0 | '' | null | void;
-type Function = (...args: any[]) => any;
-type Constructor = new (...args: any[]) => any;
 
 export type Not<T extends boolean> = T extends true ? false : true;
 export type And<T, U> = T extends Falsy ? T : U;
@@ -60,7 +58,6 @@ export type Type<T> =
   T extends string ? 'string' :
   T extends symbol ? 'symbol' :
   T extends Function ? 'function' :
-  T extends Constructor ? 'function' :
   T extends void ? null extends void ? 'object' | 'undefined' : 'undefined' :
   'object';
 
@@ -99,7 +96,7 @@ export type Partial<T> =
   T;
 export type DeepPartial<T, E extends object | undefined | null = any[]> =
   T extends E ? T :
-  T extends object ? { [P in keyof T]+?: NonNullable<T[P]> extends NonNullable<E | Function | Constructor> ? T[P] : DeepPartial<T[P], E>; } :
+  T extends object ? { [P in keyof T]+?: NonNullable<T[P]> extends NonNullable<E | Function> ? T[P] : DeepPartial<T[P], E>; } :
   T;
 export type Required<T> =
   T extends (infer U)[] ? T :
@@ -107,7 +104,7 @@ export type Required<T> =
   T;
 export type DeepRequired<T, E extends object | undefined | null = any[]> =
   T extends E ? T :
-  T extends object ? { [P in keyof T]-?: NonNullable<T[P]> extends NonNullable<E | Function | Constructor> ? T[P] : DeepRequired<T[P], E>; } :
+  T extends object ? { [P in keyof T]-?: NonNullable<T[P]> extends NonNullable<E | Function> ? T[P] : DeepRequired<T[P], E>; } :
   T;
 export type Readonly<T> =
   T extends (infer U)[] ? ReadonlyArray<U> :
@@ -116,7 +113,7 @@ export type Readonly<T> =
 export type DeepReadonly<T, E extends object | undefined | null = never> =
   T extends E ? T :
   T extends (infer U)[] ? ReadonlyArray<U> :
-  T extends object ? { readonly [P in keyof T]: NonNullable<T[P]> extends NonNullable<E | Function | Constructor> ? T[P] : DeepReadonly<T[P], E>; } :
+  T extends object ? { readonly [P in keyof T]: NonNullable<T[P]> extends NonNullable<E | Function> ? T[P] : DeepReadonly<T[P], E>; } :
   T;
 
 export function type(target: any): string {
