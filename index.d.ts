@@ -477,6 +477,11 @@ declare class HCons<a, c extends HNil | HList<any, any>> {
   tuple<a, b, c, d, e, f, g, h, i>(this: HList<a, HList<b, HList<c, HList<d, HList<e, HList<f, HList<g, HList<h, HList<i, HNil>>>>>>>>>): [a, b, c, d, e, f, g, h, i];
 }
 
+export class Future<T = undefined> extends Promise<T> {
+  constructor();
+  readonly bind: (value: T | PromiseLike<T>) => Promise<T>;
+}
+
 export interface WeakMapLike<K, V> {
   get(key: K): V | undefined;
   set(key: K, value: V): this;

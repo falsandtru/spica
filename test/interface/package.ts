@@ -11,6 +11,7 @@ import {
   tuple,
   NonEmptyList, Nil,
   NonEmptyHList, HNil,
+  Future,
   DataMap, AttrMap,
   Cache,
   tick,
@@ -120,6 +121,13 @@ describe('Interface: Package', function () {
   describe('HList', function () {
     it('HList', function () {
       <NonEmptyHList<number, HNil>>new HNil().push(0);
+    });
+
+  });
+
+  describe('Future', function () {
+    it('Future', function () {
+      assert(typeof Future === 'function');
     });
 
   });
