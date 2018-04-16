@@ -361,14 +361,7 @@ export type Right<b> = Monad.Either.Right<b>;
 export function Right<b>(b: b): Right<b>;
 export function Right<a, b>(b: b): Either<a, b>;
 
-type Compose<T, U> = Pick<T & U, keyof T | keyof U>;
-export type Diff<T, U> = Pick<T, DiffKey<keyof T, keyof U>>;
-export type Overwrite<T, U> = Compose<{ [P in DiffKey<keyof T, keyof U>]: T[P]; }, U>;
-type DiffKey<T extends string, U extends string> = (
-  & { [P in T]: P; }
-  & { [P in U]: never; }
-  & { [x: string]: never; }
-)[T];
+export * from './src/lib/type';
 
 interface Curried1<a, z> {
   (a: a): z;
