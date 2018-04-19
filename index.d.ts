@@ -482,6 +482,13 @@ export class Future<T = undefined> extends Promise<T> {
   readonly bind: (value: T | PromiseLike<T>) => Promise<T>;
 }
 
+export class Coroutine<T> extends Promise<T> {
+  constructor(
+    gen: () => Iterator<T> | AsyncIterator<T>,
+    resume?: () => Promise<void>);
+  terminate(reason?: any): void;
+}
+
 export interface WeakMapLike<K, V> {
   get(key: K): V | undefined;
   set(key: K, value: V): this;

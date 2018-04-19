@@ -11,7 +11,7 @@ import {
   tuple,
   NonEmptyList, Nil,
   NonEmptyHList, HNil,
-  Future,
+  Future, Coroutine,
   DataMap, AttrMap,
   Cache,
   tick,
@@ -128,6 +128,13 @@ describe('Interface: Package', function () {
   describe('Future', function () {
     it('Future', function () {
       assert(typeof Future === 'function');
+    });
+
+  });
+
+  describe('Coroutine', function () {
+    it('Coroutine', function () {
+      assert(typeof Coroutine === 'function');
     });
 
   });

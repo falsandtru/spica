@@ -1,4 +1,5 @@
 import { Supervisor } from './supervisor';
+import { Coroutine } from './coroutine';
 import { tick } from './tick';
 
 declare const requestAnimationFrame: (cb: () => void) => void;
@@ -430,6 +431,18 @@ describe('Unit: lib/supervisor', function () {
       assert(TestSupervisor.count === 0);
       assert(TestSupervisor.procs === 0);
       done();
+    });
+
+    it('coroutine', function (done) {
+      let cnt = 0;
+      const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
+      });
+      sv.register('', _ => new Coroutine(function* (): Iterator<[number, number] | void> {
+        sv.kill('');
+        yield;
+        return [++cnt, 0];
+      }), 0);
+      sv.call('', 0, (_, err) => assert(cnt === 0) || assert(err instanceof Error) || done());
     });
 
   });

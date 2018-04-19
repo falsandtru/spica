@@ -1,4 +1,5 @@
 import { Observation, Observer, Publisher } from './observation';
+import { Coroutine } from './coroutine';
 import { extend } from './assign';
 import { tick } from './tick';
 import { sqid } from './sqid';
@@ -267,6 +268,9 @@ class Worker<N extends string, P, R, S> {
     void Object.freeze(this);
     assert(this.alive === false);
     assert(this.available === false);
+    if (this.job instanceof Coroutine) {
+      void this.job.terminate(reason);
+    }
     void this.destructor_();
     if (this.initiated) {
       try {
@@ -284,6 +288,7 @@ class Worker<N extends string, P, R, S> {
   private alive = true;
   private available = true;
   private initiated = false;
+  private job: Supervisor.Process.Result<R, S> | PromiseLike<Supervisor.Process.Result<R, S>> | undefined;
   public call([param, expiry]: [P, number]): Promise<R> | undefined {
     const now = Date.now();
     if (!this.available || now > expiry) return;
@@ -296,7 +301,8 @@ class Worker<N extends string, P, R, S> {
           .emit([this.name], [this.name, this.process, this.state]);
         this.state = this.process.init(this.state);
       }
-      void Promise.resolve(this.process.main(param, this.state)).then(resolve, reject);
+      this.job = this.process.main(param, this.state);
+      void Promise.resolve(this.job).then(resolve, reject);
     })
       .then(
         result => {

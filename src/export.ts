@@ -11,6 +11,7 @@ export { tuple } from './lib/tuple';
 export { List, NonEmptyList, Nil } from './lib/list';
 export { HList, NonEmptyHList, HNil } from './lib/hlist';
 export { Future } from './lib/future';
+export { Coroutine } from './lib/coroutine';
 export { DataMap } from './lib/datamap';
 export { AttrMap } from './lib/attrmap';
 export { Cache } from './lib/cache';

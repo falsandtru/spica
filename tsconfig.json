@@ -2,7 +2,8 @@
   "compilerOptions": {
     "target": "es2015",
     "lib": [
-      "es2017"
+      "es2017",
+      "esnext.asynciterable"
     ],
     "downlevelIteration": true,
     "module": "commonjs",
