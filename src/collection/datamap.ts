@@ -1,4 +1,4 @@
-import { WeakMapLike } from '../../../index.d';
+import { WeakMapLike } from '../../index.d';
 import { sqid } from '../sqid';
 import { type } from '../type';
 

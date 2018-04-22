@@ -362,7 +362,7 @@ export type Right<b> = Monad.Either.Right<b>;
 export function Right<b>(b: b): Right<b>;
 export function Right<a, b>(b: b): Either<a, b>;
 
-export * from './src/lib/type';
+export * from './src/type';
 
 interface Curried1<a, z> {
   (a: a): z;

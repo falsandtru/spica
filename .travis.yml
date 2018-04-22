@@ -19,7 +19,7 @@ script:
 before_deploy:
 - sed -i 's/"private":\ true/"private":\ false/' package.json
 - sed -i -E 's/^dist\/?.*$//' .gitignore
-- cp -r src/lib/* .
+- cp -r src/* .
 deploy:
   provider: npm
   email:
