@@ -8,6 +8,7 @@
 export abstract class Supervisor<N extends string, P = undefined, R = undefined, S = undefined> {
   static readonly count: number;
   static readonly procs: number;
+  static readonly terminator: unique symbol;
   constructor(options?: Supervisor.Options);
   readonly id: string;
   readonly name: string;

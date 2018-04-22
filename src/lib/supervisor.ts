@@ -1,5 +1,4 @@
 import { Observation, Observer, Publisher } from './observation';
-import { Coroutine } from './coroutine';
 import { extend } from './assign';
 import { tick } from './tick';
 import { sqid } from './sqid';
@@ -21,6 +20,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
         acc + sv.workers.size
       , 0);
   }
+  public static readonly terminator = Symbol();
   constructor(opts: Supervisor.Options = {}) {
     void Object.freeze(extend(this.settings, opts));
     assert(Object.isFrozen(this.settings));
@@ -268,10 +268,20 @@ class Worker<N extends string, P, R, S> {
     void Object.freeze(this);
     assert(this.alive === false);
     assert(this.available === false);
-    if (this.job instanceof Coroutine) {
-      void this.job.terminate(reason);
+    try {
+      this.job &&
+      this.job[Supervisor.terminator] &&
+      void this.job[Supervisor.terminator](reason);
     }
-    void this.destructor_();
+    catch (reason) {
+      void causeAsyncException(reason);
+    }
+    try {
+      void this.destructor_();
+    }
+    catch (reason) {
+      void causeAsyncException(reason);
+    }
     if (this.initiated) {
       try {
         void this.process.exit(reason, this.state);
