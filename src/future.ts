@@ -3,15 +3,14 @@ export class Future<T = undefined> extends Promise<T> {
     return Promise;
   }
   constructor() {
+    let state = true;
     let bind: (value: T | PromiseLike<T>) => Promise<T>;
     super(resolve =>
       bind = value => {
+        if (!state) throw new Error(`Spica: Future: Cannot rebind a value.`);
+        state = false;
         void resolve(value);
-        return Promise.all([this, value])
-          .then(([a, b]) =>
-            [a].includes(b)
-              ? this
-              : Promise.reject(new Error(`Spica: Future: Cannot rebind a different value.`)));
+        return this;
       });
     this.bind = bind!;
   }
