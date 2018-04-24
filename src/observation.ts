@@ -1,3 +1,5 @@
+import { DeepRequired } from './type';
+import { extend } from './assign';
 import { concat } from './concat';
 import { findIndex } from './equal';
 import { causeAsyncException } from './exception';
@@ -47,11 +49,18 @@ export namespace RegisterItemType {
 
 export class Observation<N extends any[], D, R>
   implements Observer<N, D, R>, Publisher<N, D, R> {
+  constructor(opts: Observation.Options = {}) {
+    void Object.freeze(extend(this.settings, opts));
+  }
+  private readonly settings: DeepRequired<Observation.Options> = {
+    limit: 10,
+  };
   public monitor(namespace: N, listener: Monitor<N, D>, { once = false }: ObserverOptions = {}): () => void {
     if (typeof listener !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${listener}`);
     const off = () => this.off(namespace, listener, RegisterItemType.monitor);
     const { items } = this.seekNode_(namespace);
     if (isRegistered(items, RegisterItemType.monitor, namespace, listener)) return off;
+    if (items.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
     void items.push({
       type: RegisterItemType.monitor,
       namespace,
@@ -67,6 +76,7 @@ export class Observation<N extends any[], D, R>
     const off = () => this.off(namespace, listener);
     const { items } = this.seekNode_(namespace);
     if (isRegistered(items, RegisterItemType.subscriber, namespace, listener)) return off;
+    if (items.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
     void items.push({
       type: RegisterItemType.subscriber,
       namespace,
@@ -228,6 +238,11 @@ export class Observation<N extends any[], D, R>
       node = children.get(name)!;
     }
     return node;
+  }
+}
+export namespace Observation {
+  export interface Options {
+    readonly limit?: number;
   }
 }
 

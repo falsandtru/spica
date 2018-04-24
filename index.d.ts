@@ -59,6 +59,12 @@ export namespace Supervisor {
 }
 
 export class Observation<N extends any[], D, R> {
+  constructor(options?: Observation.Options);
+}
+export namespace Observation {
+  export interface Options {
+    readonly limit?: number;
+  }
 }
 export interface Observation<N extends any[], D, R>
   extends Observer< N, D, R >, Publisher < N, D, R > {
