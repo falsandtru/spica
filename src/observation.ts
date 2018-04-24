@@ -48,9 +48,10 @@ export namespace RegisterItemType {
 export class Observation<N extends any[], D, R>
   implements Observer<N, D, R>, Publisher<N, D, R> {
   public monitor(namespace: N, listener: Monitor<N, D>, { once = false }: ObserverOptions = {}): () => void {
-    void throwTypeErrorIfInvalidListener(listener, namespace);
+    if (typeof listener !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${listener}`);
+    const off = () => this.off(namespace, listener, RegisterItemType.monitor);
     const { items } = this.seekNode_(namespace);
-    if (isRegistered(items, RegisterItemType.monitor, namespace, listener)) return () => undefined;
+    if (isRegistered(items, RegisterItemType.monitor, namespace, listener)) return off;
     void items.push({
       type: RegisterItemType.monitor,
       namespace,
@@ -59,12 +60,13 @@ export class Observation<N extends any[], D, R>
         once
       },
     });
-    return () => this.off(namespace, listener, RegisterItemType.monitor);
+    return off;
   }
   public on(namespace: N, listener: Subscriber<N, D, R>, { once = false }: ObserverOptions = {}): () => void {
-    void throwTypeErrorIfInvalidListener(listener, namespace);
+    if (typeof listener !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${listener}`);
+    const off = () => this.off(namespace, listener);
     const { items } = this.seekNode_(namespace);
-    if (isRegistered(items, RegisterItemType.subscriber, namespace, listener)) return () => undefined;
+    if (isRegistered(items, RegisterItemType.subscriber, namespace, listener)) return off;
     void items.push({
       type: RegisterItemType.subscriber,
       namespace,
@@ -73,10 +75,9 @@ export class Observation<N extends any[], D, R>
         once
       },
     });
-    return () => this.off(namespace, listener);
+    return off;
   }
   public once(namespace: N, listener: Subscriber<N, D, R>): () => void {
-    void throwTypeErrorIfInvalidListener(listener, namespace);
     return this.on(namespace, listener, { once: true });
   }
   public off(namespace: N, listener?: Monitor<N, D> | Subscriber<N, D, R>, type: RegisterItemType = RegisterItemType.subscriber): void {
@@ -112,7 +113,7 @@ export class Observation<N extends any[], D, R>
         return;
       }
       default:
-        throw throwTypeErrorIfInvalidListener(listener, namespace);
+        throw new Error(`Spica: Observation: Unreachable.`);
     }
   }
   public emit(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void
@@ -231,18 +232,9 @@ export class Observation<N extends any[], D, R>
 }
 
 function isRegistered<N extends any[], D, R>(items: RegisterItem<N, D, R>[], type: RegisterItemType, namespace: N, listener: Monitor<N, D> | Subscriber<N, D, R>): boolean {
-  return items.some(({ type: t, namespace: n, listener: l }) =>
-    t === type &&
-    n.length === namespace.length &&
-    n.every((_, i) => n[i] === namespace[i]) &&
-    l === listener);
-}
-
-function throwTypeErrorIfInvalidListener<T extends any[], D, R>(listener: Monitor<T, D> | Subscriber<T, D, R> | undefined, types: T): void {
-  switch (typeof listener) {
-    case 'function':
-      return;
-    default:
-      throw new TypeError(`Spica: Observation: Invalid listener.\n\t${types} ${listener}`);
-  }
+  return items.some(item =>
+    item.type === type &&
+    item.namespace.length === namespace.length &&
+    item.namespace.every((ns, i) => ns === namespace[i]) &&
+    item.listener === listener);
 }
