@@ -119,9 +119,9 @@ describe('Unit: lib/type', () => {
 
   describe('Case', () => {
     it('', () => {
-      assert((): true => true as TEq<Case<'0', [1]>, 1>);
-      assert((): true => true as TEq<Case<'0', { 0: 1 }>, 1>);
-      assert((): true => true as TEq<Case<'1', { 0: 1; [otherwise: string]: number; }>, number>);
+      assert((): true => true as TEq<Case<0, [1]>, 1>);
+      assert((): true => true as TEq<Case<0, { 0: 1 }>, 1>);
+      assert((): true => true as TEq<Case<1, { 0: 1; [otherwise: string]: number; }>, number>);
     });
 
   });
@@ -165,7 +165,7 @@ describe('Unit: lib/type', () => {
   describe('valueof', () => {
     it('', () => {
       assert((): true => true as TEq<valueof<{ 0: 0; a: 1; }>, 0 | 1>);
-      assert((): true => true as TEq<valueof<{ 0: 0; a: 1; }, '0'>, 0>);
+      assert((): true => true as TEq<valueof<{ 0: 0; a: 1; }, 0>, 0>);
       assert((): true => true as TEq<valueof<[0]>, 0>);
       assert((): true => true as TEq<valueof<{ [i: number]: 0; }>, 0>);
       assert((): true => true as TEq<valueof<Readonly<{ 0: 0; a: 1; }>>, 0 | 1>);
@@ -176,7 +176,7 @@ describe('Unit: lib/type', () => {
 
   describe('indexof', () => {
     it('', () => {
-      assert((): true => true as TEq<indexof<{ 0: 0; 1: -1 }, -1>, '1'>);
+      assert((): true => true as TEq<indexof<{ 0: 0; 1: -1 }, -1>, 1>);
     });
 
   });
