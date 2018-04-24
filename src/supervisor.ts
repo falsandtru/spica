@@ -135,7 +135,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
   public cast(name: N, param: P, timeout = this.settings.timeout): boolean {
     void this.throwErrorIfNotAvailable();
     const result = this.workers.has(name)
-      ? this.workers.get(name)!.call([param, timeout])
+      ? this.workers.get(name)!.call([param, Date.now() + timeout])
       : undefined;
     if (result === undefined) {
       void this.events_.loss.emit([name], [name, param]);
