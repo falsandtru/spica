@@ -145,7 +145,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
     void result.catch(() => undefined);
     return true;
   }
-  public refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason: any) => boolean][] {
+  public refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason?: any) => boolean][] {
     void this.throwErrorIfNotAvailable();
     return name === undefined
       ? [...this.workers.values()].map(convert)
@@ -153,7 +153,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
         ? [convert(this.workers.get(name)!)]
         : [];
 
-    function convert(worker: Worker<N, P, R, S>): [N, Supervisor.Process<P, R, S>, S, (reason: any) => boolean] {
+    function convert(worker: Worker<N, P, R, S>): [N, Supervisor.Process<P, R, S>, S, (reason?: any) => boolean] {
       assert(worker instanceof Worker);
       return [
         worker.name,
