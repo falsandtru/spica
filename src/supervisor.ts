@@ -1,4 +1,5 @@
 import { Observation, Observer, Publisher } from './observation';
+import { DeepRequired } from './type';
 import { extend } from './assign';
 import { tick } from './tick';
 import { sqid } from './sqid';
@@ -52,7 +53,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
   }
   public readonly id: string = sqid();
   public readonly name: string;
-  public readonly settings = {
+  private readonly settings: DeepRequired<Supervisor.Options> = {
     name: '',
     size: Infinity,
     timeout: Infinity,
