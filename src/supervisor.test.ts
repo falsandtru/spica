@@ -452,7 +452,7 @@ describe('Unit: lib/supervisor', function () {
       let cnt = 0;
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
       });
-      sv.register('', _ => new Coroutine(function* (): Iterator<[number, number] | void> {
+      sv.register('', _ => new Coroutine<[number, number]>(function* (): Iterator<[number, number] | void> {
         sv.kill('');
         yield;
         return [++cnt, 0];

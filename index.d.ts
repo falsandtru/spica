@@ -492,7 +492,7 @@ export class Future<T = undefined> extends Promise<T> {
 
 export class Coroutine<T, S = void> extends Promise<If<TEq<Exclude<T, S>, never>, T, Exclude<T, S>>> {
   constructor(
-    gen: () => Iterator<T> | AsyncIterator<T>,
+    gen: (this: Coroutine<T, S>) => Iterator<T | S> | AsyncIterator<T | S>,
     resume?: () => Promise<void>);
   terminate(reason?: any): void;
   [Symbol.asyncIterator](): AsyncIterableIterator<S>;

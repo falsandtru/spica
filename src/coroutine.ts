@@ -11,12 +11,12 @@ export class Coroutine<T, S = void> extends Promise<Result<T, S>> {
     return Promise;
   }
   constructor(
-    gen: () => Iterator<T> | AsyncIterator<T>,
+    gen: (this: Coroutine<T, S>) => Iterator<T | S> | AsyncIterator<T | S>,
     resume: () => Promise<void> = () => clock,
   ) {
     super((resolve, reject) =>
       void tick(() => void this.result.then(resolve, reject)));
-    const iter = gen();
+    const iter = gen.call(this);
     void (async () => {
       try {
         while (this.alive) {
