@@ -6,7 +6,7 @@ type Result<T, S> = If<TEq<Exclude<T, S>, never>, T, Exclude<T, S>>;
 
 const clock = Promise.resolve();
 
-export class Coroutine<T, S = void> extends Promise<Result<T, S>> {
+export class Coroutine<T, S = void> extends Promise<Result<T, S>> implements AsyncIterable<S> {
   static get [Symbol.species]() {
     return Promise;
   }
