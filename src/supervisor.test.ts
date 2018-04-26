@@ -447,6 +447,7 @@ describe('Unit: lib/supervisor', function () {
       done();
     });
 
+    if (navigator.userAgent.includes('Edge')) return;
     it('coroutine', function (done) {
       let cnt = 0;
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({

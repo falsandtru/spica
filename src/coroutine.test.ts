@@ -21,6 +21,22 @@ describe('Unit: lib/coroutine', () => {
       co.catch(done);
     });
 
+    it('iterator', async () => {
+      let cnt = 0;
+      const co = new Coroutine<number, number>(async function* () {
+        yield Promise.resolve(0);
+        yield Promise.resolve(1);
+        return 2;
+      });
+      for await (const n of co) {
+        assert(n === cnt++);
+      }
+      for await (const _ of co) {
+        assert(false);
+      }
+      assert(await co === cnt++);
+    });
+
   });
 
 });
