@@ -21,9 +21,9 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
   register(name: N, process: Supervisor.Process.Main<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
   register(name: N, process: Supervisor.Process<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
   register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
-  call(name: N, param: P, timeout?: number): Promise<R>;
-  call(name: N, param: P, callback: Supervisor.Callback<R>, timeout?: number): void;
-  cast(name: N, param: P, timeout?: number): boolean;
+  call(name: N | ('' extends N ? undefined : never), param: P, timeout?: number): Promise<R>;
+  call(name: N | ('' extends N ? undefined : never), param: P, callback: Supervisor.Callback<R>, timeout?: number): void;
+  cast(name: N | ('' extends N ? undefined : never), param: P, timeout?: number): boolean;
   refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason: any) => boolean][];
   kill(name: N, reason?: any): boolean;
   terminate(reason?: any): boolean;

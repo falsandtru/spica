@@ -204,7 +204,7 @@ describe('Unit: lib/supervisor', function () {
       sv.call('', 1, () => assert(cnt === 2) || done());
     });
 
-    it('validation for returned values', function (done) {
+    it('validation of returned values', function (done) {
       let cnt = 0;
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> {
       }();
@@ -359,6 +359,19 @@ describe('Unit: lib/supervisor', function () {
       sv.register('', _ => [++cnt, 0], 0);
       sv.call('', 0, _ => assert(cnt === 1) || done());
       assert(cnt === 0);
+    });
+
+    it('pool', function (done) {
+      let cnt = 0;
+      const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
+      });
+      sv.register('0', (_, s) => [s + ++cnt, 0], 0);
+      sv.register('1', (_, s) => [s + ++cnt, 0], 1);
+      sv.register('2', (_, s) => [s + ++cnt, 0], 2);
+      sv.call(undefined, 0, r => assert(r === 1));
+      sv.call(undefined, 0, r => assert(r === 3));
+      sv.call(undefined, 0, r => assert(r === 5));
+      sv.call(undefined, 0, r => assert(r === 4) || done());
     });
 
     it('kill process', function (done) {
