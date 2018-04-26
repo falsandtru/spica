@@ -1,4 +1,5 @@
 import { Supervisor } from './supervisor';
+import './supervisor.esnext';
 import { Coroutine } from './coroutine';
 import { tick } from './tick';
 

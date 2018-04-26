@@ -39,7 +39,3 @@ export class Coroutine<T, S = void> extends Promise<Exclude<T, S>> {
     void this.state.bind(Promise.reject(reason));
   }
 }
-
-// Should be moved to each file which implements a consumer class after AsyncIterator is recommended officially. 
-import { Supervisor } from './supervisor'; 
-Coroutine.prototype[Supervisor.terminator] = Coroutine.prototype.terminate;
