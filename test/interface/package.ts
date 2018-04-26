@@ -12,6 +12,7 @@ import {
   NonEmptyList, Nil,
   NonEmptyHList, HNil,
   Future, Coroutine,
+  cofetch,
   DataMap, AttrMap,
   Cache,
   tick,
@@ -135,6 +136,10 @@ describe('Interface: Package', function () {
   describe('Coroutine', function () {
     it('Coroutine', function () {
       assert(typeof Coroutine === 'function');
+    });
+
+    it('cofetch', function () {
+      assert(typeof cofetch === 'function');
     });
 
   });

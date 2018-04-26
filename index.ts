@@ -12,6 +12,7 @@ export { List, NonEmptyList, Nil } from './src/list';
 export { HList, NonEmptyHList, HNil } from './src/hlist';
 export { Future } from './src/future';
 export { Coroutine } from './src/coroutine';
+export { cofetch } from './src/cofetch';
 export { DataMap } from './src/datamap';
 export { AttrMap } from './src/attrmap';
 export { Cache } from './src/cache';

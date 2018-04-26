@@ -3,8 +3,6 @@ import './supervisor.esnext';
 import { Coroutine } from './coroutine';
 import { tick } from './tick';
 
-declare const requestAnimationFrame: (cb: () => void) => void;
-
 describe('Unit: lib/supervisor', function () {
   describe('Supervisor', function () {
     beforeEach(() => {

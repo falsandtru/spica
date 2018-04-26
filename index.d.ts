@@ -498,6 +498,19 @@ export class Coroutine<T, S = void> extends Promise<If<TEq<Exclude<T, S>, never>
   [Symbol.asyncIterator](): AsyncIterableIterator<S>;
 }
 
+export function cofetch(url: string, options?: CofetchOptions): Cofetch;
+export interface CofetchOptions {
+  method?: string;
+  headers?: Headers;
+  body?: FormData | null;
+  responseType?: XMLHttpRequestResponseType;
+  timeout?: number;
+  withCredentials?: boolean;
+}
+interface Cofetch extends Promise<XMLHttpRequest>, AsyncIterable<ProgressEvent> {
+  cancel(): void;
+}
+
 export interface WeakMapLike<K, V> {
   get(key: K): V | undefined;
   set(key: K, value: V): this;
