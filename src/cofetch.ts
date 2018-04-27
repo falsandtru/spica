@@ -57,7 +57,7 @@ class Cofetch extends Promise<XMLHttpRequest> implements AsyncIterable<ProgressE
           new Promise<ProgressEvent>(resolve => xhr.addEventListener('progress', resolve, { once: true })),
           complete,
         ]);
-        if (ev.type !== 'progress') break;
+        if (ev.type !== 'progress') continue;
         yield ev;
       }
       yield complete;
