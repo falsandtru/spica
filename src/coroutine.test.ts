@@ -16,8 +16,8 @@ describe('Unit: lib/coroutine', () => {
       const co = new Coroutine(async function* () {
         return 0;
       });
-      co.terminate();
-      co.terminate(1);
+      co[Coroutine.terminator]();
+      co[Coroutine.terminator](1);
       co.catch(done);
     });
 

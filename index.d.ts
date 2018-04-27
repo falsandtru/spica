@@ -491,10 +491,11 @@ export class Future<T = undefined> extends Promise<T> {
 }
 
 export class Coroutine<T, S = void> extends Promise<If<TEq<Exclude<T, S>, never>, T, Exclude<T, S>>> {
+  static readonly terminator: unique symbol;
   constructor(
     gen: (this: Coroutine<T, S>) => Iterator<T | S> | AsyncIterator<T | S>,
     resume?: () => Promise<void>);
-  terminate(reason?: any): void;
+  //[Coroutine.terminator](reason?: any): void;
   [Symbol.asyncIterator](): AsyncIterableIterator<S>;
 }
 
@@ -507,7 +508,7 @@ export interface CofetchOptions {
   timeout?: number;
   withCredentials?: boolean;
 }
-interface Cofetch extends Promise<XMLHttpRequest>, AsyncIterable<ProgressEvent> {
+interface Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
   cancel(): void;
 }
 

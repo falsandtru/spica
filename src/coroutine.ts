@@ -3,9 +3,11 @@ import { If, TEq } from './type';
 
 type Result<T, S> = If<TEq<Exclude<T, S>, never>, T, Exclude<T, S>>;
 
+const terminator = Symbol();
 const clock = Promise.resolve();
 
 export class Coroutine<T, S = void> extends Promise<Result<T, S>> implements AsyncIterable<S> {
+  static readonly terminator = terminator;
   static get [Symbol.species]() {
     return Promise;
   }
@@ -43,14 +45,14 @@ export class Coroutine<T, S = void> extends Promise<Result<T, S>> implements Asy
         }
       }
       catch (reason) {
-        void this.terminate(reason);
+        void this[Coroutine.terminator](reason);
       }
     })();
   }
   private alive = true;
   private clock = clock;
   private state = new Future<IteratorResult<S>>();
-  public terminate(reason?: any): void {
+  public [terminator](reason?: any): void {
     if (!this.alive) return;
     this.alive = false;
     void this.state.bind({ value: undefined as any as S, done: true })

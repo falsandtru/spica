@@ -39,18 +39,15 @@ export function cofetch(url: string, options: CofetchOptions = {}): Cofetch {
   }
 }
 
-class Cofetch extends Promise<XMLHttpRequest> implements AsyncIterable<ProgressEvent> {
-  static get [Symbol.species]() {
-    return Promise;
-  }
+class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
   constructor(
-    xhr: XMLHttpRequest,
+    private readonly xhr: XMLHttpRequest
   ) {
-    const co = new Coroutine<XMLHttpRequest, ProgressEvent>(async function* (): AsyncIterableIterator<ProgressEvent | XMLHttpRequest> {
+    super(async function* (): AsyncIterableIterator<ProgressEvent | XMLHttpRequest> {
       ['error', 'abort', 'timeout']
         .forEach(type =>
           xhr.addEventListener(type, ev =>
-            void this.terminate(ev)));
+            void terminate(ev)));
       const complete = new Promise<ProgressEvent>(resolve => xhr.addEventListener('load', resolve as any));
       while (xhr.readyState < 4) {
         const ev = await Promise.race([
@@ -63,17 +60,13 @@ class Cofetch extends Promise<XMLHttpRequest> implements AsyncIterable<ProgressE
       yield complete;
       return xhr;
     });
-    super(resolve => resolve(co));
-    this.co = co;
-    this.xhr = xhr;
+    const terminate = (reason: any) => void super[Coroutine.terminator](reason);
   }
-  private readonly co: Coroutine<XMLHttpRequest, ProgressEvent>;
-  private readonly xhr: XMLHttpRequest;
   public cancel(): void {
     this.xhr.readyState < 4 &&
     this.xhr.abort();
   }
-  public [Symbol.asyncIterator](): AsyncIterableIterator<ProgressEvent> {
-    return this.co[Symbol.asyncIterator]();
+  public [Coroutine.terminator](): void {
+    throw new Error(`Spica: Cofetch: Can't terminate the cofetch process directly.`);
   }
 }
