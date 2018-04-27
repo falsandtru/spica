@@ -16,21 +16,20 @@ export class Coroutine<T, S = void> extends Promise<Result<T, S>> implements Asy
   ) {
     super((resolve, reject) =>
       void tick(() => void this.result.then(resolve, reject)));
-    const iter = gen.call(this);
+    const iter = gen.call(this) as ReturnType<typeof gen>;
     void (async () => {
       try {
         while (this.alive) {
           const { value, done } = await iter.next();
           if (!this.alive) break;
           if (!done) {
-            const state = this.state.bind({ value: await value as any as S, done });
+            const state = this.state.bind({ value: await value as S, done });
             assert(state === this.state);
             if (!this.alive) break;
             this.state = new Future();
             await state;
             if (!this.alive) break;
-            this.clock = resume();
-            await this.clock;
+            await (this.clock = resume());
             continue;
           }
           else {
