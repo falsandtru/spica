@@ -23,12 +23,14 @@ export class Coroutine<T, S = void> extends Promise<Result<T, S>> implements Asy
           const { value, done } = await iter.next();
           if (!this.alive) break;
           if (!done) {
-            await value;
-            await this.state.bind({ value: value as any as S, done });
-            if (!this.alive) continue;
+            const state = this.state.bind({ value: await value as any as S, done });
+            assert(state === this.state);
+            if (!this.alive) break;
+            this.state = new Future();
+            await state;
+            if (!this.alive) break;
             this.clock = resume();
             await this.clock;
-            this.state = new Future();
             continue;
           }
           else {
