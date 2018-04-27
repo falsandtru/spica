@@ -44,10 +44,11 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
     private readonly xhr: XMLHttpRequest
   ) {
     super(async function* () {
+      assert(xhr.readyState < 4);
       ['error', 'abort', 'timeout']
         .forEach(type =>
-          xhr.addEventListener(type, ev =>
-            void terminate(ev)));
+          xhr.addEventListener(type, this[Coroutine.terminator]));
+      delete this[Coroutine.terminator];
       const complete = new Promise<ProgressEvent>(resolve => xhr.addEventListener('load', resolve as any));
       while (xhr.readyState < 4) {
         const ev = await Promise.race([
@@ -60,13 +61,9 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
       yield complete;
       return xhr;
     });
-    const terminate = (reason: any) => void super[Coroutine.terminator](reason);
   }
-  public cancel(): void {
+  public readonly cancel = (): void => {
     this.xhr.readyState < 4 &&
     this.xhr.abort();
-  }
-  public [Coroutine.terminator](): void {
-    throw new Error(`Spica: Cofetch: Can't terminate the cofetch process directly.`);
-  }
+  };
 }

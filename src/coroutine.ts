@@ -49,18 +49,18 @@ export class Coroutine<T, S = void> extends Promise<T> implements AsyncIterable<
   private alive = true;
   private clock = clock;
   private state = new Future<IteratorResult<S>>();
-  public [terminator](reason?: any): void {
-    if (!this.alive) return;
-    this.alive = false;
-    void this.state.bind({ value: undefined as any as S, done: true })
-      .then(() => void this.result.bind(Promise.reject(reason)));
-  }
-  public [Symbol.asyncIterator] = async function* (this: Coroutine<T, S>): AsyncIterableIterator<S> {
+  public readonly [Symbol.asyncIterator] = async function* (this: Coroutine<T, S>): AsyncIterableIterator<S> {
     await this.clock; // Skip the current state if it's already resolved.
     while (this.alive) {
       const { value, done } = await this.state;
       if (done) return;
       yield value;
     }
+  }
+  public readonly [terminator] = (reason?: any): void => {
+    if (!this.alive) return;
+    this.alive = false;
+    void this.state.bind({ value: undefined as any as S, done: true })
+      .then(() => void this.result.bind(Promise.reject(reason)));
   }
 }

@@ -508,7 +508,7 @@ export interface CofetchOptions {
   withCredentials?: boolean;
 }
 interface Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
-  cancel(): void;
+  readonly cancel: () => void;
 }
 
 export interface WeakMapLike<K, V> {
