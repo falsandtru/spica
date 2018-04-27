@@ -1,12 +1,9 @@
 import { Future } from './future'; 
-import { If, TEq } from './type';
-
-type Result<T, S> = If<TEq<Exclude<T, S>, never>, T, Exclude<T, S>>;
 
 const terminator = Symbol();
 const clock = Promise.resolve();
 
-export class Coroutine<T, S = void> extends Promise<Result<T, S>> implements AsyncIterable<S> {
+export class Coroutine<T, S = void> extends Promise<T> implements AsyncIterable<S> {
   static readonly terminator = terminator;
   static get [Symbol.species]() {
     return Promise;
@@ -17,7 +14,7 @@ export class Coroutine<T, S = void> extends Promise<Result<T, S>> implements Asy
   constructor(
     gen: (this: Coroutine<T, S>) => Iterator<T | S> | AsyncIterator<T | S>,
     resume: () => Promise<void> = () => clock,
-    private readonly result = new Future<Result<T, S>>()
+    private readonly result = new Future<T>()
   ) {
     super((resolve, reject) =>
       void result.then(resolve, reject));
@@ -40,7 +37,7 @@ export class Coroutine<T, S = void> extends Promise<Result<T, S>> implements Asy
           else {
             this.alive = false;
             await this.state.bind({ value: undefined as any as S, done });
-            void result.bind(value as Result<T, S>);
+            void result.bind(value as T);
           }
         }
       }

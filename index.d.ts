@@ -369,7 +369,6 @@ export function Right<b>(b: b): Right<b>;
 export function Right<a, b>(b: b): Either<a, b>;
 
 export * from './src/type';
-import { If, TEq } from './src/type';
 
 interface Curried1<a, z> {
   (a: a): z;
@@ -490,7 +489,7 @@ export class Future<T = undefined> extends Promise<T> {
   readonly bind: (value: T | PromiseLike<T>) => Promise<T>;
 }
 
-export class Coroutine<T, S = void> extends Promise<If<TEq<Exclude<T, S>, never>, T, Exclude<T, S>>> {
+export class Coroutine<T, S = void> extends Promise<T> {
   static readonly terminator: unique symbol;
   constructor(
     gen: (this: Coroutine<T, S>) => Iterator<T | S> | AsyncIterator<T | S>,

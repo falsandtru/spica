@@ -43,7 +43,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
   constructor(
     private readonly xhr: XMLHttpRequest
   ) {
-    super(async function* (): AsyncIterableIterator<ProgressEvent | XMLHttpRequest> {
+    super(async function* () {
       ['error', 'abort', 'timeout']
         .forEach(type =>
           xhr.addEventListener(type, ev =>
