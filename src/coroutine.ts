@@ -25,6 +25,7 @@ export class Coroutine<T, S = void> extends Promise<Result<T, S>> implements Asy
           if (!done) {
             await value;
             await this.state.bind({ value: value as any as S, done });
+            if (!this.alive) continue;
             this.clock = resume();
             await this.clock;
             this.state = new Future();
@@ -33,7 +34,7 @@ export class Coroutine<T, S = void> extends Promise<Result<T, S>> implements Asy
           else {
             this.alive = false;
             await this.state.bind({ value: undefined as any as S, done });
-            this.result.bind(value as Result<T, S>);
+            void this.result.bind(value as Result<T, S>);
           }
         }
       }
@@ -51,7 +52,7 @@ export class Coroutine<T, S = void> extends Promise<Result<T, S>> implements Asy
     this.alive = false;
     void (async () => {
       await this.state.bind({ value: undefined as any as S, done: true });
-      this.result.bind(Promise.reject(reason));
+      void this.result.bind(Promise.reject(reason));
     })();
   }
   public [Symbol.asyncIterator] = async function* (this: Coroutine<T, S>): AsyncIterableIterator<S> {
