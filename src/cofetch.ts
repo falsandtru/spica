@@ -1,4 +1,5 @@
 import { Coroutine } from './coroutine';
+import { Cancellation } from './cancellation';
 
 interface Headers {
   entries(): IterableIterator<[string, string]>;
@@ -18,8 +19,7 @@ export function cofetch(url: string, options: CofetchOptions = {}): Cofetch {
 
   function fetch(url: string, options: CofetchOptions): XMLHttpRequest {
     const xhr = new XMLHttpRequest();
-    xhr.open(options.method || 'GET', url);
-    xhr.send(options.body || null);
+    void xhr.open(options.method || 'GET', url);
     for (const key of Object.keys(options)) {
       switch (key) {
         case 'method':
@@ -28,42 +28,53 @@ export function cofetch(url: string, options: CofetchOptions = {}): Cofetch {
         case 'headers':
           [...options.headers!.entries()]
             .forEach(([name, value]) =>
-              xhr.setRequestHeader(name, value));
+              void xhr.setRequestHeader(name, value));
           continue;
         default:
           if (key in xhr) xhr[key] = options[key];
           continue;
       }
     }
+    void xhr.send(options.body || null);
     return xhr;
   }
 }
 
 class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
   constructor(
-    private readonly xhr: XMLHttpRequest
+    xhr: XMLHttpRequest
   ) {
     super(async function* () {
       assert(xhr.readyState < 4);
       ['error', 'abort', 'timeout']
         .forEach(type =>
-          xhr.addEventListener(type, this[Coroutine.terminator]));
-      delete this[Coroutine.terminator];
+          void xhr.addEventListener(type, this[Coroutine.terminator].bind(this)));
+      void cancellation.register(() =>
+        xhr.readyState < 4 &&
+        void xhr.abort());
+      delete this[Coroutine.port as any];
+      assert(!this[Coroutine.port]);
+      this[Coroutine.terminator] = undefined as never;
+      assert(!this[Coroutine.terminator]);
       const complete = new Promise<ProgressEvent>(resolve => xhr.addEventListener('load', resolve as any));
-      while (xhr.readyState < 4) {
-        const ev = await Promise.race([
-          new Promise<ProgressEvent>(resolve => xhr.addEventListener('progress', resolve, { once: true })),
-          complete,
-        ]);
-        if (ev.type !== 'progress') continue;
-        yield ev;
+      try {
+        while (xhr.readyState < 4) {
+          const ev = await Promise.race([
+            new Promise<ProgressEvent>(resolve => xhr.addEventListener('progress', resolve, { once: true })),
+            complete,
+          ]);
+          if (ev.type !== 'progress') continue;
+          yield ev;
+        }
+        yield complete;
       }
-      yield complete;
+      catch (_) { // Don't use optional catch binding to make this code usable with esnext and browserify.
+        void cancellation.cancel();
+      }
       return xhr;
     });
+    const cancellation = new Cancellation();
+    this.cancel = cancellation.cancel;
   }
-  public readonly cancel = (): void => {
-    this.xhr.readyState < 4 &&
-    this.xhr.abort();
-  };
+  public readonly cancel: () => void;
 }

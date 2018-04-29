@@ -489,13 +489,24 @@ export class Future<T = undefined> extends Promise<T> {
   readonly bind: (value: T | PromiseLike<T>) => Promise<T>;
 }
 
-export class Coroutine<T, S = void> extends Promise<T> {
+export interface CoroutineOptions {
+  readonly resume?: () => Promise<void>;
+  readonly size?: number;
+}
+export interface CoroutinePort<R, S> {
+  readonly send: (msg: S | PromiseLike<S>) => Promise<IteratorResult<R>>;
+  readonly recv: () => Promise<IteratorResult<R>>;
+}
+
+export class Coroutine<T, R = void, S = void> extends Promise<T> implements AsyncIterable<R> {
+  static readonly port: unique symbol;
   static readonly terminator: unique symbol;
   constructor(
-    gen: (this: Coroutine<T, S>) => Iterator<T | S> | AsyncIterator<T | S>,
-    resume?: () => Promise<void>);
+    gen: (this: Coroutine<T, R>) => Iterator<T | R> | AsyncIterator<T | R>,
+    options?: CoroutineOptions);
+  [Symbol.asyncIterator](): AsyncIterableIterator<R>;
+  //[Coroutine.port]: CoroutinePort<R, S>;
   //[Coroutine.terminator](reason?: any): void;
-  [Symbol.asyncIterator](): AsyncIterableIterator<S>;
 }
 
 export function cofetch(url: string, options?: CofetchOptions): Cofetch;
