@@ -1,6 +1,7 @@
 import { Future } from './future'; 
 import { DeepRequired } from './type';
 import { extend } from './assign';
+import { tuple } from './tuple';
 import { noop } from './noop';
 
 const clock = Promise.resolve();
@@ -15,7 +16,7 @@ export interface CoroutinePort<R, S> {
   readonly send: (msg: S | PromiseLike<S>) => Promise<IteratorResult<R>>;
   readonly recv: () => Promise<IteratorResult<R>>;
 }
-type Reply<R> = (msg: IteratorResult<R> | Promise<IteratorResult<R>>) => void;
+type Reply<R> = (msg: IteratorResult<R> | Promise<never>) => void;
 
 export class Coroutine<T, R = void, S = void> extends Promise<T> implements AsyncIterable<R> {
   static readonly port: typeof port = port;
@@ -44,12 +45,17 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
         let cnt = 0;
         while (this.alive) {
           // Block.
-          const [msg, reply] = this.settings.size === 0 || ++cnt === 1
-            ? await [undefined, noop] as [undefined, Reply<R>]
-            : await this.settings.resume().then(resume);
+          const [[msg, reply]] = await Promise.all([
+            // Don't block.
+            this.settings.size === 0 || ++cnt === 1
+              ? Promise.resolve(tuple([undefined as S | undefined, noop as Reply<R>]))
+              : resume(),
+            // Don't block.
+            this.settings.resume(),
+          ]);
           assert(msg instanceof Promise === false);
           const { value: val, done } = await iter.next(msg);
-          const value = await val;
+          const value = await val; // Workaround for the TypeScript's bug.
           assert(value instanceof Promise === false);
           if (!this.alive) return;
           if (!done) {
@@ -80,7 +86,7 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
         }
       }
       catch (reason) {
-        void this[Coroutine.terminator](reason);
+        void (this[Coroutine.terminator] || Coroutine.prototype[Coroutine.terminator]).call(this, reason);
       }
     })();
   }
@@ -120,9 +126,9 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
     send: (msg: S | PromiseLike<S>): Promise<IteratorResult<R>> => {
       if (this.settings.size === 0) throw new Error(`Spica: Coroutine: Can't send a message without message queue.`);
       if (!this.alive) return Promise.reject(new Error(`Spica: Coroutine: Canceled.`));
-      const result = new Future<IteratorResult<R>>();
+      const res = new Future<IteratorResult<R>>();
       // Don't block.
-      void this.msgs.push([msg, result.bind]);
+      void this.msgs.push([msg, res.bind]);
       void this.resume.bind(undefined);
       this.resume = new Future();
       while (this.msgs.length > this.settings.size) {
@@ -130,7 +136,7 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
         const [, reply] = this.msgs.shift()!;
         void reply(Promise.reject(new Error(`Spica: Coroutine: Overflowed.`)));
       }
-      return result.then();
+      return res.then();
     },
   };
 }
