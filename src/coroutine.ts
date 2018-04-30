@@ -101,16 +101,14 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
   public [terminator](reason?: any): void {
     if (!this.alive) return;
     this.alive = false;
-    // Block.
-    void (async () => {
-      await this.state.bind({ value: undefined as any as R, done: true })
-      void this.result.bind(Promise.reject(reason));
-      while (this.msgs.length > this.settings.size) {
-        // Don't block.
-        const [, reply] = this.msgs.shift()!;
-        void reply(Promise.reject(new Error(`Spica: Coroutine: Canceled.`)));
-      }
-    })();
+    // Don't block.
+    void this.state.bind({ value: undefined as any as R, done: true })
+    void this.result.bind(Promise.reject(reason));
+    while (this.msgs.length > this.settings.size) {
+      // Don't block.
+      const [, reply] = this.msgs.shift()!;
+      void reply(Promise.reject(new Error(`Spica: Coroutine: Canceled.`)));
+    }
   }
   public readonly [Symbol.asyncIterator] = async function* (this: Coroutine<T, R, S>): AsyncIterableIterator<R> {
     if (this.settings.size > 0) throw new Error(`Spica: Coroutine: Can't make an iterator with message queue.`);
