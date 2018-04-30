@@ -1,6 +1,4 @@
 import { Supervisor } from './supervisor';
-import './supervisor.esnext';
-import { Coroutine } from './coroutine';
 import { tick } from './tick';
 
 describe('Unit: lib/supervisor', function () {
@@ -443,19 +441,6 @@ describe('Unit: lib/supervisor', function () {
       assert(TestSupervisor.count === 0);
       assert(TestSupervisor.procs === 0);
       done();
-    });
-
-    if (navigator.userAgent.includes('Edge')) return;
-    it('coroutine', function (done) {
-      let cnt = 0;
-      const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
-      });
-      sv.register('', _ => new Coroutine<[number, number]>(function* (): Iterator<[number, number] | void> {
-        sv.kill('');
-        yield;
-        return [++cnt, 0];
-      }), 0);
-      sv.call('', 0, (_, err) => assert(cnt === 0) || assert(err instanceof Error) || done());
     });
 
   });

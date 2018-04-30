@@ -310,14 +310,6 @@ class Worker<N extends string, P, R, S> {
     assert(this.alive === false);
     assert(this.available === false);
     try {
-      this.job &&
-      this.job[Supervisor.terminator] &&
-      void this.job[Supervisor.terminator](reason);
-    }
-    catch (reason) {
-      void causeAsyncException(reason);
-    }
-    try {
       void this.destructor_();
     }
     catch (reason) {
@@ -339,7 +331,6 @@ class Worker<N extends string, P, R, S> {
   private alive = true;
   private available = true;
   private initiated = false;
-  private job: Supervisor.Process.Result<R, S> | PromiseLike<Supervisor.Process.Result<R, S>> | undefined;
   public call([param, expiry]: [P, number]): Promise<R> | undefined {
     const now = Date.now();
     if (!this.available || now > expiry) return;
@@ -352,8 +343,7 @@ class Worker<N extends string, P, R, S> {
           .emit([this.name], [this.name, this.process, this.state]);
         this.state = this.process.init(this.state);
       }
-      this.job = this.process.main(param, this.state);
-      void Promise.resolve(this.job).then(resolve, reject);
+      void Promise.resolve(this.process.main(param, this.state)).then(resolve, reject);
     })
       .then(
         result => {
