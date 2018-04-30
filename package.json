@@ -56,7 +56,7 @@
     "karma": "^2.0.2",
     "karma-chrome-launcher": "^2.2.0",
     "karma-coverage": "^1.1.1",
-    "karma-coveralls": "^1.2.0",
+    "karma-coveralls": "^1.2.1",
     "karma-edge-launcher": "^0.4.2",
     "karma-espower-preprocessor": "^1.2.0",
     "karma-firefox-launcher": "^1.1.0",
