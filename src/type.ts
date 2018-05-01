@@ -46,7 +46,7 @@ export type StrictRewrite<T, R extends [any, any]> =
     : T;
 
 export type StrictExtract<T, U> = T extends U ? U extends T ? T : never : never;
-export type StrictExclude<T, U> = T extends U ? T extends StrictExtract<T, U> ? never : T : T;
+export type StrictExclude<T, U> = T extends StrictExtract<T, U> ? never : T;
 
 export type indexof<T, V extends valueof<T>> = { [P in keyof T]: If<TEq<T[P], V>, P, never>; }[keyof T];
 export type valueof<T, K extends string | number | symbol = T extends { [n: number]: any; length: number; } ? number : string | number> = T[Extract<keyof T, K>];
