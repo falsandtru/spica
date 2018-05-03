@@ -226,7 +226,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
       if (result === undefined) {
         void this.events_.loss.emit([names[0]], [names[0], param]);
         try {
-          void callback(undefined as any, new Error(`Spica: Supervisor: A processing has failed.`));
+          void callback(undefined as any, new Error(`Spica: Supervisor: A process has failed.`));
         }
         catch (reason) {
           void causeAsyncException(reason);
@@ -238,7 +238,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
             reply =>
               void callback(reply),
             () =>
-              void callback(undefined as any, new Error(`Spica: Supervisor: A processing has failed.`)));
+              void callback(undefined as any, new Error(`Spica: Supervisor: A process has failed.`)));
       }
     }
   }

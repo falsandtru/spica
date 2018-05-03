@@ -26,6 +26,7 @@ describe('Unit: lib/supervisor.es2018', function () {
       }, { size: Infinity }));
       assert(await sv.call('', 1) === 2);
       assert(await sv.call('', 2) === 3);
+      await new Promise(resolve => void setTimeout(resolve, 100));
       assert(sv.kill('') === false);
       assert(await sv.call('', 3).catch(e => e instanceof Error));
     });
