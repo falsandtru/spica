@@ -14,13 +14,14 @@ abstract class Supervisor2018<N extends string, P = undefined, R = undefined, S 
       {
         init: state => state,
         main: (param, state) =>
-          (process as Coroutine<R, R, P>)[Coroutine.port].send(param)
-            .then<Supervisor.Process.Result<R, S>>(({ value: reply, done }) =>
+          process[Coroutine.port].send(param)
+            .then(({ value: reply, done }) =>
               done
-                ? void this.kill(name, undefined) ||
-                  (process as Coroutine<R, R, P>).then<Supervisor.Process.Result<R, S>>(reply =>
-                    [reply, state])
-                : [reply, state,]),
+                ? process
+                    .then(reply =>
+                      void this.kill(name, undefined) ||
+                      { reply, state })
+                : { reply, state }),
         exit: reason => void process[Coroutine.terminator](reason),
       },
       state,
