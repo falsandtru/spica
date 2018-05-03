@@ -1,10 +1,6 @@
 import { Coroutine } from './coroutine';
 import { Cancellation } from './cancellation';
 
-interface Headers {
-  entries(): IterableIterator<[string, string]>;
-}
-
 export interface CofetchOptions {
   method?: string;
   headers?: Headers;
