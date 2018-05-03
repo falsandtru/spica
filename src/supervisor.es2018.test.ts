@@ -1,4 +1,4 @@
-import { Supervisor2018 } from './supervisor.es2018';
+import { Supervisor } from './supervisor.es2018';
 import { Coroutine } from './coroutine';
 
 describe('Unit: lib/supervisor.es2018', function () {
@@ -6,24 +6,24 @@ describe('Unit: lib/supervisor.es2018', function () {
 
   describe('Supervisor', function () {
     beforeEach(() => {
-      assert(Supervisor2018.count === 0);
-      assert(Supervisor2018.procs === 0);
+      assert(Supervisor.count === 0);
+      assert(Supervisor.procs === 0);
     });
 
     afterEach(() => {
-      assert(Supervisor2018.count === 0);
-      assert(Supervisor2018.procs === 0);
+      assert(Supervisor.count === 0);
+      assert(Supervisor.procs === 0);
     });
 
     it('coroutine', async function () {
-      const sv = new class TestSupervisor extends Supervisor2018<string, number, number> { }({
+      const sv = new class TestSupervisor extends Supervisor<string, number, number> { }({
         timeout: 10,
       });
-      sv.register('', new Coroutine<never, number, number>(async function* () {
+      sv.register('', new Coroutine<number, number, number>(async function* () {
         assert((yield 1) === 1);
         assert((yield 2) === 2);
         return 3;
-      }, { size: Infinity }), 0 as never);
+      }, { size: Infinity }));
       assert(await sv.call('', 1) === 2);
       assert(await sv.call('', 2) === 3);
       assert(sv.kill('') === false);

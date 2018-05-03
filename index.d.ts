@@ -18,9 +18,8 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
     readonly exit: Observer<never[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>;
   };
   readonly available: boolean;
-  register(name: N, process: Supervisor.Process.Main<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
-  register(name: N, process: Supervisor.Process<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
-  register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
+  register(name: N, process: Coroutine<R, R, P>, state?: never, reason?: any): (reason?: any) => boolean;
+  register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S> | Coroutine<R, R, P>, state: S, reason?: any): (reason?: any) => boolean;
   call(name: N | ('' extends N ? undefined : never), param: P, timeout?: number): Promise<R>;
   call(name: N | ('' extends N ? undefined : never), param: P, callback: Supervisor.Callback<R>, timeout?: number): void;
   cast(name: N | ('' extends N ? undefined : never), param: P, timeout?: number): boolean;

@@ -84,9 +84,6 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
   private throwErrorIfNotAvailable(): void {
     if (!this.available) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A supervisor is already terminated.`);
   }
-  public register(name: N, process: Supervisor.Process.Main<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
-  public register(name: N, process: Supervisor.Process<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
-  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S>, state: S, reason?: any): (reason?: any) => boolean;
   public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S>, state: S, reason?: any): (reason?: any) => boolean {
     void this.throwErrorIfNotAvailable();
     if (arguments.length > 3) {
