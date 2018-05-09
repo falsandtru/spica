@@ -99,7 +99,7 @@ type RegisterItem<N extends any[], D, R> = {
   options: ObserverOptions;
 };
 
-export class Cancellation<L = undefined> {
+export class Cancellation<L = undefined> extends Promise<L> {
   constructor(cancelees?: Iterable<Cancellee<L>>);
 }
 export interface Cancellation<L = undefined>

@@ -13,7 +13,9 @@ describe('Unit: lib/cancellation', () => {
       cancellation.register(n => (
         assert(++cnt === 2),
         assert(n === 0),
-        done()));
+        cancellation.then(reason => (
+          assert(reason === 0),
+          done()))));
       cancellation.cancel(NaN);
     });
 
@@ -27,7 +29,7 @@ describe('Unit: lib/cancellation', () => {
       cancellation.register(() =>
         done(false));
       cancellation.close();
-      done();
+      cancellation.catch(done);
     });
 
     it('link', done => {

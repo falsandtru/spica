@@ -1,3 +1,5 @@
+import { Future } from './future';
+import { tick } from './tick';
 import { causeAsyncException } from './exception';
 import { Maybe, Just, Nothing } from './monad/maybe';
 import { Either, Left, Right } from './monad/either';
@@ -17,14 +19,21 @@ export interface Cancellee<L = undefined> {
 }
 
 export class Cancellation<L = undefined>
+  extends Promise<L>
   implements Canceller<L>, Cancellee<L> {
+  static get [Symbol.species]() {
+    return Promise;
+  }
   constructor(cancelees: Iterable<Cancellee<L>> = []) {
+    super(resolve =>
+      void tick(() => resolve(this.state)));
     void [...cancelees]
       .forEach(cancellee =>
         void cancellee.register(this.cancel));
   }
   private done = false;
   private reason?: L;
+  private readonly state: Future<L> = new Future();
   private readonly listeners: Set<(reason: L) => void> = new Set();
   public readonly register = (listener: (reason: L) => void) => {
     if (this.canceled) return void handler(this.reason!), () => undefined;
@@ -49,6 +58,7 @@ export class Cancellation<L = undefined>
     this.done = true;
     this.canceled = true;
     this.reason = reason!;
+    this.state.bind(this.reason);
     void Object.freeze(this.listeners);
     void Object.freeze(this);
     void this.listeners
@@ -58,6 +68,7 @@ export class Cancellation<L = undefined>
   public readonly close = () => {
     if (this.done) return;
     this.done = true;
+    void this.state.bind(Promise.reject());
     void Object.freeze(this.listeners);
     void Object.freeze(this);
   };
