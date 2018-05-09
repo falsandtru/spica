@@ -11,7 +11,8 @@ import {
   tuple,
   NonEmptyList, Nil,
   NonEmptyHList, HNil,
-  Future, Coroutine,
+  Future,
+  Coroutine, Colistener,
   cofetch,
   DataMap, AttrMap,
   Cache,
@@ -136,6 +137,10 @@ describe('Interface: Package', function () {
   describe('Coroutine', function () {
     it('Coroutine', function () {
       assert(typeof Coroutine === 'function');
+    });
+
+    it('Colistener', function () {
+      assert(typeof Colistener === 'function');
     });
 
     it('cofetch', function () {
