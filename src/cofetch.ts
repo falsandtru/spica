@@ -40,12 +40,12 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
   constructor(
     xhr: XMLHttpRequest
   ) {
-    super(async function* () {
+    super(async function* (this: Cofetch) {
       assert(xhr.readyState < 4);
       ['error', 'abort', 'timeout']
         .forEach(type =>
           void xhr.addEventListener(type, this[Coroutine.terminator].bind(this)));
-      void cancellation.register(() =>
+      void this.cancellation.register(() =>
         xhr.readyState < 4 &&
         void xhr.abort());
       delete this[Coroutine.port as any];
@@ -65,12 +65,11 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
         yield complete;
       }
       catch (_) { // Don't use optional catch binding to make this code usable with esnext and browserify.
-        void cancellation.cancel();
+        void this.cancel();
       }
       return xhr;
     });
-    const cancellation = new Cancellation();
-    this.cancel = cancellation.cancel;
   }
-  public readonly cancel: () => void;
+  private readonly cancellation = new Cancellation();
+  public readonly cancel: () => void = this.cancellation.cancel;
 }
