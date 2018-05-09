@@ -38,5 +38,5 @@ export class Colistener<T> extends Coroutine<void, T> {
     });
   }
   private readonly cancellation = new Cancellation();
-  public close: () => void = this.cancellation.cancel;
+  public readonly close: () => void = this.cancellation.cancel;
 }
