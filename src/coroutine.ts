@@ -122,7 +122,6 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
   public readonly [port]: CoroutinePort<R, S> = {
     recv: () => this.state,
     send: (msg: S | PromiseLike<S>): Promise<IteratorResult<R>> => {
-      if (this.settings.size === 0) throw new Error(`Spica: Coroutine: Can't send a message without message queue.`);
       if (!this.alive) return Promise.reject(new Error(`Spica: Coroutine: Canceled.`));
       const res = new Future<IteratorResult<R>>();
       // Don't block.

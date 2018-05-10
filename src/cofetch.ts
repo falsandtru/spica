@@ -48,10 +48,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
       void this.cancellation.register(() =>
         xhr.readyState < 4 &&
         void xhr.abort());
-      delete this[Coroutine.port as any];
-      assert(!this[Coroutine.port]);
-      this[Coroutine.terminator] = undefined as never;
-      assert(!this[Coroutine.terminator]);
+      this[Coroutine.terminator] = this.cancel;
       const complete = new Promise<ProgressEvent>(resolve => xhr.addEventListener('load', resolve as any));
       try {
         while (xhr.readyState < 4) {

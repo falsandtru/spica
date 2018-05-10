@@ -8,8 +8,6 @@ export class Colistener<T> extends Coroutine<void, T> {
   ) {
     super(async function* (this: Colistener<T>) {
       void this.catch(() => void this.close());
-      delete this[Coroutine.port as any];
-      assert(!this[Coroutine.port]);
       this[Coroutine.terminator] = undefined as never;
       assert(!this[Coroutine.terminator]);
       let state: Future<[T]> = new Future();
