@@ -4,7 +4,7 @@ import { Cancellation } from './cancellation';
 
 export class Colistener<T> extends Coroutine<void, T> {
   constructor(
-    register: (listener: (value: T) => void) => () => void
+    listen: (listener: (value: T) => void) => () => void
   ) {
     super(async function* (this: Colistener<T>) {
       void this.catch(() => void this.close());
@@ -12,7 +12,7 @@ export class Colistener<T> extends Coroutine<void, T> {
       assert(!this[Coroutine.terminator]);
       let state: Future<[T]> = new Future();
       let cell: [T] | undefined;
-      const unregister = register(val => {
+      const unlisten = listen(val => {
         if (cell) {
           cell[0] = val;
         }
@@ -22,7 +22,7 @@ export class Colistener<T> extends Coroutine<void, T> {
           state = new Future();
         }
       });
-      void this.cancellation.register(unregister);
+      void this.cancellation.register(unlisten);
       const done = this.cancellation.then(() => []);
       while (!this.cancellation.canceled) {
         yield* await Promise.race([
@@ -32,7 +32,7 @@ export class Colistener<T> extends Coroutine<void, T> {
         // Ignore changes in processing.
         cell = undefined;
       }
-      void unregister();
+      void unlisten();
     });
   }
   private readonly cancellation = new Cancellation();
