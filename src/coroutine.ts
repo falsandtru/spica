@@ -111,7 +111,6 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
     }
   }
   public readonly [Symbol.asyncIterator] = async function* (this: Coroutine<T, R, S>): AsyncIterableIterator<R> {
-    if (this.settings.size > 0) throw new Error(`Spica: Coroutine: Can't make an iterator with message queue.`);
     while (this.alive) {
       const { value, done } = await this.state;
       if (done) return;
