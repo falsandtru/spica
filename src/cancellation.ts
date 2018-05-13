@@ -18,8 +18,7 @@ export interface Cancellee<L = undefined> {
   readonly either: <R>(val: R) => Either<L, R>;
 }
 
-export class Cancellation<L = undefined>
-  extends Promise<L>
+export class Cancellation<L = undefined> extends Promise<L>
   implements Canceller<L>, Cancellee<L> {
   static get [Symbol.species]() {
     return Promise;
@@ -31,18 +30,19 @@ export class Cancellation<L = undefined>
       .forEach(cancellee =>
         void cancellee.register(this.cancel));
   }
-  private done = false;
+  private alive = true;
+  private canceled_ = false;
   private reason?: L;
   private readonly state: Future<L> = new Future();
   private readonly listeners: Set<(reason: L) => void> = new Set();
   public readonly register = (listener: (reason: L) => void) => {
-    if (this.canceled) return void handler(this.reason!), () => undefined;
-    if (this.done) return () => undefined;
+    if (this.canceled_) return void handler(this.reason!), () => undefined;
+    if (!this.alive) return () => undefined;
     void this.listeners.add(handler);
     return () =>
-      this.done
-        ? undefined
-        : void this.listeners.delete(handler);
+      this.alive
+        ? void this.listeners.delete(handler)
+        : undefined;
 
     function handler(reason: L): void {
       try {
@@ -54,9 +54,9 @@ export class Cancellation<L = undefined>
     }
   };
   public readonly cancel: Canceller<L>['cancel'] = (reason?: L) => {
-    if (this.done) return;
-    this.done = true;
-    this.canceled = true;
+    if (!this.alive) return;
+    this.alive = false;
+    this.canceled_ = true;
     this.reason = reason!;
     this.state.bind(this.reason);
     void Object.freeze(this.listeners);
@@ -66,23 +66,25 @@ export class Cancellation<L = undefined>
         void cb(reason!));
   };
   public readonly close = () => {
-    if (this.done) return;
-    this.done = true;
+    if (!this.alive) return;
+    this.alive = false;
     void this.state.bind(Promise.reject());
     void Object.freeze(this.listeners);
     void Object.freeze(this);
   };
-  public canceled = false;
+  public get canceled(): boolean {
+    return this.canceled_;
+  }
   public readonly promise = <T>(val: T): Promise<T> =>
-    this.canceled
-      ? new Promise<T>((_, reject) => void reject(this.reason))
+    this.canceled_
+      ? Promise.reject(this.reason)
       : Promise.resolve(val);
   public readonly maybe = <T>(val: T): Maybe<T> =>
-    this.canceled
+    this.canceled_
       ? Nothing
       : Just(val);
   public readonly either = <R>(val: R): Either<L, R> =>
-    this.canceled
+    this.canceled_
       ? Left(this.reason!)
       : Right(val);
 }
