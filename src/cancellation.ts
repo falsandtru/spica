@@ -1,5 +1,4 @@
 import { Future } from './future';
-import { tick } from './tick';
 import { causeAsyncException } from './exception';
 import { Maybe, Just, Nothing } from './monad/maybe';
 import { Either, Left, Right } from './monad/either';
@@ -24,8 +23,9 @@ export class Cancellation<L = undefined> extends Promise<L>
     return Promise;
   }
   constructor(cancelees: Iterable<Cancellee<L>> = []) {
-    super(resolve =>
-      void tick(() => resolve(this.state)));
+    super(res => resolve = res);
+    var resolve!: (v: PromiseLike<L>) => void;
+    void resolve(this.state);
     void [...cancelees]
       .forEach(cancellee =>
         void cancellee.register(this.cancel));

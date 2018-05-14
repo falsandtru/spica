@@ -26,14 +26,14 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
   }
   constructor(
     gen: (this: Coroutine<T, R>) => Iterator<T | R> | AsyncIterator<T | R>,
-    opts?: CoroutineOptions);
-  constructor(
-    gen: (this: Coroutine<T, R>) => Iterator<T | R> | AsyncIterator<T | R>,
     opts: CoroutineOptions = {},
-    private readonly result = new Future<T>()
   ) {
-    super((resolve, reject) =>
-      void result.then(resolve, reject));
+    super((resolve, reject) => {
+      result = new Future<T>();
+      void result.then(resolve, reject);
+    });
+    var result!: Future<T>;
+    this.result = result;
     void Object.freeze(extend(this.settings, opts));
     void (async () => {
       try {
@@ -93,6 +93,7 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
   private alive = true;
   private state = new Future<IteratorResult<R>>();
   private resume = new Future();
+  private readonly result: Future<T>;
   private readonly msgs: [S | PromiseLike<S>, Reply<R>][] = [];
   private readonly settings: DeepRequired<CoroutineOptions> = {
     resume: () => clock,
