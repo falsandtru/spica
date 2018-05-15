@@ -54,8 +54,7 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
             this.settings.resume(),
           ]);
           assert(msg instanceof Promise === false);
-          const { value: val, done } = await iter.next(msg);
-          const value = await val; // Workaround for the TypeScript's bug.
+          const { value, done } = await iter.next(msg);
           assert(value instanceof Promise === false);
           if (!this.alive) return;
           if (!done) {
