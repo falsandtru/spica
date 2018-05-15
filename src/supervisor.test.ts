@@ -1,4 +1,5 @@
 import { Supervisor } from './supervisor';
+import { Coroutine } from './coroutine';
 import { tick } from './tick';
 
 describe('Unit: lib/supervisor', function () {
@@ -254,6 +255,24 @@ describe('Unit: lib/supervisor', function () {
       assert(inits === exits);
       assert(inits === 1);
       done();
+    });
+
+    it('coroutine', async function () {
+      if (navigator.userAgent.includes('Edge')) return;
+
+      const sv = new class TestSupervisor extends Supervisor<string, number, number> { }({
+        timeout: 10,
+      });
+      sv.register('', new Coroutine<number, number, number>(async function* () {
+        assert((yield 1) === 1);
+        assert((yield 2) === 2);
+        return 3;
+      }, { size: Infinity }));
+      assert(await sv.call('', 1) === 2);
+      assert(await sv.call('', 2) === 3);
+      await new Promise(resolve => void setTimeout(resolve, 100));
+      assert(sv.kill('') === false);
+      assert(await sv.call('', 3).catch(e => e instanceof Error));
     });
 
     it('timeout of messaging', function (done) {
