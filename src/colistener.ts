@@ -11,10 +11,10 @@ export class Colistener<T> extends Coroutine<void, T> {
       void this.catch(() => void this.close());
       this[Coroutine.terminator] = undefined as never;
       assert(!this[Coroutine.terminator]);
-      let notifier: Future<T[]> = new Future();
+      let notifier: Future<T[]> | undefined;
       const queue: T[] = [];
       void this.cancellation.register(listen(val => {
-        queue.length === 0 && void notifier.bind(queue);
+        queue.length === 0 && notifier && void notifier.bind(queue);
         void queue.push(val);
         while (queue.length > (opts.size || 1)) {
           void queue.shift()!;
@@ -22,14 +22,16 @@ export class Colistener<T> extends Coroutine<void, T> {
       }));
       const done = this.cancellation.then(() => []);
       while (!this.cancellation.canceled) {
+        assert(!notifier);
+        notifier = new Future();
         const q = await Promise.race([
           notifier,
           done,
         ]);
+        notifier = undefined;
         while (q.length > 0) {
           yield q.shift()!;
         }
-        notifier = new Future();
       }
     }, { ...opts, size: 0 });
   }
