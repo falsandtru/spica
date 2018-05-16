@@ -62,10 +62,9 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
           assert(value instanceof Promise === false);
           if (!this.alive) return;
           if (!done) {
-            // Block.
+            // Don't block.
             const state = this.state.bind({ value: value as R, done });
             assert(state === this.state);
-            if (!this.alive) return;
             this.state = new Future();
             // Block.
             await state;
