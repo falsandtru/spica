@@ -1,4 +1,5 @@
 import { Coroutine } from './coroutine';
+import { Colistener } from './colistener';
 import { Cancellation } from './cancellation';
 
 export interface CofetchOptions {
@@ -41,6 +42,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
     xhr: XMLHttpRequest
   ) {
     super(async function* (this: Cofetch) {
+      void this.catch(() => void this.cancel());
       assert(xhr.readyState < 4);
       ['error', 'abort', 'timeout']
         .forEach(type =>
@@ -50,20 +52,15 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
         void xhr.abort());
       this[Coroutine.terminator] = this.cancel;
       const complete = new Promise<ProgressEvent>(resolve => xhr.addEventListener('load', resolve as any));
-      try {
-        while (xhr.readyState < 4) {
-          const ev = await Promise.race([
-            new Promise<ProgressEvent>(resolve => xhr.addEventListener('progress', resolve, { once: true })),
-            complete,
-          ]);
-          if (ev.type !== 'progress') continue;
-          yield ev;
-        }
-        yield complete;
+      const events = new Colistener<ProgressEvent>(listener => (
+        void xhr.addEventListener('progress', listener),
+        () => xhr.removeEventListener('progress', listener)));
+      void complete.then(events.close);
+      for await (const ev of events) {
+        assert(ev.type === 'progress');
+        yield ev;
       }
-      catch (_) { // Don't use optional catch binding to make this code usable with esnext and browserify.
-        void this.cancel();
-      }
+      yield complete;
       return xhr;
     });
   }
