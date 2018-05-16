@@ -510,7 +510,8 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
 
 export class Colistener<T> extends Coroutine<void, T> {
   constructor(
-    listen: (listener: (value: T) => void) => () => void);
+    listen: (listener: (value: T) => void) => () => void,
+    options?: CoroutineOptions);
   readonly close: () => void;
 }
 
