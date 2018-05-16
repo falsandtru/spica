@@ -16,7 +16,7 @@ import {
   cofetch,
   DataMap, AttrMap,
   Cache,
-  tick,
+  tick, wait,
   throttle, debounce,
   uuid,
   sqid,
@@ -170,6 +170,10 @@ describe('Interface: Package', function () {
   describe('utils', function () {
     it('tick', function () {
       assert(typeof tick === 'function');
+    });
+
+    it('wait', function () {
+      assert(typeof wait === 'function');
     });
 
     it('throttle', function () {

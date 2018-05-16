@@ -1,4 +1,5 @@
 import { Colistener } from './colistener';
+import { wait } from './wait';
 
 describe('Unit: lib/colistener', () => {
   if (navigator.userAgent.includes('Edge')) return;
@@ -42,7 +43,7 @@ describe('Unit: lib/colistener', () => {
       const co = new Colistener<Event>(listener => {
         document.addEventListener('click', listener);
         return () => void document.removeEventListener('click', listener);
-      }, { resume: () => new Promise(resolve => setTimeout(resolve, 100)) });
+      }, { resume: () => wait(100) });
       setTimeout(() => {
         document.body.click();
         document.body.click();
