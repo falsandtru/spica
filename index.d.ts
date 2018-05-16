@@ -108,7 +108,7 @@ export interface Cancellation<L = undefined>
 }
 export interface Canceller<L = undefined> {
   readonly cancel: {
-    (this: Cancellation<undefined>): void;
+    (this: Cancellation<void>): void;
     (reason: L): void;
   };
 }
