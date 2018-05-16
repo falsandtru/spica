@@ -508,11 +508,14 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
   //[Coroutine.terminator](reason?: any): void;
 }
 
-export class Colistener<T> extends Coroutine<void, T> {
+export class Colistener<T, U = void> extends Coroutine<U, T> {
   constructor(
     listen: (listener: (value: T) => void) => () => void,
     options?: CoroutineOptions);
-  readonly close: () => void;
+  readonly close: {
+    (this: Colistener<T, void>): void;
+    (value: U): void;
+  };
 }
 
 export function cofetch(url: string, options?: CofetchOptions): Cofetch;

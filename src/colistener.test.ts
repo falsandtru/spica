@@ -21,6 +21,13 @@ describe('Unit: lib/colistener', () => {
       assert(await co === undefined);
     });
 
+    it('close', async () => {
+      const co = new Colistener<Event, number>(() =>
+        () => undefined);
+      co.close(0);
+      assert(await co === 0);
+    });
+
     it('size', async () => {
       const co = new Colistener<Event>(listener => {
         document.addEventListener('click', listener);
