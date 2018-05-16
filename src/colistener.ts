@@ -12,7 +12,7 @@ export class Colistener<T> extends Coroutine<void, T> {
       assert(!this[Coroutine.terminator]);
       let state: Future<[T]> = new Future();
       let cell: [T] | undefined;
-      const unlisten = listen(val => {
+      void this.cancellation.register(listen(val => {
         if (cell) {
           cell[0] = val;
         }
@@ -21,8 +21,7 @@ export class Colistener<T> extends Coroutine<void, T> {
           state.bind(cell);
           state = new Future();
         }
-      });
-      void this.cancellation.register(unlisten);
+      }));
       const done = this.cancellation.then(() => []);
       while (!this.cancellation.canceled) {
         yield* await Promise.race([
@@ -32,7 +31,6 @@ export class Colistener<T> extends Coroutine<void, T> {
         // Ignore changes in processing.
         cell = undefined;
       }
-      void unlisten();
     });
   }
   private readonly cancellation = new Cancellation();
