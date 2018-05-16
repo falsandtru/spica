@@ -108,7 +108,7 @@ export interface Cancellation<L = undefined>
 }
 export interface Canceller<L = undefined> {
   readonly cancel: {
-    (this: Cancellation<void>): void;
+    (this: Cancellation<void>, reason?: L): void;
     (reason: L): void;
   };
 }
@@ -513,7 +513,7 @@ export class Colistener<T, U = void> extends Coroutine<U, T> {
     listen: (listener: (value: T) => void) => () => void,
     options?: CoroutineOptions);
   readonly close: {
-    (this: Colistener<T, void>): void;
+    (this: Colistener<T, void>, value?: U): void;
     (value: U): void;
   };
 }

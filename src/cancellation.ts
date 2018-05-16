@@ -5,7 +5,7 @@ import { Either, Left, Right } from './monad/either';
 
 export interface Canceller<L = undefined> {
   readonly cancel: {
-    (this: Cancellation<void>): void;
+    (this: Cancellation<void>, reason?: L): void;
     (reason: L): void;
   };
 }
