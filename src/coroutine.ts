@@ -44,14 +44,17 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
         const iter = gen.call(this) as ReturnType<typeof gen>;
         let cnt = 0;
         while (this.alive) {
+          void ++cnt;
           // Block.
           const [[msg, reply]] = await Promise.all([
             // Don't block.
-            this.settings.size === 0 || ++cnt === 1
+            cnt === 1 || this.settings.size === 0
               ? Promise.resolve(tuple([undefined as S | undefined, noop as Reply<R>]))
               : resume(),
             // Don't block.
-            this.settings.resume(),
+            cnt === 1
+              ? undefined
+              : this.settings.resume(),
           ]);
           assert(msg instanceof Promise === false);
           const { value, done } = await iter.next(msg);
