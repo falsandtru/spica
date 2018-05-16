@@ -19,7 +19,7 @@ export class Colistener<T, U = void> extends Coroutine<U, T> {
           void queue.shift()!;
         }
       });
-      void this.catch(() => void unlisten());
+      void this.catch(unlisten);
       void this.cancellation.register(unlisten);
       const done = this.cancellation.then(() => []);
       while (!this.cancellation.canceled) {

@@ -42,7 +42,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
     xhr: XMLHttpRequest
   ) {
     super(async function* (this: Cofetch) {
-      void this.catch(() => void this.cancel());
+      void this.catch(this.cancel);
       assert(xhr.readyState < 4);
       ['error', 'abort', 'timeout']
         .forEach(type =>
