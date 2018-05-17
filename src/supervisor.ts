@@ -1,9 +1,9 @@
 import { Supervisor } from './supervisor.legacy';
 import { Coroutine } from './coroutine';
 
-abstract class Supervisor2018<N extends string, P = undefined, R = undefined, S = undefined> extends Supervisor<N, P, R, S> {
-  public register(name: N, process: Coroutine<R, R, P>, state?: never, reason?: any): (reason?: any) => boolean;
+abstract class Supervisor2018<N extends string, P = void, R = void, S = void> extends Supervisor<N, P, R, S> {
   public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S> | Coroutine<R, R, P>, state: S, reason?: any): (reason?: any) => boolean;
+  public register(name: N, process: Coroutine<R, R, P>, state?: never, reason?: any): (reason?: any) => boolean;
   public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S> | Coroutine<R, R, P>, state: never, reason?: any): (reason?: any) => boolean {
     if (arguments.length > 3) {
       void this.kill(name, reason);

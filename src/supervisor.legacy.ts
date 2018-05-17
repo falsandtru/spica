@@ -6,7 +6,7 @@ import { sqid } from './sqid';
 import { noop } from './noop';
 import { causeAsyncException } from './exception';
 
-export abstract class Supervisor<N extends string, P = undefined, R = undefined, S = undefined> {
+export abstract class Supervisor<N extends string, P = void, R = void, S = void> {
   private static instances_: Set<Supervisor<string, any, any, any>>;
   private static get instances(): typeof Supervisor.instances_ {
     return this.hasOwnProperty('instances_')
