@@ -14,8 +14,7 @@ export interface Cancellee<L = undefined> {
   readonly either: <R>(val: R) => Either<L, R>;
 }
 
-export class Cancellation<L = undefined> extends Promise<L>
-  implements Canceller<L>, Cancellee<L> {
+export class Cancellation<L = undefined> extends Promise<L> implements Canceller<L>, Cancellee<L> {
   static get [Symbol.species]() {
     return Promise;
   }
@@ -62,10 +61,10 @@ export class Cancellation<L = undefined> extends Promise<L>
       .forEach(cb =>
         void cb(reason!));
   }) as any;
-  public readonly close = () => {
+  public readonly close = (reason?: any) => {
     if (!this.alive) return;
     this.alive = false;
-    void this.state.bind(Promise.reject());
+    void this.state.bind(Promise.reject(reason));
     void Object.freeze(this.listeners);
     void Object.freeze(this);
   };

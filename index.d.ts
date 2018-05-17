@@ -102,9 +102,8 @@ type RegisterItem<N extends any[], D, R> = {
 export class Cancellation<L = undefined> extends Promise<L> {
   constructor(cancelees?: Iterable<Cancellee<L>>);
 }
-export interface Cancellation<L = undefined>
-  extends Canceller<L>, Cancellee<L> {
-  readonly close: () => void;
+export interface Cancellation<L = undefined> extends Canceller<L>, Cancellee<L> {
+  readonly close: (reason?: any) => void;
 }
 export interface Canceller<L = undefined> {
   readonly cancel: [L] extends [void] ? (reason?: L) => void : (reason: L) => void;
