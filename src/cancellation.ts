@@ -4,10 +4,7 @@ import { Maybe, Just, Nothing } from './monad/maybe';
 import { Either, Left, Right } from './monad/either';
 
 export interface Canceller<L = undefined> {
-  readonly cancel: {
-    (this: Cancellation<void>, reason?: L): void;
-    (reason: L): void;
-  };
+  readonly cancel: [L] extends [void] ? (reason?: L) => void : (reason: L) => void;
 }
 export interface Cancellee<L = undefined> {
   readonly register: (listener: (reason: L) => void) => () => void;
@@ -53,7 +50,7 @@ export class Cancellation<L = undefined> extends Promise<L>
       }
     }
   };
-  public readonly cancel: Canceller<L>['cancel'] = (reason?: L) => {
+  public readonly cancel: Canceller<L>['cancel'] = ((reason?: L) => {
     if (!this.alive) return;
     this.alive = false;
     this.canceled_ = true;
@@ -64,7 +61,7 @@ export class Cancellation<L = undefined> extends Promise<L>
     void this.listeners
       .forEach(cb =>
         void cb(reason!));
-  };
+  }) as any;
   public readonly close = () => {
     if (!this.alive) return;
     this.alive = false;

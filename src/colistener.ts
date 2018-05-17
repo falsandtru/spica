@@ -42,8 +42,5 @@ export class Colistener<T, U = void> extends Coroutine<U, T> {
     }, { ...opts, size: 0 });
   }
   private readonly cancellation: Cancellation<U> = new Cancellation();
-  public readonly close: {
-    (this: Colistener<T, void>, value?: U): void;
-    (value: U): void;
-  } = this.cancellation.cancel as any;
+  public readonly close = this.cancellation.cancel;
 }
