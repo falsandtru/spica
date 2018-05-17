@@ -22,6 +22,7 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
         acc + sv.workers.size
       , 0);
   }
+  protected static readonly coroutine = Symbol();
   constructor(opts: Supervisor.Options = {}) {
     void Object.freeze(extend(this.settings, opts));
     assert(Object.isFrozen(this.settings));
@@ -99,7 +100,7 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
         }
       : process;
     return this.workers
-      .set(name, new Worker<N, P, R, S>(this, name, process, state, this.events_, () =>
+      .set(name, new Worker<N, P, R, S>(this, name, process, state, this.events_, state as never === Supervisor.coroutine, () =>
         void this.workers.delete(name)))
       .get(name)!
       .terminate;
@@ -294,9 +295,11 @@ class Worker<N extends string, P, R, S> {
       readonly init: Publisher<never[] | [N], Supervisor.Event.Data.Init<N, P, R, S>, any>;
       readonly exit: Publisher<never[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>;
     },
-    private readonly destructor_: () => void
+    initiated: boolean,
+    private readonly destructor_: () => void,
   ) {
     assert(process.init && process.exit);
+    initiated && this.init();
   }
   private destructor(reason: any): void {
     assert(this.alive === true);
@@ -312,21 +315,32 @@ class Worker<N extends string, P, R, S> {
       void causeAsyncException(reason);
     }
     if (this.initiated) {
-      try {
-        void this.process.exit(reason, this.state);
-        void this.events.exit
-          .emit([this.name], [this.name, this.process, this.state, reason]);
-      }
-      catch (reason_) {
-        void this.events.exit
-          .emit([this.name], [this.name, this.process, this.state, reason]);
-        void this.sv.terminate(reason_);
-      }
+      void this.exit(reason);
     }
   }
   private alive = true;
   private available = true;
   private initiated = false;
+  private init(): void {
+    assert(!this.initiated);
+    this.initiated = true;
+    void this.events.init
+      .emit([this.name], [this.name, this.process, this.state]);
+    this.state = this.process.init(this.state);
+  }
+  private exit(reason: any): void {
+    assert(this.initiated);
+    try {
+      void this.process.exit(reason, this.state);
+      void this.events.exit
+        .emit([this.name], [this.name, this.process, this.state, reason]);
+    }
+    catch (reason_) {
+      void this.events.exit
+        .emit([this.name], [this.name, this.process, this.state, reason]);
+      void this.sv.terminate(reason_);
+    }
+  }
   public call([param, expiry]: [P, number]): Promise<R> | undefined {
     const now = Date.now();
     if (!this.available || now > expiry) return;
@@ -334,10 +348,7 @@ class Worker<N extends string, P, R, S> {
       isFinite(expiry) && void setTimeout(() => void reject(new Error()), expiry - now);
       this.available = false;
       if (!this.initiated) {
-        this.initiated = true;
-        void this.events.init
-          .emit([this.name], [this.name, this.process, this.state]);
-        this.state = this.process.init(this.state);
+        void this.init();
       }
       void Promise.resolve(this.process.main(param, this.state)).then(resolve, reject);
     })

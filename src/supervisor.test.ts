@@ -274,6 +274,13 @@ describe('Unit: lib/supervisor', function () {
       await new Promise(resolve => void setTimeout(resolve, 100));
       assert(sv.kill('') === false);
       assert(await sv.call('', 3).catch(e => e instanceof Error));
+      const co = new Coroutine<number, number, number>(async function* () {
+        yield 0;
+        return 0;
+      });
+      sv.register('', co);
+      assert(sv.kill('') === true);
+      assert(await co.then(() => 0, () => 1) === 1);
     });
 
     it('timeout of messaging', function (done) {
