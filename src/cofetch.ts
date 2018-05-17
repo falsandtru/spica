@@ -51,10 +51,11 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
         xhr.readyState < 4 &&
         void xhr.abort());
       this[Coroutine.terminator] = this.cancel;
-      const events = new Colistener<ProgressEvent, ProgressEvent>(listener => (
-        void xhr.addEventListener('progress', listener),
-        () => undefined));
-      void xhr.addEventListener('load', events.close);
+      const events = new Colistener<ProgressEvent, ProgressEvent>(function (listener) {
+        void xhr.addEventListener('progress', listener);
+        void xhr.addEventListener('load', this.close);
+        return () => undefined;
+      });
       for await (const ev of events) {
         assert(ev.type === 'progress');
         yield ev;

@@ -4,7 +4,7 @@ import { Cancellation } from './cancellation';
 
 export class Colistener<T, U = void> extends Coroutine<U, T> {
   constructor(
-    listen: (listener: (value: T) => void) => () => void,
+    listen: (this: Colistener<T, U>, listener: (value: T) => void) => () => void,
     opts: CoroutineOptions = {}
   ) {
     super(async function* (this: Colistener<T, U>) {
@@ -13,7 +13,7 @@ export class Colistener<T, U = void> extends Coroutine<U, T> {
       let notifier: Future<T[]> | undefined;
       assert(!notifier);
       const queue: T[] = [];
-      const unlisten = listen(val => {
+      const unlisten = listen.call(this, (val: T) => {
         if (notifier && queue.length === 0) {
           void notifier.bind(queue);
           notifier = undefined;
