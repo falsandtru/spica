@@ -203,6 +203,10 @@ gulp.task('ci', ['clean'], function (done) {
   seq(
     'ts:test',
     'karma:ci',
+    'karma:ci',
+    'karma:ci',
+    'karma:ci',
+    'karma:ci',
     'dist',
     done
   );

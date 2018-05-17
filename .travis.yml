@@ -15,7 +15,7 @@ before_install:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export DISPLAY=:99.0; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sh -e /etc/init.d/xvfb start; fi
 script:
-- npm run ci
+- travis_retry npm run ci
 before_deploy:
 - sed -i 's/"private":\ true/"private":\ false/' package.json
 - sed -i -E 's/^dist\/?.*$//' .gitignore
