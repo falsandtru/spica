@@ -8,8 +8,6 @@ export class Colistener<T, U = void> extends Coroutine<U, T> {
     opts: CoroutineOptions = {},
   ) {
     super(async function* (this: Colistener<T, U>) {
-      this[Coroutine.terminator] = undefined as never;
-      assert(!this[Coroutine.terminator]);
       let notifier: Future<T[]> | undefined;
       assert(!notifier);
       const queue: T[] = [];

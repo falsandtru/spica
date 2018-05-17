@@ -66,18 +66,6 @@ describe('Unit: lib/colistener', () => {
       assert(await co === undefined);
     });
 
-    it('exception', async () => {
-      const co = new Colistener<void>(listener => {
-        setTimeout(() => listener(Promise.reject(0) as any));
-        return () => undefined;
-      });
-      for await (const _ of co) {
-      }
-      await co.catch(reason => {
-        assert(reason === 0);
-      });
-    });
-
     it('close', async () => {
       const co = new Colistener<Event, number>(listener => {
         document.addEventListener('click', listener);
@@ -93,6 +81,14 @@ describe('Unit: lib/colistener', () => {
         co.close(0);
       }
       assert(await co === 0);
+    });
+
+    it('terminate', async () => {
+      const co = new Colistener<void>(() => {
+        return () => undefined;
+      });
+      co[Colistener.terminator](1);
+      assert(await co.catch(reason => reason) === 1);
     });
 
   });
