@@ -46,16 +46,18 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
         while (this.alive) {
           void ++cnt;
           // Block.
-          const [[msg, reply]] = await Promise.all([
-            // Don't block.
-            this.settings.size === 0
-              ? Promise.resolve(tuple([undefined as S | undefined, noop as Reply<R>]))
-              : resume(),
-            // Don't block.
-            cnt === 1
-              ? undefined
-              : this.settings.resume(),
-          ]);
+          const [[msg, reply]] = this.settings.size === 0 && cnt === 1
+            ? [[undefined as S | undefined, noop as Reply<R>]]
+            : await Promise.all([
+                // Don't block.
+                this.settings.size === 0
+                  ? Promise.resolve(tuple([undefined as S | undefined, noop as Reply<R>]))
+                  : resume(),
+                // Don't block.
+                cnt === 1
+                  ? undefined
+                  : this.settings.resume(),
+              ]);
           assert(msg instanceof Promise === false);
           const { value: val, done } = await iter.next(msg);
           const value = await val; // Workaround for the TypeScript's bug.

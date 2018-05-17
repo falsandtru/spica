@@ -24,17 +24,19 @@ describe('Unit: lib/coroutine', () => {
     it('iterator', async () => {
       let cnt = 0;
       const co = new Coroutine<number, number>(async function* () {
-        yield Promise.resolve(0);
-        yield Promise.resolve(1);
-        return 2;
+        assert(++cnt === 1);
+        yield Promise.resolve(2);
+        yield Promise.resolve(3);
+        return 4;
       });
+      assert(cnt === 1);
       for await (const n of co) {
-        assert(n === cnt++);
+        assert(n === ++cnt);
       }
       for await (const _ of co) {
         assert(false);
       }
-      assert(await co === cnt++);
+      assert(await co === ++cnt);
     });
 
     it('port', async () => {
