@@ -1,4 +1,5 @@
 import { Future } from './future'; 
+import { Cancellation } from './cancellation';
 import { DeepRequired } from './type';
 import { extend } from './assign';
 import { tuple } from './tuple';
@@ -28,12 +29,9 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
     gen: (this: Coroutine<T, R>) => Iterator<T | R> | AsyncIterator<T | R>,
     opts: CoroutineOptions = {},
   ) {
-    super((resolve, reject) => {
-      result = new Future<T>();
-      void result.then(resolve, reject);
-    });
-    var result!: Future<T>;
-    this.result = result;
+    super(resolve => res = resolve);
+    var res!: (v: T | Promise<never>) => void;
+    this.result.register(res);
     void Object.freeze(extend(this.settings, opts));
     void (async () => {
       try {
@@ -80,7 +78,7 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
             await this.state.bind({ value: undefined as any as R, done });
             // Don't block.
             void reply({ value: undefined as any as R, done });
-            void result.bind(value as T);
+            void this.result.cancel(value as T);
             while (this.msgs.length > 0) {
               // Don't block.
               const [, reply] = this.msgs.shift()!;
@@ -97,7 +95,7 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
   private alive = true;
   private state = new Future<IteratorResult<R>>();
   private resume = new Future();
-  private readonly result: Future<T>;
+  private readonly result: Cancellation<T | Promise<never>> = new Cancellation();
   private readonly msgs: [S | PromiseLike<S>, Reply<R>][] = [];
   private readonly settings: DeepRequired<CoroutineOptions> = {
     resume: () => clock,
@@ -108,7 +106,7 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
     this.alive = false;
     // Don't block.
     void this.state.bind({ value: undefined as any as R, done: true });
-    void this.result.bind(Promise.reject(reason));
+    void this.result.cancel(Promise.reject(reason));
     while (this.msgs.length > this.settings.size) {
       // Don't block.
       const [, reply] = this.msgs.shift()!;
