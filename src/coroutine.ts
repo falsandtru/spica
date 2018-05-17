@@ -88,7 +88,7 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
         }
       }
       catch (reason) {
-        void (this[Coroutine.terminator] || Coroutine.prototype[Coroutine.terminator]).call(this, reason);
+        void this[Coroutine.terminator](reason);
       }
     })();
   }
@@ -101,7 +101,7 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
     resume: () => clock,
     size: 0,
   };
-  public [terminator](reason?: any): void {
+  public [terminator] = (reason?: any): void => {
     if (!this.alive) return;
     this.alive = false;
     // Don't block.
