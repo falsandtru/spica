@@ -46,7 +46,7 @@ describe('Unit: lib/coroutine', () => {
       const port = co[Coroutine.port];
       assert.deepStrictEqual(
         await Promise.all([
-          port.recv(),
+          port.send(Promise.resolve(0)),
           port.send(Promise.resolve(1)),
           port.send(Promise.resolve(2)),
           port.send(Promise.resolve(3)).catch(e => e instanceof Error),

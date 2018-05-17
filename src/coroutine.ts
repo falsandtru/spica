@@ -48,7 +48,7 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
           // Block.
           const [[msg, reply]] = await Promise.all([
             // Don't block.
-            cnt === 1 || this.settings.size === 0
+            this.settings.size === 0
               ? Promise.resolve(tuple([undefined as S | undefined, noop as Reply<R>]))
               : resume(),
             // Don't block.

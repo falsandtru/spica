@@ -268,6 +268,7 @@ describe('Unit: lib/supervisor', function () {
         assert((yield 2) === 2);
         return 3;
       }, { size: Infinity }));
+      assert(await sv.call('', 0) === 1);
       assert(await sv.call('', 1) === 2);
       assert(await sv.call('', 2) === 3);
       await new Promise(resolve => void setTimeout(resolve, 100));
