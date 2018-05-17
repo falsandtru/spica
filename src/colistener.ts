@@ -5,7 +5,7 @@ import { Cancellation } from './cancellation';
 export class Colistener<T, U = void> extends Coroutine<U, T> {
   constructor(
     listen: (this: Colistener<T, U>, listener: (value: T) => void) => () => void,
-    opts: CoroutineOptions = {}
+    opts: CoroutineOptions = {},
   ) {
     super(async function* (this: Colistener<T, U>) {
       this[Coroutine.terminator] = undefined as never;
@@ -27,16 +27,20 @@ export class Colistener<T, U = void> extends Coroutine<U, T> {
       void this.catch(unlisten);
       void this.cancellation.register(unlisten);
       const done = this.cancellation.then(() => []);
+      while (queue.length > 0 && !this.cancellation.canceled) {
+        yield queue.shift()!;
+      }
       while (!this.cancellation.canceled) {
         assert(queue.length === 0);
         const q = await Promise.race([
           notifier = notifier || new Future(),
           done,
         ]);
-        while (q.length > 0) {
+        assert(q === queue || q.length === 0);
+        while (q.length > 0 && !this.cancellation.canceled) {
           yield q.shift()!;
         }
-        assert(queue.length === 0);
+        assert(queue.length === 0 || this.cancellation.canceled);
       }
       return this.cancellation;
     }, { ...opts, size: 0 });

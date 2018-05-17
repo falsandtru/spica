@@ -21,13 +21,6 @@ describe('Unit: lib/colistener', () => {
       assert(await co === undefined);
     });
 
-    it('close', async () => {
-      const co = new Colistener<Event, number>(() =>
-        () => undefined);
-      co.close(0);
-      assert(await co === 0);
-    });
-
     it('size', async () => {
       const co = new Colistener<Event>(listener => {
         document.addEventListener('click', listener);
@@ -83,6 +76,23 @@ describe('Unit: lib/colistener', () => {
       await co.catch(reason => {
         assert(reason === 0);
       });
+    });
+
+    it('close', async () => {
+      const co = new Colistener<Event, number>(listener => {
+        document.addEventListener('click', listener);
+        return () => void document.removeEventListener('click', listener);
+      }, { size: Infinity });
+      setTimeout(() => {
+        document.body.click();
+        document.body.click();
+      });
+      let cnt = 0;
+      for await (const _ of co) {
+        assert(++cnt === 1);
+        co.close(0);
+      }
+      assert(await co === 0);
     });
 
   });
