@@ -106,7 +106,10 @@ export interface Cancellation<L = undefined> extends Canceller<L>, Cancellee<L> 
   readonly close: (reason?: any) => void;
 }
 export interface Canceller<L = undefined> {
-  readonly cancel: [L] extends [void] ? (reason?: L) => void : (reason: L) => void;
+  readonly cancel: {
+    (this: Canceller<void>, reason?: L): void;
+    (reason: L): void;
+  };
 }
 export interface Cancellee<L = void> {
   readonly register: (listener: (reason: L) => void) => () => void;
@@ -508,7 +511,10 @@ export class Colistener<T, U = void> extends Coroutine<U, T> {
   constructor(
     listen: (listener: (this: Colistener<T, U>, value: T) => void) => () => void,
     options?: CoroutineOptions);
-  readonly close: [U] extends [void] ? (value?: U) => void : (value: U) => void;
+  readonly close: {
+    (this: Colistener<T, void>, value?: U): void;
+    (value: U): void;
+  };
 }
 
 export function cofetch(url: string, options?: CofetchOptions): Cofetch;

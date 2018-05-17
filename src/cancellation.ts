@@ -4,7 +4,10 @@ import { Maybe, Just, Nothing } from './monad/maybe';
 import { Either, Left, Right } from './monad/either';
 
 export interface Canceller<L = undefined> {
-  readonly cancel: [L] extends [void] ? (reason?: L) => void : (reason: L) => void;
+  readonly cancel: {
+    (this: Canceller<void>, reason?: L): void;
+    (reason: L): void;
+  };
 }
 export interface Cancellee<L = undefined> {
   readonly register: (listener: (reason: L) => void) => () => void;
