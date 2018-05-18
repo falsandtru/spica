@@ -103,19 +103,6 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
     resume: () => clock,
     size: 0,
   };
-  public [destructor]: (callback: () => void) => void = callback => void this.result.register(() => void callback());
-  public [terminator] = (reason?: any): void => {
-    if (!this.alive) return;
-    this.alive = false;
-    // Don't block.
-    void this.state.bind({ value: undefined as any as R, done: true });
-    void this.result.cancel(Promise.reject(reason));
-    while (this.msgs.length > this.settings.size) {
-      // Don't block.
-      const [, reply] = this.msgs.shift()!;
-      void reply(Promise.reject(new Error(`Spica: Coroutine: Canceled.`)));
-    }
-  }
   public readonly [Symbol.asyncIterator] = async function* (this: Coroutine<T, R, S>): AsyncIterableIterator<R> {
     while (this.alive) {
       const { value, done } = await this.state;
@@ -141,4 +128,17 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
       return res.then();
     },
   };
+  public [destructor]: (callback: () => void) => void = callback => void this.result.register(() => void callback());
+  public [terminator] = (reason?: any): void => {
+    if (!this.alive) return;
+    this.alive = false;
+    // Don't block.
+    void this.state.bind({ value: undefined as any as R, done: true });
+    void this.result.cancel(Promise.reject(reason));
+    while (this.msgs.length > this.settings.size) {
+      // Don't block.
+      const [, reply] = this.msgs.shift()!;
+      void reply(Promise.reject(new Error(`Spica: Coroutine: Canceled.`)));
+    }
+  }
 }
