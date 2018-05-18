@@ -65,18 +65,6 @@ describe('Unit: lib/coroutine', () => {
         ]);
     });
 
-    it('Skip the currect state.', async () => {
-      const port = new Coroutine<number, number, number>(async function* () {
-        yield Promise.resolve(1);
-        yield Promise.resolve(2);
-        return 2;
-      }, { size: Infinity })[Coroutine.port];
-      port.send(1);
-      assert.deepStrictEqual(await port.recv(), { value: 1, done: false });
-      port.send(2);
-      assert.deepStrictEqual(await port.recv(), { value: 2, done: false });
-    });
-
   });
 
 });

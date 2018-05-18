@@ -1,6 +1,7 @@
 import { Supervisor } from './supervisor';
 import { Coroutine } from './coroutine';
 import { tick } from './tick';
+import { wait } from './wait';
 
 describe('Unit: lib/supervisor', function () {
   describe('Supervisor', function () {
@@ -261,7 +262,6 @@ describe('Unit: lib/supervisor', function () {
       if (navigator.userAgent.includes('Edge')) return;
 
       const sv = new class TestSupervisor extends Supervisor<string, number, number> { }({
-        timeout: 10,
       });
       sv.register('', new Coroutine<number, number, number>(async function* () {
         assert((yield 1) === 1);
@@ -271,14 +271,13 @@ describe('Unit: lib/supervisor', function () {
       assert(await sv.call('', 0) === 1);
       assert(await sv.call('', 1) === 2);
       assert(await sv.call('', 2) === 3);
-      await new Promise(resolve => void setTimeout(resolve, 100));
+      await wait(100);
       assert(sv.kill('') === false);
-      assert(await sv.call('', 3).catch(e => e instanceof Error));
       const co = new Coroutine<number, number, number>(async function* () {
-        yield 0;
-        return 0;
+        return new Promise<never>(() => undefined);
       });
       sv.register('', co);
+      await wait(100);
       assert(sv.kill('') === true);
       assert(await co.then(() => 0, () => 1) === 1);
     });

@@ -22,7 +22,7 @@ export class Colistener<T, U = void> extends Coroutine<U, T> {
         }
         assert(queue.length > 0);
       });
-      await Promise.resolve();
+      await 0;
       void this[Coroutine.destructor](unlisten);
       void this.cancellation.register(unlisten);
       const done = this.cancellation.then(() => []);

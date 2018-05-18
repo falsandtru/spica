@@ -22,7 +22,7 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
         acc + sv.workers.size
       , 0);
   }
-  protected static readonly coroutine = Symbol();
+  protected static readonly initiated = Symbol();
   constructor(opts: Supervisor.Options = {}) {
     void Object.freeze(extend(this.settings, opts));
     assert(Object.isFrozen(this.settings));
@@ -100,7 +100,7 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
         }
       : process;
     return this.workers
-      .set(name, new Worker<N, P, R, S>(this, name, process, state, this.events_, state as never === Supervisor.coroutine, () =>
+      .set(name, new Worker<N, P, R, S>(this, name, process, state, this.events_, state as never === Supervisor.initiated, () =>
         void this.workers.delete(name)))
       .get(name)!
       .terminate;
@@ -299,7 +299,7 @@ class Worker<N extends string, P, R, S> {
     private readonly destructor_: () => void,
   ) {
     assert(process.init && process.exit);
-    initiated && this.init();
+    initiated && void this.init();
   }
   private destructor(reason: any): void {
     assert(this.alive === true);

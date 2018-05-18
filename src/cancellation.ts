@@ -35,6 +35,7 @@ export class Cancellation<L = undefined> extends Promise<L> implements Canceller
   private readonly state: Future<L> = new Future();
   private readonly listeners: Set<(reason: L) => void> = new Set();
   public readonly register = (listener: (reason: L) => void) => {
+    assert(listener);
     if (this.canceled_) return void handler(this.reason!), () => undefined;
     if (!this.alive) return () => undefined;
     void this.listeners.add(handler);

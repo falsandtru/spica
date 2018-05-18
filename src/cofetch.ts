@@ -18,10 +18,10 @@ export function cofetch(url: string, options?: CofetchOptions): Cofetch {
 class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
   constructor(
     url: string,
-    options: CofetchOptions = {},
+    opts: CofetchOptions = {},
   ) {
     super(async function* (this: Cofetch) {
-      await Promise.resolve();
+      await 0;
       void this[Coroutine.destructor](this.cancel);
       const xhr = new XMLHttpRequest();
       const state = new Cancellation<ProgressEvent>();
@@ -32,7 +32,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
         void ['error', 'abort', 'timeout']
           .forEach(type =>
             void xhr.addEventListener(type, state.cancel));
-        void fetch(xhr, url, options);
+        void fetch(xhr, url, opts);
         void this.cancellation.register(() =>
           xhr.readyState < 4 &&
           void xhr.abort());

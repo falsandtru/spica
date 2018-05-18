@@ -498,7 +498,7 @@ export interface CoroutinePort<R, S> {
 
 export class Coroutine<T, R = void, S = void> extends Promise<T> implements AsyncIterable<R> {
   static readonly port: unique symbol;
-  static readonly destructor: unique symbol;
+  protected static readonly destructor: unique symbol;
   static readonly terminator: unique symbol;
   constructor(
     gen: (this: Coroutine<T, R>) => Iterator<T | R> | AsyncIterator<T | R>,

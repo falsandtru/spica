@@ -21,10 +21,10 @@ export interface CoroutinePort<R, S> {
 type Reply<R> = (msg: IteratorResult<R> | Promise<never>) => void;
 
 export class Coroutine<T, R = void, S = void> extends Promise<T> implements AsyncIterable<R> {
-  static readonly port: typeof port = port;
-  static readonly destructor: typeof destructor = destructor;
-  static readonly terminator: typeof terminator = terminator;
-  static get [Symbol.species]() {
+  public static readonly port: typeof port = port;
+  protected static readonly destructor: typeof destructor = destructor;
+  public static readonly terminator: typeof terminator = terminator;
+  public static get [Symbol.species]() {
     return Promise;
   }
   constructor(
@@ -106,11 +106,11 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
   public readonly [Symbol.asyncIterator] = async function* (this: Coroutine<T, R, S>): AsyncIterableIterator<R> {
     while (this.alive) {
       const { value, done } = await this.state;
-      if (done) return;
       assert(value instanceof Promise === false);
+      if (done || this.result.canceled) return;
       yield value;
     }
-  }
+  };
   public readonly [port]: CoroutinePort<R, S> = {
     recv: () => this.state,
     send: (msg: S | PromiseLike<S>): Promise<IteratorResult<R>> => {
@@ -128,7 +128,7 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
       return res.then();
     },
   };
-  public [destructor]: (callback: () => void) => void = callback => void this.result.register(() => void callback());
+  public readonly [destructor]: (callback: () => void) => void = callback => void this.result.register(() => void callback());
   public [terminator] = (reason?: any): void => {
     if (!this.alive) return;
     this.alive = false;
@@ -140,5 +140,5 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
       const [, reply] = this.msgs.shift()!;
       void reply(Promise.reject(new Error(`Spica: Coroutine: Canceled.`)));
     }
-  }
+  };
 }

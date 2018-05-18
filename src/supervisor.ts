@@ -24,7 +24,7 @@ abstract class Supervisor2018<N extends string, P = void, R = void, S = void> ex
                 : { reply, state }),
         exit: reason => void process[Coroutine.terminator](reason),
       },
-      Supervisor.coroutine as never,
+      Supervisor.initiated as never,
       reason);
     return super.register(name, process, state);
   }
