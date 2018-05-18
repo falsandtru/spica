@@ -7,6 +7,7 @@ import { noop } from './noop';
 
 const clock = Promise.resolve();
 const port = Symbol();
+const destructor = Symbol();
 const terminator = Symbol();
 
 export interface CoroutineOptions {
@@ -21,6 +22,7 @@ type Reply<R> = (msg: IteratorResult<R> | Promise<never>) => void;
 
 export class Coroutine<T, R = void, S = void> extends Promise<T> implements AsyncIterable<R> {
   static readonly port: typeof port = port;
+  static readonly destructor: typeof destructor = destructor;
   static readonly terminator: typeof terminator = terminator;
   static get [Symbol.species]() {
     return Promise;
@@ -101,6 +103,7 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
     resume: () => clock,
     size: 0,
   };
+  public [destructor]: (callback: () => void) => void = callback => void this.result.register(() => void callback());
   public [terminator] = (reason?: any): void => {
     if (!this.alive) return;
     this.alive = false;

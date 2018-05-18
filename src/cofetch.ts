@@ -22,7 +22,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
   ) {
     super(async function* (this: Cofetch) {
       await Promise.resolve();
-      void this.catch(this.cancel);
+      void this[Coroutine.destructor](this.cancel);
       const xhr = new XMLHttpRequest();
       const state = new Cancellation<ProgressEvent>();
       const process = new Colistener<ProgressEvent, XMLHttpRequest>(listener => {
