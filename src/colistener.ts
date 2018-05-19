@@ -11,12 +11,12 @@ export class Colistener<T, U = void> extends Coroutine<U, T> {
       let notifier: Future<T[]> | undefined;
       assert(!notifier);
       const queue: T[] = [];
-      const unlisten = listen.call(this, (val: T) => {
+      const unlisten = listen.call(this, (value: T) => {
         if (notifier && queue.length === 0) {
           void notifier.bind(queue);
           notifier = undefined;
         }
-        void queue.push(val);
+        void queue.push(value);
         while (queue.length > (opts.size || 1)) {
           void queue.shift()!;
         }
