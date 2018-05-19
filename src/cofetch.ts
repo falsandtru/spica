@@ -21,7 +21,6 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
     opts: CofetchOptions = {},
   ) {
     super(async function* (this: Cofetch) {
-      await 0;
       void this[Coroutine.destructor](this.cancel);
       const xhr = new XMLHttpRequest();
       const state = new Cancellation<ProgressEvent>();
@@ -49,7 +48,8 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
             process.close);
       }
       return process;
-    });
+    }, {}, false);
+    void this[Coroutine.run]();
   }
   private readonly cancellation = new Cancellation();
   public readonly cancel: () => void = this.cancellation.cancel;

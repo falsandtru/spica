@@ -3,9 +3,11 @@ import { Cancellation } from './cancellation';
 import { DeepRequired } from './type';
 import { extend } from './assign';
 import { tuple } from './tuple';
+import { tick } from './tick';
 import { noop } from './noop';
 
 const clock = Promise.resolve();
+const run = Symbol();
 const port = Symbol();
 const destructor = Symbol();
 const terminator = Symbol();
@@ -21,6 +23,7 @@ export interface CoroutinePort<R, S> {
 type Reply<R> = (msg: IteratorResult<R> | Promise<never>) => void;
 
 export class Coroutine<T, R = void, S = void> extends Promise<T> implements AsyncIterable<R> {
+  protected static readonly run: typeof run = run;
   public static readonly port: typeof port = port;
   protected static readonly destructor: typeof destructor = destructor;
   public static readonly terminator: typeof terminator = terminator;
@@ -30,13 +33,15 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
   constructor(
     gen: (this: Coroutine<T, R>) => Iterator<T | R> | AsyncIterator<T | R>,
     opts: CoroutineOptions = {},
+    autorun: boolean = true,
   ) {
     super(resolve => res = resolve);
     var res!: (v: T | Promise<never>) => void;
     this.result.register(res);
     void Object.freeze(extend(this.settings, opts));
-    void (async () => {
+    this[Coroutine.run] = async () => {
       try {
+        this[Coroutine.run] = noop;
         const resume = async (): Promise<[S, Reply<R>]> =>
           this.msgs.length > 0
             ? Promise.all(this.msgs.shift()!)
@@ -92,8 +97,12 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
       catch (reason) {
         void this[Coroutine.terminator](reason);
       }
-    })();
+    };
+    autorun
+      ? void this[Coroutine.run]()
+      : void tick(() => void this[Coroutine.run]());
   }
+  protected [run]: () => void;
   private alive = true;
   private state = new Future<IteratorResult<R>>();
   private resume = new Future();

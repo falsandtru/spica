@@ -22,7 +22,6 @@ export class Colistener<T, U = void> extends Coroutine<U, T> {
         }
         assert(queue.length > 0);
       });
-      await 0;
       void this[Coroutine.destructor](unlisten);
       void this.cancellation.register(unlisten);
       const done = this.cancellation.then(() => []);
@@ -42,7 +41,8 @@ export class Colistener<T, U = void> extends Coroutine<U, T> {
         assert(queue.length === 0 || this.cancellation.canceled);
       }
       return this.cancellation;
-    }, { ...opts, size: 0 });
+    }, { ...opts, size: 0 }, false);
+    void this[Coroutine.run]();
   }
   private readonly cancellation: Cancellation<U> = new Cancellation();
   public readonly close: {
