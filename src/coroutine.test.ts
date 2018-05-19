@@ -41,8 +41,8 @@ describe('Unit: lib/coroutine', () => {
 
     it('port', async () => {
       const co = new Coroutine<number, number, number>(async function* () {
-        assert((yield Promise.resolve(0)) === 1);
-        assert((yield Promise.resolve(1)) === 2);
+        assert(1 === (yield Promise.resolve(0)));
+        assert(2 === (yield Promise.resolve(1)));
         return 2;
       }, { size: Infinity });
       const port = co[Coroutine.port];

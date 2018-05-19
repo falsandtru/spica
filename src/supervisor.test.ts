@@ -264,8 +264,8 @@ describe('Unit: lib/supervisor', function () {
       const sv = new class TestSupervisor extends Supervisor<string, number, number> { }({
       });
       sv.register('', new Coroutine<number, number, number>(async function* () {
-        assert((yield 0) === 1);
-        assert((yield 1) === 2);
+        assert(1 === (yield 0));
+        assert(2 === (yield 1));
         return 2;
       }, { size: Infinity }));
       assert(await sv.call('', 1) === 1);
