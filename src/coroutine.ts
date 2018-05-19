@@ -65,6 +65,7 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
                   : this.settings.resume(),
               ]);
           assert(msg instanceof Promise === false);
+          // Block.
           const { value: val, done } = await iter.next(msg);
           const value = await val; // Workaround for the TypeScript's bug.
           assert(value instanceof Promise === false);
@@ -83,8 +84,7 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
           else {
             this.alive = false;
             // Block.
-            await this.state.bind({ value: undefined as any as R, done });
-            // Don't block.
+            void this.state.bind({ value: undefined as any as R, done });
             void reply({ value: undefined as any as R, done });
             void this.result.cancel(value as T);
             while (this.msgs.length > 0) {
@@ -144,7 +144,7 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
     // Don't block.
     void this.state.bind({ value: undefined as any as R, done: true });
     void this.result.cancel(Promise.reject(reason));
-    while (this.msgs.length > this.settings.size) {
+    while (this.msgs.length > 0) {
       // Don't block.
       const [, reply] = this.msgs.shift()!;
       void reply(Promise.reject(new Error(`Spica: Coroutine: Canceled.`)));

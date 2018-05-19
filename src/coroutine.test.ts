@@ -43,7 +43,7 @@ describe('Unit: lib/coroutine', () => {
       const co = new Coroutine<number, number, number>(async function* () {
         assert((yield Promise.resolve(1)) === 1);
         assert((yield Promise.resolve(2)) === 2);
-        return 2;
+        return 3;
       }, { size: Infinity });
       const port = co[Coroutine.port];
       assert.deepStrictEqual(
@@ -60,7 +60,7 @@ describe('Unit: lib/coroutine', () => {
           { value: 2, done: false },
           { value: undefined, done: true },
           true,
-          2,
+          3,
           true,
         ]);
     });
