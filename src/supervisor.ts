@@ -13,13 +13,13 @@ abstract class Supervisor2018<N extends string, P = void, R = void, S = void> ex
       name,
       {
         init: state => state,
-        main: (param, state) =>
+        main: (param, state, kill) =>
           process[Coroutine.port].send(param)
             .then(({ value: reply, done }) =>
               done
                 ? process
                     .then(reply =>
-                      void this.kill(name, undefined) ||
+                      void kill() ||
                       { reply, state })
                 : { reply, state }),
         exit: reason => void process[Coroutine.terminator](reason),

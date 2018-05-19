@@ -259,7 +259,7 @@ export namespace Supervisor {
   };
   export namespace Process {
     export type Init<S> = (state: S) => S;
-    export type Main<P, R, S> = (param: P, state: S) => Result<R, S> | PromiseLike<Result<R, S>>;
+    export type Main<P, R, S> = (param: P, state: S, kill: (reason?: any) => void) => Result<R, S> | PromiseLike<Result<R, S>>;
     export type Exit<S> = (reason: any, state: S) => void;
     export type Result<R, S> = [R, S] | { reply: R; state: S; };
   }
@@ -350,7 +350,7 @@ class Worker<N extends string, P, R, S> {
       if (!this.initiated) {
         void this.init();
       }
-      void Promise.resolve(this.process.main(param, this.state)).then(resolve, reject);
+      void Promise.resolve(this.process.main(param, this.state, this.terminate)).then(resolve, reject);
     })
       .then(
         result => {
