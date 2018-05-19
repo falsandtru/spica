@@ -53,7 +53,7 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
         while (this.alive) {
           void ++cnt;
           // Block.
-          const [[msg, reply]] = this.settings.size === 0 && cnt === 1
+          const [[msg, reply]] = cnt === 1
             ? [[undefined as S | undefined, noop as Reply<R>]]
             : await Promise.all([
                 // Don't block.
@@ -61,9 +61,7 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
                   ? Promise.resolve(tuple([undefined as S | undefined, noop as Reply<R>]))
                   : resume(),
                 // Don't block.
-                cnt === 1
-                  ? undefined
-                  : this.settings.resume(),
+                this.settings.resume(),
               ]);
           assert(msg instanceof Promise === false);
           // Block.

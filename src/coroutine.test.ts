@@ -41,14 +41,14 @@ describe('Unit: lib/coroutine', () => {
 
     it('port', async () => {
       const co = new Coroutine<number, number, number>(async function* () {
-        assert((yield Promise.resolve(1)) === 1);
-        assert((yield Promise.resolve(2)) === 2);
-        return 3;
+        assert((yield Promise.resolve(0)) === 1);
+        assert((yield Promise.resolve(1)) === 2);
+        return 2;
       }, { size: Infinity });
       const port = co[Coroutine.port];
       assert.deepStrictEqual(
         await Promise.all([
-          port.send(Promise.resolve(0)),
+          port.recv(),
           port.send(Promise.resolve(1)),
           port.send(Promise.resolve(2)),
           port.send(Promise.resolve(3)).catch(e => e instanceof Error),
@@ -56,11 +56,11 @@ describe('Unit: lib/coroutine', () => {
           port.send(Promise.resolve(4)).catch(e => e instanceof Error),
         ]),
         [
+          { value: 0, done: false },
           { value: 1, done: false },
-          { value: 2, done: false },
           { value: undefined, done: true },
           true,
-          3,
+          2,
           true,
         ]);
     });

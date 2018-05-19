@@ -264,13 +264,12 @@ describe('Unit: lib/supervisor', function () {
       const sv = new class TestSupervisor extends Supervisor<string, number, number> { }({
       });
       sv.register('', new Coroutine<number, number, number>(async function* () {
-        assert((yield 1) === 1);
-        assert((yield 2) === 2);
-        return 3;
+        assert((yield 0) === 1);
+        assert((yield 1) === 2);
+        return 2;
       }, { size: Infinity }));
-      assert(await sv.call('', 0) === 1);
-      assert(await sv.call('', 1) === 2);
-      assert(await sv.call('', 2) === 3);
+      assert(await sv.call('', 1) === 1);
+      assert(await sv.call('', 2) === 2);
       await wait(100);
       assert(sv.kill('') === false);
       const co = new Coroutine<number, number, number>(async function* () {
