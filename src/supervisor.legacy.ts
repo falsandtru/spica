@@ -100,7 +100,7 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
         }
       : process;
     return this.workers
-      .set(name, new Worker<N, P, R, S>(this, name, process, state, this.events_, state as never === Supervisor.initiated, () =>
+      .set(name, new Worker<N, P, R, S>(this, name, process, state, state as never === Supervisor.initiated, this.events_, () =>
         void this.workers.delete(name)))
       .get(name)!
       .terminate;
@@ -291,11 +291,11 @@ class Worker<N extends string, P, R, S> {
     public readonly name: N,
     public readonly process: Supervisor.Process<P, R, S>,
     public state: S,
+    initiated: boolean,
     private readonly events: {
       readonly init: Publisher<never[] | [N], Supervisor.Event.Data.Init<N, P, R, S>, any>;
       readonly exit: Publisher<never[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>;
     },
-    initiated: boolean,
     private readonly destructor_: () => void,
   ) {
     assert(process.init && process.exit);
