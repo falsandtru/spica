@@ -37,7 +37,8 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
   ) {
     super(resolve => res = resolve);
     var res!: (v: T | Promise<never>) => void;
-    this.result.register(res);
+    void this.result.register(res);
+    void this.result.register(() => void this[Coroutine.destructor]());
     void Object.freeze(extend(this.settings, opts));
     this[Coroutine.run] = async () => {
       try {
@@ -137,7 +138,6 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
       return res.then();
     },
   };
-  public readonly [destructor]: (callback: () => void) => void = callback => void this.result.register(() => void callback());
   public [terminator] = (reason?: any): void => {
     if (!this.alive) return;
     this.alive = false;
@@ -150,4 +150,5 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
       void reply(Promise.reject(new Error(`Spica: Coroutine: Canceled.`)));
     }
   };
+  protected [destructor]: () => void = noop;
 }

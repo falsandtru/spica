@@ -507,8 +507,8 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
     autorun?: boolean);
   [Symbol.asyncIterator](): AsyncIterableIterator<R>;
   //[Coroutine.port]: CoroutinePort<R, S>;
-  //[Coroutine.destructor]: (callback: () => void) => void;
   //[Coroutine.terminator](reason?: any): void;
+  //protected [Coroutine.destructor]: () => void;
 }
 
 export class Colistener<T, U = void> extends Coroutine<U, T> {
