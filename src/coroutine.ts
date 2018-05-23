@@ -4,10 +4,9 @@ import { Either, Left, Right } from './either';
 import { DeepRequired } from './type';
 import { extend } from './assign';
 import { tuple } from './tuple';
-import { tick } from './tick';
+import { clock, tick } from './clock';
 import { noop } from './noop';
 
-const clock = Promise.resolve();
 const run = Symbol();
 const port = Symbol();
 const destructor = Symbol();

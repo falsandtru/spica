@@ -1,7 +1,7 @@
 import { Observation, Observer, Publisher } from './observation';
 import { DeepRequired } from './type';
 import { extend } from './assign';
-import { tick } from './tick';
+import { tick } from './clock';
 import { sqid } from './sqid';
 import { noop } from './noop';
 import { causeAsyncException } from './exception';

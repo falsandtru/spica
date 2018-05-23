@@ -1,5 +1,5 @@
 import { Observation, RegisterItem, RegisterItemType } from './observation';
-import { tick } from './tick';
+import { tick } from './clock';
 
 describe('Unit: lib/observation', function () {
   describe('Observation', function () {

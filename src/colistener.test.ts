@@ -1,5 +1,5 @@
 import { Colistener } from './colistener';
-import { wait } from './wait';
+import { wait } from './clock';
 
 describe('Unit: lib/colistener', () => {
   if (navigator.userAgent.includes('Edge')) return;
