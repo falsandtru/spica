@@ -4,7 +4,7 @@ export class Future<T = undefined> extends Promise<T> {
   }
   constructor() {
     let state = true;
-    let bind: (value: T | PromiseLike<T>) => Promise<T>;
+    let bind: (value: T | PromiseLike<T>) => Future<T>;
     super(resolve =>
       bind = value => {
         if (!state) throw new Error(`Spica: Future: Cannot rebind a value.`);

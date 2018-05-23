@@ -488,7 +488,7 @@ export class Future<T = undefined> extends Promise<T> {
 }
 
 export interface CoroutineOptions {
-  readonly resume?: () => Promise<void>;
+  readonly resume?: () => PromiseLike<void>;
   readonly size?: number;
 }
 export interface CoroutinePort<R, S> {

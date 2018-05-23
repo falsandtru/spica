@@ -14,7 +14,7 @@ const destructor = Symbol();
 const terminator = Symbol();
 
 export interface CoroutineOptions {
-  readonly resume?: () => Promise<void>;
+  readonly resume?: () => PromiseLike<void>;
   readonly size?: number;
 }
 export interface CoroutinePort<R, S> {

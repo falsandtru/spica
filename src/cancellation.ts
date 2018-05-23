@@ -64,7 +64,7 @@ export class Cancellation<L = undefined> extends Promise<L> implements Canceller
     void this.listeners
       .forEach(cb =>
         void cb(reason!));
-  }) as any;
+  });
   public readonly close = (reason?: any) => {
     if (!this.alive) return;
     this.alive = false;
