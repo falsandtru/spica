@@ -4,7 +4,7 @@ const value = Symbol();
 const queue = Symbol();
 const resume = Symbol();
 
-export class AtomicPromise<T> implements PromiseLike<T> {
+export class AtomicPromise<T> implements Promise<T> {
   public static get [Symbol.species]() {
     return AtomicPromise;
   }

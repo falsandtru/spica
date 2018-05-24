@@ -482,7 +482,7 @@ declare class HCons<a, c extends HNil | HList<any, any>> {
   tuple<a, b, c, d, e, f, g, h, i>(this: HList<a, HList<b, HList<c, HList<d, HList<e, HList<f, HList<g, HList<h, HList<i, HNil>>>>>>>>>): [a, b, c, d, e, f, g, h, i];
 }
 
-export class AtomicPromise<T> implements PromiseLike<T> {
+export class AtomicPromise<T> implements Promise<T> {
   static [Symbol.species]: typeof AtomicPromise;
   readonly [Symbol.toStringTag]: 'Promise';
   static resolve(): AtomicPromise<void>;
