@@ -1,4 +1,5 @@
-import { Future } from './future';
+import { AtomicPromise } from './promise';
+import { AtomicFuture } from './future';
 import { causeAsyncException } from './exception';
 import { Maybe, Just, Nothing } from './monad/maybe';
 import { Either, Left, Right } from './monad/either';
@@ -12,14 +13,14 @@ export interface Canceller<L = undefined> {
 export interface Cancellee<L = undefined> {
   readonly register: (listener: (reason: L) => void) => () => void;
   readonly canceled: boolean;
-  readonly promise: <T>(val: T) => Promise<T>;
+  readonly promise: <T>(val: T) => AtomicPromise<T>;
   readonly maybe: <T>(val: T) => Maybe<T>;
   readonly either: <R>(val: R) => Either<L, R>;
 }
 
-export class Cancellation<L = undefined> extends Promise<L> implements Canceller<L>, Cancellee<L> {
+export class Cancellation<L = undefined> extends AtomicPromise<L> implements Canceller<L>, Cancellee<L> {
   static get [Symbol.species]() {
-    return Promise;
+    return AtomicPromise;
   }
   constructor(cancelees: Iterable<Cancellee<L>> = []) {
     super(res => resolve = res);
@@ -32,7 +33,7 @@ export class Cancellation<L = undefined> extends Promise<L> implements Canceller
   private alive = true;
   private canceled_ = false;
   private reason?: L;
-  private readonly state: Future<L> = new Future();
+  private readonly state: AtomicFuture<L> = new AtomicFuture();
   private readonly listeners: Set<(reason: L) => void> = new Set();
   public readonly register = (listener: (reason: L) => void) => {
     assert(listener);
@@ -68,17 +69,17 @@ export class Cancellation<L = undefined> extends Promise<L> implements Canceller
   public readonly close = (reason?: any) => {
     if (!this.alive) return;
     this.alive = false;
-    void this.state.bind(Promise.reject(reason));
+    void this.state.bind(AtomicPromise.reject(reason));
     void Object.freeze(this.listeners);
     void Object.freeze(this);
   };
   public get canceled(): boolean {
     return this.canceled_;
   }
-  public readonly promise = <T>(val: T): Promise<T> =>
+  public readonly promise = <T>(val: T): AtomicPromise<T> =>
     this.canceled_
-      ? Promise.reject(this.reason)
-      : Promise.resolve(val);
+      ? AtomicPromise.reject(this.reason)
+      : AtomicPromise.resolve(val);
   public readonly maybe = <T>(val: T): Maybe<T> =>
     this.canceled_
       ? Nothing

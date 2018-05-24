@@ -1,5 +1,6 @@
+import { AtomicPromise } from './promise';
+import { AtomicFuture } from './future';
 import { Coroutine, CoroutineOptions } from './coroutine';
-import { Future } from './future';
 import { Cancellation } from './cancellation';
 
 export class Colistener<T, U = void> extends Coroutine<U, T> {
@@ -8,7 +9,7 @@ export class Colistener<T, U = void> extends Coroutine<U, T> {
     opts: CoroutineOptions = {},
   ) {
     super(async function* (this: Colistener<T, U>) {
-      let notifier: Future<T[]> | undefined;
+      let notifier: AtomicFuture<T[]> | undefined;
       assert(!notifier);
       const queue: T[] = [];
       this[Coroutine.destructor] = listen.call(this, (value: T) => {
@@ -26,16 +27,18 @@ export class Colistener<T, U = void> extends Coroutine<U, T> {
       const done = this.cancellation.then(() => []);
       while (queue.length > 0 && !this.cancellation.canceled) {
         yield queue.shift()!;
+        await 0;
       }
       while (!this.cancellation.canceled) {
         assert(queue.length === 0);
-        const q = await Promise.race([
-          notifier = notifier || new Future(),
+        const q = await AtomicPromise.race([
+          notifier = notifier || new AtomicFuture(),
           done,
         ]);
         assert(q === queue || q.length === 0);
         while (q.length > 0 && !this.cancellation.canceled) {
           yield q.shift()!;
+          await 0;
         }
         assert(queue.length === 0 || this.cancellation.canceled);
       }

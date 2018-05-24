@@ -1,7 +1,7 @@
 {
   "name": "spica",
   "version": "0.0.181",
-  "description": "Supervisor/Actor, Coroutine, Cancellation, Sequence, Maybe, Either, and some utils.",
+  "description": "Supervisor/Actor, AtomicPromise, Coroutine, Cancellation, Sequence, Maybe, Either, and some utils.",
   "private": true,
   "homepage": "https://github.com/falsandtru/spica",
   "repository": {

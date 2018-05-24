@@ -4,7 +4,7 @@
 [![Coverage Status](https://coveralls.io/repos/falsandtru/spica/badge.svg?branch=master&service=github)](https://coveralls.io/github/falsandtru/spica?branch=master)
 [![Dependency Status](https://gemnasium.com/falsandtru/spica.svg)](https://gemnasium.com/falsandtru/spica)
 
-Supervisor/Actor, Coroutine, Cancellation, Sequence, Maybe, Either, and some utils.
+Supervisor/Actor, AtomicPromise, Coroutine, Cancellation, Sequence, Maybe, Either, and some utils.
 
 ## Install
 
@@ -28,6 +28,7 @@ $ npm i spica
 - tuple
 - List, Nil
 - HList, HNil
+- AtomicPromise
 - Coroutine, Cofetch, Colistener
 - DataMap
 - AttrMap

@@ -1,3 +1,4 @@
+import { AtomicPromise } from './promise';
 import { Observation, Observer, Publisher } from './observation';
 import { DeepRequired } from './type';
 import { extend } from './assign';
@@ -105,14 +106,14 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
       .get(name)!
       .terminate;
   }
-  public call(name: N | ('' extends N ? undefined : never), param: P, timeout?: number): Promise<R>;
+  public call(name: N | ('' extends N ? undefined : never), param: P, timeout?: number): AtomicPromise<R>;
   public call(name: N | ('' extends N ? undefined : never), param: P, callback: Supervisor.Callback<R>, timeout?: number): void;
-  public call(name: N | ('' extends N ? undefined : never), param: P, callback: Supervisor.Callback<R> | number = this.settings.timeout, timeout = this.settings.timeout): Promise<R> | void {
+  public call(name: N | ('' extends N ? undefined : never), param: P, callback: Supervisor.Callback<R> | number = this.settings.timeout, timeout = this.settings.timeout): AtomicPromise<R> | void {
     return this.call_(name === undefined ? new NamePool(this.workers) : name, param, callback, timeout);
   }
-  private call_(name: N | NamePool<N>, param: P, callback: Supervisor.Callback<R> | number, timeout: number): Promise<R> | void {
+  private call_(name: N | NamePool<N>, param: P, callback: Supervisor.Callback<R> | number, timeout: number): AtomicPromise<R> | void {
     void this.throwErrorIfNotAvailable();
-    if (typeof callback === 'number') return new Promise<R>((resolve, reject) =>
+    if (typeof callback === 'number') return new AtomicPromise<R>((resolve, reject) =>
       void this.call_(name, param, (result, err) => err ? reject(err) : resolve(result), timeout));
     void this.messages.push([
       name,
@@ -146,7 +147,7 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
     void result.catch(noop);
     return true;
   }
-  private cast_(name: N | NamePool<N>, param: P, timeout: number): Promise<R> | undefined {
+  private cast_(name: N | NamePool<N>, param: P, timeout: number): AtomicPromise<R> | undefined {
     void this.throwErrorIfNotAvailable();
     const names = typeof name === 'string'
       ? [name]
@@ -341,16 +342,16 @@ class Worker<N extends string, P, R, S> {
       void this.sv.terminate(reason_);
     }
   }
-  public call([param, expiry]: [P, number]): Promise<R> | undefined {
+  public call([param, expiry]: [P, number]): AtomicPromise<R> | undefined {
     const now = Date.now();
     if (!this.available || now > expiry) return;
-    return new Promise<Supervisor.Process.Result<R, S>>((resolve, reject) => {
+    return new AtomicPromise<Supervisor.Process.Result<R, S>>((resolve, reject) => {
       isFinite(expiry) && void setTimeout(() => void reject(new Error()), expiry - now);
       this.available = false;
       if (!this.initiated) {
         void this.init();
       }
-      void Promise.resolve(this.process.main(param, this.state, this.terminate)).then(resolve, reject);
+      void AtomicPromise.resolve(this.process.main(param, this.state, this.terminate)).then(resolve, reject);
     })
       .then(
         result => {

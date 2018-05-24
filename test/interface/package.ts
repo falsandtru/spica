@@ -11,7 +11,8 @@ import {
   tuple,
   NonEmptyList, Nil,
   NonEmptyHList, HNil,
-  Future,
+  AtomicPromise,
+  Future, AtomicFuture,
   Coroutine, Colistener,
   cofetch,
   DataMap, AttrMap,
@@ -127,9 +128,20 @@ describe('Interface: Package', function () {
 
   });
 
+  describe('Promise', function () {
+    it('AtomicPromise', function () {
+      assert(typeof AtomicPromise === 'function');
+    });
+
+  });
+
   describe('Future', function () {
     it('Future', function () {
       assert(typeof Future === 'function');
+    });
+
+    it('AtomicFuture', function () {
+      assert(typeof AtomicFuture === 'function');
     });
 
   });
