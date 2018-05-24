@@ -126,6 +126,7 @@ gulp.task('karma:test', function (done) {
       'dist/*.js': ['coverage', 'espower']
     },
     reporters: ['dots', 'coverage'],
+    concurrency: 1,
     singleRun: true
   }, done).start();
 });
@@ -134,6 +135,7 @@ gulp.task('karma:bench', function (done) {
   new Server({
     configFile: __dirname + '/karma.conf.js',
     browsers: config.browsers,
+    concurrency: 1,
     singleRun: true
   }, done).start();
 });
@@ -146,6 +148,7 @@ gulp.task('karma:ci', function (done) {
       'dist/*.js': ['coverage', 'espower']
     },
     reporters: ['dots', 'coverage', 'coveralls'],
+    concurrency: 1,
     singleRun: true
   }, done).start();
 });
