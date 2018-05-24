@@ -58,8 +58,8 @@ const config = {
   } else if (typeof module === 'object' && module.exports) {
       module.exports = factory();
   } else {
-      root.returnExports = factory();
-}
+      //root.returnExports = factory();
+  }
 }(typeof self !== 'undefined' ? self : this, function () {
   return require('${pkg.name}');
 }));
@@ -89,6 +89,7 @@ function compile({ src, dest }, opts = {}) {
       .on("error", err => done = console.log(err + ''))
       .pipe(source(`${pkg.name}.js`))
       .pipe(buffer())
+      .pipe($.footer(config.module))
       .once('finish', () => console.timeEnd('bundle'))
       .once("finish", () => done || force || process.exit(1))
       .pipe(gulp.dest(dest));
@@ -115,7 +116,6 @@ gulp.task('ts:dist', function () {
   return compile(config.ts.dist)
     .pipe($.unassert())
     .pipe($.header(config.banner))
-    .pipe($.footer(config.module))
     .pipe(gulp.dest(config.ts.dist.dest))
     .pipe($.rename({ extname: '.min.js' }))
     .pipe(minify({ output: { comments: /^!/ } }))
