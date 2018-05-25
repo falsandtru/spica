@@ -45,8 +45,8 @@ export class Maybe<a> extends MonadPlus<a> {
     return this.bind(m => m);
   }
   public extract(): a
-  public extract(transform: () => a): a
-  public extract<b>(transform: () => b): a | b
+  public extract(nothing: () => a): a
+  public extract<b>(nothing: () => b): a | b
   public extract<b>(nothing: () => b, just: (a: a) => b): b
   public extract<b>(nothing?: () => b, just?: (a: a) => b): a | b {
     return !just
