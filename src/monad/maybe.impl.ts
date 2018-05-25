@@ -1,4 +1,5 @@
 import { MonadPlus } from './monadplus';
+import { AtomicPromise } from '../promise';
 
 export class Maybe<a> extends MonadPlus<a> {
   private readonly MAYBE!: Just<a> | Nothing;
@@ -69,12 +70,16 @@ export namespace Maybe {
     (f: (a: a) => Nothing): Maybe<a>;
     <b>(f: (a: a) => Maybe<b>): Maybe<b>;
   };
-  export function sequence<a>(ms: Maybe<a>[]): Maybe<a[]> {
-    return ms.reduce((acc, m) =>
-      acc.bind(as =>
-        m.fmap(a =>
-          as.concat([a])))
-    , Return<a[]>([]))
+  export function sequence<a>(fm: Maybe<a>[]): Maybe<a[]>;
+  export function sequence<a>(fm: Maybe<PromiseLike<a>>): AtomicPromise<Maybe<a>>;
+  export function sequence<a>(fm: Maybe<a>[] | Maybe<PromiseLike<a>>): Maybe<a[]> | AtomicPromise<Maybe<a>> {
+    return fm instanceof Maybe
+      ? fm.extract(() => AtomicPromise.resolve(Maybe.mzero), a => AtomicPromise.resolve(a).then(Return))
+      : fm.reduce((acc, m) =>
+          acc.bind(as =>
+            m.fmap(a =>
+              as.concat([a])))
+        , Return<a[]>([]));
   }
 }
 

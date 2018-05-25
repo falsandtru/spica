@@ -255,7 +255,8 @@ declare namespace Monad.Maybe {
       (f: (a: a) => Nothing): Maybe<a>;
       <b>(f: (a: a) => Maybe<b>): Maybe<b>;
     }
-    export function sequence<a>(ms: Maybe<a>[]): Maybe<a[]>;
+    export function sequence<a>(fm: Maybe<a>[]): Maybe<a[]>;
+    export function sequence<a>(fm: Maybe<PromiseLike<a>>): AtomicPromise<Maybe<a>>;
     export const mzero: Maybe<never>;
     export function mplus<a>(ml: Maybe<a>, mr: Nothing): Maybe<a>;
     export function mplus<a>(ml: Nothing, mr: Maybe<a>): Maybe<a>;
@@ -326,7 +327,8 @@ declare namespace Monad.Either {
     export const Return: typeof pure;
     export function bind<e, a, b>(m: Either<e, a>, f: (a: a) => Either<e, b>): Either<e, b>;
     export function bind<e, a>(m: Either<e, a>): <b>(f: (a: a) => Either<e, b>) => Either<e, b>;
-    export function sequence<a, b>(ms: Either<a, b>[]): Either<a, b[]>;
+    export function sequence<a, b>(fm: Either<a, b>[]): Either<a, b[]>;
+    export function sequence<a, b>(fm: Either<a, PromiseLike<b>>): AtomicPromise<Either<a, b>>;
   }
   export class Left<a> extends Either<a, never> {
     private readonly LEFT: a;

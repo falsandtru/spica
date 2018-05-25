@@ -153,9 +153,12 @@ describe('Unit: lib/maybe', () => {
       assert(Return(Return(0)).join().extract() === 0);
     });
 
-    it('sequence', () => {
+    it('sequence', async () => {
       assert.deepStrictEqual(Maybe.sequence([Just(0), Just(1)]).extract(), [0, 1]);
       assert.deepStrictEqual(Maybe.sequence([Nothing, Just(1)]).extract(() => [] as number[]), []);
+      assert(await Maybe.sequence(Just(Promise.resolve(0))).then(m => m.extract()) === 0);
+      assert(await Maybe.sequence(Just(Promise.reject(1))).catch(b => b) === 1);
+      assert(await Maybe.sequence(Nothing) === Nothing);
     });
 
     it('Monad law 1', () => {

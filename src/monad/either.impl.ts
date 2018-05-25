@@ -1,4 +1,5 @@
 import { Monad } from './monad';
+import { AtomicPromise } from '../promise';
 
 export class Either<a, b> extends Monad<b> {
   private readonly EITHER!: Left<a> | Right<b>;
@@ -62,12 +63,16 @@ export namespace Either {
   export const Return = pure;
   export declare function bind<e, a, b>(m: Either<e, a>, f: (a: a) => Either<e, b>): Either<e, b>
   export declare function bind<e, a>(m: Either<e, a>): <b>(f: (a: a) => Either<e, b>) => Either<e, b>
-  export function sequence<a, b>(ms: Either<a, b>[]): Either<a, b[]> {
-    return ms.reduce((acc, m) =>
-      acc.bind(bs =>
-        m.fmap(b =>
-          bs.concat([b])))
-    , Return<a, b[]>([]))
+  export function sequence<a, b>(fm: Either<a, b>[]): Either<a, b[]>;
+  export function sequence<a, b>(fm: Either<a, PromiseLike<b>>): AtomicPromise<Either<a, b>>;
+  export function sequence<a, b>(fm: Either<a, b>[] | Either<a, PromiseLike<b>>): Either<a, b[]> | AtomicPromise<Either<a, b>> {
+    return fm instanceof Either
+      ? fm.extract(b => AtomicPromise.resolve<Either<a, b>>(new Left(b)), a => AtomicPromise.resolve(a).then<Either<a, b>>(Return))
+      : fm.reduce((acc, m) =>
+          acc.bind(as =>
+            m.fmap(a =>
+              as.concat([a])))
+        , Return<a, b[]>([]));
   }
 }
 

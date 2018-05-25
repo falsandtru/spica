@@ -148,9 +148,12 @@ describe('Unit: lib/either', () => {
       assert(Return(Return(0)).join().extract() === 0);
     });
 
-    it('sequence', () => {
+    it('sequence', async () => {
       assert.deepStrictEqual(Either.sequence([Right(0), Right(1)]).extract(), [0, 1]);
       assert.deepStrictEqual(Either.sequence([Left([]), Right(1)]).extract(a => a), []);
+      assert(await Either.sequence(Right(Promise.resolve(0))).then(m => m.extract()) === 0);
+      assert(await Either.sequence(Right(Promise.reject(1))).catch(a => a) === 1);
+      assert(await Either.sequence(Left(1)).then(m => m.extract(a => a)) === 1);
     });
 
     it('Monad law 1', () => {
