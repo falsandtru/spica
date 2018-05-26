@@ -9,7 +9,7 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
   static readonly count: number;
   static readonly procs: number;
   static readonly terminator: unique symbol;
-  constructor(options?: SupervisorOptions);
+  constructor(opts?: SupervisorOptions);
   readonly id: string;
   readonly name: string;
   readonly events: {
@@ -58,7 +58,7 @@ export interface SupervisorOptions {
 }
 
 export class Observation<N extends any[], D, R> {
-  constructor(options?: ObservationOptions);
+  constructor(opts?: ObservationOptions);
 }
 export interface ObservationOptions {
   readonly limit?: number;
@@ -69,8 +69,8 @@ export interface Observation<N extends any[], D, R>
   refs(namespace: never[] | N): RegisterItem<N, D, R>[];
 }
 export interface Observer<N extends any[], D, R> {
-  monitor(namespace: N, listener: Monitor<N, D>, options?: ObserverOptions): () => void;
-  on(namespace: N, listener: Subscriber<N, D, R>, options?: ObserverOptions): () => void;
+  monitor(namespace: N, listener: Monitor<N, D>, opts?: ObserverOptions): () => void;
+  on(namespace: N, listener: Subscriber<N, D, R>, opts?: ObserverOptions): () => void;
   off(namespace: N, listener?: Subscriber<N, D, R>): void;
   once(namespace: N, listener: Subscriber<N, D, R>): () => void;
 }
@@ -89,12 +89,12 @@ type RegisterItem<N extends any[], D, R> = {
   type: 'monitor';
   namespace: N;
   listener: Monitor<N, D>;
-  options: ObserverOptions;
+  opts: ObserverOptions;
  } | {
   type: 'subscriber';
   namespace: N;
   listener: Subscriber<N, D, R>;
-  options: ObserverOptions;
+  opts: ObserverOptions;
 };
 
 export class Cancellation<L = undefined> extends Promise<L> {
@@ -531,7 +531,7 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
   static readonly terminator: unique symbol;
   constructor(
     gen: (this: Coroutine<T, R>) => Iterator<T | R> | AsyncIterator<T | R>,
-    options?: CoroutineOptions,
+    opts?: CoroutineOptions,
     autorun?: boolean);
   [Symbol.asyncIterator](): AsyncIterableIterator<R>;
   //[Coroutine.port]: CoroutinePort<R, S>;
@@ -550,14 +550,14 @@ export interface CoroutinePort<R, S> {
 export class Colistener<T, U = void> extends Coroutine<U, T> {
   constructor(
     listen: (listener: (this: Colistener<T, U>, value: T) => void) => () => void,
-    options?: CoroutineOptions);
+    opts?: CoroutineOptions);
   readonly close: {
     (this: Colistener<T, void>, value?: U): void;
     (value: U): void;
   };
 }
 
-export function cofetch(url: string, options?: CofetchOptions): Cofetch;
+export function cofetch(url: string, opts?: CofetchOptions): Cofetch;
 interface Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
   readonly cancel: () => void;
 }
