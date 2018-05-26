@@ -20,7 +20,7 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
   readonly available: boolean;
   register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S> | Coroutine<R, R, P>, state: S, reason?: any): (reason?: any) => boolean;
   register(name: N, process: Coroutine<R, R, P>, state?: never, reason?: any): (reason?: any) => boolean;
-  call(name: N | ('' extends N ? undefined : never), param: P, timeout?: number): Promise<R>;
+  call(name: N | ('' extends N ? undefined : never), param: P, timeout?: number): AtomicPromise<R>;
   call(name: N | ('' extends N ? undefined : never), param: P, callback: Supervisor.Callback<R>, timeout?: number): void;
   cast(name: N | ('' extends N ? undefined : never), param: P, timeout?: number): boolean;
   refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason: any) => boolean][];
@@ -97,7 +97,85 @@ type RegisterItem<N extends any[], D, R> = {
   opts: ObserverOptions;
 };
 
-export class Cancellation<L = undefined> extends Promise<L> {
+export class AtomicPromise<T> implements Promise<T> {
+  static [Symbol.species]: typeof AtomicPromise;
+  readonly [Symbol.toStringTag]: 'Promise';
+  static resolve(): AtomicPromise<void>;
+  static resolve<T>(value: T | PromiseLike<T>): AtomicPromise<T>;
+  static reject<T = never>(reason?: any): AtomicPromise<T>;
+  static all<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>, T10 | PromiseLike<T10>]): AtomicPromise<[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]>;
+  static all<T1, T2, T3, T4, T5, T6, T7, T8, T9>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>]): AtomicPromise<[T1, T2, T3, T4, T5, T6, T7, T8, T9]>;
+  static all<T1, T2, T3, T4, T5, T6, T7, T8>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>]): AtomicPromise<[T1, T2, T3, T4, T5, T6, T7, T8]>;
+  static all<T1, T2, T3, T4, T5, T6, T7>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>]): AtomicPromise<[T1, T2, T3, T4, T5, T6, T7]>;
+  static all<T1, T2, T3, T4, T5, T6>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>]): AtomicPromise<[T1, T2, T3, T4, T5, T6]>;
+  static all<T1, T2, T3, T4, T5>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>]): AtomicPromise<[T1, T2, T3, T4, T5]>;
+  static all<T1, T2, T3, T4>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>]): AtomicPromise<[T1, T2, T3, T4]>;
+  static all<T1, T2, T3>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>]): AtomicPromise<[T1, T2, T3]>;
+  static all<T1, T2>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>]): AtomicPromise<[T1, T2]>;
+  static all<T>(values: (T | PromiseLike<T>)[]): AtomicPromise<T[]>;
+  static race<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>, T10 | PromiseLike<T10>]): AtomicPromise<T1 | T2 | T3 | T4 | T5 | T6 | T7 | T8 | T9 | T10>;
+  static race<T1, T2, T3, T4, T5, T6, T7, T8, T9>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>]): AtomicPromise<T1 | T2 | T3 | T4 | T5 | T6 | T7 | T8 | T9>;
+  static race<T1, T2, T3, T4, T5, T6, T7, T8>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>]): AtomicPromise<T1 | T2 | T3 | T4 | T5 | T6 | T7 | T8>;
+  static race<T1, T2, T3, T4, T5, T6, T7>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>]): AtomicPromise<T1 | T2 | T3 | T4 | T5 | T6 | T7>;
+  static race<T1, T2, T3, T4, T5, T6>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>]): AtomicPromise<T1 | T2 | T3 | T4 | T5 | T6>;
+  static race<T1, T2, T3, T4, T5>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>]): AtomicPromise<T1 | T2 | T3 | T4 | T5>;
+  static race<T1, T2, T3, T4>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>]): AtomicPromise<T1 | T2 | T3 | T4>;
+  static race<T1, T2, T3>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>]): AtomicPromise<T1 | T2 | T3>;
+  static race<T1, T2>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>]): AtomicPromise<T1 | T2>;
+  static race<T>(values: (T | PromiseLike<T>)[]): AtomicPromise<T>;
+  constructor(executor: (resolve: (value?: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void);
+  then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2>;
+  catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult>;
+  finally(onfinally?: (() => void) | undefined | null): AtomicPromise<T>;
+}
+
+export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implements AsyncIterable<R> {
+  protected static readonly run: unique symbol;
+  static readonly port: unique symbol;
+  protected static readonly destructor: unique symbol;
+  static readonly terminator: unique symbol;
+  constructor(
+    gen: (this: Coroutine<T, R>) => Iterator<T | R> | AsyncIterator<T | R>,
+    opts?: CoroutineOptions,
+    autorun?: boolean);
+  [Symbol.asyncIterator](): AsyncIterableIterator<R>;
+  //[Coroutine.port]: CoroutinePort<R, S>;
+  //[Coroutine.terminator](reason?: any): void;
+  //protected [Coroutine.destructor]: () => void;
+}
+export interface CoroutineOptions {
+  readonly resume?: () => PromiseLike<void>;
+  readonly size?: number;
+}
+export interface CoroutinePort<R, S> {
+  readonly send: (msg: S | PromiseLike<S>) => AtomicPromise<IteratorResult<R>>;
+  readonly recv: () => AtomicPromise<IteratorResult<R>>;
+}
+
+export class Colistener<T, U = void> extends Coroutine<U, T> {
+  constructor(
+    listen: (listener: (this: Colistener<T, U>, value: T) => void) => () => void,
+    opts?: CoroutineOptions);
+  readonly close: {
+    (this: Colistener<T, void>, value?: U): void;
+    (value: U): void;
+  };
+}
+
+export function cofetch(url: string, opts?: CofetchOptions): Cofetch;
+interface Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
+  readonly cancel: () => void;
+}
+export interface CofetchOptions {
+  method?: string;
+  headers?: Headers;
+  body?: FormData | null;
+  responseType?: XMLHttpRequestResponseType;
+  timeout?: number;
+  withCredentials?: boolean;
+}
+
+export class Cancellation<L = undefined> extends AtomicPromise<L> {
   constructor(cancelees?: Iterable<Cancellee<L>>);
 }
 export interface Cancellation<L = undefined> extends Canceller<L>, Cancellee<L> {
@@ -112,7 +190,7 @@ export interface Canceller<L = undefined> {
 export interface Cancellee<L = void> {
   readonly register: (listener: (reason: L) => void) => () => void;
   readonly canceled: boolean;
-  readonly promise: <T>(val: T) => Promise<T>;
+  readonly promise: <T>(val: T) => AtomicPromise<T>;
   readonly maybe: <T>(val: T) => Maybe<T>;
   readonly either: <R>(val: R) => Either<L, R>;
 }
@@ -482,38 +560,6 @@ declare class HCons<a, c extends HNil | HList<any, any>> {
   tuple<a, b, c, d, e, f, g, h, i>(this: HList<a, HList<b, HList<c, HList<d, HList<e, HList<f, HList<g, HList<h, HList<i, HNil>>>>>>>>>): [a, b, c, d, e, f, g, h, i];
 }
 
-export class AtomicPromise<T> implements Promise<T> {
-  static [Symbol.species]: typeof AtomicPromise;
-  readonly [Symbol.toStringTag]: 'Promise';
-  static resolve(): AtomicPromise<void>;
-  static resolve<T>(value: T | PromiseLike<T>): AtomicPromise<T>;
-  static reject<T = never>(reason?: any): AtomicPromise<T>;
-  static all<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>, T10 | PromiseLike<T10>]): AtomicPromise<[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]>;
-  static all<T1, T2, T3, T4, T5, T6, T7, T8, T9>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>]): AtomicPromise<[T1, T2, T3, T4, T5, T6, T7, T8, T9]>;
-  static all<T1, T2, T3, T4, T5, T6, T7, T8>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>]): AtomicPromise<[T1, T2, T3, T4, T5, T6, T7, T8]>;
-  static all<T1, T2, T3, T4, T5, T6, T7>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>]): AtomicPromise<[T1, T2, T3, T4, T5, T6, T7]>;
-  static all<T1, T2, T3, T4, T5, T6>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>]): AtomicPromise<[T1, T2, T3, T4, T5, T6]>;
-  static all<T1, T2, T3, T4, T5>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>]): AtomicPromise<[T1, T2, T3, T4, T5]>;
-  static all<T1, T2, T3, T4>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>]): AtomicPromise<[T1, T2, T3, T4]>;
-  static all<T1, T2, T3>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>]): AtomicPromise<[T1, T2, T3]>;
-  static all<T1, T2>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>]): AtomicPromise<[T1, T2]>;
-  static all<T>(values: (T | PromiseLike<T>)[]): AtomicPromise<T[]>;
-  static race<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>, T10 | PromiseLike<T10>]): AtomicPromise<T1 | T2 | T3 | T4 | T5 | T6 | T7 | T8 | T9 | T10>;
-  static race<T1, T2, T3, T4, T5, T6, T7, T8, T9>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>]): AtomicPromise<T1 | T2 | T3 | T4 | T5 | T6 | T7 | T8 | T9>;
-  static race<T1, T2, T3, T4, T5, T6, T7, T8>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>]): AtomicPromise<T1 | T2 | T3 | T4 | T5 | T6 | T7 | T8>;
-  static race<T1, T2, T3, T4, T5, T6, T7>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>]): AtomicPromise<T1 | T2 | T3 | T4 | T5 | T6 | T7>;
-  static race<T1, T2, T3, T4, T5, T6>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>]): AtomicPromise<T1 | T2 | T3 | T4 | T5 | T6>;
-  static race<T1, T2, T3, T4, T5>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>]): AtomicPromise<T1 | T2 | T3 | T4 | T5>;
-  static race<T1, T2, T3, T4>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>]): AtomicPromise<T1 | T2 | T3 | T4>;
-  static race<T1, T2, T3>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>]): AtomicPromise<T1 | T2 | T3>;
-  static race<T1, T2>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>]): AtomicPromise<T1 | T2>;
-  static race<T>(values: (T | PromiseLike<T>)[]): AtomicPromise<T>;
-  constructor(executor: (resolve: (value?: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void);
-  then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2>;
-  catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult>;
-  finally(onfinally?: (() => void) | undefined | null): AtomicPromise<T>;
-}
-
 export class Future<T = undefined> extends Promise<T> {
   static [Symbol.species]: typeof Promise;
   constructor();
@@ -522,52 +568,6 @@ export class Future<T = undefined> extends Promise<T> {
 export class AtomicFuture<T = undefined> extends AtomicPromise<T> implements Future<T> {
   static [Symbol.species]: typeof AtomicPromise;
   readonly bind: (value: T | PromiseLike<T>) => AtomicPromise<T>;
-}
-
-export class Coroutine<T, R = void, S = void> extends Promise<T> implements AsyncIterable<R> {
-  protected static readonly run: unique symbol;
-  static readonly port: unique symbol;
-  protected static readonly destructor: unique symbol;
-  static readonly terminator: unique symbol;
-  constructor(
-    gen: (this: Coroutine<T, R>) => Iterator<T | R> | AsyncIterator<T | R>,
-    opts?: CoroutineOptions,
-    autorun?: boolean);
-  [Symbol.asyncIterator](): AsyncIterableIterator<R>;
-  //[Coroutine.port]: CoroutinePort<R, S>;
-  //[Coroutine.terminator](reason?: any): void;
-  //protected [Coroutine.destructor]: () => void;
-}
-export interface CoroutineOptions {
-  readonly resume?: () => PromiseLike<void>;
-  readonly size?: number;
-}
-export interface CoroutinePort<R, S> {
-  readonly send: (msg: S | PromiseLike<S>) => Promise<IteratorResult<R>>;
-  readonly recv: () => Promise<IteratorResult<R>>;
-}
-
-export class Colistener<T, U = void> extends Coroutine<U, T> {
-  constructor(
-    listen: (listener: (this: Colistener<T, U>, value: T) => void) => () => void,
-    opts?: CoroutineOptions);
-  readonly close: {
-    (this: Colistener<T, void>, value?: U): void;
-    (value: U): void;
-  };
-}
-
-export function cofetch(url: string, opts?: CofetchOptions): Cofetch;
-interface Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
-  readonly cancel: () => void;
-}
-export interface CofetchOptions {
-  method?: string;
-  headers?: Headers;
-  body?: FormData | null;
-  responseType?: XMLHttpRequestResponseType;
-  timeout?: number;
-  withCredentials?: boolean;
 }
 
 export interface WeakMapLike<K, V> {
@@ -627,7 +627,7 @@ export class Cache<K, V = void> {
 }
 
 export function tick(fn: () => void, dedup?: boolean): void;
-export function wait(ms: number): Promise<void>;
+export function wait(ms: number): AtomicPromise<void>;
 export function throttle<T>(interval: number, callback: (last: T, buffer: T[]) => void): (arg: T) => void;
 export function debounce<T>(delay: number, callback: (last: T, buffer: T[]) => void): (arg: T) => void;
 

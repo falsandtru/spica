@@ -18,6 +18,8 @@ $ npm i spica
 
 - Supervisor
 - Observation
+- AtomicPromise
+- Coroutine, Cofetch, Colistener
 - Cancellation
 - Sequence
 - Maybe, Just, Nothing
@@ -28,8 +30,6 @@ $ npm i spica
 - tuple
 - List, Nil
 - HList, HNil
-- AtomicPromise
-- Coroutine, Cofetch, Colistener
 - DataMap
 - AttrMap
 - Cache
