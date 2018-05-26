@@ -30,7 +30,6 @@ abstract class Supervisor2018<N extends string, P = void, R = void, S = void> ex
   }
 }
 namespace Supervisor2018 {
-  export import Options = Supervisor.Options;
   export import Process = Supervisor.Process;
   export import Callback = Supervisor.Callback;
   export import Event = Supervisor.Event;

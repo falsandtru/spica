@@ -9,7 +9,7 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
   static readonly count: number;
   static readonly procs: number;
   static readonly terminator: unique symbol;
-  constructor(options?: Supervisor.Options);
+  constructor(options?: SupervisorOptions);
   readonly id: string;
   readonly name: string;
   readonly events: {
@@ -28,14 +28,6 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
   terminate(reason?: any): boolean;
 }
 export namespace Supervisor {
-  export interface Options {
-    readonly name?: string;
-    readonly size?: number;
-    readonly timeout?: number;
-    readonly destructor?: (reason: any) => void;
-    readonly scheduler?: (cb: () => void) => void;
-    readonly resource?: number;
-  }
   export type Process<P, R, S> = {
     readonly init: Process.Init<S>;
     readonly main: Process.Main<P, R, S>;
@@ -56,14 +48,20 @@ export namespace Supervisor {
     }
   }
 }
+export interface SupervisorOptions {
+  readonly name?: string;
+  readonly size?: number;
+  readonly timeout?: number;
+  readonly destructor?: (reason: any) => void;
+  readonly scheduler?: (cb: () => void) => void;
+  readonly resource?: number;
+}
 
 export class Observation<N extends any[], D, R> {
-  constructor(options?: Observation.Options);
+  constructor(options?: ObservationOptions);
 }
-export namespace Observation {
-  export interface Options {
-    readonly limit?: number;
-  }
+export interface ObservationOptions {
+  readonly limit?: number;
 }
 export interface Observation<N extends any[], D, R>
   extends Observer< N, D, R >, Publisher < N, D, R > {
@@ -526,15 +524,6 @@ export class AtomicFuture<T = undefined> extends AtomicPromise<T> implements Fut
   readonly bind: (value: T | PromiseLike<T>) => AtomicPromise<T>;
 }
 
-export interface CoroutineOptions {
-  readonly resume?: () => PromiseLike<void>;
-  readonly size?: number;
-}
-export interface CoroutinePort<R, S> {
-  readonly send: (msg: S | PromiseLike<S>) => Promise<IteratorResult<R>>;
-  readonly recv: () => Promise<IteratorResult<R>>;
-}
-
 export class Coroutine<T, R = void, S = void> extends Promise<T> implements AsyncIterable<R> {
   protected static readonly run: unique symbol;
   static readonly port: unique symbol;
@@ -549,6 +538,14 @@ export class Coroutine<T, R = void, S = void> extends Promise<T> implements Asyn
   //[Coroutine.terminator](reason?: any): void;
   //protected [Coroutine.destructor]: () => void;
 }
+export interface CoroutineOptions {
+  readonly resume?: () => PromiseLike<void>;
+  readonly size?: number;
+}
+export interface CoroutinePort<R, S> {
+  readonly send: (msg: S | PromiseLike<S>) => Promise<IteratorResult<R>>;
+  readonly recv: () => Promise<IteratorResult<R>>;
+}
 
 export class Colistener<T, U = void> extends Coroutine<U, T> {
   constructor(
@@ -561,6 +558,9 @@ export class Colistener<T, U = void> extends Coroutine<U, T> {
 }
 
 export function cofetch(url: string, options?: CofetchOptions): Cofetch;
+interface Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
+  readonly cancel: () => void;
+}
 export interface CofetchOptions {
   method?: string;
   headers?: Headers;
@@ -568,9 +568,6 @@ export interface CofetchOptions {
   responseType?: XMLHttpRequestResponseType;
   timeout?: number;
   withCredentials?: boolean;
-}
-interface Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
-  readonly cancel: () => void;
 }
 
 export interface WeakMapLike<K, V> {

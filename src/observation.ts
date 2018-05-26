@@ -47,12 +47,16 @@ export namespace RegisterItemType {
   export const subscriber = 'subscriber';
 }
 
+export interface ObservationOptions {
+  readonly limit?: number;
+}
+
 export class Observation<N extends any[], D, R>
   implements Observer<N, D, R>, Publisher<N, D, R> {
-  constructor(opts: Observation.Options = {}) {
+  constructor(opts: ObservationOptions = {}) {
     void Object.freeze(extend(this.settings, opts));
   }
-  private readonly settings: DeepRequired<Observation.Options> = {
+  private readonly settings: DeepRequired<ObservationOptions> = {
     limit: 10,
   };
   public monitor(namespace: N, listener: Monitor<N, D>, { once = false }: ObserverOptions = {}): () => void {
@@ -238,11 +242,6 @@ export class Observation<N extends any[], D, R>
       node = children.get(name)!;
     }
     return node;
-  }
-}
-export namespace Observation {
-  export interface Options {
-    readonly limit?: number;
   }
 }
 

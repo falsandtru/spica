@@ -7,6 +7,15 @@ import { sqid } from './sqid';
 import { noop } from './noop';
 import { causeAsyncException } from './exception';
 
+export interface SupervisorOptions {
+  readonly name?: string;
+  readonly size?: number;
+  readonly timeout?: number;
+  readonly destructor?: (reason: any) => void;
+  readonly scheduler?: (cb: () => void) => void;
+  readonly resource?: number;
+}
+
 export abstract class Supervisor<N extends string, P = void, R = void, S = void> {
   private static instances_: Set<Supervisor<string, any, any, any>>;
   private static get instances(): typeof Supervisor.instances_ {
@@ -24,7 +33,7 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
       , 0);
   }
   protected static readonly initiated = Symbol();
-  constructor(opts: Supervisor.Options = {}) {
+  constructor(opts: SupervisorOptions = {}) {
     void Object.freeze(extend(this.settings, opts));
     assert(Object.isFrozen(this.settings));
     this.name = this.settings.name;
@@ -58,7 +67,7 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
   }
   public readonly id: string = sqid();
   public readonly name: string;
-  private readonly settings: DeepRequired<Supervisor.Options> = {
+  private readonly settings: DeepRequired<SupervisorOptions> = {
     name: '',
     size: Infinity,
     timeout: Infinity,
@@ -245,14 +254,6 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
   }
 }
 export namespace Supervisor {
-  export interface Options {
-    readonly name?: string;
-    readonly size?: number;
-    readonly timeout?: number;
-    readonly destructor?: (reason: any) => void;
-    readonly scheduler?: (cb: () => void) => void;
-    readonly resource?: number;
-  }
   export type Process<P, R, S> = {
     readonly init: Process.Init<S>;
     readonly main: Process.Main<P, R, S>;
