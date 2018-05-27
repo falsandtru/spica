@@ -25,9 +25,9 @@ describe('Unit: lib/coroutine', () => {
       let cnt = 0;
       const co = new Coroutine<number, number>(async function* () {
         assert(++cnt === 1);
-        yield Promise.resolve(2);
-        yield Promise.resolve(3);
-        return 4;
+        assert(undefined === (yield Promise.resolve(2)));
+        assert(undefined === (yield Promise.resolve(3)));
+        return Promise.resolve(4);
       });
       assert(cnt === 1);
       for await (const n of co) {
@@ -37,13 +37,14 @@ describe('Unit: lib/coroutine', () => {
         assert(false);
       }
       assert(await co === ++cnt);
+      assert(++cnt === 5);
     });
 
     it('port', async () => {
       const co = new Coroutine<number, number, number>(async function* () {
         assert(1 === (yield Promise.resolve(0)));
         assert(2 === (yield Promise.resolve(1)));
-        return 2;
+        return Promise.resolve(2);
       }, { size: Infinity });
       const port = co[Coroutine.port];
       assert.deepStrictEqual(
