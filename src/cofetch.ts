@@ -5,7 +5,7 @@ import { Cancellation } from './cancellation';
 export interface CofetchOptions {
   method?: string;
   headers?: Headers;
-  body?: FormData | null;
+  body?: Document | BodyInit | null;
   responseType?: XMLHttpRequestResponseType;
   timeout?: number;
   withCredentials?: boolean;
