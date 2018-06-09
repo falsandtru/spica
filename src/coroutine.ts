@@ -65,8 +65,7 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
           assert(msg instanceof Promise === false);
           assert(msg instanceof AtomicPromise === false);
           // Block.
-          const { value: val, done } = await iter.next(msg);
-          const value = await val; // Workaround for the TypeScript's bug.
+          const { value, done } = await iter.next(msg);
           assert(value instanceof Promise === false);
           assert(value instanceof AtomicPromise === false);
           if (!this.alive) return;

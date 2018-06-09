@@ -73,5 +73,5 @@ function fetch(xhr: XMLHttpRequest, url: string, options: CofetchOptions): void 
         continue;
     }
   }
-  void xhr.send(options.body || null);
+  void xhr.send(options.body || undefined);
 }
