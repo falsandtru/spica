@@ -123,8 +123,8 @@ export class AtomicPromise<T> implements Promise<T> {
   public finally(onfinally?: (() => void) | undefined | null): AtomicPromise<T> {
     onfinally = onfinally || noop;
     return this.then(
-      value => void onfinally!() || value,
-      reason => void onfinally!() || AtomicPromise.reject(reason));
+      () => AtomicPromise.resolve(onfinally!()).then(() => this),
+      () => AtomicPromise.resolve(onfinally!()).then(() => this));
   }
 }
 

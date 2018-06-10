@@ -44,6 +44,14 @@ describe('Unit: lib/promise', () => {
       assert(await AtomicPromise.reject(1).catch(n => { throw ++n; }).catch(r => ++r) === 3);
     });
 
+    it('finally', async () => {
+      assert(await AtomicPromise.resolve(0).finally(() => 1) === 0);
+      assert(await AtomicPromise.resolve(0).finally(() => AtomicPromise.reject(1)).catch(r => ++r) === 2);
+      assert(await AtomicPromise.reject(0).finally(() => AtomicPromise.reject(1)).catch(r => ++r) === 2);
+      assert(await AtomicPromise.resolve(0).finally(() => { throw 1; }).catch(r => ++r) === 2);
+      assert(await AtomicPromise.reject(0).finally(() => { throw 1; }).catch(r => ++r) === 2);
+    });
+
     it('atomic', async () => {
       let cnt = 0;
       AtomicPromise.resolve().then(() => assert(cnt === 0));
