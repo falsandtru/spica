@@ -1,5 +1,4 @@
 import { concat } from './concat';
-import { noop } from './noop';
 
 const enum State {
   resolved,
@@ -51,10 +50,7 @@ export class AtomicPromise<T> implements Promise<T> {
   public static resolve(): AtomicPromise<void>;
   public static resolve<T>(value: T | PromiseLike<T>): AtomicPromise<T>;
   public static resolve<T>(value?: T | PromiseLike<T>): AtomicPromise<T> {
-    return new AtomicPromise<T>((resolve, reject) =>
-      isPromiseLike(value)
-        ? void value.then(resolve, reject)
-        : void resolve(value));
+    return new AtomicPromise<T>(resolve => void resolve(value));
   }
   public static reject<T = never>(reason?: any): AtomicPromise<T> {
     return new AtomicPromise<T>((_, reject) => void reject(reason));
@@ -97,22 +93,26 @@ export class AtomicPromise<T> implements Promise<T> {
   }
   private readonly [queue]: [(value: T) => void, (reason: any) => void][] = [];
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
-    onfulfilled = onfulfilled || AtomicPromise.resolve;
-    onrejected = onrejected || AtomicPromise.reject;
     return new AtomicPromise((resolve, reject) => {
       void this[queue].push([
         value => {
+          if (!onfulfilled) return void resolve(value as any);
           try {
-            void resolve(onfulfilled!(value));
+            void resolve(onfulfilled(value));
           }
           catch (reason) {
             void reject(reason);
           }
         },
-        reason =>
-          void new AtomicPromise<TResult1 | TResult2>(resolve =>
-            void resolve(onrejected!(reason)))
-            .then(resolve, reject),
+        reason => {
+          if (!onrejected) return void resolve(this as any);
+          try {
+            void resolve(onrejected(reason));
+          }
+          catch (reason) {
+            void reject(reason);
+          }
+        },
       ]);
       void this[resume]();
     });
@@ -121,10 +121,7 @@ export class AtomicPromise<T> implements Promise<T> {
     return this.then(undefined, onrejected);
   }
   public finally(onfinally?: (() => void) | undefined | null): AtomicPromise<T> {
-    onfinally = onfinally || noop;
-    return this.then(
-      () => AtomicPromise.resolve(onfinally!()).then(() => this),
-      () => AtomicPromise.resolve(onfinally!()).then(() => this));
+    return this.then(onfinally, onfinally).then(() => this);
   }
 }
 

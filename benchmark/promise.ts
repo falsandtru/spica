@@ -14,7 +14,7 @@ describe('Benchmark:', function () {
     });
 
     function chain(n: number, done: () => void) {
-      benchmark(`AtomicPromise bind ${n}`, () => {
+      benchmark(`AtomicPromise then ${n}`, () => {
         let promise: AtomicPromise<number> = new AtomicPromise(resolve => resolve(0));
         for (let i = 0; i < n; ++i) {
           promise = promise.then(n => n);
