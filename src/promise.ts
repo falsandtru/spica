@@ -126,7 +126,6 @@ export class AtomicPromise<T> implements Promise<T> {
 }
 
 function isPromiseLike(value: any): value is PromiseLike<any> {
-  return !!value
-      && typeof value === 'object'
+  return !!value && typeof value === 'object'
       && 'then' in value && typeof value.then === 'function';
 }
