@@ -21,7 +21,7 @@ describe('Unit: lib/coroutine', () => {
       co.catch(done);
     });
 
-    it('iterator', async () => {
+    it('iterate', async () => {
       let cnt = 0;
       const co = new Coroutine<number, number>(async function* () {
         assert(++cnt === 1);
