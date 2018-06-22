@@ -112,7 +112,7 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
     resume: () => clock,
     size: 0,
   };
-  public readonly [Symbol.asyncIterator] = async function* (this: Coroutine<T, R, S>): AsyncIterableIterator<R> {
+  public async *[Symbol.asyncIterator](): AsyncIterableIterator<R> {
     while (this.alive) {
       const { value, done } = await this.state;
       assert(value instanceof Promise === false);
@@ -120,7 +120,7 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
       if (done || this.result.canceled) return;
       yield value;
     }
-  };
+  }
   public readonly [port]: CoroutinePort<R, S> = {
     recv: () => this.state,
     send: (msg: S | PromiseLike<S>): AtomicPromise<IteratorResult<R>> => {
