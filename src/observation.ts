@@ -193,7 +193,7 @@ export class Observation<N extends any[], D, R>
       }
     }
   }
-  public refs(namespace: never[] | N): RegisterItem<N, D, R>[] {
+  public refs(namespace: [] | N): RegisterItem<N, D, R>[] {
     return this.refsBelow_(this.seekNode_(namespace));
   }
   private refsAbove_({parent, items}: RegisterNode<N, D, R>): RegisterItem<N, D, R>[] {
@@ -226,7 +226,7 @@ export class Observation<N extends any[], D, R>
     childrenNames: [],
     items: []
   };
-  private seekNode_(namespace: never[] | N): RegisterNode<N, D, R> {
+  private seekNode_(namespace: [] | N): RegisterNode<N, D, R> {
     let node = this.node_;
     for (const name of namespace) {
       const {children} = node;

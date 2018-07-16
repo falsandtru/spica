@@ -14,7 +14,7 @@ export class Nil {
   public extend<a>(f: () => a): NonEmptyList<a, Nil> {
     return this.push(f());
   }
-  public array(): never[] {
+  public array(): [] {
     return [];
   }
 }

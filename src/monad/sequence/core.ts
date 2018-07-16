@@ -84,9 +84,9 @@ export interface Sequence<a, z> {
 }
 
 export namespace Sequence {
-  export type Data<a, z> = never[] | [a] | [a, z];
+  export type Data<a, z> = [] | [a] | [a, z];
   export namespace Data {
-    export function cons<a, z>(): never[];
+    export function cons<a, z>(): [];
     export function cons<a, z>(a: a): [a];
     export function cons<a, z>(a: a, z: z): [a, z];
     export function cons<a, z>(a?: a, z?: z): Data<a, z> {

@@ -14,7 +14,7 @@ export class HNil {
   public extend<a>(f: () => a): NonEmptyHList<a, HNil> {
     return this.push(f());
   }
-  public array(): never[] {
+  public array(): [] {
     return [];
   }
 }
@@ -68,7 +68,7 @@ class HCons<a, c extends HNil | NonEmptyHList<any, any>> {
   public tuple(): any[] {
     return this.array();
   }
-  public array(): never[] {
-    return <never[]>concat([this.head], this.tail.array());
+  public array(): [] {
+    return <[]>concat([this.head], this.tail.array());
   }
 }

@@ -13,9 +13,9 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
   readonly id: string;
   readonly name: string;
   readonly events: {
-    readonly init: Observer<never[] | [N], Supervisor.Event.Data.Init<N, P, R, S>, any>;
-    readonly loss: Observer<never[] | [N], Supervisor.Event.Data.Loss<N, P>, any>;
-    readonly exit: Observer<never[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>;
+    readonly init: Observer<[] | [N], Supervisor.Event.Data.Init<N, P, R, S>, any>;
+    readonly loss: Observer<[] | [N], Supervisor.Event.Data.Loss<N, P>, any>;
+    readonly exit: Observer<[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>;
   };
   readonly available: boolean;
   register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S> | Coroutine<R, R, P>, state: S, reason?: any): (reason?: any) => boolean;
@@ -66,7 +66,7 @@ export interface ObservationOptions {
 export interface Observation<N extends any[], D, R>
   extends Observer< N, D, R >, Publisher < N, D, R > {
   relay(source: Observer<N, D, any>): () => void;
-  refs(namespace: never[] | N): RegisterItem<N, D, R>[];
+  refs(namespace: [] | N): RegisterItem<N, D, R>[];
 }
 export interface Observer<N extends any[], D, R> {
   monitor(namespace: N, listener: Monitor<N, D>, opts?: ObserverOptions): () => void;
@@ -290,7 +290,7 @@ export class Sequence<a, z> extends MonadPlus<a> implements Iterable<a> {
   memoize(): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]>;
 }
 export namespace Sequence {
-  export type Data<a, z> = never[] | [a] | [a, z];
+  export type Data<a, z> = [] | [a] | [a, z];
   export type Thunk<a> = [a, Iterator<a>, number];
   export type Iterator<a> = () => Thunk<a>;
 }

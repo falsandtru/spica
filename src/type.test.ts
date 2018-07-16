@@ -68,8 +68,8 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Eq<never, void>, false>);
       assert((): true => true as TEq<Eq<never, undefined>, false>);
       assert((): true => true as TEq<Eq<never, null>, false>);
-      assert((): true => true as TEq<Eq<{}, never[] | {}>, boolean>);
-      assert((): true => true as TEq<Eq<never[] | {}, {}>, boolean>);
+      assert((): true => true as TEq<Eq<{}, [] | {}>, boolean>);
+      assert((): true => true as TEq<Eq<[] | {}, {}>, boolean>);
     });
 
   });
@@ -88,8 +88,8 @@ describe('Unit: lib/type', () => {
       assert((): false => true as TEq<boolean, never>);
       assert((): false => true as TEq<never, boolean>);
       assert((): true => true as TEq<never, never>);
-      assert((): true => true as TEq<{}, never[] | {}>);
-      assert((): true => true as TEq<never[] | {}, {}>);
+      assert((): true => true as TEq<{}, [] | {}>);
+      assert((): true => true as TEq<[] | {}, {}>);
     });
 
   });
@@ -140,7 +140,7 @@ describe('Unit: lib/type', () => {
 
   describe('StrictRewrite', () => {
     it('', () => {
-      assert((): true => true as TEq<StrictRewrite<never[] | {}, [{}, void]>, never[] | void>);
+      assert((): true => true as TEq<StrictRewrite<[] | {}, [{}, void]>, [] | void>);
       assert((): true => true as TEq<StrictRewrite<0, [never, 1]>, 0>);
     });
 
@@ -148,7 +148,7 @@ describe('Unit: lib/type', () => {
 
   describe('StrictExtract', () => {
     it('', () => {
-      assert((): true => true as TEq<StrictExtract<never[] | {}, {} | null>, {}>);
+      assert((): true => true as TEq<StrictExtract<[] | {}, {} | null>, {}>);
       assert((): true => true as TEq<StrictExtract<0, never>, never>);
     });
 
@@ -156,7 +156,7 @@ describe('Unit: lib/type', () => {
 
   describe('StrictExclude', () => {
     it('', () => {
-      assert((): true => true as TEq<StrictExclude<never[] | {}, {} | null>, never[]>);
+      assert((): true => true as TEq<StrictExclude<[] | {}, {} | null>, []>);
       assert((): true => true as TEq<StrictExclude<0, never>, 0>);
     });
 
