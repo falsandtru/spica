@@ -93,7 +93,7 @@ export type DeepRewriteProp<T, R extends [any, any], E extends object | undefine
 type Includes<T, U> = true extends (T extends U ? true : never) ? true : false;
 
 export type Partial<T> =
-  T extends (infer U)[] ? T :
+  T extends any[] ? T :
   T extends object ? { [P in keyof T]+?: T[P]; } :
   T;
 export type DeepPartial<T, E extends object | undefined | null = any[]> =
@@ -101,7 +101,7 @@ export type DeepPartial<T, E extends object | undefined | null = any[]> =
   T extends object ? { [P in keyof T]+?: NonNullable<T[P]> extends NonNullable<E | Function> ? T[P] : DeepPartial<T[P], E>; } :
   T;
 export type Required<T> =
-  T extends (infer U)[] ? T :
+  T extends any[] ? T :
   T extends object ? { [P in keyof T]-?: T[P]; } :
   T;
 export type DeepRequired<T, E extends object | undefined | null = any[]> =
