@@ -10,8 +10,8 @@ describe('Unit: lib/colistener', () => {
         document.addEventListener('click', listener);
         return () => void document.removeEventListener('click', listener);
       });
-      setTimeout(() => document.body.click(), 100);
-      setTimeout(() => document.body.click(), 200);
+      setTimeout(() => document.body!.click(), 100);
+      setTimeout(() => document.body!.click(), 200);
       let cnt = 0;
       for await (const ev of co) {
         assert(ev instanceof Event);
@@ -27,8 +27,8 @@ describe('Unit: lib/colistener', () => {
         return () => void document.removeEventListener('click', listener);
       }, { size: 2 });
       setTimeout(() => {
-        document.body.click();
-        document.body.click();
+        document.body!.click();
+        document.body!.click();
       });
       let cnt = 0;
       for await (const ev of co) {
@@ -45,14 +45,14 @@ describe('Unit: lib/colistener', () => {
         return () => void document.removeEventListener('click', listener);
       }, { resume: () => wait(100) });
       setTimeout(() => {
-        document.body.click();
-        document.body.click();
+        document.body!.click();
+        document.body!.click();
       });
       let cnt = 0;
       setTimeout(() => {
         assert(cnt === 1);
-        document.body.click();
-        document.body.click();
+        document.body!.click();
+        document.body!.click();
         setTimeout(() => {
           assert(cnt === 2);
           co.close();
@@ -72,8 +72,8 @@ describe('Unit: lib/colistener', () => {
         return () => void document.removeEventListener('click', listener);
       }, { size: Infinity });
       setTimeout(() => {
-        document.body.click();
-        document.body.click();
+        document.body!.click();
+        document.body!.click();
       });
       let cnt = 0;
       for await (const _ of co) {
