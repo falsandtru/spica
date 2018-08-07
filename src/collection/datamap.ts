@@ -1,8 +1,8 @@
-import { WeakMapLike } from '../../index.d';
+import { Collection } from '../collection';
 import { sqid } from '../sqid';
 import { type } from '../type';
 
-export class DataMap<K, V> implements WeakMapLike<K, V> {
+export class DataMap<K, V> implements Collection<K, V> {
   constructor(entries: Iterable<[K, V]> = []) {
     void [...entries]
       .forEach(([k, v]) =>

@@ -570,13 +570,13 @@ export class AtomicFuture<T = undefined> extends AtomicPromise<T> implements Fut
   readonly bind: (value: T | PromiseLike<T>) => AtomicPromise<T>;
 }
 
-export interface WeakMapLike<K, V> {
+interface Collection<K, V> {
+  has(key: K): boolean;
   get(key: K): V | undefined;
   set(key: K, value: V): this;
-  has(key: K): boolean;
   delete(key: K): boolean;
 }
-export class DataMap<K, V> implements WeakMapLike<K, V> {
+export class DataMap<K, V> implements Collection<K, V> {
   constructor(
     entries?: Iterable<[K, V]>);
   get(key: K): V | undefined;
@@ -589,8 +589,8 @@ export class DataMap<K, V> implements WeakMapLike<K, V> {
 export class AttrMap<C, K, V> {
   constructor(
     entries?: Iterable<[C, K, V]>,
-    KeyMap?: new <K, V>(entries?: Iterable<[K, V]>) => WeakMapLike<K, V>,
-    ValueMap?: new <K, V>(entries?: Iterable<[K, V]>) => WeakMapLike<K, V>);
+    KeyMap?: new <K, V>(entries?: Iterable<[K, V]>) => Collection<K, V>,
+    ValueMap?: new <K, V>(entries?: Iterable<[K, V]>) => Collection<K, V>);
   get(ctx: C, key: K): V | undefined;
   set(ctx: C, key: K, val: V): this;
   has(ctx: C): boolean;
@@ -625,6 +625,11 @@ export class Cache<K, V = void> {
   [Symbol.iterator](): Iterator<[K, V]>;
   export(): { stats: [K[], K[]]; entries: [K, V][]; };
 }
+
+export function generative
+  <T extends Collection<any, any>>
+  (collection: T, factory: (key: T extends { get(key: infer U): unknown; } ? U : never) => T extends { set(key: unknown, value: infer U): unknown; } ? U : never)
+  : T;
 
 export function tick(fn: () => void, dedup?: boolean): void;
 export function wait(ms: number): AtomicPromise<void>;

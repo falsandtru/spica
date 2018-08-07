@@ -1,16 +1,16 @@
-import { WeakMapLike } from '../../index.d';
+import { Collection } from '../collection';
 
 export class AttrMap<C, K, V> {
   constructor(
     entries: Iterable<[C, K, V]> = [],
-    private readonly KeyMap: new <K, V>(entries?: Iterable<[K, V]>) => WeakMapLike<K, V> = WeakMap,
-    private readonly ValueMap: new <K, V>(entries?: Iterable<[K, V]>) => WeakMapLike<K, V> = Map
+    private readonly KeyMap: new <K, V>(entries?: Iterable<[K, V]>) => Collection<K, V> = WeakMap,
+    private readonly ValueMap: new <K, V>(entries?: Iterable<[K, V]>) => Collection<K, V> = Map
   ) {
     void [...entries]
       .forEach(([c, k, v]) =>
         void this.set(c, k, v));
   }
-  private readonly store = new this.KeyMap<C, WeakMapLike<K, V>>();
+  private readonly store = new this.KeyMap<C, Collection<K, V>>();
   public get(ctx: C, key: K): V | undefined {
     return this.store.get(ctx) && this.store.get(ctx)!.get(key)!;
   }

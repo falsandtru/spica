@@ -17,6 +17,7 @@ import {
   cofetch,
   DataMap, AttrMap,
   Cache,
+  generative,
   tick, wait,
   throttle, debounce,
   uuid,
@@ -168,6 +169,10 @@ describe('Interface: Package', function () {
 
     it('AttrMap', function () {
       assert(typeof AttrMap === 'function');
+    });
+
+    it('generative', function () {
+      assert(typeof generative === 'function');
     });
 
   });
