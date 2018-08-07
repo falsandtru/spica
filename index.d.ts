@@ -654,3 +654,4 @@ export function extend<T extends object>(target: object, source: T, ...sources: 
 export function concat<T>(target: T[], source: T[]): T[];
 export function concat<T>(target: T[], source: { [index: number]: T; length: number; }): T[];
 export function sort<T>(as: T[], cmp: (a: T, b: T) => number, times: number): T[];
+export function memoize<a, z>(f: (a: a) => z, memory?: Collection<a, z>): typeof f;
