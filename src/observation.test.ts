@@ -153,7 +153,7 @@ describe('Unit: lib/observation', function () {
       let cnt = 0;
       const ob = new Observation<string[], number, void>();
       ob.once([''], () => ob.emit([''], 1, data => assert(cnt === 0 && data === 1 && ++cnt)));
-      ob.emit([''], 0, data => assert(cnt === 1 && data === 0 && ++cnt) || done());
+      ob.emit([''], 0, data => void assert(cnt === 1 && data === 0 && ++cnt) || done());
     });
 
     it('reflect', function (done) {
@@ -169,7 +169,7 @@ describe('Unit: lib/observation', function () {
       const ob = new Observation<string[], number, void>();
       ob.monitor([''], data => assert(cnt === 0 && data === 0 && ++cnt));
       ob.monitor([''], data => assert(cnt === 1 && data === 0 && ++cnt));
-      ob.emit([''], 0, data => assert(cnt === 2 && data === 0 && ++cnt) || done());
+      ob.emit([''], 0, data => void assert(cnt === 2 && data === 0 && ++cnt) || done());
     });
 
     it('monitor once', function (done) {
@@ -179,7 +179,7 @@ describe('Unit: lib/observation', function () {
       ob.emit([''], 1, data => assert(cnt === 1 && data === 1 && ++cnt));
       ob.monitor([''], data => assert(cnt === 2 && data === 2 && ++cnt), { once: true });
       ob.emit([''], 2, data => assert(cnt === 3 && data === 2 && ++cnt));
-      ob.emit([''], 3, data => assert(cnt === 4 && data === 3 && ++cnt) || done());
+      ob.emit([''], 3, data => void assert(cnt === 4 && data === 3 && ++cnt) || done());
     });
 
     it('on', function (done) {
@@ -187,7 +187,7 @@ describe('Unit: lib/observation', function () {
       const ob = new Observation<string[], number, void>();
       ob.on([''], data => assert(cnt === 0 && data === 0 && ++cnt));
       ob.on([''], data => assert(cnt === 1 && data === 0 && ++cnt));
-      ob.emit([''], 0, data => assert(cnt === 2 && data === 0 && ++cnt) || done());
+      ob.emit([''], 0, data => void assert(cnt === 2 && data === 0 && ++cnt) || done());
     });
 
     it('on once', function (done) {
@@ -199,7 +199,7 @@ describe('Unit: lib/observation', function () {
       ob.emit([''], 2, data => assert(cnt === 3 && data === 2 && ++cnt));
       ob.on([''], throwError, { once: true });
       ob.off([''], throwError);
-      ob.emit([''], 3, data => assert(cnt === 4 && data === 3 && ++cnt) || done());
+      ob.emit([''], 3, data => void assert(cnt === 4 && data === 3 && ++cnt) || done());
     });
 
     it('once', function (done) {
@@ -211,7 +211,7 @@ describe('Unit: lib/observation', function () {
       ob.emit([''], 2, data => assert(cnt === 3 && data === 2 && ++cnt));
       ob.once([''], throwError);
       ob.off([''], throwError);
-      ob.emit([''], 3, data => assert(cnt === 4 && data === 3 && ++cnt) || done());
+      ob.emit([''], 3, data => void assert(cnt === 4 && data === 3 && ++cnt) || done());
     });
 
     it('off', function (done) {
@@ -221,7 +221,7 @@ describe('Unit: lib/observation', function () {
       ob.on([''], data => assert(cnt === 0 && data === 0 && ++cnt));
       ob.on([''], throwError);
       ob.on([''], data => assert(cnt === 1 && data === 0 && ++cnt));
-      ob.monitor([''], data => assert(cnt === 3 && data === 0 && ++cnt) || done());
+      ob.monitor([''], data => void assert(cnt === 3 && data === 0 && ++cnt) || done());
       ob.off([''], throwError);
       ob.emit([''], 0);
     });
@@ -230,7 +230,7 @@ describe('Unit: lib/observation', function () {
       let cnt = 0;
       const ob = new Observation<string[], number, void>();
       ob.on([''], throwError);
-      ob.monitor([''], data => assert(cnt === 1 && data === 0 && ++cnt) || done());
+      ob.monitor([''], data => void assert(cnt === 1 && data === 0 && ++cnt) || done());
       ob.on([''], throwError);
       ob.off(['']);
       assert(ob.refs(['']).length === 1);
@@ -248,7 +248,7 @@ describe('Unit: lib/observation', function () {
       ob.on([''], throwError);
       ob.on([''], throwError);
       ob.on([''], throwError);
-      ob.emit([''], undefined, _ => assert(cnt === 1 && ++cnt) || tick(() => assert(cnt === 2 && ++cnt) || done()));
+      ob.emit([''], undefined, _ => void assert(cnt === 1 && ++cnt) || tick(() => void assert(cnt === 2 && ++cnt) || done()));
     });
 
     it('on namespace', function (done) {
@@ -257,14 +257,14 @@ describe('Unit: lib/observation', function () {
       ob.on([''], throwError);
       ob.on(['', '0'], data => assert(cnt === 0 && data === 0 && ++cnt));
       ob.on(['', '0', '0'], data => assert(cnt === 1 && data === 0 && ++cnt));
-      ob.on(['', '0', '0', '0'], data => assert(cnt === 2 && data === 0 && ++cnt) || done());
+      ob.on(['', '0', '0', '0'], data => void assert(cnt === 2 && data === 0 && ++cnt) || done());
       ob.emit(['', '0'], 0);
     });
 
     it('off namespace', function (done) {
       let cnt = 0;
       const ob = new Observation<string[], number, void>();
-      ob.monitor([''], data => assert(cnt === 4 && data === 0 && ++cnt) || tick(done));
+      ob.monitor([''], data => void assert(cnt === 4 && data === 0 && ++cnt) || tick(done));
       ob.on([''], throwError);
       ob.monitor(['', '0'], data => assert(cnt === 3 && data === 0 && ++cnt));
       ob.on(['', '0'], throwError);
@@ -288,7 +288,7 @@ describe('Unit: lib/observation', function () {
       ob.on(['', '0'], inc);
       ob.on(['', '0', '0'], inc);
       ob.on(['', '0', '0'], inc);
-      ob.emit(['', '0'], 0, () => assert(cnt === 2 && ++cnt) || done());
+      ob.emit(['', '0'], 0, () => void assert(cnt === 2 && ++cnt) || done());
     });
 
     it('mixed type key', function (done) {
@@ -301,7 +301,7 @@ describe('Unit: lib/observation', function () {
       ob.emit([NaN, Symbol()], 0);
       ob.emit([NaN, sym], 1);
       ob.off([NaN, sym]);
-      ob.monitor([NaN, sym], data => assert(cnt === 1 && data === 2 && ++cnt) || tick(done));
+      ob.monitor([NaN, sym], data => void assert(cnt === 1 && data === 2 && ++cnt) || tick(done));
       ob.emit([NaN, sym], 2);
     });
 

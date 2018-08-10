@@ -58,7 +58,7 @@ describe('Unit: lib/cancellation', () => {
         .then(_ => NaN)
         .then(_ => cancellation.promise(NaN))
         .then(_ => NaN)
-        .catch(n => assert(++n === 3) || done());
+        .catch(n => void assert(++n === 3) || done());
     });
 
     it('maybe', () => {

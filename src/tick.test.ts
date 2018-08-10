@@ -4,7 +4,7 @@ describe('Unit: lib/clock.tick', function () {
   describe('tick', function () {
     it('async', function (done) {
       let async = false;
-      tick(() => assert(async === true) || done());
+      tick(() => void assert(async === true) || done());
       async = true;
     });
 
@@ -13,7 +13,7 @@ describe('Unit: lib/clock.tick', function () {
       let interrupt = false;
       tick(() => ++cnt);
       Promise.resolve().then(() => interrupt = true);
-      tick(() => assert(cnt === 1 && interrupt === false) || done());
+      tick(() => void assert(cnt === 1 && interrupt === false) || done());
     });
 
     it('recursion', function (done) {
@@ -24,7 +24,7 @@ describe('Unit: lib/clock.tick', function () {
       let cnt = 0;
       tick(() => {
         Promise.resolve().then(() => ++cnt);
-        tick(() => assert(cnt === 1) || done());
+        tick(() => void assert(cnt === 1) || done());
       });
     });
 

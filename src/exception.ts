@@ -1,5 +1,5 @@
 export function causeAsyncException(reason: any): void {
-  assert(!console.debug(stringify(reason)));
+  assert(!void console.debug(stringify(reason)));
   void new Promise((_, reject) =>
     void reject(reason));
 }
