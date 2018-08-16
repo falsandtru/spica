@@ -3,8 +3,6 @@ import { AtomicFuture } from './future';
 import { Coroutine, CoroutineOptions } from './coroutine';
 import { Cancellation } from './cancellation';
 
-const asynciterable = !!Symbol.asyncIterator;
-
 export class Colistener<T, U = void> extends Coroutine<U, T> {
   constructor(
     listen: (this: Colistener<T, U>, listener: (value: T) => void) => () => void,
@@ -29,7 +27,6 @@ export class Colistener<T, U = void> extends Coroutine<U, T> {
       const done = this.cancellation.then(() => []);
       while (queue.length > 0 && !this.cancellation.canceled) {
         yield queue.shift()!;
-        asynciterable ? 0 : await 0; // Workaround for the downpile bug of TypeScript.
       }
       while (!this.cancellation.canceled) {
         assert(queue.length === 0);
@@ -40,7 +37,6 @@ export class Colistener<T, U = void> extends Coroutine<U, T> {
         assert(q === queue || q.length === 0);
         while (q.length > 0 && !this.cancellation.canceled) {
           yield q.shift()!;
-          asynciterable ? 0 : await 0; // Workaround for the downpile bug of TypeScript.
         }
         assert(queue.length === 0 || this.cancellation.canceled);
       }
