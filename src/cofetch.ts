@@ -48,7 +48,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
             process.close);
       }
       return process;
-    }, {}, false);
+    }, { autorun: false });
     void this[Coroutine.run]();
   }
   private readonly cancellation = new Cancellation();

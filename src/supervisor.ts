@@ -14,6 +14,7 @@ abstract class Supervisor2018<N extends string, P = void, R = void, S = void> ex
       {
         init: state => state,
         main: (param, state, kill) =>
+          void process[Coroutine['run']]() ||
           process[Coroutine.port].send(param)
             .then(({ value: reply, done }) =>
               done

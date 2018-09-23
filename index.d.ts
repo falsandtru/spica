@@ -136,8 +136,7 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
   static readonly terminator: unique symbol;
   constructor(
     gen: (this: Coroutine<T, R>) => Iterator<T | R> | AsyncIterator<T | R>,
-    opts?: CoroutineOptions,
-    autorun?: boolean);
+    opts?: CoroutineOptions);
   [Symbol.asyncIterator](): AsyncIterableIterator<R>;
   //[Coroutine.port]: CoroutinePort<R, S>;
   //[Coroutine.terminator](reason?: any): void;
@@ -146,6 +145,7 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
 export interface CoroutineOptions {
   readonly resume?: () => PromiseLike<void>;
   readonly size?: number;
+  readonly autorun?: boolean;
 }
 export interface CoroutinePort<R, S> {
   readonly send: (msg: S | PromiseLike<S>) => AtomicPromise<IteratorResult<R>>;

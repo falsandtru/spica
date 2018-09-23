@@ -15,6 +15,7 @@ const terminator = Symbol();
 export interface CoroutineOptions {
   readonly resume?: () => PromiseLike<void>;
   readonly size?: number;
+  readonly autorun?: boolean;
 }
 export interface CoroutinePort<R, S> {
   readonly send: (msg: S | PromiseLike<S>) => AtomicPromise<IteratorResult<R>>;
@@ -33,7 +34,6 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
   constructor(
     gen: (this: Coroutine<T, R>) => Iterator<T | R> | AsyncIterator<T | R>,
     opts: CoroutineOptions = {},
-    autorun: boolean = true,
   ) {
     super(resolve => res = resolve);
     var res!: (v: T | AtomicPromise<never>) => void;
@@ -99,7 +99,7 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
         void this[Coroutine.terminator](reason);
       }
     };
-    autorun
+    this.settings.autorun
       ? void this[Coroutine.run]()
       : void tick(() => void this[Coroutine.run]());
   }
@@ -112,6 +112,7 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
   private readonly settings: DeepRequired<CoroutineOptions> = {
     resume: () => clock,
     size: 0,
+    autorun: false,
   };
   public async *[Symbol.asyncIterator](): AsyncIterableIterator<R> {
     while (this.alive) {

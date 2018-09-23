@@ -41,7 +41,7 @@ export class Colistener<T, U = void> extends Coroutine<U, T> {
         assert(queue.length === 0 || this.cancellation.canceled);
       }
       return this.cancellation;
-    }, { ...opts, size: 0 }, false);
+    }, { ...opts, size: 0, autorun: false });
     void this[Coroutine.run]();
   }
   private readonly cancellation: Cancellation<U> = new Cancellation();
