@@ -9,24 +9,27 @@ abstract class Supervisor2018<N extends string, P = void, R = void, S = void> ex
       void this.kill(name, reason);
       return this.register(name, process, state);
     }
-    if (process instanceof Coroutine) return this.register(
-      name,
-      {
-        init: state => state,
-        main: (param, state, kill) =>
-          void process[Coroutine['run']]() ||
-          process[Coroutine.port].send(param)
-            .then(({ value: reply, done }) =>
-              done
-                ? process
-                    .then(reply =>
-                      void kill() ||
-                      { reply, state })
-                : { reply, state }),
-        exit: reason => void process[Coroutine.terminator](reason),
-      },
-      Supervisor.initiated as never,
-      reason);
+    if (process instanceof Coroutine) {
+      const res = this.register(
+        name,
+        {
+          init: state => state,
+          main: (param, state, kill) =>
+            process[Coroutine.port].send(param)
+              .then(({ value: reply, done }) =>
+                done
+                  ? process
+                      .then(reply =>
+                        void kill() ||
+                        { reply, state })
+                  : { reply, state }),
+          exit: reason => void process[Coroutine.terminator](reason),
+        },
+        Supervisor.initiated as never,
+        reason);
+      void process[Coroutine['run']]();
+      return res;
+    }
     return super.register(name, process, state);
   }
 }
