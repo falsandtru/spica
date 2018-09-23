@@ -10,8 +10,8 @@ describe('Unit: lib/colistener', () => {
         document.addEventListener('click', listener);
         return () => void document.removeEventListener('click', listener);
       });
+      document.body!.click();
       setTimeout(() => document.body!.click(), 100);
-      setTimeout(() => document.body!.click(), 200);
       let cnt = 0;
       for await (const ev of co) {
         assert(ev instanceof Event);

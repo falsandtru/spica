@@ -51,9 +51,10 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
         let cnt = 0;
         while (this.alive) {
           void ++cnt;
-          // Block.
           const [[msg, reply]] = cnt === 1
+            // Don't block.
             ? [[undefined as S | undefined, noop as Reply<R>]]
+            // Block.
             : await AtomicPromise.all([
                 // Don't block.
                 this.settings.size === 0

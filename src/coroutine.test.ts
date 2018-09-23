@@ -1,4 +1,5 @@
 import { Coroutine } from './coroutine';
+import { wait } from './clock';
 
 describe('Unit: lib/coroutine', () => {
   if (navigator.userAgent.includes('Edge')) return;
@@ -27,7 +28,9 @@ describe('Unit: lib/coroutine', () => {
         assert(++cnt === 1);
         assert(undefined === (yield Promise.resolve(2)));
         assert(undefined === (yield Promise.resolve(3)));
-        return Promise.resolve(4);
+        await wait(100);
+        assert(undefined === (yield Promise.resolve(4)));
+        return Promise.resolve(5);
       });
       assert(cnt === 1);
       for await (const n of co) {
@@ -37,7 +40,7 @@ describe('Unit: lib/coroutine', () => {
         assert(false);
       }
       assert(await co === ++cnt);
-      assert(++cnt === 5);
+      assert(cnt === 5);
     });
 
     it('port', async () => {
