@@ -138,9 +138,9 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
     gen: (this: Coroutine<T, R>) => Iterator<T | R> | AsyncIterator<T | R>,
     opts?: CoroutineOptions);
   [Symbol.asyncIterator](): AsyncIterableIterator<R>;
-  //[Coroutine.port]: CoroutinePort<R, S>;
-  //[Coroutine.terminator](reason?: any): void;
-  //protected [Coroutine.destructor]: () => void;
+  [Coroutine.port]: CoroutinePort<R, S>;
+  [Coroutine.terminator](reason?: any): void;
+  protected [Coroutine.destructor]: () => void;
 }
 export interface CoroutineOptions {
   readonly resume?: () => PromiseLike<void>;

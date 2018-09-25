@@ -140,7 +140,7 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
       return res.then();
     },
   };
-  public [terminator] = (reason?: any): void => {
+  public readonly [terminator]: (reason?: any) => void = reason => {
     if (!this.alive) return;
     this.alive = false;
     // Don't block.
