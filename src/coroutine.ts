@@ -32,7 +32,7 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
     return AtomicPromise;
   }
   constructor(
-    gen: (this: Coroutine<T, R>) => Iterator<T | R> | AsyncIterator<T | R>,
+    gen: (this: Coroutine<T, R, S>) => Iterator<T | R> | AsyncIterator<T | R>,
     opts: CoroutineOptions = {},
   ) {
     super(resolve => res = resolve);

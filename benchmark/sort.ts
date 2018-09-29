@@ -8,7 +8,7 @@ describe('Benchmark:', function () {
     this.timeout(100 * 1e3);
 
     function array(n: number) {
-      return (<void[]>Array.apply([], Array(n))).map((_, i) => i);
+      return Array.apply([], Array(n)).map((_, i) => i);
     }
 
     function bench(n: number) {
