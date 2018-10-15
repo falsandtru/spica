@@ -32,7 +32,7 @@ describe('Unit: lib/coroutine', () => {
         assert(undefined === (yield Promise.resolve(4)));
         return Promise.resolve(5);
       });
-      assert(cnt === 0);
+      assert(cnt === 1);
       for await (const n of co) {
         assert(n === ++cnt);
       }

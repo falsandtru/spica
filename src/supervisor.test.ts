@@ -281,6 +281,12 @@ describe('Unit: lib/supervisor', function () {
       await wait(100);
       assert(sv.kill('') === true);
       assert(await co.then(() => 0, () => 1) === 1);
+      sv.register('', new Coroutine<number, number, number>(async function* (): any {
+        throw 1;
+      }));
+      assert(sv.refs('').length === 1);
+      await wait(100);
+      assert(sv.kill('') === false);
     });
 
     it('timeout of messaging', function (done) {

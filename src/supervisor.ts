@@ -10,7 +10,7 @@ abstract class Supervisor2018<N extends string, P = void, R = void, S = void> ex
       return this.register(name, process, state);
     }
     if (process instanceof Coroutine) {
-      const res = this.register(
+      const kill = this.register(
         name,
         {
           init: state => state,
@@ -27,8 +27,8 @@ abstract class Supervisor2018<N extends string, P = void, R = void, S = void> ex
         },
         Supervisor.initiated as never,
         reason);
-      void process[Coroutine['run']]();
-      return res;
+      void process.catch(kill);
+      return kill;
     }
     return super.register(name, process, state);
   }

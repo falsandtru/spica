@@ -112,7 +112,7 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
   private readonly settings: DeepRequired<CoroutineOptions> = {
     resume: () => clock,
     size: 0,
-    autorun: false,
+    autorun: true,
   };
   public async *[Symbol.asyncIterator](): AsyncIterableIterator<R> {
     while (this.alive) {
