@@ -32,7 +32,7 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
         acc + sv.workers.size
       , 0);
   }
-  protected static readonly initiated = Symbol();
+  protected static readonly standalone = new WeakSet<Supervisor.Process<any, any, any>>();
   constructor(opts: SupervisorOptions = {}) {
     void Object.freeze(extend(this.settings, opts));
     assert(Object.isFrozen(this.settings));
@@ -100,17 +100,11 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
       void this.kill(name, reason);
       return this.register(name, process, state);
     }
+    if (typeof process === 'function') return this.register(name, { init: state => state, main: process, exit: _ => undefined }, state);
     if (this.workers.has(name)) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: Cannot register a process multiply with the same name.`);
     void this.schedule();
-    process = typeof process === 'function'
-      ? {
-          init: state => state,
-          main: process,
-          exit: _ => undefined,
-        }
-      : process;
     return this.workers
-      .set(name, new Worker<N, P, R, S>(this, name, process, state, state as never === Supervisor.initiated, this.events_, () =>
+      .set(name, new Worker<N, P, R, S>(this, name, process, state, Supervisor.standalone.has(process), this.events_, () =>
         void this.workers.delete(name)))
       .get(name)!
       .terminate;
