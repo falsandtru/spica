@@ -138,7 +138,7 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
     gen: (this: Coroutine<T, R, S>) => Iterator<T | R> | AsyncIterator<T | R>,
     opts?: CoroutineOptions);
   [Symbol.asyncIterator](): AsyncIterableIterator<R>;
-  [Coroutine.port]: CoroutinePort<R, S>;
+  [Coroutine.port]: CoroutinePort<T, R, S>;
   [Coroutine.terminator](reason?: any): void;
   protected [Coroutine.destructor]: () => void;
 }
@@ -147,9 +147,10 @@ export interface CoroutineOptions {
   readonly size?: number;
   readonly autorun?: boolean;
 }
-export interface CoroutinePort<R, S> {
+interface CoroutinePort<T, R, S> {
   readonly send: (msg: S | PromiseLike<S>) => AtomicPromise<IteratorResult<R>>;
   readonly recv: () => AtomicPromise<IteratorResult<R>>;
+  readonly connect: (com: () => Iterator<S> | AsyncIterator<S>) => Promise<unknown>;
 }
 
 export class Colistener<T, U = void> extends Coroutine<U, T> {

@@ -62,11 +62,36 @@ describe('Unit: lib/coroutine', () => {
         [
           { value: 0, done: false },
           { value: 2, done: false },
-          { value: undefined, done: true },
+          { value: 4, done: true },
           true,
           4,
           true,
         ]);
+      assert(3 === await new Coroutine<number, number, number>(async function* () {
+        assert(1 === (yield Promise.resolve(0)));
+        assert(4 === (yield Promise.resolve(2)));
+        assert(false);
+        return Promise.resolve(4);
+      }, { size: Infinity })[Coroutine.port].connect(function* () {
+        assert(2 === (yield 1));
+        return 3;
+      }));
+      assert(true === await new Coroutine<number, number, number>(async function* () {
+        assert(1 === (yield Promise.resolve(0)));
+        return Promise.resolve(2);
+      }, { size: Infinity })[Coroutine.port].connect(function* () {
+        assert(2 === (yield 1));
+        assert(4 === (yield 3));
+      }).catch(e => e instanceof Error));
+      assert(5 === await new Coroutine<number, number, number>(async function* () {
+        assert(1 === (yield Promise.resolve(0)));
+        assert(3 === (yield Promise.resolve(2)));
+        return Promise.resolve(4);
+      }, { size: Infinity })[Coroutine.port].connect(function* () {
+        assert(2 === (yield 1));
+        assert(4 === (yield 3));
+        return 5;
+      }));
     });
 
   });

@@ -17,9 +17,13 @@ export interface CoroutineOptions {
   readonly size?: number;
   readonly autorun?: boolean;
 }
-export interface CoroutinePort<R, S> {
+interface CoroutinePort<_T, R, S> {
+  //readonly send: (msg: S | PromiseLike<S>) => AtomicPromise<IteratorResult<R, T>>;
   readonly send: (msg: S | PromiseLike<S>) => AtomicPromise<IteratorResult<R>>;
+  //readonly recv: () => AtomicPromise<IteratorResult<R, T>>;
   readonly recv: () => AtomicPromise<IteratorResult<R>>;
+  //readonly connect: <U>(com: () => Iterator<S, U> | AsyncIterator<S, U>) => Promise<U>;
+  readonly connect: (com: () => Iterator<S> | AsyncIterator<S>) => Promise<unknown>;
 }
 type Reply<R> = (msg: IteratorResult<R> | Promise<never>) => void;
 
@@ -84,8 +88,8 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
           else {
             this.alive = false;
             // Block.
-            void this.state.bind({ value: undefined as any as R, done });
-            void reply({ value: undefined as any as R, done });
+            void this.state.bind({ value: value as any as R, done });
+            void reply({ value: value as any as R, done });
             void this.result.cancel(value as T);
             while (this.msgs.length > 0) {
               // Don't block.
@@ -123,7 +127,7 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
       yield value;
     }
   }
-  public readonly [port]: CoroutinePort<R, S> = {
+  public readonly [port]: CoroutinePort<T, R, S> = {
     recv: () => this.state,
     send: (msg: S | PromiseLike<S>): AtomicPromise<IteratorResult<R>> => {
       if (!this.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
@@ -138,6 +142,16 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
         void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`)));
       }
       return res.then();
+    },
+    connect: async (com: () => Iterator<S> | AsyncIterator<S>): Promise<unknown> => {
+      const iter = com();
+      let reply: T | R | undefined;
+      while (true) {
+        const msg = await iter.next(reply!);
+        if (msg.done) return msg.value;
+        const rpy = await this[port].send(msg.value);
+        reply = rpy.value;
+      }
     },
   };
   public readonly [terminator]: (reason?: any) => void = reason => {
