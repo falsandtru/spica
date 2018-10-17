@@ -17,13 +17,13 @@ export interface CoroutineOptions {
   readonly size?: number;
   readonly autorun?: boolean;
 }
-interface CoroutinePort<_T, R, S> {
+interface CoroutinePort<T, R, S> {
   //readonly send: (msg: S | PromiseLike<S>) => AtomicPromise<IteratorResult<R, T>>;
   readonly send: (msg: S | PromiseLike<S>) => AtomicPromise<IteratorResult<R>>;
   //readonly recv: () => AtomicPromise<IteratorResult<R, T>>;
   readonly recv: () => AtomicPromise<IteratorResult<R>>;
   //readonly connect: <U>(com: () => Iterator<S, U> | AsyncIterator<S, U>) => Promise<U>;
-  readonly connect: (com: () => Iterator<S> | AsyncIterator<S>) => Promise<unknown>;
+  readonly connect: <U = T | R>(com: () => Iterator<S> | AsyncIterator<S>) => Promise<U>;
 }
 type Reply<R> = (msg: IteratorResult<R> | Promise<never>) => void;
 
@@ -143,12 +143,12 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
       }
       return res.then();
     },
-    connect: async (com: () => Iterator<S> | AsyncIterator<S>): Promise<unknown> => {
+    connect: async <U = T | R>(com: () => Iterator<S> | AsyncIterator<S>): Promise<U> => {
       const iter = com();
       let reply: T | R | undefined;
       while (true) {
         const msg = await iter.next(reply!);
-        if (msg.done) return msg.value;
+        if (msg.done) return msg.value as any as U;
         const rpy = await this[port].send(msg.value);
         reply = rpy.value;
       }

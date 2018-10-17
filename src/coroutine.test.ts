@@ -69,9 +69,9 @@ describe('Unit: lib/coroutine', () => {
         ]);
       assert(3 === await new Coroutine<number, number, number>(async function* () {
         assert(1 === (yield Promise.resolve(0)));
-        assert(4 === (yield Promise.resolve(2)));
+        yield Promise.resolve(2);
         assert(false);
-        return Promise.resolve(4);
+        throw 1;
       }, { size: Infinity })[Coroutine.port].connect(function* () {
         assert(2 === (yield 1));
         return 3;
@@ -81,7 +81,13 @@ describe('Unit: lib/coroutine', () => {
         return Promise.resolve(2);
       }, { size: Infinity })[Coroutine.port].connect(function* () {
         assert(2 === (yield 1));
-        assert(4 === (yield 3));
+        try {
+          yield 3;
+        }
+        finally {
+          //assert(false);
+          throw 1;
+        }
       }).catch(e => e instanceof Error));
       assert(5 === await new Coroutine<number, number, number>(async function* () {
         assert(1 === (yield Promise.resolve(0)));

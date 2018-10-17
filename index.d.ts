@@ -150,7 +150,7 @@ export interface CoroutineOptions {
 interface CoroutinePort<T, R, S> {
   readonly send: (msg: S | PromiseLike<S>) => AtomicPromise<IteratorResult<R>>;
   readonly recv: () => AtomicPromise<IteratorResult<R>>;
-  readonly connect: (com: () => Iterator<S> | AsyncIterator<S>) => Promise<unknown>;
+  readonly connect: <U = T | R>(com: () => Iterator<S> | AsyncIterator<S>) => Promise<U>;
 }
 
 export class Colistener<T, U = void> extends Coroutine<U, T> {
