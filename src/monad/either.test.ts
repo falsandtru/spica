@@ -156,6 +156,17 @@ describe('Unit: lib/either', () => {
       assert(await Either.sequence(Left(1)).then(m => m.extract(a => a)) === 1);
     });
 
+    it('do', () => {
+      assert(3 === Either.do(function* () {
+        const n = yield Right(1);
+        const m = yield Right(2);
+        return Right(n + m);
+      }).extract());
+      assert(0 === Either.do(function* () {
+        yield Left(0);
+      }).extract(() => 0));
+    });
+
     it('Monad law 1', () => {
       const f = (n: number) => Return(n + 1);
       const x = 0;

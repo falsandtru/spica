@@ -54,6 +54,19 @@ export class Maybe<a> extends MonadPlus<a> {
       ? this.evaluate().extract(nothing!)
       : this.fmap(just).extract(nothing!);
   }
+  public static do<a>(block: () => Iterator<Maybe<a>>): Maybe<a> {
+    const iter = block();
+    let val: a | undefined;
+    while (true) {
+      const { value: m, done } = iter.next(val!);
+      if (done) return m;
+      const r = m.extract(
+        () => undefined,
+        a => [a]);
+      if (!r) return m;
+      val = r[0];
+    }
+  }
 }
 export namespace Maybe {
   export declare function fmap<a, b>(m: Maybe<a>, f: (a: a) => b): Maybe<b>

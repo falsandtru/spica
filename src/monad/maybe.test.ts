@@ -161,6 +161,17 @@ describe('Unit: lib/maybe', () => {
       assert(await Maybe.sequence(Nothing) === Nothing);
     });
 
+    it('do', () => {
+      assert(3 === Maybe.do(function* () {
+        const n = yield Just(1);
+        const m = yield Just(2);
+        return Just(n + m);
+      }).extract());
+      assert(0 === Maybe.do(function* () {
+        yield Nothing;
+      }).extract(() => 0));
+    });
+
     it('Monad law 1', () => {
       const f = (n: number) => Return(n + 1);
       const x = 0;

@@ -314,6 +314,7 @@ declare namespace Monad {
     extract(transform: () => a): a;
     extract<b>(transform: () => b): a | b;
     extract<b>(nothing: () => b, just: (a: a) => b): b;
+    static do<a>(block: () => Iterator<Maybe<a>>): Maybe<a>;
   }
 }
 declare namespace Monad.Maybe {
@@ -389,6 +390,7 @@ declare namespace Monad {
     extract(transform: (a: a) => b): b;
     extract<c>(transform: (a: a) => c): b | c;
     extract<c>(left: (a: a) => c, right: (b: b) => c): c;
+    static do<a, b>(block: () => Iterator<Either<a, b>>): Either<a, b>;
   }
 }
 declare namespace Monad.Either {
