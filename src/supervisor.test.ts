@@ -280,8 +280,8 @@ describe('Unit: lib/supervisor', function () {
       sv.register('', co);
       await wait(100);
       assert(sv.kill('') === true);
-      assert(await co.then(() => 0, () => 1) === 1);
-      sv.register('', new Coroutine<number, number, number>(async function* (): any {
+      assert(await co.catch(() => 0) === 0);
+      sv.register('', new Coroutine<number, number, number>(async function* (): AsyncIterator<never> {
         throw 1;
       }));
       assert(sv.refs('').length === 1);

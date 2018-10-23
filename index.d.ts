@@ -8,7 +8,6 @@
 export abstract class Supervisor<N extends string, P = void, R = void, S = void> {
   static readonly count: number;
   static readonly procs: number;
-  static readonly terminator: unique symbol;
   constructor(opts?: SupervisorOptions);
   readonly id: string;
   readonly name: string;
