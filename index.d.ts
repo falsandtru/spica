@@ -5,7 +5,7 @@
 * @author falsandtru https://github.com/falsandtru/spica
 */
 
-export abstract class Supervisor<N extends string, P = void, R = void, S = void> {
+export abstract class Supervisor<N extends string, P = void, R = void, S = void> extends Coroutine<void> {
   static readonly count: number;
   static readonly procs: number;
   constructor(opts?: SupervisorOptions);

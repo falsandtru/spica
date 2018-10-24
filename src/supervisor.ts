@@ -30,10 +30,16 @@ abstract class Supervisor2018<N extends string, P = void, R = void, S = void> ex
     }
     return super.register(name, process, state);
   }
+  public [Coroutine.terminator] = (reason?: any): void =>
+    void this.terminate(reason);
 }
 namespace Supervisor2018 {
   export import Process = Supervisor.Process;
   export import Callback = Supervisor.Callback;
   export import Event = Supervisor.Event;
 }
+interface Supervisor2018<N extends string, P = void, R = void, S = void> extends Coroutine<void> {
+}
+Supervisor['__proto__'] = Coroutine;
+Supervisor.prototype['__proto__'] = Coroutine.prototype;
 export { Supervisor2018 as Supervisor };

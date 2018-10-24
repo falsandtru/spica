@@ -72,8 +72,8 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
           assert(msg instanceof AtomicPromise === false);
           // Block.
           const { value, done } = await iter.next(msg);
-          assert(value instanceof Promise === false);
-          assert(value instanceof AtomicPromise === false);
+          //assert(value instanceof Promise === false);
+          //assert(value instanceof AtomicPromise === false);
           if (!this[status].alive) return;
           if (!done) {
             // Don't block.
@@ -112,8 +112,8 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
   public async *[Symbol.asyncIterator](): AsyncIterableIterator<R> {
     while (this[status].alive) {
       const { value, done } = await this[status].state;
-      assert(value instanceof Promise === false);
-      assert(value instanceof AtomicPromise === false);
+      //assert(value instanceof Promise === false);
+      //assert(value instanceof AtomicPromise === false);
       if (done || this[status].result.canceled) return;
       yield value;
     }

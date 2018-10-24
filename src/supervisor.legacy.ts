@@ -1,4 +1,5 @@
 import { AtomicPromise } from './promise';
+import { AtomicFuture } from './future';
 import { Observation, Observer, Publisher } from './observation';
 import { DeepRequired } from './type';
 import { extend } from './assign';
@@ -16,7 +17,7 @@ export interface SupervisorOptions {
   readonly resource?: number;
 }
 
-export abstract class Supervisor<N extends string, P = void, R = void, S = void> {
+export abstract class Supervisor<N extends string, P = void, R = void, S = void> extends AtomicPromise<void> {
   private static instances_: Set<Supervisor<string, any, any, any>>;
   private static get instances(): typeof Supervisor.instances_ {
     return this.hasOwnProperty('instances_')
@@ -34,12 +35,18 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
   }
   protected static readonly standalone = new WeakSet<Supervisor.Process<any, any, any>>();
   constructor(opts: SupervisorOptions = {}) {
+    super((resolve, reject) => (
+      cb = [resolve, reject],
+      { next: () => new AtomicPromise(r => void tick(() => r({ value: this.state, done: true }))) }));
+    var cb: [() => void, () => void];
+    void this.state.then(...cb!);
     void Object.freeze(extend(this.settings, opts));
     assert(Object.isFrozen(this.settings));
     this.name = this.settings.name;
     if (this.constructor === Supervisor) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot instantiate abstract classes.`);
     void (this.constructor as typeof Supervisor).instances.add(this);
   }
+  protected state = new AtomicFuture<void>();
   private destructor(reason: any): void {
     assert(this.alive === true);
     assert(this.available === true);
@@ -64,6 +71,7 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
     assert(this.alive === false);
     assert(this.available === false);
     void this.settings.destructor(reason);
+    void this.state.bind(reason === undefined ? undefined : AtomicPromise.reject(reason));
   }
   public readonly id: string = sqid();
   public readonly name: string;

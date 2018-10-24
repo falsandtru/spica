@@ -287,6 +287,11 @@ describe('Unit: lib/supervisor', function () {
       assert(sv.refs('').length === 1);
       await wait(100);
       assert(sv.kill('') === false);
+      const ssv = new class TestSupervisor extends Supervisor<''> { }();
+      ssv.register('', sv);
+      ssv.terminate();
+      assert(await sv === undefined);
+      assert(await ssv === undefined);
     });
 
     it('timeout of messaging', function (done) {
