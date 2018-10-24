@@ -59,24 +59,23 @@ export class AtomicPromise<T> implements Promise<T> {
     try {
       void executor(
         value => {
-          this[status] = this[status] || [State.resolved, value!];
+          this[status][0] = this[status][0] || [State.resolved, value!];
           void this[resume]();
         },
         reason => {
-          this[status] = this[status] || [State.rejected, reason];
+          this[status][0] = this[status][0] || [State.rejected, reason];
           void this[resume]();
         });
     }
     catch (reason) {
-      assert(!this[status]);
-      this[status] = [State.rejected, reason];
+      assert(!this[status][0]);
+      this[status][0] = [State.rejected, reason];
       void this[resume]();
     }
   }
-  private [status]?: Status<T>;
   private [resume](): void {
-    if (!this[status]) return;
-    const [state, value] = this[status]!;
+    if (!this[status][0]) return;
+    const [state, value] = this[status][0]!;
     while (this[queue].length > 0) {
       const [resolve, reject] = this[queue].shift()!;
       switch (state) {
@@ -91,6 +90,7 @@ export class AtomicPromise<T> implements Promise<T> {
       }
     }
   }
+  private readonly [status]: [Status<T>?] = [];
   private readonly [queue]: [(value: T) => void, (reason: any) => void][] = [];
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
     return new AtomicPromise((resolve, reject) => {
