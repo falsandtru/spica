@@ -38,8 +38,7 @@ namespace Supervisor2018 {
   export import Callback = Supervisor.Callback;
   export import Event = Supervisor.Event;
 }
-interface Supervisor2018<N extends string, P = void, R = void, S = void> extends Coroutine<void> {
-}
+interface Supervisor2018<N extends string, P = void, R = void, S = void> extends Coroutine<void> { }
 Supervisor['__proto__'] = Coroutine;
 Supervisor.prototype['__proto__'] = Coroutine.prototype;
 export { Supervisor2018 as Supervisor };

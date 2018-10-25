@@ -88,7 +88,7 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
           }
           else {
             this[status].alive = false;
-            // Block.
+            // Don't block.
             void this[status].state.bind({ value: value as any as R, done });
             void reply({ value: value as any as R, done });
             void this[status].result.cancel(value as T);
