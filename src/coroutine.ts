@@ -77,9 +77,9 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
           if (!this[status].alive) return;
           if (!done) {
             // Don't block.
-            const state = this[status].state.bind({ value: value as R, done });
-            assert(state === this[status].state);
+            const state = this[status].state;
             this[status].state = new AtomicFuture();
+            void state.bind({ value: value as R, done });
             // Block.
             await state;
             // Don't block.
