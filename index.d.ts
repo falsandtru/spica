@@ -17,8 +17,8 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
     readonly exit: Observer<[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>;
   };
   readonly available: boolean;
-  register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S> | Coroutine<R, R, P>, state: S, reason?: any): (reason?: any) => boolean;
-  register(name: N, process: Coroutine<R, R, P>, state?: never, reason?: any): (reason?: any) => boolean;
+  register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S> | CoroutineInterface<R, R, P>, state: S, reason?: any): (reason?: any) => boolean;
+  register(name: N, process: CoroutineInterface<R, R, P>, state?: never, reason?: any): (reason?: any) => boolean;
   call(name: N | ('' extends N ? undefined : never), param: P, timeout?: number): AtomicPromise<R>;
   call(name: N | ('' extends N ? undefined : never), param: P, callback: Supervisor.Callback<R>, timeout?: number): void;
   cast(name: N | ('' extends N ? undefined : never), param: P, timeout?: number): boolean;
@@ -128,7 +128,14 @@ export class AtomicPromise<T> implements Promise<T> {
   finally(onfinally?: (() => void) | undefined | null): AtomicPromise<T>;
 }
 
-export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implements AsyncIterable<R> {
+export interface CoroutineInterface<T, R = void, _ = void> extends Promise<T>, AsyncIterable<R> {
+  constructor: {
+    port: symbol;
+    terminator: symbol;
+    [Symbol.species]: typeof Promise;
+  };
+}
+export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implements Promise<T>, AsyncIterable<R> {
   protected static readonly run: unique symbol;
   static readonly port: unique symbol;
   protected static readonly destructor: unique symbol;

@@ -288,6 +288,7 @@ describe('Unit: lib/supervisor', function () {
       await wait(100);
       assert(sv.kill('') === false);
       const ssv = new class TestSupervisor extends Supervisor<''> { }();
+      assert(ssv instanceof Coroutine);
       ssv.register('', sv);
       ssv.terminate();
       assert(await sv === undefined);
