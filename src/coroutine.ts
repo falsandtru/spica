@@ -10,7 +10,6 @@ import { noop } from './noop';
 const run = Symbol();
 const status = Symbol();
 const port = Symbol();
-const destructor = Symbol();
 const terminator = Symbol();
 
 export interface CoroutineOptions {
@@ -41,7 +40,6 @@ export interface Coroutine<T, R = void, S = void> extends AtomicPromise<T>, Asyn
 export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implements Promise<T>, AsyncIterable<R> {
   protected static readonly run: typeof run = run;
   public static readonly port: typeof port = port;
-  protected static readonly destructor: typeof destructor = destructor;
   public static readonly terminator: typeof terminator = terminator;
   public static get [Symbol.species]() {
     return AtomicPromise;
@@ -53,7 +51,6 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
     super(resolve => res = resolve);
     var res!: (v: T | AtomicPromise<never>) => void;
     void this[status].result.register(res);
-    void this[status].result.register(() => void this[Coroutine.destructor]());
     void Object.freeze(extend(this[status].settings, opts));
     this[Coroutine.run] = async () => {
       try {
@@ -167,7 +164,6 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
       void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
     }
   };
-  protected [destructor]: () => void = noop;
 }
 
 class State<T, R, S> {

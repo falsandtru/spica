@@ -12,7 +12,7 @@ export class Colistener<T, U = void> extends Coroutine<U, T> {
       let notifier: AtomicFuture<T[]> | undefined;
       assert(!notifier);
       const queue: T[] = [];
-      this[Coroutine.destructor] = listen.call(this, (value: T) => {
+      void this.finally(listen.call(this, (value: T) => {
         if (notifier && queue.length === 0) {
           void notifier.bind(queue);
           notifier = undefined;
@@ -22,8 +22,7 @@ export class Colistener<T, U = void> extends Coroutine<U, T> {
           void queue.shift()!;
         }
         assert(queue.length > 0);
-      });
-      void this.cancellation.register(this[Coroutine.destructor]);
+      }));
       const done = this.cancellation.then(() => []);
       while (queue.length > 0 && !this.cancellation.canceled) {
         yield queue.shift()!;

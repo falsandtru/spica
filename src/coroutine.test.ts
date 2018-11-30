@@ -14,10 +14,16 @@ describe('Unit: lib/coroutine', () => {
     });
 
     it('terminate', done => {
+      let cnt = 0;
       const co = new Coroutine(async function* () {
+        assert(cnt === 0 && ++cnt);
         return 0;
       });
+      co.finally(() => {
+        assert(cnt === 1 && ++cnt);
+      });
       co[Coroutine.terminator]();
+      assert(cnt === 2 && ++cnt);
       co[Coroutine.terminator](1);
       co.catch(done);
     });
