@@ -65,7 +65,7 @@ function stringifyArray(arr: any[]): string {
 }
 
 function stringifyObject(obj: object): string {
-  if (!isObject(obj)) return '';
+  if (!isObject(obj || typeof obj === 'function')) return '';
   let acc = '';
   for (const k of Object.keys(obj)) {
     acc += `${stringify(k)}:${stringify(obj[k])},`;

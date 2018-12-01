@@ -126,5 +126,5 @@ export function type(target: any): string {
 
 export function isObject(target: any): target is object {
   return target !== null
-      && typeof target ==='object';
+      && (typeof target ==='object' || target instanceof Object);
 }
