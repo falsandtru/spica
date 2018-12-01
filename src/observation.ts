@@ -5,9 +5,9 @@ import { findIndex } from './equal';
 import { causeAsyncException } from './exception';
 
 export interface Observer<N extends any[], D, R> {
-  monitor(namespace: N, listener: Monitor<N, D>, options?: ObserverOptions): () => void;
+  monitor(namespace: [] | N, listener: Monitor<N, D>, options?: ObserverOptions): () => void;
   on(namespace: N, listener: Subscriber<N, D, R>, options?: ObserverOptions): () => void;
-  off(namespace: N, listener?: Subscriber<N, D, R>): void;
+  off(namespace: [] | N, listener?: Subscriber<N, D, R>): void;
   once(namespace: N, listener: Subscriber<N, D, R>): () => void;
 }
 export interface ObserverOptions {
@@ -30,7 +30,7 @@ interface RegisterNode<N extends any[], D, R> {
 }
 export type RegisterItem<N extends any[], D, R> = {
   type: RegisterItemType.Monitor;
-  namespace: N;
+  namespace: [] | N;
   listener: Monitor<N, D>;
   options: ObserverOptions;
  } | {
@@ -59,7 +59,7 @@ export class Observation<N extends any[], D, R>
   private readonly settings: DeepRequired<ObservationOptions> = {
     limit: 10,
   };
-  public monitor(namespace: N, listener: Monitor<N, D>, { once = false }: ObserverOptions = {}): () => void {
+  public monitor(namespace: [] | N, listener: Monitor<N, D>, { once = false }: ObserverOptions = {}): () => void {
     if (typeof listener !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${listener}`);
     const off = () => this.off(namespace, listener, RegisterItemType.monitor);
     const { items } = this.seekNode_(namespace);
@@ -94,7 +94,7 @@ export class Observation<N extends any[], D, R>
   public once(namespace: N, listener: Subscriber<N, D, R>): () => void {
     return this.on(namespace, listener, { once: true });
   }
-  public off(namespace: N, listener?: Monitor<N, D> | Subscriber<N, D, R>, type: RegisterItemType = RegisterItemType.subscriber): void {
+  public off(namespace: [] | N, listener?: Monitor<N, D> | Subscriber<N, D, R>, type: RegisterItemType = RegisterItemType.subscriber): void {
     switch (typeof listener) {
       case 'function':
         return void this.seekNode_(namespace).items
@@ -114,7 +114,7 @@ export class Observation<N extends any[], D, R>
         const node = this.seekNode_(namespace);
         void node.childrenNames.slice()
           .forEach(name => {
-            void this.off(namespace.concat([name]) as N);
+            void this.off(namespace.concat([name as never]) as N);
             const child = node.children.get(name);
             if (!child) return;
             if (child.items.length + child.childrenNames.length > 0) return;

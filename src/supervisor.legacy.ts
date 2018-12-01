@@ -84,14 +84,14 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
     resource: 10,
   };
   private readonly events_ = {
-    init: new Observation<[] | [N], Supervisor.Event.Data.Init<N, P, R, S>, any>(),
-    loss: new Observation<[] | [N], Supervisor.Event.Data.Loss<N, P>, any>(),
-    exit: new Observation<[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>(),
+    init: new Observation<[N], Supervisor.Event.Data.Init<N, P, R, S>, any>(),
+    loss: new Observation<[N], Supervisor.Event.Data.Loss<N, P>, any>(),
+    exit: new Observation<[N], Supervisor.Event.Data.Exit<N, P, R, S>, any>(),
   };
   public readonly events: {
-    readonly init: Observer<[] | [N], Supervisor.Event.Data.Init<N, P, R, S>, any>;
-    readonly loss: Observer<[] | [N], Supervisor.Event.Data.Loss<N, P>, any>;
-    readonly exit: Observer<[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>;
+    readonly init: Observer<[N], Supervisor.Event.Data.Init<N, P, R, S>, any>;
+    readonly loss: Observer<[N], Supervisor.Event.Data.Loss<N, P>, any>;
+    readonly exit: Observer<[N], Supervisor.Event.Data.Exit<N, P, R, S>, any>;
   } = this.events_;
   private readonly workers = new Map<N, Worker<N, P, R, S>>();
   private alive = true;
@@ -297,8 +297,8 @@ class Worker<N extends string, P, R, S> {
     public state: S,
     initiated: boolean,
     private readonly events: {
-      readonly init: Publisher<[] | [N], Supervisor.Event.Data.Init<N, P, R, S>, any>;
-      readonly exit: Publisher<[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>;
+      readonly init: Publisher<[N], Supervisor.Event.Data.Init<N, P, R, S>, any>;
+      readonly exit: Publisher<[N], Supervisor.Event.Data.Exit<N, P, R, S>, any>;
     },
     private readonly destructor_: () => void,
   ) {

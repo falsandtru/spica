@@ -12,9 +12,9 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
   readonly id: string;
   readonly name: string;
   readonly events: {
-    readonly init: Observer<[] | [N], Supervisor.Event.Data.Init<N, P, R, S>, any>;
-    readonly loss: Observer<[] | [N], Supervisor.Event.Data.Loss<N, P>, any>;
-    readonly exit: Observer<[] | [N], Supervisor.Event.Data.Exit<N, P, R, S>, any>;
+    readonly init: Observer<[N], Supervisor.Event.Data.Init<N, P, R, S>, any>;
+    readonly loss: Observer<[N], Supervisor.Event.Data.Loss<N, P>, any>;
+    readonly exit: Observer<[N], Supervisor.Event.Data.Exit<N, P, R, S>, any>;
   };
   readonly available: boolean;
   register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S> | CoroutineInterface<R, R, P>, state: S, reason?: any): (reason?: any) => boolean;
@@ -68,9 +68,9 @@ export interface Observation<N extends any[], D, R>
   refs(namespace: [] | N): RegisterItem<N, D, R>[];
 }
 export interface Observer<N extends any[], D, R> {
-  monitor(namespace: N, listener: Monitor<N, D>, opts?: ObserverOptions): () => void;
+  monitor(namespace: [] | N, listener: Monitor<N, D>, opts?: ObserverOptions): () => void;
   on(namespace: N, listener: Subscriber<N, D, R>, opts?: ObserverOptions): () => void;
-  off(namespace: N, listener?: Subscriber<N, D, R>): void;
+  off(namespace: [] | N, listener?: Subscriber<N, D, R>): void;
   once(namespace: N, listener: Subscriber<N, D, R>): () => void;
 }
 export interface ObserverOptions {
