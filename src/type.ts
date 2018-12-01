@@ -120,6 +120,11 @@ export type DeepReadonly<T, E extends object | undefined | null = never> =
 
 export function type(target: any): string {
   const type = (Object.prototype.toString.call(target) as string).split(' ').pop()!.slice(0, -1);
-  if (typeof target !== 'object' && target instanceof Object === false || target === null) return type.toLowerCase();
+  if (target === null || typeof target !== 'object' && target instanceof Object === false) return type.toLowerCase();
   return type;
+}
+
+export function isObject(target: any): target is object {
+  return target !== null
+      && typeof target ==='object';
 }

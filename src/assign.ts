@@ -1,4 +1,4 @@
-import { type } from './type';
+import { type, isObject } from './type';
 
 export const assign = template((key, target, source) =>
   target[key] = source[key]);
@@ -8,8 +8,8 @@ export const clone = template((key, target, source): void => {
     case 'Array':
       return target[key] = clone([], source[key]);
     case 'Object':
-      return target[key] = source[key] instanceof Object
-        ? clone({}, source[key])
+      return target[key] = isObject(source[key])
+        ? clone(source[key] instanceof Object ? {} : Object.create(null), source[key])
         : source[key];
     default:
       return target[key] = source[key];
@@ -23,12 +23,12 @@ export const extend = template((key, target, source): void => {
     case 'Object':
       switch (type(target[key])) {
         case 'Object':
-          return target[key] = source[key] instanceof Object
+          return target[key] = isObject(source[key])
             ? extend(target[key], source[key])
             : source[key];
         default:
-          return target[key] = source[key] instanceof Object
-            ? extend({}, source[key])
+          return target[key] = isObject(source[key])
+            ? extend(source[key] instanceof Object ? {} : Object.create(null), source[key])
             : source[key];
       }
     default:

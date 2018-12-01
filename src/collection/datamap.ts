@@ -1,6 +1,6 @@
 import { Collection } from '../collection';
 import { sqid } from '../sqid';
-import { type } from '../type';
+import { type, isObject } from '../type';
 
 export class DataMap<K, V> implements Collection<K, V> {
   constructor(entries: Iterable<[K, V]> = []) {
@@ -65,7 +65,7 @@ function stringifyArray(arr: any[]): string {
 }
 
 function stringifyObject(obj: object): string {
-  if (obj instanceof Object === false) return '';
+  if (!isObject(obj)) return '';
   let acc = '';
   for (const k of Object.keys(obj)) {
     acc += `${stringify(k)}:${stringify(obj[k])},`;

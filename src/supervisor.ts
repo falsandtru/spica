@@ -1,5 +1,6 @@
 import { Supervisor } from './supervisor.legacy';
 import { Coroutine, CoroutineInterface } from './coroutine';
+import { isObject } from './type';
 
 abstract class Supervisor2018<N extends string, P = void, R = void, S = void> extends Supervisor<N, P, R, S> {
   public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S> | CoroutineInterface<R, R, P>, state: S, reason?: any): (reason?: any) => boolean;
@@ -44,7 +45,7 @@ Supervisor.prototype['__proto__'] = Coroutine.prototype;
 export { Supervisor2018 as Supervisor };
 
 function isCoroutine(target: unknown): target is CoroutineInterface<unknown, unknown, unknown> {
-  return target instanceof Object
+  return isObject(target)
       && typeof target.constructor['port'] === 'symbol'
       && typeof target[target.constructor['port']] === 'object'
       && typeof target.constructor['terminator'] === 'symbol'

@@ -1,4 +1,5 @@
 import { DataMap } from './datamap';
+import { extend } from '../assign';
 
 describe('Unit: lib/datamap', () => {
   describe('DataMap', () => {
@@ -32,12 +33,15 @@ describe('Unit: lib/datamap', () => {
       assert(map.get({}) === undefined);
       assert(map.set({}, '') === map);
       assert(map.get({}) === '');
+      assert(map.get(Object.create(null)) === '');
       assert(map.get({ '': '' }) === undefined);
       assert(map.set({ '': '' }, ' ') === map);
       assert(map.get({ '': '' }) === ' ');
+      assert(map.get(extend(Object.create(null), { '': '' })) === ' ');
       assert(map.get({}) === '');
       assert(map.set({}, ' ') === map);
       assert(map.get({}) === ' ');
+      assert(map.get(Object.create(null)) === ' ');
     });
 
     it('has', () => {
@@ -82,16 +86,6 @@ describe('Unit: lib/datamap', () => {
       assert(map.size === 1);
       assert(map.clear() === undefined);
       assert(map.size === 0);
-    });
-
-    it('plain object', () => {
-      const map = new DataMap<object, string>();
-      const o1 = Object.create(null);
-      const o2 = Object.create(null);
-      assert(map.set(o1, '') === map);
-      assert(map.has(o1) === true);
-      assert(map.has(o2) === false);
-      assert(map.has({}) === false);
     });
 
     it('injection', () => {
