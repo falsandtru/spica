@@ -1,11 +1,11 @@
 const gulp = require('gulp');
+const { series, parallel } = gulp;
 const glob = require('glob');
 const shell = cmd => require('child_process').execSync(cmd, { stdio: [0, 1, 2] });
 const del = require('del');
 const source = require('vinyl-source-stream');
 const buffer = require('vinyl-buffer');
 const $ = require('gulp-load-plugins')();
-const seq = require('run-sequence');
 const browserify = require('browserify');
 const watchify = require('watchify');
 const tsify = require('tsify');
@@ -175,56 +175,52 @@ gulp.task('install', function () {
   shell('npm i --no-shrinkwrap');
 });
 
-gulp.task('update', function () {
+gulp.task('update', function (done) {
   shell('ncu -ua');
   shell('npm i -DE typescript@next --no-shrinkwrap');
   shell('npm i --no-shrinkwrap');
+  done();
 });
 
-gulp.task('watch', ['clean'], function (done) {
-  seq(
+gulp.task('watch',
+  series(
+    'clean',
     'ts:test',
-    [
+    parallel(
       'ts:watch',
-      'karma:watch'
-    ],
-    done
-  );
-});
+      'karma:watch',
+    )));
 
-gulp.task('test', ['clean'], function (done) {
-  seq(
-    'ts:test',
-    'karma:test',
-    'ts:dist',
-    done
-  );
-});
+gulp.task('test',
+  series(
+    'clean',
+    series(
+      'ts:test',
+      'karma:test',
+      'ts:dist',
+    )));
 
-gulp.task('bench', ['clean'], function (done) {
-  seq(
+gulp.task('dist',
+  series(
+    'clean',
+    series(
+      'ts:dist',
+    )));
+
+gulp.task('bench',
+  series(
+    'clean',
     'ts:bench',
     'karma:bench',
-    done
-  );
-});
+  ));
 
-gulp.task('dist', ['clean'], function (done) {
-  seq(
-    'ts:dist',
-    done
-  );
-});
-
-gulp.task('ci', ['clean'], function (done) {
-  seq(
-    'ts:test',
-    'karma:ci',
-    'karma:ci',
-    'karma:ci',
-    'karma:ci',
-    'karma:ci',
-    'dist',
-    done
-  );
-});
+gulp.task('ci',
+  series(
+    'clean',
+    series(
+      'ts:test',
+      'karma:ci',
+      'karma:ci',
+      'karma:ci',
+      'dist',
+    )));
