@@ -122,7 +122,7 @@ gulp.task('ts:view', () =>
       .pipe(gulp.dest('./gh-pages/assets/js/lib'))));
 
 gulp.task('karma:dev', done =>
-  new Server({
+  void new Server({
     configFile: __dirname + '/karma.conf.js',
     browsers: config.browsers,
     preprocessors: {
@@ -131,7 +131,7 @@ gulp.task('karma:dev', done =>
   }, done).start());
 
 gulp.task('karma:test', done =>
-  new Server({
+  void new Server({
     configFile: __dirname + '/karma.conf.js',
     browsers: config.browsers,
     preprocessors: {
@@ -143,7 +143,7 @@ gulp.task('karma:test', done =>
   }, done).start());
 
 gulp.task('karma:bench', done =>
-  new Server({
+  void new Server({
     configFile: __dirname + '/karma.conf.js',
     browsers: config.browsers,
     concurrency: 1,
@@ -151,7 +151,7 @@ gulp.task('karma:bench', done =>
   }, done).start());
 
 gulp.task('karma:ci', done =>
-  new Server({
+  void new Server({
     configFile: __dirname + '/karma.conf.js',
     browsers: config.browsers,
     preprocessors: {
