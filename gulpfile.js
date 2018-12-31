@@ -103,6 +103,7 @@ gulp.task('ts:test', () =>
 gulp.task('ts:bench', () =>
   compile(config.ts.bench.src)
     .pipe($.unassert())
+    .pipe($.rename({ extname: '.test.js' }))
     .pipe(gulp.dest(config.ts.bench.dest)));
 
 gulp.task('ts:dist', () =>
