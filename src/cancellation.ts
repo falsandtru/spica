@@ -81,11 +81,15 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
       ? AtomicPromise.reject(this.reason)
       : AtomicPromise.resolve(val);
   public readonly maybe = <T>(val: T): Maybe<T> =>
-    this.canceled_
-      ? Nothing
-      : Just(val);
+    Just(val)
+      .bind(val =>
+        this.canceled_
+          ? Nothing
+          : Just(val));
   public readonly either = <R>(val: R): Either<L, R> =>
-    this.canceled_
-      ? Left(this.reason!)
-      : Right(val);
+    Right(val)
+      .bind<R, L>(val =>
+        this.canceled_
+          ? Left(this.reason!)
+          : Right(val));
 }
