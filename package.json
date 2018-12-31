@@ -69,7 +69,7 @@
     "power-assert": "^1.6.1",
     "tsify": "^4.0.1",
     "typescript": "3.3.0-dev.20181229",
-    "uglify-es": "^3.3.10",
+    "uglify-es": "^3.3.9",
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0"
   },
