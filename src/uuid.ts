@@ -1,8 +1,10 @@
-const FORMAT_V4 = Object.freeze('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.split(''));
+const FORMAT_V4 = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
+
 export function uuid(): string {
   // version 4
   let acc = '';
-  for (const c of FORMAT_V4) {
+  for (let i = 0; i < FORMAT_V4.length; ++i) {
+    const c = FORMAT_V4[i];
     if (c === 'x' || c === 'y') {
       const r = Math.random() * 16 | 0;
       const v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -12,5 +14,5 @@ export function uuid(): string {
       acc += c;
     }
   }
-  return acc.toLowerCase();
+  return acc;
 }
