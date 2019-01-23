@@ -18,7 +18,6 @@ export { cofetch } from './src/cofetch';
 export { DataMap } from './src/datamap';
 export { AttrMap } from './src/attrmap';
 export { Cache } from './src/cache';
-export { generative } from './src/collection';
 export { tick, wait } from './src/clock';
 export { throttle, debounce } from './src/throttle';
 export { uuid } from './src/uuid';

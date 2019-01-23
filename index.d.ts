@@ -633,11 +633,6 @@ export class Cache<K, V = void> {
   export(): { stats: [K[], K[]]; entries: [K, V][]; };
 }
 
-export function generative
-  <T extends Collection<any, any>>
-  (collection: T, factory: (key: T extends { get(key: infer U): unknown; } ? U : never) => T extends { set(key: unknown, value: infer U): unknown; } ? U : never)
-  : T;
-
 export function tick(fn: () => void, dedup?: boolean): void;
 export function wait(ms: number): AtomicPromise<void>;
 export function throttle<T>(interval: number, callback: (last: T, buffer: T[]) => void): (arg: T) => void;
