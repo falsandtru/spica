@@ -354,6 +354,7 @@ describe('Unit: lib/type', () => {
       type I = { readonly a?: number[]; readonly b: { c: string; }; readonly d: () => 0; readonly e: new () => object };
       type M = { a?: number[]; b: { c: string; }; d: () => 0; e: new () => object };
       assert((): true => true as TEq<Readonly<M>, I>);
+      assert((): true => true as TEq<Readonly<unknown[]>, ReadonlyArray<unknown>>);
     });
 
   });
@@ -364,6 +365,7 @@ describe('Unit: lib/type', () => {
       type M = { a?: number; b: { c: string[]; d: () => 0; e: new () => object }; };
       assert((): true => true as TEq<DeepReadonly<M>, I>);
       assert((): true => true as TEq<DeepReadonly<M, M['b']>, Readonly<M>>);
+      assert((): true => true as TEq<DeepReadonly<unknown[]>, ReadonlyArray<unknown>>);
     });
 
   });

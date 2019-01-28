@@ -110,11 +110,13 @@ export type DeepRequired<T, E extends object | undefined | null = any[]> =
   T;
 export type Readonly<T> =
   T extends (infer U)[] ? ReadonlyArray<U> :
+  T extends ReadonlyArray<any> | ReadonlySet<any> | ReadonlyMap<any, any> ? T :
   T extends object ? { readonly [P in keyof T]: T[P]; } :
   T;
 export type DeepReadonly<T, E extends object | undefined | null = never> =
   T extends E ? T :
   T extends (infer U)[] ? ReadonlyArray<U> :
+  T extends ReadonlyArray<any> | ReadonlySet<any> | ReadonlyMap<any, any> ? T :
   T extends object ? { readonly [P in keyof T]: NonNullable<T[P]> extends NonNullable<E | Function> ? T[P] : DeepReadonly<T[P], E>; } :
   T;
 
