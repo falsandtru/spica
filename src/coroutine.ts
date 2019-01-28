@@ -28,10 +28,10 @@ interface CoroutinePort<T, R, S> {
 type Reply<R> = (msg: IteratorResult<R> | Promise<never>) => void;
 
 export interface CoroutineInterface<T, R = void, _ = void> extends Promise<T>, AsyncIterable<R> {
-  constructor: {
-    port: symbol;
-    terminator: symbol;
-    [Symbol.species]: typeof Promise;
+  readonly constructor: {
+    readonly port: symbol;
+    readonly terminator: symbol;
+    readonly [Symbol.species]: typeof Promise;
   };
 }
 export interface Coroutine<T, R = void, S = void> extends AtomicPromise<T>, AsyncIterable<R> {
