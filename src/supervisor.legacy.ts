@@ -1,7 +1,7 @@
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future';
 import { Observation, Observer, Publisher } from './observation';
-import { DeepRequired } from './type';
+import { DeepReadonly, DeepRequired } from './type';
 import { extend } from './assign';
 import { tick } from './clock';
 import { sqid } from './sqid';
@@ -40,8 +40,7 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
       { next: () => new AtomicPromise(r => void tick(() => r({ value: this.state, done: true }))) }));
     var cb: [() => void, () => void];
     void this.state.then(...cb!);
-    void Object.freeze(extend(this.settings, opts));
-    assert(Object.isFrozen(this.settings));
+    void extend(this.settings, opts);
     this.name = this.settings.name;
     if (this.constructor === Supervisor) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot instantiate abstract classes.`);
     void (this.constructor as typeof Supervisor).instances.add(this);
@@ -75,7 +74,7 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
   }
   public readonly id: string = sqid();
   public readonly name: string;
-  private readonly settings: DeepRequired<SupervisorOptions> = {
+  private readonly settings: DeepReadonly<DeepRequired<SupervisorOptions>> = {
     name: '',
     size: Infinity,
     timeout: Infinity,

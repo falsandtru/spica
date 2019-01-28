@@ -1,7 +1,7 @@
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future'; 
 import { Cancellation } from './cancellation';
-import { DeepRequired } from './type';
+import { DeepReadonly, DeepRequired } from './type';
 import { extend } from './assign';
 import { tuple } from './tuple';
 import { clock, tick } from './clock';
@@ -50,8 +50,8 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
   ) {
     super(resolve => res = resolve);
     var res!: (v: T | AtomicPromise<never>) => void;
+    this[status] = new State(opts);
     void this[status].result.register(res);
-    void Object.freeze(extend(this[status].settings, opts));
     this[Coroutine.run] = async () => {
       try {
         this[Coroutine.run] = noop;
@@ -151,7 +151,7 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
       }
     },
   };
-  private [status] = new State<T, R, S>();
+  private readonly [status]: State<T, R, S>;
   public readonly [terminator]: (reason?: any) => void = reason => {
     if (!this[status].alive) return;
     this[status].alive = false;
@@ -167,12 +167,15 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
 }
 
 class State<T, R, S> {
+  constructor(opts: CoroutineOptions) {
+    void extend(this.settings, opts);
+  }
   public alive = true;
   public state = new AtomicFuture<IteratorResult<R>>();
   public resume = new AtomicFuture();
   public readonly result: Cancellation<T | AtomicPromise<never>> = new Cancellation();
   public readonly msgs: [S | PromiseLike<S>, Reply<R>][] = [];
-  public readonly settings: DeepRequired<CoroutineOptions> = {
+  public readonly settings: DeepReadonly<DeepRequired<CoroutineOptions>> = {
     resume: () => clock,
     size: 0,
     autorun: true,

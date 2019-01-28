@@ -606,20 +606,21 @@ export class AttrMap<C, K, V> {
   delete(ctx: C, key: K): boolean;
 }
 
+export interface CacheOptions<K, V = void> {
+  ignore?: {
+    delete?: boolean;
+    clear?: boolean;
+  };
+  data?: {
+    stats: [K[], K[]];
+    entries: [K, V][];
+  };
+}
 export class Cache<K, V = void> {
   constructor(
     size: number,
     callback?: (key: K, value: V) => void,
-    opts?: {
-      ignore?: {
-        delete?: boolean;
-        clear?: boolean;
-      };
-      data?: {
-        stats: [K[], K[]];
-        entries: [K, V][];
-      };
-    },
+    opts?: CacheOptions<K, V>,
   );
   put(key: K, value: V, log?: boolean): boolean;
   put(this: Cache<K, void>, key: K): boolean;
@@ -630,7 +631,7 @@ export class Cache<K, V = void> {
   delete(key: K): boolean;
   clear(): void;
   [Symbol.iterator](): Iterator<[K, V]>;
-  export(): { stats: [K[], K[]]; entries: [K, V][]; };
+  export(): NonNullable<CacheOptions<K, V>['data']>;
 }
 
 export function tick(fn: () => void, dedup?: boolean): void;

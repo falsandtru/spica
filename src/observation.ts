@@ -1,4 +1,4 @@
-import { DeepRequired } from './type';
+import { DeepReadonly, DeepRequired } from './type';
 import { extend } from './assign';
 import { concat } from './concat';
 import { findIndex } from './equal';
@@ -54,9 +54,9 @@ export interface ObservationOptions {
 export class Observation<N extends any[], D, R>
   implements Observer<N, D, R>, Publisher<N, D, R> {
   constructor(opts: ObservationOptions = {}) {
-    void Object.freeze(extend(this.settings, opts));
+    void extend(this.settings, opts);
   }
-  private readonly settings: DeepRequired<ObservationOptions> = {
+  private readonly settings: DeepReadonly<DeepRequired<ObservationOptions>> = {
     limit: 10,
   };
   public monitor(namespace: [] | N, listener: Monitor<N, D>, { once = false }: ObserverOptions = {}): () => void {

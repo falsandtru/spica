@@ -1,5 +1,17 @@
 import { extend } from './assign';
 import { findIndex } from './equal';
+import { DeepReadonly, DeepRequired } from './type';
+
+export interface CacheOptions<K, V = void> {
+  ignore?: {
+    delete?: boolean;
+    clear?: boolean;
+  };
+  data?: {
+    stats: [K[], K[]];
+    entries: [K, V][];
+  };
+}
 
 export class Cache<K, V = void> {
   constructor(
@@ -17,14 +29,8 @@ export class Cache<K, V = void> {
     } = {},
   ) {
     if (size > 0 === false) throw new Error(`Spica: Cache: Cache size must be greater than 0.`);
-    void Object.freeze(extend(this.opts, opts));
-    const {
-      stats,
-      entries,
-    } = opts.data || {
-      stats: [[], []],
-      entries: [],
-    };
+    void extend(this.settings, opts);
+    const { stats, entries } = this.settings.data;
     const LFU = stats[1].slice(0, size);
     const LRU = stats[0].slice(0, size - LFU.length);
     this.stats = {
@@ -38,10 +44,14 @@ export class Cache<K, V = void> {
     if (this.store.size !== LFU.length + LRU.length) throw new Error(`Spica: Cache: Size of stats and entries is not matched.`);
     if (![...LFU, ...LRU].every(k => this.store.has(k))) throw new Error(`Spica: Cache: Keys of stats and entries is not matched.`);
   }
-  private readonly opts = {
+  private readonly settings: DeepReadonly<DeepRequired<CacheOptions<K, V>>> = {
     ignore: {
       delete: false,
       clear: false,
+    },
+    data: {
+      stats: [[], []],
+      entries: [],
     },
   };
   public put(key: K, value: V, log?: boolean): boolean;
@@ -95,7 +105,7 @@ export class Cache<K, V = void> {
       if (index === -1) continue;
       const val = this.store.get(key)!;
       void this.store.delete(stat.splice(index, 1)[0]);
-      if (this.opts.ignore.delete) return true;
+      if (this.settings.ignore.delete) return true;
       void this.callback(key, val);
       return true;
     }
@@ -108,7 +118,7 @@ export class Cache<K, V = void> {
       LRU: [],
       LFU: [],
     };
-    if (this.opts.ignore.clear) return;
+    if (this.settings.ignore.clear) return;
     return void [...store]
       .forEach(([key, val]) =>
         void this.callback(key, val));
@@ -116,7 +126,7 @@ export class Cache<K, V = void> {
   public [Symbol.iterator](): Iterator<[K, V]> {
     return this.store[Symbol.iterator]();
   }
-  public export(): { stats: [K[], K[]]; entries: [K, V][]; } {
+  public export(): NonNullable<CacheOptions<K, V>['data']> {
     return {
       stats: [this.stats.LRU.slice(), this.stats.LFU.slice()],
       entries: [...this],
