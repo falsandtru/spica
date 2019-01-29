@@ -84,7 +84,7 @@ export namespace Either {
       : fm.reduce((acc, m) =>
           acc.bind(as =>
             m.fmap(a =>
-              as.concat([a])))
+              [...as, a]))
         , Return<a, b[]>([]));
   }
 }

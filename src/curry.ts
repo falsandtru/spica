@@ -43,5 +43,5 @@ export const curry: Curry = <Curry>(<z>(f: () => z) =>
 function apply(f: (...xs: any[]) => any, xs: any[]) {
   return xs.length >= f.length
     ? f(...xs)
-    : (...ys: any[]) => apply(f, xs.concat(ys));
+    : (...ys: any[]) => apply(f, [...xs, ...ys]);
 }

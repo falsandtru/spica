@@ -114,7 +114,7 @@ export class Observation<N extends any[], D, R>
         const node = this.seekNode_(namespace);
         void node.childrenNames.slice()
           .forEach(name => {
-            void this.off(namespace.concat([name as never]) as N);
+            void this.off([...namespace, name as never] as N);
             const child = node.children.get(name);
             if (!child) return;
             if (child.items.length + child.childrenNames.length > 0) return;
