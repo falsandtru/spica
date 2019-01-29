@@ -2,6 +2,10 @@ import { curry } from './curry';
 
 describe('Unit: lib/curry', () => {
   describe('curry', () => {
+    it('0', () => {
+      assert(curry(() => 0)() === 0);
+    });
+
     it('1', () => {
       assert(curry((a: number) => a)(1) === 1);
     });

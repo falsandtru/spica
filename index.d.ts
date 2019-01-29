@@ -453,6 +453,9 @@ export function Right<a, b>(b: b): Either<a, b>;
 
 export * from './src/type';
 
+interface Curried0<z> {
+  (): z;
+}
 interface Curried1<a, z> {
   (a: a): z;
 }
@@ -479,6 +482,7 @@ interface Curried5<a, b, c, d, e, z> {
   (a: a): Curried4<b, c, d, e, z>;
 }
 interface Curry {
+  <z>(f: () => z, ctx?: any): Curried0<z>;
   <a, z>(f: (a: a) => z, ctx?: any): Curried1<a, z>;
   <a, b, z>(f: (a: a, b: b) => z, ctx?: any): Curried2<a, b, z>;
   <a, b, c, z>(f: (a: a, b: b, c: c) => z, ctx?: any): Curried3<a, b, c, z>;
