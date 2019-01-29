@@ -1,4 +1,5 @@
 interface Uncurry {
+  <z>(f: () => z): (a: []) => z;
   <a, z>(f: (a: a) => z): (a: [a]) => z;
   <a, b, z>(f: (a: a, b: b) => z): (a: [a, b]) => z;
   <a, b, c, z>(f: (a: a, b: b, c: c) => z): (a: [a, b, c]) => z;
@@ -7,4 +8,4 @@ interface Uncurry {
 }
 
 export const uncurry: Uncurry = <Uncurry>(<a, z>(f: (...as: a[]) => z) =>
-  (as: a[]) => f(...as.slice(0, f.length)));
+  (as: a[]) => f(...as));

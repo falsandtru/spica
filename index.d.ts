@@ -492,6 +492,7 @@ interface Curry {
 export const curry: Curry;
 
 interface Uncurry {
+  <z>(f: () => z): (a: []) => z;
   <a, z>(f: (a: a) => z): (a: [a]) => z;
   <a, b, z>(f: (a: a, b: b) => z): (a: [a, b]) => z;
   <a, b, c, z>(f: (a: a, b: b, c: c) => z): (a: [a, b, c]) => z;

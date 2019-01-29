@@ -35,7 +35,7 @@ export interface Curry {
   <a, b, c, d, e, z>(f: (a: a, b: b, c: c, d: d, e: e) => z): Curried5<a, b, c, d, e, z>;
 }
 
-export const curry: Curry = <Curry>((f: () => any) =>
+export const curry: Curry = <Curry>(<z>(f: () => z) =>
   f.length === 0
     ? f
     : apply(f, []));
