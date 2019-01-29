@@ -37,11 +37,11 @@ export interface Curry {
 
 export const curry: Curry = <Curry>((f: () => any, ctx?: any) =>
   f.length === 0
-    ? () => f.call(ctx)
+    ? f.bind(ctx)
     : curry_(f, [], ctx));
 
 function curry_(f: (...ys: any[]) => any, xs: any[], ctx: any) {
-  return f.length <= xs.length
-    ? f.apply(ctx, xs.slice(0, f.length))
+  return xs.length >= f.length
+    ? f.apply(ctx, xs)
     : (...ys: any[]) => curry_(f, xs.concat(ys), ctx);
 }

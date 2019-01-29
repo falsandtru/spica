@@ -29,6 +29,13 @@ describe('Unit: lib/curry', () => {
       assert([0].every(curry((_: never, __: never) => false)) === false);
     });
 
+    it('recursive', () => {
+      assert(curry(curry(() => 0))() === 0);
+      assert(curry(curry((a: number) => a))(1) === 1);
+      assert(curry(curry((a: number, b: number) => a + b))(1)(2) === 3);
+      assert(curry(curry((a: number, b: number) => a + b)(1))(2) === 3);
+    });
+
   });
 
 });
