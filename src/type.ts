@@ -95,22 +95,22 @@ type Includes<T, U> = true extends (T extends U ? true : never) ? true : false;
 export type Partial<T> =
   { [P in keyof T]+?: T[P]; };
 export type DeepPartial<T, E extends object | undefined | null = ReadonlyArray<any>> =
-  T extends E ? T :
-  { [P in keyof T]+?: NonNullable<T[P]> extends NonNullable<E | Function> ? T[P] : DeepPartial<T[P], E>; };
+  T extends E | Function ? T :
+  { [P in keyof T]+?: DeepPartial<T[P], E>; };
 export type Required<T> =
   { [P in keyof T]-?: T[P]; };
 export type DeepRequired<T, E extends object | undefined | null = ReadonlyArray<any>> =
-  T extends E ? T :
-  { [P in keyof T]-?: NonNullable<T[P]> extends NonNullable<E | Function> ? T[P] : DeepRequired<T[P], E>; };
+  T extends E | Function ? T :
+  { [P in keyof T]-?: DeepRequired<T[P], E>; };
 export type Readonly<T> =
   T extends (infer U)[] ? ReadonlyArray<U> :
   T extends ReadonlyArray<any> | ReadonlySet<any> | ReadonlyMap<any, any> ? T :
   { readonly [P in keyof T]: T[P]; };
 export type DeepReadonly<T, E extends object | undefined | null = never> =
-  T extends E ? T :
+  T extends E | Function ? T :
   T extends (infer U)[] ? ReadonlyArray<U> :
   T extends ReadonlyArray<any> | ReadonlySet<any> | ReadonlyMap<any, any> ? T :
-  { readonly [P in keyof T]: NonNullable<T[P]> extends NonNullable<E | Function> ? T[P] : DeepReadonly<T[P], E>; };
+  { readonly [P in keyof T]: DeepReadonly<T[P], E>; };
 
 export function type(target: any): string {
   const type = (Object.prototype.toString.call(target) as string).split(' ').pop()!.slice(0, -1);
