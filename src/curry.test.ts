@@ -22,11 +22,12 @@ describe('Unit: lib/curry', () => {
       assert(curry((a: number, b: number, c: number) => a + b + c)(1, 2, 3) === 6);
     });
 
-    it('over parameters', () => {
-      assert([].every(curry(() => false)) === true);
-      assert([0].every(curry(() => false)) === false);
-      assert([0].every(curry((_: never) => false)) === false);
-      assert([0].every(curry((_: never, __: never) => false)) === false);
+    it('extra parameters', () => {
+      assert.deepStrictEqual([].map(curry(() => 0)), []);
+      assert.deepStrictEqual([1].map(curry(() => 0)), [0]);
+      assert.deepStrictEqual([1].map(curry((a: number) => a)), [1]);
+      assert.deepStrictEqual([1].map(curry((a: number, b: number) => [a, b])), [[1, 0]]);
+      assert.deepStrictEqual([1].map(curry((...as: any[]) => as)), [[1, 0, [1]]]);
     });
 
     it('recursive', () => {
