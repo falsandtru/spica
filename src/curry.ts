@@ -38,10 +38,10 @@ export interface Curry {
 export const curry: Curry = <Curry>((f: () => any, ctx?: any) =>
   f.length === 0
     ? f.bind(ctx)
-    : curry_(f, [], ctx));
+    : curry_(f.bind(ctx), f.length));
 
-function curry_(f: (...ys: any[]) => any, xs: any[], ctx: any) {
-  return xs.length >= f.length
-    ? f.apply(ctx, xs)
-    : (...ys: any[]) => curry_(f, xs.concat(ys), ctx);
+function curry_(f: (...xs: any[]) => any, rest: number) {
+  return rest <= 0
+    ? f()
+    : (...xs: any[]) => curry_(f.bind(undefined, ...xs), rest - xs.length);
 }
