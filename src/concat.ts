@@ -1,6 +1,6 @@
-export function concat<T>(target: T[], source: T[]): T[] {
-  for (let i = 0, offset = target.length, len = source.length; i < len; ++i) {
-    target[offset + i] = source[i];
+export function concat<T>(target: T[], source: ReadonlyArray<T>): T[] {
+  for (let i = 0; i < source.length; ++i) {
+    target.push(source[i]);
   }
   return target;
 }
