@@ -103,13 +103,13 @@ export type DeepRequired<T, E extends object | undefined | null = ReadonlyArray<
   T extends E | Function ? T :
   { [P in keyof T]-?: DeepRequired<T[P], E>; };
 export type Readonly<T> =
-  T extends (infer U)[] ? ReadonlyArray<U> :
-  T extends ReadonlyArray<any> | ReadonlySet<any> | ReadonlyMap<any, any> ? T :
+  T extends ReadonlySet<any> ? T extends Set<infer V> ? ReadonlySet<V> : T :
+  T extends ReadonlyMap<any, any> ? T extends Map<infer K, infer V> ? ReadonlyMap<K, V> : T :
   { readonly [P in keyof T]: T[P]; };
 export type DeepReadonly<T, E extends object | undefined | null = never> =
   T extends E | Function ? T :
-  T extends (infer U)[] ? ReadonlyArray<U> :
-  T extends ReadonlyArray<any> | ReadonlySet<any> | ReadonlyMap<any, any> ? T :
+  T extends ReadonlySet<any> ? T extends Set<infer V> ? ReadonlySet<V> : T :
+  T extends ReadonlyMap<any, any> ? T extends Map<infer K, infer V> ? ReadonlyMap<K, V> : T :
   { readonly [P in keyof T]: DeepReadonly<T[P], E>; };
 
 export function type(target: any): string {
