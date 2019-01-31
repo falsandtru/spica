@@ -351,8 +351,8 @@ describe('Unit: lib/type', () => {
 
   describe('Readonly', () => {
     it('', () => {
-      type I = { readonly a?: [number]; readonly b: { c: string; }; readonly d: () => 0; readonly e: new () => object };
-      type M = { a?: [number]; b: { c: string; }; d: () => 0; e: new () => object };
+      type I = { readonly a?: [number]; readonly b: { c: string; }; readonly d: () => 0; readonly e: new () => object, f: Set<number>, g: ReadonlySet<number> };
+      type M = { a?: [number]; b: { c: string; }; d: () => 0; e: new () => object, f: Set<number>, g: ReadonlySet<number> };
       assert((): true => true as TEq<Readonly<M>, I>);
       assert((): true => true as TEq<Readonly<unknown[]>, ReadonlyArray<unknown>>);
     });
@@ -361,8 +361,8 @@ describe('Unit: lib/type', () => {
 
   describe('DeepReadonly', () => {
     it('', () => {
-      type I = { readonly a?: number; readonly b: { readonly c: readonly [string]; readonly d: () => 0; readonly e: new () => object }; };
-      type M = { a?: number; b: { c: [string]; d: () => 0; e: new () => object }; };
+      type I = { readonly a?: number; readonly b: { readonly c: readonly [string]; readonly d: () => 0; readonly e: new () => object, f: ReadonlySet<number>, g: ReadonlySet<number> }; };
+      type M = { a?: number; b: { c: [string]; d: () => 0; e: new () => object, f: Set<number>, g: ReadonlySet<number> }; };
       assert((): true => true as TEq<DeepReadonly<M>, I>);
       assert((): true => true as TEq<DeepReadonly<M, M['b']>, Readonly<M>>);
       assert((): true => true as TEq<DeepReadonly<unknown[]>, ReadonlyArray<unknown>>);
