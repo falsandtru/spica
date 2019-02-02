@@ -1,4 +1,4 @@
-import { DeepReadonly, DeepRequired } from './type';
+import { DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
 import { concat } from './concat';
 import { findIndex } from './equal';
@@ -56,7 +56,7 @@ export class Observation<N extends any[], D, R>
   constructor(opts: ObservationOptions = {}) {
     void extend(this.settings, opts);
   }
-  private readonly settings: DeepReadonly<DeepRequired<ObservationOptions>> = {
+  private readonly settings: DeepImmutable<DeepRequired<ObservationOptions>> = {
     limit: 10,
   };
   public monitor(namespace: [] | N, listener: Monitor<N, D>, { once = false }: ObserverOptions = {}): () => void {

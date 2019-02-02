@@ -5,7 +5,7 @@ import {
   Type,
   DiffStruct, OverwriteStruct,
   ExtractProp, DeepExtractProp, ExcludeProp, DeepExcludeProp, RewriteProp, DeepRewriteProp,
-  Partial, DeepPartial, Required, DeepRequired, Readonly, DeepReadonly,
+  Partial, DeepPartial, Required, DeepRequired, Immutable, DeepImmutable,
   type
 } from './type';
 
@@ -168,7 +168,7 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<valueof<{ 0: 0; a: 1; }, 0>, 0>);
       assert((): true => true as TEq<valueof<[0]>, 0>);
       assert((): true => true as TEq<valueof<{ [i: number]: 0; }>, 0>);
-      assert((): true => true as TEq<valueof<Readonly<{ 0: 0; a: 1; }>>, 0 | 1>);
+      assert((): true => true as TEq<valueof<Immutable<{ 0: 0; a: 1; }>>, 0 | 1>);
       assert((): true => true as TEq<valueof<ReadonlyArray<0>>, 0>);
     });
 
@@ -349,23 +349,23 @@ describe('Unit: lib/type', () => {
 
   });
 
-  describe('Readonly', () => {
+  describe('Immutable', () => {
     it('', () => {
       type I = { readonly a?: [number]; readonly b: { c: string; }; readonly d: () => 0; readonly e: new () => object, f: Set<number>, g: ReadonlySet<number> };
       type M = { a?: [number]; b: { c: string; }; d: () => 0; e: new () => object, f: Set<number>, g: ReadonlySet<number> };
-      assert((): true => true as TEq<Readonly<M>, I>);
-      assert((): true => true as TEq<Readonly<unknown[]>, ReadonlyArray<unknown>>);
+      assert((): true => true as TEq<Immutable<M>, I>);
+      assert((): true => true as TEq<Immutable<unknown[]>, ReadonlyArray<unknown>>);
     });
 
   });
 
-  describe('DeepReadonly', () => {
+  describe('DeepImmutable', () => {
     it('', () => {
       type I = { readonly a?: number; readonly b: { readonly c: readonly [string]; readonly d: () => 0; readonly e: new () => object, f: ReadonlySet<number>, g: ReadonlySet<number> }; };
       type M = { a?: number; b: { c: [string]; d: () => 0; e: new () => object, f: Set<number>, g: ReadonlySet<number> }; };
-      assert((): true => true as TEq<DeepReadonly<M>, I>);
-      assert((): true => true as TEq<DeepReadonly<M, M['b']>, Readonly<M>>);
-      assert((): true => true as TEq<DeepReadonly<unknown[]>, ReadonlyArray<unknown>>);
+      assert((): true => true as TEq<DeepImmutable<M>, I>);
+      assert((): true => true as TEq<DeepImmutable<M, M['b']>, Immutable<M>>);
+      assert((): true => true as TEq<DeepImmutable<unknown[]>, ReadonlyArray<unknown>>);
     });
 
   });

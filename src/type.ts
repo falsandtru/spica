@@ -102,15 +102,15 @@ export type Required<T> =
 export type DeepRequired<T, E extends object | undefined | null = ReadonlyArray<any>> =
   T extends E | Function ? T :
   { [P in keyof T]-?: DeepRequired<T[P], E>; };
-export type Readonly<T> =
+export type Immutable<T> =
   T extends ReadonlySet<infer V> ? ReadonlySet<V> :
   T extends ReadonlyMap<infer K, infer V> ? ReadonlyMap<K, V> :
   { readonly [P in keyof T]: T[P]; };
-export type DeepReadonly<T, E extends object | undefined | null = never> =
+export type DeepImmutable<T, E extends object | undefined | null = never> =
   T extends E | Function ? T :
   T extends ReadonlySet<infer V> ? ReadonlySet<V> :
   T extends ReadonlyMap<infer K, infer V> ? ReadonlyMap<K, V> :
-  { readonly [P in keyof T]: DeepReadonly<T[P], E>; };
+  { readonly [P in keyof T]: DeepImmutable<T[P], E>; };
 
 export function type(target: any): string {
   const type = (Object.prototype.toString.call(target) as string).split(' ').pop()!.slice(0, -1);

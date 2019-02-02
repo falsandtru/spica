@@ -1,7 +1,7 @@
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future';
 import { Observation, Observer, Publisher } from './observation';
-import { DeepReadonly, DeepRequired } from './type';
+import { DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
 import { tick } from './clock';
 import { sqid } from './sqid';
@@ -74,7 +74,7 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
   }
   public readonly id: string = sqid();
   public readonly name: string;
-  private readonly settings: DeepReadonly<DeepRequired<SupervisorOptions>> = {
+  private readonly settings: DeepImmutable<DeepRequired<SupervisorOptions>> = {
     name: '',
     size: Infinity,
     timeout: Infinity,

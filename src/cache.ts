@@ -1,6 +1,6 @@
 import { extend } from './assign';
 import { findIndex } from './equal';
-import { DeepReadonly, DeepRequired } from './type';
+import { DeepImmutable, DeepRequired } from './type';
 
 export interface CacheOptions<K, V = void> {
   ignore?: {
@@ -44,7 +44,7 @@ export class Cache<K, V = void> {
     if (this.store.size !== LFU.length + LRU.length) throw new Error(`Spica: Cache: Size of stats and entries is not matched.`);
     if (![...LFU, ...LRU].every(k => this.store.has(k))) throw new Error(`Spica: Cache: Keys of stats and entries is not matched.`);
   }
-  private readonly settings: DeepReadonly<DeepRequired<CacheOptions<K, V>>> = {
+  private readonly settings: DeepImmutable<DeepRequired<CacheOptions<K, V>>> = {
     ignore: {
       delete: false,
       clear: false,

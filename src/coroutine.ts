@@ -1,7 +1,7 @@
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future'; 
 import { Cancellation } from './cancellation';
-import { DeepReadonly, DeepRequired } from './type';
+import { DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
 import { tuple } from './tuple';
 import { clock, tick } from './clock';
@@ -175,7 +175,7 @@ class State<T, R, S> {
   public resume = new AtomicFuture();
   public readonly result: Cancellation<T | AtomicPromise<never>> = new Cancellation();
   public readonly msgs: [S | PromiseLike<S>, Reply<R>][] = [];
-  public readonly settings: DeepReadonly<DeepRequired<CoroutineOptions>> = {
+  public readonly settings: DeepImmutable<DeepRequired<CoroutineOptions>> = {
     resume: () => clock,
     size: 0,
     autorun: true,
