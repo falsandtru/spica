@@ -50,9 +50,9 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
     assert(this.alive === true);
     assert(this.available === true);
     this.available_ = false;
-    void this.workers
-      .forEach(worker =>
-        void worker.terminate(reason));
+    for (const [, worker] of this.workers) {
+      void worker.terminate(reason);
+    }
     assert(this.workers.size === 0);
     void Object.freeze(this.workers);
     while (this.messages.length > 0) {

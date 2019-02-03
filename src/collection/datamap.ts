@@ -4,9 +4,9 @@ import { type, isObject } from '../type';
 
 export class DataMap<K, V> implements Collection<K, V> {
   constructor(entries: Iterable<[K, V]> = []) {
-    void [...entries]
-      .forEach(([k, v]) =>
-        void this.set(k, v));
+    for (const [k, v] of entries) {
+      void this.set(k, v);
+    }
   }
   private readonly store = new Map<string, [K, V]>();
   public get(key: K): V | undefined {

@@ -38,9 +38,9 @@ export class Cache<K, V = void> {
       LFU,
     };
     this.store = new Map(entries);
-    void [...stats[1], ...stats[0]].slice(LFU.length + LRU.length)
-      .forEach(k =>
-        void this.store.delete(k));
+    for (const k of [...stats[1], ...stats[0]].slice(LFU.length + LRU.length)) {
+      void this.store.delete(k);
+    }
     if (this.store.size !== LFU.length + LRU.length) throw new Error(`Spica: Cache: Size of stats and entries is not matched.`);
     if (![...LFU, ...LRU].every(k => this.store.has(k))) throw new Error(`Spica: Cache: Keys of stats and entries is not matched.`);
   }
@@ -119,9 +119,9 @@ export class Cache<K, V = void> {
       LFU: [],
     };
     if (this.settings.ignore.clear) return;
-    return void [...store]
-      .forEach(([key, val]) =>
-        void this.callback(key, val));
+    for (const [key, val] of store) {
+      void this.callback(key, val);
+    }
   }
   public [Symbol.iterator](): Iterator<[K, V]> {
     return this.store[Symbol.iterator]();

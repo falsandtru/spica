@@ -28,9 +28,9 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
         void xhr.addEventListener('loadstart', listener);
         void xhr.addEventListener('progress', listener);
         void xhr.addEventListener('loadend', listener);
-        void ['error', 'abort', 'timeout']
-          .forEach(type =>
-            void xhr.addEventListener(type, state.cancel));
+        for (const type of ['error', 'abort', 'timeout']) {
+          void xhr.addEventListener(type, state.cancel);
+        }
         void fetch(xhr, url, opts);
         void this.cancellation.register(() =>
           xhr.readyState < 4 &&
@@ -64,9 +64,9 @@ function fetch(xhr: XMLHttpRequest, url: string, options: CofetchOptions): void 
       case 'body':
         continue;
       case 'headers':
-        [...options.headers!.entries()]
-          .forEach(([name, value]) =>
-            void xhr.setRequestHeader(name, value));
+        for (const [name, value] of options.headers!) {
+          void xhr.setRequestHeader(name, value);
+        }
         continue;
       default:
         if (key in xhr) xhr[key] = options[key];

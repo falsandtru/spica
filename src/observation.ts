@@ -112,16 +112,15 @@ export class Observation<N extends any[], D, R>
           });
       case 'undefined': {
         const node = this.seekNode_(namespace);
-        void node.childrenNames.slice()
-          .forEach(name => {
-            void this.off([...namespace, name as never] as N);
-            const child = node.children.get(name);
-            if (!child) return;
-            if (child.items.length + child.childrenNames.length > 0) return;
-            void node.children.delete(name);
-            assert(findIndex(name, node.childrenNames) !== -1);
-            void node.childrenNames.splice(findIndex(name, node.childrenNames), 1);
-          });
+        for (const name of node.childrenNames.slice()) {
+          void this.off([...namespace, name as never] as N);
+          const child = node.children.get(name);
+          if (!child) continue;
+          if (child.items.length + child.childrenNames.length > 0) continue;
+          void node.children.delete(name);
+          assert(findIndex(name, node.childrenNames) !== -1);
+          void node.childrenNames.splice(findIndex(name, node.childrenNames), 1);
+        }
         node.items = node.items
           .filter(({ type }) => type === RegisterItemType.monitor);
         return;
@@ -155,35 +154,33 @@ export class Observation<N extends any[], D, R>
   }
   private drain_(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void {
     const results: R[] = [];
-    void this.refsBelow_(this.seekNode_(namespace))
-      .reduce<void>((_, { type, listener, options: { once } }) => {
-        if (type !== RegisterItemType.subscriber) return;
-        if (once) {
-          void this.off(namespace, listener);
+    for (const { type, listener, options: { once } } of this.refsBelow_(this.seekNode_(namespace))) {
+      if (type !== RegisterItemType.subscriber) continue;
+      if (once) {
+        void this.off(namespace, listener);
+      }
+      try {
+        const result: R = listener(data, namespace);
+        if (tracker) {
+          results[results.length] = result;
         }
-        try {
-          const result: R = listener(data, namespace);
-          if (tracker) {
-            results[results.length] = result;
-          }
-        }
-        catch (reason) {
-          void causeAsyncException(reason);
-        }
-      }, undefined);
-    void this.refsAbove_(this.seekNode_(namespace))
-      .reduce<void>((_, { type, listener, options: { once } }) => {
-        if (type !== RegisterItemType.monitor) return;
-        if (once) {
-          void this.off(namespace, listener, RegisterItemType.monitor);
-        }
-        try {
-          void listener(data, namespace);
-        }
-        catch (reason) {
-          void causeAsyncException(reason);
-        }
-      }, undefined);
+      }
+      catch (reason) {
+        void causeAsyncException(reason);
+      }
+    }
+    for (const { type, listener, options: { once } } of this.refsAbove_(this.seekNode_(namespace))) {
+      if (type !== RegisterItemType.monitor) continue;
+      if (once) {
+        void this.off(namespace, listener, RegisterItemType.monitor);
+      }
+      try {
+        void listener(data, namespace);
+      }
+      catch (reason) {
+        void causeAsyncException(reason);
+      }
+    }
     if (tracker) {
       try {
         void tracker(data, results);

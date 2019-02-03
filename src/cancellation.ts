@@ -26,9 +26,9 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
     super(res => resolve = res);
     var resolve!: (v: PromiseLike<L>) => void;
     void resolve(this.state);
-    void [...cancelees]
-      .forEach(cancellee =>
-        void cancellee.register(this.cancel));
+    for (const cancellee of cancelees) {
+      void cancellee.register(this.cancel);
+    }
   }
   private alive = true;
   private canceled_ = false;
@@ -62,9 +62,9 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
     this.state.bind(this.reason);
     void Object.freeze(this.listeners);
     void Object.freeze(this);
-    void this.listeners
-      .forEach(cb =>
-        void cb(reason!));
+    for (const listener of this.listeners) {
+      void listener(reason!);
+    }
   });
   public readonly close = (reason?: any) => {
     if (!this.alive) return;

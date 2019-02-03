@@ -43,9 +43,11 @@ export class AtomicPromise<T> implements Promise<T> {
   public static race<T1, T2>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>]): AtomicPromise<T1 | T2>;
   public static race<T>(values: (T | PromiseLike<T>)[]): AtomicPromise<T>;
   public static race<T>(values: (T | PromiseLike<T>)[]): AtomicPromise<T> {
-    return new AtomicPromise<T>((resolve, reject) =>
-      void values.forEach(value =>
-        void AtomicPromise.resolve(value).then(resolve, reject)));
+    return new AtomicPromise<T>((resolve, reject) => {
+      for (const value of values) {
+        void AtomicPromise.resolve(value).then(resolve, reject);
+      }
+    });
   }
   public static resolve(): AtomicPromise<void>;
   public static resolve<T>(value: T | PromiseLike<T>): AtomicPromise<T>;
