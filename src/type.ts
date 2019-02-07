@@ -70,7 +70,7 @@ export type ExtractProp<T, V> =
 export type DeepExtractProp<T, V, E extends object | undefined | null = never> =
   T extends E ? never :
   T extends V ? T :
-  T extends ReadonlyArray<any> | Function ? never :
+  T extends readonly any[] | Function ? never :
   T extends object ? ExcludeProp<{ [Q in { [P in keyof T]: If<TEq<V, never>, T[P] extends never ? P : never, T[P] extends V | object ? T[P] extends E ? never : P : never>; }[keyof T]]: StrictExclude<DeepExtractProp<T[Q], V, E>, {}>; }, never> :
   never;
 export type ExcludeProp<T, V> =
@@ -78,7 +78,7 @@ export type ExcludeProp<T, V> =
 export type DeepExcludeProp<T, V, E extends object | undefined | null = never> =
   T extends E ? T :
   T extends V ? never :
-  T extends ReadonlyArray<any> | Function ? T :
+  T extends readonly any[] | Function ? T :
   T extends object ? ExcludeProp<{ [Q in { [P in keyof T]: If<TEq<V, never>, T[P] extends never ? P : P, If<Includes<T[P], V>, T[P] extends E ? P : never, P>>; }[keyof T]]: StrictExclude<DeepExcludeProp<T[Q], V, E>, {}>; }, never> :
   T;
 export type RewriteProp<T, R extends [any, any]> =
@@ -87,19 +87,19 @@ export type DeepRewriteProp<T, R extends [any, any], E extends object | undefine
   [T] extends [never] ? Rewrite<T, R> :
   T extends E ? T :
   true extends (R extends never ? never : T extends R[0] ? true : never) ? Rewrite<T, R> :
-  T extends ReadonlyArray<any> | Function ? T :
+  T extends readonly any[] | Function ? T :
   T extends object ? ExcludeProp<{ [P in keyof T]: DeepRewriteProp<T[P], R, E>; }, never> :
   T;
 type Includes<T, U> = true extends (T extends U ? true : never) ? true : false;
 
 export type Partial<T> =
   { [P in keyof T]+?: T[P]; };
-export type DeepPartial<T, E extends object | undefined | null = ReadonlyArray<any>> =
+export type DeepPartial<T, E extends object | undefined | null = readonly any[]> =
   T extends E | Function ? T :
   { [P in keyof T]+?: DeepPartial<T[P], E>; };
 export type Required<T> =
   { [P in keyof T]-?: T[P]; };
-export type DeepRequired<T, E extends object | undefined | null = ReadonlyArray<any>> =
+export type DeepRequired<T, E extends object | undefined | null = readonly any[]> =
   T extends E | Function ? T :
   { [P in keyof T]-?: DeepRequired<T[P], E>; };
 export type Immutable<T> =
