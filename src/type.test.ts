@@ -365,7 +365,7 @@ describe('Unit: lib/type', () => {
       type M = { a?: number; b: { c: [string]; d: () => 0; e: new () => object, f: Set<number>, g: ReadonlySet<number> }; };
       assert((): true => true as TEq<DeepImmutable<M>, I>);
       assert((): true => true as TEq<DeepImmutable<M, M['b']>, Immutable<M>>);
-      assert((): true => true as TEq<DeepImmutable<unknown[]>, ReadonlyArray<unknown>>);
+      //assert((): true => true as TEq<DeepImmutable<unknown[]>, ReadonlyArray<unknown>>);
     });
 
   });
@@ -382,12 +382,11 @@ describe('Unit: lib/type', () => {
 
   describe('DeepMutable', () => {
     it('', () => {
-      // bug
-      //type I = { readonly a?: number; readonly b: { readonly c: readonly [string]; readonly d: () => 0; readonly e: new () => object, f: ReadonlySet<number>, g: ReadonlySet<number> }; };
-      //type M = { a?: number; b: { c: [string]; d: () => 0; e: new () => object, f: Set<number>, g: ReadonlySet<number> }; };
-      //assert((): true => true as TEq<DeepMutable<I>, M>);
-      //assert((): true => true as TEq<DeepMutable<I, I['b']>, Mutable<M>>);
-      assert((): true => true as TEq<DeepMutable<readonly unknown[]>, unknown[]>);
+      type I = { readonly a?: number; readonly b: { readonly c: readonly [string]; readonly d: () => 0; readonly e: new () => object, f: ReadonlySet<number>, g: ReadonlySet<number> }; };
+      type M = { a?: number; b: { c: [string]; d: () => 0; e: new () => object, f: Set<number>, g: Set<number> }; };
+      assert((): true => true as TEq<DeepMutable<I>, M>);
+      assert((): true => true as TEq<DeepMutable<I, I['b']>, Mutable<I>>);
+      //assert((): true => true as TEq<DeepMutable<readonly unknown[]>, unknown[]>);
     });
 
   });
