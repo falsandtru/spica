@@ -147,8 +147,9 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
   [Coroutine.terminator](reason?: any): void;
 }
 export interface CoroutineOptions {
-  readonly resume?: () => PromiseLike<void>;
   readonly size?: number;
+  readonly interval?: number,
+  readonly resume?: () => PromiseLike<void>;
   readonly autorun?: boolean;
 }
 interface CoroutinePort<T, R, S> {

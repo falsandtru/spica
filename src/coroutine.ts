@@ -4,7 +4,7 @@ import { Cancellation } from './cancellation';
 import { DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
 import { tuple } from './tuple';
-import { clock, tick } from './clock';
+import { clock, wait, tick } from './clock';
 import { noop } from './noop';
 
 const run = Symbol();
@@ -13,8 +13,9 @@ const port = Symbol();
 const terminator = Symbol();
 
 export interface CoroutineOptions {
-  readonly resume?: () => PromiseLike<void>;
   readonly size?: number;
+  readonly interval?: number,
+  readonly resume?: () => PromiseLike<void>;
   readonly autorun?: boolean;
 }
 interface CoroutinePort<T, R, S> {
@@ -73,7 +74,10 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
                   ? AtomicPromise.resolve(tuple([undefined as S | undefined, noop as Reply<R>]))
                   : resume(),
                 // Don't block.
-                this[status].settings.resume(),
+                AtomicPromise.all([
+                  this[status].settings.resume(),
+                  wait(this[status].settings.interval),
+                ]),
               ]);
           assert(msg instanceof Promise === false);
           assert(msg instanceof AtomicPromise === false);
@@ -176,8 +180,9 @@ class State<T, R, S> {
   public readonly result: Cancellation<T | AtomicPromise<never>> = new Cancellation();
   public readonly msgs: [S | PromiseLike<S>, Reply<R>][] = [];
   public readonly settings: DeepImmutable<DeepRequired<CoroutineOptions>> = {
-    resume: () => clock,
     size: 0,
+    interval: 0,
+    resume: () => clock,
     autorun: true,
   };
 }
