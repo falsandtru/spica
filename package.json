@@ -68,7 +68,7 @@
     "npm-check-updates": "^2.15.0",
     "power-assert": "^1.6.1",
     "tsify": "^4.0.1",
-    "typescript": "3.4.0-dev.20190207",
+    "typescript": "3.4.0-dev.20190208",
     "uglify-es": "^3.3.9",
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0"
