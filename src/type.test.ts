@@ -187,6 +187,7 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Type<undefined>, 'undefined'>);
       assert((): true => true as TEq<Type<boolean>, 'boolean'>);
       assert((): true => true as TEq<Type<number>, 'number'>);
+      assert((): true => true as TEq<Type<bigint>, 'bigint'>);
       assert((): true => true as TEq<Type<string>, 'string'>);
       assert((): true => true as TEq<Type<symbol>, 'symbol'>);
       assert((): true => true as TEq<Type<() => any>, 'function'>);
