@@ -106,20 +106,24 @@ export type DeepRequired<T, E extends object | undefined | null = readonly any[]
 export type Immutable<T> =
   T extends ReadonlySet<infer V> ? ReadonlySet<V> :
   T extends ReadonlyMap<infer K, infer V> ? ReadonlyMap<K, V> :
+  T extends ReadonlyArray<infer V> ? If<TEq<T, V[]>, readonly V[], { readonly [P in keyof T]: T[P]; }> :
   { readonly [P in keyof T]: T[P]; };
 export type DeepImmutable<T, E extends object | undefined | null = never> =
   T extends E | Function ? T :
   T extends ReadonlySet<infer V> ? ReadonlySet<V> :
   T extends ReadonlyMap<infer K, infer V> ? ReadonlyMap<K, V> :
+  T extends ReadonlyArray<infer V> ? If<TEq<T, V[]>, readonly V[], { readonly [P in keyof T]: DeepImmutable<T[P]>; }> :
   { readonly [P in keyof T]: DeepImmutable<T[P], E>; };
 export type Mutable<T> =
   T extends ReadonlySet<infer V> ? Set<V> :
   T extends ReadonlyMap<infer K, infer V> ? Map<K, V> :
+  T extends ReadonlyArray<infer V> ? If<TEq<T, readonly V[]>, V[], { -readonly [P in keyof T]: T[P]; }> :
   { -readonly [P in keyof T]: T[P]; };
 export type DeepMutable<T, E extends object | undefined | null = never> =
   T extends E | Function ? T :
   T extends ReadonlySet<infer V> ? Set<V> :
   T extends ReadonlyMap<infer K, infer V> ? Map<K, V> :
+  T extends ReadonlyArray<infer V> ? If<TEq<T, readonly V[]>, V[], { -readonly [P in keyof T]: DeepMutable<T[P]>; }> :
   { -readonly [P in keyof T]: DeepMutable<T[P], E>; };
 
 export function type(target: any): string {

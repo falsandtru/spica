@@ -356,6 +356,7 @@ describe('Unit: lib/type', () => {
       type M = { a?: [number]; b: { c: string; }; d: () => 0; e: new () => object, f: Set<number>, g: ReadonlySet<number> };
       assert((): true => true as TEq<Immutable<M>, I>);
       assert((): true => true as TEq<Immutable<unknown[]>, ReadonlyArray<unknown>>);
+      assert((): true => true as TEq<Immutable<{ a: unknown }>, { readonly a: unknown }>);
     });
 
   });
@@ -366,7 +367,8 @@ describe('Unit: lib/type', () => {
       type M = { a?: number; b: { c: [string]; d: () => 0; e: new () => object, f: Set<number>, g: ReadonlySet<number> }; };
       assert((): true => true as TEq<DeepImmutable<M>, I>);
       assert((): true => true as TEq<DeepImmutable<M, M['b']>, Immutable<M>>);
-      //assert((): true => true as TEq<DeepImmutable<unknown[]>, ReadonlyArray<unknown>>);
+      assert((): true => true as TEq<DeepImmutable<unknown[]>, ReadonlyArray<unknown>>);
+      assert((): true => true as TEq<DeepImmutable<{ a: unknown[] }>, { readonly a: readonly unknown[] }>);
     });
 
   });
@@ -377,6 +379,7 @@ describe('Unit: lib/type', () => {
       type M = { a?: [number]; b: { c: string; }; d: () => 0; e: new () => object, f: Set<number>, g: ReadonlySet<number> };
       assert((): true => true as TEq<Mutable<I>, M>);
       assert((): true => true as TEq<Mutable<readonly unknown[]>, unknown[]>);
+      assert((): true => true as TEq<Mutable<{ readonly a: unknown }>, { a: unknown }>);
     });
 
   });
@@ -387,7 +390,8 @@ describe('Unit: lib/type', () => {
       type M = { a?: number; b: { c: [string]; d: () => 0; e: new () => object, f: Set<number>, g: Set<number> }; };
       assert((): true => true as TEq<DeepMutable<I>, M>);
       assert((): true => true as TEq<DeepMutable<I, I['b']>, Mutable<I>>);
-      //assert((): true => true as TEq<DeepMutable<readonly unknown[]>, unknown[]>);
+      assert((): true => true as TEq<DeepMutable<readonly unknown[]>, unknown[]>);
+      assert((): true => true as TEq<DeepMutable<{ readonly a: readonly unknown[] }>, { a: unknown[] }>);
     });
 
   });
