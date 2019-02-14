@@ -6,7 +6,7 @@ export class Future<T = undefined> extends Promise<T> {
   }
   constructor() {
     let state = true;
-    let bind: (value: T | PromiseLike<T>) => Future<T>;
+    let bind!: (value: T | PromiseLike<T>) => Future<T>;
     super(resolve =>
       bind = value => {
         if (!state) throw new Error(`Spica: Future: Cannot rebind a value.`);
@@ -14,9 +14,9 @@ export class Future<T = undefined> extends Promise<T> {
         void resolve(value);
         return this;
       });
-    this.bind = bind!;
+    this.bind = bind;
   }
-  public readonly bind!: (value: T | PromiseLike<T>) => Promise<T>;
+  public readonly bind: (value: T | PromiseLike<T>) => Promise<T>;
 }
 
 export class AtomicFuture<T = undefined> extends AtomicPromise<T> implements Future<T> {
@@ -25,7 +25,7 @@ export class AtomicFuture<T = undefined> extends AtomicPromise<T> implements Fut
   }
   constructor() {
     let state = true;
-    let bind: (value: T | PromiseLike<T>) => AtomicFuture<T>;
+    let bind!: (value: T | PromiseLike<T>) => AtomicFuture<T>;
     super(resolve =>
       bind = value => {
         if (!state) throw new Error(`Spica: AtomicFuture: Cannot rebind a value.`);
@@ -33,7 +33,7 @@ export class AtomicFuture<T = undefined> extends AtomicPromise<T> implements Fut
         void resolve(value);
         return this;
       });
-    this.bind = bind!;
+    this.bind = bind;
   }
-  public readonly bind!: (value: T | PromiseLike<T>) => AtomicPromise<T>;
+  public readonly bind: (value: T | PromiseLike<T>) => AtomicPromise<T>;
 }
