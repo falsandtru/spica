@@ -47,7 +47,7 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
     if (this.constructor === Supervisor) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot instantiate abstract classes.`);
     void (this.constructor as typeof Supervisor).instances.add(this);
   }
-  protected state = new AtomicFuture<void>();
+  protected readonly state = new AtomicFuture<void>();
   private destructor(reason: any): void {
     assert(this.alive === true);
     assert(this.available === true);
