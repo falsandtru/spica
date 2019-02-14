@@ -150,10 +150,9 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
       const iter = com();
       let reply: T | R | undefined;
       while (true) {
-        const msg = await iter.next(reply!);
-        if (msg.done) return msg.value as any as U;
-        const rpy = await this[port].send(msg.value);
-        reply = rpy.value;
+        const { value, done } = await iter.next(reply!);
+        if (done) return value as any as U;
+        reply = (await this[port].send(value)).value;
       }
     },
   };
