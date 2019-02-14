@@ -7,8 +7,8 @@ import { tuple } from './tuple';
 import { clock, wait, tick } from './clock';
 import { noop } from './noop';
 
-const run = Symbol();
 const status = Symbol();
+const run = Symbol();
 const port = Symbol();
 const terminator = Symbol();
 
@@ -51,7 +51,7 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
   ) {
     super(resolve => res = resolve);
     var res!: (v: T | AtomicPromise<never>) => void;
-    this[status] = new State(opts);
+    this[status] = new Status(opts);
     void this[status].result.register(res);
     this[Coroutine.run] = async () => {
       try {
@@ -118,6 +118,7 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
       ? void this[Coroutine.run]()
       : void tick(() => void this[Coroutine.run]());
   }
+  private readonly [status]: Status<T, R, S>;
   protected [run]: () => void;
   public async *[Symbol.asyncIterator](): AsyncIterableIterator<R> {
     while (this[status].alive) {
@@ -155,7 +156,6 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
       }
     },
   };
-  private readonly [status]: State<T, R, S>;
   public readonly [terminator]: (reason?: any) => void = reason => {
     if (!this[status].alive) return;
     this[status].alive = false;
@@ -170,7 +170,7 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
   };
 }
 
-class State<T, R, S> {
+class Status<T, R, S> {
   constructor(opts: CoroutineOptions) {
     void extend(this.settings, opts);
   }
