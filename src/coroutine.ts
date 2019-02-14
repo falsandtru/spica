@@ -81,6 +81,7 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
               ]);
           assert(msg instanceof Promise === false);
           assert(msg instanceof AtomicPromise === false);
+          if (!this[status].alive) return;
           // Block.
           const { value, done } = await iter.next(msg);
           //assert(value instanceof Promise === false);
