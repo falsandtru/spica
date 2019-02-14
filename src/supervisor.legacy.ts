@@ -37,9 +37,11 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
   constructor(opts: SupervisorOptions = {}) {
     super((resolve, reject) => (
       cb = [resolve, reject],
-      { next: () => new AtomicPromise(r => void tick(() => r({ value: this.state, done: true }))) }));
-    var cb: [() => void, () => void];
-    void this.state.then(...cb!);
+      { next: () => new AtomicPromise(r => r({ value: state = new AtomicFuture(), done: true })) }));
+    var cb!: [() => void, () => void];
+    var state!: AtomicFuture<void>;
+    void this.state.then(...cb);
+    void state.bind(this.state);
     void extend(this.settings, opts);
     this.name = this.settings.name;
     if (this.constructor === Supervisor) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot instantiate abstract classes.`);
