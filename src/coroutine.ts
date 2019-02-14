@@ -123,10 +123,10 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
   protected [run]: () => void;
   public async *[Symbol.asyncIterator](): AsyncIterableIterator<R> {
     while (this[status].alive) {
-      const { value, done } = await this[status].state;
+      const { value } = await this[status].state;
       //assert(value instanceof Promise === false);
       //assert(value instanceof AtomicPromise === false);
-      if (done || this[status].result.canceled) return;
+      if (!this[status].alive) break;
       yield value;
     }
   }
