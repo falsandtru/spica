@@ -131,7 +131,7 @@ export type DeepMutable<T, E extends object | undefined | null = never> =
   { -readonly [P in keyof T]: DeepMutable<T[P], E>; };
 
 export function type(target: any): string {
-  const type = (Object.prototype.toString.call(target) as string).split(' ').pop()!.slice(0, -1);
+  const type = (Object.prototype.toString.call(target)).split(' ').pop()!.slice(0, -1);
   if (target === null || typeof target !== 'object' && target instanceof Object === false) return type.toLowerCase();
   return type;
 }

@@ -60,7 +60,7 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
           this[status].msgs.length > 0
             ? AtomicPromise.all(this[status].msgs.shift()!)
             : this[status].resume.then(resume);
-        const iter = gen.call(this) as ReturnType<typeof gen>;
+        const iter = gen.call(this);
         let cnt = 0;
         while (this[status].alive) {
           void ++cnt;
