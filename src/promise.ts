@@ -1,10 +1,22 @@
 import { concat } from './concat';
 
+const enum State {
+  resolved,
+  rejected,
+}
+type Status<T> =
+  | [State.resolved, T | PromiseLike<T>]
+  | [State.rejected, any];
+
+const status = Symbol();
+const queue = Symbol();
+const resume = Symbol();
+
 export class AtomicPromise<T> implements Promise<T> {
   public static get [Symbol.species]() {
     return AtomicPromise;
   }
-  public readonly [Symbol.toStringTag]: string = 'Promise';
+  public readonly [Symbol.toStringTag] = 'Promise';
   public static all<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>, T10 | PromiseLike<T10>]): AtomicPromise<[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]>;
   public static all<T1, T2, T3, T4, T5, T6, T7, T8, T9>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>]): AtomicPromise<[T1, T2, T3, T4, T5, T6, T7, T8, T9]>;
   public static all<T1, T2, T3, T4, T5, T6, T7, T8>(values: [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>]): AtomicPromise<[T1, T2, T3, T4, T5, T6, T7, T8]>;
@@ -46,33 +58,49 @@ export class AtomicPromise<T> implements Promise<T> {
     return new AtomicPromise<T>((_, reject) => void reject(reason));
   }
   constructor(executor: (resolve: (value?: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void) {
-    void statuses.set(this, new Status());
-    const status = statuses.get(this)!;
     try {
       void executor(
         value => {
-          status.result = status.result || [State.resolved, value!];
-          void status.resume();
+          this[status][0] = this[status][0] || [State.resolved, value!];
+          void this[resume]();
         },
         reason => {
-          status.result = status.result || [State.rejected, reason];
-          void status.resume();
+          this[status][0] = this[status][0] || [State.rejected, reason];
+          void this[resume]();
         });
     }
     catch (reason) {
-      assert(!status.result);
-      status.result = [State.rejected, reason];
-      void status.resume();
+      assert(!this[status][0]);
+      this[status][0] = [State.rejected, reason];
+      void this[resume]();
     }
   }
+  private [resume](): void {
+    if (!this[status][0]) return;
+    const [state, value] = this[status][0]!;
+    while (this[queue].length > 0) {
+      const [resolve, reject] = this[queue].shift()!;
+      switch (state) {
+        case State.resolved:
+          isPromiseLike(value)
+            ? void value.then(resolve, reject)
+            : void resolve(value);
+          continue;
+        case State.rejected:
+          void reject(value);
+          continue;
+      }
+    }
+  }
+  private readonly [status]: [Status<T>?] = [];
+  private readonly [queue]: [(value: T) => void, (reason: any) => void][] = [];
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
-    const status = statuses.get(this)!;
     return new AtomicPromise((resolve, reject) => {
-      void status.queue.push([
+      void this[queue].push([
         value => {
           if (!onfulfilled) return void resolve(value as any);
           try {
-            void resolve(onfulfilled(value as T));
+            void resolve(onfulfilled(value));
           }
           catch (reason) {
             void reject(reason);
@@ -88,7 +116,7 @@ export class AtomicPromise<T> implements Promise<T> {
           }
         },
       ]);
-      void status.resume();
+      void this[resume]();
     });
   }
   public catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult> {
@@ -96,34 +124,6 @@ export class AtomicPromise<T> implements Promise<T> {
   }
   public finally(onfinally?: (() => void) | undefined | null): AtomicPromise<T> {
     return this.then(onfinally, onfinally).then(() => this);
-  }
-}
-
-const enum State {
-  resolved,
-  rejected,
-}
-
-const statuses = new WeakMap<AtomicPromise<unknown>, Status<unknown>>();
-class Status<T> {
-  public result?: [State.resolved, T | PromiseLike<T>] | [State.rejected, unknown];
-  public readonly queue: [(value: T) => void, (reason: any) => void][] = [];
-  public resume(): void {
-    if (!this.result) return;
-    const [state, value] = this.result!;
-    while (this.queue.length > 0) {
-      const [resolve, reject] = this.queue.shift()!;
-      switch (state) {
-        case State.resolved:
-          isPromiseLike(value)
-            ? void value.then(resolve, reject)
-            : void resolve(value as T);
-          continue;
-        case State.rejected:
-          void reject(value);
-          continue;
-      }
-    }
   }
 }
 
