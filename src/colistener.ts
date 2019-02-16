@@ -3,7 +3,7 @@ import { AtomicFuture } from './future';
 import { Coroutine, CoroutineOptions } from './coroutine';
 import { Cancellation } from './cancellation';
 
-export class Colistener<T, U = void> extends Coroutine<U, T> {
+export class Colistener<T, U = undefined> extends Coroutine<U, T> {
   constructor(
     listen: (this: Colistener<T, U>, listener: (value: T) => void) => () => void,
     opts: CoroutineOptions = {},

@@ -28,17 +28,17 @@ interface CoroutinePort<T, R, S> {
 }
 type Reply<R> = (msg: IteratorResult<R> | Promise<never>) => void;
 
-export interface CoroutineInterface<T, R = void, _ = void> extends Promise<T>, AsyncIterable<R> {
+export interface CoroutineInterface<T = unknown, R = unknown, _ = unknown> extends Promise<T>, AsyncIterable<R> {
   readonly constructor: {
     readonly port: symbol;
     readonly terminator: symbol;
     readonly [Symbol.species]: typeof Promise;
   };
 }
-export interface Coroutine<T, R = void, S = void> extends AtomicPromise<T>, AsyncIterable<R> {
+export interface Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicPromise<T>, AsyncIterable<R> {
   constructor: typeof Coroutine;
 }
-export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implements Promise<T>, AsyncIterable<R> {
+export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicPromise<T> implements Promise<T>, AsyncIterable<R> {
   protected static readonly run: typeof run = run;
   public static readonly port: typeof port = port;
   public static readonly terminator: typeof terminator = terminator;
@@ -156,7 +156,7 @@ export class Coroutine<T, R = void, S = void> extends AtomicPromise<T> implement
       }
     },
   };
-  public readonly [terminator]: (reason?: any) => void = reason => {
+  public readonly [terminator]: (reason?: unknown) => void = reason => {
     if (!this[status].alive) return;
     this[status].alive = false;
     // Don't block.

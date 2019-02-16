@@ -18,13 +18,13 @@ describe('Unit: lib/promise', () => {
     });
 
     it('reject', async () => {
-      assert(await AtomicPromise.reject(1).catch(r => ++r) === 2);
-      assert(await AtomicPromise.reject(AtomicPromise.resolve(0)).catch(r => r.then()) === 0);
-      assert(await AtomicPromise.reject(Promise.resolve(0)).catch(r => r.then()) === 0);
-      assert(await AtomicPromise.reject(AtomicPromise.reject(1)).catch(r => r.catch((r: number) => ++r)) === 2);
-      assert(await AtomicPromise.reject(Promise.reject(1)).catch(r => r.catch((r: number) => ++r)) === 2);
-      assert(await AtomicPromise.resolve(AtomicPromise.reject(1)).catch(r => ++r) === 2);
-      assert(await AtomicPromise.resolve(Promise.reject(1)).catch(r => ++r) === 2);
+      assert(await AtomicPromise.reject(1).catch((r: number) => ++r) === 2);
+      assert(await AtomicPromise.reject(AtomicPromise.resolve(0)).catch((r: AtomicPromise<Number>) => r.then()) === 0);
+      assert(await AtomicPromise.reject(Promise.resolve(0)).catch((r: AtomicPromise<number>) => r.then()) === 0);
+      assert(await AtomicPromise.reject(AtomicPromise.reject(1)).catch((r: AtomicPromise<number>) => r.catch((r: number) => ++r)) === 2);
+      assert(await AtomicPromise.reject(Promise.reject(1)).catch((r: AtomicPromise<number>) => r.catch((r: number) => ++r)) === 2);
+      assert(await AtomicPromise.resolve(AtomicPromise.reject(1)).catch((r: number) => ++r) === 2);
+      assert(await AtomicPromise.resolve(Promise.reject(1)).catch((r: number) => ++r) === 2);
     });
 
     it('then', async () => {
@@ -38,18 +38,18 @@ describe('Unit: lib/promise', () => {
     });
 
     it('catch', async () => {
-      assert(await new AtomicPromise(() => { throw 1; }).catch(r => ++r) === 2);
-      assert(await AtomicPromise.reject(1).catch(r => ++r) === 2);
-      assert(await AtomicPromise.resolve(0).then(n => { throw ++n; }).catch(r => ++r) === 2);
-      assert(await AtomicPromise.reject(1).catch(n => { throw ++n; }).catch(r => ++r) === 3);
+      assert(await new AtomicPromise(() => { throw 1; }).catch((r: number) => ++r) === 2);
+      assert(await AtomicPromise.reject(1).catch((r: number) => ++r) === 2);
+      assert(await AtomicPromise.resolve(0).then((n: number) => { throw ++n; }).catch((r: number) => ++r) === 2);
+      assert(await AtomicPromise.reject(1).catch((n: number) => { throw ++n; }).catch((r: number) => ++r) === 3);
     });
 
     it('finally', async () => {
       assert(await AtomicPromise.resolve(0).finally(() => 1) === 0);
-      assert(await AtomicPromise.resolve(0).finally(() => AtomicPromise.reject(1)).catch(r => ++r) === 2);
-      assert(await AtomicPromise.reject(0).finally(() => AtomicPromise.reject(1)).catch(r => ++r) === 2);
-      assert(await AtomicPromise.resolve(0).finally(() => { throw 1; }).catch(r => ++r) === 2);
-      assert(await AtomicPromise.reject(0).finally(() => { throw 1; }).catch(r => ++r) === 2);
+      assert(await AtomicPromise.resolve(0).finally(() => AtomicPromise.reject(1)).catch((r: number) => ++r) === 2);
+      assert(await AtomicPromise.reject(0).finally(() => AtomicPromise.reject(1)).catch((r: number) => ++r) === 2);
+      assert(await AtomicPromise.resolve(0).finally(() => { throw 1; }).catch((r: number) => ++r) === 2);
+      assert(await AtomicPromise.reject(0).finally(() => { throw 1; }).catch((r: number) => ++r) === 2);
     });
 
     it('atomic', async () => {

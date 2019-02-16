@@ -26,7 +26,7 @@ describe('Unit: lib/cofetch', () => {
         for await (const _ of co) throw 1;
         return co.then(
           () => Promise.reject(),
-          reason => {
+          (reason: Event) => {
             assert(reason instanceof Event);
             assert(reason.type === 'abort');
           });

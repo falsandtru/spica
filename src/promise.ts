@@ -6,13 +6,13 @@ const enum State {
 }
 type Status<T> =
   | [State.resolved, T | PromiseLike<T>]
-  | [State.rejected, any];
+  | [State.rejected, unknown];
 
 const status = Symbol();
 const queue = Symbol();
 const resume = Symbol();
 
-export class AtomicPromise<T> implements Promise<T> {
+export class AtomicPromise<T = unknown> implements Promise<T> {
   public static get [Symbol.species]() {
     return AtomicPromise;
   }
@@ -54,10 +54,10 @@ export class AtomicPromise<T> implements Promise<T> {
   public static resolve<T>(value?: T | PromiseLike<T>): AtomicPromise<T> {
     return new AtomicPromise<T>(resolve => void resolve(value));
   }
-  public static reject<T = never>(reason?: any): AtomicPromise<T> {
+  public static reject<T = never>(reason?: unknown): AtomicPromise<T> {
     return new AtomicPromise<T>((_, reject) => void reject(reason));
   }
-  constructor(executor: (resolve: (value?: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void) {
+  constructor(executor: (resolve: (value?: T | PromiseLike<T>) => void, reject: (reason?: unknown) => void) => void) {
     try {
       void executor(
         value => {
@@ -84,7 +84,7 @@ export class AtomicPromise<T> implements Promise<T> {
         case State.resolved:
           isPromiseLike(value)
             ? void value.then(resolve, reject)
-            : void resolve(value);
+            : void resolve(value as T);
           continue;
         case State.rejected:
           void reject(value);
@@ -93,8 +93,8 @@ export class AtomicPromise<T> implements Promise<T> {
     }
   }
   private readonly [status]: [Status<T>?] = [];
-  private readonly [queue]: [(value: T) => void, (reason: any) => void][] = [];
-  public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
+  private readonly [queue]: [(value: T) => void, (reason: unknown) => void][] = [];
+  public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
     return new AtomicPromise((resolve, reject) => {
       void this[queue].push([
         value => {
@@ -119,7 +119,7 @@ export class AtomicPromise<T> implements Promise<T> {
       void this[resume]();
     });
   }
-  public catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult> {
+  public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult> {
     return this.then(undefined, onrejected);
   }
   public finally(onfinally?: (() => void) | undefined | null): AtomicPromise<T> {

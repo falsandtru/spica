@@ -12,13 +12,13 @@ export interface SupervisorOptions {
   readonly name?: string;
   readonly size?: number;
   readonly timeout?: number;
-  readonly destructor?: (reason: any) => void;
+  readonly destructor?: (reason: unknown) => void;
   readonly scheduler?: (cb: () => void) => void;
   readonly resource?: number;
 }
 
-export abstract class Supervisor<N extends string, P = void, R = void, S = void> extends AtomicPromise<void> {
-  private static instances_: Set<Supervisor<string, any, any, any>>;
+export abstract class Supervisor<N extends string, P = unknown, R = unknown, S = unknown> extends AtomicPromise<undefined> {
+  private static instances_: Set<Supervisor<string, unknown, unknown, unknown>>;
   private static get instances(): typeof Supervisor.instances_ {
     return this.hasOwnProperty('instances_')
       ? this.instances_
@@ -33,13 +33,13 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
         acc + sv.workers.size
       , 0);
   }
-  protected static readonly standalone = new WeakSet<Supervisor.Process<any, any, any>>();
+  protected static readonly standalone = new WeakSet<Supervisor.Process<unknown, unknown, unknown>>();
   constructor(opts: SupervisorOptions = {}) {
     super((resolve, reject) => (
       cb = [resolve, reject],
       { next: () => new AtomicPromise(r => r({ value: state = new AtomicFuture(), done: true })) }));
     var cb!: [() => void, () => void];
-    var state!: AtomicFuture<void>;
+    var state!: AtomicFuture;
     void this.state.then(...cb);
     void state.bind(this.state);
     void extend(this.settings, opts);
@@ -47,8 +47,8 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
     if (this.constructor === Supervisor) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot instantiate abstract classes.`);
     void (this.constructor as typeof Supervisor).instances.add(this);
   }
-  protected readonly state = new AtomicFuture<void>();
-  private destructor(reason: any): void {
+  protected readonly state = new AtomicFuture();
+  private destructor(reason: unknown): void {
     assert(this.alive === true);
     assert(this.available === true);
     this.available = false;
@@ -80,19 +80,19 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
     name: '',
     size: Infinity,
     timeout: Infinity,
-    destructor: (_: any) => undefined,
+    destructor: (_: unknown) => undefined,
     scheduler: tick,
     resource: 10,
   };
   private readonly events_ = {
-    init: new Observation<[N], Supervisor.Event.Data.Init<N, P, R, S>, any>(),
-    loss: new Observation<[N], Supervisor.Event.Data.Loss<N, P>, any>(),
-    exit: new Observation<[N], Supervisor.Event.Data.Exit<N, P, R, S>, any>(),
+    init: new Observation<[N], Supervisor.Event.Data.Init<N, P, R, S>, unknown>(),
+    loss: new Observation<[N], Supervisor.Event.Data.Loss<N, P>, unknown>(),
+    exit: new Observation<[N], Supervisor.Event.Data.Exit<N, P, R, S>, unknown>(),
   };
   public readonly events: {
-    readonly init: Observer<[N], Supervisor.Event.Data.Init<N, P, R, S>, any>;
-    readonly loss: Observer<[N], Supervisor.Event.Data.Loss<N, P>, any>;
-    readonly exit: Observer<[N], Supervisor.Event.Data.Exit<N, P, R, S>, any>;
+    readonly init: Observer<[N], Supervisor.Event.Data.Init<N, P, R, S>, unknown>;
+    readonly loss: Observer<[N], Supervisor.Event.Data.Loss<N, P>, unknown>;
+    readonly exit: Observer<[N], Supervisor.Event.Data.Exit<N, P, R, S>, unknown>;
   } = this.events_;
   private readonly workers = new Map<N, Worker<N, P, R, S>>();
   private alive = true;
@@ -100,7 +100,7 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
   private throwErrorIfNotAvailable(): void {
     if (!this.available) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A supervisor is already terminated.`);
   }
-  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S>, state: S, reason?: any): (reason?: any) => boolean {
+  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S>, state: S, reason?: unknown): (reason?: unknown) => boolean {
     void this.throwErrorIfNotAvailable();
     if (arguments.length > 3) {
       void this.kill(name, reason);
@@ -173,7 +173,7 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
     }
     return result;
   }
-  public refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason?: any) => boolean][] {
+  public refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason?: unknown) => boolean][] {
     void this.throwErrorIfNotAvailable();
     return name === undefined
       ? [...this.workers.values()].map(convert)
@@ -181,7 +181,7 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
         ? [convert(this.workers.get(name)!)]
         : [];
 
-    function convert(worker: Worker<N, P, R, S>): [N, Supervisor.Process<P, R, S>, S, (reason?: any) => boolean] {
+    function convert(worker: Worker<N, P, R, S>): [N, Supervisor.Process<P, R, S>, S, (reason?: unknown) => boolean] {
       assert(worker instanceof Worker);
       return [
         worker.name,
@@ -191,14 +191,14 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
       ];
     }
   }
-  public kill(name: N, reason?: any): boolean {
+  public kill(name: N, reason?: unknown): boolean {
     if (!this.available) return false;
     assert(this.alive === true);
     return this.workers.has(name)
       ? this.workers.get(name)!.terminate(reason)
       : false;
   }
-  public terminate(reason?: any): boolean {
+  public terminate(reason?: unknown): boolean {
     if (!this.available) return false;
     assert(this.alive === true);
     void this.destructor(reason);
@@ -261,8 +261,8 @@ export namespace Supervisor {
   };
   export namespace Process {
     export type Init<S> = (state: S) => S;
-    export type Main<P, R, S> = (param: P, state: S, kill: (reason?: any) => void) => Result<R, S> | PromiseLike<Result<R, S>>;
-    export type Exit<S> = (reason: any, state: S) => void;
+    export type Main<P, R, S> = (param: P, state: S, kill: (reason?: unknown) => void) => Result<R, S> | PromiseLike<Result<R, S>>;
+    export type Exit<S> = (reason: unknown, state: S) => void;
     export type Result<R, S> = [R, S] | { reply: R; state: S; };
   }
   export type Callback<R> = (reply: R, error?: Error) => void;
@@ -270,14 +270,14 @@ export namespace Supervisor {
     export namespace Data {
       export type Init<N extends string, P, R, S> = [N, Process<P, R, S>, S];
       export type Loss<N extends string, P> = [N, P];
-      export type Exit<N extends string, P, R, S> = [N, Process<P, R, S>, S, any];
+      export type Exit<N extends string, P, R, S> = [N, Process<P, R, S>, S, unknown];
     }
   }
 }
 
 class NamePool<N extends string> implements Iterable<N> {
   constructor(
-    private readonly workers: ReadonlyMap<N, any>,
+    private readonly workers: ReadonlyMap<N, unknown>,
   ) {
   }
   [Symbol.iterator](): IterableIterator<N> {
@@ -295,15 +295,15 @@ class Worker<N extends string, P, R, S> {
     public state: S,
     initiated: boolean,
     private readonly events: {
-      readonly init: Publisher<[N], Supervisor.Event.Data.Init<N, P, R, S>, any>;
-      readonly exit: Publisher<[N], Supervisor.Event.Data.Exit<N, P, R, S>, any>;
+      readonly init: Publisher<[N], Supervisor.Event.Data.Init<N, P, R, S>, unknown>;
+      readonly exit: Publisher<[N], Supervisor.Event.Data.Exit<N, P, R, S>, unknown>;
     },
     private readonly destructor_: () => void,
   ) {
     assert(process.init && process.exit);
     initiated && void this.init();
   }
-  private destructor(reason: any): void {
+  private destructor(reason: unknown): void {
     assert(this.alive === true);
     this.alive = false;
     this.available = false;
@@ -330,7 +330,7 @@ class Worker<N extends string, P, R, S> {
       .emit([this.name], [this.name, this.process, this.state]);
     this.state = this.process.init(this.state);
   }
-  private exit(reason: any): void {
+  private exit(reason: unknown): void {
     assert(this.initiated);
     try {
       void this.process.exit(reason, this.state);
@@ -373,7 +373,7 @@ class Worker<N extends string, P, R, S> {
           throw reason;
         });
   }
-  public readonly terminate = (reason: any): boolean => {
+  public readonly terminate = (reason: unknown): boolean => {
     if (!this.alive) return false;
     void this.destructor(reason);
     return true;
