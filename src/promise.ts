@@ -107,7 +107,7 @@ export class AtomicPromise<T = unknown> implements Promise<T> {
           }
         },
         reason => {
-          if (!onrejected) return void resolve(this as any);
+          if (!onrejected) return void reject(reason);
           try {
             void resolve(onrejected(reason));
           }
