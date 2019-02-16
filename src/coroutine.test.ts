@@ -92,7 +92,7 @@ describe('Unit: lib/coroutine', () => {
         }
         finally {
           //assert(false);
-          throw 1;
+          return NaN;
         }
       }).catch(e => e instanceof Error));
       assert(5 === await new Coroutine<number, number, number>(async function* () {
