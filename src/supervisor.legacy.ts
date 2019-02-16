@@ -51,7 +51,7 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
   private destructor(reason: any): void {
     assert(this.alive === true);
     assert(this.available === true);
-    this.available_ = false;
+    this.available = false;
     for (const [, worker] of this.workers) {
       void worker.terminate(reason);
     }
@@ -96,10 +96,7 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
   } = this.events_;
   private readonly workers = new Map<N, Worker<N, P, R, S>>();
   private alive = true;
-  private available_ = true;
-  public get available(): boolean {
-    return this.available_;
-  }
+  private available = true;
   private throwErrorIfNotAvailable(): void {
     if (!this.available) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A supervisor is already terminated.`);
   }

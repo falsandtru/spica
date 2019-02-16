@@ -16,7 +16,6 @@ export abstract class Supervisor<N extends string, P = void, R = void, S = void>
     readonly loss: Observer<[N], Supervisor.Event.Data.Loss<N, P>, any>;
     readonly exit: Observer<[N], Supervisor.Event.Data.Exit<N, P, R, S>, any>;
   };
-  readonly available: boolean;
   register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S> | CoroutineInterface<R, R, P>, state: S, reason?: any): (reason?: any) => boolean;
   register(name: N, process: CoroutineInterface<R, R, P>, state?: never, reason?: any): (reason?: any) => boolean;
   call(name: N | ('' extends N ? undefined : never), param: P, timeout?: number): AtomicPromise<R>;
