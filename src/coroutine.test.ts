@@ -78,14 +78,14 @@ describe('Unit: lib/coroutine', () => {
         yield Promise.resolve(2);
         assert(false);
         throw 1;
-      }, { size: Infinity })[Coroutine.port].connect(function* () {
+      }, { size: 1 })[Coroutine.port].connect(function* () {
         assert(2 === (yield 1));
         return 3;
       }));
       assert(true === await new Coroutine<number, number, number>(async function* () {
         assert(1 === (yield Promise.resolve(0)));
         return Promise.resolve(2);
-      }, { size: Infinity })[Coroutine.port].connect(function* () {
+      }, { size: 1 })[Coroutine.port].connect(function* () {
         assert(2 === (yield 1));
         try {
           yield 3;
@@ -99,7 +99,7 @@ describe('Unit: lib/coroutine', () => {
         assert(1 === (yield Promise.resolve(0)));
         assert(3 === (yield Promise.resolve(2)));
         return Promise.resolve(4);
-      }, { size: Infinity })[Coroutine.port].connect(function* () {
+      }, { size: 1 })[Coroutine.port].connect(function* () {
         assert(2 === (yield 1));
         assert(4 === (yield 3));
         return 5;

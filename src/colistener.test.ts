@@ -43,7 +43,7 @@ describe('Unit: lib/colistener', () => {
       const co = new Colistener<Event>(listener => {
         document.addEventListener('click', listener);
         return () => void document.removeEventListener('click', listener);
-      }, { resume: () => wait(100) });
+      }, { size: 1, resume: () => wait(100) });
       setTimeout(() => {
         document.body!.click();
         document.body!.click();

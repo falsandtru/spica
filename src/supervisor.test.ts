@@ -266,7 +266,7 @@ describe('Unit: lib/supervisor', function () {
         assert(1 === (yield 0));
         assert(2 === (yield 1));
         return 2;
-      }, { size: Infinity }));
+      }, { size: 1 }));
       assert(await sv.call('', 1) === 1);
       await wait(100);
       assert(sv.refs('').length === 1);
