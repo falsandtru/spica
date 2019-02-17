@@ -1,6 +1,5 @@
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future'; 
-import { Cancellation } from './cancellation';
 import { DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
 import { tuple } from './tuple';
@@ -50,9 +49,9 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
     opts: CoroutineOptions = {},
   ) {
     super(resolve => res = resolve);
-    var res!: (v: T | AtomicPromise<never>) => void;
+    var res!: (v: T | AtomicPromise<T>) => void;
     this[status] = new Status(opts);
-    void this[status].result.register(res);
+    void res(this[status].result);
     this[Coroutine.run] = async () => {
       try {
         this[Coroutine.run] = noop;
@@ -102,7 +101,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
             await this[status].state.bind({ value: value as any as R, done });
             // Don't block.
             void reply({ value: value as any as R, done });
-            void this[status].result.cancel(value as T);
+            void this[status].result.bind(value as T);
             while (this[status].msgs.length > 0) {
               // Don't block.
               const [, reply] = this[status].msgs.shift()!;
@@ -161,7 +160,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
     this[status].alive = false;
     // Don't block.
     void this[status].state.bind({ value: undefined as any as R, done: true });
-    void this[status].result.cancel(AtomicPromise.reject(reason));
+    void this[status].result.bind(AtomicPromise.reject(reason));
     while (this[status].msgs.length > 0) {
       // Don't block.
       const [, reply] = this[status].msgs.shift()!;
@@ -177,7 +176,7 @@ class Status<T, R, S> {
   public alive = true;
   public state = new AtomicFuture<IteratorResult<R>>();
   public resume = new AtomicFuture();
-  public readonly result: Cancellation<T | AtomicPromise<never>> = new Cancellation();
+  public readonly result = new AtomicFuture<T>();
   public readonly msgs: [S | PromiseLike<S>, Reply<R>][] = [];
   public readonly settings: DeepImmutable<DeepRequired<CoroutineOptions>> = {
     size: 0,
