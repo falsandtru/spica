@@ -98,9 +98,9 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
           else {
             this[status].alive = false;
             // Block.
-            await this[status].state.bind({ value: value as any as R, done });
+            await this[status].state.bind({ value: value as R, done });
             // Don't block.
-            void reply({ value: value as any as R, done });
+            void reply({ value: value as R, done });
             void this[status].result.bind(value as T);
             while (this[status].msgs.length > 0) {
               // Don't block.
