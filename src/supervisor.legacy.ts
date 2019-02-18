@@ -37,7 +37,8 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
   constructor(opts: SupervisorOptions = {}) {
     super((resolve, reject) => (
       cb = [resolve, reject],
-      { next: () => new AtomicPromise(r => r({ value: state = new AtomicFuture(), done: true })) }));
+      state = new AtomicFuture(),
+      { next: () => new AtomicPromise(r => r({ value: state, done: true })) }));
     var cb!: [() => void, () => void];
     var state!: AtomicFuture;
     void this.state.then(...cb);
