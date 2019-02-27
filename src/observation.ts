@@ -24,8 +24,8 @@ export type Subscriber<N extends any[], D, R> = (data: D, namespace: N) => R;
 
 interface RegisterNode<N extends any[], D, R> {
   parent: RegisterNode<N, D, R> | undefined;
-  children: Map<N[keyof N], RegisterNode<N, D, R>>;
-  childrenNames: N[keyof N][];
+  children: Map<N[number], RegisterNode<N, D, R>>;
+  childrenNames: N[number][];
   items: RegisterItem<N, D, R>[];
 }
 export type RegisterItem<N extends any[], D, R> = {
@@ -193,7 +193,7 @@ export class Observation<N extends any[], D, R>
   public refs(namespace: [] | N): RegisterItem<N, D, R>[] {
     return this.refsBelow_(this.seekNode_(namespace));
   }
-  private refsAbove_({parent, items}: RegisterNode<N, D, R>): RegisterItem<N, D, R>[] {
+  private refsAbove_({ parent, items }: RegisterNode<N, D, R>): RegisterItem<N, D, R>[] {
     items = concat([], items);
     while (parent) {
       items = concat(items, parent.items);
@@ -201,7 +201,7 @@ export class Observation<N extends any[], D, R>
     }
     return items;
   }
-  private refsBelow_({childrenNames, children, items}: RegisterNode<N, D, R>): RegisterItem<N, D, R>[] {
+  private refsBelow_({ childrenNames, children, items }: RegisterNode<N, D, R>): RegisterItem<N, D, R>[] {
     items = concat([], items);
     for (let i = 0; i < childrenNames.length; ++i) {
       const name = childrenNames[i];
