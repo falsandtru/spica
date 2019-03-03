@@ -15,7 +15,7 @@ export interface CoroutineOptions {
   readonly size?: number;
   readonly interval?: number,
   readonly resume?: () => PromiseLike<void>;
-  readonly autorun?: boolean;
+  readonly syncrun?: boolean;
 }
 interface CoroutinePort<T, R, S> {
   //readonly send: (msg: S | PromiseLike<S>) => AtomicPromise<IteratorResult<R, T>>;
@@ -114,7 +114,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
         void this[Coroutine.terminator](reason);
       }
     };
-    this[status].settings.autorun
+    this[status].settings.syncrun
       ? void this[Coroutine.run]()
       : void tick(() => void this[Coroutine.run]());
   }
@@ -182,6 +182,6 @@ class Status<T, R, S> {
     size: 0,
     interval: 0,
     resume: () => clock,
-    autorun: true,
+    syncrun: true,
   };
 }
