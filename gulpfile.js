@@ -175,7 +175,7 @@ gulp.task('install', done => {
 });
 
 gulp.task('update', done => {
-  shell('ncu -ua');
+  shell('ncu -u');
   shell('npm i -DE typescript@next --no-shrinkwrap');
   shell('npm i --no-shrinkwrap');
   done();
