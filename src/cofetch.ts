@@ -55,23 +55,23 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
   public readonly cancel: () => void = this.cancellation.cancel;
 }
 
-function fetch(xhr: XMLHttpRequest, url: string, options: CofetchOptions): void {
+function fetch(xhr: XMLHttpRequest, url: string, opts: CofetchOptions): void {
   assert(xhr.readyState === 0);
-  void xhr.open(options.method || 'GET', url);
-  for (const key of Object.keys(options)) {
+  void xhr.open(opts.method || 'GET', url);
+  for (const key of Object.keys(opts)) {
     switch (key) {
       case 'method':
       case 'body':
         continue;
       case 'headers':
-        for (const [name, value] of options.headers!) {
+        for (const [name, value] of opts.headers!) {
           void xhr.setRequestHeader(name, value);
         }
         continue;
       default:
-        if (key in xhr) xhr[key] = options[key];
+        if (key in xhr) xhr[key] = opts[key];
         continue;
     }
   }
-  void xhr.send(options.body || undefined);
+  void xhr.send(opts.body || undefined);
 }
