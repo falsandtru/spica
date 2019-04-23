@@ -1,4 +1,4 @@
-﻿export { Supervisor } from './src/supervisor';
+export { Supervisor } from './src/supervisor';
 export { Observation } from './src/observation';
 export { Cancellation } from './src/cancellation';
 export { Sequence } from './src/sequence';
