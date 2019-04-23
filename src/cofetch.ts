@@ -22,6 +22,10 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
   ) {
     super(async function* (this: Cofetch) {
       void this.finally(this.cancel);
+      url = url.split('#', 1)[0] || '';
+      opts = { ...opts };
+      opts.method = opts.method || 'GET';
+      opts.headers = new Headers(opts.headers || new Headers());
       const xhr = new XMLHttpRequest();
       const state = new Cancellation<ProgressEvent>();
       const process = new Colistener<ProgressEvent, XMLHttpRequest>(listener => {
@@ -57,14 +61,15 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
 
 function fetch(xhr: XMLHttpRequest, url: string, opts: CofetchOptions): void {
   assert(xhr.readyState === 0);
-  void xhr.open(opts.method || 'GET', url);
+  assert(opts.method);
+  void xhr.open(opts.method!, url);
   for (const key of Object.keys(opts)) {
     switch (key) {
       case 'method':
       case 'body':
         continue;
       case 'headers':
-        for (const [name, value] of opts.headers!) {
+        for (const [name, value] of opts.headers || []) {
           void xhr.setRequestHeader(name, value);
         }
         continue;
@@ -73,5 +78,5 @@ function fetch(xhr: XMLHttpRequest, url: string, opts: CofetchOptions): void {
         continue;
     }
   }
-  void xhr.send(opts.body || undefined);
+  void xhr.send(opts.body);
 }
