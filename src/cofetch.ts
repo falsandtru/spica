@@ -57,7 +57,8 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
               switch (opts.method) {
                 case 'GET':
                   if (xhr.statusText.match(/2../)) {
-                    xhr.getResponseHeader('ETag')
+                    xhr.getResponseHeader('ETag') &&
+                    !(xhr.getResponseHeader('Cache-Control') || '').trim().split(/[\s,]+/).includes('no-store')
                       ? void opts.cache.set(url, xhr)
                       : void opts.cache.delete(url);
                   }
