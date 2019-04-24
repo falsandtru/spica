@@ -1,6 +1,7 @@
 import { Coroutine } from './coroutine';
 import { Colistener } from './colistener';
 import { Cancellation } from './cancellation';
+import { Collection } from './collection';
 
 export interface CofetchOptions {
   method?: string;
@@ -9,6 +10,7 @@ export interface CofetchOptions {
   responseType?: XMLHttpRequestResponseType;
   timeout?: number;
   withCredentials?: boolean;
+  cache?: Collection<string, XMLHttpRequest>;
 }
 
 export function cofetch(url: string, options?: CofetchOptions): Cofetch {
@@ -22,7 +24,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
   ) {
     super(async function* (this: Cofetch) {
       void this.finally(this.cancel);
-      url = url.split('#', 1)[0] || '';
+      url = new URL(url, typeof location === 'object' ? location.href : undefined).href.split('#', 1)[0];
       opts = { ...opts };
       opts.method = opts.method || 'GET';
       opts.headers = new Headers(opts.headers || new Headers());
@@ -34,6 +36,9 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
         void xhr.addEventListener('loadend', listener);
         for (const type of ['error', 'abort', 'timeout']) {
           void xhr.addEventListener(type, state.cancel);
+        }
+        if (opts.cache && opts.cache.has(url) && opts.cache.get(url)!.getResponseHeader('ETag')) {
+          void opts.headers!.set('If-None-Match', opts.cache.get(url)!.getResponseHeader('ETag')!);
         }
         void fetch(xhr, url, opts);
         void this.cancellation.register(() =>
@@ -47,6 +52,23 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
         yield ev;
         if (ev.type !== 'loadend') continue;
         void state.either(xhr)
+          .fmap(xhr => {
+            if (opts.cache) {
+              switch (opts.method) {
+                case 'GET':
+                  if (xhr.statusText.match(/2../)) {
+                    xhr.getResponseHeader('ETag')
+                      ? void opts.cache.set(url, xhr)
+                      : void opts.cache.delete(url);
+                  }
+                  if (xhr.status === 304 && opts.cache.has(url)) {
+                    return opts.cache.get(url)!;
+                  }
+                  break;
+              }
+            }
+            return xhr;
+          })
           .extract(
             process[Coroutine.terminator],
             process.close);
@@ -67,6 +89,7 @@ function fetch(xhr: XMLHttpRequest, url: string, opts: CofetchOptions): void {
     switch (key) {
       case 'method':
       case 'body':
+      case 'cache':
         continue;
       case 'headers':
         for (const [name, value] of opts.headers || []) {

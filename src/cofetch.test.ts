@@ -1,4 +1,5 @@
 import { cofetch } from './cofetch';
+import { Cache } from './cache';
 
 describe('Unit: lib/cofetch', () => {
   if (navigator.userAgent.includes('Edge')) return;
@@ -32,6 +33,10 @@ describe('Unit: lib/cofetch', () => {
           });
       }
       throw 1;
+    });
+
+    it('cache', async () => {
+      cofetch('', { cache: new Cache(9) });
     });
 
   });
