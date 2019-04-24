@@ -2,7 +2,7 @@ import {
   Not, And, Or, Eq, TEq, DEq, If, Case,
   Rewrite, StrictRewrite, StrictExtract, StrictExclude,
   valueof, indexof,
-  Type,
+  Type, StrictType,
   DiffStruct, OverwriteStruct,
   ExtractProp, DeepExtractProp, ExcludeProp, DeepExcludeProp, RewriteProp, DeepRewriteProp,
   Partial, DeepPartial, Required, DeepRequired, Immutable, DeepImmutable, Mutable, DeepMutable,
@@ -200,6 +200,9 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Type<any[]>, 'object'>);
       assert((): true => true as TEq<Type<object>, 'object'>);
       assert((): true => true as TEq<Type<null>, 'object'>);
+      assert((): true => true as TEq<StrictType<void>, 'undefined'>);
+      assert((): true => true as TEq<StrictType<undefined>, 'undefined'>);
+      assert((): true => true as TEq<StrictType<null>, 'null'>);
     });
 
   });

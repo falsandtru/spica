@@ -52,6 +52,7 @@ export type indexof<T, V extends valueof<T>> = { [P in keyof T]: If<TEq<T[P], V>
 export type valueof<T, K extends string | number | symbol = T extends { [n: number]: any; length: number; } ? number : string | number> = T[Extract<keyof T, K>];
 
 export type Type<T> =
+  T extends void ? null extends void ? 'object' | 'undefined' : 'undefined' :
   T extends undefined ? 'undefined' :
   T extends boolean ? 'boolean' :
   T extends number ? 'number' :
@@ -59,8 +60,11 @@ export type Type<T> =
   T extends string ? 'string' :
   T extends symbol ? 'symbol' :
   T extends Function ? 'function' :
-  T extends void ? null extends void ? 'object' | 'undefined' : 'undefined' :
   'object';
+export type StrictType<T> =
+  T extends void ? null extends void ? 'null' | 'undefined' : 'undefined' :
+  T extends null ? 'null' :
+  Type<T>;
 
 export type DiffStruct<T, U> = Pick<T, Exclude<keyof T, keyof U>>;
 export type OverwriteStruct<T, U> = Unify<{ [P in Exclude<keyof T, keyof U>]: T[P]; }, U>;
