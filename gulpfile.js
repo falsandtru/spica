@@ -118,13 +118,6 @@ gulp.task('ts:dist', () =>
     .pipe(minify({ output: { comments: /^!/ } }))
     .pipe(gulp.dest(config.ts.dist.dest)));
 
-gulp.task('ts:view', () =>
-  gulp.watch(config.ts.dist.src, { ignoreInitial: false }, () =>
-    compile(config.ts.dist.src)
-      .pipe($.unassert())
-      .pipe($.header(config.banner))
-      .pipe(gulp.dest('./gh-pages/assets/js/lib'))));
-
 gulp.task('karma:dev', done =>
   void new Server({
     configFile: __dirname + '/karma.conf.js',
