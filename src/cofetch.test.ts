@@ -21,18 +21,15 @@ describe('Unit: lib/cofetch', () => {
 
     it('cancel', async () => {
       const co = cofetch('');
+      const types = new Set<string>();
       for await (const ev of co) {
+        types.add(ev.type);
         co.cancel();
         if (ev.type !== 'loadend') continue;
         for await (const _ of co) throw 1;
-        return co.then(
-          () => Promise.reject(),
-          (reason: Event) => {
-            assert(reason instanceof Event);
-            assert(reason.type === 'abort');
-          });
       }
-      throw 1;
+      assert.deepStrictEqual([...types], ['loadstart', 'loadend']);
+      assert(await co instanceof XMLHttpRequest);
     });
 
     it('cache', async () => {
