@@ -32,6 +32,7 @@
     "test",
     "collection",
     "monad",
+    "url",
     "*.ts",
     "*.js",
     "*.json",
