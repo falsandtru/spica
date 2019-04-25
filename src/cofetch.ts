@@ -65,12 +65,18 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
               case 'GET':
               case 'PUT':
                 if (xhr.statusText.match(/2../)) {
+                  const cc = new Map<string, string>(
+                    xhr.getResponseHeader('Cache-Control')
+                      ? xhr.getResponseHeader('Cache-Control')!.trim().split(/\s*,\s*/)
+                          .filter(v => v.length > 0)
+                          .map(v => v.split('=').concat('') as [string, string])
+                      : []);
                   if (xhr.getResponseHeader('ETag') &&
-                      !(xhr.getResponseHeader('Cache-Control') || '').trim().split(/\s*,\s*/).includes('no-store')) {
+                      !cc.has('no-store')) {
                     void memory.set(xhr, {
-                      expiry: xhr.getResponseHeader('Cache-Control')!.trim().split(/\s*,\s*/).includes('no-cache')
-                        ? 0
-                        : Date.now() + +(xhr.getResponseHeader('Cache-Control')!.trim().split(/\s*,\s*/).find(s => s.startsWith('max-age=')) || '').split('=')[1] * 1000 || 0,
+                      expiry: cc.has('max-age') && !cc.has('no-cache')
+                        ? Date.now() + +cc.get('max-age')! * 1000 || 0
+                        : 0,
                     });
                     void opts.cache.set(key, xhr);
                   }
