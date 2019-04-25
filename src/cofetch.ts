@@ -10,7 +10,7 @@ export interface CofetchOptions {
   responseType?: XMLHttpRequestResponseType;
   timeout?: number;
   withCredentials?: boolean;
-  cache?: Collection<string, XMLHttpRequest>;
+  cache?: Collection<string, { etag: string; expiry: number; xhr: XMLHttpRequest; }>;
 }
 
 export function cofetch(url: string, options?: CofetchOptions): Cofetch {
@@ -26,8 +26,8 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
       void this.finally(this.cancel);
       url = new URL(url, typeof location === 'object' ? location.href : undefined).href.split('#', 1)[0];
       opts = { ...opts };
-      opts.method = opts.method || 'GET';
-      opts.headers = new Headers(opts.headers || new Headers());
+      opts.method = (opts.method || 'GET').toUpperCase();
+      opts.headers = new Headers(opts.headers || []);
       const xhr = new XMLHttpRequest();
       const state = new Cancellation<ProgressEvent>();
       const process = new Colistener<ProgressEvent, XMLHttpRequest>(listener => {
@@ -37,8 +37,8 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
         for (const type of ['error', 'abort', 'timeout']) {
           void xhr.addEventListener(type, state.cancel);
         }
-        if (opts.cache && opts.cache.has(url) && opts.cache.get(url)!.getResponseHeader('ETag')) {
-          void opts.headers!.set('If-None-Match', opts.cache.get(url)!.getResponseHeader('ETag')!);
+        if (['GET', 'PUT'].includes(opts.method!) && opts.cache && opts.cache.has(url) && Date.now() > opts.cache.get(url)!.expiry) {
+          void opts.headers!.set('If-None-Match', opts.cache.get(url)!.etag);
         }
         void fetch(xhr, url, opts);
         void this.cancellation.register(() =>
@@ -59,11 +59,17 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
                   if (xhr.statusText.match(/2../)) {
                     xhr.getResponseHeader('ETag') &&
                     !(xhr.getResponseHeader('Cache-Control') || '').trim().split(/\s*,\s*/).includes('no-store')
-                      ? void opts.cache.set(url, xhr)
+                      ? void opts.cache.set(url, {
+                          etag: xhr.getResponseHeader('ETag')!,
+                          expiry: xhr.getResponseHeader('Cache-Control')!.trim().split(/\s*,\s*/).includes('no-cache')
+                            ? 0
+                            : Date.now() + +(xhr.getResponseHeader('Cache-Control')!.trim().split(/\s*,\s*/).find(s => s.startsWith('max-age=')) || '').split('=')[1] * 1000 || 0,
+                          xhr,
+                        })
                       : void opts.cache.delete(url);
                   }
                   if (xhr.status === 304 && opts.cache.has(url)) {
-                    return opts.cache.get(url)!;
+                    return opts.cache.get(url)!.xhr;
                   }
                   break;
               }
