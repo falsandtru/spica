@@ -37,7 +37,6 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     while (this.instances.size > 0) {
       for (const sv of this.instances) {
         void sv.terminate(reason);
-        break;
       }
     }
   }
@@ -209,7 +208,6 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     while (this.workers.size > 0) {
       for (const [, worker] of this.workers) {
         void worker.terminate(reason);
-        break;
       }
     }
   }

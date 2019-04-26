@@ -449,6 +449,7 @@ describe('Unit: lib/supervisor', function () {
       assert(TestSupervisor.count === 1);
       assert(TestSupervisor.procs === 0);
       assert(sv.terminate() === true);
+      sv.clear();
       assert(TestSupervisor.count === 0);
       assert(TestSupervisor.procs === 0);
       new TestSupervisor({});
