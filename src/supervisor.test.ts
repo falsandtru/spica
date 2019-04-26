@@ -410,7 +410,7 @@ describe('Unit: lib/supervisor', function () {
       sv.call(undefined, 0, r => void assert(r === 4) || done());
     });
 
-    it('kill process', function (done) {
+    it('kill', function (done) {
       class TestSupervisor extends Supervisor<string, number, number, number> {
       }
       assert(TestSupervisor.count === 0);
@@ -425,6 +425,27 @@ describe('Unit: lib/supervisor', function () {
       assert(TestSupervisor.count === 1);
       assert(TestSupervisor.procs === 1);
       assert(sv.kill(' ') === true);
+      assert(TestSupervisor.count === 1);
+      assert(TestSupervisor.procs === 0);
+      assert(sv.terminate() === true);
+      assert(TestSupervisor.count === 0);
+      assert(TestSupervisor.procs === 0);
+      done();
+    });
+
+    it('clear', function (done) {
+      class TestSupervisor extends Supervisor<string, number, number, number> {
+      }
+      assert(TestSupervisor.count === 0);
+      assert(TestSupervisor.procs === 0);
+      const sv = new TestSupervisor({});
+      assert(TestSupervisor.count === 1);
+      assert(TestSupervisor.procs === 0);
+      void sv.register('1', _ => [0, 0], 0);
+      void sv.register('2', _ => [0, 0], 0);
+      assert(TestSupervisor.count === 1);
+      assert(TestSupervisor.procs === 2);
+      sv.clear('');
       assert(TestSupervisor.count === 1);
       assert(TestSupervisor.procs === 0);
       assert(sv.terminate() === true);

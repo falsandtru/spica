@@ -53,9 +53,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     assert(this.alive === true);
     assert(this.available === true);
     this.available = false;
-    for (const [, worker] of this.workers) {
-      void worker.terminate(reason);
-    }
+    void this.clear(reason);
     assert(this.workers.size === 0);
     void Object.freeze(this.workers);
     while (this.messages.length > 0) {
@@ -198,6 +196,14 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     return this.workers.has(name)
       ? this.workers.get(name)!.terminate(reason)
       : false;
+  }
+  public clear(reason?: unknown): void {
+    while (this.workers.size > 0) {
+      for (const [, worker] of this.workers) {
+        void worker.terminate(reason);
+        break;
+      }
+    }
   }
   public terminate(reason?: unknown): boolean {
     if (!this.available) return false;
