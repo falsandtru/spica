@@ -445,10 +445,17 @@ describe('Unit: lib/supervisor', function () {
       void sv.register('2', _ => [0, 0], 0);
       assert(TestSupervisor.count === 1);
       assert(TestSupervisor.procs === 2);
-      sv.clear('');
+      sv.clear();
       assert(TestSupervisor.count === 1);
       assert(TestSupervisor.procs === 0);
       assert(sv.terminate() === true);
+      assert(TestSupervisor.count === 0);
+      assert(TestSupervisor.procs === 0);
+      new TestSupervisor({});
+      new TestSupervisor({});
+      assert(TestSupervisor.count === 2);
+      assert(TestSupervisor.procs === 0);
+      TestSupervisor.clear();
       assert(TestSupervisor.count === 0);
       assert(TestSupervisor.procs === 0);
       done();

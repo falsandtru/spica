@@ -33,6 +33,14 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
         acc + sv.workers.size
       , 0);
   }
+  public static clear(reason?: unknown): void {
+    while (this.instances.size > 0) {
+      for (const sv of this.instances) {
+        void sv.terminate(reason);
+        break;
+      }
+    }
+  }
   protected static readonly standalone = new WeakSet<Supervisor.Process<unknown, unknown, unknown>>();
   constructor(opts: SupervisorOptions = {}) {
     super((resolve, reject) => (
