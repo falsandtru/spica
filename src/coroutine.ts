@@ -82,9 +82,9 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
           assert(msg instanceof AtomicPromise === false);
           if (!this[status].alive) break;
           // Block.
+          // `value` can be Promise when using iterator.
+          // `value` never be Promise when using async iterator.
           const { value, done } = await iter.next(msg);
-          //assert(value instanceof Promise === false);
-          //assert(value instanceof AtomicPromise === false);
           if (!this[status].alive) break;
           if (!done) {
             const state = this[status].state;
@@ -123,8 +123,6 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
   public async *[Symbol.asyncIterator](): AsyncIterableIterator<R> {
     while (this[status].alive) {
       const { value } = await this[status].state;
-      //assert(value instanceof Promise === false);
-      //assert(value instanceof AtomicPromise === false);
       if (!this[status].alive) break;
       yield value;
     }
