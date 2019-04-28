@@ -1,6 +1,6 @@
 import {
   Not, And, Or, Eq, TEq, DEq, If, Case,
-  Rewrite, StrictRewrite, StrictExtract, StrictExclude,
+  Rewrite, StrictRewrite, ExactExtract, ExactExclude,
   valueof, indexof,
   Type, StrictType,
   DiffStruct, OverwriteStruct,
@@ -146,18 +146,18 @@ describe('Unit: lib/type', () => {
 
   });
 
-  describe('StrictExtract', () => {
+  describe('ExactExtract', () => {
     it('', () => {
-      assert((): true => true as TEq<StrictExtract<[] | {}, {} | null>, {}>);
-      assert((): true => true as TEq<StrictExtract<0, never>, never>);
+      assert((): true => true as TEq<ExactExtract<[] | {}, {} | null>, {}>);
+      assert((): true => true as TEq<ExactExtract<0, never>, never>);
     });
 
   });
 
-  describe('StrictExclude', () => {
+  describe('ExactExclude', () => {
     it('', () => {
-      assert((): true => true as TEq<StrictExclude<[] | {}, {} | null>, []>);
-      assert((): true => true as TEq<StrictExclude<0, never>, 0>);
+      assert((): true => true as TEq<ExactExclude<[] | {}, {} | null>, []>);
+      assert((): true => true as TEq<ExactExclude<0, never>, 0>);
     });
 
   });
