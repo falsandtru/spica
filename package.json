@@ -47,7 +47,7 @@
     "@types/power-assert": "^1.5.0",
     "benchmark": "^2.1.4",
     "browserify": "^16.2.3",
-    "del": "^4.1.0",
+    "del": "^4.1.1",
     "gulp": "^4.0.1",
     "gulp-derequire": "^2.1.0",
     "gulp-footer": "^2.0.2",
