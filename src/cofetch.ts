@@ -71,8 +71,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
                           .filter(v => v.length > 0)
                           .map(v => v.split('=').concat('') as [string, string])
                       : []);
-                  if (xhr.getResponseHeader('ETag') &&
-                      !cc.has('no-store')) {
+                  if (xhr.getResponseHeader('ETag') && !cc.has('no-store')) {
                     void memory.set(xhr, {
                       expiry: cc.has('max-age') && !cc.has('no-cache')
                         ? Date.now() + +cc.get('max-age')! * 1000 || 0
