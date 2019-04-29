@@ -4,7 +4,6 @@ export function throttle<T>(interval: number, callback: (last: T, buffer: T[]) =
   return (arg: T) => {
     void buffer.push(arg);
     if (timer > 0) return;
-    // @ts-ignore
     timer = setTimeout(() => {
       assert(timer > 0);
       assert(buffer.length > 0);
@@ -26,7 +25,6 @@ export function debounce<T>(delay: number, callback: (last: T, buffer: T[]) => v
   return (arg: T) => {
     void buffer.push(arg);
     if (timer > 0) return;
-    // @ts-ignore
     timer = setTimeout(() => {
       assert(timer > 0);
       assert(buffer.length > 0);
