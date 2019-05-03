@@ -8,22 +8,23 @@ describe('Benchmark:', function () {
     this.timeout(100 * 1e3);
 
     function array(n: number) {
-      return Array.apply([], Array(n)).map((_, i) => i);
+      return Array(n).fill(0).map((_, i) => i);
     }
 
     function bench(n: number) {
       return Promise.resolve()
         .then(() => new Promise(resolve => native(array(n), resolve)))
         .then(() => new Promise(resolve => partial(array(n), resolve)));
-    }
-    function native(arr: number[], done: () => void) {
-      benchmark(`sort native ${arr.length}`, () => arr.sort(), done);
-    }
-    function partial(arr: number[], done: () => void) {
-      function cmp(a: number, b: number): number {
-        return a - b;
+
+      function native(arr: number[], done: () => void) {
+        benchmark(`sort native ${arr.length}`, () => arr.sort(), done);
       }
-      benchmark(`sort partial ${arr.length}`, () => sort(arr, cmp, 1), done);
+      function partial(arr: number[], done: () => void) {
+        function cmp(a: number, b: number): number {
+          return a - b;
+        }
+        benchmark(`sort partial ${arr.length}`, () => sort(arr, cmp, 1), done);
+      }
     }
 
     it('sort 10', function (done) {
