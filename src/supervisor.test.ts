@@ -1,6 +1,7 @@
 import { Supervisor } from './supervisor';
 import { Coroutine } from './coroutine';
 import { tick, wait } from './clock';
+import { Sequence } from './sequence';
 
 describe('Unit: lib/supervisor', function () {
   describe('Supervisor', function () {
@@ -408,6 +409,19 @@ describe('Unit: lib/supervisor', function () {
       sv.call(undefined, 0, r => assert(r === 3));
       sv.call(undefined, 0, r => assert(r === 5));
       sv.call(undefined, 0, r => void assert(r === 4) || done());
+    });
+
+    it('select', function (done) {
+      let cnt = 0;
+      const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
+      });
+      sv.register('0', (_, s) => [s + ++cnt, 0], 0);
+      sv.register('1', (_, s) => [s + ++cnt, 0], 1);
+      sv.register('2', (_, s) => [s + ++cnt, 0], 2);
+      sv.call(ns => Sequence.from(ns).filter(n => n === '2'), 0, r => assert(r === 3));
+      sv.call(ns => Sequence.from(ns).filter(n => n === '1'), 0, r => assert(r === 5));
+      sv.call(ns => Sequence.from(ns).filter(n => n === '0'), 0, r => assert(r === 6));
+      sv.call(ns => ns, 0, r => void assert(r === 4) || done());
     });
 
     it('kill', function (done) {

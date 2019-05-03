@@ -121,10 +121,10 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
       .get(name)!
       .terminate;
   }
-  public call(name: N | ('' extends N ? undefined : never), param: P, timeout?: number): AtomicPromise<R>;
-  public call(name: N | ('' extends N ? undefined : never), param: P, callback: Supervisor.Callback<R>, timeout?: number): void;
-  public call(name: N | ('' extends N ? undefined : never), param: P, callback: Supervisor.Callback<R> | number = this.settings.timeout, timeout = this.settings.timeout): AtomicPromise<R> | void {
-    return this.call_(name === undefined ? new NamePool(this.workers) : name, param, callback, timeout);
+  public call(name: N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), param: P, timeout?: number): AtomicPromise<R>;
+  public call(name: N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), param: P, callback: Supervisor.Callback<R>, timeout?: number): void;
+  public call(name: N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), param: P, callback: Supervisor.Callback<R> | number = this.settings.timeout, timeout = this.settings.timeout): AtomicPromise<R> | void {
+    return this.call_(typeof name === 'string' ? name : new NamePool(this.workers, name), param, callback, timeout);
   }
   private call_(name: N | NamePool<N>, param: P, callback: Supervisor.Callback<R> | number, timeout: number): AtomicPromise<R> | void {
     void this.throwErrorIfNotAvailable();
@@ -140,7 +140,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
       const [name, param, callback] = this.messages.shift()!;
       const names = typeof name === 'string'
         ? [name]
-        : [...name];
+        : [name[Symbol.iterator]().next().value];
       void this.events_.loss.emit([names[0]], [names[0], param]);
       try {
         void callback(undefined as any, new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A message overflowed.`));
@@ -156,8 +156,8 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
       void this.schedule()
     , timeout + 3);
   }
-  public cast(name: N | ('' extends N ? undefined : never), param: P, timeout = this.settings.timeout): boolean {
-    const result = this.cast_(name === undefined ? new NamePool(this.workers) : name, param, timeout);
+  public cast(name: N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), param: P, timeout = this.settings.timeout): boolean {
+    const result = this.cast_(typeof name === 'string' ? name : new NamePool(this.workers, name), param, timeout);
     if (result === undefined) return false;
     void result.catch(noop);
     return true;
@@ -166,16 +166,17 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     void this.throwErrorIfNotAvailable();
     const names = typeof name === 'string'
       ? [name]
-      : [...name];
-    const result = names.reduce((result, name) => (
-      result
-        ? result
-        : this.workers.has(name)
-          ? this.workers.get(name)!.call([param, Date.now() + timeout])
-          : undefined
-    ), undefined);
+      : name;
+    let result: AtomicPromise<R> | undefined;
+    for (const name of names) {
+      result = this.workers.has(name)
+        ? this.workers.get(name)!.call([param, Date.now() + timeout])
+        : undefined;
+      if (result) break;
+    }
     if (result === undefined) {
-      void this.events_.loss.emit([names[0]], [names[0], param]);
+      const name = names[Symbol.iterator]().next().value;
+      void this.events_.loss.emit([name], [name, param]);
     }
     return result;
   }
@@ -231,14 +232,14 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
       const [name, param, callback, expiry] = this.messages[i];
       const names = typeof name === 'string'
         ? [name]
-        : [...name];
-      const result = names.reduce((result, name) => (
-        result
-          ? result
-          : this.workers.has(name)
-            ? this.workers.get(name)!.call([param, expiry])
-            : undefined
-      ), undefined);
+        : name;
+      let result: AtomicPromise<R> | undefined;
+      for (const name of names) {
+        result = this.workers.has(name)
+          ? this.workers.get(name)!.call([param, expiry])
+          : undefined;
+        if (result) break;
+      }
       if (result === undefined && Date.now() < expiry) continue;
       i === 0
         ? void this.messages.shift()
@@ -247,7 +248,8 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
       void --len;
 
       if (result === undefined) {
-        void this.events_.loss.emit([names[0]], [names[0], param]);
+        const name = names[Symbol.iterator]().next().value;
+        void this.events_.loss.emit([name], [name, param]);
         try {
           void callback(undefined as any, new Error(`Spica: Supervisor: A process has failed.`));
         }
@@ -291,12 +293,19 @@ export namespace Supervisor {
 class NamePool<N extends string> implements Iterable<N> {
   constructor(
     private readonly workers: ReadonlyMap<N, unknown>,
+    private readonly selector: (names: Iterable<N>) => Iterable<N> = ns => ns,
   ) {
+    assert([...this].length > 0);
   }
-  [Symbol.iterator](): IterableIterator<N> {
-    return this.workers.size === 0
-      ? ['' as N][Symbol.iterator]()
-      : this.workers.keys();
+  *[Symbol.iterator](): IterableIterator<N> {
+    let cnt = 0;
+    for (const name of this.selector(this.workers.keys())) {
+      void ++cnt;
+      yield name;
+    }
+    if (cnt === 0) {
+      yield '' as N;
+    }
   }
 }
 
