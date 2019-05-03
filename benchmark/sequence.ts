@@ -14,20 +14,25 @@ describe('Benchmark:', function () {
     function take(n: number) {
       return Promise.resolve()
         .then(() => new Promise(resolve => arrTake(n, resolve)))
+        .then(() => new Promise(resolve => iterTake(n, resolve)))
         .then(() => new Promise(resolve => seqTake(n, resolve)))
         .then(() => new Promise(resolve => memTake(n, resolve)));
 
       function arrTake(n: number, done: () => void) {
         const arr = array(n);
-        benchmark(`Sequence take arr ${n}`, () => arr.slice(0, n), done);
+        benchmark(`Sequence take arr  ${n}`, () => arr.slice(0, n), done);
+      }
+      function iterTake(n: number, done: () => void) {
+        const seq = Sequence.from(array(n));
+        benchmark(`Sequence take iter ${n}`, () => seq.extract(), done);
       }
       function seqTake(n: number, done: () => void) {
         const seq = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1)).take(n);
-        benchmark(`Sequence take seq ${n}`, () => seq.extract(), done);
+        benchmark(`Sequence take seq  ${n}`, () => seq.extract(), done);
       }
       function memTake(n: number, done: () => void) {
         const seq = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1)).take(n).memoize();
-        benchmark(`Sequence take mem ${n}`, () => seq.extract(), done);
+        benchmark(`Sequence take mem  ${n}`, () => seq.extract(), done);
       }
     }
 
@@ -50,20 +55,28 @@ describe('Benchmark:', function () {
     function mapfilter(n: number) {
       return Promise.resolve()
         .then(() => new Promise(resolve => arrMapFilter(n, resolve)))
+        .then(() => new Promise(resolve => iterMapFilter(n, resolve)))
         .then(() => new Promise(resolve => seqMapFilter(n, resolve)));
 
       function arrMapFilter(n: number, done: () => void) {
         const arr = array(n);
         const f = <T>(n: T) => n;
         const g = () => true;
-        benchmark(`Sequence map filter arr ${n}`, () => arr.map(f).filter(g).slice(0, n), done);
+        benchmark(`Sequence map filter arr  ${n}`, () => arr.map(f).filter(g).slice(0, n), done);
+      }
+      function iterMapFilter(n: number, done: () => void) {
+        const seq = Sequence.from(array(n))
+          .map(n => n)
+          .filter(_ => true)
+          .take(n);
+        benchmark(`Sequence map filter iter ${n}`, () => seq.extract(), done);
       }
       function seqMapFilter(n: number, done: () => void) {
         const seq = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1))
           .map(n => n)
           .filter(_ => true)
           .take(n);
-        benchmark(`Sequence map filter seq ${n}`, () => seq.extract(), done);
+        benchmark(`Sequence map filter seq  ${n}`, () => seq.extract(), done);
       }
     }
 
