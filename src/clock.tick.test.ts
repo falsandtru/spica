@@ -28,29 +28,6 @@ describe('Unit: lib/clock.tick', function () {
       });
     });
 
-    it('dedup', function (done) {
-      let cnt = 0;
-      function f() {
-        ++cnt;
-      }
-      tick(f, true);
-      tick(() => {
-        assert(cnt === 1);
-        tick(f);
-        tick(f, true);
-      });
-      tick(f, true);
-      tick(() => {
-        assert(cnt === 1);
-        tick(f);
-        tick(f, true);
-        tick(() => {
-          assert(cnt === 4);
-          done();
-        });
-      });
-    });
-
     /*
     it.skip('recovery', function (done) {
       for (let i = 0; i < 100; i++) {

@@ -3,13 +3,8 @@ import { causeAsyncException } from './exception';
 type Callback = () => void;
 
 let queue: Callback[] = [];
-let register = new WeakSet<Callback>();
 
-export function tick(cb: Callback, dedup = false): void {
-  if (dedup) {
-    if (register.has(cb)) return;
-    void register.add(cb);
-  }
+export function tick(cb: Callback): void {
   void queue.push(cb);
   void schedule();
 }
@@ -40,6 +35,5 @@ function run(): void {
 function flush(): Callback[] {
   const cbs = queue;
   queue = [];
-  register = new WeakSet();
   return cbs;
 }
