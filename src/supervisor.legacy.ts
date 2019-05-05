@@ -219,13 +219,17 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     return true;
   }
   public schedule(): void {
+    if (this.scheduled) return;
     if (this.messages.length === 0) return;
     assert(this.available);
-    void tick(this.scheduler, true);
+    void tick(this.scheduler);
+    this.scheduled = true;
   }
+  private scheduled = false;
   private readonly scheduler = () => void (void 0, this.settings.scheduler)(this.deliver);
   private readonly messages: [N | NamePool<N>, P, Supervisor.Callback<R>, number][] = [];
   private readonly deliver = (): void => {
+    this.scheduled = false;
     const since = Date.now();
     for (let i = 0, len = this.messages.length; this.available && i < len; ++i) {
       if (this.settings.resource - (Date.now() - since) <= 0) return void this.schedule();
