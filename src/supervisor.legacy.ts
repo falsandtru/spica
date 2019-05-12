@@ -53,6 +53,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     void extend(this.settings, opts);
     this.name = this.settings.name;
     if (this.constructor === Supervisor) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot instantiate abstract classes.`);
+    // @ts-ignore
     void (this.constructor as typeof Supervisor).instances.add(this);
   }
   protected readonly state = new AtomicFuture();
@@ -73,6 +74,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     assert(this.messages.length === 0);
     void Object.freeze(this.messages);
     this.alive = false;
+    // @ts-ignore
     void (this.constructor as typeof Supervisor).instances.delete(this);
     void Object.freeze(this);
     assert(this.alive === false);
