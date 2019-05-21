@@ -29,7 +29,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
       url = new URL(url, typeof location === 'object' ? location.href : undefined).href.split('#', 1)[0];
       opts = { ...opts };
       opts.method = (opts.method || 'GET').toUpperCase();
-      opts.headers = new Headers(opts.headers || []);
+      opts.headers = new Headers(opts.headers);
       let state: 'load' | 'error' | 'abort' | 'timeout';
       const key = `${opts.method}:${url}`;
       const xhr = new XMLHttpRequest();
