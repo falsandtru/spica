@@ -57,7 +57,9 @@ export type Init<T extends unknown[]> =
 type init<T extends unknown[], U extends unknown[]> =
   { 0: U; 1: Prepend<T[0], Init<Tail<T>>>; }[T extends [unknown] ? 0 : 1];
 export type Last<T extends unknown[]> =
-  { 0: never; 1: T[0]; 2: Last<Tail<T>>; }[T extends [] ? 0 : T extends [unknown] ? 1 : 2]
+  T extends [] ? never :
+  Tail<T> extends T ? T[0] :
+  { 0: T[0]; 1: Last<Tail<T>>; }[T extends [unknown] ? 0 : 1]
 export type Inits<as extends unknown[]> =
   number extends as['length'] ? never :
   as extends [] ? never :
@@ -65,7 +67,7 @@ export type Inits<as extends unknown[]> =
 type inits<as extends unknown[]> = {
   0: never;
   1: [Split<as>[0]] | Prepend<Split<as>[0], inits<Split<as>[1]>>;
-}[number extends as['length'] ? 0 : as extends [unknown, ...unknown[]] ? 1 : as extends [] ? 0 : 0];
+}[as extends [unknown, ...unknown[]] ? 1 : 0];
 export type Tails<as extends unknown[]> =
   number extends as['length'] ? never :
   as extends [] ? never :
@@ -73,7 +75,7 @@ export type Tails<as extends unknown[]> =
 type tails<as extends unknown[]> = {
   0: never;
   1: as | tails<Split<as>[1]>;
-}[number extends as['length'] ? 0 : as extends [unknown, ...unknown[]] ? 1 : as extends [] ? 0 : 0];
+}[as extends [unknown, ...unknown[]] ? 1 : 0];
 export type Join<T extends [] | [unknown, ...unknown[]], U extends unknown[]> =
   { 0: U; 1: Join<Init<T>, Prepend<Last<T>, U>>; }[T extends [] ? 0 : 1];
 export type Reverse<T extends unknown[]> =
