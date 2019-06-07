@@ -1,65 +1,53 @@
-import { concat } from './concat';
+import { Prepend, Split, AtLeast, Reverse } from './type';
 
-export type List<a, c extends Nil | NonEmptyList<a, any>> = Nil | NonEmptyList<a, c>;
-export type NonEmptyList<a, c extends Nil | NonEmptyList<a, any>> = Cons<a, c>;
+export type List<as extends unknown[]> = as extends [infer _, ...unknown[]] ? Cons<as> : Nil<as[0]>;
 
-export class Nil {
+export class Nil<z = unknown> {
   private readonly NIL: void;
   constructor() {
     void this.NIL;
   }
-  public push<a>(a: a): NonEmptyList<a, Nil> {
-    return new Cons<a, Nil>(a, this);
+  public push<a extends z>(a: a): Cons<[a]> {
+    return new Cons(a, this);
   }
-  public extend<a>(f: () => a): NonEmptyList<a, Nil> {
+  public extend<a extends z>(f: () => a): Cons<[a]> {
     return this.push(f());
   }
-  public array(): [] {
+  public tuple(): [] {
     return [];
   }
 }
 
-class Cons<a, c extends Nil | NonEmptyList<a, any>> {
-  private readonly CONS!: a;
+class Cons<as extends unknown[]> {
+  private readonly CONS!: as;
   constructor(
-    public readonly head: a,
-    public readonly tail: c,
+    public readonly head: Split<as>[0],
+    public readonly tail: as['length'] extends 1 ? Nil<as[0]> : Cons<Split<as>[1]>,
   ) {
     void this.CONS;
   }
-  public push(a: a): NonEmptyList<a, NonEmptyList<a, c>> {
-    return new Cons<a, this>(a, this);
+  public push(a: as[0]): Cons<Prepend<as[0], as>> {
+    return new Cons(a, this as any);
   }
-  public walk(f: (a: a) => void): c {
+  public walk(f: (a: as[0]) => void): this['tail'] {
     void f(this.head);
     return this.tail;
   }
-  public modify(f: (a: a) => a): NonEmptyList<a, c> {
-    return (<any>this.tail.push)(f(this.head));
+  public modify(f: (a: as[0]) => as[0]): Cons<as> {
+    return this.tail.push(f(this.head)) as any;
   }
-  public extend(f: (a: a) => a): NonEmptyList<a, NonEmptyList<a, c>> {
+  public extend(f: (a: as[0]) => as[0]): Cons<Prepend<as[0], as>> {
     return this.push(f(this.head));
   }
-  public compact<c extends Nil | NonEmptyList<a, any>>(this: NonEmptyList<a, NonEmptyList<a, c>>, f: (l: a, r: a) => a): NonEmptyList<a, c> {
-    return this.tail.modify(r => f(this.head, r));
+  public compact(this: Cons<as extends AtLeast<2, unknown> ? as : never>, f: (l: as[0], r: as[1]) => as[0]): Cons<Split<as>[1]> {
+    return (this.tail as Cons<Split<as>[1]>).modify(r => f(this.head, r)) as any;
   }
-  public reverse(): NonEmptyList<a, c> {
-    return <this>this.array()
-      .reduce<Nil | NonEmptyList<a, any>>((l: Nil, e: a) => l.push(e), new Nil());
+  public reverse(): Reverse<as> {
+    return this.tuple().reverse() as any;
   }
-  public tuple(this: NonEmptyList<a, Nil>): [a]
-  public tuple(this: NonEmptyList<a, NonEmptyList<a, Nil>>): [a, a]
-  public tuple(this: NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, Nil>>>): [a, a, a]
-  public tuple(this: NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, Nil>>>>): [a, a, a, a]
-  public tuple(this: NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, Nil>>>>>): [a, a, a, a, a]
-  public tuple(this: NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, Nil>>>>>>): [a, a, a, a, a, a]
-  public tuple(this: NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, Nil>>>>>>>): [a, a, a, a, a, a, a]
-  public tuple(this: NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, Nil>>>>>>>>): [a, a, a, a, a, a, a, a]
-  public tuple(this: NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, NonEmptyList<a, Nil>>>>>>>>>): [a, a, a, a, a, a, a, a, a]
-  public tuple(): a[] {
-    return this.array();
-  }
-  public array(): a[] {
-    return concat([this.head], this.tail.array());
+  public tuple(): as {
+    const t = this.tail.tuple();
+    void t.unshift(this.head);
+    return t as as;
   }
 }
