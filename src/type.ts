@@ -29,6 +29,64 @@ interface NondeterminateTypeMap {
   boolean: boolean;
 }
 
+export type Prepend<Elm, T extends unknown[]> =
+  T extends any ?
+  ((arg: Elm, ...rest: T) => void) extends ((...args: infer T2) => void) ? T2 :
+  never :
+  never;
+export type Append<Elm, T extends [] | [unknown, ...unknown[]]> =
+  T extends any ?
+  Join<T, [Elm]> :
+  never;
+export type Split<T extends unknown[]> =
+  T extends any ?
+  T extends [] ? never :
+  ((...rest: T) => void) extends ((arg: infer T1, ...args: infer T2) => void) ? [T1, T2] :
+  never :
+  never;
+export type Head<T extends unknown[]> =
+  T extends [] ? never :
+  Split<T>[0];
+export type Tail<T extends unknown[]> =
+  T extends [] ? never :
+  Split<T>[1];
+export type Init<T extends unknown[]> =
+  number extends T['length'] ? T :
+  T extends [] ? never :
+  init<T, []>;
+type init<T extends unknown[], U extends unknown[]> =
+  { 0: U; 1: Prepend<T[0], Init<Tail<T>>>; }[T extends [infer _] ? 0 : 1];
+export type Last<T extends unknown[]> =
+  { 0: never; 1: T[0]; 2: Last<Tail<T>>; }[T extends [] ? 0 : T extends [infer _] ? 1 : 2]
+export type Inits<as extends unknown[]> =
+  number extends as['length'] ? never :
+  as extends [] ? never :
+  [] | inits<as>;
+type inits<as extends unknown[]> = {
+  0: never;
+  1: [Split<as>[0]] | Prepend<Split<as>[0], inits<Split<as>[1]>>;
+}[number extends as['length'] ? 0 : as extends [infer _, ...unknown[]] ? 1 : as extends [] ? 0 : 0];
+export type Tails<as extends unknown[]> =
+  number extends as['length'] ? never :
+  as extends [] ? never :
+  tails<as> | [];
+type tails<as extends unknown[]> = {
+  0: never;
+  1: as | tails<Split<as>[1]>;
+}[number extends as['length'] ? 0 : as extends [infer _, ...unknown[]] ? 1 : as extends [] ? 0 : 0];
+export type Join<T extends [] | [unknown, ...unknown[]], U extends unknown[]> =
+  { 0: U; 1: Join<Init<T>, Prepend<Last<T>, U>>; }[T extends [] ? 0 : 1];
+export type Reverse<T extends unknown[]> =
+  number extends T['length'] ? T :
+  Rev<T, []>;
+type Rev<T extends unknown[], U extends unknown[]> =
+  { 0: U; 1: Rev<Tail<T>, Prepend<T[0], U>>; }[T extends [] ? 0 : 1];
+export type AtLeast<N extends number, T> = AtLeastRec<N, T, T[], []>;
+type AtLeastRec<L, Elm, T extends unknown[], C extends unknown[]> = {
+  0: T;
+  1: AtLeastRec<L, Elm, Prepend<Elm, T>, Prepend<unknown, C>>;
+}[C['length'] extends L ? 0 : 1];
+
 export type Rewrite<T, R extends [any, any]> =
   [T] extends [never]
     ? true extends (R extends never ? never : R[0] extends never ? true : never)

@@ -1,5 +1,6 @@
 import {
   Not, And, Or, Eq, TEq, DEq, If, Case,
+  Prepend, Append, Split, Head, Tail, Init, Last, Inits, Tails, Join, Reverse, AtLeast,
   Rewrite, StrictRewrite, ExactExtract, ExactExclude,
   valueof, indexof,
   Type, StrictType,
@@ -122,6 +123,138 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Case<0, [1]>, 1>);
       assert((): true => true as TEq<Case<0, { 0: 1 }>, 1>);
       assert((): true => true as TEq<Case<1, { 0: 1; [otherwise: string]: number; }>, number>);
+    });
+
+  });
+
+  describe('Prepend', () => {
+    it('', () => {
+      assert((): true => true as TEq<Prepend<0, []>, [0]>);
+      assert((): true => true as TEq<Prepend<0, [1]>, [0, 1]>);
+      assert((): true => true as TEq<Prepend<0, [1, 2]>, [0, 1, 2]>);
+      assert((): true => true as TEq<Prepend<0, number[]>, [0, ...number[]]>);
+      assert((): true => true as TEq<Prepend<0, [1, ...number[]]>, [0, 1, ...number[]]>);
+    });
+
+  });
+
+  describe('Append', () => {
+    it('', () => {
+      assert((): true => true as TEq<Append<9, []>, [9]>);
+      assert((): true => true as TEq<Append<9, [1]>, [1, 9]>);
+      assert((): true => true as TEq<Append<9, [1, 2]>, [1, 2, 9]>);
+    });
+
+  });
+
+  describe('Split', () => {
+    it('', () => {
+      assert((): true => true as TEq<Split<[]>, never>);
+      assert((): true => true as TEq<Split<[0]>, [0, []]>);
+      assert((): true => true as TEq<Split<[0, 1]>, [0, [1]]>);
+      assert((): true => true as TEq<Split<[0, 1, 2]>, [0, [1, 2]]>);
+      assert((): true => true as TEq<Split<number[]>, [number, number[]]>);
+      assert((): true => true as TEq<Split<[0, 1, ...number[]]>, [0, [1, ...number[]]]>);
+    });
+
+  });
+
+  describe('Head', () => {
+    it('', () => {
+      assert((): true => true as TEq<Head<[]>, never>);
+      assert((): true => true as TEq<Head<[0]>, 0>);
+      assert((): true => true as TEq<Head<[0, 1]>, 0>);
+      assert((): true => true as TEq<Head<number[]>, number>);
+      assert((): true => true as TEq<Head<[0, 1, ...number[]]>, 0>);
+    });
+
+  });
+
+  describe('Tail', () => {
+    it('', () => {
+      assert((): true => true as TEq<Tail<[]>, never>);
+      assert((): true => true as TEq<Tail<[0]>, []>);
+      assert((): true => true as TEq<Tail<[0, 1]>, [1]>);
+      assert((): true => true as TEq<Tail<number[]>, number[]>);
+      assert((): true => true as TEq<Tail<[0, 1, ...number[]]>, [1, ...number[]]>);
+    });
+
+  });
+
+  describe('Init', () => {
+    it('', () => {
+      assert((): true => true as TEq<Init<[]>, never>);
+      assert((): true => true as TEq<Init<[0]>, []>);
+      assert((): true => true as TEq<Init<[0, 1]>, [0]>);
+      assert((): true => true as TEq<Init<number[]>, number[]>);
+      assert((): true => true as TEq<Init<[0, 1, ...number[]]>, [0, 1, ...number[]]>);
+    });
+
+  });
+
+  describe('Last', () => {
+    it('', () => {
+      assert((): true => true as TEq<Last<[]>, never>);
+      assert((): true => true as TEq<Last<[0]>, 0>);
+      assert((): true => true as TEq<Last<[0, 1]>, 1>);
+      assert((): true => true as TEq<Last<number[]>, number>);
+      assert((): true => true as TEq<Last<[0, 1, ...number[]]>, number>);
+    });
+
+  });
+
+  describe('Inits', () => {
+    it('', () => {
+      assert((): true => true as TEq<Inits<[]>, never>);
+      assert((): true => true as TEq<Inits<[0]>, [0] | []>);
+      assert((): true => true as TEq<Inits<[0, 1]>, [0, 1] | [0] | []>);
+      assert((): true => true as TEq<Inits<number[]>, never>);
+      assert((): true => true as TEq<Inits<[0, 1, ...number[]]>, never>);
+    });
+
+  });
+
+  describe('Tails', () => {
+    it('', () => {
+      assert((): true => true as TEq<Tails<[]>, never>);
+      assert((): true => true as TEq<Tails<[0]>, [0] | []>);
+      assert((): true => true as TEq<Tails<[0, 1]>, [0, 1] | [1] | []>);
+      assert((): true => true as TEq<Tails<number[]>, never>);
+      assert((): true => true as TEq<Tails<[0, 1, ...number[]]>, never>);
+    });
+
+  });
+
+  describe('Join', () => {
+    it('', () => {
+      assert((): true => true as TEq<Join<[], []>, []>);
+      assert((): true => true as TEq<Join<[], [0]>, [0]>);
+      assert((): true => true as TEq<Join<[0], []>, [0]>);
+      assert((): true => true as TEq<Join<[0], [1]>, [0, 1]>);
+      assert((): true => true as TEq<Join<[0, 1], [2, 3]>, [0, 1, 2, 3]>);
+      assert((): true => true as TEq<Join<[0, 1], number[]>, [0, 1, ...number[]]>);
+      assert((): true => true as TEq<Join<[0, 1], [2, ...number[]]>, [0, 1, 2, ...number[]]>);
+    });
+
+  });
+
+  describe('Reverse', () => {
+    it('', () => {
+      assert((): true => true as TEq<Reverse<[]>, []>);
+      assert((): true => true as TEq<Reverse<[0]>, [0]>);
+      assert((): true => true as TEq<Reverse<[0, 1]>, [1, 0]>);
+      assert((): true => true as TEq<Reverse<[0, 1, 2]>, [2, 1, 0]>);
+      assert((): true => true as TEq<Reverse<0[]>, 0[]>);
+    });
+
+  });
+
+  describe('AtLeast', () => {
+    it('', () => {
+      assert((): AtLeast<0, number> => []);
+      assert((): AtLeast<0, number> => [0]);
+      assert((): AtLeast<1, number> => [0]);
+      assert((): AtLeast<1, number> => [0, 0]);
     });
 
   });
