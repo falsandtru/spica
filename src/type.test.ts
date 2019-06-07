@@ -1,5 +1,5 @@
 import {
-  Not, And, Or, Eq, TEq, DEq, If, Case,
+  Not, And, Or, Eq, TEq, DEq, If, Case, IsAny,
   Prepend, Append, Split, Head, Tail, Init, Last, Inits, Tails, Join, Reverse, AtLeast,
   Rewrite, StrictRewrite, ExactExtract, ExactExclude,
   valueof, indexof,
@@ -89,6 +89,11 @@ describe('Unit: lib/type', () => {
       assert((): false => true as TEq<boolean, never>);
       assert((): false => true as TEq<never, boolean>);
       assert((): true => true as TEq<never, never>);
+      assert((): true => true as TEq<any, any>);
+      assert((): false => true as TEq<any, unknown>);
+      assert((): false => true as TEq<unknown, any>);
+      assert((): false => true as TEq<[], [] | {}>);
+      assert((): false => true as TEq<[] | {}, []>);
       assert((): true => true as TEq<{}, [] | {}>);
       assert((): true => true as TEq<[] | {}, {}>);
     });
@@ -123,6 +128,15 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Case<0, [1]>, 1>);
       assert((): true => true as TEq<Case<0, { 0: 1 }>, 1>);
       assert((): true => true as TEq<Case<1, { 0: 1; [otherwise: string]: number; }>, number>);
+    });
+
+  });
+
+  describe('IsAny', () => {
+    it('', () => {
+      assert((): true => true as TEq<IsAny<any>, true>);
+      assert((): true => true as TEq<IsAny<unknown>, false>);
+      assert((): true => true as TEq<IsAny<{}>, false>);
     });
 
   });

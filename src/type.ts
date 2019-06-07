@@ -1,4 +1,6 @@
 type Falsy = undefined | false | 0 | '' | null | void;
+declare const Unique: unique symbol
+type Unique = typeof Unique;
 
 export type Not<T extends boolean> = T extends true ? false : true;
 export type And<T, U> = T extends Falsy ? T : U;
@@ -14,7 +16,9 @@ export type Eq<T, U> =
     ? never : // Never reach here.
   // Compare distributed T and U.
   T extends U ? U extends T ? true : false : false;
-export type TEq<T, U> = [T] extends [U] ? [U] extends [T] ? true : false : false;
+export type TEq<T, U> =
+  Or<IsAny<T>, IsAny<U>> extends true ? And<IsAny<T>, IsAny<U>> :
+  [T] extends [U] ? [U] extends [T] ? true : false : false;
 export type If<S, T, U> = S extends Falsy ? U : T;
 export type Case<T extends keyof U, U extends {}> = U[T];
 
@@ -28,6 +32,8 @@ type Determine<T extends valueof<NondeterminateTypeMap>> =
 interface NondeterminateTypeMap {
   boolean: boolean;
 }
+
+export type IsAny<T> = [T] extends [Unique] ? true : false;
 
 export type Prepend<Elm, T extends unknown[]> =
   T extends unknown ?
