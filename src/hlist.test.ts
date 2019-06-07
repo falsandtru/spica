@@ -1,19 +1,19 @@
-import { NonEmptyHList, HNil } from './hlist';
+import { HList, HNil } from './hlist';
 
 describe('Unit: lib/hlist', () => {
   describe('HList', () => {
+    it('HList 0', () => {
+      const list: HList<[]> = new HNil();
+      assert.deepStrictEqual(list.tuple(), []);
+    });
+
     it('HList 1', () => {
-      const list: NonEmptyHList<number, HNil> = new HNil().push(0);
+      const list: HList<[number]> = new HNil().push(0);
       assert(list.head === 0);
     });
 
     it('HList 2', () => {
-      const list: NonEmptyHList<string, NonEmptyHList<number, HNil>> = new HNil().push(0).push('');
-      assert(list.head === '');
-    });
-
-    it('HList 1+', () => {
-      const list: NonEmptyHList<string, HNil | NonEmptyHList<any, any>> = new HNil().push(0).push('');
+      const list: HList<[string, number]> = new HNil().push(0).push('');
       assert(list.head === '');
     });
 
@@ -43,17 +43,17 @@ describe('Unit: lib/hlist', () => {
 
     it('compact', () => {
       {
-        const l: NonEmptyHList<number[], HNil> = new HNil().push(1).push([2]).compact((ns, n) => ns.concat(n));
+        const l: HList<[number[]]> = new HNil().push(1).push([2]).compact((ns, n) => ns.concat(n));
         assert.deepStrictEqual(l.tuple(), [[2, 1]]);
       }
       {
-        const l: NonEmptyHList<number[], NonEmptyHList<string, HNil>> = new HNil().push('').push(2).push([5]).compact((ns, n) => ns.concat(n));
+        const l: HList<[number[], string]> = new HNil().push('').push(2).push([5]).compact((ns, n) => ns.concat(n));
         assert.deepStrictEqual(l.tuple(), [[5, 2], '']);
       }
     });
 
     it('reverse', () => {
-        const t: [boolean, number, string] = new HNil().push(false).push(0).push('').reverse().tuple();
+        const t: [boolean, number, string] = new HNil().push(false).push(0).push('').reverse();
         assert.deepStrictEqual(t, [false, 0, '']);
     });
 

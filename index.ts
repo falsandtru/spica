@@ -9,7 +9,7 @@ export { uncurry } from './src/uncurry';
 export { flip } from './src/flip';
 export { tuple } from './src/tuple';
 export { List, Nil } from './src/list';
-export { HList, NonEmptyHList, HNil } from './src/hlist';
+export { HList, HNil } from './src/hlist';
 export { AtomicPromise } from './src/promise';
 export { Future, AtomicFuture } from './src/future';
 export { Coroutine } from './src/coroutine';
