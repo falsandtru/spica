@@ -66,7 +66,7 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
       void listener(reason!);
     }
   });
-  public readonly close = (reason?: any) => {
+  public readonly close = (reason?: unknown) => {
     if (!this.alive) return;
     this.alive = false;
     void this.state.bind(AtomicPromise.reject(reason));

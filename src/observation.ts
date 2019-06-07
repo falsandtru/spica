@@ -4,7 +4,7 @@ import { concat } from './concat';
 import { findIndex } from './equal';
 import { causeAsyncException } from './exception';
 
-export interface Observer<N extends any[], D, R> {
+export interface Observer<N extends unknown[], D, R> {
   monitor(namespace: [] | N, listener: Monitor<N, D>, options?: ObserverOptions): () => void;
   on(namespace: N, listener: Subscriber<N, D, R>, options?: ObserverOptions): () => void;
   off(namespace: [] | N, listener?: Subscriber<N, D, R>): void;
@@ -13,22 +13,22 @@ export interface Observer<N extends any[], D, R> {
 export interface ObserverOptions {
   once?: boolean;
 }
-export interface Publisher<N extends any[], D, R> {
+export interface Publisher<N extends unknown[], D, R> {
   emit(this: Publisher<N, void, R>, namespace: N, data?: D, tracker?: (data: D, results: R[]) => void): void;
   emit(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void;
   reflect(this: Publisher<N, void, R>, namespace: N, data?: D): R[];
   reflect(namespace: N, data: D): R[];
 }
-export type Monitor<N extends any[], D> = (data: D, namespace: N) => any;
-export type Subscriber<N extends any[], D, R> = (data: D, namespace: N) => R;
+export type Monitor<N extends unknown[], D> = (data: D, namespace: N) => unknown;
+export type Subscriber<N extends unknown[], D, R> = (data: D, namespace: N) => R;
 
-interface RegisterNode<N extends any[], D, R> {
+interface RegisterNode<N extends unknown[], D, R> {
   parent: RegisterNode<N, D, R> | undefined;
   children: Map<N[number], RegisterNode<N, D, R>>;
   childrenNames: N[number][];
   items: RegisterItem<N, D, R>[];
 }
-export type RegisterItem<N extends any[], D, R> = {
+export type RegisterItem<N extends unknown[], D, R> = {
   type: RegisterItemType.Monitor;
   namespace: [] | N;
   listener: Monitor<N, D>;
@@ -51,7 +51,7 @@ export interface ObservationOptions {
   readonly limit?: number;
 }
 
-export class Observation<N extends any[], D, R>
+export class Observation<N extends unknown[], D, R>
   implements Observer<N, D, R>, Publisher<N, D, R> {
   constructor(opts: ObservationOptions = {}) {
     void extend(this.settings, opts);
@@ -129,24 +129,24 @@ export class Observation<N extends any[], D, R>
         throw new Error(`Spica: Observation: Unreachable.`);
     }
   }
-  public emit(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void
   public emit(this: Observation<N, void, R>, type: N, data?: D, tracker?: (data: D, results: R[]) => void): void
+  public emit(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void
   public emit(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void {
     void this.drain_(namespace, data, tracker);
   }
-  public reflect(namespace: N, data: D): R[]
   public reflect(this: Observation<N, void, R>, type: N, data?: D): R[]
+  public reflect(namespace: N, data: D): R[]
   public reflect(namespace: N, data: D): R[] {
     let results: R[] = [];
     void this.emit(namespace, data, (_, r) => results = r);
     assert(Array.isArray(results));
     return results;
   }
-  private relaySources = new WeakSet<Observer<N, D, any>>();
-  public relay(source: Observer<N, D, any>): () => void {
+  private relaySources = new WeakSet<Observer<N, D, unknown>>();
+  public relay(source: Observer<N, D, unknown>): () => void {
     if (this.relaySources.has(source)) return () => undefined;
     void this.relaySources.add(source);
-    const unbind = source.monitor([] as any[] as N, (data, namespace) =>
+    const unbind = source.monitor([] as unknown[] as N, (data, namespace) =>
       void this.emit(namespace, data));
     return () => (
       void this.relaySources.delete(source),
@@ -160,7 +160,7 @@ export class Observation<N extends any[], D, R>
         void this.off(namespace, listener);
       }
       try {
-        const result: R = listener(data, namespace);
+        const result: R = listener(data, namespace) as R;
         if (tracker) {
           results[results.length] = result;
         }
@@ -242,7 +242,7 @@ export class Observation<N extends any[], D, R>
   }
 }
 
-function isRegistered<N extends any[], D, R>(items: RegisterItem<N, D, R>[], type: RegisterItemType, namespace: N, listener: Monitor<N, D> | Subscriber<N, D, R>): boolean {
+function isRegistered<N extends unknown[], D, R>(items: RegisterItem<N, D, R>[], type: RegisterItemType, namespace: N, listener: Monitor<N, D> | Subscriber<N, D, R>): boolean {
   return items.some(item =>
     item.type === type &&
     item.namespace.length === namespace.length &&

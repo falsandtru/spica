@@ -148,7 +148,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
       let reply: T | R | undefined;
       while (true) {
         const { value, done } = await iter.next(reply!);
-        if (done) return value as any as U;
+        if (done) return value as unknown as U;
         reply = (await this[port].send(value)).value;
       }
     },
@@ -157,7 +157,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
     if (!this[status].alive) return;
     this[status].alive = false;
     // Don't block.
-    void this[status].state.bind({ value: undefined as any as R, done: true });
+    void this[status].state.bind({ value: undefined as unknown as R, done: true });
     void this[status].result.bind(AtomicPromise.reject(reason));
     while (this[status].msgs.length > 0) {
       // Don't block.

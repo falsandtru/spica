@@ -10,7 +10,7 @@ export class DataMap<K, V> implements Collection<K, V> {
   }
   private readonly store = new Map<string, [K, V]>();
   public get(key: K): V | undefined {
-    return (this.store.get(stringify(key)) || [] as any as [never, V])[1];
+    return (this.store.get(stringify(key)) || [] as unknown as [never, V])[1];
   }
   public set(key: K, val: V): this {
     void this.store.set(stringify(key), [key, val]);
@@ -55,7 +55,7 @@ function stringify(target: any): string {
   }
 }
 
-function stringifyArray(arr: any[]): string {
+function stringifyArray(arr: unknown[]): string {
   assert(Array.isArray(arr));
   let acc = '';
   for (const k of arr) {

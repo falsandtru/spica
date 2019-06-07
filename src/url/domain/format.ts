@@ -20,7 +20,7 @@ type URL<T> = Identifier.URL<T>;
 
 export type StandardURL = URL<Encoded & Normalized>;
 
-export function standardize(url: URL<any>, base?: string): void
+export function standardize(url: URL<unknown>, base?: string): void
 export function standardize(url: string, base?: string): StandardURL
 export function standardize(url: string, base: string = location.href): StandardURL {
   return encode(normalize(url, base));
@@ -58,7 +58,7 @@ export { encode as _encode }
 
 type NormalizedURL = URL<Normalized>;
 
-function normalize(url: URL<any>, base: string): void
+function normalize(url: URL<unknown>, base: string): void
 function normalize(url: string, base: string): NormalizedURL
 function normalize(url: string, base: string): NormalizedURL {
   return new global.URL(formatURLForEdge(url, base), base).href as NormalizedURL;

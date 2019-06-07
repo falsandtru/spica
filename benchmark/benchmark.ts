@@ -5,7 +5,7 @@ interface Event {
   target: void;
 }
 
-export function benchmark(name: string, proc: () => any, done: (err?: any) => void) {
+export function benchmark(name: string, proc: () => unknown, done: (err?: unknown) => void) {
   new Benchmark.Suite()
     .add(`${name}`, function () {
       proc();

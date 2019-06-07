@@ -7,7 +7,7 @@ describe('Unit: lib/observation', function () {
       constructor(public type: string, public namespace: string[] = []) {
       }
     }
-    function throwError(err: any) {
+    function throwError(err: unknown) {
       throw err;
     }
 
@@ -71,7 +71,7 @@ describe('Unit: lib/observation', function () {
 
       done();
 
-      function convert(register: RegisterItem<any, any, any>) {
+      function convert(register: RegisterItem<unknown[], unknown, unknown>) {
         return [
           register.namespace,
           register.listener,
@@ -296,8 +296,8 @@ describe('Unit: lib/observation', function () {
       const sym = Symbol();
       const ob = new Observation<[number, symbol], number, void>();
       ob.on([NaN, sym], data => assert(cnt === 0 && data === 1 && ++cnt));
-      ob.emit([NaN, <any>Symbol().toString()], 0);
-      ob.emit([<any>'NaN', sym], 0);
+      ob.emit([NaN, Symbol().toString() as any], 0);
+      ob.emit(['NaN' as any, sym], 0);
       ob.emit([NaN, Symbol()], 0);
       ob.emit([NaN, sym], 1);
       ob.off([NaN, sym]);

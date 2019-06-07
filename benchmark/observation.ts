@@ -4,7 +4,8 @@ import { Observation } from '../';
 describe('Benchmark:', function () {
   this.timeout(10 * 1e3);
 
-  function noop(): any {
+  function noop(): unknown {
+    return;
   }
 
   describe('Observation', function () {

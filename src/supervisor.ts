@@ -3,9 +3,9 @@ import { Coroutine, CoroutineInterface } from './coroutine';
 import { isObject } from './type';
 
 abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = unknown> extends Supervisor<N, P, R, S> {
-  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S> | CoroutineInterface<R, R, P>, state: S, reason?: any): (reason?: any) => boolean;
-  public register(name: N, process: CoroutineInterface<R, R, P>, state?: never, reason?: any): (reason?: any) => boolean;
-  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S> | CoroutineInterface<R, R, P>, state: never, reason?: any): (reason?: any) => boolean {
+  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S> | CoroutineInterface<R, R, P>, state: S, reason?: unknown): (reason?: unknown) => boolean;
+  public register(name: N, process: CoroutineInterface<R, R, P>, state?: never, reason?: unknown): (reason?: unknown) => boolean;
+  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S> | CoroutineInterface<R, R, P>, state: never, reason?: unknown): (reason?: unknown) => boolean {
     if (arguments.length > 3) {
       void this.kill(name, reason);
       return this.register(name, process, state);
@@ -31,7 +31,7 @@ abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = un
     }
     return super.register(name, process, state);
   }
-  public [Coroutine.terminator] = (reason?: any): void =>
+  public [Coroutine.terminator] = (reason?: unknown): void =>
     void this.terminate(reason);
 }
 namespace Supervisor2018 {

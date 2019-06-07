@@ -1,4 +1,4 @@
-export function compose<T extends new (...args: any[]) => object>(target: T, ...sources: T[]): T {
+export function compose<T extends new (...args: unknown[]) => object>(target: T, ...sources: T[]): T {
   return sources
     .reduce((b, d) => {
       void Object.getOwnPropertyNames(d.prototype)

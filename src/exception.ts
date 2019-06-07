@@ -1,4 +1,4 @@
-export function causeAsyncException(reason: any): void {
+export function causeAsyncException(reason: unknown): void {
   assert(!void console.debug(stringify(reason)));
   void new Promise((_, reject) =>
     void reject(reason));

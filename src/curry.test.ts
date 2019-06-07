@@ -27,7 +27,7 @@ describe('Unit: lib/curry', () => {
       assert.deepStrictEqual([1].map(curry(() => 0)), [0]);
       assert.deepStrictEqual([1].map(curry((a: number) => a)), [1]);
       assert.deepStrictEqual([1].map(curry((a: number, b: number) => [a, b])), [[1, 0]]);
-      assert.deepStrictEqual([1].map(curry((...as: any[]) => as)), [[1, 0, [1]]]);
+      assert.deepStrictEqual([1].map(curry((...as: unknown[]) => as)), [[1, 0, [1]]]);
     });
 
     it('recursive', () => {
