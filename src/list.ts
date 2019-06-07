@@ -1,6 +1,8 @@
 import { Prepend, Split, AtLeast, Reverse } from './type';
 
-export type List<as extends unknown[]> = as extends [infer _, ...unknown[]] ? Cons<as> : Nil<as[0]>;
+export type List<as extends unknown[]> =
+  as extends [unknown, ...unknown[]] ? Cons<as> :
+  Nil<as[0]>;
 
 export class Nil<z = unknown> {
   private readonly NIL: void;

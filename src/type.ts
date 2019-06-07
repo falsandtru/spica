@@ -30,16 +30,16 @@ interface NondeterminateTypeMap {
 }
 
 export type Prepend<Elm, T extends unknown[]> =
-  T extends any ?
+  T extends unknown ?
   ((arg: Elm, ...rest: T) => void) extends ((...args: infer T2) => void) ? T2 :
   never :
   never;
 export type Append<Elm, T extends [] | [unknown, ...unknown[]]> =
-  T extends any ?
+  T extends unknown ?
   Join<T, [Elm]> :
   never;
 export type Split<T extends unknown[]> =
-  T extends any ?
+  T extends unknown ?
   T extends [] ? never :
   ((...rest: T) => void) extends ((arg: infer T1, ...args: infer T2) => void) ? [T1, T2] :
   never :
@@ -55,9 +55,9 @@ export type Init<T extends unknown[]> =
   T extends [] ? never :
   init<T, []>;
 type init<T extends unknown[], U extends unknown[]> =
-  { 0: U; 1: Prepend<T[0], Init<Tail<T>>>; }[T extends [infer _] ? 0 : 1];
+  { 0: U; 1: Prepend<T[0], Init<Tail<T>>>; }[T extends [unknown] ? 0 : 1];
 export type Last<T extends unknown[]> =
-  { 0: never; 1: T[0]; 2: Last<Tail<T>>; }[T extends [] ? 0 : T extends [infer _] ? 1 : 2]
+  { 0: never; 1: T[0]; 2: Last<Tail<T>>; }[T extends [] ? 0 : T extends [unknown] ? 1 : 2]
 export type Inits<as extends unknown[]> =
   number extends as['length'] ? never :
   as extends [] ? never :
@@ -65,7 +65,7 @@ export type Inits<as extends unknown[]> =
 type inits<as extends unknown[]> = {
   0: never;
   1: [Split<as>[0]] | Prepend<Split<as>[0], inits<Split<as>[1]>>;
-}[number extends as['length'] ? 0 : as extends [infer _, ...unknown[]] ? 1 : as extends [] ? 0 : 0];
+}[number extends as['length'] ? 0 : as extends [unknown, ...unknown[]] ? 1 : as extends [] ? 0 : 0];
 export type Tails<as extends unknown[]> =
   number extends as['length'] ? never :
   as extends [] ? never :
@@ -73,7 +73,7 @@ export type Tails<as extends unknown[]> =
 type tails<as extends unknown[]> = {
   0: never;
   1: as | tails<Split<as>[1]>;
-}[number extends as['length'] ? 0 : as extends [infer _, ...unknown[]] ? 1 : as extends [] ? 0 : 0];
+}[number extends as['length'] ? 0 : as extends [unknown, ...unknown[]] ? 1 : as extends [] ? 0 : 0];
 export type Join<T extends [] | [unknown, ...unknown[]], U extends unknown[]> =
   { 0: U; 1: Join<Init<T>, Prepend<Last<T>, U>>; }[T extends [] ? 0 : 1];
 export type Reverse<T extends unknown[]> =
@@ -87,7 +87,7 @@ type AtLeastRec<L, Elm, T extends unknown[], C extends unknown[]> = {
   1: AtLeastRec<L, Elm, Prepend<Elm, T>, Prepend<unknown, C>>;
 }[C['length'] extends L ? 0 : 1];
 
-export type Rewrite<T, R extends [any, any]> =
+export type Rewrite<T, R extends [unknown, unknown]> =
   [T] extends [never]
     ? true extends (R extends never ? never : R[0] extends never ? true : never)
       ? R extends (R extends never ? never : R[0] extends never ? R : never) ? R[1] : never
@@ -96,7 +96,7 @@ export type Rewrite<T, R extends [any, any]> =
   true extends (R extends never ? never : T extends R[0] ? true : never)
     ? R extends (R extends never ? never : T extends R[0] ? R : never) ? R[1] : never
     : T;
-export type StrictRewrite<T, R extends [any, any]> =
+export type StrictRewrite<T, R extends [unknown, unknown]> =
   [T] extends [never] ? Rewrite<T, R> :
   T extends never ? never :
   true extends (R extends never ? never : If<Eq<T, R[0]>, true, never>)
@@ -107,7 +107,7 @@ export type ExactExtract<T, U> = T extends U ? U extends T ? T : never : never;
 export type ExactExclude<T, U> = T extends ExactExtract<T, U> ? never : T;
 
 export type indexof<T, V extends valueof<T>> = { [P in keyof T]: If<TEq<T[P], V>, P, never>; }[keyof T];
-export type valueof<T, K extends string | number | symbol = T extends { [n: number]: any; length: number; } ? number : string | number> = T[Extract<keyof T, K>];
+export type valueof<T, K extends string | number | symbol = T extends { [n: number]: unknown; length: number; } ? number : string | number> = T[Extract<keyof T, K>];
 
 export type Type<T> =
   T extends void ? null extends void ? 'object' | 'undefined' : 'undefined' :
@@ -133,7 +133,7 @@ export type ExtractProp<T, V> =
 export type DeepExtractProp<T, V, E extends object | undefined | null = never> =
   T extends E ? never :
   T extends V ? T :
-  T extends readonly any[] | Function ? never :
+  T extends readonly unknown[] | Function ? never :
   T extends object ? ExcludeProp<{ [Q in { [P in keyof T]: If<TEq<V, never>, T[P] extends never ? P : never, T[P] extends V | object ? T[P] extends E ? never : P : never>; }[keyof T]]: ExactExclude<DeepExtractProp<T[Q], V, E>, {}>; }, never> :
   never;
 export type ExcludeProp<T, V> =
@@ -141,28 +141,28 @@ export type ExcludeProp<T, V> =
 export type DeepExcludeProp<T, V, E extends object | undefined | null = never> =
   T extends E ? T :
   T extends V ? never :
-  T extends readonly any[] | Function ? T :
+  T extends readonly unknown[] | Function ? T :
   T extends object ? ExcludeProp<{ [Q in { [P in keyof T]: If<TEq<V, never>, T[P] extends never ? P : P, If<Includes<T[P], V>, T[P] extends E ? P : never, P>>; }[keyof T]]: ExactExclude<DeepExcludeProp<T[Q], V, E>, {}>; }, never> :
   T;
-export type RewriteProp<T, R extends [any, any]> =
+export type RewriteProp<T, R extends [unknown, unknown]> =
   { [P in keyof T]: Rewrite<T[P], R>; };
-export type DeepRewriteProp<T, R extends [any, any], E extends object | undefined | null = never> =
+export type DeepRewriteProp<T, R extends [unknown, unknown], E extends object | undefined | null = never> =
   [T] extends [never] ? Rewrite<T, R> :
   T extends E ? T :
   true extends (R extends never ? never : T extends R[0] ? true : never) ? Rewrite<T, R> :
-  T extends readonly any[] | Function ? T :
+  T extends readonly unknown[] | Function ? T :
   T extends object ? ExcludeProp<{ [P in keyof T]: DeepRewriteProp<T[P], R, E>; }, never> :
   T;
 type Includes<T, U> = true extends (T extends U ? true : never) ? true : false;
 
 export type Partial<T> =
   { [P in keyof T]+?: T[P]; };
-export type DeepPartial<T, E extends object | undefined | null = readonly any[]> =
+export type DeepPartial<T, E extends object | undefined | null = readonly unknown[]> =
   T extends E | Function ? T :
   { [P in keyof T]+?: DeepPartial<T[P], E>; };
 export type Required<T> =
   { [P in keyof T]-?: T[P]; };
-export type DeepRequired<T, E extends object | undefined | null = readonly any[]> =
+export type DeepRequired<T, E extends object | undefined | null = readonly unknown[]> =
   T extends E | Function ? T :
   { [P in keyof T]-?: DeepRequired<T[P], E>; };
 export type Immutable<T> =
@@ -192,13 +192,13 @@ export type DeepMutable<T, E extends object | undefined | null = never> =
   { -readonly [P in keyof T]: DeepMutable<T[P], E>; } :
   { -readonly [P in keyof T]: DeepMutable<T[P], E>; };
 
-export function type(target: any): string {
+export function type(target: unknown): string {
   const type = (Object.prototype.toString.call(target)).split(' ').pop()!.slice(0, -1);
   if (target === null || typeof target !== 'object' && target instanceof Object === false) return type.toLowerCase();
   return type;
 }
 
-export function isObject(target: any): target is object {
+export function isObject(target: unknown): target is object {
   return target !== null
       && (typeof target ==='object' || target instanceof Object);
 }

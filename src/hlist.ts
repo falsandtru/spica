@@ -1,6 +1,8 @@
 import { Prepend, Split, AtLeast, Reverse } from './type';
 
-export type HList<as extends unknown[]> = as extends [infer _, ...unknown[]] ? HCons<as> : HNil<as[0]>;
+export type HList<as extends unknown[]> =
+  as extends [unknown, ...unknown[]] ? HCons<as> :
+  HNil<as[0]>;
 
 export class HNil<z = unknown> {
   private readonly NIL: void;
