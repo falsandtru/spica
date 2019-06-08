@@ -23,8 +23,9 @@ describe('Unit: lib/hlist', () => {
     });
 
     it('tail', () => {
-      assert(HNil.push(0).push('').tail.head === 0);
-      assert(HNil.push(0).push('').push(2).tail.head === '');
+      assert.deepStrictEqual(HNil.push(0).tail.tuple(), []);
+      assert.deepStrictEqual(HNil.push(0).push('').tail.tuple(), [0]);
+      assert.deepStrictEqual(HNil.push(0).push('').push(2).tail.tuple(), ['', 0]);
     });
 
     it('walk', () => {

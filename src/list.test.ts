@@ -23,6 +23,7 @@ describe('Unit: lib/list', () => {
     });
 
     it('tail', () => {
+      assert.deepStrictEqual(Nil.push(0).tail.tuple(), []);
       assert.deepStrictEqual(Nil.push(0).push(1).tail.tuple(), [0]);
       assert.deepStrictEqual(Nil.push(0).push(1).push(2).tail.tuple(), [1, 0]);
     });
