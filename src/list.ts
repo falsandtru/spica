@@ -4,7 +4,8 @@ export type List<as extends unknown[]> =
   as extends [unknown, ...unknown[]] ? Cons<as> :
   Nil;
 
-export class Nil {
+export type Nil = typeof Nil;
+export const Nil = new class Nil {
   private readonly NIL: void;
   constructor() {
     void this.NIL;
@@ -18,7 +19,7 @@ export class Nil {
   public tuple(): [] {
     return [];
   }
-}
+}();
 
 class Cons<as extends unknown[]> {
   private readonly CONS!: as;

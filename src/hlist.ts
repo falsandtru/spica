@@ -4,7 +4,8 @@ export type HList<as extends unknown[]> =
   as extends [unknown, ...unknown[]] ? HCons<as> :
   HNil;
 
-export class HNil {
+export type HNil = typeof HNil;
+export const HNil = new class HNil {
   private readonly NIL: void;
   constructor() {
     void this.NIL;
@@ -18,7 +19,7 @@ export class HNil {
   public tuple(): [] {
     return [];
   }
-}
+}();
 
 class HCons<as extends unknown[]> {
   private readonly CONS!: as;
