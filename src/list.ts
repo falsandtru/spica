@@ -2,17 +2,17 @@ import { Prepend, Split, AtLeast, Reverse } from './type';
 
 export type List<as extends unknown[]> =
   as extends [unknown, ...unknown[]] ? Cons<as> :
-  Nil<as[0]>;
+  Nil;
 
-export class Nil<z = unknown> {
+export class Nil {
   private readonly NIL: void;
   constructor() {
     void this.NIL;
   }
-  public push<a extends z>(a: a): Cons<[a]> {
+  public push<a>(a: a): Cons<[a]> {
     return new Cons(a, this);
   }
-  public extend<a extends z>(f: () => a): Cons<[a]> {
+  public extend<a>(f: () => a): Cons<[a]> {
     return this.push(f());
   }
   public tuple(): [] {
@@ -24,7 +24,7 @@ class Cons<as extends unknown[]> {
   private readonly CONS!: as;
   constructor(
     public readonly head: Split<as>[0],
-    public readonly tail: as['length'] extends 1 ? Nil<as[0]> : Cons<Split<as>[1]>,
+    public readonly tail: as['length'] extends 1 ? Nil : Cons<Split<as>[1]>,
   ) {
     void this.CONS;
   }

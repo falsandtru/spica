@@ -2,17 +2,17 @@ import { Prepend, Split, AtLeast, Reverse } from './type';
 
 export type HList<as extends unknown[]> =
   as extends [unknown, ...unknown[]] ? HCons<as> :
-  HNil<as[0]>;
+  HNil;
 
-export class HNil<z = unknown> {
+export class HNil {
   private readonly NIL: void;
   constructor() {
     void this.NIL;
   }
-  public push<a extends z>(a: a): HCons<[a]> {
+  public push<a>(a: a): HCons<[a]> {
     return new HCons(a, this);
   }
-  public extend<a extends z>(f: () => a): HCons<[a]> {
+  public extend<a>(f: () => a): HCons<[a]> {
     return this.push(f());
   }
   public tuple(): [] {
@@ -24,7 +24,7 @@ class HCons<as extends unknown[]> {
   private readonly CONS!: as;
   constructor(
     public readonly head: Split<as>[0],
-    public readonly tail: as['length'] extends 1 ? HNil<as[0]> : HCons<Split<as>[1]>,
+    public readonly tail: as['length'] extends 1 ? HNil : HCons<Split<as>[1]>,
   ) {
     void this.CONS;
   }
