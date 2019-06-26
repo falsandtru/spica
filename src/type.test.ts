@@ -1,6 +1,6 @@
 import {
   Not, And, Or, Eq, TEq, DEq, If, Case, IsAny,
-  Prepend, Append, Split, Head, Tail, Init, Last, Inits, Tails, Join, Reverse, AtLeast,
+  Prepend, Append, Split, Head, Tail, Init, Last, Inits, Tails, Concat, Reverse, AtLeast,
   Rewrite, StrictRewrite, ExactExtract, ExactExclude,
   valueof, indexof,
   Type, StrictType,
@@ -239,15 +239,15 @@ describe('Unit: lib/type', () => {
 
   });
 
-  describe('Join', () => {
+  describe('Concat', () => {
     it('', () => {
-      assert((): true => true as TEq<Join<[], []>, []>);
-      assert((): true => true as TEq<Join<[], [0]>, [0]>);
-      assert((): true => true as TEq<Join<[0], []>, [0]>);
-      assert((): true => true as TEq<Join<[0], [1]>, [0, 1]>);
-      assert((): true => true as TEq<Join<[0, 1], [2, 3]>, [0, 1, 2, 3]>);
-      assert((): true => true as TEq<Join<[0, 1], number[]>, [0, 1, ...number[]]>);
-      assert((): true => true as TEq<Join<[0, 1], [2, ...number[]]>, [0, 1, 2, ...number[]]>);
+      assert((): true => true as TEq<Concat<[], []>, []>);
+      assert((): true => true as TEq<Concat<[], [0]>, [0]>);
+      assert((): true => true as TEq<Concat<[0], []>, [0]>);
+      assert((): true => true as TEq<Concat<[0], [1]>, [0, 1]>);
+      assert((): true => true as TEq<Concat<[0, 1], [2, 3]>, [0, 1, 2, 3]>);
+      assert((): true => true as TEq<Concat<[0, 1], number[]>, [0, 1, ...number[]]>);
+      assert((): true => true as TEq<Concat<[0, 1], [2, ...number[]]>, [0, 1, 2, ...number[]]>);
     });
 
   });

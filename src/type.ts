@@ -42,7 +42,7 @@ export type Prepend<Elm, T extends unknown[]> =
   never;
 export type Append<Elm, T extends [] | [unknown, ...unknown[]]> =
   T extends unknown ?
-  Join<T, [Elm]> :
+  Concat<T, [Elm]> :
   never;
 export type Split<T extends unknown[]> =
   T extends unknown ?
@@ -82,8 +82,8 @@ type tails<as extends unknown[]> = {
   0: never;
   1: as | tails<Split<as>[1]>;
 }[as extends [unknown, ...unknown[]] ? 1 : 0];
-export type Join<T extends [] | [unknown, ...unknown[]], U extends unknown[]> =
-  { 0: U; 1: Join<Init<T>, Prepend<Last<T>, U>>; }[T extends [] ? 0 : 1];
+export type Concat<T extends [] | [unknown, ...unknown[]], U extends unknown[]> =
+  { 0: U; 1: Concat<Init<T>, Prepend<Last<T>, U>>; }[T extends [] ? 0 : 1];
 export type Reverse<T extends unknown[]> =
   number extends T['length'] ? T :
   Rev<T, []>;
