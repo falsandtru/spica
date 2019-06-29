@@ -104,7 +104,7 @@ export type Rewrite<T, R extends [unknown, unknown]> =
   true extends (R extends never ? never : T extends R[0] ? true : never)
     ? R extends (R extends never ? never : T extends R[0] ? R : never) ? R[1] : never
     : T;
-export type StrictRewrite<T, R extends [unknown, unknown]> =
+export type ExactRewrite<T, R extends [unknown, unknown]> =
   [T] extends [never] ? Rewrite<T, R> :
   T extends never ? never :
   true extends (R extends never ? never : If<Eq<T, R[0]>, true, never>)

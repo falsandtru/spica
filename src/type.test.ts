@@ -1,7 +1,7 @@
 import {
   Not, And, Or, Eq, TEq, DEq, If, Case, IsAny,
   Prepend, Append, Split, Head, Tail, Init, Last, Inits, Tails, Concat, Reverse, AtLeast,
-  Rewrite, StrictRewrite, ExactExtract, ExactExclude,
+  Rewrite, ExactRewrite, ExactExtract, ExactExclude,
   valueof, indexof,
   Type, StrictType,
   DiffStruct, OverwriteStruct,
@@ -285,10 +285,10 @@ describe('Unit: lib/type', () => {
 
   });
 
-  describe('StrictRewrite', () => {
+  describe('ExactRewrite', () => {
     it('', () => {
-      assert((): true => true as TEq<StrictRewrite<[] | {}, [{}, void]>, [] | void>);
-      assert((): true => true as TEq<StrictRewrite<0, [never, 1]>, 0>);
+      assert((): true => true as TEq<ExactRewrite<[] | {}, [{}, void]>, [] | void>);
+      assert((): true => true as TEq<ExactRewrite<0, [never, 1]>, 0>);
     });
 
   });
