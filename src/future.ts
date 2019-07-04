@@ -16,7 +16,10 @@ export class Future<T = unknown> extends Promise<T> {
       });
     this.bind = bind;
   }
-  public readonly bind: (value: T | PromiseLike<T>) => Promise<T>;
+  public readonly bind: {
+    (this: Future<undefined>, value?: T | PromiseLike<T>): Promise<T>;
+    (value: T | PromiseLike<T>): Promise<T>;
+  };
 }
 
 export class AtomicFuture<T = unknown> extends AtomicPromise<T> implements Future<T> {
@@ -35,5 +38,8 @@ export class AtomicFuture<T = unknown> extends AtomicPromise<T> implements Futur
       });
     this.bind = bind;
   }
-  public readonly bind: (value: T | PromiseLike<T>) => AtomicPromise<T>;
+  public readonly bind: {
+    (this: AtomicFuture<undefined>, value?: T | PromiseLike<T>): AtomicPromise<T>;
+    (value: T | PromiseLike<T>): AtomicPromise<T>;
+  };
 }

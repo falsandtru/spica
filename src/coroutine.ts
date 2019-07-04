@@ -131,7 +131,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
       const res = new AtomicFuture<IteratorResult<R, T>>();
       // Don't block.
       void this[status].msgs.push([msg, res.bind]);
-      void this[status].resume.bind(undefined);
+      void this[status].resume.bind();
       this[status].resume = new AtomicFuture();
       while (this[status].msgs.length > this[status].settings.size) {
         // Don't block.
@@ -170,7 +170,7 @@ class Status<T, R, S> {
   }
   public alive = true;
   public state = new AtomicFuture<IteratorResult<R, undefined>>();
-  public resume = new AtomicFuture();
+  public resume = new AtomicFuture<never>();
   public readonly result = new AtomicFuture<T>();
   public readonly msgs: [S | PromiseLike<S>, Reply<R, T>][] = [];
   public readonly settings: DeepImmutable<DeepRequired<CoroutineOptions>> = {
