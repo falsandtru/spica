@@ -164,6 +164,7 @@ describe('Unit: lib/either', () => {
       }).extract());
       assert(0 === Either.do(function* () {
         yield Left(0);
+        return Right(1);
       }).extract(() => 0));
     });
 

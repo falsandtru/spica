@@ -169,6 +169,7 @@ describe('Unit: lib/maybe', () => {
       }).extract());
       assert(0 === Maybe.do(function* () {
         yield Nothing;
+        return Just(1);
       }).extract(() => 0));
     });
 

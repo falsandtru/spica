@@ -18,14 +18,11 @@ export interface CoroutineOptions {
   readonly syncrun?: boolean;
 }
 interface CoroutinePort<T, R, S> {
-  //readonly send: (msg: S | PromiseLike<S>) => AtomicPromise<IteratorResult<R, T>>;
-  readonly send: (msg: S | PromiseLike<S>) => AtomicPromise<IteratorResult<R>>;
-  //readonly recv: () => AtomicPromise<IteratorResult<R, T>>;
-  readonly recv: () => AtomicPromise<IteratorResult<R>>;
-  //readonly connect: <U>(com: () => Iterator<S, U> | AsyncIterator<S, U>) => Promise<U>;
-  readonly connect: <U = T | R>(com: () => Iterator<S> | AsyncIterator<S>) => Promise<U>;
+  readonly send: (msg: S | PromiseLike<S>) => AtomicPromise<IteratorResult<R, T>>;
+  readonly recv: () => AtomicPromise<IteratorResult<R, undefined>>;
+  readonly connect: <U>(com: () => Generator<S, U, T | R> | AsyncGenerator<S, U, T | R>) => Promise<U>;
 }
-type Reply<R> = (msg: IteratorResult<R> | Promise<never>) => void;
+type Reply<R, T> = (msg: IteratorResult<R, T> | Promise<never>) => void;
 
 export interface CoroutineInterface<T = unknown, R = unknown, _ = unknown> extends Promise<T>, AsyncIterable<R> {
   readonly constructor: {
@@ -45,7 +42,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
     return AtomicPromise;
   }
   constructor(
-    gen: (this: Coroutine<T, R, S>) => Iterator<T | R> | AsyncIterator<T | R>,
+    gen: (this: Coroutine<T, R, S>) => Generator<R, T, S> | AsyncGenerator<R, T, S>,
     opts: CoroutineOptions = {},
   ) {
     super(resolve => res = resolve);
@@ -55,7 +52,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
     this[Coroutine.run] = async () => {
       try {
         this[Coroutine.run] = noop;
-        const resume = (): AtomicPromise<[S, Reply<R>]> =>
+        const resume = (): AtomicPromise<[S, Reply<R, T>]> =>
           this[status].msgs.length > 0
             ? AtomicPromise.all(this[status].msgs.shift()!)
             : this[status].resume.then(resume);
@@ -65,12 +62,12 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
           void ++cnt;
           const [[msg, reply]] = cnt === 1
             // Don't block.
-            ? [[undefined as S | undefined, noop as Reply<R>]]
+            ? [[undefined as S | undefined, noop as Reply<R, T>]]
             // Block.
             : await AtomicPromise.all([
                 // Don't block.
                 this[status].settings.size === 0
-                  ? AtomicPromise.resolve(tuple([undefined as S | undefined, noop as Reply<R>]))
+                  ? AtomicPromise.resolve(tuple([undefined as S | undefined, noop as Reply<R, T>]))
                   : resume(),
                 // Don't block.
                 AtomicPromise.all([
@@ -84,7 +81,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
           // Block.
           // `value` can be Promise when using iterator.
           // `value` never be Promise when using async iterator.
-          const { value, done } = await iter.next(msg);
+          const { value, done } = await iter.next(msg!);
           if (!this[status].alive) break;
           if (!done) {
             const state = this[status].state;
@@ -98,9 +95,9 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
           else {
             this[status].alive = false;
             // Block.
-            await this[status].state.bind({ value: value as R, done });
+            await this[status].state.bind({ value: undefined, done });
             // Don't block.
-            void reply({ value: value as R, done });
+            void reply({ value: value as T, done });
             void this[status].result.bind(value as T);
             while (this[status].msgs.length > 0) {
               // Don't block.
@@ -124,14 +121,14 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
     while (this[status].alive) {
       const { value } = await this[status].state;
       if (!this[status].alive) break;
-      yield value;
+      yield value!;
     }
   }
   public readonly [port]: CoroutinePort<T, R, S> = {
     recv: () => this[status].state,
-    send: (msg: S | PromiseLike<S>): AtomicPromise<IteratorResult<R>> => {
+    send: (msg: S | PromiseLike<S>): AtomicPromise<IteratorResult<R, T>> => {
       if (!this[status].alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
-      const res = new AtomicFuture<IteratorResult<R>>();
+      const res = new AtomicFuture<IteratorResult<R, T>>();
       // Don't block.
       void this[status].msgs.push([msg, res.bind]);
       void this[status].resume.bind(undefined);
@@ -143,13 +140,13 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
       }
       return res.then();
     },
-    connect: async <U = T | R>(com: () => Iterator<S> | AsyncIterator<S>): Promise<U> => {
+    connect: async <U>(com: () => Generator<S, U, T | R> | AsyncGenerator<S, U, T | R>): Promise<U> => {
       const iter = com();
       let reply: T | R | undefined;
       while (true) {
         const { value, done } = await iter.next(reply!);
-        if (done) return value as unknown as U;
-        reply = (await this[port].send(value)).value;
+        if (done) return value as U;
+        reply = (await this[port].send(value as S)).value;
       }
     },
   };
@@ -157,7 +154,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
     if (!this[status].alive) return;
     this[status].alive = false;
     // Don't block.
-    void this[status].state.bind({ value: undefined as unknown as R, done: true });
+    void this[status].state.bind({ value: undefined, done: true });
     void this[status].result.bind(AtomicPromise.reject(reason));
     while (this[status].msgs.length > 0) {
       // Don't block.
@@ -172,10 +169,10 @@ class Status<T, R, S> {
     void extend(this.settings, opts);
   }
   public alive = true;
-  public state = new AtomicFuture<IteratorResult<R>>();
+  public state = new AtomicFuture<IteratorResult<R, undefined>>();
   public resume = new AtomicFuture();
   public readonly result = new AtomicFuture<T>();
-  public readonly msgs: [S | PromiseLike<S>, Reply<R>][] = [];
+  public readonly msgs: [S | PromiseLike<S>, Reply<R, T>][] = [];
   public readonly settings: DeepImmutable<DeepRequired<CoroutineOptions>> = {
     size: 0,
     interval: 0,

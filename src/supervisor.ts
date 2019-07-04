@@ -15,7 +15,7 @@ abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = un
         init: state => state,
         main: (param, state, kill) =>
           process[Coroutine.port].send(param)
-            .then(({ value: reply, done }: IteratorResult<R>) =>
+            .then(({ value: reply, done }: IteratorResult<R, R>) =>
               done
                 ? process
                     .then(reply =>

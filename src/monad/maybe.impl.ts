@@ -54,7 +54,7 @@ export class Maybe<a> extends MonadPlus<a> {
       ? this.evaluate().extract(nothing!)
       : this.fmap(just).extract(nothing!);
   }
-  public static do<a>(block: () => Iterator<Maybe<a>>): Maybe<a> {
+  public static do<a>(block: () => Iterator<Maybe<a>, Maybe<a>, a>): Maybe<a> {
     const iter = block();
     let val: a | undefined;
     while (true) {

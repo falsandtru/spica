@@ -142,7 +142,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
       const [name, param, callback] = this.messages.shift()!;
       const names = typeof name === 'string'
         ? [name]
-        : [name[Symbol.iterator]().next().value];
+        : [name[Symbol.iterator]().next().value as N];
       void this.events_.loss.emit([names[0]], [names[0], param]);
       try {
         void callback(undefined as any, new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A message overflowed.`));
@@ -303,7 +303,7 @@ class NamePool<N extends string> implements Iterable<N> {
   ) {
     assert([...this].length > 0);
   }
-  *[Symbol.iterator](): IterableIterator<N> {
+  *[Symbol.iterator](): Generator<N, void> {
     let cnt = 0;
     for (const name of this.selector(this.workers.keys())) {
       void ++cnt;
