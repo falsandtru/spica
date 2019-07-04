@@ -22,7 +22,7 @@ interface CoroutinePort<T, R, S> {
   readonly recv: () => AtomicPromise<IteratorResult<R, undefined>>;
   readonly connect: <U>(com: () => Generator<S, U, T | R> | AsyncGenerator<S, U, T | R>) => Promise<U>;
 }
-type Reply<R, T> = (msg: IteratorResult<R, T> | Promise<never>) => void;
+type Reply<R, T> = (msg: IteratorResult<R, T> | PromiseLike<never>) => void;
 
 export interface CoroutineInterface<T = unknown, R = unknown, _ = unknown> extends Promise<T>, AsyncIterable<R> {
   readonly constructor: {
