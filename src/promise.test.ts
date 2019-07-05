@@ -75,7 +75,7 @@ describe('Unit: lib/promise', () => {
 
     it('race', async () => {
       assert(await AtomicPromise.race([AtomicPromise.resolve(1), 2]) === 1);
-      assert(await AtomicPromise.race([AtomicPromise.reject(1), 2]).catch(r => r) === 1);
+      assert(await AtomicPromise.race([AtomicPromise.reject(1), 2 as Promise<number> | number]).catch(r => r) === 1);
     });
 
     it('promise', async () => {
