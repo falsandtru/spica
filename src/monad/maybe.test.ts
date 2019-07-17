@@ -162,7 +162,7 @@ describe('Unit: lib/maybe', () => {
     });
 
     it('do', () => {
-      assert(3 === Maybe.do(function* () {
+      assert(3 === Maybe.do<number>(function* () {
         const n = yield Just(1);
         const m = yield Just(2);
         return Just(n + m);

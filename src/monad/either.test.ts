@@ -157,7 +157,7 @@ describe('Unit: lib/either', () => {
     });
 
     it('do', () => {
-      assert(3 === Either.do(function* () {
+      assert(3 === Either.do<number>(function* () {
         const n = yield Right(1);
         const m = yield Right(2);
         return Right(n + m);
