@@ -48,6 +48,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
       { next: () => new AtomicPromise(r => r({ value: state, done: true })) }));
     var cb!: [() => void, () => void];
     var state!: AtomicFuture;
+    cb || void this.then();
     void this.state.then(...cb);
     void state.bind(this.state);
     void extend(this.settings, opts);

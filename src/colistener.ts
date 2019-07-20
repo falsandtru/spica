@@ -40,7 +40,7 @@ export class Colistener<T, U = undefined> extends Coroutine<U, T> {
         assert(queue.length === 0 || this.cancellation.canceled);
       }
       return this.cancellation;
-    }, { ...opts, size: 0, syncrun: false });
+    }, { ...opts, size: 0 });
     void this[Coroutine.run]();
   }
   private readonly cancellation: Cancellation<U> = new Cancellation();

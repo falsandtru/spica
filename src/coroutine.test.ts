@@ -38,7 +38,7 @@ describe('Unit: lib/coroutine', () => {
         assert(undefined === (yield Promise.resolve(4)));
         return Promise.resolve(5);
       });
-      assert(cnt === 1);
+      assert(cnt === 0);
       for await (const n of co) {
         assert(n === ++cnt);
       }
@@ -47,6 +47,21 @@ describe('Unit: lib/coroutine', () => {
       }
       assert(await co === ++cnt);
       assert(cnt === 5);
+    });
+
+    it('autorun', async () => {
+      let cnt = 0;
+      for await (const _ of new Coroutine(async function* () {
+        assert(cnt === 0 && ++cnt);
+        yield;
+      })) {
+        assert(cnt === 1 && ++cnt);
+      }
+      assert(cnt === 2 && ++cnt);
+      new Coroutine(async function* () {
+        assert(cnt === 3 && ++cnt);
+      })[Coroutine.terminator]();
+      assert(cnt === 4 && ++cnt);
     });
 
     it('port', async () => {

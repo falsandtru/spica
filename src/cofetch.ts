@@ -94,7 +94,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
         default:
           return xhr;
       }
-    }, { syncrun: false });
+    });
     void this[Coroutine.run]();
   }
   private readonly cancellation = new Cancellation();
