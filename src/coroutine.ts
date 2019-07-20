@@ -181,7 +181,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
   };
   public readonly [terminator]: (reason?: unknown) => void = reason => {
     if (!this[status].alive) return;
-    !this[status].settings.delay && void this[run]();
+    void this[run]();
     this[status].alive = false;
     // Don't block.
     void this[status].state.bind({ value: undefined, done: true });

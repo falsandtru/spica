@@ -60,7 +60,7 @@ describe('Unit: lib/coroutine', () => {
       assert(cnt === 2 && ++cnt);
       new Coroutine(async function* () {
         assert(cnt === 3 && ++cnt);
-      })[Coroutine.terminator]();
+      }, { delay: true })[Coroutine.terminator]();
       assert(cnt === 4 && ++cnt);
     });
 
