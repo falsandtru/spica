@@ -16,6 +16,7 @@ export interface CoroutineOptions {
   readonly interval?: number,
   readonly resume?: () => PromiseLike<void>;
   readonly delay?: boolean;
+  readonly trigger?: string | symbol | ReadonlyArray<string | symbol>;
 }
 interface CoroutinePort<T, R, S> {
   readonly send: (msg: S | PromiseLike<S>) => AtomicPromise<IteratorResult<R, T>>;
@@ -112,6 +113,29 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
         void this[Coroutine.terminator](reason);
       }
     };
+    if (this[status].settings.trigger !== undefined) {
+      for (const prop of new Set(Array<string | symbol>().concat(this[status].settings.trigger))) {
+        const desc = Object.getOwnPropertyDescriptor(this, prop) || {
+          value: this[prop],
+          enumerable: true,
+          configurable: true,
+          writable: true,
+        };
+        void Object.defineProperty(this, prop, {
+          set(value: unknown) {
+            void Object.defineProperty(this, prop, { ...desc, value });
+            void this[Coroutine.run]();
+          },
+          get() {
+            void Object.defineProperty(this, prop, desc);
+            void this[Coroutine.run]();
+            return this[prop];
+          },
+          enumerable: true,
+          configurable: true,
+        });
+      }
+    }
     void tick(() => void this[Coroutine.run]());
   }
   private readonly [status]: Status<T, R, S>;
@@ -196,5 +220,6 @@ class Status<T, R, S> {
     interval: 0,
     resume: () => clock,
     delay: false,
+    trigger: undefined as any,
   };
 }

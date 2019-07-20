@@ -64,6 +64,22 @@ describe('Unit: lib/coroutine', () => {
       assert(cnt === 4 && ++cnt);
     });
 
+    it('trigger', () => {
+      let cnt = 0;
+      new Coroutine(async function* () {
+        assert(cnt === 0 && ++cnt);
+      }, { trigger: 'then' }).then;
+      assert(cnt === 1 && ++cnt);
+      new Coroutine(async function* () {
+        assert(cnt === 2 && ++cnt);
+      }, { trigger: ['then', 'then'] }).then;
+      assert(cnt === 3 && ++cnt);
+      new Coroutine(async function* () {
+        assert(cnt === 5 && ++cnt);
+      }, { trigger: 'then', delay: true }).then;
+      assert(cnt === 4 && ++cnt);
+    });
+
     it('port', async () => {
       const co = new Coroutine<number, number, number>(async function* () {
         assert(1 === (yield Promise.resolve(0)));
