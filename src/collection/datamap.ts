@@ -31,7 +31,7 @@ export class DataMap<K, V> implements Collection<K, V> {
   public get size(): number {
     return this.store.size;
   }
-  public [Symbol.iterator](): IterableIterator<[K, V]> {
+  public [Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
     return this.store.values();
   }
 }

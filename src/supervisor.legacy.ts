@@ -304,7 +304,7 @@ class NamePool<N extends string> implements Iterable<N> {
   ) {
     assert([...this].length > 0);
   }
-  *[Symbol.iterator](): Generator<N, void> {
+  *[Symbol.iterator](): Iterator<N, undefined, undefined> {
     let cnt = 0;
     for (const name of this.selector(this.workers.keys())) {
       void ++cnt;
@@ -313,6 +313,7 @@ class NamePool<N extends string> implements Iterable<N> {
     if (cnt === 0) {
       yield '' as N;
     }
+    return;
   }
 }
 

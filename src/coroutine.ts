@@ -140,13 +140,14 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
   }
   private readonly [status]: Status<T, R, S>;
   protected [run]: () => void;
-  public async *[Symbol.asyncIterator](): AsyncIterableIterator<R> {
+  public async *[Symbol.asyncIterator](): AsyncIterator<R, undefined, undefined> {
     !this[status].settings.delay && void this[run]();
     while (this[status].alive) {
       const { value } = await this[status].state;
       if (!this[status].alive) break;
       yield value!;
     }
+    return;
   }
   public readonly [port]: CoroutinePort<T, R, S> = {
     recv: () => {

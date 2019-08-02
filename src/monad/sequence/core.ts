@@ -6,7 +6,7 @@ export class Sequence<a, z> extends MonadPlus<a> implements Iterable<a> {
   ) {
     super(throwCallError);
   }
-  public [Symbol.iterator](): Iterator<a> {
+  public [Symbol.iterator](): Iterator<a, undefined, undefined> {
     let iter = () => this.iterate();
     return {
       next() {
@@ -15,7 +15,7 @@ export class Sequence<a, z> extends MonadPlus<a> implements Iterable<a> {
         return {
           done: !Sequence.isIterable(thunk),
           value: Sequence.Thunk.value(thunk)
-        };
+        } as IteratorResult<a, undefined>;
       }
     };
   }

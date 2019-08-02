@@ -123,7 +123,7 @@ export class Cache<K, V = void> {
       void this.callback(key, val);
     }
   }
-  public [Symbol.iterator](): Iterator<[K, V]> {
+  public [Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
     return this.store[Symbol.iterator]();
   }
   public export(): NonNullable<CacheOptions<K, V>['data']> {
