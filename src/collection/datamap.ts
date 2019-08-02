@@ -3,30 +3,36 @@ import { sqid } from '../sqid';
 import { type, isObject } from '../type';
 
 export class DataMap<K, V> implements Collection<K, V> {
-  constructor(entries: Iterable<[K, V]> = []) {
+  constructor(
+    entries: Iterable<[K, V]> = [],
+    private indentify: (key: K) => unknown = stringify,
+  ) {
     for (const [k, v] of entries) {
       void this.set(k, v);
     }
   }
-  private readonly store = new Map<string, [K, V]>();
+  private readonly store = new Map<unknown, [K, V]>();
   public get(key: K): V | undefined {
-    return (this.store.get(stringify(key)) || [] as unknown as [never, V])[1];
+    return (this.store.get(this.indentify(key)) || [0, undefined] as [never, undefined])[1];
   }
   public set(key: K, val: V): this {
-    void this.store.set(stringify(key), [key, val]);
+    void this.store.set(this.indentify(key), [key, val]);
     return this;
   }
   public has(key: K): boolean {
-    return this.store.has(stringify(key));
+    return this.store.has(this.indentify(key));
   }
   public delete(key: K): boolean {
-    return this.store.delete(stringify(key));
+    return this.store.delete(this.indentify(key));
   }
   public clear(): void {
     return this.store.clear();
   }
   public get size(): number {
     return this.store.size;
+  }
+  public [Symbol.iterator](): IterableIterator<[K, V]> {
+    return this.store.values();
   }
 }
 
