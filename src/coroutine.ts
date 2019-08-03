@@ -13,7 +13,7 @@ const terminator = Symbol();
 
 export interface CoroutineOptions {
   readonly size?: number;
-  readonly interval?: number,
+  readonly interval?: number;
   readonly resume?: () => PromiseLike<void>;
   readonly delay?: boolean;
   readonly trigger?: string | symbol | ReadonlyArray<string | symbol>;
