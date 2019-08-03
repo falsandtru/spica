@@ -224,7 +224,7 @@ describe('Unit: lib/supervisor', function () {
     it('state', function (done) {
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
       });
-      sv.register('', (n, s) => Promise.resolve<[number, number]>([n + s, ++s]), 0);
+      sv.register('', (n, s) => Promise.resolve([n + s, ++s]), 0);
       sv.call('', 1, n => assert(n === 1));
       sv.call('', 2, n => void assert(n === 3) || done(), 100);
     });

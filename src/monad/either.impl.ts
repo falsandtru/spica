@@ -82,7 +82,7 @@ export namespace Either {
   export function sequence<a, b>(fm: Either<a, PromiseLike<b>>): AtomicPromise<Either<a, b>>;
   export function sequence<a, b>(fm: Either<a, b>[] | Either<a, PromiseLike<b>>): Either<a, b[]> | AtomicPromise<Either<a, b>> {
     return fm instanceof Either
-      ? fm.extract(b => AtomicPromise.resolve<Either<a, b>>(new Left(b)), a => AtomicPromise.resolve(a).then<Either<a, b>>(Return))
+      ? fm.extract(b => AtomicPromise.resolve(new Left(b)), a => AtomicPromise.resolve(a).then<Either<a, b>>(Return))
       : fm.reduce((acc, m) =>
           acc.bind(as =>
             m.fmap(a =>
