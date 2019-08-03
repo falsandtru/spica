@@ -1,4 +1,3 @@
-export function concat<T>(target: T[], source: readonly T[]): T[] {
-  target.push(...source);
-  return target;
+export function concat<T>(target: T[], source: Iterable<T>): T[] {
+  return void target.push(...source), target;
 }
