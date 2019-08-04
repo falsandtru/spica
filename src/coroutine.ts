@@ -51,18 +51,21 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
     this[status] = new Status(opts);
     void res(this[status].result);
     this[Coroutine.run] = async () => {
+      let reply: Reply<R, T> = noop;
       try {
         this[Coroutine.run] = noop;
         if (!this[status].alive) return;
         const resume = (): AtomicPromise<[S, Reply<R, T>]> =>
           this[status].msgs.length > 0
-            ? AtomicPromise.all(this[status].msgs.shift()!)
+            ? (reply = this[status].msgs[0][1]) &&
+              AtomicPromise.all(this[status].msgs.shift()!)
             : this[status].resume.then(resume);
         const iter = gen.call(this);
         let cnt = 0;
         while (this[status].alive) {
           void ++cnt;
-          const [[msg, reply]] = cnt === 1
+          reply = noop;
+          const [[msg]] = cnt === 1
             // Don't block.
             ? [[undefined as S | undefined, noop as Reply<R, T>]]
             // Block.
@@ -110,6 +113,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
         }
       }
       catch (reason) {
+        void reply(AtomicPromise.reject(reason));
         void this[Coroutine.terminator](reason);
       }
     };
