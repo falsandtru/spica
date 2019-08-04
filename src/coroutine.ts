@@ -2,7 +2,6 @@ import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future'; 
 import { DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
-import { tuple } from './tuple';
 import { clock, wait, tick } from './clock';
 import { noop } from './noop';
 
@@ -55,24 +54,24 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
       try {
         this[Coroutine.run] = noop;
         if (!this[status].alive) return;
-        const resume = (): AtomicPromise<[S, Reply<R, T>]> =>
+        const resume = (): AtomicPromise<S> =>
           this[status].msgs.length > 0
             ? (reply = this[status].msgs[0][1]) &&
-              AtomicPromise.all(this[status].msgs.shift()!)
+              AtomicPromise.resolve(this[status].msgs.shift()![0])
             : this[status].resume.then(resume);
         const iter = gen.call(this);
         let cnt = 0;
         while (this[status].alive) {
           void ++cnt;
           reply = noop;
-          const [[msg]] = cnt === 1
+          const [msg] = cnt === 1
             // Don't block.
-            ? [[undefined as S | undefined, noop as Reply<R, T>]]
+            ? [undefined as S | undefined]
             // Block.
             : await AtomicPromise.all([
                 // Don't block.
                 this[status].settings.size === 0
-                  ? AtomicPromise.resolve(tuple([undefined as S | undefined, noop as Reply<R, T>]))
+                  ? AtomicPromise.resolve(undefined as S | undefined)
                   : resume(),
                 // Don't block.
                 AtomicPromise.all([
