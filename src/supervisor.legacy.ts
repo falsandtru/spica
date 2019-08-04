@@ -232,6 +232,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
   private readonly scheduler = () => void (void 0, this.settings.scheduler)(this.deliver);
   private readonly messages: [N | NamePool<N>, P, Supervisor.Callback<R>, number][] = [];
   private readonly deliver = (): void => {
+    if (!this.available) return;
     this.scheduled = false;
     const since = Date.now();
     for (let i = 0, len = this.messages.length; this.available && i < len; ++i) {
