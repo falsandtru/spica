@@ -145,6 +145,9 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     return this.call_(typeof name === 'string' ? name : new NamePool(this.workers, name), param, callback, timeout);
   }
   private call_(name: N | NamePool<N>, param: P, callback: Supervisor.Callback<R> | number, timeout: number): AtomicPromise<R> | void {
+    if (!this.available && typeof callback === 'function') {
+      void new AtomicPromise(() => void this.throwErrorIfNotAvailable()).catch(err => void callback(undefined as any, err as Error));
+    }
     void this.throwErrorIfNotAvailable();
     if (typeof callback === 'number') return new AtomicPromise<R>((resolve, reject) =>
       void this.call_(name, param, (result, err) => err ? reject(err) : resolve(result), timeout));
