@@ -51,11 +51,20 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
         assert(this.available);
         while (this.available) {
           const value: [N, P, (Supervisor.Callback<R> | number)?, number?] = yield;
-          if (!this.available && value.length === 0 as number) continue;
+          if (value.length === 0 as number) break;
           const [name, param, callback = undefined, timeout = undefined] = value;
-          typeof callback === 'function'
-            ? void this.call(name, param, callback, timeout)
-            : void this.call(name, param, callback || timeout);
+          if (this.available) {
+            typeof callback === 'function'
+              ? void this.call(name, param, callback, timeout)
+              : void this.call(name, param, callback || timeout);
+          }
+          else if (typeof callback === 'function') {
+            try {
+              void this.call(name, param, callback, timeout);
+            }
+            catch {
+            }
+          }
         }
         return state;
       }.call(this);
