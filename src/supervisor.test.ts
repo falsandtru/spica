@@ -291,6 +291,10 @@ describe('Unit: lib/supervisor', function () {
       const ssv = new class TestSupervisor extends Supervisor<''> { }();
       assert(ssv instanceof Coroutine);
       ssv.register('', sv);
+      sv.register('', new Coroutine<number, number, number>(async function* () {
+        return (yield 0) + 1;
+      }, { size: 1 }));
+      assert(await new Promise<number>(resolve => ssv[Coroutine.port].send(['', ['', 0, resolve]])) === 1);
       ssv.terminate();
       assert(await sv === undefined);
       assert(await ssv === undefined);

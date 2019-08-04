@@ -31,6 +31,10 @@ abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = un
     }
     return super.register(name, process, state);
   }
+  public terminate(reason?: unknown): boolean {
+    void this[Coroutine.port].send([] as any);
+    return super.terminate(reason);
+  }
   public [Coroutine.terminator](reason?: unknown): void {
     void this.terminate(reason);
   }
@@ -40,7 +44,7 @@ namespace Supervisor2018 {
   export import Callback = Supervisor.Callback;
   export import Event = Supervisor.Event;
 }
-interface Supervisor2018<N extends string, P = unknown, R = unknown, S = unknown> extends Coroutine<undefined> { }
+interface Supervisor2018<N extends string, P = unknown, R = unknown, S = unknown> extends Coroutine<undefined, undefined, [N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), P, (Supervisor.Callback<R> | number)?, number?]> { }
 Supervisor['__proto__'] = Coroutine;
 Supervisor.prototype['__proto__'] = Coroutine.prototype;
 export { Supervisor2018 as Supervisor };

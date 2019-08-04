@@ -42,10 +42,23 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
   }
   protected static readonly standalone = new WeakSet<Supervisor.Process<unknown, unknown, unknown>>();
   constructor(opts: SupervisorOptions = {}) {
-    super((resolve, reject) => (
-      cb = [resolve, reject],
-      state = new AtomicFuture(),
-      { next: () => new AtomicPromise(r => r({ value: state, done: true })) }));
+    // @ts-ignore
+    super(function* (this: Supervisor<N, P, R, S>, resolve, reject) {
+      cb = [resolve, reject];
+      state = new AtomicFuture();
+      if (this.then === AtomicPromise.prototype.then) return state;
+      assert(this.available);
+      while (this.available) {
+        const value: [N, P, (Supervisor.Callback<R> | number)?, number?] = yield;
+        if (!this.available && value.length === 0 as number) continue;
+        const [name, param, callback = undefined, timeout = undefined] = value;
+        typeof callback === 'function'
+          ? void this.call(name, param, callback, timeout)
+          : void this.call(name, param, callback || timeout);
+      }
+      return state;
+    // @ts-ignore
+    }, { size: typeof opts.size === 'number' ? opts.size : Infinity });
     var cb!: [() => void, () => void];
     var state!: AtomicFuture;
     cb || void this.then();
