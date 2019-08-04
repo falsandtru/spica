@@ -61,9 +61,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
           else if (typeof callback === 'function') {
             try {
               void this.call(name, param, callback, timeout);
-            }
-            catch {
-            }
+            } catch { }
           }
         }
         return state;
