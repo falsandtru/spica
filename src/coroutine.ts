@@ -56,8 +56,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
         if (!this[status].alive) return;
         const resume = (): AtomicPromise<S> =>
           this[status].msgs.length > 0
-            ? (reply = this[status].msgs[0][1]) &&
-              AtomicPromise.resolve(this[status].msgs.shift()![0])
+            ? AtomicPromise.resolve(([, reply] = this[status].msgs.shift()!)[0])
             : this[status].resume.then(resume);
         const iter = gen.call(this);
         let cnt = 0;
