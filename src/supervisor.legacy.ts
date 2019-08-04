@@ -56,7 +56,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
           if (this.available) {
             typeof callback === 'function'
               ? void this.call(name, param, callback, timeout)
-              : void this.call(name, param, callback || timeout);
+              : void this.call(name, param, callback);
           }
           else if (typeof callback === 'function') {
             try {
@@ -159,7 +159,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     }
     void this.throwErrorIfNotAvailable();
     if (typeof callback === 'number') return new AtomicPromise<R>((resolve, reject) =>
-      void this.call_(name, param, (result, err) => err ? reject(err) : resolve(result), timeout));
+      void this.call_(name, param, (result, err) => err ? reject(err) : resolve(result), callback));
     void this.messages.push([
       name,
       param,
