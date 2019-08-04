@@ -31,8 +31,9 @@ abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = un
     }
     return super.register(name, process, state);
   }
-  public [Coroutine.terminator] = (reason?: unknown): void =>
+  public [Coroutine.terminator](reason?: unknown): void {
     void this.terminate(reason);
+  }
 }
 namespace Supervisor2018 {
   export import Process = Supervisor.Process;

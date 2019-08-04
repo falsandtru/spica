@@ -149,6 +149,19 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
     }
     return;
   }
+  public [terminator](reason?: unknown): void {
+    if (!this[status].alive) return;
+    void this[run]();
+    this[status].alive = false;
+    // Don't block.
+    void this[status].state.bind({ value: undefined, done: true });
+    void this[status].result.bind(AtomicPromise.reject(reason));
+    while (this[status].msgs.length > 0) {
+      // Don't block.
+      const [, reply] = this[status].msgs.shift()!;
+      void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
+    }
+  }
   public readonly [port]: CoroutinePort<T, R, S> = {
     recv: () => {
       !this[status].settings.delay && void this[run]();
@@ -179,19 +192,6 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
         reply = (await this[port].send(value as S)).value;
       }
     },
-  };
-  public readonly [terminator]: (reason?: unknown) => void = reason => {
-    if (!this[status].alive) return;
-    void this[run]();
-    this[status].alive = false;
-    // Don't block.
-    void this[status].state.bind({ value: undefined, done: true });
-    void this[status].result.bind(AtomicPromise.reject(reason));
-    while (this[status].msgs.length > 0) {
-      // Don't block.
-      const [, reply] = this[status].msgs.shift()!;
-      void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
-    }
   };
 }
 Coroutine.prototype.then = function () {
