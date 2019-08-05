@@ -3,6 +3,7 @@ import { AtomicFuture } from './future';
 import { DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
 import { clock, wait, tick } from './clock';
+import { causeAsyncException } from './exception';
 import { noop } from './noop';
 
 const status = Symbol();
@@ -212,10 +213,19 @@ class Status<T, R, S> {
   constructor(opts: CoroutineOptions) {
     void extend(this.settings, opts);
     void this.result.finally(() => {
-      while (this.msgs.length > 0) {
-        // Don't block.
-        const [, reply] = this.msgs.shift()!;
-        void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
+      while (true) {
+        try {
+          while (this.msgs.length > 0) {
+            // Don't block.
+            const [, reply] = this.msgs.shift()!;
+            void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
+          }
+        }
+        catch (reason) {
+          void causeAsyncException(reason);
+          continue;
+        }
+        return;
       }
     });
   }
