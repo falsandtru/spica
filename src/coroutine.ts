@@ -103,11 +103,6 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
             void reply({ value: value as T, done });
             reply = noop;
             void this[status].result.bind(value as T);
-            while (this[status].msgs.length > 0) {
-              // Don't block.
-              const [, reply] = this[status].msgs.shift()!;
-              void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
-            }
             return;
           }
         }
@@ -161,11 +156,6 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
     // Don't block.
     void this[status].state.bind({ value: undefined, done: true });
     void this[status].result.bind(AtomicPromise.reject(reason));
-    while (this[status].msgs.length > 0) {
-      // Don't block.
-      const [, reply] = this[status].msgs.shift()!;
-      void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
-    }
   }
   public readonly [port]: CoroutinePort<T, R, S> = {
     recv: () => {
@@ -215,6 +205,13 @@ Coroutine.prototype.finally = function () {
 class Status<T, R, S> {
   constructor(opts: CoroutineOptions) {
     void extend(this.settings, opts);
+    void this.result.finally(() => {
+      while (this.msgs.length > 0) {
+        // Don't block.
+        const [, reply] = this.msgs.shift()!;
+        void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
+      }
+    });
   }
   public alive = true;
   public state = new AtomicFuture<IteratorResult<R, undefined>>();
