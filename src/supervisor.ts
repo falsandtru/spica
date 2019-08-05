@@ -32,8 +32,9 @@ abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = un
     return super.register(name, process, state);
   }
   public terminate(reason?: unknown): boolean {
-    void this[Coroutine.port].send([] as any);
-    return super.terminate(reason);
+    const result = super.terminate(reason);
+    void this[Coroutine.exit](undefined);
+    return result;
   }
   public [Coroutine.terminate](reason?: unknown): void {
     void this.terminate(reason);
@@ -51,8 +52,10 @@ export { Supervisor2018 as Supervisor };
 
 function isCoroutine(target: unknown): target is CoroutineInterface<unknown, unknown, unknown> {
   return isObject(target)
-      && typeof target.constructor['port'] === 'symbol'
-      && typeof target[target.constructor['port']] === 'object'
+      && typeof target.constructor['exit'] === 'symbol'
+      && typeof target[target.constructor['exit']] === 'function'
       && typeof target.constructor['terminate'] === 'symbol'
-      && typeof target[target.constructor['terminate']] === 'function';
+      && typeof target[target.constructor['terminate']] === 'function'
+      && typeof target.constructor['port'] === 'symbol'
+      && typeof target[target.constructor['port']] === 'object';
 }

@@ -296,6 +296,7 @@ describe('Unit: lib/supervisor', function () {
       }, { size: 1 }));
       assert(await new Promise<number>(resolve => ssv[Coroutine.port].send(['', ['', 0, resolve]])) === 1);
       ssv.terminate();
+      assert(sv.kill('') === false);
       assert(await sv === undefined);
       assert(await ssv === undefined);
     });
