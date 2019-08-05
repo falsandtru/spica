@@ -22,9 +22,9 @@ describe('Unit: lib/coroutine', () => {
       co.finally(() => {
         assert(cnt === 1 && ++cnt);
       });
-      co[Coroutine.terminator]();
+      co[Coroutine.terminate]();
       assert(cnt === 2 && ++cnt);
-      co[Coroutine.terminator](1);
+      co[Coroutine.terminate](1);
       co.catch(done);
     });
 
@@ -60,7 +60,7 @@ describe('Unit: lib/coroutine', () => {
       assert(cnt === 2 && ++cnt);
       new Coroutine(async function* () {
         assert(cnt === 3 && ++cnt);
-      }, { delay: true })[Coroutine.terminator]();
+      }, { delay: true })[Coroutine.terminate]();
       assert(cnt === 4 && ++cnt);
     });
 

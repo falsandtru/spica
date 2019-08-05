@@ -8,7 +8,7 @@ import { noop } from './noop';
 const status = Symbol();
 const run = Symbol();
 const port = Symbol();
-const terminator = Symbol();
+const terminate = Symbol();
 
 export interface CoroutineOptions {
   readonly size?: number;
@@ -27,7 +27,7 @@ type Reply<R, T> = (msg: IteratorResult<R, T> | PromiseLike<never>) => void;
 export interface CoroutineInterface<T = unknown, R = unknown, _ = unknown> extends Promise<T>, AsyncIterable<R> {
   readonly constructor: {
     readonly port: symbol;
-    readonly terminator: symbol;
+    readonly terminate: symbol;
     readonly [Symbol.species]: typeof Promise;
   };
 }
@@ -37,7 +37,7 @@ export interface Coroutine<T = unknown, R = unknown, S = unknown> extends Atomic
 export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicPromise<T> implements Promise<T>, AsyncIterable<R> {
   protected static readonly run: typeof run = run;
   public static readonly port: typeof port = port;
-  public static readonly terminator: typeof terminator = terminator;
+  public static readonly terminate: typeof terminate = terminate;
   public static get [Symbol.species]() {
     return AtomicPromise;
   }
@@ -110,7 +110,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
       }
       catch (reason) {
         void reply(AtomicPromise.reject(reason));
-        void this[Coroutine.terminator](reason);
+        void this[Coroutine.terminate](reason);
       }
     };
     if (this[status].settings.trigger !== undefined) {
@@ -149,7 +149,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
     }
     return;
   }
-  public [terminator](reason?: unknown): void {
+  public [terminate](reason?: unknown): void {
     if (!this[status].alive) return;
     void this[run]();
     this[status].alive = false;

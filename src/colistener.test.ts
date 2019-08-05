@@ -87,7 +87,7 @@ describe('Unit: lib/colistener', () => {
       const co = new Colistener<void>(() => {
         return () => undefined;
       });
-      co[Colistener.terminator](1);
+      co[Colistener.terminate](1);
       assert(await co.catch(reason => reason) === 1);
     });
 

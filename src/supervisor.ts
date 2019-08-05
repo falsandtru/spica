@@ -22,7 +22,7 @@ abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = un
                       void kill() ||
                       { reply, state })
                 : { reply, state }),
-        exit: reason => void process[Coroutine.terminator](reason),
+        exit: reason => void process[Coroutine.terminate](reason),
       };
       void Supervisor.standalone.add(proc);
       const kill = this.register(name, proc, state, reason);
@@ -35,7 +35,7 @@ abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = un
     void this[Coroutine.port].send([] as any);
     return super.terminate(reason);
   }
-  public [Coroutine.terminator](reason?: unknown): void {
+  public [Coroutine.terminate](reason?: unknown): void {
     void this.terminate(reason);
   }
 }
@@ -53,6 +53,6 @@ function isCoroutine(target: unknown): target is CoroutineInterface<unknown, unk
   return isObject(target)
       && typeof target.constructor['port'] === 'symbol'
       && typeof target[target.constructor['port']] === 'object'
-      && typeof target.constructor['terminator'] === 'symbol'
-      && typeof target[target.constructor['terminator']] === 'function';
+      && typeof target.constructor['terminate'] === 'symbol'
+      && typeof target[target.constructor['terminate']] === 'function';
 }
