@@ -11,6 +11,7 @@ export class Colistener<T, U = undefined> extends Coroutine<U, T> {
       assert(!notifier);
       const queue: T[] = [];
       void this.finally(listen.call(this, (value: T) => {
+        assert(this[Coroutine.alive]);
         if (notifier && queue.length === 0) {
           void notifier.bind(queue);
           notifier = undefined;
@@ -21,19 +22,20 @@ export class Colistener<T, U = undefined> extends Coroutine<U, T> {
         }
         assert(queue.length > 0);
       }));
-      while (queue.length > 0 && this[Coroutine.alive]) {
+      while (queue.length > 0) {
         yield queue.shift()!;
+        assert(this[Coroutine.alive]);
       }
-      while (this[Coroutine.alive]) {
+      while (true) {
         assert(queue.length === 0);
         const q = await (notifier = notifier || new AtomicFuture());
         assert(q === queue || q.length === 0);
-        while (q.length > 0 && this[Coroutine.alive]) {
+        assert(this[Coroutine.alive]);
+        while (q.length > 0) {
           yield q.shift()!;
+          assert(this[Coroutine.alive]);
         }
-        assert(queue.length === 0 || !this[Coroutine.alive]);
       }
-      throw new Error(`Spica: Colistener: Unreachable.`);
     }, { ...opts, size: 0 });
     void this[Coroutine.init]();
   }
