@@ -62,7 +62,6 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
         let cnt = 0;
         while (this[status].alive) {
           void ++cnt;
-          reply = noop;
           const [msg] = cnt === 1
             // Don't block.
             ? [undefined as S | undefined]
@@ -93,6 +92,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
             await state.bind({ value: value as R, done });
             // Don't block.
             void reply({ value: value as R, done });
+            reply = noop;
             continue;
           }
           else {
@@ -101,14 +101,17 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
             await this[status].state.bind({ value: undefined, done });
             // Don't block.
             void reply({ value: value as T, done });
+            reply = noop;
             void this[status].result.bind(value as T);
             while (this[status].msgs.length > 0) {
               // Don't block.
               const [, reply] = this[status].msgs.shift()!;
               void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
             }
+            return;
           }
         }
+        void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
       }
       catch (reason) {
         void reply(AtomicPromise.reject(reason));
