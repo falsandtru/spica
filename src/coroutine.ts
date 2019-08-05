@@ -7,6 +7,7 @@ import { causeAsyncException } from './exception';
 import { noop } from './noop';
 
 const status = Symbol();
+const alive = Symbol();
 const init = Symbol();
 const exit = Symbol();
 const terminate = Symbol();
@@ -28,6 +29,7 @@ type Reply<R, T> = (msg: IteratorResult<R, T> | PromiseLike<never>) => void;
 
 export interface CoroutineInterface<T = unknown, R = unknown, _ = unknown> extends Promise<T>, AsyncIterable<R> {
   readonly constructor: {
+    readonly alive: symbol;
     readonly exit: symbol;
     readonly terminate: symbol;
     readonly port: symbol;
@@ -38,6 +40,7 @@ export interface Coroutine<T = unknown, R = unknown, S = unknown> extends Atomic
   constructor: typeof Coroutine;
 }
 export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicPromise<T> implements Promise<T>, AsyncIterable<R> {
+  public static readonly alive: typeof alive = alive;
   protected static readonly init: typeof init = init;
   public static readonly exit: typeof exit = exit;
   public static readonly terminate: typeof terminate = terminate;
@@ -93,7 +96,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
             const state = this[status].state;
             this[status].state = new AtomicFuture();
             // Block.
-            await state.bind({ value: value as R, done });
+            void state.bind({ value: value as R, done });
             // Don't block.
             void [reply, reply = noop][0]({ value: value as R, done });
             continue;
@@ -101,7 +104,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
           else {
             this[status].alive = false;
             // Block.
-            await this[status].state.bind({ value: undefined, done });
+            void this[status].state.bind({ value: undefined, done });
             // Don't block.
             void [reply, reply = noop][0]({ value: value as T, done });
             void this[status].result.bind(value as T);
@@ -142,6 +145,9 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
     void tick(() => void this[Coroutine.init]());
   }
   private readonly [status]: Status<T, R, S>;
+  protected get [alive](): boolean {
+    return this[status].alive;
+  }
   protected [init]: () => void;
   public [exit](result: T | PromiseLike<T>): void {
     if (!this[status].alive) return;

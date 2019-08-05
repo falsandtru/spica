@@ -1,7 +1,5 @@
-import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future';
 import { Coroutine, CoroutineOptions } from './coroutine';
-import { Cancellation } from './cancellation';
 
 export class Colistener<T, U = undefined> extends Coroutine<U, T> {
   constructor(
@@ -23,29 +21,25 @@ export class Colistener<T, U = undefined> extends Coroutine<U, T> {
         }
         assert(queue.length > 0);
       }));
-      const done = this.cancellation.then(() => []);
-      while (queue.length > 0 && !this.cancellation.canceled) {
+      while (queue.length > 0 && this[Coroutine.alive]) {
         yield queue.shift()!;
       }
-      while (!this.cancellation.canceled) {
+      while (this[Coroutine.alive]) {
         assert(queue.length === 0);
-        const q = await AtomicPromise.race([
-          notifier = notifier || new AtomicFuture(),
-          done,
-        ]);
+        const q = await (notifier = notifier || new AtomicFuture());
         assert(q === queue || q.length === 0);
-        while (q.length > 0 && !this.cancellation.canceled) {
+        while (q.length > 0 && this[Coroutine.alive]) {
           yield q.shift()!;
         }
-        assert(queue.length === 0 || this.cancellation.canceled);
+        assert(queue.length === 0 || !this[Coroutine.alive]);
       }
-      return this.cancellation;
+      throw new Error(`Spica: Colistener: Unreachable.`);
     }, { ...opts, size: 0 });
     void this[Coroutine.init]();
   }
-  private readonly cancellation: Cancellation<U> = new Cancellation();
-  public readonly close: {
-    (this: Colistener<T, void>, value?: U): void;
-    (value: U): void;
-  } = this.cancellation.cancel;
+  public close(this: Colistener<T, void>, value?: U): void;
+  public close(value: U): void;
+  public close(value: U): void {
+    void this[Coroutine.exit](value);
+  }
 }

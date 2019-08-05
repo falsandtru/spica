@@ -98,7 +98,9 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
     void this[Coroutine.init]();
   }
   private readonly cancellation = new Cancellation();
-  public readonly cancel: () => void = this.cancellation.cancel;
+  public cancel(): void {
+    void this.cancellation.cancel();
+  }
 }
 
 function fetch(xhr: XMLHttpRequest, url: string, opts: CofetchOptions): void {
