@@ -7,14 +7,14 @@ export class Colistener<T, U = undefined> extends Coroutine<U, T> {
     opts: CoroutineOptions = {},
   ) {
     super(async function* (this: Colistener<T, U>) {
-      let notifier: AtomicFuture<T[]> | undefined;
-      assert(!notifier);
       const queue: T[] = [];
+      let notifier: AtomicFuture<undefined> = new AtomicFuture();
+      let notifiable: boolean = true;
       void this.finally(listen.call(this, (value: T) => {
         assert(this[Coroutine.alive]);
-        if (notifier && queue.length === 0) {
-          void notifier.bind(queue);
-          notifier = undefined;
+        if (notifiable) {
+          void notifier.bind();
+          notifiable = false;
         }
         void queue.push(value);
         while (queue.length > (opts.size || 1)) {
@@ -22,18 +22,12 @@ export class Colistener<T, U = undefined> extends Coroutine<U, T> {
         }
         assert(queue.length > 0);
       }));
-      while (queue.length > 0) {
-        yield queue.shift()!;
-        assert(this[Coroutine.alive]);
-      }
       while (true) {
-        assert(queue.length === 0);
-        const q = await (notifier = notifier || new AtomicFuture());
-        assert(q === queue || q.length === 0);
-        assert(this[Coroutine.alive]);
-        while (q.length > 0) {
-          yield q.shift()!;
-          assert(this[Coroutine.alive]);
+        await notifier;
+        notifier = new AtomicFuture();
+        notifiable = true;
+        while (queue.length > 0) {
+          yield queue.shift()!;
         }
       }
     }, { ...opts, size: 0 });
