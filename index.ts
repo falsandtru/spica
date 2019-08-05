@@ -16,6 +16,7 @@ export { Coroutine } from './src/coroutine';
 export { Colistener } from './src/colistener';
 export { cofetch } from './src/cofetch';
 export { DataMap } from './src/datamap';
+export { MultiMap } from './src/multimap';
 export { AttrMap } from './src/attrmap';
 export { Cache } from './src/cache';
 export { URL, StandardURL, standardize } from './src/url';

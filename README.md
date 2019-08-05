@@ -30,6 +30,7 @@ $ npm i spica
 - List, Nil
 - HList, HNil
 - DataMap
+- MultiMap
 - AttrMap
 - Cache
 - tick
