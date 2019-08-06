@@ -21,8 +21,8 @@ export interface CoroutineOptions {
   readonly trigger?: string | symbol | ReadonlyArray<string | symbol>;
 }
 interface CoroutinePort<T, R, S> {
+  readonly recv: () => AtomicPromise<IteratorResult<R, T>>;
   readonly send: (msg: S | PromiseLike<S>) => AtomicPromise<IteratorResult<R, T>>;
-  readonly recv: () => AtomicPromise<IteratorResult<R, undefined>>;
   readonly connect: <U>(com: () => Generator<S, U, T | R> | AsyncGenerator<S, U, T | R>) => Promise<U>;
 }
 type Reply<R, T> = (msg: IteratorResult<R, T> | PromiseLike<never>) => void;
@@ -95,19 +95,19 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
           if (!done) {
             const state = this[status].state;
             this[status].state = new AtomicFuture();
-            // Block.
-            void state.bind({ value: value as R, done });
             // Don't block.
+            void state.bind({ value: value as R, done });
             void [reply, reply = noop][0]({ value: value as R, done });
             continue;
           }
           else {
             this[status].alive = false;
-            // Block.
-            void this[status].state.bind({ value: undefined, done });
             // Don't block.
-            void [reply, reply = noop][0]({ value: value as T, done });
-            void this[status].result.bind(value as T);
+            void this[status].state.bind({ value: undefined, done });
+            // Block.
+            this[status].result.bind(value as T)
+              .then(() =>
+                void [reply, reply = noop][0]({ value: value as T, done }));
             return;
           }
         }
@@ -167,12 +167,16 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
       if (!this[status].alive) break;
       yield value!;
     }
-    return;
+    return this.then(() => undefined);
   }
   public readonly [port]: CoroutinePort<T, R, S> = {
     recv: () => {
       !this[status].settings.delay && void this[init]();
-      return this[status].state;
+      return this[status].state
+        .then(({ value, done }) =>
+          done
+            ? this.then(value => ({ value, done }))
+            : { value: value!, done });
     },
     send: (msg: S | PromiseLike<S>): AtomicPromise<IteratorResult<R, T>> => {
       if (!this[status].alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
