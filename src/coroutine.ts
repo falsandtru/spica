@@ -225,12 +225,12 @@ class Status<T, R, S> {
             const [, reply] = this.msgs.shift()!;
             void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
           }
+          return;
         }
         catch (reason) {
           void causeAsyncException(reason);
           continue;
         }
-        return;
       }
     });
   }

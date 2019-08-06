@@ -23,12 +23,12 @@ function run(): void {
       while (cbs.length > 0) {
         void cbs.shift()!();
       }
+      return;
     }
     catch (reason) {
       void causeAsyncException(reason);
       continue;
     }
-    return;
   }
 }
 
