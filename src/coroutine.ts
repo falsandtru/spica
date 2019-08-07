@@ -20,11 +20,6 @@ export interface CoroutineOptions {
   readonly delay?: boolean;
   readonly trigger?: string | symbol | ReadonlyArray<string | symbol>;
 }
-interface CoroutinePort<T, R, S> {
-  readonly recv: () => AtomicPromise<IteratorResult<R, T>>;
-  readonly send: (msg: S | PromiseLike<S>) => AtomicPromise<IteratorResult<R, T>>;
-  readonly connect: <U>(com: () => Generator<S, U, T | R> | AsyncGenerator<S, U, T | R>) => Promise<U>;
-}
 type Reply<R, T> = (msg: IteratorResult<R, T> | PromiseLike<never>) => void;
 
 export interface CoroutineInterface<T = unknown, R = unknown, _ = unknown> extends Promise<T>, AsyncIterable<R> {
@@ -145,7 +140,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
     void tick(() => void this[Coroutine.init]());
   }
   private readonly [status]: Status<T, R, S>;
-  protected get [alive](): boolean {
+  public get [alive](): boolean {
     return this[status].alive;
   }
   protected [init]: () => void;
@@ -169,8 +164,8 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
     }
     return this.then(() => undefined);
   }
-  public readonly [port]: CoroutinePort<T, R, S> = {
-    recv: () => {
+  public readonly [port] = {
+    recv: (): AtomicPromise<IteratorResult<R, T>> => {
       !this[status].settings.delay && void this[init]();
       return this[status].state
         .then(({ value, done }) =>
@@ -203,7 +198,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
         reply = (await this[port].send(value as S)).value;
       }
     },
-  };
+  } as const;
 }
 Coroutine.prototype.then = function () {
   !this[status].settings.delay && void this[init]();
