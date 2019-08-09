@@ -71,7 +71,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     // @ts-ignore #31251
     void (this.constructor as typeof Supervisor).instances.add(this);
   }
-  protected readonly state = new AtomicFuture();
+  private readonly state = new AtomicFuture();
   private destructor(reason: unknown): void {
     assert(this.alive === true);
     assert(this.available === true);
