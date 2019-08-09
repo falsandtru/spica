@@ -34,6 +34,11 @@ abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = un
   public [Coroutine.terminate](reason?: unknown): void {
     void this.terminate(reason);
   }
+  public [Coroutine.port] = {
+    recv: () => { throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot use coroutine port.`); },
+    send: () => { throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot use coroutine port.`); },
+    connect: () => { throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot use coroutine port.`); },
+  } as const;
 }
 namespace Supervisor2018 {
   export import Process = Supervisor.Process;

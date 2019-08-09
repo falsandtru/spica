@@ -46,20 +46,10 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     super((resolve, reject) => {
       cb = [resolve, reject];
       state = new AtomicFuture();
-      if (this.then === AtomicPromise.prototype.then) return state;
-      return function* (this: Supervisor<N, P, R, S>) {
-        assert(this.available);
-        while (this.available) {
-          const [name, param, callback = undefined, timeout = undefined]: [N, P, (Supervisor.Callback<R> | number)?, number?] = yield;
-          assert(this.available);
-          typeof callback === 'function'
-            ? void this.call(name, param, callback, timeout)
-            : void this.call(name, param, callback);
-        }
-        return state;
-      }.call(this);
-    // @ts-ignore
-    }, { size: typeof opts.size === 'number' ? opts.size : Infinity });
+      return this.then === AtomicPromise.prototype.then
+        ? state
+        : function* () { return state; }();
+    });
     var cb!: [() => void, () => void];
     var state!: AtomicFuture;
     cb || void this.then();
