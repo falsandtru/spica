@@ -144,10 +144,6 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     return this.call_(typeof name === 'string' ? name : new NamePool(this.workers, name), param, callback, timeout);
   }
   private call_(name: N | NamePool<N>, param: P, callback: Supervisor.Callback<R> | number, timeout: number): AtomicPromise<R> | void {
-    if (!this.available && typeof callback === 'function') {
-      void new AtomicPromise(() => void this.throwErrorIfNotAvailable()).catch(err => void callback(undefined as any, err as Error));
-    }
-    void this.throwErrorIfNotAvailable();
     if (typeof callback === 'number') return new AtomicPromise<R>((resolve, reject) =>
       void this.call_(name, param, (result, err) => err ? reject(err) : resolve(result), callback));
     void this.messages.push([
@@ -156,7 +152,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
       callback,
       Date.now() + timeout,
     ]);
-    while (this.messages.length > this.settings.size) {
+    while (this.messages.length > (this.available ? this.settings.size : 0)) {
       const [name, param, callback] = this.messages.shift()!;
       const names = typeof name === 'string'
         ? [name]
@@ -169,6 +165,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
         void causeAsyncException(reason);
       }
     }
+    void this.throwErrorIfNotAvailable();
     void this.schedule();
     if (timeout <= 0) return;
     if (timeout === Infinity) return;
@@ -201,7 +198,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     return result;
   }
   public refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason?: unknown) => boolean][] {
-    void this.throwErrorIfNotAvailable();
+    assert(this.available || this.workers.size === 0);
     return name === undefined
       ? [...this.workers.values()].map(convert)
       : this.workers.has(name)
