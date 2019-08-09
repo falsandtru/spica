@@ -12,7 +12,7 @@ const status = Symbol();
 const queue = Symbol();
 const resume = Symbol();
 
-export class AtomicPromise<T = unknown> implements Promise<T> {
+export class AtomicPromise<T = undefined> implements Promise<T> {
   public static get [Symbol.species]() {
     return AtomicPromise;
   }

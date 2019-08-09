@@ -6,7 +6,7 @@ describe('Benchmark:', function () {
 
   describe('AtomicPromise', function () {
     it('new', function (done) {
-      benchmark('AtomicPromise new', () => new AtomicPromise(resolve => resolve(0)), done);
+      benchmark('AtomicPromise new', () => new AtomicPromise<number>(resolve => resolve(0)), done);
     });
 
     it('resolve', function (done) {

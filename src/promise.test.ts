@@ -5,8 +5,8 @@ describe('Unit: lib/promise', () => {
     it('new', async () => {
       assert(new AtomicPromise(() => undefined) instanceof AtomicPromise);
       assert(new AtomicPromise(() => undefined) instanceof Promise === false);
-      assert(await new AtomicPromise(res => res(0)) === 0);
-      assert(await new AtomicPromise((res, rej) => (res(0), res(1), rej())) === 0);
+      assert(await new AtomicPromise<number>(res => res(0)) === 0);
+      assert(await new AtomicPromise<number>((res, rej) => (res(0), res(1), rej())) === 0);
     });
 
     it('resolve', async () => {

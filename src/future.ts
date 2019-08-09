@@ -22,7 +22,7 @@ export class Future<T = unknown> extends Promise<T> {
   };
 }
 
-export class AtomicFuture<T = unknown> extends AtomicPromise<T> implements Future<T> {
+export class AtomicFuture<T = undefined> extends AtomicPromise<T> implements Future<T> {
   static get [Symbol.species]() {
     return AtomicPromise;
   }
