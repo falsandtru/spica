@@ -167,6 +167,7 @@ describe('Unit: lib/maybe', () => {
         const m = yield Just(2);
         return Just(n + m);
       }).extract());
+      // @ts-ignore #32728
       assert(0 === Maybe.do(function* () {
         yield Nothing;
         return Just(1);

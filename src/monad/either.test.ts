@@ -162,6 +162,7 @@ describe('Unit: lib/either', () => {
         const m = yield Right(2);
         return Right(n + m);
       }).extract());
+      // @ts-ignore #32728
       assert(0 === Either.do(function* () {
         yield Left(0);
         return Right(1);
