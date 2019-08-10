@@ -77,7 +77,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
       void this.events_.loss.emit([names[0]], [names[0], param]);
     }
     assert(this.messages.length === 0);
-    void Object.freeze(this.messages);
+    assert(!Object.isFrozen(this.messages));
     this.alive = false;
     // @ts-ignore #31251
     void (this.constructor as typeof Supervisor).instances.delete(this);
