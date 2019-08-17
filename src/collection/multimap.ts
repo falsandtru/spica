@@ -13,9 +13,9 @@ export class MultiMap<K, V> implements Collection<K, V> {
     return (this.store.get(key) || []).shift();
   }
   public set(key: K, val: V): this {
-    void this.store.has(key)
-      ? this.store.get(key)!.push(val)
-      : this.store.set(key, [val]);
+    this.store.has(key)
+      ? void this.store.get(key)!.push(val)
+      : void this.store.set(key, [val]);
     return this;
   }
   public has(key: K): boolean {
