@@ -10,7 +10,7 @@ export class MultiMap<K, V> implements Collection<K, V> {
     }
   }
   public get(key: K): V | undefined {
-    return (this.store.get(key) || []).shift();
+    return (this.store.get(key) || [])[0];
   }
   public set(key: K, val: V): this {
     this.store.has(key)
