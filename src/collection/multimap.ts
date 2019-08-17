@@ -12,6 +12,9 @@ export class MultiMap<K, V> implements Collection<K, V> {
   public get(key: K): V | undefined {
     return (this.store.get(key) || [])[0];
   }
+  public take(key: K, size: number): V[] {
+    return (this.store.get(key) || []).splice(0, size);
+  }
   public set(key: K, val: V): this {
     this.store.has(key)
       ? void this.store.get(key)!.push(val)
