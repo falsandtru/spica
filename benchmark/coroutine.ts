@@ -6,11 +6,11 @@ describe('Benchmark:', function () {
 
   describe('Coroutine', function () {
     it('new', function (done) {
-      benchmark('Coroutine new', () => new Coroutine(function* () { return undefined; }), done);
+      benchmark('Coroutine new', () => new Coroutine(function* () { return undefined; }, { size: 1 }), done);
     });
 
-    it.skip('new async', function (done) {
-      benchmark('Coroutine new async', () => new Coroutine(async function* () { return undefined; }), done);
+    it('new async', function (done) {
+      benchmark('Coroutine new async', () => new Coroutine(async function* () { return undefined; }, { size: 1 }), done);
     });
 
     it('iterate', function (done) {

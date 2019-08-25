@@ -2,7 +2,7 @@ import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future'; 
 import { DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
-import { clock, wait, tick } from './clock';
+import { wait, tick } from './clock';
 import { causeAsyncException } from './exception';
 import { noop } from './noop';
 
@@ -16,7 +16,7 @@ const port = Symbol();
 export interface CoroutineOptions {
   readonly size?: number;
   readonly interval?: number;
-  readonly resume?: () => PromiseLike<void>;
+  readonly resume?: () => PromiseLike<void> | void;
   readonly delay?: boolean;
   readonly trigger?: string | symbol | ReadonlyArray<string | symbol>;
 }
@@ -56,9 +56,9 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
       try {
         this[Coroutine.init] = noop;
         if (!this[status].alive) return;
-        const resume = (): AtomicPromise<S> =>
+        const resume = (): S | PromiseLike<S> =>
           this[status].msgs.length > 0
-            ? AtomicPromise.resolve(([, reply] = this[status].msgs.shift()!)[0])
+            ? ([, reply] = this[status].msgs.shift()!)[0]
             : this[status].resume.then(resume);
         const iter = gen.call(this);
         let cnt = 0;
@@ -71,12 +71,14 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
             : await AtomicPromise.all([
                 // Don't block.
                 this[status].settings.size === 0
-                  ? AtomicPromise.resolve(undefined as S | undefined)
+                  ? undefined
                   : resume(),
                 // Don't block.
                 AtomicPromise.all([
                   this[status].settings.resume(),
-                  wait(this[status].settings.interval),
+                  this[status].settings.interval > 0
+                    ? wait(this[status].settings.interval)
+                    : undefined,
                 ]),
               ]);
           assert(msg instanceof Promise === false);
@@ -241,7 +243,7 @@ class Status<T, R, S> {
   public readonly settings: DeepImmutable<DeepRequired<CoroutineOptions>> = {
     size: 0,
     interval: 0,
-    resume: () => clock,
+    resume: () => undefined,
     delay: false,
     trigger: undefined as any,
   };

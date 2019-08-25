@@ -54,10 +54,10 @@ describe('Unit: lib/promise', () => {
 
     it('atomic', async () => {
       let cnt = 0;
-      AtomicPromise.resolve().then(() => assert(cnt === 0));
-      assert(++cnt === 1);
-      AtomicPromise.reject().catch(() => assert(cnt === 1));
+      AtomicPromise.resolve().then(() => assert(++cnt === 1));
       assert(++cnt === 2);
+      AtomicPromise.reject().catch(() => assert(++cnt === 2));
+      assert(++cnt === 4);
     });
 
     it('all', async () => {
