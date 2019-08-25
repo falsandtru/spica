@@ -66,7 +66,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
           void ++cnt;
           const [msg] = cnt === 1
             // Don't block.
-            ? [undefined as S | undefined]
+            ? [undefined]
             // Block.
             : await AtomicPromise.all([
                 // Don't block.
