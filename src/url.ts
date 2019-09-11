@@ -22,7 +22,7 @@ export class URL<T extends string> {
   }
   public get resource(): URL.Resource<T> {
     return `${this.origin}${this.path}`
-      .replace(/\/?\??$|\/(?=\?)/, '') as any;
+      .replace(/\?(?=#|$)/, '') as any;
   }
   public get origin(): URL.Origin<T> {
     return `${this.protocol}//${this.host}` as any;
