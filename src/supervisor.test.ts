@@ -310,6 +310,7 @@ describe('Unit: lib/supervisor', function () {
       const ssv = new class TestSupervisor extends Supervisor<''> { }();
       assert(ssv instanceof Coroutine);
       ssv.register('', sv);
+      assert.doesNotThrow(() => ssv[Coroutine.port]);
       assert.throws(() => ssv[Coroutine.port].recv());
       assert.throws(() => ssv[Coroutine.port].send());
       assert.throws(() => ssv[Coroutine.port].connect());
