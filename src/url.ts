@@ -21,8 +21,7 @@ export class URL<T extends string> {
     return this.url.href as any;
   }
   public get resource(): URL.Resource<T> {
-    return `${this.origin}${this.path}`
-      .replace(/\?(?=#|$)/, '') as any;
+    return `${this.origin}${this.pathname}${this.query === '?' ? '' : this.query}` as any;
   }
   public get origin(): URL.Origin<T> {
     return `${this.protocol}//${this.host}` as any;
