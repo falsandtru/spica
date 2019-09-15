@@ -2,6 +2,7 @@ import { Coroutine } from './coroutine';
 import { Colistener } from './colistener';
 import { Cancellation } from './cancellation';
 import { Collection } from './collection';
+import { URL } from './url';
 
 export interface CofetchOptions {
   method?: string;
@@ -26,7 +27,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
   ) {
     super(async function* (this: Cofetch) {
       void this.finally(this.cancel);
-      url = new URL(url, typeof location === 'object' ? location.href : undefined).href.split('#', 1)[0];
+      url = new URL(url).reference;
       opts = { ...opts };
       opts.method = (opts.method || 'GET').toUpperCase();
       opts.headers = new Headers(opts.headers);
