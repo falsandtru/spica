@@ -1,4 +1,4 @@
-import { StandardURL, formatURLForEdge } from './url/domain/format';
+import { formatURLForEdge } from './url/domain/format';
 
 export { StandardURL, standardize } from './url/domain/format';
 
@@ -7,8 +7,9 @@ const location = { get href() { return global['location'] && global['location'].
 
 export class URL<T extends string> {
   constructor(url: URL.Reference<T> | URL.Resource<T> | URL.Origin<T>, base?: string)
-  constructor(url: URL.Reference<T> | URL.Resource<T> | URL.Origin<T> | URL.Path<T> | URL.Pathname<T> | URL.Query<T> | URL.Fragment<T>, base?: T)
-  constructor(url: T, base?: T extends StandardURL ? string : T)
+  constructor(url: URL.Reference<T> | URL.Resource<T> | URL.Origin<T> | URL.Path<T> | URL.Pathname<T> | URL.Query<T> | URL.Fragment<T>, base?: string)
+  constructor(url: URLFragment<string> & string, base?: string)
+  constructor(url: T, base?: string)
   constructor(url: string, base: string = location.href) {
     this.url = new global.URL(formatURLForEdge(url, base), base);
     assert(this.url.href.startsWith(this.url.protocol));
@@ -25,19 +26,19 @@ export class URL<T extends string> {
   public get origin(): URL.Origin<T> {
     return `${this.protocol}//${this.host}` as any;
   }
-  public get scheme(): URL.Scheme<T> {
+  public get scheme(): URL.Scheme {
     return this.url.protocol.slice(0, -1) as any;
   }
-  public get protocol(): URL.Protocol<T> {
+  public get protocol(): URL.Protocol {
     return this.url.protocol as any;
   }
-  public get host(): URL.Host<T> {
+  public get host(): URL.Host {
     return this.url.host as any;
   }
-  public get hostname(): URL.Hostname<T> {
+  public get hostname(): URL.Hostname {
     return this.url.hostname as any;
   }
-  public get port(): URL.Port<T> {
+  public get port(): URL.Port {
     return this.url.port as any;
   }
   public get path(): URL.Path<T> {
@@ -61,11 +62,11 @@ export namespace URL {
   export type Reference<T extends string> = URLFragment<'reference'> & T;
   export type Resource<T extends string> = URLFragment<'resource'> & T;
   export type Origin<T extends string> = URLFragment<'origin'> & T;
-  export type Scheme<T extends string> = URLFragment<'scheme'> & T;
-  export type Protocol<T extends string> = URLFragment<'protocol'> & T;
-  export type Host<T extends string> = URLFragment<'host'> & T;
-  export type Hostname<T extends string> = URLFragment<'hostname'> & T;
-  export type Port<T extends string> = URLFragment<'port'> & T;
+  export type Scheme = URLFragment<'scheme'> & string;
+  export type Protocol = URLFragment<'protocol'> & string;
+  export type Host = URLFragment<'host'> & string;
+  export type Hostname = URLFragment<'hostname'> & string;
+  export type Port = URLFragment<'port'> & string;
   export type Path<T extends string> = URLFragment<'path'> & T;
   export type Pathname<T extends string> = URLFragment<'pathname'> & T;
   export type Query<T extends string> = URLFragment<'query'> & T;
