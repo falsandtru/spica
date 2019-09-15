@@ -65,5 +65,5 @@ function normalize(url: string, base: string): NormalizedURL {
 }
 
 export function formatURLForEdge(url: string, base: string = location.href): string {
-  return (url.trim() || base);
+  return url.trim() || base;
 }
