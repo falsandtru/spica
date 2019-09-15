@@ -1,7 +1,8 @@
 import { curry, Curried2 } from './curry';
 
-export function flip<a, b, c>(f: (a: a) => (b: b) => c): Curried2<b, a, c>
-export function flip<a, b, c>(f: (a: a, b: b) => c): Curried2<b, a, c>
+export function flip<a, b, c>(f: (a: a) => (b: b) => c): (b: b) => (a: a) => c
+export function flip<a, b, c>(f: (a: a, b: b) => c): (b: b, a: a) => c
+export function flip<a, b, c>(f: ((a: a, b: b) => c) | ((a: a) => (b: b) => c)): Curried2<b, a, c>
 export function flip<a, b, c>(f: ((a: a, b: b) => c) | ((a: a) => (b: b) => c)): Curried2<b, a, c> {
   return curry((b: b, a: a) =>
     f.length > 1
