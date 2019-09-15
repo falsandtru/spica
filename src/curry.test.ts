@@ -2,10 +2,6 @@ import { curry } from './curry';
 
 describe('Unit: lib/curry', () => {
   describe('curry', () => {
-    it('0', () => {
-      assert(curry(() => 0)() === 0);
-    });
-
     it('1', () => {
       assert(curry((a: number) => a)(1) === 1);
     });
@@ -23,15 +19,11 @@ describe('Unit: lib/curry', () => {
     });
 
     it('extra parameters', () => {
-      assert.deepStrictEqual([].map(curry(() => 0)), []);
-      assert.deepStrictEqual([1].map(curry(() => 0)), [0]);
       assert.deepStrictEqual([1].map(curry((a: number) => a)), [1]);
-      assert.deepStrictEqual([1].map(curry((a: number, b: number) => [a, b])), [[1, 0]]);
-      assert.deepStrictEqual([1].map(curry((...as: unknown[]) => as)), [[1, 0, [1]]]);
+      assert.deepStrictEqual([1].map(curry((a: number, b: number = NaN) => [a, b])), [[1, 0]]);
     });
 
     it('recursive', () => {
-      assert(curry(curry(() => 0))() === 0);
       assert(curry(curry((a: number) => a))(1) === 1);
       assert(curry(curry((a: number, b: number) => a + b))(1)(2) === 3);
       assert(curry(curry((a: number, b: number) => a + b)(1))(2) === 3);

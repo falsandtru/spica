@@ -1,6 +1,3 @@
-export interface Curried0<z> {
-  (): z;
-}
 export interface Curried1<a, z> {
   (a: a): z;
 }
@@ -27,7 +24,6 @@ export interface Curried5<a, b, c, d, e, z> {
   (a: a): Curried4<b, c, d, e, z>;
 }
 export interface Curry {
-  <z>(f: () => z): Curried0<z>;
   <a, z>(f: (a: a) => z): Curried1<a, z>;
   <a, b, z>(f: (a: a, b: b) => z): Curried2<a, b, z>;
   <a, b, c, z>(f: (a: a, b: b, c: c) => z): Curried3<a, b, c, z>;
@@ -36,9 +32,7 @@ export interface Curry {
 }
 
 export const curry: Curry = <Curry>(<z>(f: () => z) =>
-  f.length === 0
-    ? f
-    : apply(f, []));
+  apply(f, []));
 
 function apply(f: (...xs: any[]) => any, xs: any[]) {
   return xs.length >= f.length
