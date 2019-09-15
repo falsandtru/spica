@@ -96,7 +96,6 @@ describe('Unit: lib/url', () => {
     it('standard', () => {
       assert((): URL<StandardURL> => new URL(standardize('')));
       assert((): URL<StandardURL> => new URL(standardize(''), location.href));
-      assert((): URL<StandardURL> => new URL<StandardURL>(standardize(''), location.href));
       assert((): URL<StandardURL> => new URL(new URL(standardize('')).reference, location.href));
       assert((): URL<StandardURL> => new URL(new URL(standardize('')).path, standardize(location.href)));
     });

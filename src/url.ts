@@ -7,8 +7,7 @@ const location = { get href() { return global['location'] && global['location'].
 
 export class URL<T extends string> {
   constructor(url: URL.Reference<T> | URL.Resource<T> | URL.Origin<T>, base?: string)
-  constructor(url: URL.Path<T> | URL.Pathname<T> | URL.Query<T> | URL.Fragment<T>, base?: T)
-  constructor(url: URLFragment<string> & T, base?: T extends StandardURL ? string : T)
+  constructor(url: URL.Reference<T> | URL.Resource<T> | URL.Origin<T> | URL.Path<T> | URL.Pathname<T> | URL.Query<T> | URL.Fragment<T>, base?: T)
   constructor(url: T, base?: T extends StandardURL ? string : T)
   constructor(url: string, base: string = location.href) {
     this.url = new global.URL(formatURLForEdge(url, base), base);
