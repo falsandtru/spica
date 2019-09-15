@@ -1,5 +1,9 @@
 import { Encoded } from '../attribute/encode';
 import { Normalized } from '../attribute/normalize';
+import { memoize } from '../../memoization';
+import { Cache } from '../../cache';
+import { flip } from '../../flip';
+import { uncurry } from '../../uncurry';
 
 const global: typeof globalThis = typeof globalThis !== 'undefined' && globalThis || eval('self');
 const location = { get href() { return global['location'] && global['location'].href; } };
@@ -61,9 +65,11 @@ type NormalizedURL = URL<Normalized>;
 function normalize(url: URL<unknown>, base: string): void
 function normalize(url: string, base: string): NormalizedURL
 function normalize(url: string, base: string): NormalizedURL {
-  return new global.URL(formatURLForEdge(url, base), base).href as NormalizedURL;
+  return newURL(url, base).href as NormalizedURL;
 }
 
-export function formatURLForEdge(url: string, base: string = location.href): string {
+export const newURL: (url: string, base: string) => globalThis.URL = flip(uncurry(memoize((base: string) => memoize((url: string) => Object.freeze(new global.URL(formatURLForEdge(url, base), base)), new Cache(9)), new Cache(9))));
+
+function formatURLForEdge(url: string, base: string = location.href): string {
   return url.trim() || base;
 }

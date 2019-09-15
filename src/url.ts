@@ -1,4 +1,4 @@
-import { formatURLForEdge } from './url/domain/format';
+import { newURL } from './url/domain/format';
 
 export { StandardURL, standardize } from './url/domain/format';
 
@@ -11,7 +11,7 @@ export class URL<T extends string> {
   constructor(url: URLSegment<string> & string, base?: string)
   constructor(url: T, base?: string)
   constructor(url: string, base: string = location.href) {
-    this.url = new global.URL(formatURLForEdge(url, base), base);
+    this.url = newURL(url, base);
     assert(this.url.href.startsWith(this.url.protocol));
     Object.freeze(this);
   }
