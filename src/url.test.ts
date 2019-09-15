@@ -58,27 +58,24 @@ describe('Unit: lib/url', () => {
     });
 
     it('resource', () => {
-      assert(new URL(origin + dir).resource === origin + dir);
-      assert(new URL(origin + dir + file).resource === origin + dir + file);
       assert(new URL(origin + dir + file + query + fragment).resource === origin + dir + file + query);
-      assert(new URL(origin + dir + file + '?').resource === origin + dir + file);
-      assert(new URL(origin + dir + file + '??').resource === origin + dir + file + '??');
-      assert(new URL(origin + dir + file + '?#').resource === origin + dir + file);
       assert(new URL(origin + '/?').resource === origin + '/');
       assert(new URL(origin + '/??').resource === origin + '/??');
       assert(new URL(origin + '/?#').resource === origin + '/');
-      assert(new URL(origin + dir + query).resource === origin + dir + query);
+      assert(new URL(origin + dir + file + '?').resource === origin + dir + file);
+      assert(new URL(origin + dir + file + '??').resource === origin + dir + file + '??');
+      assert(new URL(origin + dir + file + '?#').resource === origin + dir + file);
     });
 
     it('path', () => {
-      assert(new URL(dir + file + query + fragment).path === dir + file + query);
       assert(new URL(origin).path === '/');
+      assert(new URL(dir + file + query + fragment).path === dir + file + query);
       assert(new URL('/').path === '/');
     });
 
     it('pathname', () => {
-      assert(new URL(dir + file + query + fragment).pathname === dir + file);
       assert(new URL(origin).pathname === '/');
+      assert(new URL(dir + file + query + fragment).pathname === dir + file);
       assert(new URL('/').pathname === '/');
     });
 
