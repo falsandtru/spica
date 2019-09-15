@@ -68,7 +68,7 @@ function normalize(url: string, base: string): NormalizedURL {
   return newURL(url, base).href as NormalizedURL;
 }
 
-export const newURL: (url: string, base: string) => globalThis.URL = flip(uncurry(memoize((base: string) => memoize((url: string) => Object.freeze(new global.URL(formatURLForEdge(url, base), base)), new Cache(9)), new Cache(9))));
+export const newURL: (url: string, base: string) => Readonly<globalThis.URL> = flip(uncurry(memoize((base: string) => memoize((url: string) => new global.URL(formatURLForEdge(url, base), base), new Cache(9)), new Cache(9))));
 
 function formatURLForEdge(url: string, base: string = location.href): string {
   return url.trim() || base;

@@ -13,7 +13,6 @@ export class URL<T extends string> {
   constructor(url: string, base: string = location.href) {
     this.url = newURL(url, base);
     assert(this.url.href.startsWith(this.url.protocol));
-    Object.freeze(this);
   }
   private readonly url: globalThis.URL;
   public get reference(): URL.Reference<T> {
