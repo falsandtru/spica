@@ -8,7 +8,7 @@ const location = { get href() { return global['location'] && global['location'].
 export class URL<T extends string> {
   constructor(url: URL.Reference<T> | URL.Resource<T> | URL.Origin<T>, base?: string)
   constructor(url: URL.Reference<T> | URL.Resource<T> | URL.Origin<T> | URL.Path<T> | URL.Pathname<T> | URL.Query<T> | URL.Fragment<T>, base?: string)
-  constructor(url: URLFragment<string> & string, base?: string)
+  constructor(url: URLSegment<string> & string, base?: string)
   constructor(url: T, base?: string)
   constructor(url: string, base: string = location.href) {
     this.url = new global.URL(formatURLForEdge(url, base), base);
@@ -59,20 +59,20 @@ export class URL<T extends string> {
   }
 }
 export namespace URL {
-  export type Reference<T extends string> = URLFragment<'reference'> & T;
-  export type Resource<T extends string> = URLFragment<'resource'> & T;
-  export type Origin<T extends string> = URLFragment<'origin'> & T;
-  export type Scheme = URLFragment<'scheme'> & string;
-  export type Protocol = URLFragment<'protocol'> & string;
-  export type Host = URLFragment<'host'> & string;
-  export type Hostname = URLFragment<'hostname'> & string;
-  export type Port = URLFragment<'port'> & string;
-  export type Path<T extends string> = URLFragment<'path'> & T;
-  export type Pathname<T extends string> = URLFragment<'pathname'> & T;
-  export type Query<T extends string> = URLFragment<'query'> & T;
-  export type Fragment<T extends string> = URLFragment<'fragment'> & T;
+  export type Reference<T extends string> = URLSegment<'reference'> & T;
+  export type Resource<T extends string> = URLSegment<'resource'> & T;
+  export type Origin<T extends string> = URLSegment<'origin'> & T;
+  export type Scheme = URLSegment<'scheme'> & string;
+  export type Protocol = URLSegment<'protocol'> & string;
+  export type Host = URLSegment<'host'> & string;
+  export type Hostname = URLSegment<'hostname'> & string;
+  export type Port = URLSegment<'port'> & string;
+  export type Path<T extends string> = URLSegment<'path'> & T;
+  export type Pathname<T extends string> = URLSegment<'pathname'> & T;
+  export type Query<T extends string> = URLSegment<'query'> & T;
+  export type Fragment<T extends string> = URLSegment<'fragment'> & T;
 }
 
-declare class URLFragment<T extends string> {
+declare class URLSegment<T extends string> {
   private readonly URL: T;
 }
