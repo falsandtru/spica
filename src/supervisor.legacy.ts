@@ -8,6 +8,10 @@ import { sqid } from './sqid';
 import { noop } from './noop';
 import { causeAsyncException } from './exception';
 
+declare const Array: {
+  isArray(target: any): target is readonly any[];
+};
+
 export interface SupervisorOptions {
   readonly name?: string;
   readonly size?: number;
@@ -290,14 +294,14 @@ export namespace Supervisor {
     export type Init<S> = (state: S) => S;
     export type Main<P, R, S> = (param: P, state: S, kill: (reason?: unknown) => void) => Result<R, S> | PromiseLike<Result<R, S>>;
     export type Exit<S> = (reason: unknown, state: S) => void;
-    export type Result<R, S> = [R, S] | { reply: R; state: S; };
+    export type Result<R, S> = readonly [R, S] | { reply: R; state: S; };
   }
   export type Callback<R> = (reply: R, error?: Error) => void;
   export namespace Event {
     export namespace Data {
-      export type Init<N extends string, P, R, S> = [N, Process<P, R, S>, S];
-      export type Loss<N extends string, P> = [N, P];
-      export type Exit<N extends string, P, R, S> = [N, Process<P, R, S>, S, unknown];
+      export type Init<N extends string, P, R, S> = readonly [N, Process<P, R, S>, S];
+      export type Loss<N extends string, P> = readonly [N, P];
+      export type Exit<N extends string, P, R, S> = readonly [N, Process<P, R, S>, S, unknown];
     }
   }
 }
