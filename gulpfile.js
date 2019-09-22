@@ -125,6 +125,7 @@ gulp.task('karma:dev', done =>
     preprocessors: {
       'dist/*.js': ['espower']
     },
+    singleRun: false
   }, done).start());
 
 gulp.task('karma:test', done =>
