@@ -33,7 +33,7 @@ export function debounce<T>(delay: number, callback: (last: T, buffer: T[]) => v
         if (timer > 0) return;
         assert(buffer.length > 0);
         void callback(buffer[buffer.length - 1], flush());
-      }, delay);
+      }, buffer.length > 1 ? delay : 0);
     }, delay);
   };
 
