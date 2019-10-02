@@ -2,7 +2,6 @@ import { StandardURL, newURL } from './url/domain/format';
 
 export { StandardURL, standardize } from './url/domain/format';
 
-const global: typeof globalThis = typeof globalThis !== 'undefined' && globalThis || eval('self');
 const location = { get href() { return global['location'] && global['location'].href; } };
 
 export class URL<T extends string> {
@@ -14,7 +13,7 @@ export class URL<T extends string> {
     this.url = newURL(url, base);
     assert(this.url.href.startsWith(this.url.protocol));
   }
-  private readonly url: globalThis.URL;
+  private readonly url: global.URL;
   public get reference(): URL.Reference<T> {
     assert(this.url.href === `${this.origin}${this.path}${this.fragment}`);
     return this.url.href as any;

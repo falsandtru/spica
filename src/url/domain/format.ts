@@ -5,7 +5,6 @@ import { Cache } from '../../cache';
 import { flip } from '../../flip';
 import { uncurry } from '../../uncurry';
 
-const global: typeof globalThis = typeof globalThis !== 'undefined' && globalThis || eval('self');
 const location = { get href() { return global['location'] && global['location'].href; } };
 
 namespace Identifier {
@@ -68,7 +67,7 @@ function normalize(url: string, base: string): NormalizedURL {
   return newURL(url, base).href as NormalizedURL;
 }
 
-export const newURL: (url: string, base: string) => Readonly<globalThis.URL> = flip(uncurry(memoize((base: string) => memoize((url: string) => new global.URL(formatURLForEdge(url, base), base), new Cache(9)), new Cache(9))));
+export const newURL: (url: string, base: string) => Readonly<global.URL> = flip(uncurry(memoize((base: string) => memoize((url: string) => new global.URL(formatURLForEdge(url, base), base), new Cache(9)), new Cache(9))));
 
 function formatURLForEdge(url: string, base: string = location.href): string {
   return url.trim() || base;

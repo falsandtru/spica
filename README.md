@@ -42,6 +42,7 @@ $ npm i spica
 - extend
 - concat
 - sort
+- global
 
 ## Browsers
 
