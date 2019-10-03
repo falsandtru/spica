@@ -11,6 +11,10 @@ describe('Unit: lib/flip', () => {
       assert(flip(curry((n: number, m: number) => n / m))(1)(0) === 0);
     });
 
+    it('generic', () => {
+      assert(flip(<T extends 0, U extends 1>(n: T, m: U) => n / m)(1, 0) === 0);
+    });
+
   });
 
 });
