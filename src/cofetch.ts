@@ -3,6 +3,7 @@ import { Colistener } from './colistener';
 import { Cancellation } from './cancellation';
 import { Collection } from './collection';
 import { URL } from './url';
+import { concat } from './concat';
 
 export interface CofetchOptions {
   method?: string;
@@ -70,7 +71,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
                     xhr.getResponseHeader('Cache-Control')
                       ? xhr.getResponseHeader('Cache-Control')!.trim().split(/\s*,\s*/)
                           .filter(v => v.length > 0)
-                          .map(v => v.split('=').concat('') as [string, string])
+                          .map(v => concat(v.split('='), ['']) as [string, string])
                       : []);
                   if (xhr.getResponseHeader('ETag') && !cc.has('no-store')) {
                     void memory.set(xhr, {
