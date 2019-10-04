@@ -12,7 +12,7 @@ export class AttrMap<C, K, V> {
   }
   private readonly store = new this.KeyMap<C, Collection<K, V>>();
   public get(ctx: C, key: K): V | undefined {
-    return this.store.get(ctx) && this.store.get(ctx)!.get(key)!;
+    return this.store.get(ctx)?.get(key);
   }
   public set(ctx: C, key: K, val: V): this {
     const store = this.store.has(ctx)
@@ -26,15 +26,13 @@ export class AttrMap<C, K, V> {
   public has(ctx: C, key?: K): boolean {
     return arguments.length === 1
       ? this.store.has(ctx)
-      : this.store.has(ctx) && this.store.get(ctx)!.has(key!);
+      : this.store.get(ctx)?.has(key!) ?? false;
   }
   public delete(ctx: C): boolean
   public delete(ctx: C, key: K): boolean
   public delete(ctx: C, key?: K): boolean {
     return arguments.length === 1
       ? this.store.delete(ctx)
-      : this.store.has(ctx)
-        ? this.store.get(ctx)!.delete(key!)
-        : false;
+      : this.store.get(ctx)?.delete(key!) ?? false;
   }
 }
