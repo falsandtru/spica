@@ -1,5 +1,4 @@
 import { AtomicPromise } from './promise';
-import { AtomicFuture } from './future';
 import { causeAsyncException } from './exception';
 import { Maybe, Just, Nothing } from './monad/maybe';
 import { Either, Left, Right } from './monad/either';
@@ -24,8 +23,8 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
   }
   constructor(cancelees: Iterable<Cancellee<L>> = []) {
     super(res => resolve = res);
-    var resolve!: (v: PromiseLike<L>) => void;
-    void resolve(this.state);
+    var resolve!: (v: L | PromiseLike<never>) => void;
+    this.resolve = resolve;
     for (const cancellee of cancelees) {
       void cancellee.register(this.cancel);
     }
@@ -33,7 +32,7 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
   private alive = true;
   private canceled_ = false;
   private reason?: L;
-  private readonly state: AtomicFuture<L> = new AtomicFuture();
+  private resolve: (reason: L | PromiseLike<never>) => void;
   private readonly listeners: Set<(reason: L) => void> = new Set();
   public readonly register = (listener: (reason: L) => void) => {
     assert(listener);
@@ -59,7 +58,7 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
     this.alive = false;
     this.canceled_ = true;
     this.reason = reason!;
-    this.state.bind(this.reason);
+    this.resolve(this.reason);
     void Object.freeze(this.listeners);
     void Object.freeze(this);
     for (const listener of this.listeners) {
@@ -69,7 +68,7 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
   public readonly close = (reason?: unknown) => {
     if (!this.alive) return;
     this.alive = false;
-    void this.state.bind(AtomicPromise.reject(reason));
+    void this.resolve(AtomicPromise.reject(reason));
     void Object.freeze(this.listeners);
     void Object.freeze(this);
   };
