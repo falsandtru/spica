@@ -91,7 +91,7 @@ describe('Unit: lib/datamap', () => {
     it('injection', () => {
       const map = new DataMap<string[], string>();
       assert(map.set(['a', 'b'], '') === map);
-      assert(map.has(['a,3:b']) === false);
+      assert(map.has(['a,4:b']) === false);
     });
 
   });

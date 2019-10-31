@@ -201,12 +201,8 @@ export type DeepMutable<T, E extends object | undefined | null = never> =
   { -readonly [P in keyof T]: DeepMutable<T[P], E>; };
 
 export function type(target: unknown): string {
-  const type = (Object.prototype.toString.call(target)).split(' ').pop()!.slice(0, -1);
-  if (target === null || typeof target !== 'object' && target instanceof Object === false) return type.toLowerCase();
-  return type;
-}
-
-export function isObject(target: unknown): target is object {
-  return target !== null
-      && (typeof target ==='object' || target instanceof Object);
+  const name = (Object.prototype.toString.call(target)).split(' ').pop()!.slice(0, -1);
+  return target === null || typeof target !== 'object' && target instanceof Object === false
+    ? name.toLowerCase()
+    : name;
 }

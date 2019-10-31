@@ -549,7 +549,7 @@ describe('Unit: lib/type', () => {
   describe('type', () => {
     it('primitive', () => {
       assert(type(undefined) === 'undefined');
-      assert(type(true) === 'boolean');
+      assert(type(false) === 'boolean');
       assert(type(0) === 'number');
       assert(type('') === 'string');
       assert(type(Symbol()) === 'symbol');

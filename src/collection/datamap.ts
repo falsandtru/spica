@@ -1,6 +1,6 @@
 import { Collection } from '../collection';
 import { sqid } from '../sqid';
-import { type, isObject } from '../type';
+import { type } from '../type';
 
 export class DataMap<K, V> implements Collection<K, V> {
   constructor(
@@ -47,10 +47,12 @@ function stringify(target: any): string {
       return `1:${target}`;
     case 'number':
       return `2:${target}`;
-    case 'string':
+    case 'bigint':
       return `3:${encodeURIComponent(target)}`;
+    case 'string':
+      return `4:${encodeURIComponent(target)}`;
     case 'symbol':
-      return `4:${encodeURIComponent(target.toString().replace(/^Symbol\((.*?)\)$/, '$1'))}`;
+      return `5:${encodeURIComponent(target.toString().replace(/^Symbol\((.*?)\)$/, '$1'))}`;
     case 'Array':
       return `9:${stringifyArray(target)}`;
     default:
@@ -71,7 +73,7 @@ function stringifyArray(arr: unknown[]): string {
 }
 
 function stringifyObject(obj: object): string {
-  if (!isObject(obj) || typeof obj === 'function') return '';
+  if (typeof obj === 'function') return '';
   let acc = '';
   for (const k of Object.keys(obj)) {
     acc += `${stringify(k)}:${stringify(obj[k])},`;
