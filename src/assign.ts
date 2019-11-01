@@ -1,4 +1,5 @@
 import { type } from './type';
+import { concat } from './concat';
 
 export const assign = template((key, target, source) =>
   target[key] = source[key]);
@@ -29,6 +30,27 @@ export const extend = template((key, target, source) => {
           return target[key] = extend(target[key], source[key]);
         default:
           return target[key] = extend(source[key] instanceof Object ? {} : Object.create(null), source[key]);
+      }
+    default:
+      return target[key] = source[key];
+  }
+});
+
+export const merge = template((key, target, source) => {
+  switch (type(source[key])) {
+    case 'Array':
+      switch (type(target[key])) {
+        case 'Array':
+          return target[key] = concat(target[key], source[key]);
+        default:
+          return target[key] = merge([], source[key]);
+      }
+    case 'Object':
+      switch (type(target[key])) {
+        case 'Object':
+          return target[key] = merge(target[key], source[key]);
+        default:
+          return target[key] = merge(source[key] instanceof Object ? {} : Object.create(null), source[key]);
       }
     default:
       return target[key] = source[key];
