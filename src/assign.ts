@@ -3,33 +3,32 @@ import { type } from './type';
 export const assign = template((key, target, source) =>
   target[key] = source[key]);
 
-export const clone = template((key, target, source): void => {
+export const clone = template((key, target, source) => {
   switch (type(source[key])) {
     case 'Array':
       return target[key] = clone([], source[key]);
     case 'Object':
-      return target[key] = type(source[key]) === 'Object'
-        ? clone(source[key] instanceof Object ? {} : Object.create(null), source[key])
-        : source[key];
+      switch (type(target[key])) {
+        case 'Object':
+          return target[key] = clone(source[key] instanceof Object ? {} : Object.create(null), source[key]);
+        default:
+          return target[key] = source[key];
+      }
     default:
       return target[key] = source[key];
   }
 });
 
-export const extend = template((key, target, source): void => {
+export const extend = template((key, target, source) => {
   switch (type(source[key])) {
     case 'Array':
       return target[key] = extend([], source[key]);
     case 'Object':
       switch (type(target[key])) {
         case 'Object':
-          return target[key] = type(source[key]) === 'Object'
-            ? extend(target[key], source[key])
-            : source[key];
+          return target[key] = extend(target[key], source[key]);
         default:
-          return target[key] = type(source[key]) === 'Object'
-            ? extend(source[key] instanceof Object ? {} : Object.create(null), source[key])
-            : source[key];
+          return target[key] = extend(source[key] instanceof Object ? {} : Object.create(null), source[key]);
       }
     default:
       return target[key] = source[key];
