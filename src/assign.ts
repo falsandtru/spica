@@ -57,7 +57,7 @@ export const merge = template((key, target, source) => {
   }
 });
 
-function template(strategy: (key: string, target: object, source: object) => void) {
+export function template(strategy: (key: string, target: object, source: object) => void) {
   return walk;
 
   function walk<T extends U, U extends object>(target: T, ...sources: Partial<U>[]): T;
