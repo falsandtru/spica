@@ -1,4 +1,4 @@
-import { type } from './type';
+import { type, isPrimitive } from './type';
 import { concat } from './concat';
 
 export const assign = template((key, target, source) =>
@@ -60,15 +60,24 @@ export const merge = template((key, target, source) => {
 export function template(strategy: (key: string, target: object, source: object) => void) {
   return walk;
 
+  function walk<T extends object, U extends T>(target: T, ...sources: Partial<U>[]): T;
   function walk<T extends U, U extends object>(target: T, ...sources: Partial<U>[]): T;
+  function walk<T extends object, U extends T>(target: object, source: T, ...sources: Partial<U>[]): T;
   function walk<T extends U, U extends object>(target: object, source: T, ...sources: Partial<U>[]): T;
   function walk<T extends object>(target: T, ...sources: Partial<T>[]): T;
   function walk<T extends object>(target: object, source: T, ...sources: Partial<T>[]): T;
-  function walk<T extends U, U extends object>(target: T, ...sources: Partial<U>[]): T {
-    if (target === undefined || target === null) throw new TypeError(`Spica: assign: Cannot walk on ${target}.`);
-    for (const source of sources) if (source) {
-      for (const key of Object.keys(source)) {
-        void strategy(key, target, source);
+  function walk<T extends object>(target: T, ...sources: T[]): T {
+    let isPrimitiveTarget = isPrimitive(target);
+    for (const source of sources) {
+      const isPrimitiveSource = isPrimitive(source);
+      if (isPrimitiveTarget || isPrimitiveSource) {
+        target = source;
+        isPrimitiveTarget = isPrimitiveSource;
+      }
+      else {
+        for (const key of Object.keys(source)) {
+          void strategy(key, target, source);
+        }
       }
     }
     return target;

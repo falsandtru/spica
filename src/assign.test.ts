@@ -5,7 +5,7 @@ describe('Unit: lib/assign', () => {
   describe('assign', () => {
     it('shallow', () => {
       assert.deepStrictEqual(
-        assign<{}>({
+        assign<object>({
           a: 1,
           b: undefined,
           c: 0
@@ -45,7 +45,7 @@ describe('Unit: lib/assign', () => {
 
     it('array', () => {
       assert.deepStrictEqual(
-        assign<{}>({
+        assign<object>({
           a: [1],
           b: [],
           c: [2]
@@ -75,7 +75,7 @@ describe('Unit: lib/assign', () => {
 
     it('object', () => {
       assert.deepStrictEqual(
-        assign<{}>({
+        assign<object>({
           a: undefined,
           b: undefined,
           c: null,
@@ -113,12 +113,37 @@ describe('Unit: lib/assign', () => {
       assert.deepStrictEqual(assign({ a: { 0: 0 } }, { a: Object.create(null) }), { a: Object.create(null) });
     });
 
+    it('mixed', () => {
+      assert.deepStrictEqual(
+        assign<object>({
+          a: {
+            a: 1,
+            b: [1]
+          }
+        }, {
+          a: {
+            a: [2],
+            b: 2
+          }
+        }, {
+          a: {
+            a: 3,
+            b: [3]
+          }
+        }), {
+          a: {
+            a: 3,
+            b: [3]
+          }
+        });
+    });
+
   });
 
   describe('clone', () => {
     it('shallow', () => {
       assert.deepStrictEqual(
-        clone<{}>({
+        clone<object>({
           a: 1,
           b: undefined,
           c: 0
@@ -158,7 +183,7 @@ describe('Unit: lib/assign', () => {
 
     it('array', () => {
       assert.deepStrictEqual(
-        clone<{}>({
+        clone<object>({
           a: [1],
           b: [],
           c: [2]
@@ -188,7 +213,7 @@ describe('Unit: lib/assign', () => {
 
     it('object', () => {
       assert.deepStrictEqual(
-        clone<{}>({
+        clone<object>({
           a: undefined,
           b: undefined,
           c: null,
@@ -226,12 +251,37 @@ describe('Unit: lib/assign', () => {
       assert.deepStrictEqual(clone({ a: { 0: 0 } }, { a: Object.create(null) }), { a: Object.create(null) });
     });
 
+    it('mixed', () => {
+      assert.deepStrictEqual(
+        clone<object>({
+          a: {
+            a: 1,
+            b: [1]
+          }
+        }, {
+          a: {
+            a: [2],
+            b: 2
+          }
+        }, {
+          a: {
+            a: 3,
+            b: [3]
+          }
+        }), {
+          a: {
+            a: 3,
+            b: [3]
+          }
+        });
+    });
+
   });
 
   describe('extend', () => {
     it('shallow', () => {
       assert.deepStrictEqual(
-        extend<{}>({
+        extend<object>({
           a: 1,
           b: undefined,
           c: 0
@@ -272,7 +322,7 @@ describe('Unit: lib/assign', () => {
 
     it('array', () => {
       assert.deepStrictEqual(
-        extend<{}>({
+        extend<object>({
           a: [1],
           b: [],
           c: [2]
@@ -302,7 +352,7 @@ describe('Unit: lib/assign', () => {
 
     it('object', () => {
       assert.deepStrictEqual(
-        extend<{}>({
+        extend<object>({
           a: undefined,
           b: undefined,
           c: null,
@@ -340,12 +390,37 @@ describe('Unit: lib/assign', () => {
       assert.deepStrictEqual(extend({ a: { 0: 0 } }, { a: Object.create(null) }), { a: { 0: 0 } });
     });
 
+    it('mixed', () => {
+      assert.deepStrictEqual(
+        extend<object>({
+          a: {
+            a: 1,
+            b: [1]
+          }
+        }, {
+          a: {
+            a: [2],
+            b: 2
+          }
+        }, {
+          a: {
+            a: 3,
+            b: [3]
+          }
+        }), {
+          a: {
+            a: 3,
+            b: [3]
+          }
+        });
+    });
+
   });
 
   describe('merge', () => {
     it('shallow', () => {
       assert.deepStrictEqual(
-        merge<{}>({
+        merge<object>({
           a: 1,
           b: undefined,
           c: 0
@@ -386,7 +461,7 @@ describe('Unit: lib/assign', () => {
 
     it('array', () => {
       assert.deepStrictEqual(
-        merge<{}>({
+        merge<object>({
           a: [1],
           b: [],
           c: [2]
@@ -416,7 +491,7 @@ describe('Unit: lib/assign', () => {
 
     it('object', () => {
       assert.deepStrictEqual(
-        merge<{}>({
+        merge<object>({
           a: undefined,
           b: undefined,
           c: null,
@@ -452,6 +527,31 @@ describe('Unit: lib/assign', () => {
         });
       assert(type(merge({ a: null }, { a: Object.create(null) }).a) === 'Object');
       assert.deepStrictEqual(merge({ a: { 0: 0 } }, { a: Object.create(null) }), { a: { 0: 0 } });
+    });
+
+    it('mixed', () => {
+      assert.deepStrictEqual(
+        merge<object>({
+          a: {
+            a: 1,
+            b: [1]
+          }
+        }, {
+          a: {
+            a: [2],
+            b: 2
+          }
+        }, {
+          a: {
+            a: 3,
+            b: [3]
+          }
+        }), {
+          a: {
+            a: 3,
+            b: [3]
+          }
+        });
     });
 
   });

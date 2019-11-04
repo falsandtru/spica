@@ -201,8 +201,33 @@ export type DeepMutable<T, E extends object | undefined | null = never> =
   { -readonly [P in keyof T]: DeepMutable<T[P], E>; };
 
 export function type(target: unknown): string {
-  const name = (Object.prototype.toString.call(target)).split(' ').pop()!.slice(0, -1);
-  return target === null || typeof target !== 'object' && target instanceof Object === false
-    ? name.toLowerCase()
-    : name;
+  const t = target == null ? target : typeof target;
+  switch (t) {
+    case undefined:
+    case null:
+      return `${target}`;
+    case 'boolean':
+    case 'number':
+    case 'bigint':
+    case 'string':
+    case 'symbol':
+      return t;
+    default:
+      return Object.prototype.toString.call(target).slice(8, -1);
+  }
+}
+
+export function isPrimitive(target: unknown): boolean {
+  switch (type(target)) {
+    case 'undefined':
+    case 'null':
+    case 'boolean':
+    case 'number':
+    case 'bigint':
+    case 'string':
+    case 'symbol':
+      return true;
+    default:
+      return false;
+  }
 }
