@@ -2,6 +2,24 @@ import { assign, clone, extend, merge } from './assign';
 import { type } from './type';
 
 describe('Unit: lib/assign', () => {
+  describe('type', () => {
+    it('setting', () => {
+      interface Setting {
+        a: {
+          b: 0;
+        };
+      };
+      interface Option {
+        a?: {
+          b?: 0;
+        };
+      }
+      assert((): Setting => extend({} as Setting, {} as Option));
+      assert((): Setting => extend({}, {} as Setting, {} as Option));
+    });
+
+  });
+
   describe('assign', () => {
     it('shallow', () => {
       assert.deepStrictEqual(
@@ -27,7 +45,7 @@ describe('Unit: lib/assign', () => {
 
     it('deep', () => {
       assert.deepStrictEqual(
-        assign({
+        assign<object>({
           a: {
             a: 1,
             b: 1
@@ -168,7 +186,7 @@ describe('Unit: lib/assign', () => {
 
     it('deep', () => {
       assert.deepStrictEqual(
-        clone({
+        clone<object>({
           a: {
             a: 1,
             b: 1
@@ -309,7 +327,7 @@ describe('Unit: lib/assign', () => {
 
     it('deep', () => {
       assert.deepStrictEqual(
-        extend({
+        extend<object>({
           a: {
             a: 1,
             b: 1
@@ -451,7 +469,7 @@ describe('Unit: lib/assign', () => {
 
     it('deep', () => {
       assert.deepStrictEqual(
-        merge({
+        merge<object>({
           a: {
             a: 1,
             b: 1

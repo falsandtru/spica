@@ -59,24 +59,13 @@ export const merge = template((key, target, source) => {
 
 export function template(
   strategy: (key: string, target: object, source: object) => void,
-  empty: <T extends object>(source: T) => T = source => {
-    switch (type(source)) {
-      case 'Array':
-        return [];
-      case 'Object':
-        return source instanceof Object ? {} : Object.create(null);
-      default:
-        return source;
-    }
-  }) {
+  empty = empty_) {
   return walk;
 
-  function walk<T extends object, U extends T>(target: T, ...sources: Partial<U>[]): T;
-  function walk<T extends U, U extends object>(target: T, ...sources: Partial<U>[]): T;
-  function walk<T extends object, U extends T>(target: object, source: T, ...sources: Partial<U>[]): T;
-  function walk<T extends U, U extends object>(target: object, source: T, ...sources: Partial<U>[]): T;
-  function walk<T extends object>(target: T, ...sources: Partial<T>[]): T;
-  function walk<T extends object>(target: object, source: T, ...sources: Partial<T>[]): T;
+  function walk<T extends U, U extends object>(target: Partial<U>, source1: T, source2: Partial<U>, ...sources: Partial<U>[]): T;
+  function walk<T extends U, U extends object>(target: T, source: Partial<U>, ...sources: Partial<U>[]): T;
+  function walk<T extends object>(target: Partial<T>, source1: T, source2: Partial<T>, ...sources: Partial<T>[]): T;
+  function walk<T extends object>(target: T, source: Partial<T>, ...sources: Partial<T>[]): T;
   function walk<T extends object>(target: T, ...sources: T[]): T {
     let isPrimitiveTarget = isPrimitive(target);
     for (const source of sources) {
@@ -92,11 +81,24 @@ export function template(
           assert(!isPrimitive(target));
           isPrimitiveTarget = isPrimitiveSource;
         }
+        assert(!isPrimitiveTarget && !isPrimitiveSource);
+        assert(!isPrimitive(target) && !isPrimitive(source));
         for (const key of Object.keys(source)) {
           void strategy(key, target, source);
         }
       }
     }
     return target;
+  }
+}
+
+function empty_<T extends object>(source: T): T {
+  switch (type(source)) {
+    case 'Array':
+      return [] as T;
+    case 'Object':
+      return source instanceof Object ? {} : Object.create(null);
+    default:
+      return source;
   }
 }
