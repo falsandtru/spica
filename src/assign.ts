@@ -57,7 +57,18 @@ export const merge = template((key, target, source) => {
   }
 });
 
-export function template(strategy: (key: string, target: object, source: object) => void) {
+export function template(
+  strategy: (key: string, target: object, source: object) => void,
+  empty: <T extends object>(source: T) => T = source => {
+    switch (type(source)) {
+      case 'Array':
+        return [];
+      case 'Object':
+        return source instanceof Object ? {} : Object.create(null);
+      default:
+        return source;
+    }
+  }) {
   return walk;
 
   function walk<T extends object, U extends T>(target: T, ...sources: Partial<U>[]): T;
@@ -70,11 +81,17 @@ export function template(strategy: (key: string, target: object, source: object)
     let isPrimitiveTarget = isPrimitive(target);
     for (const source of sources) {
       const isPrimitiveSource = isPrimitive(source);
-      if (isPrimitiveTarget || isPrimitiveSource) {
+      if (isPrimitiveSource) {
         target = source;
         isPrimitiveTarget = isPrimitiveSource;
       }
       else {
+        if (isPrimitiveTarget) {
+          assert(!isPrimitiveSource);
+          target = empty(source);
+          assert(!isPrimitive(target));
+          isPrimitiveTarget = isPrimitiveSource;
+        }
         for (const key of Object.keys(source)) {
           void strategy(key, target, source);
         }

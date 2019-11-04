@@ -217,7 +217,7 @@ export function type(target: unknown): string {
   }
 }
 
-export function isPrimitive(target: unknown): boolean {
+export function isPrimitive(target: unknown): target is undefined | null | boolean | number | bigint | string | symbol {
   switch (type(target)) {
     case 'undefined':
     case 'null':
