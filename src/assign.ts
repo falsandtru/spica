@@ -1,5 +1,8 @@
+import './global';
 import { type, isPrimitive } from './type';
 import { concat } from './concat';
+
+const { Object: Obj } = global;
 
 export const assign = template((key, target, source) =>
   target[key] = source[key]);
@@ -11,7 +14,7 @@ export const clone = template((key, target, source) => {
     case 'Object':
       switch (type(target[key])) {
         case 'Object':
-          return target[key] = clone(source[key] instanceof Object ? {} : Object.create(null), source[key]);
+          return target[key] = clone(source[key] instanceof Obj ? {} : Obj.create(null), source[key]);
         default:
           return target[key] = source[key];
       }
@@ -29,7 +32,7 @@ export const extend = template((key, target, source) => {
         case 'Object':
           return target[key] = extend(target[key], source[key]);
         default:
-          return target[key] = extend(source[key] instanceof Object ? {} : Object.create(null), source[key]);
+          return target[key] = extend(source[key] instanceof Obj ? {} : Obj.create(null), source[key]);
       }
     default:
       return target[key] = source[key];
@@ -50,7 +53,7 @@ export const merge = template((key, target, source) => {
         case 'Object':
           return target[key] = merge(target[key], source[key]);
         default:
-          return target[key] = merge(source[key] instanceof Object ? {} : Object.create(null), source[key]);
+          return target[key] = merge(source[key] instanceof Obj ? {} : Obj.create(null), source[key]);
       }
     default:
       return target[key] = source[key];
@@ -83,7 +86,7 @@ export function template(
         }
         assert(!isPrimitiveTarget && !isPrimitiveSource);
         assert(!isPrimitive(target) && !isPrimitive(source));
-        for (const key of Object.keys(source)) {
+        for (const key of Obj.keys(source)) {
           void strategy(key, target, source);
         }
       }
@@ -97,7 +100,7 @@ function empty_<T extends object>(source: T): T {
     case 'Array':
       return [] as T;
     case 'Object':
-      return source instanceof Object ? {} : Object.create(null);
+      return source instanceof Obj ? {} : Obj.create(null);
     default:
       return source;
   }

@@ -1,3 +1,4 @@
+import './global';
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future'; 
 import { DeepImmutable, DeepRequired } from './type';
@@ -5,6 +6,8 @@ import { extend } from './assign';
 import { wait, tick } from './clock';
 import { causeAsyncException } from './exception';
 import { noop } from './noop';
+
+const { Object: Obj } = global;
 
 const status = Symbol();
 const alive = Symbol();
@@ -118,19 +121,19 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
     };
     if (this[status].settings.trigger !== undefined) {
       for (const prop of new Set(Array<string | symbol>().concat(this[status].settings.trigger))) {
-        const desc = Object.getOwnPropertyDescriptor(this, prop) || {
+        const desc = Obj.getOwnPropertyDescriptor(this, prop) || {
           value: this[prop],
           enumerable: true,
           configurable: true,
           writable: true,
         };
-        void Object.defineProperty(this, prop, {
+        void Obj.defineProperty(this, prop, {
           set(value: unknown) {
-            void Object.defineProperty(this, prop, { ...desc, value });
+            void Obj.defineProperty(this, prop, { ...desc, value });
             void this[Coroutine.init]();
           },
           get() {
-            void Object.defineProperty(this, prop, desc);
+            void Obj.defineProperty(this, prop, desc);
             void this[Coroutine.init]();
             return this[prop];
           },

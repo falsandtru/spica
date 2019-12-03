@@ -9,7 +9,7 @@ import { sqid } from './sqid';
 import { noop } from './noop';
 import { causeAsyncException } from './exception';
 
-const { Set, Map, WeakSet, Error, setTimeout } = global;
+const { Object: Obj, Set, Map, WeakSet, Error, setTimeout } = global;
 
 declare const Array: {
   isArray(target: any): target is readonly any[];
@@ -75,7 +75,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     this.available = false;
     void this.clear(reason);
     assert(this.workers.size === 0);
-    void Object.freeze(this.workers);
+    void Obj.freeze(this.workers);
     while (this.messages.length > 0) {
       const [name, param] = this.messages.shift()!;
       const names = typeof name === 'string'
@@ -84,11 +84,11 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
       void this.events_.loss.emit([names[0]], [names[0], param]);
     }
     assert(this.messages.length === 0);
-    assert(!Object.isFrozen(this.messages));
+    assert(!Obj.isFrozen(this.messages));
     this.alive = false;
     // @ts-ignore #31251
     void (this.constructor as typeof Supervisor).instances.delete(this);
-    void Object.freeze(this);
+    void Obj.freeze(this);
     assert(this.alive === false);
     assert(this.available === false);
     void this.settings.destructor(reason);
@@ -349,7 +349,7 @@ class Worker<N extends string, P, R, S> {
     assert(this.alive === true);
     this.alive = false;
     this.available = false;
-    void Object.freeze(this);
+    void Obj.freeze(this);
     assert(this.alive === false);
     assert(this.available === false);
     try {
@@ -403,7 +403,7 @@ class Worker<N extends string, P, R, S> {
             : [result.reply, result.state];
           if (this.alive) {
             void this.sv.schedule();
-            assert(!Object.isFrozen(this));
+            assert(!Obj.isFrozen(this));
             this.state = state;
             this.available = true;
           }
