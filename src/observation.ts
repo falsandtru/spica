@@ -197,7 +197,7 @@ export class Observation<N extends unknown[], D, R>
     return this.refsBelow_(this.seekNode_(namespace));
   }
   private refsAbove_({ parent, items }: RegisterNode<N, D, R>): RegisterItem<N, D, R>[] {
-    items = concat([], items);
+    items = items.slice();
     while (parent) {
       items = concat(items, parent.items);
       parent = parent.parent;
@@ -205,7 +205,7 @@ export class Observation<N extends unknown[], D, R>
     return items;
   }
   private refsBelow_({ childrenNames, children, items }: RegisterNode<N, D, R>): RegisterItem<N, D, R>[] {
-    items = concat([], items);
+    items = items.slice();
     for (let i = 0; i < childrenNames.length; ++i) {
       const name = childrenNames[i];
       const below = this.refsBelow_(children.get(name)!);
