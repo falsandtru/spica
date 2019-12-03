@@ -1,5 +1,8 @@
+import './global';
 import { AtomicPromise } from './promise';
 export { tick } from './clock.tick';
+
+const { setTimeout } = global;
 
 export const clock: Promise<void> = Promise.resolve();
 

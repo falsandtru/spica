@@ -1,8 +1,11 @@
+import './global';
 import { DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
 import { concat } from './concat';
 import { findIndex } from './equal';
 import { causeAsyncException } from './exception';
+
+const { Map, WeakSet, Error } = global;
 
 export interface Observer<N extends unknown[], D, R> {
   monitor(namespace: [] | N, listener: Monitor<N, D>, options?: ObserverOptions): () => void;

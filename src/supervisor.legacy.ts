@@ -1,3 +1,4 @@
+import './global';
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future';
 import { Observation, Observer, Publisher } from './observation';
@@ -7,6 +8,8 @@ import { tick } from './clock';
 import { sqid } from './sqid';
 import { noop } from './noop';
 import { causeAsyncException } from './exception';
+
+const { Set, Map, WeakSet, Error, setTimeout } = global;
 
 declare const Array: {
   isArray(target: any): target is readonly any[];

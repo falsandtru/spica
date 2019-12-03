@@ -5,7 +5,7 @@ import { Cache } from '../../cache';
 import { flip } from '../../flip';
 import { uncurry } from '../../uncurry';
 
-const { location } = global;
+const { URL: NativeURL, location } = global;
 
 namespace Identifier {
   declare class Identity<T> {
@@ -67,7 +67,7 @@ function normalize(url: string, base: string): NormalizedURL {
   return newURL(url, base).href as NormalizedURL;
 }
 
-export const newURL: (url: string, base: string) => Readonly<global.URL> = flip(uncurry(memoize((base: string) => memoize((url: string) => new global.URL(formatURLForEdge(url, base), base), new Cache(9)), new Cache(9))));
+export const newURL: (url: string, base: string) => Readonly<global.URL> = flip(uncurry(memoize((base: string) => memoize((url: string) => new NativeURL(formatURLForEdge(url, base), base), new Cache(9)), new Cache(9))));
 
 function formatURLForEdge(url: string, base: string = location.href): string {
   return url.trim() || base;
