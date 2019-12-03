@@ -5,7 +5,7 @@ import { Cache } from '../../cache';
 import { flip } from '../../flip';
 import { uncurry } from '../../uncurry';
 
-const location = { get href() { return global['location'] && global['location'].href; } };
+const { location } = global;
 
 namespace Identifier {
   declare class Identity<T> {
