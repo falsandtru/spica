@@ -4,7 +4,7 @@ import { causeAsyncException } from './exception';
 import { Maybe, Just, Nothing } from './monad/maybe';
 import { Either, Left, Right } from './monad/either';
 
-const { Object: Obj } = global;
+const { Object: Obj, Set } = global;
 
 export interface Canceller<L = undefined> {
   readonly cancel: {

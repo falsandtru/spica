@@ -7,7 +7,7 @@ import { wait, tick } from './clock';
 import { causeAsyncException } from './exception';
 import { noop } from './noop';
 
-const { Object: Obj } = global;
+const { Object: Obj, Set, Error } = global;
 
 const status = Symbol();
 const alive = Symbol();

@@ -1,6 +1,9 @@
+import { global } from './global';
 import { extend } from './assign';
 import { findIndex } from './equal';
 import { DeepImmutable, DeepRequired } from './type';
+
+const { Map } = global;
 
 export interface CacheOptions<K, V = void> {
   ignore?: {
