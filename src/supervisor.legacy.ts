@@ -1,4 +1,4 @@
-import './global';
+import { global } from './global';
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future';
 import { Observation, Observer, Publisher } from './observation';

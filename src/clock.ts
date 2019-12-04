@@ -1,4 +1,4 @@
-import './global';
+import { global } from './global';
 import { AtomicPromise } from './promise';
 export { tick } from './clock.tick';
 

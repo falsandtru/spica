@@ -1,4 +1,4 @@
-import './global';
+import { global } from './global';
 import { AtomicPromise } from './promise';
 import { causeAsyncException } from './exception';
 import { Maybe, Just, Nothing } from './monad/maybe';

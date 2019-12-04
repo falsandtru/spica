@@ -1,4 +1,4 @@
-import './global';
+import { global } from './global';
 
 type Falsy = undefined | false | 0 | '' | null | void;
 declare const Unique: unique symbol

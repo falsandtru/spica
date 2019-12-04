@@ -1,4 +1,4 @@
-import './global';
+import { global } from './global';
 import { type, isPrimitive } from './type';
 import { concat } from './concat';
 

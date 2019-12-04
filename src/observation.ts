@@ -1,4 +1,4 @@
-import './global';
+import { global } from './global';
 import { DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
 import { concat } from './concat';

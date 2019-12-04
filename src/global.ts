@@ -1,2 +1,4 @@
 /// <reference path="./global.d.ts" />
-eval("var global = typeof globalThis !== 'undefined' && globalThis || this;");
+export const global = typeof globalThis !== 'undefined' && globalThis || typeof self !== 'undefined' && self || this;
+export default global;
+global.global = global;

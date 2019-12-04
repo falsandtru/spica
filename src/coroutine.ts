@@ -1,4 +1,4 @@
-import './global';
+import { global } from './global';
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future'; 
 import { DeepImmutable, DeepRequired } from './type';

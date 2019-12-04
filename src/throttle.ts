@@ -1,4 +1,4 @@
-import './global';
+import { global } from './global';
 
 const { setTimeout } = global;
 

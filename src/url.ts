@@ -1,4 +1,4 @@
-import './global';
+import { global } from './global';
 import { StandardURL, newURL } from './url/domain/format';
 
 export { StandardURL, standardize } from './url/domain/format';
