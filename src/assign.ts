@@ -68,7 +68,7 @@ export function template(
   function walk<T extends U, U extends object>(target: Partial<U>, source1: T, source2: Partial<U>, ...sources: Partial<U>[]): T;
   function walk<T extends U, U extends object>(target: T, source: Partial<U>, ...sources: Partial<U>[]): T;
   function walk<T extends object>(target: Partial<T>, source1: T, source2: Partial<T>, ...sources: Partial<T>[]): T;
-  function walk<T extends object>(target: T, source: Partial<T>, ...sources: Partial<T>[]): T;
+  function walk<T extends object>(target: T, ...sources: Partial<T>[]): T;
   function walk<T extends object>(target: T, ...sources: T[]): T {
     let isPrimitiveTarget = isPrimitive(target);
     for (const source of sources) {
