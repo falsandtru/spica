@@ -204,12 +204,12 @@ export type DeepMutable<T, E extends object | undefined | null = never> =
 
 const { Object: Obj } = global;
 
-export function type(target: unknown): string {
-  const t = target == null ? target : typeof target;
+export function type(value: unknown): string {
+  const t = value == null ? value : typeof value;
   switch (t) {
     case undefined:
     case null:
-      return `${target}`;
+      return `${value}`;
     case 'boolean':
     case 'number':
     case 'bigint':
@@ -217,12 +217,12 @@ export function type(target: unknown): string {
     case 'symbol':
       return t;
     default:
-      return Obj.prototype.toString.call(target).slice(8, -1);
+      return Obj.prototype.toString.call(value).slice(8, -1);
   }
 }
 
-export function isPrimitive(target: unknown): target is undefined | null | boolean | number | bigint | string | symbol {
-  switch (type(target)) {
+export function isPrimitive(value: unknown): value is undefined | null | boolean | number | bigint | string | symbol {
+  switch (type(value)) {
     case 'undefined':
     case 'null':
     case 'boolean':
