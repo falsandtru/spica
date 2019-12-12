@@ -3,8 +3,6 @@ import { Collection } from '../collection';
 import { sqid } from '../sqid';
 import { type } from '../type';
 
-const { Object: Obj } = global;
-
 export class DataMap<K, V> implements Collection<K, V> {
   constructor(
     entries: Iterable<[K, V]> = [],
@@ -78,7 +76,8 @@ function stringifyArray(arr: unknown[]): string {
 function stringifyObject(obj: object): string {
   if (typeof obj === 'function') return '';
   let acc = '';
-  for (const k of Obj.keys(obj)) {
+  for (const k in obj) {
+    if (obj.hasOwnProperty && !obj.hasOwnProperty(k)) continue;
     acc += `${stringify(k)}:${stringify(obj[k])},`;
   }
   return `{${acc}}`;
