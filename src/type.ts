@@ -1,5 +1,3 @@
-import { global } from './global';
-
 type Falsy = undefined | false | 0 | '' | null | void;
 declare const Unique: unique symbol
 type Unique = typeof Unique;
@@ -202,7 +200,7 @@ export type DeepMutable<T, E extends object | undefined | null = never> =
   { -readonly [P in keyof T]: DeepMutable<T[P], E>; } :
   { -readonly [P in keyof T]: DeepMutable<T[P], E>; };
 
-const { Object: Obj } = global;
+const toString = Object.prototype.toString;
 
 export function type(value: unknown): string {
   const t = value == null ? value : typeof value;
@@ -217,7 +215,7 @@ export function type(value: unknown): string {
     case 'symbol':
       return t;
     default:
-      return Obj.prototype.toString.call(value).slice(8, -1);
+      return toString.call(value).slice(8, -1);
   }
 }
 
