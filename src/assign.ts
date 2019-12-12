@@ -86,7 +86,8 @@ export function template(
         }
         assert(!isPrimitiveTarget && !isPrimitiveSource);
         assert(!isPrimitive(target) && !isPrimitive(source));
-        for (const key of Obj.keys(source)) {
+        for (const key in source) {
+          if (source.hasOwnProperty && !source.hasOwnProperty(key)) continue;
           void strategy(key, target, source);
         }
       }
