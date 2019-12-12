@@ -4,64 +4,64 @@ import { concat } from './concat';
 
 const { Object: Obj } = global;
 
-export const assign = template((key, target, source) =>
-  target[key] = source[key]);
+export const assign = template((prop, target, source) =>
+  target[prop] = source[prop]);
 
-export const clone = template((key, target, source) => {
-  switch (type(source[key])) {
+export const clone = template((prop, target, source) => {
+  switch (type(source[prop])) {
     case 'Array':
-      return target[key] = clone([], source[key]);
+      return target[prop] = clone([], source[prop]);
     case 'Object':
-      switch (type(target[key])) {
+      switch (type(target[prop])) {
         case 'Object':
-          return target[key] = clone(source[key] instanceof Obj ? {} : Obj.create(null), source[key]);
+          return target[prop] = clone(source[prop] instanceof Obj ? {} : Obj.create(null), source[prop]);
         default:
-          return target[key] = source[key];
+          return target[prop] = source[prop];
       }
     default:
-      return target[key] = source[key];
+      return target[prop] = source[prop];
   }
 });
 
-export const extend = template((key, target, source) => {
-  switch (type(source[key])) {
+export const extend = template((prop, target, source) => {
+  switch (type(source[prop])) {
     case 'Array':
-      return target[key] = extend([], source[key]);
+      return target[prop] = extend([], source[prop]);
     case 'Object':
-      switch (type(target[key])) {
+      switch (type(target[prop])) {
         case 'Object':
-          return target[key] = extend(target[key], source[key]);
+          return target[prop] = extend(target[prop], source[prop]);
         default:
-          return target[key] = extend(source[key] instanceof Obj ? {} : Obj.create(null), source[key]);
+          return target[prop] = extend(source[prop] instanceof Obj ? {} : Obj.create(null), source[prop]);
       }
     default:
-      return target[key] = source[key];
+      return target[prop] = source[prop];
   }
 });
 
-export const merge = template((key, target, source) => {
-  switch (type(source[key])) {
+export const merge = template((prop, target, source) => {
+  switch (type(source[prop])) {
     case 'Array':
-      switch (type(target[key])) {
+      switch (type(target[prop])) {
         case 'Array':
-          return target[key] = concat(target[key], source[key]);
+          return target[prop] = concat(target[prop], source[prop]);
         default:
-          return target[key] = merge([], source[key]);
+          return target[prop] = merge([], source[prop]);
       }
     case 'Object':
-      switch (type(target[key])) {
+      switch (type(target[prop])) {
         case 'Object':
-          return target[key] = merge(target[key], source[key]);
+          return target[prop] = merge(target[prop], source[prop]);
         default:
-          return target[key] = merge(source[key] instanceof Obj ? {} : Obj.create(null), source[key]);
+          return target[prop] = merge(source[prop] instanceof Obj ? {} : Obj.create(null), source[prop]);
       }
     default:
-      return target[key] = source[key];
+      return target[prop] = source[prop];
   }
 });
 
 export function template(
-  strategy: (key: string, target: object, source: object) => void,
+  strategy: (prop: string, target: object, source: object) => void,
   empty = empty_) {
   return walk;
 
@@ -86,9 +86,9 @@ export function template(
         }
         assert(!isPrimitiveTarget && !isPrimitiveSource);
         assert(!isPrimitive(target) && !isPrimitive(source));
-        for (const key in source) {
-          if (source.hasOwnProperty && !source.hasOwnProperty(key)) continue;
-          void strategy(key, target, source);
+        for (const prop in source) {
+          if (source.hasOwnProperty && !source.hasOwnProperty(prop)) continue;
+          void strategy(prop, target, source);
         }
       }
     }
