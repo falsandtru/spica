@@ -49,7 +49,6 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
   }
   protected static readonly standalone = new WeakSet<Supervisor.Process<unknown, unknown, unknown>>();
   constructor(opts: SupervisorOptions = {}) {
-    // @ts-ignore
     super((resolve, reject) => {
       cb = [resolve, reject];
       state = new AtomicFuture();
