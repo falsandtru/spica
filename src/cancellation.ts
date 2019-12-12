@@ -56,7 +56,7 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
       }
     }
   };
-  public readonly cancel: Canceller<L>['cancel'] = ((reason?: L) => {
+  public readonly cancel: Canceller<L>['cancel'] = (reason?: L) => {
     if (!this.alive) return;
     this.alive = false;
     this.canceled_ = true;
@@ -67,7 +67,7 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
     for (const listener of this.listeners) {
       void listener(reason!);
     }
-  });
+  };
   public readonly close = (reason?: unknown) => {
     if (!this.alive) return;
     this.alive = false;
