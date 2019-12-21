@@ -1,6 +1,6 @@
 import { Encoded } from '../attribute/encode';
 import { Normalized } from '../attribute/normalize';
-import { memoize } from '../../memoization';
+import { memoize } from '../../memoize';
 import { Cache } from '../../cache';
 import { flip } from '../../flip';
 import { uncurry } from '../../uncurry';

@@ -1,4 +1,4 @@
-import { memoize } from './memoization';
+import { memoize } from './memoize';
 import { Cache } from './cache';
 
 describe('Unit: lib/memoization', () => {
