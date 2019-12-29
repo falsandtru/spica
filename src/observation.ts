@@ -1,7 +1,6 @@
 import { global } from './global';
 import { DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
-import { concat } from './concat';
 import { findIndex } from './equal';
 import { causeAsyncException } from './exception';
 
@@ -201,7 +200,7 @@ export class Observation<N extends unknown[], D, R>
   private refsAbove_({ parent, items }: RegisterNode<N, D, R>): RegisterItem<N, D, R>[] {
     items = items.slice();
     while (parent) {
-      items = concat(items, parent.items);
+      void items.push(...parent.items);
       parent = parent.parent;
     }
     return items;
@@ -212,7 +211,7 @@ export class Observation<N extends unknown[], D, R>
       const name = childrenNames[i];
       assert(children.has(name));
       const below = this.refsBelow_(children.get(name)!);
-      items = concat(items, below);
+      void items.push(...below);
       if (below.length === 0) {
         void children.delete(name);
         void childrenNames.splice(
