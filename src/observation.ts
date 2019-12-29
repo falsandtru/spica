@@ -115,14 +115,16 @@ export class Observation<N extends unknown[], D, R>
           });
       case 'undefined': {
         const node = this.seekNode_(namespace);
-        for (const name of node.childrenNames.slice()) {
+        for (let i = 0; i < node.childrenNames.length; ++i) {
+          const name = node.childrenNames[i];
           void this.off([...namespace, name as never] as N);
-          const child = node.children.get(name);
-          if (!child) continue;
+          assert(node.children.has(name));
+          const child = node.children.get(name)!;
           if (child.items.length + child.childrenNames.length > 0) continue;
           void node.children.delete(name);
           assert(findIndex(name, node.childrenNames) !== -1);
           void node.childrenNames.splice(findIndex(name, node.childrenNames), 1);
+          void --i;
         }
         node.items = node.items
           .filter(({ type }) => type === RegisterItemType.monitor);
@@ -208,6 +210,7 @@ export class Observation<N extends unknown[], D, R>
     items = items.slice();
     for (let i = 0; i < childrenNames.length; ++i) {
       const name = childrenNames[i];
+      assert(children.has(name));
       const below = this.refsBelow_(children.get(name)!);
       items = concat(items, below);
       if (below.length === 0) {
