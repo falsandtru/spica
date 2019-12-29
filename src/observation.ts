@@ -106,11 +106,11 @@ export class Observation<N extends unknown[], D, R>
             if (type_ !== type) return false;
             switch (i) {
               case 0:
-                return !void items.shift();
+                return items.shift(), true;
               case items.length - 1:
-                return !void items.pop();
+                return items.pop(), true;
               default:
-                return !void items.splice(i, 1);
+                return items.splice(i, 1), true;
             }
           });
       case 'undefined': {
