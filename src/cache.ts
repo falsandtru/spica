@@ -122,8 +122,8 @@ export class Cache<K, V = void> {
       LFU: [],
     };
     if (this.settings.ignore.clear) return;
-    for (const [key, val] of store) {
-      void this.callback(key, val);
+    for (const key of store.keys()) {
+      void this.callback(key, store.get(key)!);
     }
   }
   public [Symbol.iterator](): Iterator<[K, V], undefined, undefined> {

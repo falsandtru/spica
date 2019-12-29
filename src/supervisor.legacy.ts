@@ -221,7 +221,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
   }
   public clear(reason?: unknown): void {
     while (this.workers.size > 0) {
-      for (const [, worker] of this.workers) {
+      for (const worker of this.workers.values()) {
         void worker.terminate(reason);
       }
     }
