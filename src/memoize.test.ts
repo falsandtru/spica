@@ -1,7 +1,7 @@
 import { memoize } from './memoize';
 import { Cache } from './cache';
 
-describe('Unit: lib/memoization', () => {
+describe('Unit: lib/memoize', () => {
   describe('memoize', () => {
     it('Map', () => {
       let cnt = 0;
