@@ -9,12 +9,12 @@ import { noop } from './noop';
 
 const { Object: Obj, Set, Error } = global;
 
-const status = Symbol();
-const alive = Symbol();
-const init = Symbol();
-const exit = Symbol();
-const terminate = Symbol();
-const port = Symbol();
+const status = Symbol.for('status');
+const alive = Symbol.for('alive');
+const init = Symbol.for('init');
+const exit = Symbol.for('exit');
+const terminate = Symbol.for('terminate');
+const port = Symbol.for('port');
 
 export interface CoroutineOptions {
   readonly size?: number;

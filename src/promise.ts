@@ -8,9 +8,9 @@ type Status<T> =
   | [State.resolved, T | PromiseLike<T>]
   | [State.rejected, unknown];
 
-const status = Symbol();
-const queue = Symbol();
-const resume = Symbol();
+const status = Symbol.for('status');
+const queue = Symbol.for('queue');
+const resume = Symbol.for('resume');
 
 export class AtomicPromise<T = undefined> implements Promise<T> {
   public static get [Symbol.species]() {
