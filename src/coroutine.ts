@@ -89,7 +89,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
           if (!this[status].alive) break;
           // Block.
           // `value` can be Promise when using iterator.
-          // `value` never be Promise when using async iterator.
+          // `value` will never be Promise when using async iterator.
           const { value, done } = await iter.next(msg!);
           if (!this[status].alive) break;
           if (!done) {
