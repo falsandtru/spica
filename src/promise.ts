@@ -65,7 +65,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
       void this[resume]();
     }
   }
-  private [resume](): void {
+  public [resume](): void {
     if (!this[status][0]) return;
     const [state, value] = this[status][0]!;
     while (this[queue].length > 0) {
@@ -82,8 +82,8 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
       }
     }
   }
-  private readonly [status]: [Status<T>?] = [];
-  private readonly [queue]: [(value: T) => void, (reason: unknown) => void][] = [];
+  public readonly [status]: [Status<T>?] = [];
+  public readonly [queue]: [(value: T) => void, (reason: unknown) => void][] = [];
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
     return new AtomicPromise((resolve, reject) => {
       void this[queue].push([
