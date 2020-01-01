@@ -9,12 +9,12 @@ import { noop } from './noop';
 
 const { Object: Obj, Set, Error } = global;
 
-const status = Symbol.for('status');
-const alive = Symbol.for('alive');
-const init = Symbol.for('init');
-const exit = Symbol.for('exit');
-const terminate = Symbol.for('terminate');
-const port = Symbol.for('port');
+const status = Symbol.for('spica/Coroutine.status');
+const alive = Symbol.for('spica/Coroutine.alive');
+const init = Symbol.for('spica/Coroutine.init');
+const exit = Symbol.for('spica/Coroutine.exit');
+const terminate = Symbol.for('spica/Coroutine.terminate');
+const port = Symbol.for('spica/Coroutine.port');
 
 export interface CoroutineOptions {
   readonly size?: number;
