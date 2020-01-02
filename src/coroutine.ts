@@ -144,11 +144,11 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
     }
     void tick(() => void this[Coroutine.init]());
   }
-  private readonly [status]: Status<T, R, S>;
+  public readonly [status]: Status<T, R, S>;
   public get [alive](): boolean {
     return this[status].alive;
   }
-  protected [init]: () => void;
+  public [init]: () => void;
   public [exit](result: T | PromiseLike<T>): void {
     if (!this[status].alive) return;
     void this[init]();
