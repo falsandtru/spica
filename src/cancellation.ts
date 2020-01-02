@@ -20,6 +20,19 @@ export interface Cancellee<L = undefined> {
   readonly either: <R>(val: R) => Either<L, R>;
 }
 
+class Internal<L> {
+  constructor(
+    public resolve: (reason: L | PromiseLike<never>) => void,
+  ) {
+  }
+  public alive: boolean = true;
+  public canceled: boolean = false;
+  public reason?: L;
+  public readonly listeners: Set<(reason: L) => void> = new Set();
+}
+
+const internal = Symbol.for('spica/cancellation::internal');
+
 export class Cancellation<L = undefined> extends AtomicPromise<L> implements Canceller<L>, Cancellee<L> {
   static get [Symbol.species]() {
     return AtomicPromise;
@@ -27,24 +40,20 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
   constructor(cancelees: Iterable<Cancellee<L>> = []) {
     super(res => resolve = res);
     var resolve!: (v: L | PromiseLike<never>) => void;
-    this.resolve = resolve;
+    this[internal] = new Internal(resolve);
     for (const cancellee of cancelees) {
       void cancellee.register(this.cancel);
     }
   }
-  private alive = true;
-  private canceled_ = false;
-  private reason?: L;
-  private resolve: (reason: L | PromiseLike<never>) => void;
-  private readonly listeners: Set<(reason: L) => void> = new Set();
+  public [internal]: Internal<L>;
   public readonly register = (listener: (reason: L) => void) => {
     assert(listener);
-    if (this.canceled_) return void handler(this.reason!), () => undefined;
-    if (!this.alive) return () => undefined;
-    void this.listeners.add(handler);
+    if (this[internal].canceled) return void handler(this[internal].reason!), () => undefined;
+    if (!this[internal].alive) return () => undefined;
+    void this[internal].listeners.add(handler);
     return () =>
-      this.alive
-        ? void this.listeners.delete(handler)
+      this[internal].alive
+        ? void this[internal].listeners.delete(handler)
         : undefined;
 
     function handler(reason: L): void {
@@ -57,41 +66,41 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
     }
   };
   public readonly cancel: Canceller<L>['cancel'] = (reason?: L) => {
-    if (!this.alive) return;
-    this.alive = false;
-    this.canceled_ = true;
-    this.reason = reason!;
-    this.resolve(this.reason);
-    void Obj.freeze(this.listeners);
+    if (!this[internal].alive) return;
+    this[internal].alive = false;
+    this[internal].canceled = true;
+    this[internal].reason = reason!;
+    this[internal].resolve(this[internal].reason!);
+    void Obj.freeze(this[internal].listeners);
     void Obj.freeze(this);
-    for (const listener of this.listeners) {
+    for (const listener of this[internal].listeners) {
       void listener(reason!);
     }
   };
   public readonly close = (reason?: unknown) => {
-    if (!this.alive) return;
-    this.alive = false;
-    void this.resolve(AtomicPromise.reject(reason));
-    void Obj.freeze(this.listeners);
+    if (!this[internal].alive) return;
+    this[internal].alive = false;
+    void this[internal].resolve(AtomicPromise.reject(reason));
+    void Obj.freeze(this[internal].listeners);
     void Obj.freeze(this);
   };
   public get canceled(): boolean {
-    return this.canceled_;
+    return this[internal].canceled;
   }
   public readonly promise = <T>(val: T): AtomicPromise<T> =>
-    this.canceled_
-      ? AtomicPromise.reject(this.reason)
+    this[internal].canceled
+      ? AtomicPromise.reject(this[internal].reason)
       : AtomicPromise.resolve(val);
   public readonly maybe = <T>(val: T): Maybe<T> =>
     Just(val)
       .bind(val =>
-        this.canceled_
+        this[internal].canceled
           ? Nothing
           : Just(val));
   public readonly either = <R>(val: R): Either<L, R> =>
     Right(val)
       .bind<R, L>(val =>
-        this.canceled_
-          ? Left(this.reason!)
+        this[internal].canceled
+          ? Left(this[internal].reason!)
           : Right(val));
 }
