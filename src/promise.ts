@@ -1,16 +1,18 @@
 import { concat } from './concat';
 
 const enum State {
-  resolved,
+  pending,
+  fulfilled,
   rejected,
 }
 type Status<T> =
-  | [State.resolved, T | PromiseLike<T>]
-  | [State.rejected, unknown];
+  | { readonly state: State.pending; }
+  | { readonly state: State.fulfilled; readonly result: T | PromiseLike<T>; }
+  | { readonly state: State.rejected; readonly result: unknown; };
+type QueueEntity<T> = readonly [(value: T) => void, (reason: unknown) => void];
 
 const status = Symbol.for('spica/promise::status');
 const queue = Symbol.for('spica/promise::queue');
-const resume = Symbol.for('spica/promise::resume');
 
 export class AtomicPromise<T = undefined> implements Promise<T> {
   public static get [Symbol.species]() {
@@ -51,39 +53,36 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
     try {
       void executor(
         value => {
-          this[status][0] = this[status][0] || [State.resolved, value!];
-          void this[resume]();
+          if (this[status].state === State.pending) {
+            // @ts-ignore
+            this[status].state = State.fulfilled;
+            // @ts-ignore
+            this[status].result = value;
+          }
+          void process(this[status], this[queue]);
         },
         reason => {
-          this[status][0] = this[status][0] || [State.rejected, reason];
-          void this[resume]();
+          if (this[status].state === State.pending) {
+            // @ts-ignore
+            this[status].state = State.rejected;
+            // @ts-ignore
+            this[status].result = reason;
+          }
+          void process(this[status], this[queue]);
         });
     }
     catch (reason) {
-      assert(!this[status][0]);
-      this[status][0] = [State.rejected, reason];
-      void this[resume]();
-    }
-  }
-  public [resume](): void {
-    if (!this[status][0]) return;
-    const [state, value] = this[status][0]!;
-    while (this[queue].length > 0) {
-      const [resolve, reject] = this[queue].shift()!;
-      switch (state) {
-        case State.resolved:
-          isPromiseLike(value)
-            ? void value.then(resolve, reject)
-            : void resolve(value as T);
-          continue;
-        case State.rejected:
-          void reject(value);
-          continue;
+      if (this[status].state === State.pending) {
+        // @ts-ignore
+        this[status].state = State.rejected;
+        // @ts-ignore
+        this[status].result = reason;
       }
+      void process(this[status], this[queue]);
     }
   }
-  public readonly [status]: [Status<T>?] = [];
-  public readonly [queue]: [(value: T) => void, (reason: unknown) => void][] = [];
+  public readonly [status]: Status<T> = { state: State.pending };
+  public readonly [queue]: QueueEntity<T>[] = [];
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
     return new AtomicPromise((resolve, reject) => {
       void this[queue].push([
@@ -106,7 +105,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
           }
         },
       ]);
-      void this[resume]();
+      void process(this[status], this[queue]);
     });
   }
   public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult> {
@@ -114,6 +113,36 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
   }
   public finally(onfinally?: (() => void) | undefined | null): AtomicPromise<T> {
     return this.then(onfinally, onfinally).then(() => this);
+  }
+}
+
+function process<T>(status: Status<T>, queue: QueueEntity<T>[]): void {
+  switch (status.state) {
+    case State.pending:
+      return;
+    case State.fulfilled:
+      if (isPromiseLike(status.result)) {
+        return void status.result.then(
+          value => {
+            while (queue.length > 0) {
+              void queue.shift()![0](value);
+            }
+          },
+          reason => {
+            while (queue.length > 0) {
+              void queue.shift()![1](reason);
+            }
+          });
+      }
+      while (queue.length > 0) {
+        void queue.shift()![0](status.result);
+      }
+      return;
+    case State.rejected:
+      while (queue.length > 0) {
+        void queue.shift()![1](status.result);
+      }
+      return;
   }
 }
 
