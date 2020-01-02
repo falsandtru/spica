@@ -9,10 +9,15 @@ type Status<T> =
   | { readonly state: State.pending; }
   | { readonly state: State.fulfilled; readonly result: T | PromiseLike<T>; }
   | { readonly state: State.rejected; readonly result: unknown; };
-type QueueEntity<T> = readonly [(value: T) => void, (reason: unknown) => void];
 
-const status = Symbol.for('spica/promise::status');
-const queue = Symbol.for('spica/promise::queue');
+class Internal<T> {
+  public status: Status<T> = { state: State.pending };
+  public readonly fulfillReactions: ((value: T) => void)[] = [];
+  public readonly rejectReactions: ((reason: unknown) => void)[] = [];
+  public isHandled: boolean = false;
+}
+
+const internal = Symbol.for('spica/promise::internal');
 
 export class AtomicPromise<T = undefined> implements Promise<T> {
   public static get [Symbol.species]() {
@@ -53,59 +58,57 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
     try {
       void executor(
         value => {
-          if (this[status].state === State.pending) {
-            // @ts-ignore
-            this[status].state = State.fulfilled;
-            // @ts-ignore
-            this[status].result = value;
+          if (this[internal].status.state === State.pending) {
+            this[internal].status = {
+              state: State.fulfilled,
+              result: value!,
+            };
           }
-          void process(this[status], this[queue]);
+          void process(this[internal]);
         },
         reason => {
-          if (this[status].state === State.pending) {
-            // @ts-ignore
-            this[status].state = State.rejected;
-            // @ts-ignore
-            this[status].result = reason;
+          if (this[internal].status.state === State.pending) {
+            this[internal].status = {
+              state: State.rejected,
+              result: reason,
+            };
           }
-          void process(this[status], this[queue]);
+          void process(this[internal]);
         });
     }
     catch (reason) {
-      if (this[status].state === State.pending) {
-        // @ts-ignore
-        this[status].state = State.rejected;
-        // @ts-ignore
-        this[status].result = reason;
+      if (this[internal].status.state === State.pending) {
+        this[internal].status = {
+          state: State.rejected,
+          result: reason,
+        };
       }
-      void process(this[status], this[queue]);
+      void process(this[internal]);
     }
   }
-  public readonly [status]: Status<T> = { state: State.pending };
-  public readonly [queue]: QueueEntity<T>[] = [];
+  public readonly [internal]: Internal<T> = new Internal();
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
     return new AtomicPromise((resolve, reject) => {
-      void this[queue].push([
-        value => {
-          if (!onfulfilled) return void resolve(value as any);
-          try {
-            void resolve(onfulfilled(value));
-          }
-          catch (reason) {
-            void reject(reason);
-          }
-        },
-        reason => {
-          if (!onrejected) return void reject(reason);
-          try {
-            void resolve(onrejected(reason));
-          }
-          catch (reason) {
-            void reject(reason);
-          }
-        },
-      ]);
-      void process(this[status], this[queue]);
+      const { fulfillReactions, rejectReactions } = this[internal];
+      void fulfillReactions.push(value => {
+        if (!onfulfilled) return void resolve(value as any);
+        try {
+          void resolve(onfulfilled(value));
+        }
+        catch (reason) {
+          void reject(reason);
+        }
+      });
+      void rejectReactions.push(reason => {
+        if (!onrejected) return void reject(reason);
+        try {
+          void resolve(onrejected(reason));
+        }
+        catch (reason) {
+          void reject(reason);
+        }
+      });
+      void process(this[internal]);
     });
   }
   public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult> {
@@ -116,7 +119,9 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
   }
 }
 
-function process<T>(status: Status<T>, queue: QueueEntity<T>[]): void {
+function process<T>(internal: Internal<T>): void {
+  const { status, fulfillReactions, rejectReactions } = internal;
+  internal.isHandled = true;
   switch (status.state) {
     case State.pending:
       return;
@@ -124,23 +129,23 @@ function process<T>(status: Status<T>, queue: QueueEntity<T>[]): void {
       if (isPromiseLike(status.result)) {
         return void status.result.then(
           value => {
-            while (queue.length > 0) {
-              void queue.shift()![0](value);
+            while (fulfillReactions.length > 0) {
+              void fulfillReactions.shift()!(value);
             }
           },
           reason => {
-            while (queue.length > 0) {
-              void queue.shift()![1](reason);
+            while (rejectReactions.length > 0) {
+              void rejectReactions.shift()!(reason);
             }
           });
       }
-      while (queue.length > 0) {
-        void queue.shift()![0](status.result);
+      while (fulfillReactions.length > 0) {
+        void fulfillReactions.shift()!(status.result);
       }
       return;
     case State.rejected:
-      while (queue.length > 0) {
-        void queue.shift()![1](status.result);
+      while (rejectReactions.length > 0) {
+        void rejectReactions.shift()!(status.result);
       }
       return;
   }
