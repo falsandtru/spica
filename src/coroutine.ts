@@ -9,12 +9,12 @@ import { noop } from './noop';
 
 const { Object: Obj, Set, Error } = global;
 
-const status = Symbol.for('spica/Coroutine.status');
 const alive = Symbol.for('spica/Coroutine.alive');
 const init = Symbol.for('spica/Coroutine.init');
 const exit = Symbol.for('spica/Coroutine.exit');
 const terminate = Symbol.for('spica/Coroutine.terminate');
 const port = Symbol.for('spica/Coroutine.port');
+const internal = Symbol.for('spica/coroutine::internal');
 
 export interface CoroutineOptions {
   readonly size?: number;
@@ -52,20 +52,20 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
   ) {
     super(resolve => res = resolve);
     var res!: (v: T | AtomicPromise<T>) => void;
-    this[status] = new Status(opts);
-    void res(this[status].result);
+    this[internal] = new Internal(opts);
+    void res(this[internal].result);
     this[Coroutine.init] = async () => {
       let reply: Reply<R, T> = noop;
       try {
         this[Coroutine.init] = noop;
-        if (!this[status].alive) return;
+        if (!this[internal].alive) return;
         const resume = (): S | PromiseLike<S> =>
-          this[status].msgs.length > 0
-            ? ([, reply] = this[status].msgs.shift()!)[0]
-            : this[status].resume.then(resume);
+          this[internal].msgs.length > 0
+            ? ([, reply] = this[internal].msgs.shift()!)[0]
+            : this[internal].resume.then(resume);
         const iter = gen.call(this);
         let cnt = 0;
-        while (this[status].alive) {
+        while (this[internal].alive) {
           void ++cnt;
           const [msg] = cnt === 1
             // Don't block.
@@ -73,45 +73,45 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
             // Block.
             : await AtomicPromise.all([
                 // Don't block.
-                this[status].settings.size === 0
+                this[internal].settings.size === 0
                   ? undefined
                   : resume(),
                 // Don't block.
                 AtomicPromise.all([
-                  this[status].settings.resume(),
-                  this[status].settings.interval > 0
-                    ? wait(this[status].settings.interval)
+                  this[internal].settings.resume(),
+                  this[internal].settings.interval > 0
+                    ? wait(this[internal].settings.interval)
                     : undefined,
                 ]),
               ]);
           assert(msg instanceof Promise === false);
           assert(msg instanceof AtomicPromise === false);
-          if (!this[status].alive) break;
+          if (!this[internal].alive) break;
           // Block.
           // `value` can be Promise when using iterator.
           // `value` will never be Promise when using async iterator.
           const { value, done } = await iter.next(msg!);
-          if (!this[status].alive) break;
+          if (!this[internal].alive) break;
           if (!done) {
-            const state = this[status].state;
-            this[status].state = new AtomicFuture();
+            const state = this[internal].state;
+            this[internal].state = new AtomicFuture();
             // Don't block.
             void state.bind({ value: value as R, done });
             void [reply, reply = noop][0]({ value: value as R, done });
             continue;
           }
           else {
-            this[status].alive = false;
+            this[internal].alive = false;
             // Don't block.
-            void this[status].state.bind({ value: undefined, done });
+            void this[internal].state.bind({ value: undefined, done });
             // Block.
-            this[status].result.bind(value as T)
+            this[internal].result.bind(value as T)
               .then(() =>
                 void [reply, reply = noop][0]({ value: value as T, done }));
             return;
           }
         }
-        assert(!this[status].alive);
+        assert(!this[internal].alive);
         void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
       }
       catch (reason) {
@@ -119,8 +119,8 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
         void this[Coroutine.terminate](reason);
       }
     };
-    if (this[status].settings.trigger !== undefined) {
-      for (const prop of new Set(Array<string | symbol>().concat(this[status].settings.trigger))) {
+    if (this[internal].settings.trigger !== undefined) {
+      for (const prop of new Set(Array<string | symbol>().concat(this[internal].settings.trigger))) {
         const desc = Obj.getOwnPropertyDescriptor(this, prop) || {
           value: this[prop],
           enumerable: true,
@@ -144,57 +144,57 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
     }
     void tick(() => void this[Coroutine.init]());
   }
-  public readonly [status]: Status<T, R, S>;
+  public readonly [internal]: Internal<T, R, S>;
   public get [alive](): boolean {
-    return this[status].alive;
+    return this[internal].alive;
   }
   public [init]: () => void;
   public [exit](result: T | PromiseLike<T>): void {
-    if (!this[status].alive) return;
+    if (!this[internal].alive) return;
     void this[init]();
-    this[status].alive = false;
+    this[internal].alive = false;
     // Don't block.
-    void this[status].state.bind({ value: undefined, done: true });
-    void this[status].result.bind(result);
+    void this[internal].state.bind({ value: undefined, done: true });
+    void this[internal].result.bind(result);
   }
   public [terminate](reason?: unknown): void {
     return this[exit](AtomicPromise.reject(reason));
   }
   public async *[Symbol.asyncIterator](): AsyncIterator<R, undefined, undefined> {
-    !this[status].settings.delay && void this[init]();
-    while (this[status].alive) {
-      const { value } = await this[status].state;
-      if (!this[status].alive) break;
+    !this[internal].settings.delay && void this[init]();
+    while (this[internal].alive) {
+      const { value } = await this[internal].state;
+      if (!this[internal].alive) break;
       yield value!;
     }
     return this.then(() => undefined);
   }
   public readonly [port] = {
     recv: (): AtomicPromise<IteratorResult<R, T>> => {
-      !this[status].settings.delay && void this[init]();
-      return this[status].state
+      !this[internal].settings.delay && void this[init]();
+      return this[internal].state
         .then(({ value, done }) =>
           done
             ? this.then(value => ({ value, done }))
             : { value: value!, done });
     },
     send: (msg: S | PromiseLike<S>): AtomicPromise<IteratorResult<R, T>> => {
-      if (!this[status].alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
-      !this[status].settings.delay && void this[init]();
+      if (!this[internal].alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
+      !this[internal].settings.delay && void this[init]();
       const res = new AtomicFuture<IteratorResult<R, T>>();
       // Don't block.
-      void this[status].msgs.push([msg, res.bind]);
-      void this[status].resume.bind();
-      this[status].resume = new AtomicFuture();
-      while (this[status].msgs.length > this[status].settings.size) {
+      void this[internal].msgs.push([msg, res.bind]);
+      void this[internal].resume.bind();
+      this[internal].resume = new AtomicFuture();
+      while (this[internal].msgs.length > this[internal].settings.size) {
         // Don't block.
-        const [, reply] = this[status].msgs.shift()!;
+        const [, reply] = this[internal].msgs.shift()!;
         void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`)));
       }
       return res.then();
     },
     connect: async <U>(com: () => Generator<S, U, T | R> | AsyncGenerator<S, U, T | R>): Promise<U> => {
-      !this[status].settings.delay && void this[init]();
+      !this[internal].settings.delay && void this[init]();
       const iter = com();
       let reply: T | R | undefined;
       while (true) {
@@ -206,19 +206,19 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
   } as const;
 }
 Coroutine.prototype.then = function () {
-  !this[status].settings.delay && void this[init]();
+  !this[internal].settings.delay && void this[init]();
   return Coroutine.prototype['__proto__'].then.call(this, ...arguments);
 };
 Coroutine.prototype.catch = function () {
-  !this[status].settings.delay && void this[init]();
+  !this[internal].settings.delay && void this[init]();
   return Coroutine.prototype['__proto__'].catch.call(this, ...arguments);
 };
 Coroutine.prototype.finally = function () {
-  !this[status].settings.delay && void this[init]();
+  !this[internal].settings.delay && void this[init]();
   return Coroutine.prototype['__proto__'].finally.call(this, ...arguments);
 };
 
-class Status<T, R, S> {
+class Internal<T, R, S> {
   constructor(opts: CoroutineOptions) {
     void extend(this.settings, opts);
     void this.result.finally(() => {
