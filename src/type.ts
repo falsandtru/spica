@@ -90,6 +90,7 @@ export type Reverse<T extends readonly unknown[]> =
   Rev<T, []>;
 type Rev<T extends readonly unknown[], U extends readonly unknown[]> =
   { 0: U; 1: Rev<Tail<T>, Prepend<T[0], U>>; }[T extends readonly [] ? 0 : 1];
+export type Member<T, U extends readonly unknown[]> = Index<T, U> extends -1 ? false : true;
 export type Index<T, U extends readonly unknown[]> =
   number extends U['length'] ? If<TEq<U[0], T>, number, -1> :
   Idx<T, U, []>;

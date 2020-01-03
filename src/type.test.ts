@@ -1,6 +1,6 @@
 import {
   Not, And, Or, Eq, TEq, DEq, If, Case, IsAny, IsUnknown,
-  Prepend, Append, Split, Head, Tail, Init, Last, Inits, Tails, Concat, Reverse, Index, AtLeast,
+  Prepend, Append, Split, Head, Tail, Init, Last, Inits, Tails, Concat, Reverse, Member, Index, AtLeast,
   Rewrite, ExactRewrite, ExactExtract, ExactExclude,
   valueof, indexof,
   Type, StrictType,
@@ -273,6 +273,19 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Reverse<[0, 1]>, [1, 0]>);
       assert((): true => true as TEq<Reverse<[0, 1, 2]>, [2, 1, 0]>);
       assert((): true => true as TEq<Reverse<0[]>, 0[]>);
+    });
+
+  });
+
+  describe('Member', () => {
+    it('', () => {
+      assert((): true => true as TEq<Member<0, []>, false>);
+      assert((): true => true as TEq<Member<0, [0]>, true>);
+      assert((): true => true as TEq<Member<0, [0, 1]>, true>);
+      assert((): true => true as TEq<Member<1, [0, 1]>, true>);
+      assert((): true => true as TEq<Member<2, [0, 1]>, false>);
+      assert((): true => true as TEq<Member<0, 0[]>, true>);
+      assert((): true => true as TEq<Member<0, 1[]>, false>);
     });
 
   });
