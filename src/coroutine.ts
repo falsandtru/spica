@@ -240,7 +240,7 @@ class Internal<T, R, S> {
   }
   public alive = true;
   public state = new AtomicFuture<IteratorResult<R, undefined>>();
-  public resume = new AtomicFuture<never>();
+  public resume = new AtomicFuture<undefined>();
   public readonly result = new AtomicFuture<T>();
   public readonly msgs: [S | PromiseLike<S>, Reply<R, T>][] = [];
   public readonly settings: DeepImmutable<DeepRequired<CoroutineOptions>> = {
