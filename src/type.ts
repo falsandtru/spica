@@ -33,7 +33,8 @@ interface NondeterminateTypeMap {
   boolean: boolean;
 }
 
-export type IsAny<T> = [T] extends [Unique] ? true : false;
+export type IsNever<T> = [T] extends [never] ? true : false;
+export type IsAny<T> = [T] extends [Unique] ? Not<IsNever<T>> : false;
 export type IsUnknown<T> = [T] extends [Unique | {} | void | null] ? false : true;
 
 export type Prepend<Elm, T extends readonly unknown[]> =

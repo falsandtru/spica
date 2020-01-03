@@ -1,5 +1,5 @@
 import {
-  Not, And, Or, Eq, TEq, DEq, If, Case, IsAny, IsUnknown,
+  Not, And, Or, Eq, TEq, DEq, If, Case, IsNever, IsAny, IsUnknown,
   Prepend, Append, Split, Head, Tail, Init, Last, Inits, Tails, Concat, Reverse, Member, Index, AtLeast,
   Rewrite, ExactRewrite, ExactExtract, ExactExclude,
   valueof, indexof,
@@ -91,6 +91,7 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<never, never>);
       assert((): true => true as TEq<any, any>);
       assert((): false => true as TEq<any, unknown>);
+      assert((): false => true as TEq<any, never>);
       assert((): false => true as TEq<unknown, any>);
       assert((): false => true as TEq<[], [] | {}>);
       assert((): false => true as TEq<[] | {}, []>);
@@ -132,10 +133,21 @@ describe('Unit: lib/type', () => {
 
   });
 
+  describe('IsNever', () => {
+    it('', () => {
+      assert((): true => true as TEq<IsNever<never>, true>);
+      assert((): true => true as TEq<IsNever<any>, false>);
+      assert((): true => true as TEq<IsNever<unknown>, false>);
+      assert((): true => true as TEq<IsNever<{}>, false>);
+    });
+
+  });
+
   describe('IsAny', () => {
     it('', () => {
       assert((): true => true as TEq<IsAny<any>, true>);
       assert((): true => true as TEq<IsAny<unknown>, false>);
+      assert((): true => true as TEq<IsAny<never>, false>);
       assert((): true => true as TEq<IsAny<{}>, false>);
     });
 
@@ -145,6 +157,7 @@ describe('Unit: lib/type', () => {
     it('', () => {
       assert((): true => true as TEq<IsUnknown<unknown>, true>);
       assert((): true => true as TEq<IsUnknown<any>, false>);
+      assert((): true => true as TEq<IsUnknown<never>, false>);
       assert((): true => true as TEq<IsUnknown<{}>, false>);
       assert((): true => true as TEq<IsUnknown<void>, false>);
       assert((): true => true as TEq<IsUnknown<undefined>, false>);
