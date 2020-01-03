@@ -95,9 +95,9 @@ export type Member<T, U extends readonly unknown[]> = Index<T, U> extends -1 ? f
 export type Index<T, U extends readonly unknown[]> =
   number extends U['length'] ? If<TEq<U[0], T>, number, -1> :
   Idx<T, U, []>;
-type Idx<T, U extends readonly unknown[], V extends readonly unknown[]> =
+type Idx<T, U extends readonly unknown[], V extends readonly void[]> =
   U extends readonly [] ? -1 :
-  { 0: V['length']; 1: Idx<T, Tail<U>, Prepend<T, V>>; }[If<TEq<U[0], T>, 0, 1>];
+  { 0: V['length']; 1: Idx<T, Tail<U>, Prepend<void, V>>; }[If<TEq<U[0], T>, 0, 1>];
 export type AtLeast<N extends number, T> = AtLeastRec<N, T, T[], []>;
 type AtLeastRec<L, Elm, T extends readonly unknown[], C extends readonly unknown[]> = {
   0: T;
