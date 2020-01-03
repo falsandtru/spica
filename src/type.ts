@@ -138,7 +138,7 @@ type Unify<T, U> = Pick<T & U, keyof T | keyof U>;
 
 export type ExtractProp<T, V> =
   { [Q in { [P in keyof T]: T[P] extends never ? If<TEq<V, never>, P, never> : T[P] extends V ? P : never; }[keyof T]]: T[Q]; };
-export type DeepExtractProp<T, V, E extends object | undefined | null = never> =
+export type DeepExtractProp<T, V, E = never> =
   T extends E ? never :
   T extends V ? T :
   T extends readonly unknown[] | Function ? never :
@@ -146,7 +146,7 @@ export type DeepExtractProp<T, V, E extends object | undefined | null = never> =
   never;
 export type ExcludeProp<T, V> =
   { [Q in { [P in keyof T]: If<TEq<V, never>, T[P] extends never ? never : P, If<Includes<T[P], V>, never, P>>; }[keyof T]]: T[Q]; };
-export type DeepExcludeProp<T, V, E extends object | undefined | null = never> =
+export type DeepExcludeProp<T, V, E = never> =
   T extends E ? T :
   T extends V ? never :
   T extends readonly unknown[] | Function ? T :
@@ -154,7 +154,7 @@ export type DeepExcludeProp<T, V, E extends object | undefined | null = never> =
   T;
 export type RewriteProp<T, R extends [unknown, unknown]> =
   { [P in keyof T]: Rewrite<T[P], R>; };
-export type DeepRewriteProp<T, R extends [unknown, unknown], E extends object | undefined | null = never> =
+export type DeepRewriteProp<T, R extends [unknown, unknown], E = never> =
   [T] extends [never] ? Rewrite<T, R> :
   T extends E ? T :
   true extends (R extends never ? never : T extends R[0] ? true : never) ? Rewrite<T, R> :
@@ -165,12 +165,12 @@ type Includes<T, U> = true extends (T extends U ? true : never) ? true : false;
 
 export type Partial<T> =
   { [P in keyof T]+?: T[P]; };
-export type DeepPartial<T, E extends object | undefined | null = readonly unknown[]> =
+export type DeepPartial<T, E = readonly unknown[]> =
   T extends E | Function ? T :
   { [P in keyof T]+?: DeepPartial<T[P], E>; };
 export type Required<T> =
   { [P in keyof T]-?: T[P]; };
-export type DeepRequired<T, E extends object | undefined | null = readonly unknown[]> =
+export type DeepRequired<T, E = readonly unknown[]> =
   T extends E | Function ? T :
   { [P in keyof T]-?: DeepRequired<T[P], E>; };
 export type Immutable<T> =
@@ -179,7 +179,7 @@ export type Immutable<T> =
   T extends ReadonlyArray<infer V> ? TEq<T, V[]> extends true ? readonly V[] :
   { readonly [P in keyof T]: T[P]; } :
   { readonly [P in keyof T]: T[P]; };
-export type DeepImmutable<T, E extends object | undefined | null = never> =
+export type DeepImmutable<T, E = never> =
   T extends E | Function ? T :
   T extends ReadonlySet<infer V> ? ReadonlySet<V> :
   T extends ReadonlyMap<infer K, infer V> ? ReadonlyMap<K, V> :
@@ -192,7 +192,7 @@ export type Mutable<T> =
   T extends ReadonlyArray<infer V> ? TEq<T, readonly V[]> extends true ? V[] :
   { -readonly [P in keyof T]: T[P]; } :
   { -readonly [P in keyof T]: T[P]; };
-export type DeepMutable<T, E extends object | undefined | null = never> =
+export type DeepMutable<T, E = never> =
   T extends E | Function ? T :
   T extends ReadonlySet<infer V> ? Set<V> :
   T extends ReadonlyMap<infer K, infer V> ? Map<K, V> :
