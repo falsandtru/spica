@@ -151,7 +151,7 @@ function process<T>(internal: Internal<T>): void {
   }
 }
 
-function isPromiseLike(value: any): value is PromiseLike<unknown> {
+export function isPromiseLike(value: any): value is PromiseLike<unknown> {
   return !!value && typeof value === 'object'
       && 'then' in value && typeof value.then === 'function';
 }
