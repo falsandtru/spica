@@ -1,6 +1,6 @@
 import {
   Not, And, Or, Eq, TEq, DEq, If, Case, IsAny, IsUnknown,
-  Prepend, Append, Split, Head, Tail, Init, Last, Inits, Tails, Concat, Reverse, AtLeast,
+  Prepend, Append, Split, Head, Tail, Init, Last, Inits, Tails, Concat, Reverse, Index, AtLeast,
   Rewrite, ExactRewrite, ExactExtract, ExactExclude,
   valueof, indexof,
   Type, StrictType,
@@ -277,6 +277,19 @@ describe('Unit: lib/type', () => {
 
   });
 
+  describe('Index', () => {
+    it('', () => {
+      assert((): true => true as TEq<Index<0, []>, -1>);
+      assert((): true => true as TEq<Index<0, [0]>, 0>);
+      assert((): true => true as TEq<Index<0, [0, 1]>, 0>);
+      assert((): true => true as TEq<Index<1, [0, 1]>, 1>);
+      assert((): true => true as TEq<Index<2, [0, 1]>, -1>);
+      assert((): true => true as TEq<Index<0, 0[]>, number>);
+      assert((): true => true as TEq<Index<0, 1[]>, -1>);
+    });
+
+  });
+
   describe('AtLeast', () => {
     it('', () => {
       assert((): AtLeast<0, number> => []);
@@ -323,6 +336,14 @@ describe('Unit: lib/type', () => {
 
   });
 
+  describe('indexof', () => {
+    it('', () => {
+      assert((): true => true as TEq<indexof<[0, -1], -1>, 1>);
+      assert((): true => true as TEq<indexof<{ 0: 0; 1: -1 }, -1>, 1>);
+    });
+
+  });
+
   describe('valueof', () => {
     it('', () => {
       assert((): true => true as TEq<valueof<{ 0: 0; a: 1; }>, 0 | 1>);
@@ -331,13 +352,6 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<valueof<{ [i: number]: 0; }>, 0>);
       assert((): true => true as TEq<valueof<Immutable<{ 0: 0; a: 1; }>>, 0 | 1>);
       assert((): true => true as TEq<valueof<ReadonlyArray<0>>, 0>);
-    });
-
-  });
-
-  describe('indexof', () => {
-    it('', () => {
-      assert((): true => true as TEq<indexof<{ 0: 0; 1: -1 }, -1>, 1>);
     });
 
   });

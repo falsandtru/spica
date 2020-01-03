@@ -90,6 +90,12 @@ export type Reverse<T extends readonly unknown[]> =
   Rev<T, []>;
 type Rev<T extends readonly unknown[], U extends readonly unknown[]> =
   { 0: U; 1: Rev<Tail<T>, Prepend<T[0], U>>; }[T extends readonly [] ? 0 : 1];
+export type Index<T, U extends readonly unknown[]> =
+  number extends U['length'] ? If<TEq<U[0], T>, number, -1> :
+  Idx<T, U, []>;
+type Idx<T, U extends readonly unknown[], V extends readonly unknown[]> =
+  U extends readonly [] ? -1 :
+  { 0: V['length']; 1: Idx<T, Tail<U>, Prepend<T, V>>; }[If<TEq<U[0], T>, 0, 1>];
 export type AtLeast<N extends number, T> = AtLeastRec<N, T, T[], []>;
 type AtLeastRec<L, Elm, T extends readonly unknown[], C extends readonly unknown[]> = {
   0: T;
@@ -115,7 +121,9 @@ export type ExactRewrite<T, R extends [unknown, unknown]> =
 export type ExactExtract<T, U> = T extends U ? U extends T ? T : never : never;
 export type ExactExclude<T, U> = T extends ExactExtract<T, U> ? never : T;
 
-export type indexof<T, V extends valueof<T>> = { [P in keyof T]: If<TEq<T[P], V>, P, never>; }[keyof T];
+export type indexof<T, V extends valueof<T>> =
+  T extends readonly unknown[] ? Index<V, T> :
+  { [P in keyof T]: If<TEq<T[P], V>, P, never>; }[keyof T];
 export type valueof<T, K extends string | number | symbol = T extends { [n: number]: unknown; length: number; } ? number : string | number> = T[Extract<keyof T, K>];
 
 export type Type<T> =
