@@ -126,28 +126,21 @@ function process<T>(internal: Internal<T>): void {
     case State.pending:
       return;
     case State.fulfilled:
-      if (isPromiseLike(status.result)) {
-        return void status.result.then(
-          value => {
-            while (fulfillReactions.length > 0) {
-              void fulfillReactions.shift()!(value);
-            }
-          },
-          reason => {
-            while (rejectReactions.length > 0) {
-              void rejectReactions.shift()!(reason);
-            }
-          });
-      }
-      while (fulfillReactions.length > 0) {
-        void fulfillReactions.shift()!(status.result);
-      }
-      return;
+      return isPromiseLike(status.result)
+        ? void status.result.then(
+            value =>
+              void consume(fulfillReactions, value),
+            reason =>
+              void consume(rejectReactions, reason))
+        : void consume(fulfillReactions, status.result);
     case State.rejected:
-      while (rejectReactions.length > 0) {
-        void rejectReactions.shift()!(status.result);
-      }
-      return;
+      return void consume(rejectReactions, status.result);
+  }
+}
+
+function consume<a>(fs: ((a: a) => void)[], a: a): void {
+  while (fs.length > 0) {
+    void fs.shift()!(a);
   }
 }
 
