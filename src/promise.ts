@@ -64,7 +64,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
               result: value!,
             };
           }
-          void process(this[internal]);
+          void resume(this[internal]);
         },
         reason => {
           if (this[internal].status.state === State.pending) {
@@ -73,7 +73,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
               result: reason,
             };
           }
-          void process(this[internal]);
+          void resume(this[internal]);
         });
     }
     catch (reason) {
@@ -83,7 +83,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
           result: reason,
         };
       }
-      void process(this[internal]);
+      void resume(this[internal]);
     }
   }
   public readonly [internal]: Internal<T> = new Internal();
@@ -108,7 +108,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
           void reject(reason);
         }
       });
-      void process(this[internal]);
+      void resume(this[internal]);
     });
   }
   public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult> {
@@ -119,7 +119,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
   }
 }
 
-function process<T>(internal: Internal<T>): void {
+function resume<T>(internal: Internal<T>): void {
   const { status, fulfillReactions, rejectReactions } = internal;
   internal.isHandled = true;
   switch (status.state) {
