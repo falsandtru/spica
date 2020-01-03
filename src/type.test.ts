@@ -1,5 +1,5 @@
 import {
-  Not, And, Or, Eq, TEq, DEq, If, Case, IsAny,
+  Not, And, Or, Eq, TEq, DEq, If, Case, IsAny, IsUnknown,
   Prepend, Append, Split, Head, Tail, Init, Last, Inits, Tails, Concat, Reverse, AtLeast,
   Rewrite, ExactRewrite, ExactExtract, ExactExclude,
   valueof, indexof,
@@ -137,6 +137,20 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<IsAny<any>, true>);
       assert((): true => true as TEq<IsAny<unknown>, false>);
       assert((): true => true as TEq<IsAny<{}>, false>);
+    });
+
+  });
+
+  describe('IsUnknown', () => {
+    it('', () => {
+      assert((): true => true as TEq<IsUnknown<unknown>, true>);
+      assert((): true => true as TEq<IsUnknown<any>, false>);
+      assert((): true => true as TEq<IsUnknown<{}>, false>);
+      assert((): true => true as TEq<IsUnknown<void>, false>);
+      assert((): true => true as TEq<IsUnknown<undefined>, false>);
+      assert((): true => true as TEq<IsUnknown<null>, false>);
+      assert((): true => true as TEq<IsUnknown<0>, false>);
+      assert((): true => true as TEq<IsUnknown<object>, false>);
     });
 
   });
