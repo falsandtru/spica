@@ -139,6 +139,9 @@ export type Type<T> =
   T extends Function ? 'function' :
   'object';
 export type StrictType<T> =
+  IsNever<T> extends true ? 'never' :
+  IsAny<T> extends true ? 'any' :
+  IsUnknown<T> extends true ? 'unknown' :
   T extends void ? null extends void ? 'null' | 'undefined' : 'undefined' :
   T extends null ? 'null' :
   Type<T>;
