@@ -9,13 +9,6 @@ import { noop } from './noop';
 
 const { Object: Obj, Set, Error } = global;
 
-const alive = Symbol.for('spica/Coroutine.alive');
-const init = Symbol.for('spica/Coroutine.init');
-const exit = Symbol.for('spica/Coroutine.exit');
-const terminate = Symbol.for('spica/Coroutine.terminate');
-const port = Symbol.for('spica/Coroutine.port');
-const internal = Symbol.for('spica/coroutine::internal');
-
 export interface CoroutineOptions {
   readonly size?: number;
   readonly interval?: number;
@@ -23,7 +16,6 @@ export interface CoroutineOptions {
   readonly delay?: boolean;
   readonly trigger?: string | symbol | ReadonlyArray<string | symbol>;
 }
-type Reply<R, T> = (msg: IteratorResult<R, T> | PromiseLike<never>) => void;
 
 export interface CoroutineInterface<T = unknown, R = unknown, _ = unknown> extends Promise<T>, AsyncIterable<R> {
   readonly constructor: {
@@ -34,6 +26,50 @@ export interface CoroutineInterface<T = unknown, R = unknown, _ = unknown> exten
     readonly [Symbol.species]: typeof Promise;
   };
 }
+
+const alive = Symbol.for('spica/Coroutine.alive');
+const init = Symbol.for('spica/Coroutine.init');
+const exit = Symbol.for('spica/Coroutine.exit');
+const terminate = Symbol.for('spica/Coroutine.terminate');
+const port = Symbol.for('spica/Coroutine.port');
+
+class Internal<T, R, S> {
+  constructor(opts: CoroutineOptions) {
+    void extend(this.settings, opts);
+    void this.result.finally(() => {
+      while (true) {
+        try {
+          while (this.msgs.length > 0) {
+            // Don't block.
+            const [, reply] = this.msgs.shift()!;
+            void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
+          }
+          return;
+        }
+        catch (reason) {
+          void causeAsyncException(reason);
+          continue;
+        }
+      }
+    });
+  }
+  public alive = true;
+  public state = new AtomicFuture<IteratorResult<R, undefined>>();
+  public resume = new AtomicFuture<undefined>();
+  public readonly result = new AtomicFuture<T>();
+  public readonly msgs: [S | PromiseLike<S>, Reply<R, T>][] = [];
+  public readonly settings: DeepImmutable<DeepRequired<CoroutineOptions>> = {
+    size: 0,
+    interval: 0,
+    resume: () => undefined,
+    delay: false,
+    trigger: undefined as any,
+  };
+}
+type Reply<R, T> = (msg: IteratorResult<R, T> | PromiseLike<never>) => void;
+
+const internal = Symbol.for('spica/coroutine::internal');
+
 export interface Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicPromise<T>, AsyncIterable<R> {
   constructor: typeof Coroutine;
 }
@@ -217,37 +253,3 @@ Coroutine.prototype.finally = function () {
   !this[internal].settings.delay && void this[init]();
   return Coroutine.prototype['__proto__'].finally.call(this, ...arguments);
 };
-
-class Internal<T, R, S> {
-  constructor(opts: CoroutineOptions) {
-    void extend(this.settings, opts);
-    void this.result.finally(() => {
-      while (true) {
-        try {
-          while (this.msgs.length > 0) {
-            // Don't block.
-            const [, reply] = this.msgs.shift()!;
-            void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
-          }
-          return;
-        }
-        catch (reason) {
-          void causeAsyncException(reason);
-          continue;
-        }
-      }
-    });
-  }
-  public alive = true;
-  public state = new AtomicFuture<IteratorResult<R, undefined>>();
-  public resume = new AtomicFuture<undefined>();
-  public readonly result = new AtomicFuture<T>();
-  public readonly msgs: [S | PromiseLike<S>, Reply<R, T>][] = [];
-  public readonly settings: DeepImmutable<DeepRequired<CoroutineOptions>> = {
-    size: 0,
-    interval: 0,
-    resume: () => undefined,
-    delay: false,
-    trigger: undefined as any,
-  };
-}
