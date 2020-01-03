@@ -7,7 +7,7 @@ const enum State {
 }
 type Status<T> =
   | { readonly state: State.pending; }
-  | { readonly state: State.fulfilled; readonly result: T | PromiseLike<T>; }
+  | { readonly state: State.fulfilled; readonly result: { value: T; promise: false; } | { value: PromiseLike<T>; promise: true; } }
   | { readonly state: State.rejected; readonly result: unknown; };
 
 class Internal<T> {
@@ -61,7 +61,9 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
           if (this[internal].status.state === State.pending) {
             this[internal].status = {
               state: State.fulfilled,
-              result: value!,
+              result: isPromiseLike(value)
+                ? { value, promise: true }
+                : { value: value!, promise: false },
             };
           }
           void resume(this[internal]);
@@ -126,13 +128,13 @@ function resume<T>(internal: Internal<T>): void {
     case State.pending:
       return;
     case State.fulfilled:
-      return isPromiseLike(status.result)
-        ? void status.result.then(
+      return status.result.promise
+        ? void status.result.value.then(
             value =>
               void consume(fulfillReactions, value),
             reason =>
               void consume(rejectReactions, reason))
-        : void consume(fulfillReactions, status.result);
+        : void consume(fulfillReactions, status.result.value);
     case State.rejected:
       return void consume(rejectReactions, status.result);
   }
