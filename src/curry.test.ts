@@ -29,6 +29,11 @@ describe('Unit: lib/curry', () => {
       assert(curry(curry((a: number, b: number) => a + b)(1))(2) === 3);
     });
 
+    it('generic', () => {
+      assert(curry(<T extends 1, U extends 2>(a: T, b: U) => a + b)(1)(2) === 3);
+      assert(curry(<T extends 1, U extends 2>(a: T, b: U) => a + b)(1, 2) === 3);
+    });
+
   });
 
 });
