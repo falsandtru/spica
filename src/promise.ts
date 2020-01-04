@@ -2,12 +2,12 @@ import { concat } from './concat';
 
 const enum State {
   pending,
-  fulfilled,
+  resolved,
   rejected,
 }
 type Status<T> =
   | { readonly state: State.pending; }
-  | { readonly state: State.fulfilled;
+  | { readonly state: State.resolved;
       readonly result: { readonly value: T; readonly promise: false; }
                      | { readonly value: PromiseLike<T>; readonly promise: true; }
     }
@@ -65,7 +65,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
         value => {
           if (this[internal].status.state === State.pending) {
             this[internal].status = {
-              state: State.fulfilled,
+              state: State.resolved,
               result: isPromiseLike(value)
                 ? { value, promise: true }
                 : { value: value!, promise: false },
@@ -132,7 +132,7 @@ function resume<T>(internal: Internal<T>): void {
   switch (status.state) {
     case State.pending:
       return;
-    case State.fulfilled:
+    case State.resolved:
       return status.result.promise
         ? void status.result.value.then(
             value =>
