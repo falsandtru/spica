@@ -58,10 +58,6 @@ describe('Unit: lib/coroutine', () => {
         assert(cnt === 1 && ++cnt);
       }
       assert(cnt === 2 && ++cnt);
-      new Coroutine(async function* () {
-        assert(cnt === 3 && ++cnt);
-      }, { delay: true })[Coroutine.terminate]();
-      assert(cnt === 4 && ++cnt);
     });
 
     it('trigger', async () => {
@@ -75,26 +71,18 @@ describe('Unit: lib/coroutine', () => {
         assert(cnt === 2 && ++cnt);
       }).then();
       assert(cnt === 3 && ++cnt);
-      new Coroutine(async function* () {
-        assert(cnt === 5 && ++cnt);
-      }, { delay: true }).then();
-      assert(cnt === 4 && ++cnt);
       await 0;
       class C extends Coroutine {
         trigger = '';
       }
       new C(async function* () {
-        assert(cnt === 6 && ++cnt);
+        assert(cnt === 4 && ++cnt);
       }, { trigger: 'trigger' });
-      assert(cnt === 7 && ++cnt);
+      assert(cnt === 5 && ++cnt);
       new C(async function* () {
-        assert(cnt === 8 && ++cnt);
+        assert(cnt === 6 && ++cnt);
       }, { trigger: ['trigger', 'trigger'] });
-      assert(cnt === 9 && ++cnt);
-      new C(async function* () {
-        assert(cnt === 11 && ++cnt);
-      }, { trigger: 'trigger', delay: true });
-      assert(cnt === 10 && ++cnt);
+      assert(cnt === 7 && ++cnt);
     });
 
     it('port', async () => {

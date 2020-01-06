@@ -13,7 +13,6 @@ export interface CoroutineOptions {
   readonly size?: number;
   readonly interval?: number;
   readonly resume?: () => PromiseLike<void> | void;
-  readonly delay?: boolean;
   readonly trigger?: string | symbol | ReadonlyArray<string | symbol>;
 }
 
@@ -62,7 +61,6 @@ class Internal<T, R, S> {
     size: 0,
     interval: 0,
     resume: () => undefined,
-    delay: false,
     trigger: undefined as any,
   };
 }
@@ -167,7 +165,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
         void Obj.defineProperty(this, prop, {
           set(this: Coroutine, value: unknown) {
             void Obj.defineProperty(this, prop, { ...desc, value });
-            !this[internal].settings.delay && void this[init]();
+            void this[init]();
           },
           get(this: Coroutine) {
             return this[prop];
@@ -196,7 +194,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
     return this[exit](AtomicPromise.reject(reason));
   }
   public async *[Symbol.asyncIterator](): AsyncIterator<R, undefined, undefined> {
-    !this[internal].settings.delay && void this[init]();
+    void this[init]();
     while (this[internal].alive) {
       const { value } = await this[internal].state;
       if (!this[internal].alive) break;
@@ -206,7 +204,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
   }
   public readonly [port] = {
     recv: (): AtomicPromise<IteratorResult<R, T>> => {
-      !this[internal].settings.delay && void this[init]();
+      void this[init]();
       return this[internal].state
         .then(({ value, done }) =>
           done
@@ -215,7 +213,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
     },
     send: (msg: S | PromiseLike<S>): AtomicPromise<IteratorResult<R, T>> => {
       if (!this[internal].alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
-      !this[internal].settings.delay && void this[init]();
+      void this[init]();
       const res = new AtomicFuture<IteratorResult<R, T>>();
       // Don't block.
       void this[internal].msgs.push([msg, res.bind]);
@@ -229,7 +227,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
       return res.then();
     },
     connect: async <U>(com: () => Generator<S, U, T | R> | AsyncGenerator<S, U, T | R>): Promise<U> => {
-      !this[internal].settings.delay && void this[init]();
+      void this[init]();
       const iter = com();
       let reply: T | R | undefined;
       while (true) {
@@ -241,14 +239,14 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
   } as const;
 }
 Coroutine.prototype.then = function () {
-  !this[internal].settings.delay && void this[init]();
+  void this[init]();
   return Coroutine.prototype['__proto__'].then.call(this, ...arguments);
 };
 Coroutine.prototype.catch = function () {
-  !this[internal].settings.delay && void this[init]();
+  void this[init]();
   return Coroutine.prototype['__proto__'].catch.call(this, ...arguments);
 };
 Coroutine.prototype.finally = function () {
-  !this[internal].settings.delay && void this[init]();
+  void this[init]();
   return Coroutine.prototype['__proto__'].finally.call(this, ...arguments);
 };
