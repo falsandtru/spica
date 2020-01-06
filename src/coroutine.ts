@@ -7,7 +7,7 @@ import { wait, tick } from './clock';
 import { causeAsyncException } from './exception';
 import { noop } from './noop';
 
-const { Object: Obj, Set, Error } = global;
+const { Object: Obj, Error } = global;
 
 export interface CoroutineOptions {
   readonly size?: number;
@@ -156,7 +156,8 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
       }
     };
     if (this[internal].settings.trigger !== undefined) {
-      for (const prop of new Set(Array<string | symbol>().concat(this[internal].settings.trigger))) {
+      for (const prop of Array<string | symbol>().concat(this[internal].settings.trigger)) {
+        if (prop in this) continue;
         const desc = Obj.getOwnPropertyDescriptor(this, prop) || {
           value: this[prop],
           enumerable: true,
@@ -164,13 +165,11 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
           writable: true,
         };
         void Obj.defineProperty(this, prop, {
-          set(value: unknown) {
+          set(this: Coroutine, value: unknown) {
             void Obj.defineProperty(this, prop, { ...desc, value });
-            void this[Coroutine.init]();
+            !this[internal].settings.delay && void this[init]();
           },
-          get() {
-            void Obj.defineProperty(this, prop, desc);
-            void this[Coroutine.init]();
+          get(this: Coroutine) {
             return this[prop];
           },
           enumerable: true,
