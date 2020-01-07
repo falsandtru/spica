@@ -397,10 +397,15 @@ class Worker<N extends string, P, R, S> {
     if (!this.available || now > expiry) return;
     return new AtomicPromise<Supervisor.Process.Result<R, S>>((resolve, reject) => {
       isFinite(expiry) && void setTimeout(() => void reject(new Error()), expiry - now);
+      assert(this.alive);
+      assert(this.available);
       this.available = false;
       if (!this.initiated) {
         void this.init();
+        if (!this.alive) return;
       }
+      assert(this.alive);
+      assert(!this.available);
       void AtomicPromise.resolve(this.process.main(param, this.state, this.terminate)).then(resolve, reject);
     })
       .then(
