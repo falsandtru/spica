@@ -226,9 +226,9 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
       }
       return res.then();
     },
-    connect: async <U>(com: () => Generator<S, U, T | R> | AsyncGenerator<S, U, T | R>): Promise<U> => {
+    connect: async <U>(com: (this: Coroutine<T, R, S>) => Generator<S, U, T | R> | AsyncGenerator<S, U, T | R>): Promise<U> => {
       void this[init]();
-      const iter = com();
+      const iter = com.call(this);
       let reply: T | R | undefined;
       while (true) {
         const { value, done } = await iter.next(reply!);
