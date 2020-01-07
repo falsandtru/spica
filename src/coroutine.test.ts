@@ -31,14 +31,14 @@ describe('Unit: lib/coroutine', () => {
     it('iterate', async () => {
       let cnt = 0;
       const co = new Coroutine<number, number>(async function* () {
-        assert(++cnt === 1);
+        assert(cnt === 1);
         assert(undefined === (yield Promise.resolve(2)));
         assert(undefined === (yield Promise.resolve(3)));
         await wait(100);
         assert(undefined === (yield Promise.resolve(4)));
         return Promise.resolve(5);
       });
-      assert(cnt === 0);
+      assert(cnt === 0 && ++cnt);
       for await (const n of co) {
         assert(n === ++cnt);
       }
