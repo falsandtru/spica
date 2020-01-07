@@ -130,32 +130,29 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
       return this.register(name, process, state);
     }
     if (typeof process === 'function') {
-      switch (process[Symbol.toStringTag]) {
-        case 'GeneratorFunction': {
-          const iter = (process as Supervisor.Process.Generator<P, R>)();
-          return this.register(
-            name,
-            {
-              init: state => (void iter.next(), state),
-              main: (param, state, kill) => {
-                const { value: reply, done } = iter.next(param);
-                done && kill();
-                return [reply, state];
-              },
-              exit: _ => undefined
+      if (isGeneratorFunction(process)) {
+        const iter = process();
+        return this.register(
+          name,
+          {
+            init: state => (void iter.next(), state),
+            main: (param, state, kill) => {
+              const { value: reply, done } = iter.next(param);
+              done && kill();
+              return [reply, state];
             },
-            state);
-        }
-        default:
-          return this.register(
-            name,
-            {
-              init: state => state,
-              main: process as Supervisor.Process.Callback<P, R, S>,
-              exit: _ => undefined
-            },
-            state);
+            exit: _ => undefined
+          },
+          state);
       }
+      return this.register(
+        name,
+        {
+          init: state => state,
+          main: process,
+          exit: _ => undefined
+        },
+        state);
     }
     if (this.workers.has(name)) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: Cannot register a process multiply with the same name.`);
     void this.schedule();
@@ -171,6 +168,10 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
         void this.workers.delete(name));
     void this.workers.set(name, worker)
     return worker.terminate;
+
+    function isGeneratorFunction(process: Supervisor.Process<P, R, S>): process is Supervisor.Process.Generator<P, R> {
+      return process[Symbol.toStringTag] === 'GeneratorFunction';
+    }
   }
   public call(name: N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), param: P, timeout?: number): AtomicPromise<R>;
   public call(name: N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), param: P, callback: Supervisor.Callback<R>, timeout?: number): void;
