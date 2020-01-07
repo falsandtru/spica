@@ -175,7 +175,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     void this.workers.set(name, worker)
     return worker.terminate;
 
-    function isGeneratorFunction(process: Supervisor.Process<P, R, S>): process is Supervisor.Process.Generator<P, R, S> {
+    function isGeneratorFunction(process: Supervisor.Process<P, R, S>): process is Supervisor.Process.GeneratorFunction<P, R, S> {
       return process[Symbol.toStringTag] === 'GeneratorFunction';
     }
   }
@@ -335,7 +335,7 @@ export namespace Supervisor {
   export type Process<P, R, S> =
     | Process.Regular<P, R, S>
     | Process.Function<P, R, S>
-    | Process.Generator<P, R, S>;
+    | Process.GeneratorFunction<P, R, S>;
   export namespace Process {
     export type Regular<P, R, S> = {
       readonly init: (state: S) => S;
@@ -343,7 +343,7 @@ export namespace Supervisor {
       readonly exit: (reason: unknown, state: S) => void;
     };
     export type Function<P, R, S> = (param: P, state: S, kill: (reason?: unknown) => void) => Result<R, S> | PromiseLike<Result<R, S>>;
-    export type Generator<P, R, S> = (state: S) => global.Generator<R, R, P>;
+    export type GeneratorFunction<P, R, S> = (state: S) => global.Generator<R, R, P>;
     export type Result<R, S> = readonly [R, S] | { reply: R; state: S; };
   }
   export type Callback<R> = (reply: R, error?: Error) => void;

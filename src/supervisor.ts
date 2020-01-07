@@ -50,9 +50,9 @@ abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = un
         state);
       return kill;
     }
-    return super.register(name, process as Exclude<typeof process, Supervisor2018.Process.AsyncGenerator<P, R, S>>, state);
+    return super.register(name, process as Exclude<typeof process, Supervisor2018.Process.AsyncGeneratorFunction<P, R, S>>, state);
 
-    function isAsyncGeneratorFunction(process: Supervisor2018.Process<P, R, S>): process is Supervisor2018.Process.AsyncGenerator<P, R, S> {
+    function isAsyncGeneratorFunction(process: Supervisor2018.Process<P, R, S>): process is Supervisor2018.Process.AsyncGeneratorFunction<P, R, S> {
       return process[Symbol.toStringTag] === 'AsyncGeneratorFunction';
     }
   }
@@ -73,13 +73,13 @@ abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = un
 namespace Supervisor2018 {
   export type Process<P, R, S> =
     | Supervisor.Process<P, R, S>
-    | Process.AsyncGenerator<P, R, S>
+    | Process.AsyncGeneratorFunction<P, R, S>
     | Process.Coroutine<P, R>;
   export namespace Process {
     export type Regular<P, R, S> = Supervisor.Process.Regular<P, R, S>;
     export type Function<P, R, S> = Supervisor.Process.Function<P, R, S>;
-    export type Generator<P, R, S> = Supervisor.Process.Generator<P, R, S>;
-    export type AsyncGenerator<P, R, S> = (state: S) => global.AsyncGenerator<R, R, P>;
+    export type GeneratorFunction<P, R, S> = Supervisor.Process.GeneratorFunction<P, R, S>;
+    export type AsyncGeneratorFunction<P, R, S> = (state: S) => global.AsyncGenerator<R, R, P>;
     export type Coroutine<P, R> = CoroutineInterface<R, R, P>;
     export type Result<R, S> = Supervisor.Process.Result<R, S>;
   }
