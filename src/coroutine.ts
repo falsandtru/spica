@@ -250,3 +250,14 @@ Coroutine.prototype.finally = function () {
   void this[init]();
   return Coroutine.prototype['__proto__'].finally.call(this, ...arguments);
 };
+
+export function isCoroutine(target: unknown): target is CoroutineInterface<unknown, unknown, unknown> {
+  return typeof target === 'object'
+      && !!target
+      && typeof target.constructor['exit'] === 'symbol'
+      && typeof target[target.constructor['exit']] === 'function'
+      && typeof target.constructor['terminate'] === 'symbol'
+      && typeof target[target.constructor['terminate']] === 'function'
+      && typeof target.constructor['port'] === 'symbol'
+      && typeof target[target.constructor['port']] === 'object';
+}

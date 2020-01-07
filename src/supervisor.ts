@@ -1,5 +1,5 @@
 import { Supervisor } from './supervisor.legacy';
-import { Coroutine, CoroutineInterface } from './coroutine';
+import { Coroutine, CoroutineInterface, isCoroutine } from './coroutine';
 
 abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = unknown> extends Supervisor<N, P, R, S> {
   public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S> | CoroutineInterface<R, R, P>, state: S, reason?: unknown): (reason?: unknown) => boolean;
@@ -48,14 +48,3 @@ interface Supervisor2018<N extends string, P = unknown, R = unknown, S = unknown
 Supervisor['__proto__'] = Coroutine;
 Supervisor.prototype['__proto__'] = Coroutine.prototype;
 export { Supervisor2018 as Supervisor };
-
-function isCoroutine(target: unknown): target is CoroutineInterface<unknown, unknown, unknown> {
-  return typeof target === 'object'
-      && !!target
-      && typeof target.constructor['exit'] === 'symbol'
-      && typeof target[target.constructor['exit']] === 'function'
-      && typeof target.constructor['terminate'] === 'symbol'
-      && typeof target[target.constructor['terminate']] === 'function'
-      && typeof target.constructor['port'] === 'symbol'
-      && typeof target[target.constructor['port']] === 'object';
-}
