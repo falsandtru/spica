@@ -129,11 +129,18 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     if (typeof process === 'function') return this.register(name, { init: state => state, main: process, exit: _ => undefined }, state);
     if (this.workers.has(name)) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: Cannot register a process multiply with the same name.`);
     void this.schedule();
-    return this.workers
-      .set(name, new Worker<N, P, R, S>(this, name, process, state, Supervisor.standalone.has(process), this.events_, () =>
-        void this.workers.delete(name)))
-      .get(name)!
-      .terminate;
+    const worker: Worker<N, P, R, S> = new Worker(
+      this,
+      name,
+      process,
+      state,
+      Supervisor.standalone.has(process),
+      this.events_,
+      () =>
+        this.workers.get(name) === worker &&
+        void this.workers.delete(name));
+    void this.workers.set(name, worker)
+    return worker.terminate;
   }
   public call(name: N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), param: P, timeout?: number): AtomicPromise<R>;
   public call(name: N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), param: P, callback: Supervisor.Callback<R>, timeout?: number): void;
