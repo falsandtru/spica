@@ -48,7 +48,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
       }
     }
   }
-  protected static readonly standalone = new WeakSet<Supervisor.Process<unknown, unknown, unknown>>();
+  protected static readonly standalone = new WeakSet<Supervisor.Process.Regular<unknown, unknown, unknown>>();
   constructor(opts: SupervisorOptions = {}) {
     super((resolve, reject) => {
       cb = [resolve, reject];
@@ -120,9 +120,9 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
   private throwErrorIfNotAvailable(): void {
     if (!this.available) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A supervisor is already terminated.`);
   }
-  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S>, state: S, reason?: unknown): (reason?: unknown) => boolean;
-  public register(name: N, process: Supervisor.Process.Main.Generator<P, R>, state?: undefined, reason?: unknown): (reason?: unknown) => boolean;
-  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S>, state?: S, reason?: unknown): (reason?: unknown) => boolean {
+  public register(name: N, process: Supervisor.Process<P, R, S>, state: S, reason?: unknown): (reason?: unknown) => boolean;
+  public register(name: N, process: Supervisor.Process.Generator<P, R>, state?: undefined, reason?: unknown): (reason?: unknown) => boolean;
+  public register(name: N, process: Supervisor.Process<P, R, S>, state?: S, reason?: unknown): (reason?: unknown) => boolean {
     void this.throwErrorIfNotAvailable();
     state = state!;
     if (arguments.length > 3) {
@@ -132,7 +132,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     if (typeof process === 'function') {
       switch (process[Symbol.toStringTag]) {
         case 'GeneratorFunction': {
-          const iter = (process as Supervisor.Process.Main.Generator<P, R>)();
+          const iter = (process as Supervisor.Process.Generator<P, R>)();
           return this.register(
             name,
             {
@@ -151,7 +151,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
             name,
             {
               init: state => state,
-              main: process as Supervisor.Process.Main.Callback<P, R, S>,
+              main: process as Supervisor.Process.Callback<P, R, S>,
               exit: _ => undefined
             },
             state);
@@ -231,7 +231,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     }
     return result;
   }
-  public refs(name?: N): [N, Supervisor.Process<P, R, S>, S, (reason?: unknown) => boolean][] {
+  public refs(name?: N): [N, Supervisor.Process.Regular<P, R, S>, S, (reason?: unknown) => boolean][] {
     assert(this.available || this.workers.size === 0);
     return name === undefined
       ? [...this.workers.values()].map(convert)
@@ -239,7 +239,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
         ? [convert(this.workers.get(name)!)]
         : [];
 
-    function convert(worker: Worker<N, P, R, S>): [N, Supervisor.Process<P, R, S>, S, (reason?: unknown) => boolean] {
+    function convert(worker: Worker<N, P, R, S>): [N, Supervisor.Process.Regular<P, R, S>, S, (reason?: unknown) => boolean] {
       assert(worker instanceof Worker);
       return [
         worker.name,
@@ -325,29 +325,26 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
   }
 }
 export namespace Supervisor {
-  export type Process<P, R, S> = {
-    readonly init: Process.Init<S>;
-    readonly main: Process.Main.Callback<P, R, S>;
-    readonly exit: Process.Exit<S>;
-  };
+  export type Process<P, R, S> =
+    | Process.Regular<P, R, S>
+    | Process.Callback<P, R, S>
+    | Process.Generator<P, R>;
   export namespace Process {
-    export type Init<S> = (state: S) => S;
-    export type Main<P, R, S> =
-      | Main.Callback<P, R, S>
-      | Main.Generator<P, R>;
-    export namespace Main {
-      export type Callback<P, R, S> = (param: P, state: S, kill: (reason?: unknown) => void) => Result<R, S> | PromiseLike<Result<R, S>>;
-      export type Generator<P, R> = () => global.Generator<R, R, P>;
-    }
-    export type Exit<S> = (reason: unknown, state: S) => void;
+    export type Regular<P, R, S> = {
+      readonly init: (state: S) => S;
+      readonly main: Callback<P, R, S>;
+      readonly exit: (reason: unknown, state: S) => void;
+    };
+    export type Callback<P, R, S> = (param: P, state: S, kill: (reason?: unknown) => void) => Result<R, S> | PromiseLike<Result<R, S>>;
+    export type Generator<P, R> = () => global.Generator<R, R, P>;
     export type Result<R, S> = readonly [R, S] | { reply: R; state: S; };
   }
   export type Callback<R> = (reply: R, error?: Error) => void;
   export namespace Event {
     export namespace Data {
-      export type Init<N extends string, P, R, S> = readonly [N, Process<P, R, S>, S];
+      export type Init<N extends string, P, R, S> = readonly [N, Process.Regular<P, R, S>, S];
       export type Loss<N extends string, P> = readonly [N, P];
-      export type Exit<N extends string, P, R, S> = readonly [N, Process<P, R, S>, S, unknown];
+      export type Exit<N extends string, P, R, S> = readonly [N, Process.Regular<P, R, S>, S, unknown];
     }
   }
 }
@@ -376,7 +373,7 @@ class Worker<N extends string, P, R, S> {
   constructor(
     private readonly sv: Supervisor<N, P, R, S>,
     public readonly name: N,
-    public readonly process: Supervisor.Process<P, R, S>,
+    public readonly process: Supervisor.Process.Regular<P, R, S>,
     public state: S,
     initiated: boolean,
     private readonly events: {
