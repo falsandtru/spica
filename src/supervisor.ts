@@ -1,7 +1,7 @@
 import { Supervisor } from './supervisor.legacy';
 import { Coroutine, CoroutineInterface, isCoroutine } from './coroutine';
 
-interface Supervisor2018<N extends string, P = unknown, R = unknown, S = unknown> extends Coroutine<undefined, undefined, [N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), P, (Supervisor2018.Callback<R> | number)?, number?]> {
+interface Supervisor2018<N extends string, P = unknown, R = unknown, S = unknown> extends Coroutine<undefined, undefined, undefined> {
   constructor: typeof Supervisor2018 & typeof Coroutine;
 }
 abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = unknown> extends Supervisor<N, P, R, S> {
