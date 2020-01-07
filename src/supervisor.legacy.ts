@@ -120,13 +120,43 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
   private throwErrorIfNotAvailable(): void {
     if (!this.available) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A supervisor is already terminated.`);
   }
-  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S>, state: S, reason?: unknown): (reason?: unknown) => boolean {
+  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S>, state: S, reason?: unknown): (reason?: unknown) => boolean;
+  public register(name: N, process: Supervisor.Process.Main.Generator<P, R>, state?: undefined, reason?: unknown): (reason?: unknown) => boolean;
+  public register(name: N, process: Supervisor.Process<P, R, S> | Supervisor.Process.Main<P, R, S>, state?: S, reason?: unknown): (reason?: unknown) => boolean {
     void this.throwErrorIfNotAvailable();
+    state = state!;
     if (arguments.length > 3) {
       void this.kill(name, reason);
       return this.register(name, process, state);
     }
-    if (typeof process === 'function') return this.register(name, { init: state => state, main: process, exit: _ => undefined }, state);
+    if (typeof process === 'function') {
+      switch (process[Symbol.toStringTag]) {
+        case 'GeneratorFunction': {
+          const iter = (process as Supervisor.Process.Main.Generator<P, R>)();
+          return this.register(
+            name,
+            {
+              init: state => (void iter.next(), state),
+              main: (param, state, kill) => {
+                const { value: reply, done } = iter.next(param);
+                done && kill();
+                return [reply, state];
+              },
+              exit: _ => undefined
+            },
+            state);
+        }
+        default:
+          return this.register(
+            name,
+            {
+              init: state => state,
+              main: process as Supervisor.Process.Main.Callback<P, R, S>,
+              exit: _ => undefined
+            },
+            state);
+      }
+    }
     if (this.workers.has(name)) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: Cannot register a process multiply with the same name.`);
     void this.schedule();
     const worker: Worker<N, P, R, S> = new Worker(
@@ -297,12 +327,18 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
 export namespace Supervisor {
   export type Process<P, R, S> = {
     readonly init: Process.Init<S>;
-    readonly main: Process.Main<P, R, S>;
+    readonly main: Process.Main.Callback<P, R, S>;
     readonly exit: Process.Exit<S>;
   };
   export namespace Process {
     export type Init<S> = (state: S) => S;
-    export type Main<P, R, S> = (param: P, state: S, kill: (reason?: unknown) => void) => Result<R, S> | PromiseLike<Result<R, S>>;
+    export type Main<P, R, S> =
+      | Main.Callback<P, R, S>
+      | Main.Generator<P, R>;
+    export namespace Main {
+      export type Callback<P, R, S> = (param: P, state: S, kill: (reason?: unknown) => void) => Result<R, S> | PromiseLike<Result<R, S>>;
+      export type Generator<P, R> = () => global.Generator<R, R, P>;
+    }
     export type Exit<S> = (reason: unknown, state: S) => void;
     export type Result<R, S> = readonly [R, S] | { reply: R; state: S; };
   }

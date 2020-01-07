@@ -277,6 +277,55 @@ describe('Unit: lib/supervisor', function () {
       done();
     });
 
+    it('generator', async function () {
+      const sv = new class TestSupervisor extends Supervisor<string, number, number> { }({
+      });
+      sv.register('', function* () {
+        assert(1 === (yield 0));
+        assert(2 === (yield 1));
+        return 2;
+      });
+      assert(await sv.call('', 1) === 1);
+      await wait(100);
+      assert(sv.refs('').length === 1);
+      await wait(100);
+      assert(await sv.call('', 2) === 2);
+      await wait(100);
+      assert(sv.kill('') === false);
+      sv.register('', function* () {
+        throw 1;
+      });
+      sv.cast('', 0);
+      assert(sv.refs('').length === 0);
+      assert(sv.kill('') === false);
+    });
+
+    it.skip('async generator', async function () {
+      if (navigator.userAgent.includes('Edge')) return;
+
+      const sv = new class TestSupervisor extends Supervisor<string, number, number> { }({
+      });
+      sv.register('', async function* () {
+        assert(1 === (yield 0));
+        assert(2 === (yield 1));
+        return 2;
+      });
+      assert(await sv.call('', 1) === 1);
+      await wait(100);
+      assert(sv.refs('').length === 1);
+      await wait(100);
+      assert(await sv.call('', 2) === 2);
+      await wait(100);
+      assert(sv.kill('') === false);
+      sv.register('', async function* () {
+        throw 1;
+      });
+      sv.cast('', 0);
+      assert(sv.refs('').length === 1);
+      await wait(100);
+      assert(sv.kill('') === false);
+    });
+
     it('coroutine', async function () {
       if (navigator.userAgent.includes('Edge')) return;
 
