@@ -6,9 +6,9 @@ interface Supervisor2018<N extends string, P = unknown, R = unknown, S = unknown
 }
 abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = unknown> extends Supervisor<N, P, R, S> {
   // Workaround for #36053
-  public register(this: Supervisor2018<N, P, R, void>, name: N, process: Supervisor2018.Process.Callback<P, R, S>, state?: S, reason?: unknown): (reason?: unknown) => boolean;
+  public register(this: Supervisor2018<N, P, R, void>, name: N, process: Supervisor2018.Process.Function<P, R, S>, state?: S, reason?: unknown): (reason?: unknown) => boolean;
   // Workaround for #36053
-  public register(name: N, process: Supervisor2018.Process.Callback<P, R, S>, state: S, reason?: unknown): (reason?: unknown) => boolean;
+  public register(name: N, process: Supervisor2018.Process.Function<P, R, S>, state: S, reason?: unknown): (reason?: unknown) => boolean;
   public register(this: Supervisor2018<N, P, R, void>, name: N, process: Supervisor2018.Process<P, R, S>, state?: S, reason?: unknown): (reason?: unknown) => boolean;
   public register(name: N, process: Supervisor2018.Process<P, R, S>, state: S, reason?: unknown): (reason?: unknown) => boolean;
   public register(name: N, process: Supervisor2018.Process.Coroutine<P, R>, state?: never, reason?: unknown): (reason?: unknown) => boolean;
@@ -77,7 +77,7 @@ namespace Supervisor2018 {
     | Process.Coroutine<P, R>;
   export namespace Process {
     export type Regular<P, R, S> = Supervisor.Process.Regular<P, R, S>;
-    export type Callback<P, R, S> = Supervisor.Process.Callback<P, R, S>;
+    export type Function<P, R, S> = Supervisor.Process.Function<P, R, S>;
     export type Generator<P, R, S> = Supervisor.Process.Generator<P, R, S>;
     export type AsyncGenerator<P, R, S> = (state: S) => global.AsyncGenerator<R, R, P>;
     export type Coroutine<P, R> = CoroutineInterface<R, R, P>;

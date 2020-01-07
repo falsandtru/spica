@@ -124,9 +124,9 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     if (!this.available) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A supervisor is already terminated.`);
   }
   // Workaround for #36053
-  public register(this: Supervisor<N, P, R, void>, name: N, process: Supervisor.Process.Callback<P, R, S>, state?: S, reason?: unknown): (reason?: unknown) => boolean;
+  public register(this: Supervisor<N, P, R, void>, name: N, process: Supervisor.Process.Function<P, R, S>, state?: S, reason?: unknown): (reason?: unknown) => boolean;
   // Workaround for #36053
-  public register(name: N, process: Supervisor.Process.Callback<P, R, S>, state: S, reason?: unknown): (reason?: unknown) => boolean;
+  public register(name: N, process: Supervisor.Process.Function<P, R, S>, state: S, reason?: unknown): (reason?: unknown) => boolean;
   public register(this: Supervisor<N, P, R, void>, name: N, process: Supervisor.Process<P, R, S>, state?: S, reason?: unknown): (reason?: unknown) => boolean;
   public register(name: N, process: Supervisor.Process<P, R, S>, state: S, reason?: unknown): (reason?: unknown) => boolean;
   public register(name: N, process: Supervisor.Process<P, R, S>, state: S, reason?: unknown): (reason?: unknown) => boolean {
@@ -334,15 +334,15 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
 export namespace Supervisor {
   export type Process<P, R, S> =
     | Process.Regular<P, R, S>
-    | Process.Callback<P, R, S>
+    | Process.Function<P, R, S>
     | Process.Generator<P, R, S>;
   export namespace Process {
     export type Regular<P, R, S> = {
       readonly init: (state: S) => S;
-      readonly main: Callback<P, R, S>;
+      readonly main: Function<P, R, S>;
       readonly exit: (reason: unknown, state: S) => void;
     };
-    export type Callback<P, R, S> = (param: P, state: S, kill: (reason?: unknown) => void) => Result<R, S> | PromiseLike<Result<R, S>>;
+    export type Function<P, R, S> = (param: P, state: S, kill: (reason?: unknown) => void) => Result<R, S> | PromiseLike<Result<R, S>>;
     export type Generator<P, R, S> = (state: S) => global.Generator<R, R, P>;
     export type Result<R, S> = readonly [R, S] | { reply: R; state: S; };
   }
