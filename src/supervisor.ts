@@ -9,17 +9,19 @@ abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = un
   public register(this: Supervisor2018<N, P, R, void>, name: N, process: Supervisor2018.Process.Function<P, R, S>, state?: S, reason?: unknown): (reason?: unknown) => boolean;
   // Workaround for #36053
   public register(name: N, process: Supervisor2018.Process.Function<P, R, S>, state: S, reason?: unknown): (reason?: unknown) => boolean;
-  public register(this: Supervisor2018<N, P, R, void>, name: N, process: Supervisor2018.Process<P, R, S>, state?: S, reason?: unknown): (reason?: unknown) => boolean;
-  public register(name: N, process: Supervisor2018.Process<P, R, S>, state: S, reason?: unknown): (reason?: unknown) => boolean;
+  public register(this: Supervisor2018<N, P, R, void>, name: N, process: Supervisor2018.Process.GeneratorFunction<P, R, S, this> | Supervisor2018.Process.AsyncGeneratorFunction<P, R, S, this>, state?: S, reason?: unknown): (reason?: unknown) => boolean;
+  public register(name: N, process: Supervisor2018.Process.GeneratorFunction<P, R, S, this> | Supervisor2018.Process.AsyncGeneratorFunction<P, R, S, this>, state: S, reason?: unknown): (reason?: unknown) => boolean;
   public register(name: N, process: Supervisor2018.Process.Coroutine<P, R>, state?: never, reason?: unknown): (reason?: unknown) => boolean;
-  public register(name: N, process: Supervisor2018.Process<P, R, S>, state?: S, reason?: unknown): (reason?: unknown) => boolean {
+  public register(this: Supervisor2018<N, P, R, void>, name: N, process: Supervisor2018.Process<P, R, S, this>, state?: S, reason?: unknown): (reason?: unknown) => boolean;
+  public register(name: N, process: Supervisor2018.Process<P, R, S, this>, state: S, reason?: unknown): (reason?: unknown) => boolean;
+  public register(name: N, process: Supervisor2018.Process<P, R, S, this>, state?: S, reason?: unknown): (reason?: unknown) => boolean {
     state = state!;
     if (arguments.length > 3) {
       void this.kill(name, reason);
       return this.register(name, process, state);
     }
     if (isCoroutine(process)) {
-      const proc: Supervisor2018.Process<P, R, S> = {
+      const proc: Supervisor2018.Process<P, R, S, this> = {
         init: state => state,
         main: (param, state, kill) =>
           process[Coroutine.port].send(param)
@@ -33,7 +35,7 @@ abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = un
       return kill;
     }
     if (isAsyncGeneratorFunction(process)) {
-      const iter = process(state);
+      const iter = process.call(this, state);
       const kill: () => boolean = this.register(
         name,
         {
@@ -50,9 +52,9 @@ abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = un
         state);
       return kill;
     }
-    return super.register(name, process as Exclude<typeof process, Supervisor2018.Process.AsyncGeneratorFunction<P, R, S>>, state);
+    return super.register(name, process as Exclude<typeof process, Supervisor2018.Process.AsyncGeneratorFunction<P, R, S, this>>, state);
 
-    function isAsyncGeneratorFunction(process: Supervisor2018.Process<P, R, S>): process is Supervisor2018.Process.AsyncGeneratorFunction<P, R, S> {
+    function isAsyncGeneratorFunction(process: Supervisor2018.Process<P, R, S, unknown>): process is Supervisor2018.Process.AsyncGeneratorFunction<P, R, S, unknown> {
       return process[Symbol.toStringTag] === 'AsyncGeneratorFunction';
     }
   }
@@ -71,15 +73,15 @@ abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = un
   } as const;
 }
 namespace Supervisor2018 {
-  export type Process<P, R, S> =
-    | Supervisor.Process<P, R, S>
-    | Process.AsyncGeneratorFunction<P, R, S>
+  export type Process<P, R, S, C = undefined> =
+    | Supervisor.Process<P, R, S, C>
+    | Process.AsyncGeneratorFunction<P, R, S, C>
     | Process.Coroutine<P, R>;
   export namespace Process {
     export type Regular<P, R, S> = Supervisor.Process.Regular<P, R, S>;
     export type Function<P, R, S> = Supervisor.Process.Function<P, R, S>;
-    export type GeneratorFunction<P, R, S> = Supervisor.Process.GeneratorFunction<P, R, S>;
-    export type AsyncGeneratorFunction<P, R, S> = (state: S) => global.AsyncGenerator<R, R, P>;
+    export type GeneratorFunction<P, R, S, C> = Supervisor.Process.GeneratorFunction<P, R, S, C>;
+    export type AsyncGeneratorFunction<P, R, S, C> = (this: C, state: S) => global.AsyncGenerator<R, R, P>;
     export type Coroutine<P, R> = CoroutineInterface<R, R, P>;
     export type Result<R, S> = Supervisor.Process.Result<R, S>;
   }
