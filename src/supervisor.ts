@@ -1,6 +1,9 @@
 import { Supervisor } from './supervisor.legacy';
 import { Coroutine, CoroutineInterface, isCoroutine } from './coroutine';
 
+interface Supervisor2018<N extends string, P = unknown, R = unknown, S = unknown> extends Coroutine<undefined, undefined, [N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), P, (Supervisor2018.Callback<R> | number)?, number?]> {
+  constructor: typeof Supervisor2018 & typeof Coroutine;
+}
 abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = unknown> extends Supervisor<N, P, R, S> {
   // Workaround for #36053
   public register(this: Supervisor2018<N, P, R, void>, name: N, process: Supervisor2018.Process.Callback<P, R, S>, state?: S, reason?: unknown): (reason?: unknown) => boolean;
@@ -24,7 +27,7 @@ abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = un
               done && void kill() || { reply, state }),
         exit: reason => void process[Coroutine.terminate](reason),
       };
-      void Supervisor2018.standalone.add(proc);
+      void this.constructor.standalone.add(proc);
       const kill = this.register(name, proc, state, reason);
       void process.catch(kill);
       return kill;
@@ -83,7 +86,6 @@ namespace Supervisor2018 {
   export import Callback = Supervisor.Callback;
   export import Event = Supervisor.Event;
 }
-interface Supervisor2018<N extends string, P = unknown, R = unknown, S = unknown> extends Coroutine<undefined, undefined, [N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), P, (Supervisor2018.Callback<R> | number)?, number?]> { }
 Supervisor['__proto__'] = Coroutine;
 Supervisor.prototype['__proto__'] = Coroutine.prototype;
 export { Supervisor2018 as Supervisor };

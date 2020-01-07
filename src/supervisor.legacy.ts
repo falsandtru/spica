@@ -25,6 +25,9 @@ export interface SupervisorOptions {
   readonly resource?: number;
 }
 
+export interface Supervisor<N extends string, P = unknown, R = unknown, S = unknown> {
+  constructor: typeof Supervisor;
+}
 export abstract class Supervisor<N extends string, P = unknown, R = unknown, S = unknown> extends AtomicPromise<undefined> {
   private static instances_: Set<Supervisor<string, unknown, unknown, unknown>>;
   private static get instances(): typeof Supervisor.instances_ {
@@ -66,7 +69,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     this.name = this.settings.name;
     if (this.constructor === Supervisor) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot instantiate abstract classes.`);
     // @ts-ignore #31251
-    void (this.constructor as typeof Supervisor).instances.add(this);
+    void this.constructor.instances.add(this);
   }
   private readonly state = new AtomicFuture();
   private destructor(reason: unknown): void {
@@ -87,7 +90,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     assert(!Obj.isFrozen(this.messages));
     this.alive = false;
     // @ts-ignore #31251
-    void (this.constructor as typeof Supervisor).instances.delete(this);
+    void this.constructor.instances.delete(this);
     void Obj.freeze(this);
     assert(this.alive === false);
     assert(this.available === false);
@@ -164,7 +167,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
       name,
       process,
       state,
-      Supervisor.standalone.has(process),
+      this.constructor.standalone.has(process),
       this.events_,
       () =>
         this.workers.get(name) === worker &&
