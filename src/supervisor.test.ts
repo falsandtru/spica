@@ -278,13 +278,15 @@ describe('Unit: lib/supervisor', function () {
     });
 
     it('generator', async function () {
-      const sv = new class TestSupervisor extends Supervisor<string, number, number> { }({
+      const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
       });
-      sv.register('', function* () {
+      // Should remove type annotations after #36053 is fixed.
+      sv.register('', function* (state): Generator<number, number, number> {
+        assert(state === 0);
         assert(1 === (yield 0));
         assert(2 === (yield 1));
         return 2;
-      });
+      }, 0);
       assert(await sv.call('', 1) === 1);
       await wait(100);
       assert(sv.refs('').length === 1);
@@ -292,9 +294,10 @@ describe('Unit: lib/supervisor', function () {
       assert(await sv.call('', 2) === 2);
       await wait(100);
       assert(sv.kill('') === false);
-      sv.register('', function* () {
+      // Should remove type annotations after #36053 is fixed.
+      sv.register('', function* (): Generator<number, number, number> {
         throw 1;
-      });
+      }, 0);
       sv.cast('', 0);
       assert(sv.refs('').length === 0);
       assert(sv.kill('') === false);
@@ -303,13 +306,14 @@ describe('Unit: lib/supervisor', function () {
     it.skip('async generator', async function () {
       if (navigator.userAgent.includes('Edge')) return;
 
-      const sv = new class TestSupervisor extends Supervisor<string, number, number> { }({
+      const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
       });
-      sv.register('', async function* () {
+      sv.register('', async function* (state) {
+        assert(state === 0);
         assert(1 === (yield 0));
         assert(2 === (yield 1));
         return 2;
-      });
+      }, 0);
       assert(await sv.call('', 1) === 1);
       await wait(100);
       assert(sv.refs('').length === 1);
@@ -319,7 +323,7 @@ describe('Unit: lib/supervisor', function () {
       assert(sv.kill('') === false);
       sv.register('', async function* () {
         throw 1;
-      });
+      }, 0);
       sv.cast('', 0);
       assert(sv.refs('').length === 1);
       await wait(100);

@@ -120,18 +120,21 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
   private throwErrorIfNotAvailable(): void {
     if (!this.available) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A supervisor is already terminated.`);
   }
+  // Workaround for #36053
+  public register(this: Supervisor<N, P, R, void>, name: N, process: Supervisor.Process.Callback<P, R, S>, state?: S, reason?: unknown): (reason?: unknown) => boolean;
+  // Workaround for #36053
+  public register(name: N, process: Supervisor.Process.Callback<P, R, S>, state: S, reason?: unknown): (reason?: unknown) => boolean;
+  public register(this: Supervisor<N, P, R, void>, name: N, process: Supervisor.Process<P, R, S>, state?: S, reason?: unknown): (reason?: unknown) => boolean;
   public register(name: N, process: Supervisor.Process<P, R, S>, state: S, reason?: unknown): (reason?: unknown) => boolean;
-  public register(name: N, process: Supervisor.Process.Generator<P, R>, state?: undefined, reason?: unknown): (reason?: unknown) => boolean;
-  public register(name: N, process: Supervisor.Process<P, R, S>, state?: S, reason?: unknown): (reason?: unknown) => boolean {
+  public register(name: N, process: Supervisor.Process<P, R, S>, state: S, reason?: unknown): (reason?: unknown) => boolean {
     void this.throwErrorIfNotAvailable();
-    state = state!;
     if (arguments.length > 3) {
       void this.kill(name, reason);
       return this.register(name, process, state);
     }
     if (typeof process === 'function') {
       if (isGeneratorFunction(process)) {
-        const iter = process();
+        const iter = process(state);
         return this.register(
           name,
           {
@@ -169,7 +172,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     void this.workers.set(name, worker)
     return worker.terminate;
 
-    function isGeneratorFunction(process: Supervisor.Process<P, R, S>): process is Supervisor.Process.Generator<P, R> {
+    function isGeneratorFunction(process: Supervisor.Process<P, R, S>): process is Supervisor.Process.Generator<P, R, S> {
       return process[Symbol.toStringTag] === 'GeneratorFunction';
     }
   }
@@ -329,7 +332,7 @@ export namespace Supervisor {
   export type Process<P, R, S> =
     | Process.Regular<P, R, S>
     | Process.Callback<P, R, S>
-    | Process.Generator<P, R>;
+    | Process.Generator<P, R, S>;
   export namespace Process {
     export type Regular<P, R, S> = {
       readonly init: (state: S) => S;
@@ -337,7 +340,7 @@ export namespace Supervisor {
       readonly exit: (reason: unknown, state: S) => void;
     };
     export type Callback<P, R, S> = (param: P, state: S, kill: (reason?: unknown) => void) => Result<R, S> | PromiseLike<Result<R, S>>;
-    export type Generator<P, R> = () => global.Generator<R, R, P>;
+    export type Generator<P, R, S> = (state: S) => global.Generator<R, R, P>;
     export type Result<R, S> = readonly [R, S] | { reply: R; state: S; };
   }
   export type Callback<R> = (reply: R, error?: Error) => void;
