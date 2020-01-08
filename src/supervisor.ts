@@ -21,8 +21,8 @@ abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = un
       const proc: Supervisor2018.Process.Regular<P, R, S> = {
         init: state => state,
         main: (param, state, kill) =>
-          process[Coroutine.port].send(param)
-            .then(({ value: reply, done }: IteratorResult<R, R>) =>
+          (process[Coroutine.port] as Coroutine<R, R, P>[typeof Coroutine.port]).send(param)
+            .then(({ value: reply, done }) =>
               done && void kill() || { reply, state }),
         exit: reason => void process[Coroutine.terminate](reason),
       };
