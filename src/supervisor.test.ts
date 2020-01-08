@@ -280,7 +280,7 @@ describe('Unit: lib/supervisor', function () {
     it('generator', async function () {
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
       });
-      // Should remove type annotations after #36053 is fixed.
+      // This type annotation should be removed after #36053 is fixed.
       sv.register('', function* (state): Generator<number, number, number> {
         assert(state === 0);
         assert(1 === (yield 0));
@@ -294,7 +294,7 @@ describe('Unit: lib/supervisor', function () {
       assert(await sv.call('', 2) === 2);
       await wait(100);
       assert(sv.kill('') === false);
-      // Should remove type annotations after #36053 is fixed.
+      // This type annotation should be removed after #36053 is fixed.
       sv.register('', function* (): Generator<number, number, number> {
         throw 1;
       }, 0);
