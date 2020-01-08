@@ -18,7 +18,7 @@ abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = un
     state = state!;
     arguments.length > 3 && void this.kill(name, reason);
     if (isCoroutine(process)) {
-      const proc: Supervisor2018.Process<P, R, S, this> = {
+      const proc: Supervisor2018.Process.Regular<P, R, S> = {
         init: state => state,
         main: (param, state, kill) =>
           process[Coroutine.port].send(param)
