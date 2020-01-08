@@ -1,4 +1,4 @@
-import { Prepend, Split, AtLeast, Reverse } from './type';
+import type { Prepend, Split, AtLeast, Reverse } from './type';
 
 export type HList<as extends unknown[]> =
   as extends [unknown, ...unknown[]] ? HCons<as> :

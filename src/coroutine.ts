@@ -1,7 +1,7 @@
 import { global } from './global';
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future'; 
-import { DeepImmutable, DeepRequired } from './type';
+import type { DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
 import { wait, tick } from './clock';
 import { causeAsyncException } from './exception';

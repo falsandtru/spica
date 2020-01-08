@@ -1,7 +1,7 @@
 import { global } from './global';
 import { extend } from './assign';
 import { findIndex } from './equal';
-import { DeepImmutable, DeepRequired } from './type';
+import type { DeepImmutable, DeepRequired } from './type';
 
 const { Map } = global;
 

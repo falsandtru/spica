@@ -1,5 +1,5 @@
 import { global } from './global';
-import { DeepImmutable, DeepRequired } from './type';
+import type { DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
 import { findIndex } from './equal';
 import { causeAsyncException } from './exception';

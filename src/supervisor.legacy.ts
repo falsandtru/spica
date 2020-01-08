@@ -2,7 +2,7 @@ import { global } from './global';
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future';
 import { Observation, Observer, Publisher } from './observation';
-import { DeepImmutable, DeepRequired } from './type';
+import type { DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
 import { tick } from './clock';
 import { sqid } from './sqid';
