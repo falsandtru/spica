@@ -23,7 +23,7 @@ abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = un
         main: (param, state, kill) =>
           (process[Coroutine.port] as Coroutine<R, R, P>[typeof Coroutine.port]).send(param)
             .then(({ value: reply, done }) =>
-              done && void kill() || { reply, state }),
+              done && void kill() || [reply, state]),
         exit: reason => void process[Coroutine.terminate](reason),
       };
       void this.constructor.standalone.add(proc);
