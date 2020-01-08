@@ -52,7 +52,7 @@ abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = un
         state);
       return kill;
     }
-    return super.register(name, process as Exclude<typeof process, Supervisor2018.Process.AsyncGeneratorFunction<P, R, S, this>>, state);
+    return super.register(name, process, state);
 
     function isAsyncGeneratorFunction(process: Supervisor2018.Process<P, R, S, unknown>): process is Supervisor2018.Process.AsyncGeneratorFunction<P, R, S, unknown> {
       return process[Symbol.toStringTag] === 'AsyncGeneratorFunction';
