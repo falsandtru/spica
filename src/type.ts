@@ -146,6 +146,9 @@ export type StrictType<T> =
   T extends null ? 'null' :
   Type<T>;
 
+export type Pick<T, K extends string | number | symbol> = { [P in Extract<keyof T, K>]: T[P]; };
+export type Omit<T, K extends string | number | symbol> = { [P in Exclude<keyof T, K>]: T[P]; };
+export type Structural<T> = Pick<T, number | string>;
 export type DiffStruct<T, U> = Pick<T, Exclude<keyof T, keyof U>>;
 export type OverwriteStruct<T, U> = Unify<{ [P in Exclude<keyof T, keyof U>]: T[P]; }, U>;
 type Unify<T, U> = Pick<T & U, keyof T | keyof U>;

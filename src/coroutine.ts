@@ -1,7 +1,7 @@
 import { global } from './global';
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future'; 
-import type { DeepImmutable, DeepRequired } from './type';
+import type { Structural, DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
 import { wait, tick } from './clock';
 import { causeAsyncException } from './exception';
@@ -202,41 +202,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
     }
     return this.then(() => undefined);
   }
-  public readonly [port] = {
-    recv: (): AtomicPromise<IteratorResult<R, T>> => {
-      void this[init]();
-      return this[internal].state
-        .then(({ value, done }) =>
-          done
-            ? this.then(value => ({ value, done }))
-            : { value: value!, done });
-    },
-    send: (msg: S | PromiseLike<S>): AtomicPromise<IteratorResult<R, T>> => {
-      if (!this[internal].alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
-      void this[init]();
-      const res = new AtomicFuture<IteratorResult<R, T>>();
-      // Don't block.
-      void this[internal].msgs.push([msg, res.bind]);
-      void this[internal].resume.bind();
-      this[internal].resume = new AtomicFuture();
-      while (this[internal].msgs.length > this[internal].settings.size) {
-        // Don't block.
-        const [, reply] = this[internal].msgs.shift()!;
-        void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`)));
-      }
-      return res.then();
-    },
-    connect: async <U>(com: (this: Coroutine<T, R, S>) => Generator<S, U, T | R> | AsyncGenerator<S, U, T | R>): Promise<U> => {
-      void this[init]();
-      const iter = com.call(this);
-      let reply: T | R | undefined;
-      while (true) {
-        const { value, done } = await iter.next(reply!);
-        if (done) return value as U;
-        reply = (await this[port].send(value as S)).value;
-      }
-    },
-  } as const;
+  public readonly [port]: Structural<Port<T, R, S>> = new Port(this);
 }
 Coroutine.prototype.then = function () {
   void this[init]();
@@ -250,6 +216,46 @@ Coroutine.prototype.finally = function () {
   void this[init]();
   return Coroutine.prototype['__proto__'].finally.call(this, ...arguments);
 };
+
+class Port<T, R, S> {
+  constructor(
+    private co: Coroutine<T, R, S>,
+  ) {
+  }
+  public recv(): AtomicPromise<IteratorResult<R, T>> {
+    void this.co[init]();
+    return this.co[internal].state
+      .then(({ value, done }) =>
+        done
+          ? this.co.then(value => ({ value, done }))
+          : { value: value!, done });
+  }
+  public send(msg: S | PromiseLike<S>): AtomicPromise<IteratorResult<R, T>> {
+    if (!this.co[internal].alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
+    void this.co[init]();
+    const res = new AtomicFuture<IteratorResult<R, T>>();
+    // Don't block.
+    void this.co[internal].msgs.push([msg, res.bind]);
+    void this.co[internal].resume.bind();
+    this.co[internal].resume = new AtomicFuture();
+    while (this.co[internal].msgs.length > this.co[internal].settings.size) {
+      // Don't block.
+      const [, reply] = this.co[internal].msgs.shift()!;
+      void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`)));
+    }
+    return res.then();
+  }
+  public async connect<U>(com: (this: Coroutine<T, R, S>) => Generator<S, U, T | R> | AsyncGenerator<S, U, T | R>): Promise<U> {
+    void this.co[init]();
+    const iter = com.call(this.co);
+    let reply: T | R | undefined;
+    while (true) {
+      const { value, done } = await iter.next(reply!);
+      if (done) return value as U;
+      reply = (await this.send(value as S)).value;
+    }
+  }
+}
 
 export function isCoroutine(target: unknown): target is CoroutineInterface<unknown, unknown, unknown> {
   return typeof target === 'object'
