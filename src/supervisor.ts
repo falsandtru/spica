@@ -37,13 +37,10 @@ abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = un
         name,
         {
           init: state => (void iter.next().catch(kill), state),
-          main: (param, state, kill) => {
-            return iter.next(param)
-              .then(({ value: reply, done }) => {
-                done && void kill();
-                return [reply, state];
-              });
-          },
+          main: (param, state, kill) =>
+            iter.next(param)
+              .then(({ value: reply, done }) =>
+                done && void kill() || [reply, state]),
           exit: _ => undefined
         },
         state);
