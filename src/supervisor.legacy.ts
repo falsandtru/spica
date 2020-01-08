@@ -129,7 +129,8 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
   public register(this: Supervisor<N, P, R, void>, name: N, process: Supervisor.Process.GeneratorFunction<P, R, S, this>, state?: S, reason?: unknown): (reason?: unknown) => boolean;
   public register(name: N, process: Supervisor.Process.GeneratorFunction<P, R, S, this>, state: S, reason?: unknown): (reason?: unknown) => boolean;
   public register(name: N, process: Supervisor.Process<P, R, S, this>, state: S, reason?: unknown): (reason?: unknown) => boolean;
-  public register(name: N, process: Supervisor.Process<P, R, S, this>, state: S, reason?: unknown): (reason?: unknown) => boolean {
+  public register(name: N, process: Supervisor.Process<P, R, S, this>, state?: S, reason?: unknown): (reason?: unknown) => boolean {
+    state = state!;
     void this.throwErrorIfNotAvailable();
     if (arguments.length > 3) {
       void this.kill(name, reason);
