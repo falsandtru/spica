@@ -440,7 +440,7 @@ class Worker<N extends string, P, R, S> {
       this.available = false;
       if (!this.initiated) {
         void this.init();
-        if (!this.alive) return;
+        if (!this.alive) return void reject();
       }
       assert(this.alive);
       assert(!this.available);
