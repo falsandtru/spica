@@ -16,10 +16,7 @@ abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = un
   public register(name: N, process: Supervisor2018.Process<P, R, S, this>, state: S, reason?: unknown): (reason?: unknown) => boolean;
   public register(name: N, process: Supervisor2018.Process<P, R, S, this>, state?: S, reason?: unknown): (reason?: unknown) => boolean {
     state = state!;
-    if (arguments.length > 3) {
-      void this.kill(name, reason);
-      return this.register(name, process, state);
-    }
+    arguments.length > 3 && void this.kill(name, reason);
     if (isCoroutine(process)) {
       const proc: Supervisor2018.Process<P, R, S, this> = {
         init: state => state,

@@ -132,10 +132,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
   public register(name: N, process: Supervisor.Process<P, R, S, this>, state?: S, reason?: unknown): (reason?: unknown) => boolean {
     state = state!;
     void this.throwErrorIfNotAvailable();
-    if (arguments.length > 3) {
-      void this.kill(name, reason);
-      return this.register(name, process, state);
-    }
+    arguments.length > 3 && void this.kill(name, reason);
     if (typeof process === 'function') {
       if (isGeneratorFunction(process)) {
         const iter = process.call(this, state);
