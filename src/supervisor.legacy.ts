@@ -330,7 +330,7 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
   }
 }
 export namespace Supervisor {
-  export type Process<P, R, S, C = undefined> =
+  export type Process<P, R, S, C = unknown> =
     | Process.Regular<P, R, S>
     | Process.Function<P, R, S>
     | Process.GeneratorFunction<P, R, S, C>;

@@ -67,7 +67,7 @@ abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = un
   } as const;
 }
 namespace Supervisor2018 {
-  export type Process<P, R, S, C = undefined> =
+  export type Process<P, R, S, C = unknown> =
     | Supervisor.Process<P, R, S, C>
     | Process.AsyncGeneratorFunction<P, R, S, C>
     | Process.Coroutine<P, R>;
