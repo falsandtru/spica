@@ -446,25 +446,23 @@ class Worker<N extends string, P, R, S> {
       assert(!this.available);
       void AtomicPromise.resolve(this.process.main(param, this.state, this.terminate)).then(resolve, reject);
     })
-      .then(
-        result => {
-          const [reply, state] = Array.isArray(result)
-            ? result
-            : [result.reply, result.state];
-          if (this.alive) {
-            void this.sv.schedule();
-            assert(!Obj.isFrozen(this));
-            this.state = state;
-            this.available = true;
-          }
-          return reply;
-        })
-      .catch(
-        reason => {
+      .then(result => {
+        const [reply, state] = Array.isArray(result)
+          ? result
+          : [result.reply, result.state];
+        if (this.alive) {
           void this.sv.schedule();
-          void this.terminate(reason);
-          throw reason;
-        });
+          assert(!Obj.isFrozen(this));
+          this.state = state;
+          this.available = true;
+        }
+        return reply;
+      })
+      .catch(reason => {
+        void this.sv.schedule();
+        void this.terminate(reason);
+        throw reason;
+      });
   }
   public readonly terminate = (reason: unknown): boolean => {
     if (!this.alive) return false;
