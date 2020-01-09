@@ -11,9 +11,7 @@ export type And<T, U> = T extends Falsy ? T : U;
 export type Or<T, U> = T extends Falsy ? U : T;
 export type Eq<T, U> =
   // Exclude never type from T and U.
-  [T] extends [never]
-    ? [U] extends [never] ? true : false
-    : [U] extends [never] ? false :
+  Or<IsNever<T>, IsNever<U>> extends true ? And<IsNever<T>, IsNever<U>> :
   // T and U below are a type except never.
   // Distribute U.
   U extends never
