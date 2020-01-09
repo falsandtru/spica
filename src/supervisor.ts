@@ -1,10 +1,14 @@
-import { Supervisor } from './supervisor.legacy';
+import { Supervisor, SupervisorOptions } from './supervisor.legacy';
 import { Coroutine, CoroutineInterface, isCoroutine } from './coroutine';
 
 interface Supervisor2018<N extends string, P = unknown, R = unknown, S = unknown> extends Coroutine<undefined, undefined, undefined> {
   constructor: typeof Supervisor2018 & typeof Coroutine;
 }
 abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = unknown> extends Supervisor<N, P, R, S> {
+  constructor(opts: SupervisorOptions = {}) {
+    super(opts);
+    void this[Coroutine.init]();
+  }
   // Workaround for #36053
   public register(this: Supervisor2018<N, P, R, void>, name: N, process: Supervisor2018.Process.Function<P, R, S>, state?: S, reason?: unknown): (reason?: unknown) => boolean;
   public register(name: N, process: Supervisor2018.Process.Function<P, R, S>, state: S, reason?: unknown): (reason?: unknown) => boolean;

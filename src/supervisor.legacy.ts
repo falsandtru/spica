@@ -54,18 +54,16 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
   protected static readonly standalone = new WeakSet<Supervisor.Process.Regular<unknown, unknown, unknown>>();
   constructor(opts: SupervisorOptions = {}) {
     super((resolve, reject) => {
+      const legacy = !state;
       cb = [resolve, reject];
-      state = new AtomicFuture();
-      return this.then === AtomicPromise.prototype.then
+      state = state || new AtomicFuture();
+      return legacy
         ? undefined
         : function* () { }();
     });
-    var cb!: [() => void, () => void] | [undefined, undefined];
-    var state!: AtomicFuture;
-    cb
-      ? void this.state.then(...cb)
-      : void this.then();
-    assert(this.state);
+    var cb: [() => void, () => void] | [undefined, undefined] | undefined;
+    var state: AtomicFuture = state = new AtomicFuture();
+    cb && void this.state.then(...cb);
     void state.bind(this.state);
     void extend(this.settings, opts);
     this.name = this.settings.name;
