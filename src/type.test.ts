@@ -4,7 +4,7 @@ import {
   Rewrite, ExactRewrite, ExactExtract, ExactExclude,
   valueof, indexof,
   Type, StrictType,
-  DiffStruct, OverwriteStruct,
+  OverwriteStruct,
   ExtractProp, DeepExtractProp, ExcludeProp, DeepExcludeProp, RewriteProp, DeepRewriteProp,
   Partial, DeepPartial, Required, DeepRequired, Immutable, DeepImmutable, Mutable, DeepMutable,
   type
@@ -407,16 +407,6 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<StrictType<void>, 'undefined'>);
       assert((): true => true as TEq<StrictType<undefined>, 'undefined'>);
       assert((): true => true as TEq<StrictType<null>, 'null'>);
-    });
-
-  });
-
-  describe('DiffStruct', () => {
-    it('', () => {
-      type AB = { a: boolean; b: boolean; };
-      type A = { a: boolean; };
-      type B = { b: boolean; };
-      assert((): true => true as TEq<DiffStruct<AB, B>, A>);
     });
 
   });
