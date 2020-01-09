@@ -1,6 +1,6 @@
 type Falsy = undefined | false | 0 | '' | null | void;
-declare const Unique: unique symbol
 type Unique = typeof Unique;
+declare const Unique: unique symbol;
 
 export type IsNever<T> = [T] extends [never] ? true : false;
 export type IsAny<T> = [T] extends [Unique] ? Not<IsNever<T>> : false;
