@@ -184,7 +184,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
   public [init]: () => void;
   public [exit](result: T | PromiseLike<T>): void {
     if (!this[internal].alive) return;
-    void this[init]();
+    this[init] !== noop && void this[init]();
     this[internal].alive = false;
     // Don't block.
     void this[internal].state.bind({ value: undefined, done: true });
