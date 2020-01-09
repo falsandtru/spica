@@ -62,8 +62,10 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     });
     var cb!: [() => void, () => void] | [undefined, undefined];
     var state!: AtomicFuture;
-    cb || void this.then();
-    void this.state.then(...cb);
+    cb
+      ? void this.state.then(...cb)
+      : void this.then();
+    assert(this.state);
     void state.bind(this.state);
     void extend(this.settings, opts);
     this.name = this.settings.name;
