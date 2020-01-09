@@ -2,6 +2,10 @@ type Falsy = undefined | false | 0 | '' | null | void;
 declare const Unique: unique symbol
 type Unique = typeof Unique;
 
+export type IsNever<T> = [T] extends [never] ? true : false;
+export type IsAny<T> = [T] extends [Unique] ? Not<IsNever<T>> : false;
+export type IsUnknown<T> = [T] extends [Unique | {} | void | null] ? false : true;
+
 export type Not<T extends boolean> = T extends true ? false : true;
 export type And<T, U> = T extends Falsy ? T : U;
 export type Or<T, U> = T extends Falsy ? U : T;
@@ -32,10 +36,6 @@ type Determine<T extends valueof<NondeterminateTypeMap>> =
 interface NondeterminateTypeMap {
   boolean: boolean;
 }
-
-export type IsNever<T> = [T] extends [never] ? true : false;
-export type IsAny<T> = [T] extends [Unique] ? Not<IsNever<T>> : false;
-export type IsUnknown<T> = [T] extends [Unique | {} | void | null] ? false : true;
 
 export type Prepend<Elm, T extends readonly unknown[]> =
   T extends unknown ?
