@@ -10,6 +10,7 @@ import { noop } from './noop';
 const { Object: Obj, Error } = global;
 
 export interface CoroutineOptions {
+  readonly autorun?: boolean;
   readonly size?: number;
   readonly interval?: number;
   readonly resume?: () => PromiseLike<void> | void;
@@ -58,6 +59,7 @@ class Internal<T, R, S> {
   public readonly result = new AtomicFuture<T>();
   public readonly msgs: [S | PromiseLike<S>, Reply<R, T>][] = [];
   public readonly settings: DeepImmutable<DeepRequired<CoroutineOptions>> = {
+    autorun: true,
     size: 0,
     interval: 0,
     resume: () => undefined,
@@ -175,7 +177,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
         });
       }
     }
-    void tick(() => void this[Coroutine.init]());
+    this[internal].settings.autorun && void tick(() => void this[Coroutine.init]());
   }
   public readonly [internal]: Internal<T, R, S>;
   public get [alive](): boolean {
@@ -184,7 +186,6 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
   public [init]: () => void;
   public [exit](result: T | PromiseLike<T>): void {
     if (!this[internal].alive) return;
-    this[init] !== noop && void this[init]();
     this[internal].alive = false;
     // Don't block.
     void this[internal].state.bind({ value: undefined, done: true });
@@ -194,7 +195,6 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
     return this[exit](AtomicPromise.reject(reason));
   }
   public async *[Symbol.asyncIterator](): AsyncIterator<R, undefined, undefined> {
-    void this[init]();
     while (this[internal].alive) {
       const { value } = await this[internal].state;
       if (!this[internal].alive) break;
@@ -204,18 +204,6 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
   }
   public readonly [port]: Structural<Port<T, R, S>> = new Port(this);
 }
-Coroutine.prototype.then = function () {
-  void this[init]();
-  return Coroutine.prototype['__proto__'].then.call(this, ...arguments);
-};
-Coroutine.prototype.catch = function () {
-  void this[init]();
-  return Coroutine.prototype['__proto__'].catch.call(this, ...arguments);
-};
-Coroutine.prototype.finally = function () {
-  void this[init]();
-  return Coroutine.prototype['__proto__'].finally.call(this, ...arguments);
-};
 
 class Port<T, R, S> {
   constructor(
@@ -223,7 +211,6 @@ class Port<T, R, S> {
   ) {
   }
   public recv(): AtomicPromise<IteratorResult<R, T>> {
-    void this.co[init]();
     return this.co[internal].state
       .then(({ value, done }) =>
         done
@@ -232,7 +219,6 @@ class Port<T, R, S> {
   }
   public send(msg: S | PromiseLike<S>): AtomicPromise<IteratorResult<R, T>> {
     if (!this.co[internal].alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
-    void this.co[init]();
     const res = new AtomicFuture<IteratorResult<R, T>>();
     // Don't block.
     void this.co[internal].msgs.push([msg, res.bind]);
@@ -246,7 +232,6 @@ class Port<T, R, S> {
     return res.then();
   }
   public async connect<U>(com: (this: Coroutine<T, R, S>) => Generator<S, U, T | R> | AsyncGenerator<S, U, T | R>): Promise<U> {
-    void this.co[init]();
     const iter = com.call(this.co);
     let reply: T | R | undefined;
     while (true) {

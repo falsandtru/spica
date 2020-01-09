@@ -347,6 +347,7 @@ describe('Unit: lib/supervisor', function () {
       assert(await sv.call('', 2) === 2);
       await wait(100);
       assert(sv.kill('') === false);
+      assert(sv.refs('').length === 0);
       const co = new Coroutine<number, number, number>(async function* () {
         return new Promise<never>(() => undefined);
       });
@@ -357,6 +358,8 @@ describe('Unit: lib/supervisor', function () {
       sv.register('', new Coroutine<number, number, number>(function* () {
         throw 1;
       }));
+      assert(sv.refs('').length === 1);
+      await wait(100);
       assert(sv.refs('').length === 0);
       assert(sv.kill('') === false);
       sv.register('', new Coroutine<number, number, number>(async function* () {
