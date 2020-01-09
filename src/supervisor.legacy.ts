@@ -57,10 +57,10 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
       cb = [resolve, reject];
       state = new AtomicFuture();
       return this.then === AtomicPromise.prototype.then
-        ? state
-        : function* () { return state; }();
+        ? undefined
+        : function* () { }();
     });
-    var cb!: [() => void, () => void];
+    var cb!: [() => void, () => void] | [undefined, undefined];
     var state!: AtomicFuture;
     cb || void this.then();
     void this.state.then(...cb);
