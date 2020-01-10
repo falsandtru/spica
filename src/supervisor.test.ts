@@ -1,6 +1,6 @@
 import { Supervisor } from './supervisor';
 import { Coroutine } from './coroutine';
-import { tick, wait } from './clock';
+import { tick, wait, never } from './clock';
 import { Sequence } from './sequence';
 
 describe('Unit: lib/supervisor', function () {
@@ -332,7 +332,7 @@ describe('Unit: lib/supervisor', function () {
       assert(sv.kill('') === false);
       assert(sv.refs('').length === 0);
       const co = new Coroutine<number, number, number>(async function* () {
-        return new Promise<never>(() => undefined);
+        return never;
       });
       sv.register('', co);
       await wait(100);
@@ -394,7 +394,7 @@ describe('Unit: lib/supervisor', function () {
         assert(cnt === 0 && ++cnt);
         done();
       });
-      sv.register('', () => new Promise<never>(() => undefined), 0);
+      sv.register('', () => never, 0);
       sv.call('', 1, (r, e) => void assert(r === undefined) || void assert(e instanceof Error) || assert(cnt === 1 && ++cnt));
     });
 

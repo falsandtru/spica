@@ -12,3 +12,21 @@ export function wait(ms: number): AtomicPromise<undefined> {
     ? AtomicPromise.resolve(clock)
     : new AtomicPromise(resolve => void setTimeout(resolve, ms));
 }
+
+export const never: AtomicPromise<never> = new class Never extends AtomicPromise<never> {
+  public static get [Symbol.species]() {
+    return Never;
+  }
+  constructor() {
+    super(() => undefined);
+  }
+  public then() {
+    return super.then();
+  }
+  public catch() {
+    return super.then();
+  }
+  public finally() {
+    return super.then();
+  }
+}();

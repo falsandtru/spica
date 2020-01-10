@@ -1,5 +1,5 @@
 import { Coroutine } from './coroutine';
-import { wait } from './clock';
+import { wait, never } from './clock';
 
 describe('Unit: lib/coroutine', () => {
   if (navigator.userAgent.includes('Edge')) return;
@@ -37,11 +37,11 @@ describe('Unit: lib/coroutine', () => {
           assert(cnt === 5 && ++cnt);
           assert(value === 0);
         });
-      co[Coroutine.terminate](new Promise(() => undefined));
+      co[Coroutine.terminate](never);
       assert(cnt === 4 && ++cnt);
       new Coroutine(function* () {
         wait(1).then(() => this[Coroutine.terminate](0));
-        return new Promise(() => undefined);
+        return never;
       }, { autorun: true })
         .catch(reason => {
           assert(cnt === 6 && ++cnt);
