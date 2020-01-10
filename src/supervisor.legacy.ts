@@ -25,10 +25,10 @@ export interface SupervisorOptions {
   readonly resource?: number;
 }
 
-export interface Supervisor<N extends string, P = undefined, R = undefined, S = undefined> {
+export interface Supervisor<N extends string, P = undefined, R = P, S = undefined> {
   constructor: typeof Supervisor;
 }
-export abstract class Supervisor<N extends string, P = undefined, R = undefined, S = undefined> extends AtomicPromise<undefined> {
+export abstract class Supervisor<N extends string, P = undefined, R = P, S = undefined> extends AtomicPromise<undefined> {
   private static instances_: Set<Supervisor<string, unknown, unknown, unknown>>;
   private static get instances(): typeof Supervisor.instances_ {
     return this.hasOwnProperty('instances_')
@@ -329,7 +329,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = undefined,
   }
 }
 export namespace Supervisor {
-  export type Process<P, R, S> =
+  export type Process<P, R = P, S = undefined> =
     | Process.Regular<P, R, S>
     | Process.Function<P, R, S>
     | Process.GeneratorFunction<P, R, S>;

@@ -17,7 +17,7 @@ export interface CoroutineOptions {
   readonly trigger?: string | symbol | ReadonlyArray<string | symbol>;
 }
 
-export interface CoroutineInterface<T = unknown, R = unknown, _ = unknown> extends Promise<T>, AsyncIterable<R> {
+export interface CoroutineInterface<T = unknown, R = T, _ = unknown> extends Promise<T>, AsyncIterable<R> {
   readonly constructor: {
     readonly alive: symbol;
     readonly exit: symbol;
@@ -70,10 +70,10 @@ type Reply<R, T> = (msg: IteratorResult<R, T> | PromiseLike<never>) => void;
 
 const internal = Symbol.for('spica/coroutine::internal');
 
-export interface Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicPromise<T>, AsyncIterable<R> {
+export interface Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>, AsyncIterable<R> {
   constructor: typeof Coroutine;
 }
-export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicPromise<T> implements Promise<T>, AsyncIterable<R>, CoroutineInterface<T, R, S> {
+export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T> implements Promise<T>, AsyncIterable<R>, CoroutineInterface<T, R, S> {
   public static readonly alive: typeof alive = alive;
   protected static readonly init: typeof init = init;
   public static readonly exit: typeof exit = exit;

@@ -7,7 +7,7 @@ describe('Benchmark:', function () {
   describe('Supervisor', function () {
     it('cast', function (done) {
       const sv = new class extends Supervisor<string, number> { }();
-      sv.register('', _ => [undefined, undefined], undefined);
+      sv.register('', n => [n, undefined], undefined);
       benchmark('Supervisor cast', () => sv.cast('', 0), done);
     });
 

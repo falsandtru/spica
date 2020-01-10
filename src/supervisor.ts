@@ -1,10 +1,10 @@
 import { Supervisor, SupervisorOptions } from './supervisor.legacy';
 import { Coroutine, CoroutineInterface, isCoroutine } from './coroutine';
 
-interface Supervisor2018<N extends string, P = undefined, R = undefined, S = undefined> extends Coroutine<undefined, undefined, undefined> {
+interface Supervisor2018<N extends string, P = undefined, R = P, S = undefined> extends Coroutine<undefined, undefined, undefined> {
   constructor: typeof Supervisor2018 & typeof Coroutine;
 }
-abstract class Supervisor2018<N extends string, P = undefined, R = undefined, S = undefined> extends Supervisor<N, P, R, S> {
+abstract class Supervisor2018<N extends string, P = undefined, R = P, S = undefined> extends Supervisor<N, P, R, S> {
   constructor(opts: SupervisorOptions = {}) {
     super(opts);
     void this[Coroutine.init]();
@@ -70,7 +70,7 @@ abstract class Supervisor2018<N extends string, P = undefined, R = undefined, S 
   } as const;
 }
 namespace Supervisor2018 {
-  export type Process<P, R, S> =
+  export type Process<P, R = P, S = undefined> =
     | Supervisor.Process<P, R, S>
     | Process.AsyncGeneratorFunction<P, R, S>
     | Process.Coroutine<P, R>;
