@@ -25,10 +25,10 @@ export interface SupervisorOptions {
   readonly resource?: number;
 }
 
-export interface Supervisor<N extends string, P = unknown, R = unknown, S = unknown> {
+export interface Supervisor<N extends string, P = undefined, R = undefined, S = undefined> {
   constructor: typeof Supervisor;
 }
-export abstract class Supervisor<N extends string, P = unknown, R = unknown, S = unknown> extends AtomicPromise<undefined> {
+export abstract class Supervisor<N extends string, P = undefined, R = undefined, S = undefined> extends AtomicPromise<undefined> {
   private static instances_: Set<Supervisor<string, unknown, unknown, unknown>>;
   private static get instances(): typeof Supervisor.instances_ {
     return this.hasOwnProperty('instances_')
