@@ -4,9 +4,9 @@ export { tick } from './clock.tick';
 
 const { setTimeout } = global;
 
-export const clock: Promise<void> = Promise.resolve();
+export const clock: Promise<undefined> = Promise.resolve(undefined);
 
-export function wait(ms: number): AtomicPromise<void> {
+export function wait(ms: number): AtomicPromise<undefined> {
   assert(ms >= 0);
   return ms === 0
     ? AtomicPromise.resolve(clock)

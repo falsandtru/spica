@@ -5,7 +5,7 @@ import type { DeepImmutable, DeepRequired } from './type';
 
 const { Map } = global;
 
-export interface CacheOptions<K, V = void> {
+export interface CacheOptions<K, V = undefined> {
   ignore?: {
     delete?: boolean;
     clear?: boolean;
@@ -16,7 +16,7 @@ export interface CacheOptions<K, V = void> {
   };
 }
 
-export class Cache<K, V = void> {
+export class Cache<K, V = undefined> {
   constructor(
     private readonly size: number,
     private readonly callback: (key: K, value: V) => void = () => undefined,
@@ -58,7 +58,7 @@ export class Cache<K, V = void> {
     },
   };
   public put(key: K, value: V, log?: boolean): boolean;
-  public put(this: Cache<K, void>, key: K, value?: V): boolean;
+  public put(this: Cache<K, undefined>, key: K, value?: V): boolean;
   public put(key: K, value: V, log = true): boolean {
     if (!log && this.store.has(key)) return void this.store.set(key, value), true;
     if (this.access(key)) return void this.store.set(key, value), true;
@@ -86,7 +86,7 @@ export class Cache<K, V = void> {
     }
     return false;
   }
-  public set<W extends V>(this: Cache<K, void>, key: K, value?: W): W;
+  public set<W extends V>(this: Cache<K, undefined>, key: K, value?: W): W;
   public set<W extends V>(key: K, value: W, log?: boolean): W;
   public set<W extends V>(key: K, value: W, log?: boolean): W {
     void this.put(key, value, log);

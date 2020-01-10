@@ -51,7 +51,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
       }
     });
   }
-  public static resolve(): AtomicPromise<void>;
+  public static resolve(): AtomicPromise<undefined>;
   public static resolve<T>(value: T | PromiseLike<T>): AtomicPromise<T>;
   public static resolve<T>(value?: T | PromiseLike<T>): AtomicPromise<T> {
     return new AtomicPromise<T>(resolve => void resolve(value));

@@ -16,9 +16,9 @@ export interface ObserverOptions {
   once?: boolean;
 }
 export interface Publisher<N extends unknown[], D, R> {
-  emit(this: Publisher<N, void, R>, namespace: N, data?: D, tracker?: (data: D, results: R[]) => void): void;
+  emit(this: Publisher<N, undefined, R>, namespace: N, data?: D, tracker?: (data: D, results: R[]) => void): void;
   emit(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void;
-  reflect(this: Publisher<N, void, R>, namespace: N, data?: D): R[];
+  reflect(this: Publisher<N, undefined, R>, namespace: N, data?: D): R[];
   reflect(namespace: N, data: D): R[];
 }
 export type Monitor<N extends unknown[], D> = (data: D, namespace: N) => unknown;

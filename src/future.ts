@@ -1,6 +1,6 @@
 import { AtomicPromise } from './promise';
 
-export class Future<T = unknown> extends Promise<T> {
+export class Future<T = undefined> extends Promise<T> {
   static get [Symbol.species]() {
     return Promise;
   }

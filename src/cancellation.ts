@@ -8,7 +8,7 @@ const { Object: Obj, Set } = global;
 
 export interface Canceller<L = undefined> {
   readonly cancel: {
-    (this: Canceller<void>, reason?: L): void;
+    (this: Canceller<undefined>, reason?: L): void;
     (reason: L): void;
   };
 }

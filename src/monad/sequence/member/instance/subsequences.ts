@@ -18,7 +18,7 @@ function nonEmptySubsequences<a, z>(xs: Sequence<a, z>): Sequence<a[], [Sequence
     xt =>
       Sequence.mappend<a[]>(
         Sequence.from([[Sequence.Thunk.value(xt)]]),
-        new Sequence<Sequence<a[], [Sequence.Iterator<Sequence<a[], void>>, Sequence.Iterator<a[]>]>, void>((_, cons) =>
+        new Sequence<Sequence<a[], [Sequence.Iterator<Sequence<a[], undefined>>, Sequence.Iterator<a[]>]>, undefined>((_, cons) =>
           Sequence.Iterator.when(
             xt,
             () => cons(),

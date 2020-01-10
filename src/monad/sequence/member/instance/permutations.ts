@@ -16,12 +16,12 @@ export default class <a, z> extends Sequence<a, z> {
   }
 }
 
-function perms<a>(ts: Sequence<a, any>, is: Sequence<a, any>): Sequence<a[], [Sequence.Iterator<Sequence<a[], void>>, Sequence.Iterator<a[]>]> {
-  return Sequence.Iterator.when<a, Sequence<a[], [Sequence.Iterator<Sequence<a[], void>>, Sequence.Iterator<a[]>]>>(
+function perms<a>(ts: Sequence<a, any>, is: Sequence<a, any>): Sequence<a[], [Sequence.Iterator<Sequence<a[], undefined>>, Sequence.Iterator<a[]>]> {
+  return Sequence.Iterator.when<a, Sequence<a[], [Sequence.Iterator<Sequence<a[], undefined>>, Sequence.Iterator<a[]>]>>(
     ts.iterate(),
     () => Sequence.mempty,
     tt =>
-      new Sequence<Sequence<a[], [Sequence.Iterator<Sequence<a[], void>>, Sequence.Iterator<a[]>]>, void>((_, cons) =>
+      new Sequence<Sequence<a[], [Sequence.Iterator<Sequence<a[], undefined>>, Sequence.Iterator<a[]>]>, undefined>((_, cons) =>
         Sequence.Iterator.when(
           tt,
           () => cons(),

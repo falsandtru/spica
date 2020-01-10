@@ -10,11 +10,11 @@ abstract class Supervisor2018<N extends string, P = unknown, R = unknown, S = un
     void this[Coroutine.init]();
   }
   // Workaround for #36053
-  public register(this: Supervisor2018<N, P, R, void>, name: N, process: Supervisor2018.Process.Function<P, R, S>, state?: S, reason?: unknown): (reason?: unknown) => boolean;
+  public register(this: Supervisor2018<N, P, R, undefined>, name: N, process: Supervisor2018.Process.Function<P, R, S>, state?: S, reason?: unknown): (reason?: unknown) => boolean;
   public register(name: N, process: Supervisor2018.Process.Function<P, R, S>, state: S, reason?: unknown): (reason?: unknown) => boolean;
-  public register(this: Supervisor2018<N, P, R, void>, name: N, process: Supervisor2018.Process.GeneratorFunction<P, R, S, this>, state?: S, reason?: unknown): (reason?: unknown) => boolean;
+  public register(this: Supervisor2018<N, P, R, undefined>, name: N, process: Supervisor2018.Process.GeneratorFunction<P, R, S, this>, state?: S, reason?: unknown): (reason?: unknown) => boolean;
   public register(name: N, process: Supervisor2018.Process.GeneratorFunction<P, R, S, this>, state: S, reason?: unknown): (reason?: unknown) => boolean;
-  public register(this: Supervisor2018<N, P, R, void>, name: N, process: Supervisor2018.Process.AsyncGeneratorFunction<P, R, S, this>, state?: S, reason?: unknown): (reason?: unknown) => boolean;
+  public register(this: Supervisor2018<N, P, R, undefined>, name: N, process: Supervisor2018.Process.AsyncGeneratorFunction<P, R, S, this>, state?: S, reason?: unknown): (reason?: unknown) => boolean;
   public register(name: N, process: Supervisor2018.Process.AsyncGeneratorFunction<P, R, S, this>, state: S, reason?: unknown): (reason?: unknown) => boolean;
   public register(name: N, process: Supervisor2018.Process.Coroutine<P, R>, state?: never, reason?: unknown): (reason?: unknown) => boolean;
   public register(name: N, process: Supervisor2018.Process<P, R, S, this>, state: S, reason?: unknown): (reason?: unknown) => boolean;

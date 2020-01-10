@@ -33,7 +33,7 @@ export class Colistener<T, U = undefined> extends Coroutine<U, T> {
     }, { ...opts, size: 0 });
     void this[Coroutine.init]();
   }
-  public close(this: Colistener<T, void>, value?: U): void;
+  public close(this: Colistener<T, undefined>, value?: U): void;
   public close(value: U): void;
   public close(value: U): void {
     void this[Coroutine.exit](value);
