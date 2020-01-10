@@ -52,7 +52,7 @@ describe('Unit: lib/coroutine', () => {
 
     it('iterate', async () => {
       let cnt = 0;
-      const co = new Coroutine<number, number>(async function* () {
+      const co = new Coroutine(async function* () {
         assert(cnt === 1);
         assert(undefined === (yield Promise.resolve(2)));
         assert(undefined === (yield Promise.resolve(3)));
