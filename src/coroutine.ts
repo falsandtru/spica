@@ -133,7 +133,7 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
             this[internal].state = new AtomicFuture();
             // Don't block.
             void state.bind({ value: value as R, done });
-            void [reply, reply = noop][0]({ value: value as R, done });
+            void reply({ value: value as R, done });
             continue;
           }
           else {
@@ -141,9 +141,9 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
             // Don't block.
             void this[internal].state.bind({ value: undefined, done });
             // Block.
-            this[internal].result.bind(value as T)
+            void this[internal].result.bind(value as T)
               .then(() =>
-                void [reply, reply = noop][0]({ value: value as T, done }));
+                void reply({ value: value as T, done }));
             return;
           }
         }
