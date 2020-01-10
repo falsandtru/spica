@@ -124,15 +124,14 @@ export abstract class Supervisor<N extends string, P = unknown, R = unknown, S =
     if (!this.available) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A supervisor is already terminated.`);
   }
   // Workaround for #36053
-  public register(this: Supervisor<N, P, R, undefined>, name: N, process: Supervisor.Process.Function<P, R, S>, state?: S, reason?: unknown): (reason?: unknown) => boolean;
-  public register(name: N, process: Supervisor.Process.Function<P, R, S>, state: S, reason?: unknown): (reason?: unknown) => boolean;
-  public register(this: Supervisor<N, P, R, undefined>, name: N, process: Supervisor.Process.GeneratorFunction<P, R, S, this>, state?: S, reason?: unknown): (reason?: unknown) => boolean;
-  public register(name: N, process: Supervisor.Process.GeneratorFunction<P, R, S, this>, state: S, reason?: unknown): (reason?: unknown) => boolean;
-  public register(name: N, process: Supervisor.Process<P, R, S, this>, state: S, reason?: unknown): (reason?: unknown) => boolean;
-  public register(name: N, process: Supervisor.Process<P, R, S, this>, state?: S, reason?: unknown): (reason?: unknown) => boolean {
+  public register(this: Supervisor<N, P, R, undefined>, name: N, process: Supervisor.Process.Function<P, R, S>, state?: S): (reason?: unknown) => boolean;
+  public register(name: N, process: Supervisor.Process.Function<P, R, S>, state: S): (reason?: unknown) => boolean;
+  public register(this: Supervisor<N, P, R, undefined>, name: N, process: Supervisor.Process.GeneratorFunction<P, R, S, this>, state?: S): (reason?: unknown) => boolean;
+  public register(name: N, process: Supervisor.Process.GeneratorFunction<P, R, S, this>, state: S): (reason?: unknown) => boolean;
+  public register(name: N, process: Supervisor.Process<P, R, S, this>, state: S): (reason?: unknown) => boolean;
+  public register(name: N, process: Supervisor.Process<P, R, S, this>, state?: S): (reason?: unknown) => boolean {
     state = state!;
     void this.throwErrorIfNotAvailable();
-    arguments.length > 3 && void this.kill(name, reason);
     if (typeof process === 'function') {
       if (isGeneratorFunction(process)) {
         const iter = process.call(this, state);
