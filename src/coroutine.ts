@@ -137,13 +137,14 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
             continue;
           }
           else {
+            // Block.
+            const result = await value as T;
+            if (!this[internal].alive) break;
             this[internal].alive = false;
             // Don't block.
             void this[internal].state.bind({ value: undefined, done });
-            // Block.
-            void this[internal].result.bind(value as T)
-              .then(() =>
-                void reply({ value: value as T, done }));
+            void this[internal].result.bind(result);
+            void reply({ value: result, done });
             return;
           }
         }
@@ -186,10 +187,22 @@ export class Coroutine<T = unknown, R = unknown, S = unknown> extends AtomicProm
   public [init]: () => void;
   public [exit](result: T | PromiseLike<T>): void {
     if (!this[internal].alive) return;
-    this[internal].alive = false;
-    // Don't block.
-    void this[internal].state.bind({ value: undefined, done: true });
-    void this[internal].result.bind(result);
+    void AtomicPromise.resolve(result)
+      .then(
+        result => {
+          if (!this[internal].alive) return;
+          this[internal].alive = false;
+          // Don't block.
+          void this[internal].state.bind({ value: undefined, done: true });
+          void this[internal].result.bind(result);
+        },
+        reason => {
+          if (!this[internal].alive) return;
+          this[internal].alive = false;
+          // Don't block.
+          void this[internal].state.bind({ value: undefined, done: true });
+          void this[internal].result.bind(AtomicPromise.reject(reason));
+        });
   }
   public [terminate](reason?: unknown): void {
     return this[exit](AtomicPromise.reject(reason));

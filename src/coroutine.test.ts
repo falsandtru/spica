@@ -15,7 +15,7 @@ describe('Unit: lib/coroutine', () => {
 
     it('terminate', done => {
       let cnt = 0;
-      const co = new Coroutine(async function* () {
+      const co = new Coroutine(function* () {
         assert(false);
         return;
       });
@@ -26,9 +26,28 @@ describe('Unit: lib/coroutine', () => {
       assert(cnt === 1 && ++cnt);
       co[Coroutine.terminate](1);
       co.catch(reason => {
+        assert(cnt === 2 && ++cnt);
         assert(reason === 0);
-        done();
       });
+      assert(cnt === 3 && ++cnt);
+      new Coroutine(function* () {
+        return 0;
+      }, { autorun: true })
+        .then(value => {
+          assert(cnt === 5 && ++cnt);
+          assert(value === 0);
+        });
+      co[Coroutine.terminate](new Promise(() => undefined));
+      assert(cnt === 4 && ++cnt);
+      new Coroutine(function* () {
+        wait(1).then(() => this[Coroutine.terminate](0));
+        return new Promise(() => undefined);
+      }, { autorun: true })
+        .catch(reason => {
+          assert(cnt === 6 && ++cnt);
+          assert(reason === 0);
+          done();
+        });
     });
 
     it('iterate', async () => {
