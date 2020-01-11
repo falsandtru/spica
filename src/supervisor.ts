@@ -45,7 +45,7 @@ abstract class Supervisor2018<N extends string, P = undefined, R = P, S = undefi
             AtomicPromise.resolve(iter.next(param))
               .then(({ value: reply, done }) =>
                 done && void kill() || [reply, state]),
-          exit: _ => undefined
+          exit: () => undefined
         },
         state);
     }

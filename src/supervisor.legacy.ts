@@ -144,7 +144,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
               done && kill();
               return [reply, state];
             },
-            exit: _ => undefined
+            exit: () => undefined
           },
           state);
       }
@@ -153,7 +153,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
         {
           init: state => state,
           main: process,
-          exit: _ => undefined
+          exit: () => undefined
         },
         state);
     }

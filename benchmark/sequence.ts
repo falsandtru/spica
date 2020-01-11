@@ -67,14 +67,14 @@ describe('Benchmark:', function () {
       function iterMapFilter(n: number, done: () => void) {
         const seq = Sequence.from(array(n))
           .map(n => n)
-          .filter(_ => true)
+          .filter(() => true)
           .take(n);
         benchmark(`Sequence map filter iter ${n}`, () => seq.extract(), done);
       }
       function seqMapFilter(n: number, done: () => void) {
         const seq = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1))
           .map(n => n)
-          .filter(_ => true)
+          .filter(() => true)
           .take(n);
         benchmark(`Sequence map filter seq  ${n}`, () => seq.extract(), done);
       }

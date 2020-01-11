@@ -28,7 +28,7 @@ describe('Unit: lib/maybe', () => {
     it('Nothing', () => {
       const result = Return(0)
         .bind(n => Just(n + 1))
-        .bind(n => Just(`Just ${n}`).bind(_ => Nothing))
+        .bind(n => Just(`Just ${n}`).bind(() => Nothing))
         .bind(throwError)
         .extract(() => 'Nothing');
       assert(result === 'Nothing');
@@ -43,7 +43,7 @@ describe('Unit: lib/maybe', () => {
 
     it('Nothing nest', () => {
       const result = Return(Return(''))
-        .bind(m => m.bind(_ => Nothing).bind(throwError))
+        .bind(m => m.bind(() => Nothing).bind(throwError))
         .bind(throwError)
         .extract(() => 'Nothing');
       assert(result === 'Nothing');
@@ -51,15 +51,15 @@ describe('Unit: lib/maybe', () => {
 
     it('maybe', () => {
       assert(Just(0).extract(() => -1, n => n + 1) === 1);
-      assert(Nothing.extract(() => -1, _ => 0 + 1) === -1);
+      assert(Nothing.extract(() => -1, () => 0 + 1) === -1);
     });
 
     it('Call-by-need and Memoize', () => {
       let n = NaN;
       const m1 = Return(NaN)
-        .bind(_ => Just(++n));
+        .bind(() => Just(++n));
       const m2 = m1
-        .bind(_ => Just(++n));
+        .bind(() => Just(++n));
       n = 0;
       assert(m2.extract() === 2);
       assert(m2.extract() === 2);

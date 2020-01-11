@@ -26,9 +26,9 @@ describe('Unit: lib/either', () => {
 
     it('Left nest', () => {
       const result = Return(Return(''))
-        .bind(m => m.bind(_ => Left(NaN)).bind(throwError))
+        .bind(m => m.bind(() => Left(NaN)).bind(throwError))
         .bind(throwError)
-        .extract(_ => 'Nothing');
+        .extract(() => 'Nothing');
       assert(result === 'Nothing');
     });
 
@@ -44,7 +44,7 @@ describe('Unit: lib/either', () => {
       const result = Return(Return(0))
         .bind(m => Right(m))
         .bind(m => m.bind(n => Right(n + 1)).bind(n => Right(`Right ${n}`)))
-        .extract(_ => 'Nothing');
+        .extract(() => 'Nothing');
       assert(result === 'Right 1');
     });
 
@@ -58,15 +58,15 @@ describe('Unit: lib/either', () => {
 
     it('either', () => {
       assert(Right(0).extract(() => -1, n => n + 1) === 1);
-      assert(Left(0).extract(n => n -1, _ => 0 + 1) === -1);
+      assert(Left(0).extract(n => n -1, () => 0 + 1) === -1);
     });
 
     it('Call-by-need and Memoize', () => {
       let n = NaN;
       const m1 = Return(NaN)
-        .bind(_ => Right(++n));
+        .bind(() => Right(++n));
       const m2 = m1
-        .bind(_ => Right(++n));
+        .bind(() => Right(++n));
       n = 0;
       assert(m2.extract() === 2);
       assert(m2.extract() === 2);

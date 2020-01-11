@@ -110,7 +110,7 @@ describe('Unit: lib/supervisor', function () {
         destructor: reason => {
           assert(reason === undefined);
           assert(cnt === 13 && ++cnt);
-          assert.throws(() => sv.register('', _ => [0, 0], 0));
+          assert.throws(() => sv.register('', () => [0, 0], 0));
           assert.throws(() => sv.cast('', 0));
           assert.throws(() => sv.call('', 0, () => undefined));
           assert(sv.terminate() === false);
@@ -408,7 +408,7 @@ describe('Unit: lib/supervisor', function () {
         assert(p === 1);
         assert(cnt === 0 && ++cnt);
       });
-      sv.register('', _ => [0, 0], 0);
+      sv.register('', () => [0, 0], 0);
       sv.call('', 1, (r, e) => void assert(r === undefined) || void assert(e instanceof Error) || assert(cnt === 1 && ++cnt));
       sv.call('', 2, (r, e) => void assert(r === 0) || void assert(e === undefined) || void assert(cnt === 2 && ++cnt) || done(), 100);
     });
@@ -417,8 +417,8 @@ describe('Unit: lib/supervisor', function () {
       let cnt = 0;
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
       });
-      sv.register('', _ => [++cnt, 0], 0);
-      sv.call('', 0, _ => void assert(cnt === 1) || done());
+      sv.register('', () => [++cnt, 0], 0);
+      sv.call('', 0, () => void assert(cnt === 1) || done());
       assert(cnt === 0);
     });
 
@@ -462,8 +462,8 @@ describe('Unit: lib/supervisor', function () {
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
         scheduler: requestAnimationFrame
       });
-      sv.register('', _ => [++cnt, 0], 0);
-      sv.call('', 0, _ => void assert(cnt === 1) || done());
+      sv.register('', () => [++cnt, 0], 0);
+      sv.call('', 0, () => void assert(cnt === 1) || done());
       assert(cnt === 0);
     });
 
@@ -501,7 +501,7 @@ describe('Unit: lib/supervisor', function () {
       const sv = new TestSupervisor({});
       assert(TestSupervisor.count === 1);
       assert(TestSupervisor.procs === 0);
-      void sv.register(' ', _ => [0, 0], 0);
+      void sv.register(' ', () => [0, 0], 0);
       assert(TestSupervisor.count === 1);
       assert(TestSupervisor.procs === 1);
       assert(sv.kill('') === false);
@@ -524,8 +524,8 @@ describe('Unit: lib/supervisor', function () {
       const sv = new TestSupervisor({});
       assert(TestSupervisor.count === 1);
       assert(TestSupervisor.procs === 0);
-      void sv.register('1', _ => [0, 0], 0);
-      void sv.register('2', _ => [0, 0], 0);
+      void sv.register('1', () => [0, 0], 0);
+      void sv.register('2', () => [0, 0], 0);
       assert(TestSupervisor.count === 1);
       assert(TestSupervisor.procs === 2);
       sv.clear();
@@ -554,7 +554,7 @@ describe('Unit: lib/supervisor', function () {
       const sv = new TestSupervisor({
         destructor: reason => {
           assert(reason === undefined);
-          assert.throws(() => sv.register('', _ => [0, 0], 0));
+          assert.throws(() => sv.register('', () => [0, 0], 0));
           assert.throws(() => sv.cast('', 0));
           assert.throws(() => sv.call('', 0, () => undefined));
           assert(sv.terminate() === false);
@@ -563,13 +563,13 @@ describe('Unit: lib/supervisor', function () {
           ++cnt;
         }
       });
-      const kill = sv.register('', _ => [0, 0], 0);
+      const kill = sv.register('', () => [0, 0], 0);
       assert(sv.terminate() === true);
       assert(kill() === false);
       assert(sv.terminate() === false);
       assert(cnt === 1);
       try {
-        sv.register('', _ => [0, 0], 0);
+        sv.register('', () => [0, 0], 0);
         throw 0;
       }
       catch (err) {

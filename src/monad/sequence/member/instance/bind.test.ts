@@ -52,7 +52,7 @@ describe('Unit: lib/monad/sequence/member/bind', () => {
       assert.deepStrictEqual(
         nat
           .take(3)
-          .bind(_ => Sequence.from([]))
+          .bind(() => Sequence.from([]))
           .take(Infinity)
           .extract(),
         []);

@@ -11,26 +11,26 @@ describe('Benchmark:', function () {
   describe('Observation', function () {
     it('monitor', function (done) {
       const subject = new Observation();
-      subject.monitor([], _ => 0);
+      subject.monitor([], () => 0);
       benchmark('Observation monitor', () => subject.emit([], 0), done);
     });
 
     it('on', function (done) {
       const subject = new Observation();
-      subject.on([], _ => 0);
+      subject.on([], () => 0);
       benchmark('Observation on', () => subject.emit([], 0), done);
     });
 
     it('reflect', function (done) {
       const subject = new Observation();
-      subject.on([], _ => 0);
+      subject.on([], () => 0);
       benchmark('Observation reflect', () => subject.reflect([], 0), done);
     });
 
     it('reflect 10', function (done) {
       const subject = new Observation();
       for (let i = 0; i < 1e1; ++i) {
-        subject.on([i], _ => 0);
+        subject.on([i], () => 0);
       }
       benchmark('Observation reflect 10', () => subject.reflect([], 0), done);
     });
@@ -38,15 +38,15 @@ describe('Benchmark:', function () {
     it('reflect 100', function (done) {
       const subject = new Observation();
       for (let i = 0; i < 1e2; ++i) {
-        subject.on([i], _ => 0);
+        subject.on([i], () => 0);
       }
       benchmark('Observation reflect 100', () => subject.reflect([], 0), done);
     });
 
     it('monitor and on', function (done) {
       const subject = new Observation();
-      subject.monitor([], _ => 0);
-      subject.on([], _ => 0);
+      subject.monitor([], () => 0);
+      subject.on([], () => 0);
       benchmark('Observation monitor and on', () => subject.emit([], 0), done);
     });
 
@@ -60,7 +60,7 @@ describe('Benchmark:', function () {
 
     it('on with namespace', function (done) {
       const subject = new Observation();
-      subject.on(['bench'], _ => 0);
+      subject.on(['bench'], () => 0);
       benchmark('Observation on with namespace', () => subject.emit(['bench'], 0), done);
     });
 
