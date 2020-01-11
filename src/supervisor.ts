@@ -1,5 +1,6 @@
 import { Supervisor, SupervisorOptions } from './supervisor.legacy';
 import { Coroutine, CoroutineInterface, isCoroutine } from './coroutine';
+import { AtomicPromise } from './promise';
 
 interface Supervisor2018<N extends string, P = undefined, R = P, S = undefined> extends Coroutine<undefined, undefined, undefined> {
   constructor: typeof Supervisor2018 & typeof Coroutine;
@@ -41,7 +42,7 @@ abstract class Supervisor2018<N extends string, P = undefined, R = P, S = undefi
         {
           init: (state, kill) => (iter = process(state, kill), void iter.next().catch(kill), state),
           main: (param, state, kill) =>
-            iter.next(param)
+            AtomicPromise.resolve(iter.next(param))
               .then(({ value: reply, done }) =>
                 done && void kill() || [reply, state]),
           exit: _ => undefined
