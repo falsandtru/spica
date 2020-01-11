@@ -35,10 +35,11 @@ abstract class Supervisor2018<N extends string, P = undefined, R = P, S = undefi
       return kill;
     }
     if (isAsyncGeneratorFunction(process)) {
-      const kill: (reason: unknown) => boolean = this.register(
+      let iter: AsyncGenerator<R, R, P>;
+      return this.register(
         name,
         {
-          init: state => (void iter.next().catch(kill), state),
+          init: (state, kill) => (iter = process(state, kill), void iter.next().catch(kill), state),
           main: (param, state, kill) =>
             iter.next(param)
               .then(({ value: reply, done }) =>
@@ -46,8 +47,6 @@ abstract class Supervisor2018<N extends string, P = undefined, R = P, S = undefi
           exit: _ => undefined
         },
         state);
-      const iter = process(state, kill);
-      return kill;
     }
     return super.register(name, process, state);
 

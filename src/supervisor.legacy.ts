@@ -134,10 +134,11 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     void this.throwErrorIfNotAvailable();
     if (typeof process === 'function') {
       if (isGeneratorFunction(process)) {
-        const kill = this.register(
+        let iter: Generator<R, R, P>;
+        return this.register(
           name,
           {
-            init: state => (void iter.next(), state),
+            init: (state, kill) => (iter = process(state, kill), void iter.next(), state),
             main: (param, state, kill) => {
               const { value: reply, done } = iter.next(param);
               done && kill();
@@ -146,8 +147,6 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
             exit: _ => undefined
           },
           state);
-        const iter = process(state, kill);
-        return kill;
       }
       return this.register(
         name,
@@ -336,7 +335,7 @@ export namespace Supervisor {
     | Process.GeneratorFunction<P, R, S>;
   export namespace Process {
     export type Regular<P, R, S> = {
-      readonly init: (state: S) => S;
+      readonly init: (state: S, kill: (reason?: unknown) => void) => S;
       readonly main: Function<P, R, S>;
       readonly exit: (reason: unknown, state: S) => void;
     };
@@ -415,7 +414,7 @@ class Worker<N extends string, P, R, S> {
     this.initiated = true;
     void this.events.init
       .emit([this.name], [this.name, this.process, this.state]);
-    this.state = this.process.init(this.state);
+    this.state = this.process.init(this.state, this.terminate);
   }
   private exit(reason: unknown): void {
     assert(this.initiated);
