@@ -134,8 +134,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     void this.throwErrorIfNotAvailable();
     if (typeof process === 'function') {
       if (isGeneratorFunction(process)) {
-        const iter = process(state);
-        return this.register(
+        const kill = this.register(
           name,
           {
             init: state => (void iter.next(), state),
@@ -147,6 +146,8 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
             exit: _ => undefined
           },
           state);
+        const iter = process(state, kill);
+        return kill;
       }
       return this.register(
         name,
@@ -340,7 +341,7 @@ export namespace Supervisor {
       readonly exit: (reason: unknown, state: S) => void;
     };
     export type Function<P, R, S> = (param: P, state: S, kill: (reason?: unknown) => void) => Result<R, S> | PromiseLike<Result<R, S>>;
-    export type GeneratorFunction<P, R, S> = (state: S) => global.Generator<R, R, P>;
+    export type GeneratorFunction<P, R, S> = (state: S, kill: (reason?: unknown) => void) => global.Generator<R, R, P>;
     export type Result<R, S> = readonly [R, S] | { reply: R; state: S; };
   }
   export type Callback<R> = (reply: R, error?: Error) => void;

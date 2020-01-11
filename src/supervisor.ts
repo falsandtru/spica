@@ -35,8 +35,7 @@ abstract class Supervisor2018<N extends string, P = undefined, R = P, S = undefi
       return kill;
     }
     if (isAsyncGeneratorFunction(process)) {
-      const iter = process.call(this, state);
-      const kill: () => boolean = this.register(
+      const kill: (reason: unknown) => boolean = this.register(
         name,
         {
           init: state => (void iter.next().catch(kill), state),
@@ -47,6 +46,7 @@ abstract class Supervisor2018<N extends string, P = undefined, R = P, S = undefi
           exit: _ => undefined
         },
         state);
+      const iter = process(state, kill);
       return kill;
     }
     return super.register(name, process, state);
@@ -78,7 +78,7 @@ namespace Supervisor2018 {
     export type Regular<P, R, S> = Supervisor.Process.Regular<P, R, S>;
     export type Function<P, R, S> = Supervisor.Process.Function<P, R, S>;
     export type GeneratorFunction<P, R, S> = Supervisor.Process.GeneratorFunction<P, R, S>;
-    export type AsyncGeneratorFunction<P, R, S> = (state: S) => global.AsyncGenerator<R, R, P>;
+    export type AsyncGeneratorFunction<P, R, S> = (state: S, kill: (reason?: unknown) => void) => global.AsyncGenerator<R, R, P>;
     export type Coroutine<P, R> = CoroutineInterface<R, R, P>;
     export type Result<R, S> = Supervisor.Process.Result<R, S>;
   }
