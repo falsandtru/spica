@@ -341,7 +341,7 @@ export namespace Supervisor {
     };
     export type Function<P, R, S> = (param: P, state: S, kill: (reason?: unknown) => void) => Result<R, S> | PromiseLike<Result<R, S>>;
     export type GeneratorFunction<P, R, S> = (state: S, kill: (reason?: unknown) => void) => global.Generator<R, R, P>;
-    export type Result<R, S> = readonly [R, S] | { reply: R; state: S; };
+    export type Result<R, S> = readonly [R, S];
   }
   export type Callback<R> = (reply: R, error?: Error) => void;
   export namespace Event {
@@ -445,10 +445,7 @@ class Worker<N extends string, P, R, S> {
       assert(!this.available);
       void AtomicPromise.resolve(this.process.main(param, this.state, this.terminate)).then(resolve, reject);
     })
-      .then(result => {
-        const [reply, state] = Array.isArray(result)
-          ? result
-          : [result.reply, result.state];
+      .then(([reply, state]) => {
         if (this.alive) {
           void this.sv.schedule();
           assert(!Obj.isFrozen(this));
