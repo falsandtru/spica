@@ -443,7 +443,8 @@ class Worker<N extends string, P, R, S> {
       }
       assert(this.alive);
       assert(!this.available);
-      void AtomicPromise.resolve(this.process.main(param, this.state, this.terminate)).then(resolve, reject);
+      void AtomicPromise.resolve(this.process.main(param, this.state, this.terminate))
+        .then(resolve, reject);
     })
       .then(([reply, state]) => {
         if (this.alive) {
