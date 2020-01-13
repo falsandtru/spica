@@ -426,7 +426,7 @@ describe('Unit: lib/supervisor', function () {
       let cnt = 0;
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
       });
-      sv.register('', async n => n ? { reply: ++cnt, state: 0 } : Promise.reject(undefined), 0);
+      sv.register('', n => n ? [++cnt, 0] : Promise.reject(undefined), 0);
       assert(await sv.call('', 1) === 1);
       try {
         await sv.call('', 0);
