@@ -1,6 +1,7 @@
 import { global } from './global';
 import type { DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
+import { concat } from './concat';
 import { findIndex } from './equal';
 import { causeAsyncException } from './exception';
 
@@ -25,21 +26,21 @@ export type Monitor<N extends unknown[], D> = (data: D, namespace: N) => unknown
 export type Subscriber<N extends unknown[], D, R> = (data: D, namespace: N) => R;
 
 interface RegisterNode<N extends unknown[], D, R> {
-  parent: RegisterNode<N, D, R> | undefined;
-  children: Map<N[number], RegisterNode<N, D, R>>;
-  childrenNames: N[number][];
-  items: RegisterItem<N, D, R>[];
+  readonly parent: RegisterNode<N, D, R> | undefined;
+  readonly children: Map<N[number], RegisterNode<N, D, R>>;
+  readonly childrenNames: N[number][];
+  readonly items: RegisterItem<N, D, R>[];
 }
 export type RegisterItem<N extends unknown[], D, R> = {
-  type: RegisterItemType.Monitor;
-  namespace: [] | N;
-  listener: Monitor<N, D>;
-  options: ObserverOptions;
+  readonly type: RegisterItemType.Monitor;
+  readonly namespace: [] | N;
+  readonly listener: Monitor<N, D>;
+  readonly options: ObserverOptions;
  } | {
-  type: RegisterItemType.Subscriber;
-  namespace: N;
-  listener: Subscriber<N, D, R>;
-  options: ObserverOptions;
+  readonly type: RegisterItemType.Subscriber;
+  readonly namespace: N;
+  readonly listener: Subscriber<N, D, R>;
+  readonly options: ObserverOptions;
 };
 const enum RegisterItemType {
   Monitor = 'monitor',
@@ -122,8 +123,10 @@ export class Observation<N extends unknown[], D, R>
           void node.childrenNames.splice(findIndex(name, node.childrenNames), 1);
           void --i;
         }
-        node.items = node.items
-          .filter(({ type }) => type === RegisterItemType.Monitor);
+        void concat(
+          node.items,
+          node.items.splice(0, Infinity)
+            .filter(({ type }) => type === RegisterItemType.Monitor));
         return;
       }
       default:
@@ -197,7 +200,7 @@ export class Observation<N extends unknown[], D, R>
   private refsAbove_({ parent, items }: RegisterNode<N, D, R>): RegisterItem<N, D, R>[] {
     items = items.slice();
     while (parent) {
-      void items.push(...parent.items);
+      void concat(items, parent.items);
       parent = parent.parent;
     }
     return items;
@@ -208,7 +211,7 @@ export class Observation<N extends unknown[], D, R>
       const name = childrenNames[i];
       assert(children.has(name));
       const below = this.refsBelow_(children.get(name)!);
-      void items.push(...below);
+      void concat(items, below);
       if (below.length === 0) {
         void children.delete(name);
         void childrenNames.splice(
@@ -226,21 +229,19 @@ export class Observation<N extends unknown[], D, R>
     items: []
   };
   private seekNode_(namespace: [] | N): RegisterNode<N, D, R> {
-    let node = this.node_;
-    for (const name of namespace) {
-      const {children} = node;
+    return (namespace as unknown[]).reduce<RegisterNode<N, D, R>>((node, name) => {
+      const { children } = node;
       if (!children.has(name)) {
         void node.childrenNames.push(name);
-        children.set(name, {
+        void children.set(name, {
           parent: node,
           children: new Map(),
           childrenNames: [],
           items: []
         });
       }
-      node = children.get(name)!;
-    }
-    return node;
+      return children.get(name)!;
+    }, this.node_);
   }
 }
 
