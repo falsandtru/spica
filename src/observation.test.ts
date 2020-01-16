@@ -1,8 +1,12 @@
-import { Observation, RegisterItem, RegisterItemType } from './observation';
+import { Observation, RegisterItem } from './observation';
 import { tick } from './clock';
 
 describe('Unit: lib/observation', function () {
   describe('Observation', function () {
+    const enum RegisterItemType {
+      Monitor = 'monitor',
+      Subscriber = 'subscriber',
+    }
     class TestEvent {
       constructor(public type: string, public namespace: string[] = []) {
       }
@@ -22,17 +26,17 @@ describe('Unit: lib/observation', function () {
       ob.on([], id);
       const m1 = ob.monitor([], id);
       assert.deepStrictEqual(ob.refs([]).map(convert), [
-        [[], id, RegisterItemType.subscriber],
-        [[], id, RegisterItemType.monitor],
+        [[], id, RegisterItemType.Subscriber],
+        [[], id, RegisterItemType.Monitor],
       ]);
 
       ob.once([''], id);
       const m2 = ob.monitor([''], id);
       assert.deepStrictEqual(ob.refs([]).map(convert), [
-        [[], id, RegisterItemType.subscriber],
-        [[], id, RegisterItemType.monitor],
-        [[''], id, RegisterItemType.subscriber],
-        [[''], id, RegisterItemType.monitor],
+        [[], id, RegisterItemType.Subscriber],
+        [[], id, RegisterItemType.Monitor],
+        [[''], id, RegisterItemType.Subscriber],
+        [[''], id, RegisterItemType.Monitor],
       ]);
 
       ob.on(['0'], id);
@@ -42,20 +46,20 @@ describe('Unit: lib/observation', function () {
       ob.on([''], id);
       ob.on([], id);
       assert.deepStrictEqual(ob.refs([]).map(convert), [
-        [[], id, RegisterItemType.subscriber],
-        [[], id, RegisterItemType.monitor],
-        [[''], id, RegisterItemType.subscriber],
-        [[''], id, RegisterItemType.monitor],
-        [['0'], id, RegisterItemType.subscriber],
-        [['a'], id, RegisterItemType.subscriber],
-        [['1'], id, RegisterItemType.subscriber],
-        [['z'], id, RegisterItemType.subscriber],
+        [[], id, RegisterItemType.Subscriber],
+        [[], id, RegisterItemType.Monitor],
+        [[''], id, RegisterItemType.Subscriber],
+        [[''], id, RegisterItemType.Monitor],
+        [['0'], id, RegisterItemType.Subscriber],
+        [['a'], id, RegisterItemType.Subscriber],
+        [['1'], id, RegisterItemType.Subscriber],
+        [['z'], id, RegisterItemType.Subscriber],
       ]);
 
       ob.off([]);
       assert.deepStrictEqual(ob.refs([]).map(convert), [
-        [[], id, RegisterItemType.monitor],
-        [[''], id, RegisterItemType.monitor],
+        [[], id, RegisterItemType.Monitor],
+        [[''], id, RegisterItemType.Monitor],
       ]);
 
       m1();
@@ -64,7 +68,7 @@ describe('Unit: lib/observation', function () {
 
       ob.on([''], id);
       assert.deepStrictEqual(ob.refs([]).map(convert), [
-        [[''], id, RegisterItemType.subscriber],
+        [[''], id, RegisterItemType.Subscriber],
       ]);
       ob.off([''], id);
       assert.deepStrictEqual(ob.refs([]), []);

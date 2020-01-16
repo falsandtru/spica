@@ -41,12 +41,9 @@ export type RegisterItem<N extends unknown[], D, R> = {
   listener: Subscriber<N, D, R>;
   options: ObserverOptions;
 };
-export type RegisterItemType = RegisterItemType.Monitor | RegisterItemType.Subscriber;
-export namespace RegisterItemType {
-  export type Monitor = typeof monitor;
-  export const monitor = 'monitor';
-  export type Subscriber = typeof subscriber;
-  export const subscriber = 'subscriber';
+const enum RegisterItemType {
+  Monitor = 'monitor',
+  Subscriber = 'subscriber',
 }
 
 export interface ObservationOptions {
@@ -63,12 +60,12 @@ export class Observation<N extends unknown[], D, R>
   };
   public monitor(namespace: [] | N, listener: Monitor<N, D>, { once = false }: ObserverOptions = {}): () => void {
     if (typeof listener !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${listener}`);
-    const off = () => this.off(namespace, listener, RegisterItemType.monitor);
+    const off = () => this.off(namespace, listener, RegisterItemType.Monitor);
     const { items } = this.seekNode_(namespace);
-    if (isRegistered(items, RegisterItemType.monitor, namespace, listener)) return off;
+    if (isRegistered(items, RegisterItemType.Monitor, namespace, listener)) return off;
     if (items.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
     void items.push({
-      type: RegisterItemType.monitor,
+      type: RegisterItemType.Monitor,
       namespace,
       listener,
       options: {
@@ -81,10 +78,10 @@ export class Observation<N extends unknown[], D, R>
     if (typeof listener !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${listener}`);
     const off = () => this.off(namespace, listener);
     const { items } = this.seekNode_(namespace);
-    if (isRegistered(items, RegisterItemType.subscriber, namespace, listener)) return off;
+    if (isRegistered(items, RegisterItemType.Subscriber, namespace, listener)) return off;
     if (items.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
     void items.push({
-      type: RegisterItemType.subscriber,
+      type: RegisterItemType.Subscriber,
       namespace,
       listener,
       options: {
@@ -96,7 +93,7 @@ export class Observation<N extends unknown[], D, R>
   public once(namespace: N, listener: Subscriber<N, D, R>): () => void {
     return this.on(namespace, listener, { once: true });
   }
-  public off(namespace: [] | N, listener?: Monitor<N, D> | Subscriber<N, D, R>, type: RegisterItemType = RegisterItemType.subscriber): void {
+  public off(namespace: [] | N, listener?: Monitor<N, D> | Subscriber<N, D, R>, type: RegisterItemType = RegisterItemType.Subscriber): void {
     switch (typeof listener) {
       case 'function':
         return void this.seekNode_(namespace).items
@@ -126,7 +123,7 @@ export class Observation<N extends unknown[], D, R>
           void --i;
         }
         node.items = node.items
-          .filter(({ type }) => type === RegisterItemType.monitor);
+          .filter(({ type }) => type === RegisterItemType.Monitor);
         return;
       }
       default:
@@ -159,7 +156,7 @@ export class Observation<N extends unknown[], D, R>
   private drain_(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void {
     const results: R[] = [];
     for (const { type, listener, options: { once } } of this.refsBelow_(this.seekNode_(namespace))) {
-      if (type !== RegisterItemType.subscriber) continue;
+      if (type !== RegisterItemType.Subscriber) continue;
       if (once) {
         void this.off(namespace, listener);
       }
@@ -174,9 +171,9 @@ export class Observation<N extends unknown[], D, R>
       }
     }
     for (const { type, listener, options: { once } } of this.refsAbove_(this.seekNode_(namespace))) {
-      if (type !== RegisterItemType.monitor) continue;
+      if (type !== RegisterItemType.Monitor) continue;
       if (once) {
-        void this.off(namespace, listener, RegisterItemType.monitor);
+        void this.off(namespace, listener, RegisterItemType.Monitor);
       }
       try {
         void listener(data, namespace);
