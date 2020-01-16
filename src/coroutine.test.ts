@@ -2,8 +2,6 @@ import { Coroutine } from './coroutine';
 import { wait, never } from './clock';
 
 describe('Unit: lib/coroutine', () => {
-  if (navigator.userAgent.includes('Edge')) return;
-
   describe('Coroutine', () => {
     it('basic', async () => {
       assert(1 === await new Coroutine(async function* () {

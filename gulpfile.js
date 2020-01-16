@@ -8,7 +8,6 @@ const buffer = require('vinyl-buffer');
 const $ = require('gulp-load-plugins')();
 const browserify = require('browserify');
 const tsify = require('tsify');
-const minify = require('gulp-uglify/composer')(require('uglify-es'), console);
 const Server = require('karma').Server;
 
 const pkg = require('./package.json');
@@ -16,7 +15,7 @@ const config = {
   browsers: ['Chrome', 'Firefox'].concat((os => {
     switch (os) {
       case 'Windows_NT':
-        return ['Edge'];
+        return [];
       case 'Darwin':
         return [];
      default:
@@ -114,8 +113,7 @@ gulp.task('ts:dist', () =>
     .pipe($.unassert())
     .pipe($.header(config.banner))
     .pipe(gulp.dest(config.ts.dist.dest))
-    .pipe($.rename({ extname: '.min.js' }))
-    .pipe(minify({ output: { comments: /^!/ } }))
+    .pipe($.minify({ output: { comments: /^!/ }, ext: { min: '.min.js' } }))
     .pipe(gulp.dest(config.ts.dist.dest)));
 
 gulp.task('karma:dev', done =>
@@ -125,19 +123,18 @@ gulp.task('karma:dev', done =>
     preprocessors: {
       'dist/*.js': ['espower']
     },
-    singleRun: false
+    singleRun: false,
   }, done).start());
 
 gulp.task('karma:test', done =>
   void new Server({
     configFile: __dirname + '/karma.conf.js',
     browsers: config.browsers,
+    reporters: ['dots', 'coverage-istanbul'],
     preprocessors: {
-      'dist/*.js': ['coverage', 'espower']
+      'dist/*.js': ['espower', 'karma-coverage-istanbul-instrumenter']
     },
-    reporters: ['dots', 'coverage'],
     concurrency: 1,
-    singleRun: true
   }, done).start());
 
 gulp.task('karma:bench', done =>
@@ -145,19 +142,17 @@ gulp.task('karma:bench', done =>
     configFile: __dirname + '/karma.conf.js',
     browsers: config.browsers,
     concurrency: 1,
-    singleRun: true
   }, done).start());
 
 gulp.task('karma:ci', done =>
   void new Server({
     configFile: __dirname + '/karma.conf.js',
     browsers: config.browsers,
+    reporters: ['dots', 'coverage-istanbul', 'coveralls'],
     preprocessors: {
-      'dist/*.js': ['coverage', 'espower']
+      'dist/*.js': ['espower', 'karma-coverage-istanbul-instrumenter']
     },
-    reporters: ['dots', 'coverage', 'coveralls'],
     concurrency: 1,
-    singleRun: true
   }, done).start());
 
 gulp.task('clean', () =>
@@ -169,7 +164,7 @@ gulp.task('install', done => {
 });
 
 gulp.task('update', done => {
-  shell('ncu -ux del,karma-coverage');
+  shell('ncu -ux del');
   shell('ncu -ut typescript');
   shell('npm i --no-shrinkwrap');
   done();
@@ -212,8 +207,8 @@ gulp.task('ci',
     'clean',
     series(
       'ts:test',
-      'karma:ci',
-      'karma:ci',
+      'karma:test',
+      'karma:test',
       'karma:ci',
       'dist',
     )));

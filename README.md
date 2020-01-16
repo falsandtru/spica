@@ -48,7 +48,7 @@ $ npm i spica
 
 - Chrome
 - Firefox
-- Edge
+- Edge (Chromium edition only)
 
 ## Dependencies
 

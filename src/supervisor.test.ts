@@ -275,9 +275,7 @@ describe('Unit: lib/supervisor', function () {
       assert(sv.kill('') === false);
     });
 
-    it.skip('async generator', async function () {
-      if (navigator.userAgent.includes('Edge')) return;
-
+    it('async generator', async function () {
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
       });
       sv.register('', async function* (state) {
@@ -303,8 +301,6 @@ describe('Unit: lib/supervisor', function () {
     });
 
     it('coroutine', async function () {
-      if (navigator.userAgent.includes('Edge')) return;
-
       const sv = new class TestSupervisor extends Supervisor<string, number, number> { }({
       });
       sv.register('', new Coroutine<number, number, number>(async function* () {

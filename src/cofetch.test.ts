@@ -2,8 +2,6 @@ import { cofetch } from './cofetch';
 import { Cache } from './cache';
 
 describe('Unit: lib/cofetch', () => {
-  if (navigator.userAgent.includes('Edge')) return;
-
   describe('cofetch', () => {
     it('basic', async () => {
       const co = cofetch('');

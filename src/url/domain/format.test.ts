@@ -44,12 +44,10 @@ describe('Unit: lib/url/domain/format', () => {
     });
 
     it('percent-encoding', () => {
-      if (navigator.userAgent.includes('Edge')) return;
       assert(standardize('?a=b+c&%%3f#/?=+&%%3f#').endsWith(`?a=b%2Bc&%25%3F#/?=+&%%3f#`));
     });
 
     it('multiple-encoding', () => {
-      if (navigator.userAgent.includes('Edge')) return;
       assert(standardize(standardize('/%%3f%3d') as string).endsWith('/%25%3F%3D'));
     });
 
