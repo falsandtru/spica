@@ -44,7 +44,7 @@ import tails from './sequence/member/instance/tails';
 import segs from './sequence/member/instance/segs';
 import subsequences from './sequence/member/instance/subsequences';
 import permutations from './sequence/member/instance/permutations';
-import { compose } from '../compose';
+import { compose } from '../helper/compose';
 
 void compose(
   Sequence,

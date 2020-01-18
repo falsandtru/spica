@@ -1,6 +1,6 @@
 import { compose } from './compose';
 
-describe('Unit: lib/compose', () => {
+describe('Unit: lib/helper/compose', () => {
   describe('compose', () => {
     it('1', () => {
       class A {
