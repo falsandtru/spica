@@ -12,11 +12,6 @@ import { causeAsyncException } from './exception';
 
 const { Object: Obj, Set, Map, WeakSet, Error, setTimeout } = global;
 
-declare const Array: {
-  isArray(arg: any[]): arg is any[];
-  isArray(arg: any): arg is readonly any[];
-} & ArrayConstructor;
-
 export interface SupervisorOptions {
   readonly name?: string;
   readonly size?: number;
