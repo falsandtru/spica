@@ -7,7 +7,6 @@ import type { DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
 import { tick } from './clock';
 import { sqid } from './sqid';
-import { noop } from './noop';
 import { causeAsyncException } from './exception';
 
 const { Object: Obj, Set, Map, WeakSet, Error, setTimeout } = global;
@@ -203,13 +202,12 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
   public call(name: N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), param: P, timeout?: number): AtomicPromise<R>;
   public call(name: N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), param: P, callback: Supervisor.Callback<R>, timeout?: number): void;
   public call(name: N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), param: P, callback: Supervisor.Callback<R> | number = this.settings.timeout, timeout = this.settings.timeout): AtomicPromise<R> | void {
-    return this.call_(typeof name === 'string' ? name : new NamePool(this.workers, name), param, callback, timeout);
-  }
-  private call_(name: N | NamePool<N>, param: P, callback: Supervisor.Callback<R> | number, timeout: number): AtomicPromise<R> | void {
-    if (typeof callback === 'number') return new AtomicPromise<R>((resolve, reject) =>
-      void this.call_(name, param, (result, err) => err ? reject(err) : resolve(result), callback));
+    if (typeof callback !== 'function') return new AtomicPromise<R>((resolve, reject) =>
+      void this.call(name, param, (result, err) => err ? reject(err) : resolve(result), callback));
     void this.messages.push([
-      name,
+      typeof name === 'string'
+        ? name
+        : new NamePool(this.workers, name),
       param,
       callback,
       Date.now() + timeout,
@@ -218,7 +216,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       const [name, param, callback] = this.messages.shift()!;
       const names = typeof name === 'string'
         ? [name]
-        : [name[Symbol.iterator]().next().value as N];
+        : [name[Symbol.iterator]().next().value!];
       void this.events_.loss.emit([names[0]], [names[0], param]);
       try {
         void callback(undefined as any, new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A message overflowed.`));
@@ -236,16 +234,10 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     , timeout + 3);
   }
   public cast(name: N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), param: P, timeout = this.settings.timeout): boolean {
-    const result = this.cast_(typeof name === 'string' ? name : new NamePool(this.workers, name), param, timeout);
-    if (result === undefined) return false;
-    void result.catch(noop);
-    return true;
-  }
-  private cast_(name: N | NamePool<N>, param: P, timeout: number): AtomicPromise<R> | undefined {
     void this.throwErrorIfNotAvailable();
     const names = typeof name === 'string'
       ? [name]
-      : name;
+      : new NamePool(this.workers, name);
     let result: AtomicPromise<R> | undefined;
     for (const name of names) {
       result = this.workers.has(name)
@@ -256,8 +248,9 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     if (result === undefined) {
       const name = names[Symbol.iterator]().next().value;
       void this.events_.loss.emit([name], [name, param]);
+      return false;
     }
-    return result;
+    return true;
   }
   public refs(name?: N): [N, Supervisor.Process.Regular<P, R, S>, S, (reason?: unknown) => boolean][] {
     assert(this.available || this.workers.size === 0);
