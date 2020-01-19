@@ -89,6 +89,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     super(resolve => res = resolve);
     var res!: (v: T | AtomicPromise<T>) => void;
     this[internal] = new Internal(opts);
+    this[port] = new Port(this, this[internal]);
     void res(this[internal].result);
     this[Coroutine.init] = async () => {
       let reply: Reply<R, T> = noop;
@@ -215,31 +216,32 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     }
     return this.then(() => undefined);
   }
-  public readonly [port]: Structural<Port<T, R, S>> = new Port(this);
+  public readonly [port]: Structural<Port<T, R, S>>;
 }
 
 class Port<T, R, S> {
   constructor(
     private co: Coroutine<T, R, S>,
+    private internal: Internal<T, R, S>,
   ) {
   }
   public recv(): AtomicPromise<IteratorResult<R, T>> {
-    return this.co[internal].state
+    return this.internal.state
       .then(({ value, done }) =>
         done
           ? this.co.then(value => ({ value, done }))
           : { value: value!, done });
   }
   public send(msg: S | PromiseLike<S>): AtomicPromise<IteratorResult<R, T>> {
-    if (!this.co[internal].alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
+    if (!this.internal.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
     const res = new AtomicFuture<IteratorResult<R, T>>();
     // Don't block.
-    void this.co[internal].msgs.push([msg, res.bind]);
-    void this.co[internal].resume.bind();
-    this.co[internal].resume = new AtomicFuture();
-    while (this.co[internal].msgs.length > this.co[internal].settings.size) {
+    void this.internal.msgs.push([msg, res.bind]);
+    void this.internal.resume.bind();
+    this.internal.resume = new AtomicFuture();
+    while (this.internal.msgs.length > this.internal.settings.size) {
       // Don't block.
-      const [, reply] = this.co[internal].msgs.shift()!;
+      const [, reply] = this.internal.msgs.shift()!;
       void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`)));
     }
     return res.then();
