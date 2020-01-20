@@ -3,6 +3,7 @@ import { Coroutine } from '..';
 
 describe('Benchmark:', function () {
   this.timeout(30 * 1e3);
+  afterEach(done => setTimeout(done, 5 * 1e3));
 
   describe('Coroutine', function () {
     it('new', function (done) {
@@ -14,6 +15,7 @@ describe('Benchmark:', function () {
     });
 
     it('iterate', function (done) {
+      this.timeout(90 * 1e3);
       const iter = new Coroutine(function* () {
         while (true) {
           yield;
@@ -23,6 +25,7 @@ describe('Benchmark:', function () {
     });
 
     it('iterate async', function (done) {
+      this.timeout(90 * 1e3);
       const iter = new Coroutine(async function* () {
         while (true) {
           yield;

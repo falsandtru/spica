@@ -141,6 +141,8 @@ gulp.task('karma:bench', done =>
   void new Server({
     configFile: __dirname + '/karma.conf.js',
     browsers: config.browsers,
+    browserDisconnectTimeout: 90 * 1e3,
+    browserNoActivityTimeout: 90 * 1e3,
     concurrency: 1,
   }, done).start());
 
