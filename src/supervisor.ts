@@ -303,11 +303,15 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
   private scheduled = false;
   private schedule(): void {
     if (!this.available || this.scheduled || this.messages.length === 0) return;
-    void tick(() =>
-      void this.settings.scheduler.call(undefined, () => {
-        this.scheduled = false;
-        void this.deliver();
-      }));
+    const p = new AtomicFuture(false);
+    void p.finally(() => {
+      this.scheduled = false;
+      void this.deliver();
+    });
+    void tick(() => {
+      void this.settings.scheduler.call(undefined, p.bind);
+      this.settings.scheduler === requestAnimationFrame && void setTimeout(p.bind, 1000);
+    });
     this.scheduled = true;
   }
   private readonly messages: [N | NamePool<N>, P, Supervisor.Callback<R>, number][] = [];
