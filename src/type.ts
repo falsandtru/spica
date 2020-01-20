@@ -244,9 +244,8 @@ export function type(value: unknown): string {
 }
 
 export function isPrimitive(value: unknown): value is undefined | null | boolean | number | bigint | string | symbol {
-  switch (type(value)) {
+  switch (typeof value) {
     case 'undefined':
-    case 'null':
     case 'boolean':
     case 'number':
     case 'bigint':
@@ -254,6 +253,6 @@ export function isPrimitive(value: unknown): value is undefined | null | boolean
     case 'symbol':
       return true;
     default:
-      return false;
+      return value === null;
   }
 }
