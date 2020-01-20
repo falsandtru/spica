@@ -2,7 +2,7 @@ import { benchmark } from './benchmark';
 import { AtomicPromise } from '../';
 
 describe('Benchmark:', function () {
-  this.timeout(10 * 1e3);
+  this.timeout(20 * 1e3);
 
   describe('AtomicPromise', function () {
     it('new', function (done) {
