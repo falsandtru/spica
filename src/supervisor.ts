@@ -179,10 +179,11 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     if (this.workers.has(name)) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: Cannot register a process multiply with the same name.`);
     void this.schedule();
     const worker: Worker<N, P, R, S> = new Worker(
-      this,
       name,
       process,
       state,
+      this,
+      () => void this.schedule(),
       this.constructor.standalone.has(process),
       this.events_,
       () =>
@@ -227,11 +228,11 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     }
     void this.throwErrorIfNotAvailable();
     void this.schedule();
-    if (timeout <= 0) return;
-    if (timeout === Infinity) return;
-    void setTimeout(() =>
-      void this.schedule()
-    , timeout + 3);
+    if (timeout > 0 && timeout !== Infinity) {
+      void setTimeout(() =>
+        void this.schedule()
+      , timeout + 3);
+    }
   }
   public cast(name: N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), param: P, timeout = this.settings.timeout): boolean {
     void this.throwErrorIfNotAvailable();
@@ -299,19 +300,20 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     send: () => { throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot use coroutine port.`); },
     connect: () => { throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot use coroutine port.`); },
   } as const;
-  public schedule(): void {
-    if (this.scheduled) return;
-    if (this.messages.length === 0) return;
-    assert(this.available);
-    void tick(this.scheduler);
+  private scheduled = false;
+  private schedule(): void {
+    if (!this.available || this.scheduled || this.messages.length === 0) return;
+    void tick(() =>
+      void this.settings.scheduler.call(undefined, () => {
+        this.scheduled = false;
+        void this.deliver();
+      }));
     this.scheduled = true;
   }
-  private scheduled = false;
-  private readonly scheduler = () => void (void 0, this.settings.scheduler)(this.deliver);
   private readonly messages: [N | NamePool<N>, P, Supervisor.Callback<R>, number][] = [];
-  private readonly deliver = (): void => {
+  private deliver(): void {
     if (!this.available) return;
-    this.scheduled = false;
+    assert(!this.scheduled);
     const since = Date.now();
     for (let i = 0, len = this.messages.length; this.available && i < len; ++i) {
       if (this.settings.resource - (Date.now() - since) <= 0) return void this.schedule();
@@ -405,10 +407,11 @@ class NamePool<N extends string> implements Iterable<N> {
 
 class Worker<N extends string, P, R, S> {
   constructor(
-    private readonly sv: Supervisor<N, P, R, S>,
     public readonly name: N,
     public readonly process: Supervisor.Process.Regular<P, R, S>,
     public state: S,
+    private readonly sv: Supervisor<N, P, R, S>,
+    private readonly schedule: () => void,
     initiated: boolean,
     private readonly events: {
       readonly init: Publisher<[N], Supervisor.Event.Data.Init<N, P, R, S>, unknown>;
@@ -478,7 +481,7 @@ class Worker<N extends string, P, R, S> {
     })
       .then(([reply, state]) => {
         if (this.alive) {
-          void this.sv.schedule();
+          void this.schedule();
           assert(!Obj.isFrozen(this));
           this.state = state;
           this.available = true;
@@ -486,7 +489,7 @@ class Worker<N extends string, P, R, S> {
         return reply;
       })
       .catch(reason => {
-        void this.sv.schedule();
+        void this.schedule();
         void this.terminate(reason);
         throw reason;
       });
