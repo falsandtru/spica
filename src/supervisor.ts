@@ -127,10 +127,10 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       const proc: Supervisor.Process.Regular<P, R, S> = {
         init: state => state,
         main: (param, state, kill) =>
-          (process[Coroutine.port] as Coroutine<R, R, P>[typeof Coroutine.port]).send(param)
+          (process[process.constructor.port] as Coroutine<R, R, P>[typeof Coroutine.port]).send(param)
             .then(({ value: reply, done }) =>
               done && void kill() || [reply, state]),
-        exit: reason => void process[Coroutine.terminate](reason),
+        exit: reason => void process[process.constructor.terminate](reason),
       };
       void this.constructor.standalone.add(proc);
       const kill = this.register(name, proc, state);
