@@ -11,7 +11,7 @@ export function benchmark(name: string, proc: () => unknown, done: (err?: unknow
       proc();
     })
     .on('cycle', function (event: Event) {
-      console.debug(String(event.target));
+      console.log(String(event.target));
     })
     .on('complete', function () {
       done();
