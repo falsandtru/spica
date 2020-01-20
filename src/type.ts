@@ -243,6 +243,29 @@ export function type(value: unknown): string {
   }
 }
 
+export function isType(value: unknown, type: 'undefined'): value is undefined;
+export function isType(value: unknown, type: 'null'): value is null;
+export function isType(value: unknown, type: 'boolean'): value is boolean;
+export function isType(value: unknown, type: 'number'): value is number;
+export function isType(value: unknown, type: 'bigint'): value is bigint;
+export function isType(value: unknown, type: 'string'): value is string;
+export function isType(value: unknown, type: 'symbol'): value is symbol;
+export function isType(value: unknown, type: 'function'): value is Function;
+export function isType(value: unknown, type: 'object'): value is object;
+export function isType(value: unknown[], type: 'Array'): value is unknown[];
+export function isType(value: unknown, type: 'Array'): value is readonly unknown[];
+export function isType(value: unknown, name: string): boolean {
+  switch (name) {
+    case 'function':
+      return typeof value === 'function';
+    case 'object':
+      return value !== null
+          && typeof value === 'object';
+    default:
+      return type(value) === name;
+  }
+}
+
 export function isPrimitive(value: unknown): value is undefined | null | boolean | number | bigint | string | symbol {
   switch (typeof value) {
     case 'undefined':

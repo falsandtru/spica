@@ -7,7 +7,7 @@ import {
   OverwriteStruct,
   ExtractProp, DeepExtractProp, ExcludeProp, DeepExcludeProp, RewriteProp, DeepRewriteProp,
   Partial, DeepPartial, Required, DeepRequired, Immutable, DeepImmutable, Mutable, DeepMutable,
-  type
+  type, isType,
 } from './type';
 
 describe('Unit: lib/type', () => {
@@ -634,6 +634,17 @@ describe('Unit: lib/type', () => {
       assert(type(() => 0) === 'Function');
       assert(type(new Boolean()) === 'Boolean');
       assert(type(new WeakMap()) === 'WeakMap');
+    });
+
+  });
+
+  describe('isType', () => {
+    it('', () => {
+      assert(isType(undefined, 'undefined'));
+      assert(isType(null, 'null'));
+      assert(isType(() => 0, 'function'));
+      assert(isType({}, 'object'));
+      assert(isType([], 'Array'));
     });
 
   });
