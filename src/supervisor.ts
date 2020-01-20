@@ -245,11 +245,9 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     }
     name = name as N;
     assert(name !== undefined);
-    if (result === undefined) {
-      void this.events_.loss.emit([name], [name, param]);
-      return false;
-    }
-    return true;
+    if (result) return true;
+    void this.events_.loss.emit([name], [name, param]);
+    return false;
   }
   public refs(name?: N): [N, Supervisor.Process.Regular<P, R, S>, S, (reason?: unknown) => boolean][] {
     assert(this.available || this.workers.size === 0);
@@ -498,5 +496,5 @@ class Worker<N extends string, P, R, S> {
     if (!this.alive) return false;
     void this.destructor(reason);
     return true;
-  }
+  };
 }
