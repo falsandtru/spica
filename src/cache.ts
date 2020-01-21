@@ -1,5 +1,6 @@
 import { global } from './global';
 import { extend } from './assign';
+import { concat } from './concat';
 import { findIndex } from './equal';
 import type { DeepImmutable, DeepRequired } from './type';
 
@@ -41,7 +42,8 @@ export class Cache<K, V = undefined> {
       LFU,
     };
     this.store = new Map(entries);
-    for (const k of [...stats[1], ...stats[0]].slice(LFU.length + LRU.length)) {
+    if (!opts.data) return;
+    for (const k of concat(stats[1].slice(LFU.length), stats[0].slice(LRU.length))) {
       void this.store.delete(k);
     }
     if (this.store.size !== LFU.length + LRU.length) throw new Error(`Spica: Cache: Size of stats and entries is not matched.`);
