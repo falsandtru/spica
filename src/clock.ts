@@ -21,12 +21,12 @@ export const never: AtomicPromise<never> = new class Never extends AtomicPromise
     super(() => undefined);
   }
   public then() {
-    return super.then();
+    return this;
   }
   public catch() {
-    return super.then();
+    return this;
   }
   public finally() {
-    return super.then();
+    return this;
   }
 }();
