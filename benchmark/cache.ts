@@ -7,6 +7,10 @@ describe('Benchmark:', function () {
   const size = 1000;
 
   describe('Cache', function () {
+    it('new', function (done) {
+      benchmark('Cache new', () => new Cache(size), done);
+    });
+
     it('put', function (done) {
       const cache = new Cache<number, number>(size);
       let i = 0;

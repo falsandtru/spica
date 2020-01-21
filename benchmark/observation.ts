@@ -9,6 +9,10 @@ describe('Benchmark:', function () {
   }
 
   describe('Observation', function () {
+    it('new', function (done) {
+      benchmark('Observation new', () => new Observation(), done);
+    });
+
     it('monitor', function (done) {
       const subject = new Observation();
       subject.monitor([], () => 0);
