@@ -164,10 +164,8 @@ export class Observation<N extends unknown[], D, R>
         void this.off(namespace, listener);
       }
       try {
-        const result: R = listener(data, namespace) as R;
-        if (tracker) {
-          results[results.length] = result;
-        }
+        const result = listener(data, namespace) as R;
+        tracker && void results.push(result);
       }
       catch (reason) {
         void causeAsyncException(reason);
