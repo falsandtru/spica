@@ -4,6 +4,10 @@ import { wait, never } from './clock';
 describe('Unit: lib/coroutine', () => {
   describe('Coroutine', () => {
     it('basic', async () => {
+      assert(1 === await new Coroutine(function* () {
+        yield;
+        return Promise.resolve(1);
+      }));
       assert(1 === await new Coroutine(async function* () {
         yield;
         yield Promise.resolve();

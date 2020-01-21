@@ -83,7 +83,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     return AtomicPromise;
   }
   constructor(
-    gen: (this: Coroutine<T, R, S>) => Generator<R, T, S> | AsyncGenerator<R, T, S>,
+    gen: (this: Coroutine<T, R, S>) => Generator<R, T | PromiseLike<T>, S> | AsyncGenerator<R, T, S>,
     opts: CoroutineOptions = {},
   ) {
     super(resolve => res = resolve);
