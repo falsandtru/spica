@@ -17,6 +17,12 @@ describe('Benchmark:', function () {
       benchmark('Supervisor cast', () => sv.cast('', 0), done);
     });
 
+    it('call', function (done) {
+      const sv = new class extends Supervisor<string, number> { }();
+      sv.register('', n => [n, undefined], undefined);
+      benchmark('Supervisor call', done => sv.call('', 0, done), done, { defer: true });
+    });
+
   });
 
 });
