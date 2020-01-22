@@ -3,16 +3,20 @@ import { concat } from './concat';
 const enum State {
   pending,
   resolved,
+  fulfilled,
   rejected,
 }
 type Status<T> =
-  | { readonly state: State.pending; }
+  | { readonly state: State.pending;
+    }
   | { readonly state: State.resolved;
-      readonly result: { readonly value: T; readonly promise: false; }
-                     | { readonly value: PromiseLike<T>; readonly promise: true; }
+      readonly result: PromiseLike<T>; 
+    }
+  | { readonly state: State.fulfilled;
+      readonly result: T; 
     }
   | { readonly state: State.rejected;
-      readonly result: { readonly value: unknown; };
+      readonly result: unknown; 
     };
 
 class Internal<T> {
@@ -63,58 +67,64 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
     try {
       void executor(
         value => {
-          if (this[internal].status.state === State.pending) {
-            this[internal].status = {
-              state: State.resolved,
-              result: isPromiseLike(value)
-                ? { value, promise: true }
-                : { value: value!, promise: false },
-            };
-          }
+          if (this[internal].status.state !== State.pending) return;
+          this[internal].status = isPromiseLike(value)
+            ? {
+                state: State.resolved,
+                result: value,
+              }
+            : {
+                state: State.fulfilled,
+                result: value!,
+              };
           void resume(this[internal]);
         },
         reason => {
-          if (this[internal].status.state === State.pending) {
-            this[internal].status = {
-              state: State.rejected,
-              result: { value: reason },
-            };
-          }
+          if (this[internal].status.state !== State.pending) return;
+          this[internal].status = {
+            state: State.rejected,
+            result: reason,
+          };
           void resume(this[internal]);
         });
     }
     catch (reason) {
-      if (this[internal].status.state === State.pending) {
-        this[internal].status = {
-          state: State.rejected,
-          result: { value: reason },
-        };
-      }
+      if (this[internal].status.state !== State.pending) return;
+      this[internal].status = {
+        state: State.rejected,
+        result: reason,
+      };
       void resume(this[internal]);
     }
   }
   public readonly [internal]: Internal<T> = new Internal();
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
     return new AtomicPromise((resolve, reject) => {
-      const { fulfillReactions, rejectReactions } = this[internal];
-      void fulfillReactions.push(value => {
-        if (!onfulfilled) return void resolve(value as any);
-        try {
-          void resolve(onfulfilled(value));
-        }
-        catch (reason) {
-          void reject(reason);
-        }
-      });
-      void rejectReactions.push(reason => {
-        if (!onrejected) return void reject(reason);
-        try {
-          void resolve(onrejected(reason));
-        }
-        catch (reason) {
-          void reject(reason);
-        }
-      });
+      const { fulfillReactions, rejectReactions, status } = this[internal];
+      if (status.state !== State.rejected) {
+        void fulfillReactions.push(value => {
+          if (!onfulfilled) return void resolve(value as any);
+          try {
+            void resolve(onfulfilled(value));
+          }
+          catch (reason) {
+            void reject(reason);
+          }
+        });
+      }
+      if (status.state !== State.fulfilled) {
+        void rejectReactions.push(reason => {
+          if (!onrejected) return void reject(reason);
+          try {
+            void resolve(onrejected(reason));
+          }
+          catch (reason) {
+            void reject(reason);
+          }
+        });
+      }
+      assert(status.state === State.fulfilled ? rejectReactions.length === 0 : true);
+      assert(status.state === State.rejected ? fulfillReactions.length === 0 : true);
       void resume(this[internal]);
     });
   }
@@ -128,20 +138,44 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
 
 function resume<T>(internal: Internal<T>): void {
   const { status, fulfillReactions, rejectReactions } = internal;
-  internal.isHandled = true;
   switch (status.state) {
     case State.pending:
       return;
-    case State.resolved:
-      return status.result.promise
-        ? void status.result.value.then(
-            value =>
-              void consume(fulfillReactions, value),
-            reason =>
-              void consume(rejectReactions, reason))
-        : void consume(fulfillReactions, status.result.value);
+    case State.fulfilled:
+      if (rejectReactions.length > 0) {
+        rejectReactions.length = 0;
+      }
+      internal.isHandled = internal.isHandled || fulfillReactions.length > 0;
+      void consume(fulfillReactions, status.result);
+      assert(fulfillReactions.length === 0);
+      assert(rejectReactions.length === 0);
+      return;
     case State.rejected:
-      return void consume(rejectReactions, status.result.value);
+      if (fulfillReactions.length > 0) {
+        fulfillReactions.length = 0;
+      }
+      internal.isHandled = internal.isHandled || rejectReactions.length > 0;
+      void consume(rejectReactions, status.result);
+      assert(rejectReactions.length === 0);
+      assert(fulfillReactions.length === 0);
+      return;
+    case State.resolved:
+      void status.result.then(
+        value => {
+          internal.status = {
+            state: State.fulfilled,
+            result: value,
+          };
+          void resume(internal);
+        },
+        reason => {
+          internal.status = {
+            state: State.rejected,
+            result: reason,
+          };
+          void resume(internal);
+        });
+      return;
   }
 }
 
