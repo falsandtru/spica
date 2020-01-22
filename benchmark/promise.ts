@@ -19,17 +19,17 @@ describe('Benchmark:', function () {
       }
     }
     it('then 1', function (done) {
-      const promise = new AtomicPromise<number>(resolve => resolve(0));
+      const promise = AtomicPromise.resolve(0);
       benchmark(`AtomicPromise then 1`, () => chain(promise, 1), done);
     });
 
     it('then 10', function (done) {
-      const promise = new AtomicPromise<number>(resolve => resolve(0));
+      const promise = AtomicPromise.resolve(0);
       benchmark(`AtomicPromise then 10`, () => chain(promise, 10), done);
     });
 
     it('then 100', function (done) {
-      const promise = new AtomicPromise<number>(resolve => resolve(0));
+      const promise = AtomicPromise.resolve(0);
       benchmark(`AtomicPromise then 100`, () => chain(promise, 100), done);
     });
 
