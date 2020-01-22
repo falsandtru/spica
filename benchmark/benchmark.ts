@@ -1,9 +1,4 @@
-import * as IBenchmark from 'benchmark';
-declare const Benchmark: typeof IBenchmark;
-
-interface Event {
-  target: void;
-}
+import * as Benchmark from 'benchmark';
 
 export function benchmark(name: string, proc: () => unknown, done: (err?: unknown) => void) {
   new Benchmark.Suite()
