@@ -64,57 +64,60 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
     return new AtomicPromise<T>((_, reject) => void reject(reason));
   }
   constructor(executor: (resolve: (value?: T | PromiseLike<T>) => void, reject: (reason?: unknown) => void) => void) {
+    const intl: typeof internal = internal;
     try {
+      const internal = this[intl];
       void executor(
         value => {
-          if (this[internal].status.state !== State.pending) return;
+          if (internal.status.state !== State.pending) return;
           if (isPromiseLike(value)) {
-            this[internal].status = {
+            internal.status = {
               state: State.resolved,
               result: value,
             };
             void value.then(
               value => {
-                assert(this[internal].status.state === State.resolved);
-                this[internal].status = {
+                assert(internal.status.state === State.resolved);
+                internal.status = {
                   state: State.fulfilled,
                   result: value,
                 };
-                void resume(this[internal]);
+                void resume(internal);
               },
               reason => {
-                assert(this[internal].status.state === State.resolved);
-                this[internal].status = {
+                assert(internal.status.state === State.resolved);
+                internal.status = {
                   state: State.rejected,
                   result: reason,
                 };
-                void resume(this[internal]);
+                void resume(internal);
               });
           }
           else {
-            this[internal].status = {
+            internal.status = {
               state: State.fulfilled,
               result: value!,
             };
-            void resume(this[internal]);
+            void resume(internal);
           }
         },
         reason => {
-          if (this[internal].status.state !== State.pending) return;
-          this[internal].status = {
+          if (internal.status.state !== State.pending) return;
+          internal.status = {
             state: State.rejected,
             result: reason,
           };
-          void resume(this[internal]);
+          void resume(internal);
         });
     }
     catch (reason) {
-      if (this[internal].status.state !== State.pending) return;
-      this[internal].status = {
+      const internal = this[intl];
+      if (internal.status.state !== State.pending) return;
+      internal.status = {
         state: State.rejected,
         result: reason,
       };
-      void resume(this[internal]);
+      void resume(internal);
     }
   }
   public readonly [internal]: Internal<T> = new Internal();
