@@ -68,16 +68,36 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
       void executor(
         value => {
           if (this[internal].status.state !== State.pending) return;
-          this[internal].status = isPromiseLike(value)
-            ? {
-                state: State.resolved,
-                result: value,
-              }
-            : {
-                state: State.fulfilled,
-                result: value!,
-              };
-          void resume(this[internal]);
+          if (isPromiseLike(value)) {
+            this[internal].status = {
+              state: State.resolved,
+              result: value,
+            };
+            void value.then(
+              value => {
+                assert(this[internal].status.state === State.resolved);
+                this[internal].status = {
+                  state: State.fulfilled,
+                  result: value,
+                };
+                void resume(this[internal]);
+              },
+              reason => {
+                assert(this[internal].status.state === State.resolved);
+                this[internal].status = {
+                  state: State.rejected,
+                  result: reason,
+                };
+                void resume(this[internal]);
+              });
+          }
+          else {
+            this[internal].status = {
+              state: State.fulfilled,
+              result: value!,
+            };
+            void resume(this[internal]);
+          }
         },
         reason => {
           if (this[internal].status.state !== State.pending) return;
@@ -140,6 +160,7 @@ function resume<T>(internal: Internal<T>): void {
   const { status, fulfillReactions, rejectReactions } = internal;
   switch (status.state) {
     case State.pending:
+    case State.resolved:
       return;
     case State.fulfilled:
       if (rejectReactions.length > 0) {
@@ -158,23 +179,6 @@ function resume<T>(internal: Internal<T>): void {
       void consume(rejectReactions, status.result);
       assert(rejectReactions.length === 0);
       assert(fulfillReactions.length === 0);
-      return;
-    case State.resolved:
-      void status.result.then(
-        value => {
-          internal.status = {
-            state: State.fulfilled,
-            result: value,
-          };
-          void resume(internal);
-        },
-        reason => {
-          internal.status = {
-            state: State.rejected,
-            result: reason,
-          };
-          void resume(internal);
-        });
       return;
   }
 }
