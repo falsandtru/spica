@@ -159,6 +159,11 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
   }
 }
 
+export function isPromiseLike(value: any): value is PromiseLike<unknown> {
+  return value !== null && typeof value === 'object'
+      && 'then' in value && typeof value.then === 'function';
+}
+
 function resume<T>(internal: Internal<T>): void {
   const { status, fulfillReactions, rejectReactions } = internal;
   switch (status.state) {
@@ -190,9 +195,4 @@ function consume<a>(fs: ((a: a) => void)[], a: a): void {
   while (fs.length > 0) {
     void fs.shift()!(a);
   }
-}
-
-export function isPromiseLike(value: any): value is PromiseLike<unknown> {
-  return value !== null && typeof value === 'object'
-      && 'then' in value && typeof value.then === 'function';
 }
