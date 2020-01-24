@@ -12,13 +12,13 @@ type Status<T> =
   | { readonly state: State.pending;
     }
   | { readonly state: State.resolved;
-      readonly result: PromiseLike<T>; 
+      readonly result: PromiseLike<T>;
     }
   | { readonly state: State.fulfilled;
-      readonly result: T; 
+      readonly result: T;
     }
   | { readonly state: State.rejected;
-      readonly result: unknown; 
+      readonly result: unknown;
     };
 
 class Internal<T> {
