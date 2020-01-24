@@ -14,6 +14,7 @@ describe('Unit: lib/type', () => {
   describe('IsNever', () => {
     it('', () => {
       assert((): true => true as TEq<IsNever<never>, true>);
+      assert((): true => true as TEq<IsNever<void>, false>);
       assert((): true => true as TEq<IsNever<any>, false>);
       assert((): true => true as TEq<IsNever<unknown>, false>);
       assert((): true => true as TEq<IsNever<{}>, false>);
@@ -23,9 +24,10 @@ describe('Unit: lib/type', () => {
 
   describe('IsAny', () => {
     it('', () => {
+      assert((): true => true as TEq<IsAny<never>, false>);
+      assert((): true => true as TEq<IsAny<void>, false>);
       assert((): true => true as TEq<IsAny<any>, true>);
       assert((): true => true as TEq<IsAny<unknown>, false>);
-      assert((): true => true as TEq<IsAny<never>, false>);
       assert((): true => true as TEq<IsAny<{}>, false>);
     });
 
@@ -33,11 +35,11 @@ describe('Unit: lib/type', () => {
 
   describe('IsUnknown', () => {
     it('', () => {
-      assert((): true => true as TEq<IsUnknown<unknown>, true>);
-      assert((): true => true as TEq<IsUnknown<any>, false>);
       assert((): true => true as TEq<IsUnknown<never>, false>);
-      assert((): true => true as TEq<IsUnknown<{}>, false>);
       assert((): true => true as TEq<IsUnknown<void>, false>);
+      assert((): true => true as TEq<IsUnknown<any>, false>);
+      assert((): true => true as TEq<IsUnknown<unknown>, true>);
+      assert((): true => true as TEq<IsUnknown<{}>, false>);
       assert((): true => true as TEq<IsUnknown<undefined>, false>);
       assert((): true => true as TEq<IsUnknown<null>, false>);
       assert((): true => true as TEq<IsUnknown<0>, false>);
