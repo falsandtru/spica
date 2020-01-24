@@ -14,7 +14,7 @@ describe('Benchmark:', function () {
       benchmark('Coroutine new async', () => new Coroutine(async function* () { }, { size: 1 }), done);
     });
 
-    it('iterate', function (done) {
+    it.skip('iterate', function (done) {
       this.timeout(90 * 1e3);
       const iter = new Coroutine(function* () {
         while (true) {
@@ -24,7 +24,7 @@ describe('Benchmark:', function () {
       benchmark('Coroutine iterate', () => void iter.next(), done);
     });
 
-    it('iterate async', function (done) {
+    it.skip('iterate async', function (done) {
       this.timeout(90 * 1e3);
       const iter = new Coroutine(async function* () {
         while (true) {
