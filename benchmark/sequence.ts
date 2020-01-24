@@ -48,7 +48,7 @@ describe('Benchmark:', function () {
       take(100).then(() => done());
     });
 
-    it('take 1000', function (done) {
+    it.skip('take 1000', function (done) {
       take(1000).then(() => done());
     });
 
@@ -92,7 +92,7 @@ describe('Benchmark:', function () {
       mapfilter(100).then(() => done());
     });
 
-    it('map filter 1000', function (done) {
+    it.skip('map filter 1000', function (done) {
       mapfilter(1000).then(() => done());
     });
 
