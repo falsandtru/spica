@@ -1,5 +1,7 @@
 import {
-  IsNever, IsVoid, IsAny, IsUnknown, Not, And, Or, Eq, TEq, DEq, If, Case,
+  Not, And, Or,
+  IsNever, IsVoid, IsAny, IsUnknown,
+  Eq, TEq, DEq, If, Case,
   Prepend, Append, Split, Head, Tail, Init, Last, Inits, Tails, Concat, Reverse, Member, Index, AtLeast,
   Rewrite, ExactRewrite, ExactExtract, ExactExclude,
   valueof, indexof,
@@ -11,6 +13,42 @@ import {
 } from './type';
 
 describe('Unit: lib/type', () => {
+  describe('Not', () => {
+    it('', () => {
+      assert((): true => true as TEq<Not<true>, false>);
+      assert((): true => true as TEq<Not<false>, true>);
+    });
+
+  });
+
+  describe('And', () => {
+    it('', () => {
+      assert((): true => true as TEq<And<true, true>, true>);
+      assert((): true => true as TEq<And<true, false>, false>);
+      assert((): true => true as TEq<And<false, true>, false>);
+      assert((): true => true as TEq<And<false, false>, false>);
+      assert((): true => true as TEq<And<true, undefined>, undefined>);
+      assert((): true => true as TEq<And<false, undefined>, false>);
+      assert((): true => true as TEq<And<undefined, true>, undefined>);
+      assert((): true => true as TEq<And<undefined, false>, undefined>);
+      assert((): true => true as TEq<And<0, 1>, 0>);
+      assert((): true => true as TEq<And<'', 1>, ''>);
+      assert((): true => true as TEq<And<null, 1>, null>);
+      assert((): true => true as TEq<And<void, 1>, void>);
+    });
+
+  });
+
+  describe('Or', () => {
+    it('', () => {
+      assert((): true => true as TEq<Or<true, true>, true>);
+      assert((): true => true as TEq<Or<true, false>, true>);
+      assert((): true => true as TEq<Or<false, true>, true>);
+      assert((): true => true as TEq<Or<false, false>, false>);
+    });
+
+  });
+
   describe('IsNever', () => {
     it('', () => {
       assert((): true => true as TEq<IsNever<never>, true>);
@@ -59,42 +97,6 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<IsUnknown<null>, false>);
       assert((): true => true as TEq<IsUnknown<0>, false>);
       assert((): true => true as TEq<IsUnknown<object>, false>);
-    });
-
-  });
-
-  describe('Not', () => {
-    it('', () => {
-      assert((): true => true as TEq<Not<true>, false>);
-      assert((): true => true as TEq<Not<false>, true>);
-    });
-
-  });
-
-  describe('And', () => {
-    it('', () => {
-      assert((): true => true as TEq<And<true, true>, true>);
-      assert((): true => true as TEq<And<true, false>, false>);
-      assert((): true => true as TEq<And<false, true>, false>);
-      assert((): true => true as TEq<And<false, false>, false>);
-      assert((): true => true as TEq<And<true, undefined>, undefined>);
-      assert((): true => true as TEq<And<false, undefined>, false>);
-      assert((): true => true as TEq<And<undefined, true>, undefined>);
-      assert((): true => true as TEq<And<undefined, false>, undefined>);
-      assert((): true => true as TEq<And<0, 1>, 0>);
-      assert((): true => true as TEq<And<'', 1>, ''>);
-      assert((): true => true as TEq<And<null, 1>, null>);
-      assert((): true => true as TEq<And<void, 1>, void>);
-    });
-
-  });
-
-  describe('Or', () => {
-    it('', () => {
-      assert((): true => true as TEq<Or<true, true>, true>);
-      assert((): true => true as TEq<Or<true, false>, true>);
-      assert((): true => true as TEq<Or<false, true>, true>);
-      assert((): true => true as TEq<Or<false, false>, false>);
     });
 
   });

@@ -2,14 +2,15 @@ type Falsy = undefined | false | 0 | '' | null | void;
 type Unique = typeof Unique;
 declare const Unique: unique symbol;
 
+export type Not<T extends boolean> = T extends true ? false : true;
+export type And<T, U> = T extends Falsy ? T : U;
+export type Or<T, U> = T extends Falsy ? U : T;
+
 export type IsNever<T> = [T] extends [never] ? true : false;
 export type IsVoid<T> = [void] extends [T] ? Not<Or<IsAny<T>, IsUnknown<T>>> : false;
 export type IsAny<T> = [T] extends [Unique] ? Not<IsNever<T>> : false;
 export type IsUnknown<T> = [T] extends [Unique | {} | void | null] ? false : true;
 
-export type Not<T extends boolean> = T extends true ? false : true;
-export type And<T, U> = T extends Falsy ? T : U;
-export type Or<T, U> = T extends Falsy ? U : T;
 export type Eq<T, U> =
   // Exclude never type from T and U.
   Or<IsNever<T>, IsNever<U>> extends true ? And<IsNever<T>, IsNever<U>> :
