@@ -25,11 +25,12 @@ export interface Publisher<N extends readonly unknown[], D, R> {
 export type Monitor<N extends readonly unknown[], D> = (data: D, namespace: N) => unknown;
 export type Subscriber<N extends readonly unknown[], D, R> = (data: D, namespace: N) => R;
 
-interface RegisterNode<N extends readonly unknown[], D, R> {
-  readonly parent: RegisterNode<N, D, R> | undefined;
-  readonly children: Map<N[number], RegisterNode<N, D, R>>;
-  readonly childrenNames: N[number][];
-  readonly items: RegisterItem<N, D, R>[];
+class RegisterNode<N extends readonly unknown[], D, R> {
+  constructor(public readonly parent: RegisterNode<N, D, R> | undefined) {
+  }
+  public readonly children: Map<N[number], RegisterNode<N, D, R>> = new Map();
+  public readonly childrenNames: N[number][] = [];
+  public readonly items: RegisterItem<N, D, R>[] = [];
 }
 export type RegisterItem<N extends readonly unknown[], D, R> = {
   readonly type: RegisterItemType.Monitor;
@@ -219,23 +220,13 @@ export class Observation<N extends readonly unknown[], D, R>
     }
     return items;
   }
-  private node: RegisterNode<N, D, R> = {
-    parent: undefined,
-    children: new Map(),
-    childrenNames: [],
-    items: []
-  };
+  private node: RegisterNode<N, D, R> = new RegisterNode(undefined);
   private seekNode(namespace: readonly [] | N): RegisterNode<N, D, R> {
     return (namespace as N).reduce<RegisterNode<N, D, R>>((node, name) => {
       const { children } = node;
       if (!children.has(name)) {
         void node.childrenNames.push(name);
-        void children.set(name, {
-          parent: node,
-          children: new Map(),
-          childrenNames: [],
-          items: []
-        });
+        void children.set(name, new RegisterNode(node));
       }
       return children.get(name)!;
     }, this.node);
