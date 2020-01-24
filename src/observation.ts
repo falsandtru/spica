@@ -123,10 +123,9 @@ export class Observation<N extends readonly unknown[], D, R>
           void node.childrenNames.splice(findIndex(name, node.childrenNames), 1);
           void --i;
         }
-        void concat(
-          node.items,
-          node.items.splice(0, Infinity)
-            .filter(({ type }) => type === RegisterItemType.Monitor));
+        // @ts-ignore
+        node.items = node.items
+          .filter(({ type }) => type === RegisterItemType.Monitor);
         return;
       }
       default:
