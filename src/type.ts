@@ -3,6 +3,7 @@ type Unique = typeof Unique;
 declare const Unique: unique symbol;
 
 export type IsNever<T> = [T] extends [never] ? true : false;
+export type IsVoid<T> = [void] extends [T] ? Not<Or<IsAny<T>, IsUnknown<T>>> : false;
 export type IsAny<T> = [T] extends [Unique] ? Not<IsNever<T>> : false;
 export type IsUnknown<T> = [T] extends [Unique | {} | void | null] ? false : true;
 
@@ -140,7 +141,7 @@ export type StrictType<T> =
   IsNever<T> extends true ? 'never' :
   IsAny<T> extends true ? 'any' :
   IsUnknown<T> extends true ? 'unknown' :
-  T extends void ? null extends void ? 'null' | 'undefined' : 'undefined' :
+  IsVoid<T> extends true ? 'void' :
   T extends null ? 'null' :
   Type<T>;
 

@@ -1,5 +1,5 @@
 import {
-  IsNever, IsAny, IsUnknown, Not, And, Or, Eq, TEq, DEq, If, Case,
+  IsNever, IsVoid, IsAny, IsUnknown, Not, And, Or, Eq, TEq, DEq, If, Case,
   Prepend, Append, Split, Head, Tail, Init, Last, Inits, Tails, Concat, Reverse, Member, Index, AtLeast,
   Rewrite, ExactRewrite, ExactExtract, ExactExclude,
   valueof, indexof,
@@ -18,6 +18,21 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<IsNever<any>, false>);
       assert((): true => true as TEq<IsNever<unknown>, false>);
       assert((): true => true as TEq<IsNever<{}>, false>);
+    });
+
+  });
+
+  describe('IsVoid', () => {
+    it('', () => {
+      assert((): true => true as TEq<IsVoid<never>, false>);
+      assert((): true => true as TEq<IsVoid<void>, true>);
+      assert((): true => true as TEq<IsVoid<any>, false>);
+      assert((): true => true as TEq<IsVoid<unknown>, false>);
+      assert((): true => true as TEq<IsVoid<{}>, false>);
+      assert((): true => true as TEq<IsVoid<undefined>, false>);
+      assert((): true => true as TEq<IsVoid<null>, false>);
+      assert((): true => true as TEq<IsVoid<0>, false>);
+      assert((): true => true as TEq<IsVoid<object>, false>);
     });
 
   });
@@ -406,7 +421,7 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<StrictType<never>, 'never'>);
       assert((): true => true as TEq<StrictType<any>, 'any'>);
       assert((): true => true as TEq<StrictType<unknown>, 'unknown'>);
-      assert((): true => true as TEq<StrictType<void>, 'undefined'>);
+      assert((): true => true as TEq<StrictType<void>, 'void'>);
       assert((): true => true as TEq<StrictType<undefined>, 'undefined'>);
       assert((): true => true as TEq<StrictType<null>, 'null'>);
     });
