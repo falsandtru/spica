@@ -7,33 +7,33 @@ import { causeAsyncException } from './exception';
 
 const { Map, WeakSet, Error } = global;
 
-export interface Observer<N extends unknown[], D, R> {
-  monitor(namespace: [] | N, listener: Monitor<N, D>, options?: ObserverOptions): () => void;
+export interface Observer<N extends readonly unknown[], D, R> {
+  monitor(namespace: readonly [] | N, listener: Monitor<N, D>, options?: ObserverOptions): () => void;
   on(namespace: N, listener: Subscriber<N, D, R>, options?: ObserverOptions): () => void;
-  off(namespace: [] | N, listener?: Subscriber<N, D, R>): void;
+  off(namespace: readonly [] | N, listener?: Subscriber<N, D, R>): void;
   once(namespace: N, listener: Subscriber<N, D, R>): () => void;
 }
 export interface ObserverOptions {
   once?: boolean;
 }
-export interface Publisher<N extends unknown[], D, R> {
+export interface Publisher<N extends readonly unknown[], D, R> {
   emit(this: Publisher<N, undefined, R>, namespace: N, data?: D, tracker?: (data: D, results: R[]) => void): void;
   emit(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void;
   reflect(this: Publisher<N, undefined, R>, namespace: N, data?: D): R[];
   reflect(namespace: N, data: D): R[];
 }
-export type Monitor<N extends unknown[], D> = (data: D, namespace: N) => unknown;
-export type Subscriber<N extends unknown[], D, R> = (data: D, namespace: N) => R;
+export type Monitor<N extends readonly unknown[], D> = (data: D, namespace: N) => unknown;
+export type Subscriber<N extends readonly unknown[], D, R> = (data: D, namespace: N) => R;
 
-interface RegisterNode<N extends unknown[], D, R> {
+interface RegisterNode<N extends readonly unknown[], D, R> {
   readonly parent: RegisterNode<N, D, R> | undefined;
   readonly children: Map<N[number], RegisterNode<N, D, R>>;
   readonly childrenNames: N[number][];
   readonly items: RegisterItem<N, D, R>[];
 }
-export type RegisterItem<N extends unknown[], D, R> = {
+export type RegisterItem<N extends readonly unknown[], D, R> = {
   readonly type: RegisterItemType.Monitor;
-  readonly namespace: [] | N;
+  readonly namespace: readonly [] | N;
   readonly listener: Monitor<N, D>;
   readonly options: ObserverOptions;
  } | {
@@ -51,7 +51,7 @@ export interface ObservationOptions {
   readonly limit?: number;
 }
 
-export class Observation<N extends unknown[], D, R>
+export class Observation<N extends readonly unknown[], D, R>
   implements Observer<N, D, R>, Publisher<N, D, R> {
   constructor(opts: ObservationOptions = {}) {
     void extend(this.settings, opts);
@@ -59,7 +59,7 @@ export class Observation<N extends unknown[], D, R>
   private readonly settings: DeepImmutable<DeepRequired<ObservationOptions>> = {
     limit: 10,
   };
-  public monitor(namespace: [] | N, listener: Monitor<N, D>, { once = false }: ObserverOptions = {}): () => void {
+  public monitor(namespace: readonly [] | N, listener: Monitor<N, D>, { once = false }: ObserverOptions = {}): () => void {
     if (typeof listener !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${listener}`);
     const off = () => this.off(namespace, listener, RegisterItemType.Monitor);
     const { items } = this.seekNode(namespace);
@@ -94,7 +94,7 @@ export class Observation<N extends unknown[], D, R>
   public once(namespace: N, listener: Subscriber<N, D, R>): () => void {
     return this.on(namespace, listener, { once: true });
   }
-  public off(namespace: [] | N, listener?: Monitor<N, D> | Subscriber<N, D, R>, type: RegisterItemType = RegisterItemType.Subscriber): void {
+  public off(namespace: readonly [] | N, listener?: Monitor<N, D> | Subscriber<N, D, R>, type: RegisterItemType = RegisterItemType.Subscriber): void {
     switch (typeof listener) {
       case 'function':
         return void this.seekNode(namespace).items
@@ -114,7 +114,7 @@ export class Observation<N extends unknown[], D, R>
         const node = this.seekNode(namespace);
         for (let i = 0; i < node.childrenNames.length; ++i) {
           const name = node.childrenNames[i];
-          void this.off([...namespace, name as never] as N);
+          void this.off([...namespace, name] as const as N);
           assert(node.children.has(name));
           const child = node.children.get(name)!;
           if (child.items.length + child.childrenNames.length > 0) continue;
@@ -150,7 +150,7 @@ export class Observation<N extends unknown[], D, R>
   public relay(source: Observer<N, D, unknown>): () => void {
     if (this.relaySources.has(source)) return () => undefined;
     void this.relaySources.add(source);
-    const unbind = source.monitor([] as unknown[] as N, (data, namespace) =>
+    const unbind = source.monitor([], (data, namespace) =>
       void this.emit(namespace, data));
     return () => (
       void this.relaySources.delete(source),
@@ -192,7 +192,7 @@ export class Observation<N extends unknown[], D, R>
       }
     }
   }
-  public refs(namespace: [] | N): RegisterItem<N, D, R>[] {
+  public refs(namespace: readonly [] | N): RegisterItem<N, D, R>[] {
     return this.refsBelow(this.seekNode(namespace));
   }
   private refsAbove({ parent, items }: RegisterNode<N, D, R>): RegisterItem<N, D, R>[] {
@@ -226,8 +226,8 @@ export class Observation<N extends unknown[], D, R>
     childrenNames: [],
     items: []
   };
-  private seekNode(namespace: [] | N): RegisterNode<N, D, R> {
-    return (namespace as unknown[]).reduce<RegisterNode<N, D, R>>((node, name) => {
+  private seekNode(namespace: readonly [] | N): RegisterNode<N, D, R> {
+    return (namespace as N).reduce<RegisterNode<N, D, R>>((node, name) => {
       const { children } = node;
       if (!children.has(name)) {
         void node.childrenNames.push(name);
@@ -243,7 +243,7 @@ export class Observation<N extends unknown[], D, R>
   }
 }
 
-function isRegistered<N extends unknown[], D, R>(items: RegisterItem<N, D, R>[], type: RegisterItemType, namespace: N, listener: Monitor<N, D> | Subscriber<N, D, R>): boolean {
+function isRegistered<N extends readonly unknown[], D, R>(items: RegisterItem<N, D, R>[], type: RegisterItemType, namespace: N, listener: Monitor<N, D> | Subscriber<N, D, R>): boolean {
   return items.some(item =>
     item.type === type &&
     item.namespace.length === namespace.length &&
