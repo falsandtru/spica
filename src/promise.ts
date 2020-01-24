@@ -187,8 +187,6 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
           }
         });
       }
-      assert(status.state === State.fulfilled ? rejectReactions.length === 0 : true);
-      assert(status.state === State.rejected ? fulfillReactions.length === 0 : true);
       void resume(this[internal]);
     });
   }
@@ -212,22 +210,24 @@ function resume<T>(internal: Internal<T>): void {
     case State.resolved:
       return;
     case State.fulfilled:
-      if (rejectReactions.length > 0) {
+      if (!internal.isHandled && rejectReactions.length > 0) {
         rejectReactions.length = 0;
       }
-      internal.isHandled = internal.isHandled || fulfillReactions.length > 0;
-      void consume(fulfillReactions, status.result);
-      assert(fulfillReactions.length === 0);
       assert(rejectReactions.length === 0);
+      if (fulfillReactions.length === 0) return;
+      internal.isHandled = true;
+      void consume(fulfillReactions, status.result);
+      assert(fulfillReactions.length + rejectReactions.length === 0);
       return;
     case State.rejected:
-      if (fulfillReactions.length > 0) {
+      if (!internal.isHandled && fulfillReactions.length > 0) {
         fulfillReactions.length = 0;
       }
-      internal.isHandled = internal.isHandled || rejectReactions.length > 0;
-      void consume(rejectReactions, status.result);
-      assert(rejectReactions.length === 0);
       assert(fulfillReactions.length === 0);
+      if (rejectReactions.length === 0) return;
+      internal.isHandled = true;
+      void consume(rejectReactions, status.result);
+      assert(fulfillReactions.length + rejectReactions.length === 0);
       return;
   }
 }
