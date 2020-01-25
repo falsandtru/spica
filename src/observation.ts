@@ -52,8 +52,8 @@ type SubscriberItem<N extends readonly unknown[], D, R> = {
   readonly options: ObserverOptions;
 };
 const enum RegisterItemType {
-  Monitor = 'monitor',
-  Subscriber = 'subscriber',
+  Monitor,
+  Subscriber,
 }
 const enum SeekMode {
   Unreachable,

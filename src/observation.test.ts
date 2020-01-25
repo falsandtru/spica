@@ -4,8 +4,8 @@ import { tick } from './clock';
 describe('Unit: lib/observation', function () {
   describe('Observation', function () {
     const enum RegisterItemType {
-      Monitor = 'monitor',
-      Subscriber = 'subscriber',
+      Monitor,
+      Subscriber,
     }
     class TestEvent {
       constructor(public type: string, public namespace: string[] = []) {
