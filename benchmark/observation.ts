@@ -72,7 +72,7 @@ describe('Benchmark:', function () {
       const subject = new Observation();
       benchmark('Observation once with namespace', () => {
         subject.once(['bench'], noop);
-        subject.emit([], 0);
+        subject.emit(['bench'], 0);
       }, done);
     });
 
