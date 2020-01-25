@@ -230,14 +230,14 @@ export class Observation<N extends readonly unknown[], D, R>
       : [subscribers];
     let count = 0;
     for (let i = 0; i < childrenIndexes.length; ++i) {
-      const name = childrenIndexes[i];
-      assert(children.has(name));
-      const [items, cnt] = this.refsBelow_(children.get(name)!, type);
+      const index = childrenIndexes[i];
+      assert(children.has(index));
+      const [items, cnt] = this.refsBelow_(children.get(index)!, type);
       count += cnt;
       void concat(acc, items);
       if (cnt === 0) {
-        void children.delete(name);
-        void childrenIndexes.splice(indexOf(childrenIndexes, name), 1);
+        void children.delete(index);
+        void childrenIndexes.splice(indexOf(childrenIndexes, index), 1);
         void --i;
       }
     }
@@ -248,19 +248,19 @@ export class Observation<N extends readonly unknown[], D, R>
   private seekNode(namespace: readonly [] | N, mode: SeekMode): RegisterNode<N, D, R> | undefined {
     let node = this.node;
     for (let i = 0; i < namespace.length; ++i) {
-      const name = namespace[i];
+      const index = namespace[i];
       const { children } = node;
-      if (!children.has(name)) {
+      if (!children.has(index)) {
         switch (mode) {
           case SeekMode.Breakable:
             return;
           case SeekMode.Closest:
             return node;
         }
-        void node.childrenIndexes.push(name);
-        void children.set(name, new RegisterNode(node, name));
+        void node.childrenIndexes.push(index);
+        void children.set(index, new RegisterNode(node, index));
       }
-      node = children.get(name)!;
+      node = children.get(index)!;
     }
     return node;
   }
