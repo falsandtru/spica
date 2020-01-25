@@ -28,11 +28,11 @@ export type Subscriber<N extends readonly unknown[], D, R> = (data: D, namespace
 class RegisterNode<N extends readonly unknown[], D, R> {
   constructor(
     public readonly parent: RegisterNode<N, D, R> | undefined,
-    public readonly name: unknown,
+    public readonly index: unknown,
   ) {
   }
   public readonly children: Map<N[number], RegisterNode<N, D, R>> = new Map();
-  public readonly childrenNames: N[number][] = [];
+  public readonly childrenIndexes: N[number][] = [];
   public readonly monitors: MonitorItem<N, D>[] = [];
   public readonly subscribers: SubscriberItem<N, D, R>[] = [];
 }
@@ -126,7 +126,7 @@ export class Observation<N extends readonly unknown[], D, R>
           while (nodes.length > 0) {
             const node = nodes.pop()!;
             void queue.push(node);
-            if (node.childrenNames.length === 0) break;
+            if (node.childrenIndexes.length === 0) break;
             void nodes.push(...node.children.values());
           }
           assert(queue.length > 0);
@@ -134,12 +134,12 @@ export class Observation<N extends readonly unknown[], D, R>
           if (node.subscribers.length > 0) {
             node.subscribers.length = 0;
           }
-          if (node.parent && node.childrenNames.length === 0 && node.monitors.length === 0) {
-            assert(node.childrenNames.length + node.monitors.length + node.subscribers.length === 0);
+          if (node.parent && node.childrenIndexes.length === 0 && node.monitors.length === 0) {
+            assert(node.childrenIndexes.length + node.monitors.length + node.subscribers.length === 0);
             const { parent } = node;
-            void parent.children.delete(node.name);
-            assert(findIndex(node.name, parent.childrenNames) !== -1);
-            void parent.childrenNames.splice(findIndex(node.name, parent.childrenNames), 1);
+            void parent.children.delete(node.index);
+            assert(findIndex(node.index, parent.childrenIndexes) !== -1);
+            void parent.childrenIndexes.splice(findIndex(node.index, parent.childrenIndexes), 1);
           }
         }
         return;
@@ -222,21 +222,21 @@ export class Observation<N extends readonly unknown[], D, R>
     }
     return items;
   }
-  private refsBelow({ childrenNames, children, monitors, subscribers }: RegisterNode<N, D, R>, type: RegisterItemType): readonly [RegisterItem<N, D, R>[], number] {
+  private refsBelow({ childrenIndexes, children, monitors, subscribers }: RegisterNode<N, D, R>, type: RegisterItemType): readonly [RegisterItem<N, D, R>[], number] {
     const items = type === RegisterItemType.Monitor
       ? monitors.slice()
       : subscribers.slice();
     let count = 0;
-    for (let i = 0; i < childrenNames.length; ++i) {
-      const name = childrenNames[i];
+    for (let i = 0; i < childrenIndexes.length; ++i) {
+      const name = childrenIndexes[i];
       assert(children.has(name));
       const [below, cnt] = this.refsBelow(children.get(name)!, type);
       count += cnt;
       void concat(items, below);
       if (cnt === 0) {
         void children.delete(name);
-        void childrenNames.splice(
-          findIndex(name, childrenNames),
+        void childrenIndexes.splice(
+          findIndex(name, childrenIndexes),
           1);
         void --i;
       }
@@ -248,7 +248,7 @@ export class Observation<N extends readonly unknown[], D, R>
     return (namespace as N).reduce<RegisterNode<N, D, R>>((node, name) => {
       const { children } = node;
       if (!children.has(name)) {
-        void node.childrenNames.push(name);
+        void node.childrenIndexes.push(name);
         void children.set(name, new RegisterNode(node, name));
       }
       return children.get(name)!;
