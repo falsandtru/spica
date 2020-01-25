@@ -161,38 +161,47 @@ export class Observation<N extends readonly unknown[], D, R>
   public refs(namespace: readonly [] | N): RegisterItem<N, D, R>[] {
     const node = this.seekNode(namespace, SeekMode.Breakable);
     if (!node) return [];
-    return concat<RegisterItem<N, D, R>>(this.refsBelow(node, RegisterItemType.Monitor), this.refsBelow(node, RegisterItemType.Subscriber));
+    return concat<RegisterItem<N, D, R>[]>(
+      this.refsBelow(node, RegisterItemType.Monitor),
+      this.refsBelow(node, RegisterItemType.Subscriber))
+      .reduce((acc, rs) => concat(acc, rs), []);
   }
   private drain(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void {
     const node = this.seekNode(namespace, SeekMode.Breakable);
     const results: R[] = [];
-    const ss = node ? this.refsBelow(node, RegisterItemType.Subscriber) : [];
-    for (let i = 0; i < ss.length; ++i) {
-      const item = ss[i];
-      if (!item.alive) continue;
-      if (item.options.once) {
-        void this.off(item.namespace, item);
-      }
-      try {
-        const result = item.listener(data, namespace);
-        tracker && void results.push(result);
-      }
-      catch (reason) {
-        void causeAsyncException(reason);
+    const sss = node ? this.refsBelow(node, RegisterItemType.Subscriber) : [];
+    for (let i = 0; i < sss.length; ++i) {
+      const ss = sss[i].slice();
+      for (let i = 0; i < ss.length; ++i) {
+        const item = ss[i];
+        if (!item.alive) continue;
+        if (item.options.once) {
+          void this.off(item.namespace, item);
+        }
+        try {
+          const result = item.listener(data, namespace);
+          tracker && void results.push(result);
+        }
+        catch (reason) {
+          void causeAsyncException(reason);
+        }
       }
     }
-    const ms = this.refsAbove(node || this.seekNode(namespace, SeekMode.Closest), RegisterItemType.Monitor);
-    for (let i = 0; i < ms.length; ++i) {
-      const item = ms[i];
-      if (!item.alive) continue;
-      if (item.options.once) {
-        void this.off(item.namespace, item);
-      }
-      try {
-        void item.listener(data, namespace);
-      }
-      catch (reason) {
-        void causeAsyncException(reason);
+    const mss = this.refsAbove(node || this.seekNode(namespace, SeekMode.Closest), RegisterItemType.Monitor);
+    for (let i = 0; i < mss.length; ++i) {
+      const ms = mss[i].slice();
+      for (let i = 0; i < ms.length; ++i) {
+        const item = ms[i];
+        if (!item.alive) continue;
+        if (item.options.once) {
+          void this.off(item.namespace, item);
+        }
+        try {
+          void item.listener(data, namespace);
+        }
+        catch (reason) {
+          void causeAsyncException(reason);
+        }
       }
     }
     if (tracker) {
@@ -204,37 +213,34 @@ export class Observation<N extends readonly unknown[], D, R>
       }
     }
   }
-  private refsAbove({ parent, monitors, subscribers }: RegisterNode<N, D, R>, type: RegisterItemType.Monitor): MonitorItem<N, D>[];
-  private refsAbove({ parent, monitors, subscribers }: RegisterNode<N, D, R>, type: RegisterItemType): RegisterItem<N, D, R>[] {
+  private refsAbove({ parent, monitors, subscribers }: RegisterNode<N, D, R>, type: RegisterItemType.Monitor): MonitorItem<N, D>[][];
+  private refsAbove({ parent, monitors, subscribers }: RegisterNode<N, D, R>, type: RegisterItemType): RegisterItem<N, D, R>[][] {
     const acc = type === RegisterItemType.Monitor
-      ? monitors.slice()
-      : subscribers.slice();
+      ? [monitors]
+      : [subscribers];
     while (parent) {
       type === RegisterItemType.Monitor
-        ? void concat(acc as typeof monitors, parent.monitors)
-        : void concat(acc as typeof subscribers, parent.subscribers);
+        ? void (acc as typeof monitors[]).push(parent.monitors)
+        : void (acc as typeof subscribers[]).push(parent.subscribers);
       parent = parent.parent;
     }
     return acc;
   }
-  private refsBelow(node: RegisterNode<N, D, R>, type: RegisterItemType.Monitor): MonitorItem<N, D>[];
-  private refsBelow(node: RegisterNode<N, D, R>, type: RegisterItemType.Subscriber): SubscriberItem<N, D, R>[];
-  private refsBelow(node: RegisterNode<N, D, R>, type: RegisterItemType): RegisterItem<N, D, R>[] {
-    return this.refsBelow_(node, type)[0].reduce((acc, items) =>
-      concat(acc, items)
-    , []);
+  private refsBelow(node: RegisterNode<N, D, R>, type: RegisterItemType.Monitor): MonitorItem<N, D>[][];
+  private refsBelow(node: RegisterNode<N, D, R>, type: RegisterItemType.Subscriber): SubscriberItem<N, D, R>[][];
+  private refsBelow(node: RegisterNode<N, D, R>, type: RegisterItemType): RegisterItem<N, D, R>[][] {
+    return this.refsBelow_(node, type, [])[0];
   }
-  private refsBelow_({ monitors, subscribers, childrenIndexes, children }: RegisterNode<N, D, R>, type: RegisterItemType): readonly [RegisterItem<N, D, R>[][], number] {
-    const acc = type === RegisterItemType.Monitor
-      ? [monitors]
-      : [subscribers];
+  private refsBelow_({ monitors, subscribers, childrenIndexes, children }: RegisterNode<N, D, R>, type: RegisterItemType, acc: RegisterItem<N, D, R>[][]): readonly [RegisterItem<N, D, R>[][], number] {
+    type === RegisterItemType.Monitor
+      ? void (acc as typeof monitors[]).push(monitors)
+      : void (acc as typeof subscribers[]).push(subscribers);
     let count = 0;
     for (let i = 0; i < childrenIndexes.length; ++i) {
       const index = childrenIndexes[i];
       assert(children.has(index));
-      const [items, cnt] = this.refsBelow_(children.get(index)!, type);
+      const cnt = this.refsBelow_(children.get(index)!, type, acc)[1];
       count += cnt;
-      void concat(acc, items);
       if (cnt === 0) {
         void children.delete(index);
         void childrenIndexes.splice(indexOf(childrenIndexes, index), 1);
