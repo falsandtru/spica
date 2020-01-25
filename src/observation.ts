@@ -22,7 +22,7 @@ export interface Publisher<N extends readonly unknown[], D, R> {
   reflect(this: Publisher<N, undefined, R>, namespace: N, data?: D): R[];
   reflect(namespace: N, data: D): R[];
 }
-export type Monitor<N extends readonly unknown[], D> = (data: D, namespace: N) => unknown;
+export type Monitor<N extends readonly unknown[], D> = (data: D, namespace: N) => void;
 export type Subscriber<N extends readonly unknown[], D, R> = (data: D, namespace: N) => R;
 
 class RegisterNode<N extends readonly unknown[], D, R> {
@@ -167,7 +167,7 @@ export class Observation<N extends readonly unknown[], D, R>
   public refs(namespace: readonly [] | N): RegisterItem<N, D, R>[] {
     const node = this.seekNode(namespace, SeekMode.Unreachable);
     if (!node) return [];
-    return concat(this.refsBelow(node, RegisterItemType.Monitor), this.refsBelow(node, RegisterItemType.Subscriber));
+    return concat<RegisterItem<N, D, R>>(this.refsBelow(node, RegisterItemType.Monitor), this.refsBelow(node, RegisterItemType.Subscriber));
   }
   private drain(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void {
     const node = this.seekNode(namespace, SeekMode.Unreachable);
@@ -179,7 +179,7 @@ export class Observation<N extends readonly unknown[], D, R>
         void this.off(namespace, listener);
       }
       try {
-        const result = listener(data, namespace) as R;
+        const result = listener(data, namespace);
         tracker && void results.push(result);
       }
       catch (reason) {
@@ -208,6 +208,7 @@ export class Observation<N extends readonly unknown[], D, R>
       }
     }
   }
+  private refsAbove({ parent, monitors, subscribers }: RegisterNode<N, D, R>, type: RegisterItemType.Monitor): MonitorItem<N, D>[];
   private refsAbove({ parent, monitors, subscribers }: RegisterNode<N, D, R>, type: RegisterItemType): RegisterItem<N, D, R>[] {
     const acc = type === RegisterItemType.Monitor
       ? monitors.slice()
@@ -220,6 +221,8 @@ export class Observation<N extends readonly unknown[], D, R>
     }
     return acc;
   }
+  private refsBelow(node: RegisterNode<N, D, R>, type: RegisterItemType.Monitor): MonitorItem<N, D>[];
+  private refsBelow(node: RegisterNode<N, D, R>, type: RegisterItemType.Subscriber): SubscriberItem<N, D, R>[];
   private refsBelow(node: RegisterNode<N, D, R>, type: RegisterItemType): RegisterItem<N, D, R>[] {
     return this.refsBelow_(node, type)[0].reduce((acc, items) =>
       concat(acc, items)
