@@ -169,6 +169,7 @@ export class Observation<N extends readonly unknown[], D, R>
     const ss = node ? this.refsBelow(node, RegisterItemType.Subscriber) : [];
     for (let i = 0; i < ss.length; ++i) {
       const item = ss[i];
+      if (!item.alive) continue;
       if (item.options.once) {
         void this.off(item.namespace, item);
       }
@@ -183,6 +184,7 @@ export class Observation<N extends readonly unknown[], D, R>
     const ms = this.refsAbove(node || this.seekNode(namespace, SeekMode.Closest), RegisterItemType.Monitor);
     for (let i = 0; i < ms.length; ++i) {
       const item = ms[i];
+      if (!item.alive) continue;
       if (item.options.once) {
         void this.off(item.namespace, item);
       }
