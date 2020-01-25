@@ -26,7 +26,10 @@ export type Monitor<N extends readonly unknown[], D> = (data: D, namespace: N) =
 export type Subscriber<N extends readonly unknown[], D, R> = (data: D, namespace: N) => R;
 
 class RegisterNode<N extends readonly unknown[], D, R> {
-  constructor(public readonly parent: RegisterNode<N, D, R> | undefined) {
+  constructor(
+    public readonly parent: RegisterNode<N, D, R> | undefined,
+    public readonly name: unknown,
+  ) {
   }
   public readonly children: Map<N[number], RegisterNode<N, D, R>> = new Map();
   public readonly childrenNames: N[number][] = [];
@@ -117,20 +120,27 @@ export class Observation<N extends readonly unknown[], D, R>
         }
       }
       case 'undefined': {
-        const node = this.seekNode(namespace);
-        for (let i = 0; i < node.childrenNames.length; ++i) {
-          const name = node.childrenNames[i];
-          void this.off([...namespace, name] as const as N);
-          assert(node.children.has(name));
-          const child = node.children.get(name)!;
-          if (child.monitors.length + child.subscribers.length + child.childrenNames.length > 0) continue;
-          void node.children.delete(name);
-          assert(findIndex(name, node.childrenNames) !== -1);
-          void node.childrenNames.splice(findIndex(name, node.childrenNames), 1);
-          void --i;
-        }
-        if (node.subscribers.length > 0) {
-          node.subscribers.length = 0;
+        const nodes: RegisterNode<N, D, R>[] = [this.seekNode(namespace)];
+        const queue: RegisterNode<N, D, R>[] = [];
+        while (nodes.length + queue.length > 0) {
+          while (nodes.length > 0) {
+            const node = nodes.pop()!;
+            void queue.push(node);
+            if (node.childrenNames.length === 0) break;
+            void nodes.push(...node.children.values());
+          }
+          assert(queue.length > 0);
+          const node = queue.pop()!;
+          if (node.subscribers.length > 0) {
+            node.subscribers.length = 0;
+          }
+          if (node.parent && node.childrenNames.length === 0 && node.monitors.length === 0) {
+            assert(node.childrenNames.length + node.monitors.length + node.subscribers.length === 0);
+            const { parent } = node;
+            void parent.children.delete(node.name);
+            assert(findIndex(node.name, parent.childrenNames) !== -1);
+            void parent.childrenNames.splice(findIndex(node.name, parent.childrenNames), 1);
+          }
         }
         return;
       }
@@ -233,13 +243,13 @@ export class Observation<N extends readonly unknown[], D, R>
     }
     return [items, monitors.length + subscribers.length + count];
   }
-  private node: RegisterNode<N, D, R> = new RegisterNode(undefined);
+  private node: RegisterNode<N, D, R> = new RegisterNode(undefined, undefined);
   private seekNode(namespace: readonly [] | N): RegisterNode<N, D, R> {
     return (namespace as N).reduce<RegisterNode<N, D, R>>((node, name) => {
       const { children } = node;
       if (!children.has(name)) {
         void node.childrenNames.push(name);
-        void children.set(name, new RegisterNode(node));
+        void children.set(name, new RegisterNode(node, name));
       }
       return children.get(name)!;
     }, this.node);
