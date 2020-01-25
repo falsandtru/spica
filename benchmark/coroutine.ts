@@ -1,8 +1,10 @@
 import { benchmark } from './benchmark';
 import { Coroutine } from '..';
+import { AtomicPromise } from '..';
 
 describe('Benchmark:', function () {
   this.timeout(30 * 1e3);
+  afterEach(() => new AtomicPromise(requestAnimationFrame));
 
   describe('Coroutine', function () {
     it('new', function (done) {
