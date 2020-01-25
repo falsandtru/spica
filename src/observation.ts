@@ -70,6 +70,7 @@ export class Observation<N extends readonly unknown[], D, R>
   constructor(opts: ObservationOptions = {}) {
     void extend(this.settings, opts);
   }
+  private readonly node: RegisterNode<N, D, R> = new RegisterNode(undefined, undefined);
   private readonly settings: DeepImmutable<DeepRequired<ObservationOptions>> = {
     limit: 10,
   };
@@ -171,6 +172,11 @@ export class Observation<N extends readonly unknown[], D, R>
       void this.relaySources.delete(source),
       unbind());
   }
+  public refs(namespace: readonly [] | N): RegisterItem<N, D, R>[] {
+    const node = this.seekNode(namespace, Mode.Unreachable);
+    if (!node) return [];
+    return concat(this.refsBelow(node, RegisterItemType.Monitor), this.refsBelow(node, RegisterItemType.Subscriber));
+  }
   private drain(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void {
     const node = this.seekNode(namespace, Mode.Unreachable);
     const results: R[] = [];
@@ -210,11 +216,6 @@ export class Observation<N extends readonly unknown[], D, R>
       }
     }
   }
-  public refs(namespace: readonly [] | N): RegisterItem<N, D, R>[] {
-    const node = this.seekNode(namespace, Mode.Unreachable);
-    if (!node) return [];
-    return concat(this.refsBelow(node, RegisterItemType.Monitor), this.refsBelow(node, RegisterItemType.Subscriber));
-  }
   private refsAbove({ parent, monitors, subscribers }: RegisterNode<N, D, R>, type: RegisterItemType): RegisterItem<N, D, R>[] {
     const acc = type === RegisterItemType.Monitor
       ? monitors.slice()
@@ -251,7 +252,6 @@ export class Observation<N extends readonly unknown[], D, R>
     }
     return [acc, monitors.length + subscribers.length + count];
   }
-  private readonly node: RegisterNode<N, D, R> = new RegisterNode(undefined, undefined);
   private seekNode(namespace: readonly [] | N, mode: Mode.Extensible | Mode.Closest): RegisterNode<N, D, R>;
   private seekNode(namespace: readonly [] | N, mode: Mode): RegisterNode<N, D, R> | undefined;
   private seekNode(namespace: readonly [] | N, mode: Mode): RegisterNode<N, D, R> | undefined {
