@@ -149,9 +149,9 @@ export class Observation<N extends readonly unknown[], D, R>
   public reflect(this: Observation<N, void, R>, type: N, data?: D): R[]
   public reflect(namespace: N, data: D): R[]
   public reflect(namespace: N, data: D): R[] {
-    let results: R[] = [];
+    let results!: R[];
     void this.emit(namespace, data, (_, r) => results = r);
-    assert(Array.isArray(results));
+    assert(results);
     return results;
   }
   private relaySources = new WeakSet<Observer<N, D, unknown>>();
