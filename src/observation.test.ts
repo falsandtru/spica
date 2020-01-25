@@ -49,6 +49,8 @@ describe('Unit: lib/observation', function () {
         [[], id, RegisterItemType.Monitor],
         [[''], id, RegisterItemType.Monitor],
         [[], id, RegisterItemType.Subscriber],
+        [[], id, RegisterItemType.Subscriber],
+        [[''], id, RegisterItemType.Subscriber],
         [[''], id, RegisterItemType.Subscriber],
         [['0'], id, RegisterItemType.Subscriber],
         [['a'], id, RegisterItemType.Subscriber],
@@ -181,8 +183,10 @@ describe('Unit: lib/observation', function () {
       const ob = new Observation<string[], number, void>();
       ob.monitor([''], data => assert(cnt === 0 && data === 1 && ++cnt), { once: true });
       ob.emit([''], 1, data => assert(cnt === 1 && data === 1 && ++cnt));
+      assert.deepStrictEqual(ob.refs([]), []);
       ob.monitor([''], data => assert(cnt === 2 && data === 2 && ++cnt), { once: true });
-      ob.emit([''], 2, data => assert(cnt === 3 && data === 2 && ++cnt));
+      ob.emit(['', ''], 2, data => assert(cnt === 3 && data === 2 && ++cnt));
+      assert.deepStrictEqual(ob.refs([]), []);
       ob.emit([''], 3, data => void assert(cnt === 4 && data === 3 && ++cnt) || done());
     });
 
@@ -199,8 +203,10 @@ describe('Unit: lib/observation', function () {
       const ob = new Observation<string[], number, void>();
       ob.on([''], data => assert(cnt === 0 && data === 1 && ++cnt), { once: true });
       ob.emit([''], 1, data => assert(cnt === 1 && data === 1 && ++cnt));
+      assert.deepStrictEqual(ob.refs([]), []);
       ob.on([''], data => assert(cnt === 2 && data === 2 && ++cnt), { once: true });
-      ob.emit([''], 2, data => assert(cnt === 3 && data === 2 && ++cnt));
+      ob.emit([], 2, data => assert(cnt === 3 && data === 2 && ++cnt));
+      assert.deepStrictEqual(ob.refs([]), []);
       ob.on([''], throwError, { once: true });
       ob.off([''], throwError);
       ob.emit([''], 3, data => void assert(cnt === 4 && data === 3 && ++cnt) || done());
@@ -278,21 +284,6 @@ describe('Unit: lib/observation', function () {
       ob.on(['', '0', '0', '0'], data => assert(cnt === 2 && data === 0 && ++cnt));
       ob.off(['', '0'], throwError);
       ob.emit(['', '0'], 0);
-    });
-
-    it('dedup', function (done) {
-      let cnt = 0;
-      const ob = new Observation<string[], number, void>();
-      function inc() {
-        ++cnt;
-      }
-      ob.on([''], inc);
-      ob.on([''], inc);
-      ob.on(['', '0'], inc);
-      ob.on(['', '0'], inc);
-      ob.on(['', '0', '0'], inc);
-      ob.on(['', '0', '0'], inc);
-      ob.emit(['', '0'], 0, () => void assert(cnt === 2 && ++cnt) || done());
     });
 
     it('mixed type key', function (done) {
