@@ -174,7 +174,7 @@ export class Observation<N extends readonly unknown[], D, R>
   private drain(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void {
     const node = this.seekNode(namespace, Mode.Unreachable);
     const results: R[] = [];
-    const ms = node ? this.refsBelow(node, RegisterItemType.Subscriber)[0] : [];
+    const ms = node ? this.refsBelow(node, RegisterItemType.Subscriber) : [];
     for (let i = 0; i < ms.length; ++i) {
       const { listener, options: { once } } = ms[i];
       if (once) {
@@ -213,42 +213,45 @@ export class Observation<N extends readonly unknown[], D, R>
   public refs(namespace: readonly [] | N): RegisterItem<N, D, R>[] {
     const node = this.seekNode(namespace, Mode.Unreachable);
     if (!node) return [];
-    return concat(this.refsBelow(node, RegisterItemType.Monitor)[0], this.refsBelow(node, RegisterItemType.Subscriber)[0]);
+    return concat(this.refsBelow(node, RegisterItemType.Monitor), this.refsBelow(node, RegisterItemType.Subscriber));
   }
   private refsAbove({ parent, monitors, subscribers }: RegisterNode<N, D, R>, type: RegisterItemType): RegisterItem<N, D, R>[] {
-    const items = type === RegisterItemType.Monitor
+    const acc = type === RegisterItemType.Monitor
       ? monitors.slice()
       : subscribers.slice();
     while (parent) {
       type === RegisterItemType.Monitor
-        ? void concat(items as typeof monitors, parent.monitors)
-        : void concat(items as typeof subscribers, parent.subscribers);
+        ? void concat(acc as typeof monitors, parent.monitors)
+        : void concat(acc as typeof subscribers, parent.subscribers);
       parent = parent.parent;
     }
-    return items;
+    return acc;
   }
-  private refsBelow({ childrenIndexes, children, monitors, subscribers }: RegisterNode<N, D, R>, type: RegisterItemType): readonly [RegisterItem<N, D, R>[], number] {
-    const items = type === RegisterItemType.Monitor
-      ? monitors.slice()
-      : subscribers.slice();
+  private refsBelow(node: RegisterNode<N, D, R>, type: RegisterItemType): RegisterItem<N, D, R>[] {
+    return this.refsBelow_(node, type)[0].reduce((acc, items) =>
+      concat(acc, items)
+    , []);
+  }
+  private refsBelow_({ childrenIndexes, children, monitors, subscribers }: RegisterNode<N, D, R>, type: RegisterItemType): readonly [RegisterItem<N, D, R>[][], number] {
+    const acc = type === RegisterItemType.Monitor
+      ? [monitors]
+      : [subscribers];
     let count = 0;
     for (let i = 0; i < childrenIndexes.length; ++i) {
       const name = childrenIndexes[i];
       assert(children.has(name));
-      const [below, cnt] = this.refsBelow(children.get(name)!, type);
+      const [items, cnt] = this.refsBelow_(children.get(name)!, type);
       count += cnt;
-      void concat(items, below);
+      void concat(acc, items);
       if (cnt === 0) {
         void children.delete(name);
-        void childrenIndexes.splice(
-          findIndex(name, childrenIndexes),
-          1);
+        void childrenIndexes.splice(findIndex(name, childrenIndexes), 1);
         void --i;
       }
     }
-    return [items, monitors.length + subscribers.length + count];
+    return [acc, monitors.length + subscribers.length + count];
   }
-  private node: RegisterNode<N, D, R> = new RegisterNode(undefined, undefined);
+  private readonly node: RegisterNode<N, D, R> = new RegisterNode(undefined, undefined);
   private seekNode(namespace: readonly [] | N, mode: Mode.Extensible | Mode.Closest): RegisterNode<N, D, R>;
   private seekNode(namespace: readonly [] | N, mode: Mode): RegisterNode<N, D, R> | undefined;
   private seekNode(namespace: readonly [] | N, mode: Mode): RegisterNode<N, D, R> | undefined {
