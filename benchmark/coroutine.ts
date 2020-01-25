@@ -3,7 +3,6 @@ import { Coroutine } from '..';
 
 describe('Benchmark:', function () {
   this.timeout(30 * 1e3);
-  afterEach(done => setTimeout(done, 5 * 1e3));
 
   describe('Coroutine', function () {
     it('new', function (done) {
