@@ -199,6 +199,7 @@ describe('Unit: lib/cache', () => {
 
     it('rate', function () {
       this.timeout(10 * 1e3);
+      this.retries(3);
 
       const size = 10;
       const cache = new Cache<number, number>(size);

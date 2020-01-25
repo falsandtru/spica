@@ -209,8 +209,6 @@ gulp.task('ci',
     'clean',
     series(
       'ts:test',
-      'karma:test',
-      'karma:test',
       'karma:ci',
       'dist',
     )));
