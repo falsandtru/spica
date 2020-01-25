@@ -5,7 +5,7 @@ import { Sequence } from './sequence';
 
 describe('Unit: lib/supervisor', function () {
   describe('Supervisor', function () {
-    beforeEach(() => {
+    before(() => {
       assert(Supervisor.count === 0);
       assert(Supervisor.procs === 0);
     });
