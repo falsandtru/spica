@@ -55,6 +55,11 @@ const enum RegisterItemType {
   Monitor = 'monitor',
   Subscriber = 'subscriber',
 }
+const enum Mode {
+  Unreachable,
+  Extensible,
+  Closest,
+}
 
 export interface ObservationOptions {
   readonly limit?: number;
@@ -71,7 +76,7 @@ export class Observation<N extends readonly unknown[], D, R>
   public monitor(namespace: readonly [] | N, listener: Monitor<N, D>, { once = false }: ObserverOptions = {}): () => void {
     if (typeof listener !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${listener}`);
     const off = () => this.off(namespace, listener, RegisterItemType.Monitor);
-    const { monitors } = this.seekNode(namespace);
+    const { monitors } = this.seekNode(namespace, Mode.Extensible);
     if (isRegistered(monitors, RegisterItemType.Monitor, namespace, listener)) return off;
     if (monitors.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
     void monitors.push({
@@ -87,7 +92,7 @@ export class Observation<N extends readonly unknown[], D, R>
   public on(namespace: N, listener: Subscriber<N, D, R>, { once = false }: ObserverOptions = {}): () => void {
     if (typeof listener !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${listener}`);
     const off = () => this.off(namespace, listener);
-    const { subscribers } = this.seekNode(namespace);
+    const { subscribers } = this.seekNode(namespace, Mode.Extensible);
     if (isRegistered(subscribers, RegisterItemType.Subscriber, namespace, listener)) return off;
     if (subscribers.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
     void subscribers.push({
@@ -104,9 +109,13 @@ export class Observation<N extends readonly unknown[], D, R>
     return this.on(namespace, listener, { once: true });
   }
   public off(namespace: readonly [] | N, listener?: Monitor<N, D> | Subscriber<N, D, R>, type: RegisterItemType = RegisterItemType.Subscriber): void {
+    const node = this.seekNode(namespace, Mode.Unreachable);
+    if (!node) return;
     switch (typeof listener) {
       case 'function': {
-        const items = this.seekItems(namespace, type);
+        const items: RegisterItem<N, D, R>[] = type === RegisterItemType.Monitor
+          ? node.monitors
+          : node.subscribers;
         const i = items.findIndex(item => item.listener === listener);
         switch (i) {
           case -1:
@@ -120,7 +129,7 @@ export class Observation<N extends readonly unknown[], D, R>
         }
       }
       case 'undefined': {
-        const nodes: RegisterNode<N, D, R>[] = [this.seekNode(namespace)];
+        const nodes: RegisterNode<N, D, R>[] = [node];
         const queue: RegisterNode<N, D, R>[] = [];
         while (nodes.length + queue.length > 0) {
           while (nodes.length > 0) {
@@ -134,18 +143,9 @@ export class Observation<N extends readonly unknown[], D, R>
           if (node.subscribers.length > 0) {
             node.subscribers.length = 0;
           }
-          if (node.parent && node.childrenIndexes.length === 0 && node.monitors.length === 0) {
-            assert(node.childrenIndexes.length + node.monitors.length + node.subscribers.length === 0);
-            const { parent } = node;
-            void parent.children.delete(node.index);
-            assert(findIndex(node.index, parent.childrenIndexes) !== -1);
-            void parent.childrenIndexes.splice(findIndex(node.index, parent.childrenIndexes), 1);
-          }
         }
         return;
       }
-      default:
-        throw new Error(`Spica: Observation: Unreachable.`);
     }
   }
   public emit(this: Observation<N, void, R>, type: N, data?: D, tracker?: (data: D, results: R[]) => void): void
@@ -172,9 +172,9 @@ export class Observation<N extends readonly unknown[], D, R>
       unbind());
   }
   private drain(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void {
-    const node = this.seekNode(namespace);
+    const node = this.seekNode(namespace, Mode.Unreachable);
     const results: R[] = [];
-    for (const { listener, options: { once } } of this.refsBelow(node, RegisterItemType.Subscriber)[0]) {
+    for (const { listener, options: { once } } of node ? this.refsBelow(node, RegisterItemType.Subscriber)[0] : []) {
       if (once) {
         void this.off(namespace, listener);
       }
@@ -186,7 +186,7 @@ export class Observation<N extends readonly unknown[], D, R>
         void causeAsyncException(reason);
       }
     }
-    for (const { listener, options: { once } } of this.refsAbove(node, RegisterItemType.Monitor)) {
+    for (const { listener, options: { once } } of this.refsAbove(node || this.seekNode(namespace, Mode.Closest), RegisterItemType.Monitor)) {
       if (once) {
         void this.off(namespace, listener, RegisterItemType.Monitor);
       }
@@ -207,7 +207,8 @@ export class Observation<N extends readonly unknown[], D, R>
     }
   }
   public refs(namespace: readonly [] | N): RegisterItem<N, D, R>[] {
-    const node = this.seekNode(namespace);
+    const node = this.seekNode(namespace, Mode.Unreachable);
+    if (!node) return [];
     return concat(this.refsBelow(node, RegisterItemType.Monitor)[0], this.refsBelow(node, RegisterItemType.Subscriber)[0]);
   }
   private refsAbove({ parent, monitors, subscribers }: RegisterNode<N, D, R>, type: RegisterItemType): RegisterItem<N, D, R>[] {
@@ -244,24 +245,26 @@ export class Observation<N extends readonly unknown[], D, R>
     return [items, monitors.length + subscribers.length + count];
   }
   private node: RegisterNode<N, D, R> = new RegisterNode(undefined, undefined);
-  private seekNode(namespace: readonly [] | N): RegisterNode<N, D, R> {
-    return (namespace as N).reduce<RegisterNode<N, D, R>>((node, name) => {
+  private seekNode(namespace: readonly [] | N, mode: Mode.Extensible | Mode.Closest): RegisterNode<N, D, R>;
+  private seekNode(namespace: readonly [] | N, mode: Mode): RegisterNode<N, D, R> | undefined;
+  private seekNode(namespace: readonly [] | N, mode: Mode): RegisterNode<N, D, R> | undefined {
+    let node = this.node;
+    for (let i = 0; i < namespace.length; ++i) {
+      const name = namespace[i];
       const { children } = node;
       if (!children.has(name)) {
+        switch (mode) {
+          case Mode.Unreachable:
+            return;
+          case Mode.Closest:
+            return node;
+        }
         void node.childrenIndexes.push(name);
         void children.set(name, new RegisterNode(node, name));
       }
-      return children.get(name)!;
-    }, this.node);
-  }
-  private seekItems(namespace: readonly [] | N, type: RegisterItemType): RegisterItem<N, D, R>[] {
-    const node = this.seekNode(namespace);
-    switch (type) {
-      case RegisterItemType.Monitor:
-        return node.monitors;
-      case RegisterItemType.Subscriber:
-        return node.subscribers;
+      node = children.get(name)!;
     }
+    return node;
   }
 }
 
