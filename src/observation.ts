@@ -58,8 +58,8 @@ const enum RegisterItemType {
   Subscriber,
 }
 const enum SeekMode {
-  Unreachable,
   Extensible,
+  Breakable,
   Closest,
 }
 
@@ -114,7 +114,7 @@ export class Observation<N extends readonly unknown[], D, R>
   public off(namespace: readonly [] | N, listener?: Monitor<N, D> | Subscriber<N, D, R>, type?: RegisterItemType): void;
   public off(namespace: readonly [] | N, listener?: RegisterItem<N, D, R>): void;
   public off(namespace: readonly [] | N, listener?: Monitor<N, D> | Subscriber<N, D, R> | RegisterItem<N, D, R>, type: RegisterItemType = RegisterItemType.Subscriber): void {
-    const node = this.seekNode(namespace, SeekMode.Unreachable);
+    const node = this.seekNode(namespace, SeekMode.Breakable);
     if (!node) return;
     switch (typeof listener) {
       case 'object': {
@@ -159,12 +159,12 @@ export class Observation<N extends readonly unknown[], D, R>
     return unrelay;
   }
   public refs(namespace: readonly [] | N): RegisterItem<N, D, R>[] {
-    const node = this.seekNode(namespace, SeekMode.Unreachable);
+    const node = this.seekNode(namespace, SeekMode.Breakable);
     if (!node) return [];
     return concat<RegisterItem<N, D, R>>(this.refsBelow(node, RegisterItemType.Monitor), this.refsBelow(node, RegisterItemType.Subscriber));
   }
   private drain(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void {
-    const node = this.seekNode(namespace, SeekMode.Unreachable);
+    const node = this.seekNode(namespace, SeekMode.Breakable);
     const results: R[] = [];
     const ss = node ? this.refsBelow(node, RegisterItemType.Subscriber) : [];
     for (let i = 0; i < ss.length; ++i) {
@@ -250,7 +250,7 @@ export class Observation<N extends readonly unknown[], D, R>
       const { children } = node;
       if (!children.has(name)) {
         switch (mode) {
-          case SeekMode.Unreachable:
+          case SeekMode.Breakable:
             return;
           case SeekMode.Closest:
             return node;
