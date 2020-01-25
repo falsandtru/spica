@@ -129,24 +129,16 @@ export class Observation<N extends readonly unknown[], D, R>
             return void items.splice(i, 1);
         }
       }
-      case 'undefined': {
-        const nodes: RegisterNode<N, D, R>[] = [node];
-        const queue: RegisterNode<N, D, R>[] = [];
-        while (nodes.length + queue.length > 0) {
-          while (nodes.length > 0) {
-            const node = nodes.pop()!;
-            void queue.push(node);
-            if (node.childrenIndexes.length === 0) break;
-            void nodes.push(...node.children.values());
-          }
-          assert(queue.length > 0);
-          const node = queue.pop()!;
-          if (node.subscribers.length > 0) {
-            node.subscribers.length = 0;
-          }
-        }
-        return;
-      }
+      case 'undefined':
+        return void this.clear(node);
+    }
+  }
+  private clear({ subscribers, childrenIndexes, children }: RegisterNode<N, D, R>): void {
+    for (let i = 0; i < childrenIndexes.length; ++i) {
+      void this.clear(children.get(childrenIndexes[i])!);
+    }
+    if (subscribers.length > 0) {
+      subscribers.length = 0;
     }
   }
   public emit(this: Observation<N, void, R>, type: N, data?: D, tracker?: (data: D, results: R[]) => void): void
@@ -233,7 +225,7 @@ export class Observation<N extends readonly unknown[], D, R>
       concat(acc, items)
     , []);
   }
-  private refsBelow_({ childrenIndexes, children, monitors, subscribers }: RegisterNode<N, D, R>, type: RegisterItemType): readonly [RegisterItem<N, D, R>[][], number] {
+  private refsBelow_({ monitors, subscribers, childrenIndexes, children }: RegisterNode<N, D, R>, type: RegisterItemType): readonly [RegisterItem<N, D, R>[][], number] {
     const acc = type === RegisterItemType.Monitor
       ? [monitors]
       : [subscribers];
