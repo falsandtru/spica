@@ -102,19 +102,20 @@ export class Observation<N extends readonly unknown[], D, R>
   }
   public off(namespace: readonly [] | N, listener?: Monitor<N, D> | Subscriber<N, D, R>, type: RegisterItemType = RegisterItemType.Subscriber): void {
     switch (typeof listener) {
-      case 'function':
-        return void this.seekNode(namespace, type)
-          .some(({ listener: listener_ }, i, items) => {
-            if (listener_ !== listener) return false;
-            switch (i) {
-              case 0:
-                return items.shift(), true;
-              case items.length - 1:
-                return items.pop(), true;
-              default:
-                return items.splice(i, 1), true;
-            }
-          });
+      case 'function': {
+        const items = this.seekItems(namespace, type);
+        const i = items.findIndex(item => item.listener === listener);
+        switch (i) {
+          case -1:
+            return;
+          case 0:
+            return void items.shift();
+          case items.length - 1:
+            return void items.pop();
+          default:
+            return void items.splice(i, 1);
+        }
+      }
       case 'undefined': {
         const node = this.seekNode(namespace);
         for (let i = 0; i < node.childrenNames.length; ++i) {
@@ -128,7 +129,9 @@ export class Observation<N extends readonly unknown[], D, R>
           void node.childrenNames.splice(findIndex(name, node.childrenNames), 1);
           void --i;
         }
-        node.subscribers.length = 0;
+        if (node.subscribers.length > 0) {
+          node.subscribers.length = 0;
+        }
         return;
       }
       default:
@@ -229,10 +232,8 @@ export class Observation<N extends readonly unknown[], D, R>
     return [items, monitors.length + subscribers.length + count];
   }
   private node: RegisterNode<N, D, R> = new RegisterNode(undefined);
-  private seekNode(namespace: readonly [] | N): RegisterNode<N, D, R>;
-  private seekNode(namespace: readonly [] | N, type: RegisterItemType): RegisterItem<N, D, R>[];
-  private seekNode(namespace: readonly [] | N, type?: RegisterItemType): RegisterNode<N, D, R> | RegisterItem<N, D, R>[] {
-    const node = (namespace as N).reduce<RegisterNode<N, D, R>>((node, name) => {
+  private seekNode(namespace: readonly [] | N): RegisterNode<N, D, R> {
+    return (namespace as N).reduce<RegisterNode<N, D, R>>((node, name) => {
       const { children } = node;
       if (!children.has(name)) {
         void node.childrenNames.push(name);
@@ -240,13 +241,14 @@ export class Observation<N extends readonly unknown[], D, R>
       }
       return children.get(name)!;
     }, this.node);
+  }
+  private seekItems(namespace: readonly [] | N, type: RegisterItemType): RegisterItem<N, D, R>[] {
+    const node = this.seekNode(namespace);
     switch (type) {
       case RegisterItemType.Monitor:
         return node.monitors;
       case RegisterItemType.Subscriber:
         return node.subscribers;
-      default:
-        return node;
     }
   }
 }
