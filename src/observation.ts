@@ -174,7 +174,9 @@ export class Observation<N extends readonly unknown[], D, R>
   private drain(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void {
     const node = this.seekNode(namespace, Mode.Unreachable);
     const results: R[] = [];
-    for (const { listener, options: { once } } of node ? this.refsBelow(node, RegisterItemType.Subscriber)[0] : []) {
+    const ms = node ? this.refsBelow(node, RegisterItemType.Subscriber)[0] : [];
+    for (let i = 0; i < ms.length; ++i) {
+      const { listener, options: { once } } = ms[i];
       if (once) {
         void this.off(namespace, listener);
       }
@@ -186,7 +188,9 @@ export class Observation<N extends readonly unknown[], D, R>
         void causeAsyncException(reason);
       }
     }
-    for (const { listener, options: { once } } of this.refsAbove(node || this.seekNode(namespace, Mode.Closest), RegisterItemType.Monitor)) {
+    const ss = this.refsAbove(node || this.seekNode(namespace, Mode.Closest), RegisterItemType.Monitor);
+    for (let i = 0; i < ss.length; ++i) {
+      const { listener, options: { once } } = ss[i];
       if (once) {
         void this.off(namespace, listener, RegisterItemType.Monitor);
       }
