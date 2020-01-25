@@ -1,7 +1,7 @@
 import { global } from './global';
 import { extend } from './assign';
 import { concat } from './concat';
-import { findIndex } from './equal';
+import { indexOf } from './array';
 import type { DeepImmutable, DeepRequired } from './type';
 
 const { Map } = global;
@@ -106,7 +106,7 @@ export class Cache<K, V = undefined> {
     if (!this.store.has(key)) return false;
     const {LRU, LFU} = this.stats;
     for (const stat of [LFU, LRU]) {
-      const index = findIndex(key, stat);
+      const index = indexOf(stat, key);
       if (index === -1) continue;
       const val = this.store.get(key)!;
       void this.store.delete(stat.splice(index, 1)[0]);
@@ -153,7 +153,7 @@ export class Cache<K, V = undefined> {
   private accessLRU(key: K): boolean {
     if (!this.store.has(key)) return false;
     const {LRU} = this.stats;
-    const index = findIndex(key, LRU);
+    const index = indexOf(LRU, key);
     if (index === -1) return false;
     const {LFU} = this.stats;
     void LFU.unshift(...LRU.splice(index, 1));
@@ -162,7 +162,7 @@ export class Cache<K, V = undefined> {
   private accessLFU(key: K): boolean {
     if (!this.store.has(key)) return false;
     const {LFU} = this.stats;
-    const index = findIndex(key, LFU);
+    const index = indexOf(LFU, key);
     if (index === -1) return false;
     void LFU.unshift(...LFU.splice(index, 1));
     return true;

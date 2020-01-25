@@ -2,7 +2,7 @@ import { global } from './global';
 import type { DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
 import { concat } from './concat';
-import { findIndex } from './equal';
+import { indexOf } from './array';
 import { causeAsyncException } from './exception';
 
 const { Map, WeakMap, Error } = global;
@@ -237,7 +237,7 @@ export class Observation<N extends readonly unknown[], D, R>
       void concat(acc, items);
       if (cnt === 0) {
         void children.delete(name);
-        void childrenIndexes.splice(findIndex(name, childrenIndexes), 1);
+        void childrenIndexes.splice(indexOf(childrenIndexes, name), 1);
         void --i;
       }
     }
