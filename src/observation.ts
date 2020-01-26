@@ -40,7 +40,6 @@ export type RegisterItem<N extends readonly unknown[], D, R> =
   | MonitorItem<N, D>
   | SubscriberItem<N, D, R>;
 interface MonitorItem<N extends readonly unknown[], D> {
-  alive: boolean;
   readonly id: number;
   readonly type: RegisterItemType.Monitor;
   readonly namespace: readonly [] | N;
@@ -48,7 +47,6 @@ interface MonitorItem<N extends readonly unknown[], D> {
   readonly options: ObserverOptions;
  }
 interface SubscriberItem<N extends readonly unknown[], D, R> {
-  alive: boolean;
   readonly id: number;
   readonly type: RegisterItemType.Subscriber;
   readonly namespace: N;
@@ -87,7 +85,6 @@ export class Observation<N extends readonly unknown[], D, R>
     const { monitors } = this.seekNode(namespace, SeekMode.Extensible);
     if (monitors.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
     const item = {
-      alive: true,
       id: ++id,
       type: RegisterItemType.Monitor,
       namespace,
@@ -104,7 +101,6 @@ export class Observation<N extends readonly unknown[], D, R>
     const { subscribers } = this.seekNode(namespace, SeekMode.Extensible);
     if (subscribers.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
     const item = {
-      alive: true,
       id: ++id,
       type: RegisterItemType.Subscriber,
       namespace,
@@ -126,7 +122,6 @@ export class Observation<N extends readonly unknown[], D, R>
     if (!node) return;
     switch (typeof listener) {
       case 'object': {
-        if (!listener.alive) return;
         const items: RegisterItem<N, D, R>[] = listener.type === RegisterItemType.Monitor
           ? node.monitors
           : node.subscribers;
@@ -137,7 +132,7 @@ export class Observation<N extends readonly unknown[], D, R>
         const items: RegisterItem<N, D, R>[] = type === RegisterItemType.Monitor
           ? node.monitors
           : node.subscribers;
-        return void remove(items, items.findIndex(item => item.alive && item.listener === listener));
+        return void remove(items, items.findIndex(item => item.listener === listener));
       }
       case 'undefined':
         return void clear(node);
@@ -183,7 +178,6 @@ export class Observation<N extends readonly unknown[], D, R>
       const items = sss[i];
       for (let i = 0; i < items.length; ++i) {
         const item = items[i];
-        if (!item.alive) continue;
         if (item.options.once) {
           void this.off(item.namespace, item);
         }
@@ -204,7 +198,6 @@ export class Observation<N extends readonly unknown[], D, R>
       const items = mss[i];
       for (let i = 0; i < items.length; ++i) {
         const item = items[i];
-        if (!item.alive) continue;
         if (item.options.once) {
           void this.off(item.namespace, item);
         }
@@ -291,7 +284,6 @@ export class Observation<N extends readonly unknown[], D, R>
 
 function remove<N extends readonly unknown[], D, R>(items: RegisterItem<N, D, R>[], index: number): void {
   if (index === -1) return;
-  items[index].alive = false;
   switch (index) {
     case 0:
       return void items.shift();
@@ -307,9 +299,6 @@ function clear<N extends readonly unknown[], D, R>({ subscribers, childrenIndexe
     void clear(children.get(childrenIndexes[i])!);
   }
   if (subscribers.length > 0) {
-    for (let i = 0; i < subscribers.length; ++i) {
-      subscribers[i].alive = false;
-    }
     subscribers.length = 0;
   }
 }
