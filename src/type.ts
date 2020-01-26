@@ -37,19 +37,19 @@ interface NondeterminateTypeMap {
   boolean: boolean;
 }
 
-export type Prepend<Elm, T extends readonly unknown[]> =
-  T extends unknown ?
-  ((arg: Elm, ...rest: T) => void) extends ((...args: infer T2) => void) ? T2 :
+export type Prepend<T, U extends readonly unknown[]> =
+  U extends unknown ?
+  ((a: T, ...as: U) => void) extends ((...as: infer S) => void) ? S :
   never :
   never;
-export type Append<Elm, T extends readonly [] | readonly [unknown, ...readonly unknown[]]> =
-  T extends unknown ?
-  Concat<T, [Elm]> :
+export type Append<T, U extends readonly unknown[]> =
+  U extends unknown ?
+  Concat<U, [T]> :
   never;
 export type Split<T extends readonly unknown[]> =
   T extends unknown ?
   T extends readonly [] ? never :
-  ((...rest: T) => void) extends ((arg: infer T1, ...args: infer T2) => void) ? [T1, T2] :
+  ((...as: T) => void) extends ((a: infer T1, ...as: infer T2) => void) ? [T1, T2] :
   never :
   never;
 export type Head<T extends unknown[]> =
@@ -84,7 +84,7 @@ type tails<as extends readonly unknown[]> = {
   0: never;
   1: as | tails<Split<as>[1]>;
 }[as extends readonly [unknown, ...readonly unknown[]] ? 1 : 0];
-export type Concat<T extends readonly [] | readonly [unknown, ...readonly unknown[]], U extends readonly unknown[]> =
+export type Concat<T extends readonly unknown[], U extends readonly unknown[]> =
   { 0: U; 1: Concat<Init<T>, Prepend<Last<T>, U>>; }[T extends readonly [] ? 0 : 1];
 export type Reverse<T extends readonly unknown[]> =
   number extends T['length'] ? T :
