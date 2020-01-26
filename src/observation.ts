@@ -40,16 +40,16 @@ export type RegisterItem<N extends readonly unknown[], D, R> =
   | MonitorItem<N, D>
   | SubscriberItem<N, D, R>;
 interface MonitorItem<N extends readonly unknown[], D> {
+  alive: boolean;
   readonly type: RegisterItemType.Monitor;
   readonly namespace: readonly [] | N;
-  alive: boolean;
   readonly listener: Monitor<N, D>;
   readonly options: ObserverOptions;
  }
 interface SubscriberItem<N extends readonly unknown[], D, R> {
+  alive: boolean;
   readonly type: RegisterItemType.Subscriber;
   readonly namespace: N;
-  alive: boolean;
   readonly listener: Subscriber<N, D, R>;
   readonly options: ObserverOptions;
 }
@@ -81,9 +81,9 @@ export class Observation<N extends readonly unknown[], D, R>
     const { monitors } = this.seekNode(namespace, SeekMode.Extensible);
     if (monitors.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
     const item = {
+      alive: true,
       type: RegisterItemType.Monitor,
       namespace,
-      alive: true,
       listener,
       options: {
         once,
@@ -97,9 +97,9 @@ export class Observation<N extends readonly unknown[], D, R>
     const { subscribers } = this.seekNode(namespace, SeekMode.Extensible);
     if (subscribers.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
     const item = {
+      alive: true,
       type: RegisterItemType.Subscriber,
       namespace,
-      alive: true,
       listener,
       options: {
         once,
