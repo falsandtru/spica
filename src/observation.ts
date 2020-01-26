@@ -2,7 +2,6 @@ import { global } from './global';
 import type { DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
 import { concat } from './concat';
-import { indexOf } from './array';
 import { causeAsyncException } from './exception';
 
 const { Map, WeakMap, Error } = global;
@@ -255,7 +254,7 @@ export class Observation<N extends readonly unknown[], D, R>
       count += cnt;
       if (cnt === 0 && this.settings.cleanup) {
         void children.delete(index);
-        void childrenIndexes.splice(indexOf(childrenIndexes, index), 1);
+        void remove(childrenIndexes, i);
         void --i;
       }
     }
@@ -286,23 +285,27 @@ export class Observation<N extends readonly unknown[], D, R>
   }
 }
 
-function remove<N extends readonly unknown[], D, R>(items: RegisterItem<N, D, R>[], index: number): void {
+function remove(target: unknown[], index: number): void {
   if (index === -1) return;
   switch (index) {
     case 0:
-      return void items.shift();
-    case items.length - 1:
-      return void items.pop();
+      return void target.shift();
+    case target.length - 1:
+      return void target.pop();
     default:
-      return void items.splice(index, 1);
+      return void target.splice(index, 1);
   }
 }
 
-function clear<N extends readonly unknown[], D, R>({ subscribers, childrenIndexes, children }: RegisterNode<N, D, R>): void {
+function clear<N extends readonly unknown[], D, R>({ monitors, subscribers, childrenIndexes, children }: RegisterNode<N, D, R>): boolean {
   for (let i = 0; i < childrenIndexes.length; ++i) {
-    void clear(children.get(childrenIndexes[i])!);
+    if (!clear(children.get(childrenIndexes[i])!)) continue;
+    void children.delete(childrenIndexes[i]);
+    void remove(childrenIndexes, i);
+    void --i;
   }
   if (subscribers.length > 0) {
     subscribers.length = 0;
   }
+  return monitors.length === 0;
 }
