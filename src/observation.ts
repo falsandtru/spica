@@ -7,9 +7,9 @@ import { causeAsyncException } from './exception';
 const { Map, WeakMap, Error } = global;
 
 export interface Observer<N extends readonly unknown[], D, R> {
-  monitor(namespace: readonly [] | N, listener: Monitor<N, D>, options?: ObserverOptions): () => void;
+  monitor(namespace: Partial<N>, listener: Monitor<N, D>, options?: ObserverOptions): () => void;
   on(namespace: N, listener: Subscriber<N, D, R>, options?: ObserverOptions): () => void;
-  off(namespace: readonly [] | N, listener?: Subscriber<N, D, R>): void;
+  off(namespace: Partial<N>, listener?: Subscriber<N, D, R>): void;
   once(namespace: N, listener: Subscriber<N, D, R>): () => void;
 }
 export interface ObserverOptions {
@@ -41,7 +41,7 @@ export type RegisterItem<N extends readonly unknown[], D, R> =
 interface MonitorItem<N extends readonly unknown[], D> {
   readonly id: number;
   readonly type: RegisterItemType.Monitor;
-  readonly namespace: readonly [] | N;
+  readonly namespace: Partial<N>;
   readonly listener: Monitor<N, D>;
   readonly options: ObserverOptions;
  }
@@ -79,7 +79,7 @@ export class Observation<N extends readonly unknown[], D, R>
     limit: 10,
     cleanup: false,
   };
-  public monitor(namespace: readonly [] | N, listener: Monitor<N, D>, { once = false }: ObserverOptions = {}): () => void {
+  public monitor(namespace: Partial<N>, listener: Monitor<N, D>, { once = false }: ObserverOptions = {}): () => void {
     if (typeof listener !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${listener}`);
     const { monitors } = this.seekNode(namespace, SeekMode.Extensible);
     if (monitors.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
@@ -114,9 +114,9 @@ export class Observation<N extends readonly unknown[], D, R>
   public once(namespace: N, listener: Subscriber<N, D, R>): () => void {
     return this.on(namespace, listener, { once: true });
   }
-  public off(namespace: readonly [] | N, listener?: Monitor<N, D> | Subscriber<N, D, R>, type?: RegisterItemType): void;
-  public off(namespace: readonly [] | N, listener?: RegisterItem<N, D, R>): void;
-  public off(namespace: readonly [] | N, listener?: Monitor<N, D> | Subscriber<N, D, R> | RegisterItem<N, D, R>, type: RegisterItemType = RegisterItemType.Subscriber): void {
+  public off(namespace: Partial<N>, listener?: Monitor<N, D> | Subscriber<N, D, R>, type?: RegisterItemType): void;
+  public off(namespace: Partial<N>, listener?: RegisterItem<N, D, R>): void;
+  public off(namespace: Partial<N>, listener?: Monitor<N, D> | Subscriber<N, D, R> | RegisterItem<N, D, R>, type: RegisterItemType = RegisterItemType.Subscriber): void {
     const node = this.seekNode(namespace, SeekMode.Breakable);
     if (!node) return;
     switch (typeof listener) {
@@ -153,7 +153,7 @@ export class Observation<N extends readonly unknown[], D, R>
   private unrelaies = new WeakMap<Observer<N, D, unknown>, () => void>();
   public relay(source: Observer<N, D, unknown>): () => void {
     if (this.unrelaies.has(source)) return this.unrelaies.get(source)!;
-    const unbind = source.monitor([], (data, namespace) =>
+    const unbind = source.monitor([] as any, (data, namespace) =>
       void this.emit(namespace, data));
     const unrelay = () => (
       void this.unrelaies.delete(source),
@@ -161,7 +161,7 @@ export class Observation<N extends readonly unknown[], D, R>
     void this.unrelaies.set(source, unrelay);
     return unrelay;
   }
-  public refs(namespace: readonly [] | N): RegisterItem<N, D, R>[] {
+  public refs(namespace: Partial<N>): RegisterItem<N, D, R>[] {
     const node = this.seekNode(namespace, SeekMode.Breakable);
     if (!node) return [];
     return concat<RegisterItem<N, D, R>[]>(
@@ -260,9 +260,9 @@ export class Observation<N extends readonly unknown[], D, R>
     }
     return [acc, monitors.length + subscribers.length + count];
   }
-  private seekNode(namespace: readonly [] | N, mode: SeekMode.Extensible | SeekMode.Closest): RegisterNode<N, D, R>;
-  private seekNode(namespace: readonly [] | N, mode: SeekMode): RegisterNode<N, D, R> | undefined;
-  private seekNode(namespace: readonly [] | N, mode: SeekMode): RegisterNode<N, D, R> | undefined {
+  private seekNode(namespace: Partial<N>, mode: SeekMode.Extensible | SeekMode.Closest): RegisterNode<N, D, R>;
+  private seekNode(namespace: Partial<N>, mode: SeekMode): RegisterNode<N, D, R> | undefined;
+  private seekNode(namespace: Partial<N>, mode: SeekMode): RegisterNode<N, D, R> | undefined {
     let node = this.node;
     for (let i = 0; i < namespace.length; ++i) {
       const index = namespace[i];
