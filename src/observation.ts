@@ -67,6 +67,7 @@ const enum SeekMode {
 
 export interface ObservationOptions {
   readonly limit?: number;
+  readonly cleanup?: boolean;
 }
 
 let id = 0;
@@ -79,6 +80,7 @@ export class Observation<N extends readonly unknown[], D, R>
   private readonly node: RegisterNode<N, D, R> = new RegisterNode(undefined, undefined);
   private readonly settings: DeepImmutable<DeepRequired<ObservationOptions>> = {
     limit: 10,
+    cleanup: false,
   };
   public monitor(namespace: readonly [] | N, listener: Monitor<N, D>, { once = false }: ObserverOptions = {}): () => void {
     if (typeof listener !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${listener}`);
@@ -254,7 +256,7 @@ export class Observation<N extends readonly unknown[], D, R>
       assert(children.has(index));
       const cnt = this.refsBelow_(children.get(index)!, type, acc)[1];
       count += cnt;
-      if (cnt === 0) {
+      if (cnt === 0 && this.settings.cleanup) {
         void children.delete(index);
         void childrenIndexes.splice(indexOf(childrenIndexes, index), 1);
         void --i;
