@@ -248,6 +248,24 @@ describe('Unit: lib/observation', function () {
       ob.emit([''], 0);
     });
 
+    it('off sync', function (done) {
+      const ob = new Observation<string[], number, void>();
+      const f = () => 1;
+      ob.on([], f);
+      ob.on([], () => {
+        ob.off([], f);
+        ob.off([], g);
+        ob.off(['']);
+        return 2;
+      });
+      ob.on([], () => 3);
+      const g = () => 4;
+      ob.on([], g);
+      ob.on([''], () => 5);
+      assert.deepStrictEqual(ob.reflect([], 0), [1, 2, 3]);
+      done();
+    });
+
     it.skip('recovery', function (done) {
       let cnt = 0;
       const ob = new Observation<string[], void, void>();
