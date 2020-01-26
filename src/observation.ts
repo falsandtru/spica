@@ -268,18 +268,20 @@ export class Observation<N extends readonly unknown[], D, R>
     let node = this.node;
     for (let i = 0; i < namespace.length; ++i) {
       const index = namespace[i];
-      const { children } = node;
-      if (!children.has(index)) {
+      const { childrenIndexes, children } = node;
+      let child = children.get(index);
+      if (!child) {
         switch (mode) {
           case SeekMode.Breakable:
             return;
           case SeekMode.Closest:
             return node;
         }
-        void node.childrenIndexes.push(index);
-        void children.set(index, new RegisterNode(node, index));
+        child = new RegisterNode(node, index);
+        void childrenIndexes.push(index);
+        void children.set(index, child);
       }
-      node = children.get(index)!;
+      node = child;
     }
     return node;
   }
