@@ -260,13 +260,20 @@ describe('Unit: lib/observation', function () {
         ob.off([], f);
         ob.off([], g);
         ob.off(['']);
+        ob.on([], () => 5);
         return 2;
       });
       ob.on([], () => 3);
       const g = () => 4;
       ob.on([], g);
-      ob.on([''], () => 5);
+      ob.on([''], () => 6);
       assert.deepStrictEqual(ob.reflect([], 0), [1, 2, 3]);
+      ob.off([]);
+      ob.on([], () => {
+        ob.off([]);
+        return 1;
+      });
+      assert.deepStrictEqual(ob.reflect([], 0), [1]);
     });
 
     it.skip('recovery', function () {

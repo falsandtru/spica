@@ -176,7 +176,8 @@ export class Observation<N extends readonly unknown[], D, R>
     const sss = node ? this.refsBelow(node, RegisterItemType.Subscriber) : [];
     for (let i = 0; i < sss.length; ++i) {
       const items = sss[i];
-      for (let i = 0; i < items.length; ++i) {
+      if (items.length === 0) continue;
+      for (let i = 0, max = items[items.length - 1].id; i < items.length && items[i].id <= max; ++i) {
         const item = items[i];
         if (item.options.once) {
           void this.off(item.namespace, item);
@@ -188,7 +189,8 @@ export class Observation<N extends readonly unknown[], D, R>
         catch (reason) {
           void causeAsyncException(reason);
         }
-        for (; i > 0; --i) {
+        i = i < items.length ? i : items.length - 1;
+        for (; i >= 0; --i) {
           if (items[i].id <= item.id) break;
         }
       }
@@ -196,7 +198,8 @@ export class Observation<N extends readonly unknown[], D, R>
     const mss = this.refsAbove(node || this.seekNode(namespace, SeekMode.Closest), RegisterItemType.Monitor);
     for (let i = 0; i < mss.length; ++i) {
       const items = mss[i];
-      for (let i = 0; i < items.length; ++i) {
+      if (items.length === 0) continue;
+      for (let i = 0, max = items[items.length - 1].id; i < items.length && items[i].id <= max; ++i) {
         const item = items[i];
         if (item.options.once) {
           void this.off(item.namespace, item);
@@ -207,7 +210,8 @@ export class Observation<N extends readonly unknown[], D, R>
         catch (reason) {
           void causeAsyncException(reason);
         }
-        for (; i > 0; --i) {
+        i = i < items.length ? i : items.length - 1;
+        for (; i >= 0; --i) {
           if (items[i].id <= item.id) break;
         }
       }
