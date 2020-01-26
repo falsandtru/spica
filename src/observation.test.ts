@@ -236,7 +236,7 @@ describe('Unit: lib/observation', function () {
       ob.emit([''], 0);
     });
 
-    it('off type', function (done) {
+    it('off scope', function (done) {
       let cnt = 0;
       const ob = new Observation<string[], number, void>();
       ob.on([''], throwError);
@@ -304,7 +304,7 @@ describe('Unit: lib/observation', function () {
       ob.emit(['', '0'], 0);
     });
 
-    it('mixed type key', function (done) {
+    it('mixed index types', function (done) {
       let cnt = 0;
       const sym = Symbol();
       const ob = new Observation<[number, symbol], number, void>();
@@ -322,9 +322,9 @@ describe('Unit: lib/observation', function () {
       const ob = new Observation<string[], number, void>();
       const source = new Observation<string[], number, void>();
       ob.relay(source);
-      ob.once(['a'], (data, type) => {
+      ob.once(['a'], (data, index) => {
         assert(data === 0);
-        assert.deepStrictEqual(type, ['a']);
+        assert.deepStrictEqual(index, ['a']);
         done();
       });
       source.emit(['a'], 0);
