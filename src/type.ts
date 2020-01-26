@@ -103,6 +103,10 @@ type AtLeastRec<L, Elm, T extends readonly unknown[], C extends readonly unknown
   0: T;
   1: AtLeastRec<L, Elm, Prepend<Elm, T>, Prepend<unknown, C>>;
 }[C['length'] extends L ? 0 : 1];
+export type PartialTuple<as extends readonly unknown[]> = (
+  number extends as['length'] ? { readonly [P in keyof as]: as[P] } :
+  readonly [] | inits<as>
+) | as;
 
 export type Rewrite<T, R extends [unknown, unknown]> =
   [T] extends [never]
