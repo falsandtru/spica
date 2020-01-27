@@ -9,7 +9,7 @@ const { Map, WeakMap, Error } = global;
 export interface Observer<N extends readonly unknown[], D, R> {
   monitor(namespace: PartialTuple<N>, listener: Monitor<N, D>, options?: ObserverOptions): () => void;
   on(namespace: N, listener: Subscriber<N, D, R>, options?: ObserverOptions): () => void;
-  off(namespace: PartialTuple<N>, listener?: Subscriber<N, D, R>): void;
+  off(namespace: N, listener?: Subscriber<N, D, R>): void;
   once(namespace: N, listener: Subscriber<N, D, R>): () => void;
 }
 export interface ObserverOptions {
@@ -114,9 +114,9 @@ export class Observation<N extends readonly unknown[], D, R>
   public once(namespace: N, listener: Subscriber<N, D, R>): () => void {
     return this.on(namespace, listener, { once: true });
   }
-  public off(namespace: PartialTuple<N>, listener?: Monitor<N, D> | Subscriber<N, D, R>, type?: RegisterItemType): void;
+  public off(namespace: N, listener?: Subscriber<N, D, R>): void;
   public off(namespace: PartialTuple<N>, listener?: RegisterItem<N, D, R>): void;
-  public off(namespace: PartialTuple<N>, listener?: Monitor<N, D> | Subscriber<N, D, R> | RegisterItem<N, D, R>, type: RegisterItemType = RegisterItemType.Subscriber): void {
+  public off(namespace: PartialTuple<N>, listener?: Subscriber<N, D, R> | RegisterItem<N, D, R>): void {
     const node = this.seekNode(namespace, SeekMode.Breakable);
     if (!node) return;
     switch (typeof listener) {
@@ -128,9 +128,7 @@ export class Observation<N extends readonly unknown[], D, R>
         return void remove(items, items.indexOf(listener));
       }
       case 'function': {
-        const items: RegisterItem<N, D, R>[] = type === RegisterItemType.Monitor
-          ? node.monitors
-          : node.subscribers;
+        const items = node.subscribers;
         return void remove(items, items.findIndex(item => item.listener === listener));
       }
       case 'undefined':
