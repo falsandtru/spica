@@ -284,8 +284,9 @@ export class Observation<N extends readonly unknown[], D, R>
 }
 
 function remove(target: unknown[], index: number): void {
-  if (index === -1) return;
   switch (index) {
+    case -1:
+      return;
     case 0:
       return void target.shift();
     case target.length - 1:
