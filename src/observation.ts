@@ -124,7 +124,7 @@ export class Observation<N extends readonly unknown[], D, R>
         const items: RegisterItem<N, D, R>[] = listener.type === RegisterItemType.Monitor
           ? node.monitors
           : node.subscribers;
-        if (items.length === 0 || items[0].id > listener.id) return;
+        if (items.length === 0 || listener.id < items[0].id || listener.id > items[items.length - 1].id) return;
         return void remove(items, items.indexOf(listener));
       }
       case 'function': {
