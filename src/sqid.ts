@@ -9,7 +9,7 @@ export function sqid(id?: number): string {
     if (id >= 0 === false) throw new TypeError(`Spica: sqid: A parameter value must be a positive number: ${id}`);
     if (id % 1 !== 0) throw new TypeError(`Spica: sqid: A parameter value must be an integer: ${id}`);
   }
-  return id === undefined
+  return id === void 0
     ? (zeros + ++cnt).slice(-15)
     : (zeros + id).slice(-15);
 }

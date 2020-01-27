@@ -74,7 +74,7 @@ export class Observation<N extends readonly unknown[], D, R>
   constructor(opts: ObservationOptions = {}) {
     void extend(this.settings, opts);
   }
-  private readonly node: RegisterNode<N, D, R> = new RegisterNode(undefined, undefined);
+  private readonly node: RegisterNode<N, D, R> = new RegisterNode(void 0, void 0);
   private readonly settings: DeepImmutable<DeepRequired<ObservationOptions>> = {
     limit: 10,
     cleanup: false,

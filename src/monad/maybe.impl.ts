@@ -57,7 +57,7 @@ export class Maybe<a> extends MonadPlus<a> {
       const { value: m, done } = iter.next(val!);
       if (done) return m;
       const r = m.extract(
-        () => undefined,
+        () => void 0,
         a => [a]);
       if (!r) return m;
       val = r[0];
@@ -127,7 +127,7 @@ export class Nothing extends Maybe<never> {
   public extract<b>(transform: () => b): b
   public extract<b>(nothing: () => b, just: (a: never) => b): b
   public extract<b>(nothing?: () => b): b {
-    if (!nothing) throw undefined;
+    if (!nothing) throw void 0;
     return nothing();
   }
 }

@@ -83,7 +83,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     assert(this.alive === false);
     assert(this.available === false);
     void this.settings.destructor(reason);
-    void this.state.bind(reason === undefined ? undefined : AtomicPromise.reject(reason));
+    void this.state.bind(reason === void 0 ? void 0 : AtomicPromise.reject(reason));
   }
   public readonly id: string = sqid();
   public readonly name: string;
@@ -91,7 +91,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     name: '',
     size: Infinity,
     timeout: Infinity,
-    destructor: (_: unknown) => undefined,
+    destructor: (_: unknown) => void 0,
     scheduler: tick,
     resource: 10,
   };
@@ -147,7 +147,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
             AtomicPromise.resolve(iter.next(param))
               .then(({ value: reply, done }) =>
                 done && void kill() || [reply, state]),
-          exit: () => undefined
+          exit: () => void 0
         },
         state);
     }
@@ -163,7 +163,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
               done && kill();
               return [reply, state];
             },
-            exit: () => undefined
+            exit: () => void 0
           },
           state);
       }
@@ -172,7 +172,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
         {
           init: state => state,
           main: process,
-          exit: () => undefined
+          exit: () => void 0
         },
         state);
     }
@@ -220,7 +220,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
         : names[Symbol.iterator]().next().value!;
       void this.events_.loss.emit([name], [name, param]);
       try {
-        void callback(undefined as any, new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A message overflowed.`));
+        void callback(void 0 as any, new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A message overflowed.`));
       }
       catch (reason) {
         void causeAsyncException(reason);
@@ -240,18 +240,18 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     for (name of typeof name === 'string' ? [name] : new NamePool(this.workers, name)) {
       result = this.workers.has(name)
         ? this.workers.get(name)!.call([param, Date.now() + timeout])
-        : undefined;
+        : void 0;
       if (result) break;
     }
     name = name as N;
-    assert(name !== undefined);
+    assert(name !== void 0);
     if (result) return true;
     void this.events_.loss.emit([name], [name, param]);
     return false;
   }
   public refs(name?: N): [N, Supervisor.Process.Regular<P, R, S>, S, (reason?: unknown) => boolean][] {
     assert(this.available || this.workers.size === 0);
-    return name === undefined
+    return name === void 0
       ? [...this.workers.values()].map(convert)
       : this.workers.has(name)
         ? [convert(this.workers.get(name)!)]
@@ -285,7 +285,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     if (!this.available) return false;
     assert(this.alive === true);
     void this.destructor(reason);
-    void this[Coroutine.exit](undefined);
+    void this[Coroutine.exit](void 0);
     return true;
   }
   public [Coroutine.terminate](reason?: unknown): void {
@@ -305,7 +305,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       void this.deliver();
     });
     void tick(() => {
-      void this.settings.scheduler.call(undefined, p.bind);
+      void this.settings.scheduler.call(void 0, p.bind);
       this.settings.scheduler === requestAnimationFrame && void setTimeout(p.bind, 1000);
     });
     this.scheduled = true;
@@ -323,21 +323,21 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       for (name of typeof names === 'string' ? [names] : names) {
         result = this.workers.has(name)
           ? this.workers.get(name)!.call([param, expiry])
-          : undefined;
+          : void 0;
         if (result) break;
       }
-      assert(name !== undefined);
-      if (result === undefined && Date.now() < expiry) continue;
+      assert(name !== void 0);
+      if (result === void 0 && Date.now() < expiry) continue;
       i === 0
         ? void this.messages.shift()
         : void this.messages.splice(i, 1);
       void --i;
       void --len;
 
-      if (result === undefined) {
+      if (result === void 0) {
         void this.events_.loss.emit([name], [name, param]);
         try {
-          void callback(undefined as any, new Error(`Spica: Supervisor: A process has failed.`));
+          void callback(void 0 as any, new Error(`Spica: Supervisor: A process has failed.`));
         }
         catch (reason) {
           void causeAsyncException(reason);
@@ -349,7 +349,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
             reply =>
               void callback(reply),
             () =>
-              void callback(undefined as any, new Error(`Spica: Supervisor: A process has failed.`)));
+              void callback(void 0 as any, new Error(`Spica: Supervisor: A process has failed.`)));
       }
     }
   }

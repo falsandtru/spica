@@ -20,7 +20,7 @@ export interface CacheOptions<K, V = undefined> {
 export class Cache<K, V = undefined> {
   constructor(
     private readonly size: number,
-    private readonly callback: (key: K, value: V) => void = () => undefined,
+    private readonly callback: (key: K, value: V) => void = () => void 0,
     opts: {
       ignore?: {
         delete?: boolean;

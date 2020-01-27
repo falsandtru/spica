@@ -54,7 +54,7 @@ export class Either<a, b> extends Monad<b> {
       const { value: m, done } = iter.next(val!);
       if (done) return m;
       const r = m.extract(
-        () => undefined,
+        () => void 0,
         a => [a]);
       if (!r) return m;
       val = r[0];

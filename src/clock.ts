@@ -18,7 +18,7 @@ export const never: AtomicPromise<never> = new class Never extends AtomicPromise
     return Never;
   }
   constructor() {
-    super(() => undefined);
+    super(() => void 0);
   }
   public then() {
     return this;

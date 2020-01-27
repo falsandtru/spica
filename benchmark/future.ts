@@ -10,7 +10,7 @@ describe('Benchmark:', function () {
     });
 
     it('bind', function (done) {
-      benchmark('AtomicFuture bind', () => new AtomicFuture().bind(undefined), done);
+      benchmark('AtomicFuture bind', () => new AtomicFuture().bind(void 0), done);
     });
 
   });

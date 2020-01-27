@@ -2,7 +2,7 @@ import * as Monad from './maybe.impl';
 
 export class Maybe<a> extends Monad.Maybe<a> {
   private constructor() {
-    super(() => undefined as never);
+    super(() => void 0 as never);
   }
 }
 

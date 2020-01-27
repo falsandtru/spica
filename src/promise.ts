@@ -191,7 +191,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
     });
   }
   public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult> {
-    return this.then(undefined, onrejected);
+    return this.then(void 0, onrejected);
   }
   public finally(onfinally?: (() => void) | undefined | null): AtomicPromise<T> {
     return this.then(onfinally, onfinally).then(() => this);

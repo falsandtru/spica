@@ -1,6 +1,6 @@
 import { global } from './global';
 import { AtomicPromise } from './promise';
-import { AtomicFuture } from './future'; 
+import { AtomicFuture } from './future';
 import type { Structural, DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
 import { wait, tick } from './clock';
@@ -62,8 +62,8 @@ class Internal<T, R, S> {
     autorun: true,
     size: 0,
     interval: 0,
-    resume: () => undefined,
-    trigger: undefined as any,
+    resume: () => void 0,
+    trigger: void 0 as any,
   };
 }
 type Reply<R, T> = (msg: IteratorResult<R, T> | PromiseLike<never>) => void;
@@ -106,19 +106,19 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
           void ++cnt;
           const [msg] = cnt === 1
             // Don't block.
-            ? [undefined]
+            ? [void 0]
             // Block.
             : await AtomicPromise.all([
                 // Don't block.
                 this[internal].settings.size === 0
-                  ? undefined
+                  ? void 0
                   : resume(),
                 // Don't block.
                 AtomicPromise.all([
                   this[internal].settings.resume(),
                   this[internal].settings.interval > 0
                     ? wait(this[internal].settings.interval)
-                    : undefined,
+                    : void 0,
                 ]),
               ]);
           assert(msg instanceof Promise === false);
@@ -143,7 +143,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
             if (!this[internal].alive) break;
             this[internal].alive = false;
             // Don't block.
-            void this[internal].state.bind({ value: undefined, done });
+            void this[internal].state.bind({ value: void 0, done });
             void this[internal].result.bind(result);
             void reply({ value: result, done });
             return;
@@ -157,7 +157,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
         void this[Coroutine.terminate](reason);
       }
     };
-    if (this[internal].settings.trigger !== undefined) {
+    if (this[internal].settings.trigger !== void 0) {
       for (const prop of Array<string | symbol>().concat(this[internal].settings.trigger)) {
         if (prop in this) continue;
         const desc = Obj.getOwnPropertyDescriptor(this, prop) || {
@@ -194,14 +194,14 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
           if (!this[internal].alive) return;
           this[internal].alive = false;
           // Don't block.
-          void this[internal].state.bind({ value: undefined, done: true });
+          void this[internal].state.bind({ value: void 0, done: true });
           void this[internal].result.bind(result);
         },
         reason => {
           if (!this[internal].alive) return;
           this[internal].alive = false;
           // Don't block.
-          void this[internal].state.bind({ value: undefined, done: true });
+          void this[internal].state.bind({ value: void 0, done: true });
           void this[internal].result.bind(AtomicPromise.reject(reason));
         });
   }
@@ -214,7 +214,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
       if (!this[internal].alive) break;
       yield value!;
     }
-    return this.then(() => undefined);
+    return this.then(() => void 0);
   }
   public readonly [port]: Structural<Port<T, R, S>>;
 }

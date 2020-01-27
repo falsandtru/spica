@@ -2,7 +2,7 @@ import * as Monad from './either.impl';
 
 export class Either<a, b> extends Monad.Either<a, b> {
   private constructor() {
-    super(() => undefined as never);
+    super(() => void 0 as never);
   }
 }
 

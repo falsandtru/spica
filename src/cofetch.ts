@@ -53,7 +53,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
         void this[internal].register(() =>
           xhr.readyState < 4 &&
           void xhr.abort());
-        return () => undefined;
+        return () => void 0;
       });
       for await (const ev of listener) {
         assert(ev instanceof ProgressEvent);
@@ -61,7 +61,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
         yield ev;
         if (ev.type === 'loadend') break;
       }
-      assert(state! !== undefined);
+      assert(state! !== void 0);
       switch (state!) {
         case 'load':
           if (opts.cache) {

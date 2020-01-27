@@ -48,13 +48,13 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
   public [internal]: Internal<L>;
   public readonly register = (listener: (reason: L) => void) => {
     assert(listener);
-    if (this[internal].canceled) return void handler(this[internal].reason!), () => undefined;
-    if (!this[internal].alive) return () => undefined;
+    if (this[internal].canceled) return void handler(this[internal].reason!), () => void 0;
+    if (!this[internal].alive) return () => void 0;
     void this[internal].listeners.add(handler);
     return () =>
       this[internal].alive
         ? void this[internal].listeners.delete(handler)
-        : undefined;
+        : void 0;
 
     function handler(reason: L): void {
       try {
