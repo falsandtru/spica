@@ -10,19 +10,16 @@ export class MultiMap<K, V> implements Collection<K, V> {
     }
   }
   public get(key: K): V | undefined {
-    return (this.store.get(key) || [])[0];
+    return this.store.get(key)?.[0];
   }
   public take(key: K, size: number): V[] {
-    return (this.store.get(key) || []).splice(0, size);
+    return this.store.get(key)?.splice(0, size) || [];
   }
   public ref(key: K): V[] {
-    return this.store.get(key)!
-        || this.store.set(key, []).get(key)!;
+    return this.store.get(key) || [];
   }
   public set(key: K, val: V): this {
-    this.store.has(key)
-      ? void this.store.get(key)!.push(val)
-      : void this.store.set(key, [val]);
+    this.store.get(key)?.push(val) || this.store.set(key, [val]);
     return this;
   }
   public has(key: K): boolean {

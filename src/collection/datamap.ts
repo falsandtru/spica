@@ -14,7 +14,7 @@ export class DataMap<K, V> implements Collection<K, V> {
   }
   private readonly store = new Map<unknown, [K, V]>();
   public get(key: K): V | undefined {
-    return (this.store.get(this.indentify(key)) || [0, undefined] as [never, undefined])[1];
+    return this.store.get(this.indentify(key))?.[1];
   }
   public set(key: K, val: V): this {
     void this.store.set(this.indentify(key), [key, val]);

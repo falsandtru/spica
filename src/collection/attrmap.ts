@@ -15,10 +15,7 @@ export class AttrMap<C, K, V> {
     return this.store.get(ctx)?.get(key);
   }
   public set(ctx: C, key: K, val: V): this {
-    const store = this.store.has(ctx)
-      ? this.store.get(ctx)!
-      : this.store.set(ctx, new this.ValueMap<K, V>()).get(ctx)!;
-    void store.set(key, val);
+    this.store.get(ctx)?.set(key, val) || this.store.set(ctx, new this.ValueMap([[key, val]]));
     return this;
   }
   public has(ctx: C): boolean
