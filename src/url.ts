@@ -13,46 +13,62 @@ export class URL<T extends string> {
     assert(this.url.href.startsWith(this.url.protocol));
   }
   private readonly url: global.URL;
+  private reference_!: URL.Reference<T>;
   public get reference(): URL.Reference<T> {
     assert(this.url.href === `${this.origin}${this.path}${this.fragment}`);
-    return this.url.href as any;
+    return this.reference_ = this.reference_ ?? this.url.href as any;
   }
+  private resource_!: URL.Resource<T>;
   public get resource(): URL.Resource<T> {
-    return `${this.origin}${this.pathname}${this.query === '?' ? '' : this.query}` as any;
+    return this.resource_ = this.resource_ ?? `${this.origin}${this.pathname}${this.query === '?' ? '' : this.query}` as any;
   }
+  private origin_!: URL.Origin<T>;
   public get origin(): URL.Origin<T> {
-    return this.url.origin as any;
+    return this.origin_ = this.origin_ ?? this.url.origin as any;
   }
+  private scheme_!: URL.Scheme;
   public get scheme(): URL.Scheme {
-    return this.url.protocol.slice(0, -1) as any;
+    return this.scheme_ = this.scheme_ ?? this.url.protocol.slice(0, -1) as any;
   }
+  private protocol_!: URL.Protocol;
   public get protocol(): URL.Protocol {
-    return this.url.protocol as any;
+    return this.protocol_ = this.protocol_ ?? this.url.protocol as any;
   }
+  private host_!: URL.Host;
   public get host(): URL.Host {
-    return this.url.host as any;
+    return this.host_ = this.host_ ?? this.url.host as any;
   }
+  private hostname_!: URL.Hostname;
   public get hostname(): URL.Hostname {
-    return this.url.hostname as any;
+    return this.hostname_ = this.hostname_ ?? this.url.hostname as any;
   }
+  private port_!: URL.Port;
   public get port(): URL.Port {
-    return this.url.port as any;
+    return this.port_ = this.port_ ?? this.url.port as any;
   }
+  private path_!: URL.Path<T>;
   public get path(): URL.Path<T> {
-    return `${this.pathname}${this.query}` as any;
+    return this.path_ = this.path_ ?? `${this.pathname}${this.query}` as any;
   }
+  private pathname_!: URL.Pathname<T>;
   public get pathname(): URL.Pathname<T> {
-    return this.url.pathname as any;
+    return this.pathname_ = this.pathname_ ?? this.url.pathname as any;
   }
+  private query_!: URL.Query<T>;
   public get query(): URL.Query<T> {
-    return this.url.search || !this.url.href.split('#', 1)[0].includes('?')
-      ? this.url.search as any
-      : '?';
+    return this.query_ = this.query_ === void 0
+      ? this.url.search || !this.url.href.split('#', 1)[0].includes('?')
+          ? this.url.search as any
+          : '?'
+      : this.query_;
   }
+  private fragment_!: URL.Fragment<T>;
   public get fragment(): URL.Fragment<T> {
-    return this.url.hash || !this.url.href.includes('#')
-      ? this.url.hash as any
-      : '#';
+    return this.fragment_ = this.fragment_ === void 0
+      ? this.url.hash || !this.url.href.includes('#')
+          ? this.url.hash as any
+          : '#'
+      : this.fragment_;
   }
 }
 export namespace URL {
