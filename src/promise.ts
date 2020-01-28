@@ -1,6 +1,4 @@
-import './global';
-
-const { Array } = global;
+import { Array } from './global';
 
 const enum State {
   pending,

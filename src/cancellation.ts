@@ -1,10 +1,9 @@
-import { global } from './global';
+import { Set } from './global';
+import { ObjectFreeze } from './alias';
 import { AtomicPromise } from './promise';
 import { causeAsyncException } from './exception';
 import { Maybe, Just, Nothing } from './monad/maybe';
 import { Either, Left, Right } from './monad/either';
-
-const { Object: Obj, Set } = global;
 
 export interface Canceller<L = undefined> {
   readonly cancel: {
@@ -71,8 +70,8 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
     this[internal].canceled = true;
     this[internal].reason = reason!;
     this[internal].resolve(this[internal].reason!);
-    void Obj.freeze(this[internal].listeners);
-    void Obj.freeze(this);
+    void ObjectFreeze(this[internal].listeners);
+    void ObjectFreeze(this);
     for (const listener of this[internal].listeners) {
       void listener(reason!);
     }
@@ -81,8 +80,8 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
     if (!this[internal].alive) return;
     this[internal].alive = false;
     void this[internal].resolve(AtomicPromise.reject(reason));
-    void Obj.freeze(this[internal].listeners);
-    void Obj.freeze(this);
+    void ObjectFreeze(this[internal].listeners);
+    void ObjectFreeze(this);
   };
   public get canceled(): boolean {
     return this[internal].canceled;

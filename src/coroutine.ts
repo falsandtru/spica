@@ -1,4 +1,5 @@
-import { global } from './global';
+import { Array, Error } from './global';
+import { ObjectDefineProperty, ObjectGetOwnPropertyDescriptor } from './alias';
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future';
 import type { Structural, DeepImmutable, DeepRequired } from './type';
@@ -6,8 +7,6 @@ import { extend } from './assign';
 import { wait, tick } from './clock';
 import { causeAsyncException } from './exception';
 import { noop } from './noop';
-
-const { Object: Obj, Error } = global;
 
 export interface CoroutineOptions {
   readonly autorun?: boolean;
@@ -160,15 +159,15 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     if (this[internal].settings.trigger !== void 0) {
       for (const prop of Array<string | symbol>().concat(this[internal].settings.trigger)) {
         if (prop in this) continue;
-        const desc = Obj.getOwnPropertyDescriptor(this, prop) || {
+        const desc = ObjectGetOwnPropertyDescriptor(this, prop) || {
           value: this[prop],
           enumerable: true,
           configurable: true,
           writable: true,
         };
-        void Obj.defineProperty(this, prop, {
+        void ObjectDefineProperty(this, prop, {
           set(this: Coroutine, value: unknown) {
-            void Obj.defineProperty(this, prop, { ...desc, value });
+            void ObjectDefineProperty(this, prop, { ...desc, value });
             void this[init]();
           },
           get(this: Coroutine) {

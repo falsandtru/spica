@@ -1,10 +1,8 @@
-import { global } from './global';
+import { Map, WeakMap, Error } from './global';
 import type { PartialTuple, DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
 import { concat } from './concat';
 import { causeAsyncException } from './exception';
-
-const { Map, WeakMap, Error } = global;
 
 export interface Observer<N extends readonly unknown[], D, R> {
   monitor(namespace: PartialTuple<N>, listener: Monitor<N, D>, options?: ObserverOptions): () => void;

@@ -230,7 +230,7 @@ export type DeepMutable<T, E = never> =
   { -readonly [P in keyof T]: DeepMutable<T[P], E>; } :
   { -readonly [P in keyof T]: DeepMutable<T[P], E>; };
 
-const toString = Object.prototype.toString;
+const toString = Object.prototype.toString.call.bind(Object.prototype.toString) as (target: unknown) => string;
 
 export function type(value: unknown): string {
   const t = value == null ? value : typeof value;
@@ -245,7 +245,7 @@ export function type(value: unknown): string {
     case 'symbol':
       return t;
     default:
-      return toString.call(value).slice(8, -1);
+      return toString(value).slice(8, -1);
   }
 }
 

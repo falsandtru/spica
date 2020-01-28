@@ -1,4 +1,4 @@
-import '../global';
+import { hasOwnProperty } from '../alias';
 import { Collection } from '../collection';
 import { sqid } from '../sqid';
 import { type } from '../type';
@@ -77,7 +77,7 @@ function stringifyObject(obj: object): string {
   if (typeof obj === 'function') return '';
   let acc = '';
   for (const k in obj) {
-    if (obj.hasOwnProperty && !obj.hasOwnProperty(k)) continue;
+    if (!hasOwnProperty(obj, k)) continue;
     acc += `${stringify(k)}:${stringify(obj[k])},`;
   }
   return `{${acc}}`;

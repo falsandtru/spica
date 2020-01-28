@@ -1,8 +1,7 @@
-import { global } from './global';
+import { Object } from './global';
+import { hasOwnProperty, ObjectCreate } from './alias';
 import { type, isPrimitive } from './type';
 import { concat } from './concat';
-
-const { Object: Obj } = global;
 
 export const assign = template((prop, target, source) =>
   target[prop] = source[prop]);
@@ -14,7 +13,7 @@ export const clone = template((prop, target, source) => {
     case 'Object':
       switch (type(target[prop])) {
         case 'Object':
-          return target[prop] = clone(source[prop] instanceof Obj ? {} : Obj.create(null), source[prop]);
+          return target[prop] = clone(source[prop] instanceof Object ? {} : ObjectCreate(null), source[prop]);
         default:
           return target[prop] = source[prop];
       }
@@ -32,7 +31,7 @@ export const extend = template((prop, target, source) => {
         case 'Object':
           return target[prop] = extend(target[prop], source[prop]);
         default:
-          return target[prop] = extend(source[prop] instanceof Obj ? {} : Obj.create(null), source[prop]);
+          return target[prop] = extend(source[prop] instanceof Object ? {} : ObjectCreate(null), source[prop]);
       }
     default:
       return target[prop] = source[prop];
@@ -53,7 +52,7 @@ export const merge = template((prop, target, source) => {
         case 'Object':
           return target[prop] = merge(target[prop], source[prop]);
         default:
-          return target[prop] = merge(source[prop] instanceof Obj ? {} : Obj.create(null), source[prop]);
+          return target[prop] = merge(source[prop] instanceof Object ? {} : ObjectCreate(null), source[prop]);
       }
     default:
       return target[prop] = source[prop];
@@ -87,7 +86,7 @@ export function template(
         assert(!isPrimitiveTarget && !isPrimitiveSource);
         assert(!isPrimitive(target) && !isPrimitive(source));
         for (const prop in source) {
-          if (source.hasOwnProperty && !source.hasOwnProperty(prop)) continue;
+          if (!hasOwnProperty(source, prop)) continue;
           void strategy(prop, target, source);
         }
       }
@@ -101,7 +100,7 @@ function empty_<T extends object>(source: T): T {
     case 'Array':
       return [] as T;
     case 'Object':
-      return source instanceof Obj ? {} : Obj.create(null);
+      return source instanceof Object ? {} : ObjectCreate(null);
     default:
       return source;
   }

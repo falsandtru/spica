@@ -1,10 +1,8 @@
-import { global } from './global';
+import { Map } from './global';
 import { extend } from './assign';
 import { concat } from './concat';
 import { indexOf } from './array';
 import type { DeepImmutable, DeepRequired } from './type';
-
-const { Map } = global;
 
 export interface CacheOptions<K, V = undefined> {
   ignore?: {

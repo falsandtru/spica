@@ -1,9 +1,7 @@
-import { global } from './global';
+import { global, location } from './global';
 import { StandardURL, newURL } from './url/domain/format';
 
 export { StandardURL, standardize } from './url/domain/format';
-
-const { location } = global;
 
 export class URL<T extends string> {
   constructor(url: URL.Reference<T> | URL.Resource<T> | URL.Origin<T> | URL.Path<T> | URL.Pathname<T>, base?: string)

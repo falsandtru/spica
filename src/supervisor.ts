@@ -1,4 +1,5 @@
-import { global } from './global';
+import { Object, Set, Map, WeakSet, Error, setTimeout } from './global';
+import { isFinite, ObjectFreeze } from './alias';
 import { Coroutine, CoroutineInterface, isCoroutine } from './coroutine';
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future';
@@ -8,8 +9,6 @@ import { extend } from './assign';
 import { tick } from './clock';
 import { sqid } from './sqid';
 import { causeAsyncException } from './exception';
-
-const { Object: Obj, Set, Map, WeakSet, Error, setTimeout } = global;
 
 export interface SupervisorOptions {
   readonly name?: string;
@@ -66,7 +65,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     this.available = false;
     void this.clear(reason);
     assert(this.workers.size === 0);
-    void Obj.freeze(this.workers);
+    void ObjectFreeze(this.workers);
     while (this.messages.length > 0) {
       const [names, param] = this.messages.shift()!;
       const name = typeof names === 'string'
@@ -75,11 +74,11 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       void this.events_.loss.emit([name], [name, param]);
     }
     assert(this.messages.length === 0);
-    assert(!Obj.isFrozen(this.messages));
+    assert(!Object.isFrozen(this.messages));
     this.alive = false;
     // @ts-ignore #31251
     void this.constructor.instances.delete(this);
-    void Obj.freeze(this);
+    void ObjectFreeze(this);
     assert(this.alive === false);
     assert(this.available === false);
     void this.settings.destructor(reason);
@@ -424,7 +423,7 @@ class Worker<N extends string, P, R, S> {
     assert(this.alive === true);
     this.alive = false;
     this.available = false;
-    void Obj.freeze(this);
+    void ObjectFreeze(this);
     assert(this.alive === false);
     assert(this.available === false);
     try {
@@ -480,7 +479,7 @@ class Worker<N extends string, P, R, S> {
       .then(([reply, state]) => {
         if (this.alive) {
           void this.schedule();
-          assert(!Obj.isFrozen(this));
+          assert(!Object.isFrozen(this));
           this.state = state;
           this.available = true;
         }

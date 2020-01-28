@@ -1,6 +1,4 @@
-import { global } from './global';
-
-const { setTimeout } = global;
+import { setTimeout } from './global';
 
 export function throttle<T>(interval: number, callback: (last: T, buffer: T[]) => void): (arg: T) => void {
   let timer = 0;

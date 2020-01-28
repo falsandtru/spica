@@ -1,3 +1,4 @@
+import { ObjectKeys } from './alias';
 import { Coroutine } from './coroutine';
 import { Colistener } from './colistener';
 import { Cancellation } from './cancellation';
@@ -111,7 +112,7 @@ function fetch(xhr: XMLHttpRequest, url: string, opts: CofetchOptions): void {
   assert(xhr.readyState === 0);
   assert(opts.method);
   void xhr.open(opts.method!, url);
-  for (const key of Object.keys(opts)) {
+  for (const key of ObjectKeys(opts)) {
     switch (key) {
       case 'method':
       case 'body':
