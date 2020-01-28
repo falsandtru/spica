@@ -21,7 +21,7 @@ export class URL<T extends string> {
     return `${this.origin}${this.pathname}${this.query === '?' ? '' : this.query}` as any;
   }
   public get origin(): URL.Origin<T> {
-    return `${this.protocol}//${this.host}` as any;
+    return this.url.origin as any;
   }
   public get scheme(): URL.Scheme {
     return this.url.protocol.slice(0, -1) as any;

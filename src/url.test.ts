@@ -1,4 +1,5 @@
 import { URL, StandardURL, standardize } from './url';
+import { global } from './global';
 
 describe('Unit: lib/url', () => {
   describe('URL', () => {
@@ -24,6 +25,7 @@ describe('Unit: lib/url', () => {
       assert(new URL(origin).origin === origin);
       assert(new URL(origin + ':80').origin === origin + ':80');
       assert(new URL(origin + ':443').origin === origin + '');
+      assert(new URL('javascript:alert').origin === new global.URL('javascript:alert').origin);
     });
 
     it('scheme', () => {
