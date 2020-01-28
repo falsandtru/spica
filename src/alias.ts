@@ -1,6 +1,3 @@
-import { global } from './global';
-
-export const { Number } = global;
 export const {
   NaN,
   isFinite,
@@ -11,7 +8,6 @@ export const {
   parseInt,
 } = Number;
 
-//export const { Symbol } = global;
 //export const SymbolAsyncIterator: typeof Symbol.asyncIterator = Symbol.asyncIterator;
 export const SymbolFor = Symbol.for;
 //export const SymbolHasInstance: typeof Symbol.hasInstance = Symbol.hasInstance;
@@ -27,7 +23,6 @@ export const SymbolKeyFor = Symbol.keyFor;
 //export const SymbolToStringTag: typeof Symbol.toStringTag = Symbol.toStringTag;
 //export const SymbolUnscopables: typeof Symbol.unscopables = Symbol.unscopables;
 
-export const { Object } = global;
 export const hasOwnProperty = Object.prototype.hasOwnProperty.call.bind(Object.prototype.hasOwnProperty) as (target: unknown, prop: string | number | symbol) => boolean;
 export const isPrototypeOf = Object.prototype.isPrototypeOf.call.bind(Object.prototype.isPrototypeOf) as (target: unknown, base: unknown) => boolean;
 export const isEnumerable = Object.prototype.propertyIsEnumerable.call.bind(Object.prototype.propertyIsEnumerable) as (target: unknown, prop: string | number | symbol) => boolean;
@@ -53,5 +48,4 @@ export const ObjectSeal = Object.seal;
 export const ObjectSetPrototypeOf = Object.setPrototypeOf;
 export const ObjectValues = Object.values;
 
-export const { Array } = global;
 export const isArray = Array.isArray;
