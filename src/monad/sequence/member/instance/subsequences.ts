@@ -1,5 +1,4 @@
 import { Sequence } from '../../core';
-import { concat } from '../../../../concat';
 
 export default class <a, z> extends Sequence<a, z> {
   public subsequences(): Sequence<a[], [Sequence.Iterator<a[]>, Sequence.Iterator<a[]>]> {
@@ -30,7 +29,7 @@ function nonEmptySubsequences<a, z>(xs: Sequence<a, z>): Sequence<a[], [Sequence
                     Sequence.mappend(
                       Sequence.mappend(
                         Sequence.from([ys]),
-                        Sequence.from([concat([Sequence.Thunk.value(xt)], ys)])),
+                        Sequence.from([[Sequence.Thunk.value(xt), ...ys]])),
                       r)
                   , Sequence.mempty))))
           .bind(xs => xs)));

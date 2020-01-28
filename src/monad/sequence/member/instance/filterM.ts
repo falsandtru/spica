@@ -1,5 +1,4 @@
 import { Sequence } from '../../core';
-import { concat } from '../../../../concat';
 
 export default class <a, z> extends Sequence<a, z> {
   public filterM(f: (a: a) => Sequence<boolean, any>): Sequence<a[], [Sequence.Iterator<Sequence<a[], any>>, Sequence.Iterator<a[]>]> {
@@ -16,7 +15,7 @@ export default class <a, z> extends Sequence<a, z> {
                 b
                   ? xs.length === 0
                     ? Sequence.from([[x]])
-                    : Sequence.from(xs).filterM(f).fmap(ys => concat([x], ys))
+                    : Sequence.from(xs).filterM(f).fmap(ys => [x, ...ys])
                   : xs.length === 0
                     ? Sequence.from([[]])
                     : Sequence.from(xs).filterM(f));

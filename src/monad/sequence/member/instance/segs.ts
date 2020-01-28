@@ -1,5 +1,4 @@
 import { Sequence } from '../../core';
-import { concat } from '../../../../concat';
 
 export default class <a, z> extends Sequence<a, z> {
   public segs(): Sequence<a[], [Sequence.Iterator<a[]>, Sequence.Iterator<a[]>]> {
@@ -12,7 +11,7 @@ export default class <a, z> extends Sequence<a, z> {
                 Sequence.from([
                   Sequence.mappend(
                     Sequence.from([[a]]),
-                    Sequence.from(b).map(c => concat([a], c)))
+                    Sequence.from(b).map(c => [a, ...c]))
                 ]),
                 bs))
         , Sequence.from([Sequence.from([])]))
