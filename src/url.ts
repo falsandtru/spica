@@ -15,7 +15,6 @@ export class URL<T extends string> {
   private readonly url: global.URL;
   private reference_!: URL.Reference<T>;
   public get reference(): URL.Reference<T> {
-    assert(this.url.href === `${this.origin}${this.path}${this.fragment}`);
     return this.reference_ = this.reference_ ?? this.url.href as any;
   }
   private resource_!: URL.Resource<T>;
