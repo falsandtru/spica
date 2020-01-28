@@ -77,15 +77,15 @@ export class Observation<N extends readonly unknown[], D, R>
     limit: 10,
     cleanup: false,
   };
-  public monitor(namespace: PartialTuple<N>, listener: Monitor<N, D>, { once = false }: ObserverOptions = {}): () => void {
-    if (typeof listener !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${listener}`);
+  public monitor(namespace: PartialTuple<N>, monitor: Monitor<N, D>, { once = false }: ObserverOptions = {}): () => void {
+    if (typeof monitor !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${monitor}`);
     const { monitors } = this.seekNode(namespace, SeekMode.Extensible);
     if (monitors.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
     const item = {
       id: ++id,
       type: ListenerType.Monitor,
       namespace,
-      listener,
+      listener: monitor,
       options: {
         once,
       },
@@ -93,15 +93,15 @@ export class Observation<N extends readonly unknown[], D, R>
     void monitors.push(item);
     return () => void this.off(namespace, item);
   }
-  public on(namespace: N, listener: Subscriber<N, D, R>, { once = false }: ObserverOptions = {}): () => void {
-    if (typeof listener !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${listener}`);
+  public on(namespace: N, subscriber: Subscriber<N, D, R>, { once = false }: ObserverOptions = {}): () => void {
+    if (typeof subscriber !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${subscriber}`);
     const { subscribers } = this.seekNode(namespace, SeekMode.Extensible);
     if (subscribers.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
     const item = {
       id: ++id,
       type: ListenerType.Subscriber,
       namespace,
-      listener,
+      listener: subscriber,
       options: {
         once,
       },
@@ -109,25 +109,25 @@ export class Observation<N extends readonly unknown[], D, R>
     void subscribers.push(item);
     return () => void this.off(namespace, item);
   }
-  public once(namespace: N, listener: Subscriber<N, D, R>): () => void {
-    return this.on(namespace, listener, { once: true });
+  public once(namespace: N, subscriber: Subscriber<N, D, R>): () => void {
+    return this.on(namespace, subscriber, { once: true });
   }
-  public off(namespace: N, listener?: Subscriber<N, D, R>): void;
-  public off(namespace: PartialTuple<N>, listener?: ListenerItem<N, D, R>): void;
-  public off(namespace: PartialTuple<N>, listener?: Subscriber<N, D, R> | ListenerItem<N, D, R>): void {
+  public off(namespace: N, subscriber?: Subscriber<N, D, R>): void;
+  public off(namespace: PartialTuple<N>, item?: ListenerItem<N, D, R>): void;
+  public off(namespace: PartialTuple<N>, subscriber?: Subscriber<N, D, R> | ListenerItem<N, D, R>): void {
     const node = this.seekNode(namespace, SeekMode.Breakable);
     if (!node) return;
-    switch (typeof listener) {
+    switch (typeof subscriber) {
       case 'object': {
-        const items: ListenerItem<N, D, R>[] = listener.type === ListenerType.Monitor
+        const items: ListenerItem<N, D, R>[] = subscriber.type === ListenerType.Monitor
           ? node.monitors
           : node.subscribers;
-        if (items.length === 0 || listener.id < items[0].id || listener.id > items[items.length - 1].id) return;
-        return void remove(items, items.indexOf(listener));
+        if (items.length === 0 || subscriber.id < items[0].id || subscriber.id > items[items.length - 1].id) return;
+        return void remove(items, items.indexOf(subscriber));
       }
       case 'function': {
         const items = node.subscribers;
-        return void remove(items, items.findIndex(item => item.listener === listener));
+        return void remove(items, items.findIndex(item => item.listener === subscriber));
       }
       case 'undefined':
         return void clear(node);
