@@ -22,35 +22,35 @@ export interface Publisher<N extends readonly unknown[], D, R> {
 export type Monitor<N extends readonly unknown[], D> = (data: D, namespace: N) => void;
 export type Subscriber<N extends readonly unknown[], D, R> = (data: D, namespace: N) => R;
 
-class RegisterNode<N extends readonly unknown[], D, R> {
+class ListenerNode<N extends readonly unknown[], D, R> {
   constructor(
-    public readonly parent: RegisterNode<N, D, R> | undefined,
+    public readonly parent: ListenerNode<N, D, R> | undefined,
     public readonly index: unknown,
   ) {
   }
-  public readonly children: Map<N[number], RegisterNode<N, D, R>> = new Map();
+  public readonly children: Map<N[number], ListenerNode<N, D, R>> = new Map();
   public readonly childrenIndexes: N[number][] = [];
   public readonly monitors: MonitorItem<N, D>[] = [];
   public readonly subscribers: SubscriberItem<N, D, R>[] = [];
 }
-export type RegisterItem<N extends readonly unknown[], D, R> =
+export type ListenerItem<N extends readonly unknown[], D, R> =
   | MonitorItem<N, D>
   | SubscriberItem<N, D, R>;
 interface MonitorItem<N extends readonly unknown[], D> {
   readonly id: number;
-  readonly type: RegisterItemType.Monitor;
+  readonly type: ListenerType.Monitor;
   readonly namespace: PartialTuple<N>;
   readonly listener: Monitor<N, D>;
   readonly options: ObserverOptions;
  }
 interface SubscriberItem<N extends readonly unknown[], D, R> {
   readonly id: number;
-  readonly type: RegisterItemType.Subscriber;
+  readonly type: ListenerType.Subscriber;
   readonly namespace: N;
   readonly listener: Subscriber<N, D, R>;
   readonly options: ObserverOptions;
 }
-const enum RegisterItemType {
+const enum ListenerType {
   Monitor,
   Subscriber,
 }
@@ -72,7 +72,7 @@ export class Observation<N extends readonly unknown[], D, R>
   constructor(opts: ObservationOptions = {}) {
     void extend(this.settings, opts);
   }
-  private readonly node: RegisterNode<N, D, R> = new RegisterNode(void 0, void 0);
+  private readonly node: ListenerNode<N, D, R> = new ListenerNode(void 0, void 0);
   private readonly settings: DeepImmutable<DeepRequired<ObservationOptions>> = {
     limit: 10,
     cleanup: false,
@@ -83,7 +83,7 @@ export class Observation<N extends readonly unknown[], D, R>
     if (monitors.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
     const item = {
       id: ++id,
-      type: RegisterItemType.Monitor,
+      type: ListenerType.Monitor,
       namespace,
       listener,
       options: {
@@ -99,7 +99,7 @@ export class Observation<N extends readonly unknown[], D, R>
     if (subscribers.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
     const item = {
       id: ++id,
-      type: RegisterItemType.Subscriber,
+      type: ListenerType.Subscriber,
       namespace,
       listener,
       options: {
@@ -113,13 +113,13 @@ export class Observation<N extends readonly unknown[], D, R>
     return this.on(namespace, listener, { once: true });
   }
   public off(namespace: N, listener?: Subscriber<N, D, R>): void;
-  public off(namespace: PartialTuple<N>, listener?: RegisterItem<N, D, R>): void;
-  public off(namespace: PartialTuple<N>, listener?: Subscriber<N, D, R> | RegisterItem<N, D, R>): void {
+  public off(namespace: PartialTuple<N>, listener?: ListenerItem<N, D, R>): void;
+  public off(namespace: PartialTuple<N>, listener?: Subscriber<N, D, R> | ListenerItem<N, D, R>): void {
     const node = this.seekNode(namespace, SeekMode.Breakable);
     if (!node) return;
     switch (typeof listener) {
       case 'object': {
-        const items: RegisterItem<N, D, R>[] = listener.type === RegisterItemType.Monitor
+        const items: ListenerItem<N, D, R>[] = listener.type === ListenerType.Monitor
           ? node.monitors
           : node.subscribers;
         if (items.length === 0 || listener.id < items[0].id || listener.id > items[items.length - 1].id) return;
@@ -157,18 +157,18 @@ export class Observation<N extends readonly unknown[], D, R>
     void this.unrelaies.set(source, unrelay);
     return unrelay;
   }
-  public refs(namespace: PartialTuple<N>): RegisterItem<N, D, R>[] {
+  public refs(namespace: PartialTuple<N>): ListenerItem<N, D, R>[] {
     const node = this.seekNode(namespace, SeekMode.Breakable);
     if (!node) return [];
-    return concat<RegisterItem<N, D, R>[]>(
-      this.refsBelow(node, RegisterItemType.Monitor),
-      this.refsBelow(node, RegisterItemType.Subscriber))
+    return concat<ListenerItem<N, D, R>[]>(
+      this.refsBelow(node, ListenerType.Monitor),
+      this.refsBelow(node, ListenerType.Subscriber))
       .reduce((acc, rs) => concat(acc, rs), []);
   }
   private drain(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void {
     const node = this.seekNode(namespace, SeekMode.Breakable);
     const results: R[] = [];
-    const sss = node ? this.refsBelow(node, RegisterItemType.Subscriber) : [];
+    const sss = node ? this.refsBelow(node, ListenerType.Subscriber) : [];
     for (let i = 0; i < sss.length; ++i) {
       const items = sss[i];
       if (items.length === 0) continue;
@@ -190,7 +190,7 @@ export class Observation<N extends readonly unknown[], D, R>
         }
       }
     }
-    const mss = this.refsAbove(node || this.seekNode(namespace, SeekMode.Closest), RegisterItemType.Monitor);
+    const mss = this.refsAbove(node || this.seekNode(namespace, SeekMode.Closest), ListenerType.Monitor);
     for (let i = 0; i < mss.length; ++i) {
       const items = mss[i];
       if (items.length === 0) continue;
@@ -220,26 +220,26 @@ export class Observation<N extends readonly unknown[], D, R>
       }
     }
   }
-  private refsAbove({ parent, monitors, subscribers }: RegisterNode<N, D, R>, type: RegisterItemType.Monitor): MonitorItem<N, D>[][];
-  private refsAbove({ parent, monitors, subscribers }: RegisterNode<N, D, R>, type: RegisterItemType): RegisterItem<N, D, R>[][] {
-    const acc = type === RegisterItemType.Monitor
+  private refsAbove({ parent, monitors, subscribers }: ListenerNode<N, D, R>, type: ListenerType.Monitor): MonitorItem<N, D>[][];
+  private refsAbove({ parent, monitors, subscribers }: ListenerNode<N, D, R>, type: ListenerType): ListenerItem<N, D, R>[][] {
+    const acc = type === ListenerType.Monitor
       ? [monitors]
       : [subscribers];
     while (parent) {
-      type === RegisterItemType.Monitor
+      type === ListenerType.Monitor
         ? void (acc as typeof monitors[]).push(parent.monitors)
         : void (acc as typeof subscribers[]).push(parent.subscribers);
       parent = parent.parent;
     }
     return acc;
   }
-  private refsBelow(node: RegisterNode<N, D, R>, type: RegisterItemType.Monitor): MonitorItem<N, D>[][];
-  private refsBelow(node: RegisterNode<N, D, R>, type: RegisterItemType.Subscriber): SubscriberItem<N, D, R>[][];
-  private refsBelow(node: RegisterNode<N, D, R>, type: RegisterItemType): RegisterItem<N, D, R>[][] {
+  private refsBelow(node: ListenerNode<N, D, R>, type: ListenerType.Monitor): MonitorItem<N, D>[][];
+  private refsBelow(node: ListenerNode<N, D, R>, type: ListenerType.Subscriber): SubscriberItem<N, D, R>[][];
+  private refsBelow(node: ListenerNode<N, D, R>, type: ListenerType): ListenerItem<N, D, R>[][] {
     return this.refsBelow_(node, type, [])[0];
   }
-  private refsBelow_({ monitors, subscribers, childrenIndexes, children }: RegisterNode<N, D, R>, type: RegisterItemType, acc: RegisterItem<N, D, R>[][]): readonly [RegisterItem<N, D, R>[][], number] {
-    type === RegisterItemType.Monitor
+  private refsBelow_({ monitors, subscribers, childrenIndexes, children }: ListenerNode<N, D, R>, type: ListenerType, acc: ListenerItem<N, D, R>[][]): readonly [ListenerItem<N, D, R>[][], number] {
+    type === ListenerType.Monitor
       ? void (acc as typeof monitors[]).push(monitors)
       : void (acc as typeof subscribers[]).push(subscribers);
     let count = 0;
@@ -256,9 +256,9 @@ export class Observation<N extends readonly unknown[], D, R>
     }
     return [acc, monitors.length + subscribers.length + count];
   }
-  private seekNode(namespace: PartialTuple<N>, mode: SeekMode.Extensible | SeekMode.Closest): RegisterNode<N, D, R>;
-  private seekNode(namespace: PartialTuple<N>, mode: SeekMode): RegisterNode<N, D, R> | undefined;
-  private seekNode(namespace: PartialTuple<N>, mode: SeekMode): RegisterNode<N, D, R> | undefined {
+  private seekNode(namespace: PartialTuple<N>, mode: SeekMode.Extensible | SeekMode.Closest): ListenerNode<N, D, R>;
+  private seekNode(namespace: PartialTuple<N>, mode: SeekMode): ListenerNode<N, D, R> | undefined;
+  private seekNode(namespace: PartialTuple<N>, mode: SeekMode): ListenerNode<N, D, R> | undefined {
     let node = this.node;
     for (let i = 0; i < namespace.length; ++i) {
       const index = namespace[i];
@@ -271,7 +271,7 @@ export class Observation<N extends readonly unknown[], D, R>
           case SeekMode.Closest:
             return node;
         }
-        child = new RegisterNode(node, index);
+        child = new ListenerNode(node, index);
         void childrenIndexes.push(index);
         void children.set(index, child);
       }
@@ -294,7 +294,7 @@ function remove(target: unknown[], index: number): void {
   }
 }
 
-function clear<N extends readonly unknown[], D, R>({ monitors, subscribers, childrenIndexes, children }: RegisterNode<N, D, R>): boolean {
+function clear<N extends readonly unknown[], D, R>({ monitors, subscribers, childrenIndexes, children }: ListenerNode<N, D, R>): boolean {
   for (let i = 0; i < childrenIndexes.length; ++i) {
     if (!clear(children.get(childrenIndexes[i])!)) continue;
     void children.delete(childrenIndexes[i]);
