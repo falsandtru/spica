@@ -1,4 +1,4 @@
-import './global';
+import { global } from './global';
 
 describe('Unit: lib/global', () => {
   describe('global', () => {
