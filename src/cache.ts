@@ -63,7 +63,7 @@ export class Cache<K, V = undefined> {
     if (!log && this.store.has(key)) return void this.store.set(key, value), true;
     if (this.access(key)) return void this.store.set(key, value), true;
 
-    const {LRU, LFU} = this.stats;
+    const { LRU, LFU } = this.stats;
     if (LRU.length + LFU.length === this.size && LRU.length < LFU.length) {
       assert(LFU.length > 0);
       const key = LFU.pop()!;
@@ -102,7 +102,7 @@ export class Cache<K, V = undefined> {
   }
   public delete(key: K): boolean {
     if (!this.store.has(key)) return false;
-    const {LRU, LFU} = this.stats;
+    const { LRU, LFU } = this.stats;
     for (const stat of [LFU, LRU]) {
       const index = indexOf(stat, key);
       if (index === -1) continue;
@@ -136,7 +136,7 @@ export class Cache<K, V = undefined> {
     };
   }
   public inspect(): [K[], K[]] {
-    const {LRU, LFU} = this.stats;
+    const { LRU, LFU } = this.stats;
     return [LRU.slice(), LFU.slice()];
   }
   private store: Map<K, V>;
@@ -151,16 +151,16 @@ export class Cache<K, V = undefined> {
   }
   private accessLRU(key: K): boolean {
     assert(this.store.has(key));
-    const {LRU} = this.stats;
+    const { LRU } = this.stats;
     const index = indexOf(LRU, key);
     if (index === -1) return false;
-    const {LFU} = this.stats;
+    const { LFU } = this.stats;
     void LFU.unshift(...LRU.splice(index, 1));
     return true;
   }
   private accessLFU(key: K): boolean {
     assert(this.store.has(key));
-    const {LFU} = this.stats;
+    const { LFU } = this.stats;
     const index = indexOf(LFU, key);
     if (index === -1) return false;
     void LFU.unshift(...LFU.splice(index, 1));
