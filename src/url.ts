@@ -10,7 +10,13 @@ export class URL<T extends string> {
   constructor(url: T, base?: T extends StandardURL ? string : T)
   constructor(url: string, base: string = location.href) {
     this.url = newURL(url, base);
-    assert(this.url.href.startsWith(this.url.protocol));
+    assert(this.url.href.endsWith(`${this.port}${this.path}${this.fragment}`));
+    assert(this.reference === this.url.href);
+    assert(this.reference.startsWith(this.resource));
+    assert(this.protocol === this.url.protocol);
+    assert(this.host === this.url.host);
+    assert(this.hostname === this.url.hostname);
+    assert(this.port === this.url.port);
   }
   private readonly url: global.URL;
   private reference_!: URL.Reference<T>;

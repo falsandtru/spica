@@ -25,6 +25,8 @@ describe('Unit: lib/url', () => {
       assert(new URL(origin).origin === origin);
       assert(new URL(origin + ':80').origin === origin + ':80');
       assert(new URL(origin + ':443').origin === origin + '');
+      assert(new URL('file:').origin === new global.URL('file:').origin);
+      assert(new URL('blob:').origin === new global.URL('blob:').origin);
       assert(new URL('javascript:alert').origin === new global.URL('javascript:alert').origin);
     });
 
