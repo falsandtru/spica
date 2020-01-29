@@ -1,5 +1,5 @@
 import { global, location } from './global';
-import { StandardURL, newURL } from './url/domain/format';
+import { NormalizedURL, newURL } from './url/domain/format';
 
 export { StandardURL, standardize } from './url/domain/format';
 
@@ -7,7 +7,7 @@ export class URL<T extends string> {
   constructor(url: URL.Reference<T> | URL.Resource<T> | URL.Origin<T> | URL.Path<T> | URL.Pathname<T>, base?: string)
   constructor(url: URL.Reference<T> | URL.Resource<T> | URL.Origin<T> | URL.Path<T> | URL.Pathname<T> | URL.Query<T> | URL.Fragment<T>, base: T)
   constructor(url: URLSegment<string> & T, base: T)
-  constructor(url: T, base?: T extends StandardURL ? string : T)
+  constructor(url: T, base?: T extends NormalizedURL ? string : T)
   constructor(url: string, base: string = location.href) {
     this.url = newURL(url, base);
     assert(this.url.href.endsWith(`${this.port}${this.path}${this.fragment}`));

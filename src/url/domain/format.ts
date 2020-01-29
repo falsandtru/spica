@@ -58,7 +58,7 @@ function encode(url: string): EncodedURL {
 export { encode as _encode }
 
 
-type NormalizedURL = URL<Normalized>;
+export type NormalizedURL = URL<Normalized>;
 
 function normalize(url: URL<unknown>, base: string): void
 function normalize(url: string, base: string): NormalizedURL
@@ -68,6 +68,6 @@ function normalize(url: string, base: string): NormalizedURL {
 
 export const newURL: (url: string, base: string) => Readonly<global.URL> = flip(uncurry(memoize((base: string) => memoize((url: string) => new global.URL(formatURLForEdge(url, base), base), new Cache(9)), new Cache(9))));
 
-function formatURLForEdge(url: string, base: string = location.href): string {
+function formatURLForEdge(url: string, base: string): string {
   return url.trim() || base;
 }
