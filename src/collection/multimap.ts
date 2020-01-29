@@ -1,3 +1,4 @@
+import { Infinity } from '../global';
 import { Collection } from '../collection';
 
 export class MultiMap<K, V> implements Collection<K, V> {
@@ -13,7 +14,8 @@ export class MultiMap<K, V> implements Collection<K, V> {
     return this.store.get(key)?.[0];
   }
   public take(key: K, size: number): V[] {
-    return this.store.get(key)?.splice(0, size) || [];
+    const vs = this.store.get(key);
+    return vs?.splice(0, size === Infinity ? vs.length : size) || [];
   }
   public ref(key: K): V[] {
     return this.store.get(key) || [];

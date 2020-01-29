@@ -1,4 +1,4 @@
-import { Object, Set, Map, WeakSet, Error, setTimeout } from './global';
+import { Infinity, Object, Set, Map, WeakSet, Error, setTimeout } from './global';
 import { isFinite, ObjectFreeze } from './alias';
 import { Coroutine, CoroutineInterface, isCoroutine } from './coroutine';
 import { AtomicPromise } from './promise';
