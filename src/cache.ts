@@ -145,11 +145,12 @@ export class Cache<K, V = undefined> {
     LFU: K[];
   };
   private access(key: K): boolean {
+    if (!this.store.has(key)) return false;
     return this.accessLFU(key)
         || this.accessLRU(key);
   }
   private accessLRU(key: K): boolean {
-    if (!this.store.has(key)) return false;
+    assert(this.store.has(key));
     const {LRU} = this.stats;
     const index = indexOf(LRU, key);
     if (index === -1) return false;
@@ -158,7 +159,7 @@ export class Cache<K, V = undefined> {
     return true;
   }
   private accessLFU(key: K): boolean {
-    if (!this.store.has(key)) return false;
+    assert(this.store.has(key));
     const {LFU} = this.stats;
     const index = indexOf(LFU, key);
     if (index === -1) return false;
