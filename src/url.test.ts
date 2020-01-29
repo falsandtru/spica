@@ -1,5 +1,5 @@
-import { URL, StandardURL, standardize } from './url';
 import { global } from './global';
+import { URL, StandardURL, standardize } from './url';
 
 describe('Unit: lib/url', () => {
   describe('URL', () => {
@@ -14,11 +14,11 @@ describe('Unit: lib/url', () => {
     assert(origin === 'https://example.com');
 
     it('relative', () => {
-      assert(new URL('').reference === window.location.href);
+      assert(new URL('').reference === location.href);
     });
 
     it('trim', () => {
-      assert(new URL(' ').reference === window.location.href);
+      assert(new URL(' ').reference === location.href);
     });
 
     it('origin', () => {
