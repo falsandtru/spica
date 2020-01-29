@@ -28,6 +28,10 @@ describe('Unit: lib/url', () => {
       assert(new URL('file:').origin === new global.URL('file:').origin);
       assert(new URL('blob:').origin === new global.URL('blob:').origin);
       assert(new URL('javascript:alert').origin === new global.URL('javascript:alert').origin);
+      assert(new URL('http://[::]').origin === new global.URL('http://[::]').origin);
+      assert(new URL('http://[::1]').origin === new global.URL('http://[::1]').origin);
+      assert(new URL('http://[::ffff:0:0]').origin === new global.URL('http://[::ffff:0:0]').origin);
+      assert(new URL('http://name:pass@domain').origin === new global.URL('http://name:pass@domain').origin);
     });
 
     it('scheme', () => {

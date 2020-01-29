@@ -13,6 +13,7 @@ export class URL<T extends string> {
     assert(this.url.href.endsWith(`${this.port}${this.path}${this.fragment}`));
     assert(this.reference === this.url.href);
     assert(this.reference.startsWith(this.resource));
+    assert(this.origin === this.url.origin);
     assert(this.protocol === this.url.protocol);
     assert(this.host === this.url.host);
     assert(this.hostname === this.url.hostname);
@@ -52,15 +53,11 @@ export class URL<T extends string> {
   }
   private hostname_!: URL.Hostname;
   public get hostname(): URL.Hostname {
-    return this.hostname_ = this.hostname_ === void 0
-      ? this.host.slice(0, ((this.host.indexOf(':') + 1 || this.host.length + 1) - 1)) as any
-      : this.hostname_;
+    return this.hostname_ = this.hostname_ ?? this.url.hostname;
   }
   private port_!: URL.Port;
   public get port(): URL.Port {
-    return this.port_ = this.port_ === void 0
-      ? this.host.slice(((this.host.indexOf(':') + 1 || this.host.length + 1))) as any
-      : this.port_;
+    return this.port_ = this.port_ ?? this.url.port;
   }
   private path_!: URL.Path<T>;
   public get path(): URL.Path<T> {
