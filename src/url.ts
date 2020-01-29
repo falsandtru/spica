@@ -19,7 +19,13 @@ export class URL<T extends string> {
   }
   private resource_!: URL.Resource<T>;
   public get resource(): URL.Resource<T> {
-    return this.resource_ = this.resource_ ?? `${this.origin}${this.pathname}${this.query === '?' ? '' : this.query}` as any;
+    return this.resource_ = this.resource_ === void 0
+      ? this.reference.slice(
+          0,
+          this.query === '?'
+            ? this.fragment ? -this.fragment.length - 1 : -1
+            : -this.fragment.length || this.reference.length) as any
+      : this.resource_;
   }
   private origin_!: URL.Origin<T>;
   public get origin(): URL.Origin<T> {
@@ -31,7 +37,8 @@ export class URL<T extends string> {
   }
   private protocol_!: URL.Protocol;
   public get protocol(): URL.Protocol {
-    return this.protocol_ = this.protocol_ ?? this.url.protocol as any;
+    return this.protocol_ = this.protocol_
+        ?? this.reference.slice(0, this.reference.indexOf(':') + 1) as any;
   }
   private host_!: URL.Host;
   public get host(): URL.Host {
@@ -39,11 +46,15 @@ export class URL<T extends string> {
   }
   private hostname_!: URL.Hostname;
   public get hostname(): URL.Hostname {
-    return this.hostname_ = this.hostname_ ?? this.url.hostname as any;
+    return this.hostname_ = this.hostname_ === void 0
+      ? this.host.slice(0, ((this.host.indexOf(':') + 1 || this.host.length + 1) - 1)) as any
+      : this.hostname_;
   }
   private port_!: URL.Port;
   public get port(): URL.Port {
-    return this.port_ = this.port_ ?? this.url.port as any;
+    return this.port_ = this.port_ === void 0
+      ? this.host.slice(((this.host.indexOf(':') + 1 || this.host.length + 1))) as any
+      : this.port_;
   }
   private path_!: URL.Path<T>;
   public get path(): URL.Path<T> {
@@ -56,17 +67,16 @@ export class URL<T extends string> {
   private query_!: URL.Query<T>;
   public get query(): URL.Query<T> {
     return this.query_ = this.query_ === void 0
-      ? this.url.search || !this.url.href.split('#', 1)[0].includes('?')
-          ? this.url.search as any
-          : '?'
+      ? this.reference
+          .slice(
+            (this.reference.slice(0, -this.fragment.length || this.reference.length).indexOf('?') + 1 || this.reference.length + 1) - 1,
+            -this.fragment.length || this.reference.length) as any
       : this.query_;
   }
   private fragment_!: URL.Fragment<T>;
   public get fragment(): URL.Fragment<T> {
     return this.fragment_ = this.fragment_ === void 0
-      ? this.url.hash || !this.url.href.includes('#')
-          ? this.url.hash as any
-          : '#'
+      ? this.reference.slice(((this.reference.indexOf('#') + 1 || this.reference.length + 1) - 1)) as any
       : this.fragment_;
   }
 }
