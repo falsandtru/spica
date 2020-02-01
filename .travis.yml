@@ -38,6 +38,6 @@ notifications:
       secure: c/u3dsMFxB/JwNNUa3G+aotltA08al8k4SfpJGe3g3/yiNeDz1YSJw9N+2DK8USWrfDK8YB1cZIFscGbrjD6OU37IKzovZooAcmtDyopRB7dGMeajoFtCT2TtBX38mwp3LNqR84iKRPwLlpV+Lv5qpyzQpaqyzcD5TeKObCd85RdSR3AqkDVi7BgkewRpU3M/J1EXZ6a5VbPky4cskRNbQDK/LPFr8AQflO21bwLkciDgRrPvx5Bbp+w/KXukQIOeMVGnygY/j9M/kesXIPDqXQKGnLxKo0H5hZs4u+74F+JshlS4x3FPBX/NemPpAKTD3fZ3MvQqpMLsYdLF4VUO4FizJkPLOaJB/ZJ+JCPJexbI/duj3BpvhPpp/8MP3n0jCH6w9hLqhRBvLkwDYwY/xp6KVLhvWfdqhMFHwJC1nyLmtBc4OHSNhgdqddYaVOUj1q9xzvWyp/LhsqKNguKSn1EnAar4N/+uJ3kwdOHapQLV1Wxk7KBGfD3vawTzlUlpBRP/yrqgVl7mdCEMuj1xpx4EDy/5HXYlGyvmk1/avKia4KpwCowJzIQzHUSigfOOfnaP0+J74b1OhENeeQ9Gg2VwZ7tw5j2MN5FKnE42d9CilrheRYZNm2D25mFoHosHpgEu1/YyK2//ll6bsTfr2pk6YR+3WfwjCR4kgNGEV0=
     on_success: change
     on_failure: always
-after_deploy:
+after_script:
 - git clean -df
 - gulp bench
