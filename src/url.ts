@@ -72,14 +72,14 @@ export class URL<T extends string> {
     return this.query_ = this.query_ === void 0
       ? this.reference
           .slice(
-            (this.reference.slice(0, -this.fragment.length || this.reference.length).indexOf('?') + 1 || this.reference.length + 1) - 1,
+            ~(~this.reference.slice(0, -this.fragment.length || this.reference.length).indexOf('?') || ~this.reference.length),
             -this.fragment.length || this.reference.length) as any
       : this.query_;
   }
   private fragment_!: URL.Fragment<T>;
   public get fragment(): URL.Fragment<T> {
     return this.fragment_ = this.fragment_ === void 0
-      ? this.reference.slice(((this.reference.indexOf('#') + 1 || this.reference.length + 1) - 1)) as any
+      ? this.reference.slice((~(~this.reference.indexOf('#') || ~this.reference.length))) as any
       : this.fragment_;
   }
 }
