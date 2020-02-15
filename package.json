@@ -44,7 +44,7 @@
   "dependencies": {},
   "devDependencies": {
     "@types/benchmark": "^1.0.31",
-    "@types/mocha": "^5.2.7",
+    "@types/mocha": "^7.0.1",
     "@types/power-assert": "1.5.3",
     "benchmark": "^2.1.4",
     "browserify": "^16.5.0",
@@ -70,7 +70,7 @@
     "npm-check-updates": "^4.0.1",
     "power-assert": "^1.6.1",
     "tsify": "^4.0.1",
-    "typescript": "3.8.0-dev.20200125",
+    "typescript": "3.9.0-dev.20200215",
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0"
   },
