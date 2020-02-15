@@ -1,4 +1,4 @@
-import { global } from './global';
+import { global, location } from './global';
 import { URL, StandardURL, standardize } from './url';
 
 describe('Unit: lib/url', () => {
@@ -15,10 +15,11 @@ describe('Unit: lib/url', () => {
 
     it('relative', () => {
       assert(new URL('').reference === location.href);
-    });
-
-    it('trim', () => {
-      assert(new URL(' ').reference === location.href);
+      assert(new URL('' as string, location.href).reference === location.href);
+      assert(new URL('' as string).reference === new global.URL('', location.href).href);
+      assert(new URL(' ' as string).reference === location.href);
+      assert(new URL(' ' as string).reference === new global.URL(' ', location.href).href);
+      assert(new URL(' ' as string, location.href).reference === new global.URL(' ', location.href).href);
     });
 
     it('origin', () => {
@@ -105,7 +106,7 @@ describe('Unit: lib/url', () => {
       assert((): URL<StandardURL> => new URL(standardize('')));
       assert((): URL<StandardURL> => new URL(standardize(''), location.href));
       assert((): URL<StandardURL> => new URL(new URL(standardize('')).reference, location.href));
-      assert((): URL<StandardURL> => new URL(new URL(standardize('')).path, standardize(location.href)));
+      assert((): URL<StandardURL> => new URL(new URL(standardize('')).query, ''));
     });
 
   });
