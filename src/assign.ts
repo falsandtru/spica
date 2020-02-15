@@ -1,7 +1,7 @@
 import { Object } from './global';
 import { hasOwnProperty, ObjectCreate } from './alias';
 import { type, isPrimitive } from './type';
-import { concat } from './concat';
+import { push } from './array';
 
 export const assign = template((prop, target, source) =>
   target[prop] = source[prop]);
@@ -43,7 +43,7 @@ export const merge = template((prop, target, source) => {
     case 'Array':
       switch (type(target[prop])) {
         case 'Array':
-          return target[prop] = concat(target[prop], source[prop]);
+          return target[prop] = push(target[prop], source[prop]);
         default:
           return target[prop] = merge([], source[prop]);
       }

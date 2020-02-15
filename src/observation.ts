@@ -1,7 +1,7 @@
 import { Map, WeakMap, Error } from './global';
 import type { PartialTuple, DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
-import { concat } from './concat';
+import { push } from './array';
 import { causeAsyncException } from './exception';
 
 export interface Observer<N extends readonly unknown[], D, R> {
@@ -160,10 +160,10 @@ export class Observation<N extends readonly unknown[], D, R>
   public refs(namespace: PartialTuple<N>): ListenerItem<N, D, R>[] {
     const node = this.seekNode(namespace, SeekMode.Breakable);
     if (!node) return [];
-    return concat<ListenerItem<N, D, R>[]>(
+    return push<ListenerItem<N, D, R>[]>(
       this.refsBelow(node, ListenerType.Monitor),
       this.refsBelow(node, ListenerType.Subscriber))
-      .reduce((acc, rs) => concat(acc, rs), []);
+      .reduce((acc, rs) => push(acc, rs), []);
   }
   private drain(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void {
     const node = this.seekNode(namespace, SeekMode.Breakable);
