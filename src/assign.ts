@@ -1,5 +1,5 @@
 import { Object } from './global';
-import { hasOwnProperty, ObjectCreate } from './alias';
+import { ObjectCreate, ObjectKeys } from './alias';
 import { type, isPrimitive } from './type';
 import { push } from './array';
 
@@ -85,9 +85,9 @@ export function template(
         }
         assert(!isPrimitiveTarget && !isPrimitiveSource);
         assert(!isPrimitive(target) && !isPrimitive(source));
-        for (const prop in source) {
-          if (!hasOwnProperty(source, prop)) continue;
-          void strategy(prop, target, source);
+        const keys = ObjectKeys(source);
+        for (let i = 0; i < keys.length; ++i) {
+          void strategy(keys[i], target, source);
         }
       }
     }
