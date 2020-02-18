@@ -39,5 +39,6 @@ notifications:
     on_success: change
     on_failure: always
 after_script:
+- if [ "$TRAVIS_OS_NAME" != "linux" ]; then exit 0; fi
 - git clean -df
 - gulp bench
