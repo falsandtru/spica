@@ -1,5 +1,5 @@
 import { Object } from './global';
-import { ObjectCreate, ObjectKeys } from './alias';
+import { hasOwnProperty, ObjectCreate, ObjectKeys } from './alias';
 import { type, isPrimitive } from './type';
 import { push } from './array';
 
@@ -58,6 +58,29 @@ export const merge = template((prop, target, source) => {
       return target[prop] = source[prop];
   }
 });
+
+export const inherit = template((prop, target, source) => {
+  switch (type(source[prop])) {
+    case 'Array':
+      return target[prop] = source[prop].slice();
+    case 'Object':
+      switch (type(target[prop])) {
+        case 'Object':
+          assert([Object.prototype, null].includes(Object.getPrototypeOf(source[prop])));
+          return target[prop] = isOwnProperty(target, prop)
+            ? inherit(target[prop], source[prop])
+            : inherit(ObjectCreate(target[prop]), source[prop]);
+        default:
+          return target[prop] = ObjectCreate(source[prop]);
+      }
+    default:
+      return target[prop] = source[prop];
+  }
+});
+
+const isOwnProperty: (o: object, p: string) => boolean = '__proto__' in {}
+  ? (o, p) => !('__proto__' in o) || o[p] !== o['__proto__'][p]
+  : hasOwnProperty;
 
 export function template(
   strategy: (prop: string, target: object, source: object) => void,
