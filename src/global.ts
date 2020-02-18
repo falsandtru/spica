@@ -4,4 +4,5 @@ const global: typeof globalThis = void 0
   || typeof self !== 'undefined' && self
   || Function('return this')();
 global.global = global;
-export = global.global;
+// Don't provide types.
+export = global;
