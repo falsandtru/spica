@@ -13,7 +13,7 @@ export const clone = template((prop, target, source) => {
     case 'Object':
       switch (type(target[prop])) {
         case 'Object':
-          return target[prop] = clone(source[prop] instanceof Object ? {} : ObjectCreate(null), source[prop]);
+          return target[prop] = clone(empty_(source[prop]), source[prop]);
         default:
           return target[prop] = source[prop];
       }
@@ -31,7 +31,7 @@ export const extend = template((prop, target, source) => {
         case 'Object':
           return target[prop] = extend(target[prop], source[prop]);
         default:
-          return target[prop] = extend(source[prop] instanceof Object ? {} : ObjectCreate(null), source[prop]);
+          return target[prop] = extend(empty_(source[prop]), source[prop]);
       }
     default:
       return target[prop] = source[prop];
@@ -52,7 +52,7 @@ export const merge = template((prop, target, source) => {
         case 'Object':
           return target[prop] = merge(target[prop], source[prop]);
         default:
-          return target[prop] = merge(source[prop] instanceof Object ? {} : ObjectCreate(null), source[prop]);
+          return target[prop] = merge(empty_(source[prop]), source[prop]);
       }
     default:
       return target[prop] = source[prop];
@@ -102,7 +102,7 @@ export function template(
       else {
         if (isPrimitiveTarget) {
           assert(!isPrimitiveSource);
-          target = empty(source);
+          target = empty(source) as T;
           assert(!isPrimitive(target));
           isPrimitiveTarget = isPrimitiveSource;
         }
@@ -118,10 +118,10 @@ export function template(
   }
 }
 
-function empty_<T extends object>(source: T): T {
+function empty_(source: object): object {
   switch (type(source)) {
     case 'Array':
-      return [] as T;
+      return [];
     case 'Object':
       return source instanceof Object ? {} : ObjectCreate(null);
     default:
