@@ -68,7 +68,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
             switch (opts.method) {
               case 'GET':
               case 'PUT':
-                if (xhr.statusText.match(/2../)) {
+                if (`${xhr.status}`.match(/^2..$/)) {
                   const cc = new Map<string, string>(
                     xhr.getResponseHeader('Cache-Control')
                       ? xhr.getResponseHeader('Cache-Control')!.trim().split(/\s*,\s*/)
