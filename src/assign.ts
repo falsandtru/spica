@@ -110,6 +110,7 @@ export function template(
         assert(!isPrimitive(target) && !isPrimitive(source));
         const keys = ObjectKeys(source);
         for (let i = 0; i < keys.length; ++i) {
+          if (keys[i] in {}) continue;
           void strategy(keys[i], target, source);
         }
       }
