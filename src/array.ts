@@ -52,7 +52,7 @@ export function push<a>(as: a[], bs: Iterable<a>): a[] {
   return as;
 }
 
-export function join(as: readonly unknown[], sep = ''): string {
+export function join(as: readonly (string | number)[], sep = ''): string {
   let acc = '';
   for (let i = 0; i < as.length; ++i) {
     acc += i === 0
