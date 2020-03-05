@@ -27,8 +27,9 @@ $ npm i spica
 - uncurry
 - flip
 - tuple
-- List, Nil
-- HList, HNil
+- List
+- MList
+- HList
 - DataMap
 - MultiMap
 - AttrMap
