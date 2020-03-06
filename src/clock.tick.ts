@@ -4,10 +4,11 @@ import { causeAsyncException } from './exception';
 type Callback = () => void;
 
 let list = MList<Callback>();
+let last = list;
 
 export function tick(cb: Callback): void {
   schedule();
-  list = list.add(cb);
+  last = last.append(cb);
 }
 
 const scheduler = Promise.resolve();
@@ -18,12 +19,12 @@ function schedule(): void {
 }
 
 function run(): void {
-  let cbs = list.reverse();
-  list = MList();
+  let node = list;
+  list = last = MList();
   while (true) {
     try {
-      for (; cbs.head; cbs = cbs.tail) {
-        cbs.head();
+      for (; node.tail; node = node.tail) {
+        node.head();
       }
       return;
     }

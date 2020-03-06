@@ -1,3 +1,5 @@
+import { undefined } from './global';
+
 export type List<T> = Cons<T>;
 export function List<T>(...values: T[]): List<T> {
   let node = Nil<T>();
@@ -8,7 +10,7 @@ export function List<T>(...values: T[]): List<T> {
 }
 
 function Nil<T>(): List<T> {
-  return new Cons<never>(void 0 as never, void 0 as never);
+  return new Cons<never>(undefined as never, undefined as never);
 }
 // Don't extend any class for performance.
 class Cons<T> {
@@ -49,14 +51,6 @@ class Cons<T> {
     assert(!this.tail);
     return this.replaceWith(value, List()).tail;
   }
-  public split(index: number): [List<T>, List<T>] {
-    const init = Nil<T>();
-    let tail: List<T> = this;
-    for (let cnt = 0, last = init; cnt < index && tail.tail; ++cnt, tail = tail.tail) {
-      last = last.append(tail.head);
-    }
-    return [init, tail];
-  }
   public reverse(): List<T> {
     return this.foldl((acc, value) => acc.add(value), List());
   }
@@ -80,22 +74,26 @@ export function MList<T>(...values: T[]): MList<T> {
 }
 
 function MNil<T>(): MList<T> {
-  return new MCons<never>(void 0 as never, void 0 as never);
+  return new MCons<never>(undefined as never, undefined as never);
 }
 // Don't extend any class for performance.
 class MCons<T> {
   public take(count: number): MList<T> {
-    const { 0: init, 1: tail } = this.split(count);
-    if (this.tail && tail !== this) {
-      this.replaceWith(tail.head, tail.tail);
-    }
-    return init;
+    if (count === 0) return MList();
+    let node: MList<T> = this;
+    for (let i = 0; i + 1 < count && node.tail; ++i, node = node.tail);
+    const tail = node.tail;
+    node.tail && node.replaceWith(node.head, MList());
+    const dels = new MCons(this.head, this.tail);
+    this.tail && this.replaceWith(tail?.head, tail?.tail);
+    return dels;
   }
   public prepend(value: T): MList<T> {
     return this.replaceWith(value, new MCons(this.head, this.tail));
   }
   private replace(node: MList<T>, count: number, adds?: MList<T>): MList<T> {
-    const { 0: dels, 1: { head, tail } } = node.split(count);
+    const dels = node.take(count);
+    const { head, tail } = node;
     if (adds?.tail) {
       node.replaceWith(adds.head, adds.tail);
       for (; node.tail; node = node.tail);
@@ -122,6 +120,9 @@ class MCons<T> {
       tail.replaceWith(f(tail.head as T), tail.tail);
     }
     return this as MList<any>;
+  }
+  public clear(): MList<T> {
+    return this.replaceWith(undefined as never, undefined as never);
   }
   public freeze(): List<T> {
     const first = List<T>();
@@ -163,17 +164,9 @@ class MCons<T> {
     this.tail = tail;
     return this;
   }
-  private append(value: T): MList<T> {
-    assert(!this.tail);
+  public append(value: T): MList<T> {
+    //assert(!this.tail);
     return this.replaceWith(value, MList()).tail;
-  }
-  public split(index: number): [MList<T>, MList<T>] {
-    const init = MNil<T>();
-    let tail: MList<T> = this;
-    for (let cnt = 0, last = init; cnt < index && tail.tail; ++cnt, tail = tail.tail) {
-      last = last.append(tail.head);
-    }
-    return [init, tail];
   }
   public reverse(): MList<T> {
     if (!this.tail) return this;

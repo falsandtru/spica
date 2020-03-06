@@ -5,7 +5,7 @@ export function throttle<T>(interval: number, callback: (last: T, buffer: MList<
   let timer = 0;
   let buffer = MList<T>();
   return (arg: T) => {
-    buffer = buffer.add(arg);
+    buffer.prepend(arg);
     if (timer > 0) return;
     timer = setTimeout(() => {
       assert(timer > 0);
@@ -28,7 +28,7 @@ export function debounce<T>(delay: number, callback: (last: T, buffer: MList<T>)
   let timer = 0;
   let buffer = MList<T>();
   return (arg: T) => {
-    buffer = buffer.add(arg);
+    buffer.prepend(arg);
     if (timer > 0) return;
     timer = setTimeout(() => {
       assert(timer > 0);

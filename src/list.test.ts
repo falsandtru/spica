@@ -29,31 +29,6 @@ describe('Unit: lib/list', () => {
       assert.deepStrictEqual([...List(0, 1).map(v => ++v)], [1, 2]);
     });
 
-    it('split', () => {
-      assert.deepStrictEqual([...List().split(0)[0]], []);
-      assert.deepStrictEqual([...List().split(0)[1]], []);
-      assert.deepStrictEqual([...List(0).split(0)[0]], []);
-      assert.deepStrictEqual([...List(0).split(0)[1]], [0]);
-      assert.deepStrictEqual([...List(0).split(1)[0]], [0]);
-      assert.deepStrictEqual([...List(0).split(1)[1]], []);
-      assert.deepStrictEqual([...List(0, 1).split(1)[0]], [0]);
-      assert.deepStrictEqual([...List(0, 1).split(1)[1]], [1]);
-      const list = MList(0, 1);
-      assert.deepStrictEqual([...list.split(0)[0]], []);
-      assert.deepStrictEqual([...list.split(0)[1]], [0, 1]);
-      assert.deepStrictEqual([...list], [0, 1]);
-      assert.deepStrictEqual([...list.split(1)[0]], [0]);
-      assert.deepStrictEqual([...list.split(1)[1]], [1]);
-      assert.deepStrictEqual([...list], [0, 1]);
-      assert.deepStrictEqual([...list.split(Infinity)[0]], [0, 1]);
-      assert.deepStrictEqual([...list.split(Infinity)[1]], []);
-      assert.deepStrictEqual([...list], [0, 1]);
-      assert.deepStrictEqual([...list.take(Infinity)], [0, 1]);
-      assert.deepStrictEqual([...list.split(Infinity)[0]], []);
-      assert.deepStrictEqual([...list.split(Infinity)[1]], []);
-      assert.deepStrictEqual([...list], []);
-    });
-
     it('reverse', () => {
       assert.deepStrictEqual([...List().reverse()], []);
       assert.deepStrictEqual([...List(0).reverse()], [0]);
