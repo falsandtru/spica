@@ -33,11 +33,9 @@ class Cons<T> {
     return acc;
   }
   public map<U>(f: (value: T) => U): List<U> {
-    const first = List<U>();
-    for (let last = first, node: List<T> = this; node.tail; node = node.tail) {
-      last = last.append(f(node.head));
-    }
-    return first;
+    const node = List<U>();
+    this.foldl((acc, value) => acc.append(f(value)), node);
+    return node;
   }
   private replaceWith(head: T, tail: List<T>): List<T> {
     assert(tail !== this);
@@ -153,11 +151,9 @@ class MCons<T> {
     return acc;
   }
   public map<U>(f: (value: T) => U): MList<U> {
-    const first = MList<U>();
-    for (let last = first, node: MList<T> = this; node.tail; node = node.tail) {
-      last = last.append(f(node.head));
-    }
-    return first;
+    const node = MList<U>();
+    this.foldl((acc, value) => acc.append(f(value)), node);
+    return node;
   }
   private replaceWith(head: T, tail: MList<T>): MList<T> {
     //assert(tail !== this);
