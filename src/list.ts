@@ -1,10 +1,10 @@
 export type List<T> = Cons<T>;
 export function List<T>(...values: T[]): List<T> {
-  let list = Nil<T>();
+  let node = Nil<T>();
   for (let i = values.length; i--;) {
-    list = list.add(values[i]);
+    node = node.add(values[i]);
   }
-  return list;
+  return node;
 }
 
 function Nil<T>(): List<T> {
@@ -74,11 +74,11 @@ class Cons<T> {
 
 export type MList<T> = MCons<T>;
 export function MList<T>(...values: T[]): MList<T> {
-  let list = MNil<T>();
+  let node = MNil<T>();
   for (let i = values.length; i--;) {
-    list = list.add(values[i]);
+    node = node.add(values[i]);
   }
-  return list;
+  return node;
 }
 
 function MNil<T>(): MList<T> {
