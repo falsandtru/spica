@@ -3,23 +3,23 @@ import { causeAsyncException } from './exception';
 
 type Callback = () => void;
 
-let queue = MList<Callback>();
+let list = MList<Callback>();
 
 export function tick(cb: Callback): void {
   schedule();
-  queue = queue.add(cb);
+  list = list.add(cb);
 }
 
 const scheduler = Promise.resolve();
 
 function schedule(): void {
-  if (queue.tail) return;
-  void scheduler.then(run);
+  if (list.tail) return;
+  scheduler.then(run);
 }
 
 function run(): void {
-  let cbs = queue.reverse();
-  queue = MList();
+  let cbs = list.reverse();
+  list = MList();
   while (true) {
     try {
       for (; cbs.head; cbs = cbs.tail) {
