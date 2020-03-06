@@ -26,18 +26,18 @@ describe('Benchmark:', function () {
     });
 
     it('reverse 10', function (done) {
-      const node = MList(...Array(10));
-      benchmark('MList reverse 10', () => node.reverse(), done);
+      let node = MList(...Array(10));
+      benchmark('MList reverse 10', () => node = node.reverse(), done);
     });
 
     it('reverse 100', function (done) {
-      const node = MList(...Array(100));
-      benchmark('MList reverse 100', () => node.reverse(), done);
+      let node = MList(...Array(100));
+      benchmark('MList reverse 100', () => node = node.reverse(), done);
     });
 
     it('reverse 1000', function (done) {
-      const node = MList(...Array(1000));
-      benchmark('MList reverse 1000', () => node.reverse(), done);
+      let node = MList(...Array(1000));
+      benchmark('MList reverse 1000', () => node = node.reverse(), done);
     });
 
     it('map 10', function (done) {
