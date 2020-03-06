@@ -9,14 +9,14 @@ describe('Unit: lib/throttle', () => {
           case 1:
             assert(count === 2);
             assert(last === 2);
-            assert.deepStrictEqual(buf, [1, 2]);
+            assert.deepStrictEqual([...buf], [2, 1]);
             step = 2;
             call(++count);
             break;
           case 2:
             assert(count === 3);
             assert(last === 3);
-            assert.deepStrictEqual(buf, [3]);
+            assert.deepStrictEqual([...buf], [3]);
             done();
             break;
           default:
@@ -27,7 +27,7 @@ describe('Unit: lib/throttle', () => {
       step = 1;
       call(++count);
       call(++count);
-    }); 
+    });
   });
 
   describe('debounce', () => {
@@ -38,7 +38,7 @@ describe('Unit: lib/throttle', () => {
           case 1:
             assert(count === 3);
             assert(last === 3);
-            assert.deepStrictEqual(buf, [1, 2, 3]);
+            assert.deepStrictEqual([...buf], [3, 2, 1]);
             done();
             break;
           default:
@@ -50,7 +50,7 @@ describe('Unit: lib/throttle', () => {
       setTimeout(() => call(++count), 100);
       setTimeout(() => call(++count), 200);
       call(++count);
-    }); 
+    });
   });
 
 });

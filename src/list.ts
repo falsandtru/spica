@@ -160,7 +160,7 @@ class MCons<T> {
     return first;
   }
   private replaceWith(head: T, tail: MList<T>): MList<T> {
-    assert(tail !== this);
+    //assert(tail !== this);
     // @ts-ignore
     this.head = head;
     // @ts-ignore

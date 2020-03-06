@@ -1,26 +1,34 @@
+import { MList } from './list';
 import { causeAsyncException } from './exception';
-import { noop } from './noop';
 
 type Callback = () => void;
 
-const scheduler = Promise.resolve();
-const id = <a>(a: a) => a;
-let cont: (next?: typeof cont) => typeof next = id;
+let queue = MList<Callback>();
 
 export function tick(cb: Callback): void {
-  cont === id && scheduler.then(run);
-  cont = ((prev, cb): typeof cont => next => () => prev(() => ([cb, cb = noop][0](), next)))(cont, cb);
+  schedule();
+  queue = queue.add(cb);
+}
+
+const scheduler = Promise.resolve();
+
+function schedule(): void {
+  if (queue.tail) return;
+  void scheduler.then(run);
 }
 
 function run(): void {
-  let c = [cont, cont = id][0];
-  while (c) {
+  let cbs = queue.reverse();
+  queue = MList();
+  while (true) {
     try {
-      while (c = c()!);
+      for (; cbs.head; cbs = cbs.tail) {
+        cbs.head();
+      }
       return;
     }
     catch (reason) {
-      causeAsyncException(reason);
+      void causeAsyncException(reason);
       continue;
     }
   }
