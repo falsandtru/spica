@@ -29,6 +29,7 @@ $ npm i spica
 - tuple
 - List
 - MList
+- CList
 - HList
 - DataMap
 - MultiMap
