@@ -4,16 +4,23 @@ describe('Unit: lib/clock.tick', function () {
   describe('tick', function () {
     it('async', function (done) {
       let async = false;
-      tick(() => void assert(async === true) || done());
+      let cnt = 0;
+      for (let i = 0; i < 10; ++i) {
+        tick(() => assert(async === true && ++cnt));
+      }
+      tick(() => void assert(cnt === 10 && async === true) || done());
       async = true;
     });
 
     it('serial', function (done) {
+      const size = 100 * 1000;
       let cnt = 0;
+      for (let i = 0; i < size; ++i) {
+        tick(() => ++cnt);
+      }
       let interrupt = false;
-      tick(() => ++cnt);
       Promise.resolve().then(() => interrupt = true);
-      tick(() => void assert(cnt === 1 && interrupt === false) || done());
+      tick(() => void assert(cnt === size && interrupt === false) || done());
     });
 
     it('recursion', function (done) {

@@ -1,39 +1,27 @@
 import { causeAsyncException } from './exception';
+import { noop } from './noop';
 
 type Callback = () => void;
 
-let queue: Callback[] = [];
+const scheduler = Promise.resolve();
+const id = <a>(a: a) => a;
+let cont: (next?: typeof cont) => typeof next = id;
 
 export function tick(cb: Callback): void {
-  void queue.push(cb);
-  void schedule();
-}
-
-const scheduler = Promise.resolve();
-
-function schedule(): void {
-  if (queue.length !== 1) return;
-  void scheduler.then(run);
+  cont === id && scheduler.then(run);
+  cont = ((prev, cb): typeof cont => next => () => prev(() => ([cb, cb = noop][0](), next)))(cont, cb);
 }
 
 function run(): void {
-  const cbs = flush();
-  while (true) {
+  let c = [cont, cont = id][0];
+  while (c) {
     try {
-      while (cbs.length > 0) {
-        void cbs.shift()!();
-      }
+      while (c = c()!);
       return;
     }
     catch (reason) {
-      void causeAsyncException(reason);
+      causeAsyncException(reason);
       continue;
     }
   }
-}
-
-function flush(): Callback[] {
-  const cbs = queue;
-  queue = [];
-  return cbs;
 }
