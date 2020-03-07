@@ -1,15 +1,15 @@
 import { undefined } from './global';
 
-type Cont<T> = (() => Result<T>) | undefined;
+export type Cont<T> = (() => Result<T>) | undefined;
 type Result<T> = [T, Cont<T>];
-function Cont<T>(value: T, cont: Cont<T>): NonNullable<Cont<T>> {
+export function Cont<T>(value: T, cont: Cont<T>): NonNullable<Cont<T>> {
   const r = Result(value, cont);
   return () => r;
 }
 function Result<T>(value: T, cont: Cont<T>): Result<T> {
   return [value, cont];
 }
-function append<T>(cont: Cont<T>, value: T): Cont<T> {
+export function append<T>(cont: Cont<T>, value: T): Cont<T> {
   const r = cont!();
   assert(!r[1]);
   return r[1] = Cont(value, undefined);
