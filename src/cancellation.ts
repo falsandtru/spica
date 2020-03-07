@@ -1,5 +1,4 @@
 import { Set } from './global';
-import { ObjectFreeze } from './alias';
 import { AtomicPromise } from './promise';
 import { causeAsyncException } from './exception';
 import { Maybe, Just, Nothing } from './monad/maybe';
@@ -73,7 +72,6 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
   };
   public readonly cancel: Canceller<L>['cancel'] = (reason?: L) => {
     if (!this[internal].available) return;
-    void ObjectFreeze(this);
     this[internal].available = false;
     this[internal].reason = reason!;
     this[internal].resolve(this[internal].reason!);
@@ -81,15 +79,12 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
       void listener(reason!);
     }
     this[internal].alive = false;
-    void ObjectFreeze(this[internal]);
   };
   public readonly close = (reason?: unknown) => {
     if (!this[internal].available) return;
-    void ObjectFreeze(this);
     this[internal].available = false;
     void this[internal].resolve(AtomicPromise.reject(reason));
     this[internal].alive = false;
-    void ObjectFreeze(this[internal]);
   };
   public get canceled(): boolean {
     return 'reason' in this[internal];
