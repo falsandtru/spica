@@ -26,9 +26,11 @@ class Internal<L> {
   }
   public alive: boolean = true;
   public available: boolean = true;
-  public canceled: boolean = false;
   public reason?: L;
   public readonly listeners: Set<(reason: L) => void> = new Set();
+  public get canceled(): boolean {
+    return 'reason' in this;
+  }
 }
 
 const internal = Symbol.for('spica/cancellation::internal');
@@ -72,7 +74,6 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
   public readonly cancel: Canceller<L>['cancel'] = (reason?: L) => {
     if (!this[internal].available) return;
     this[internal].available = false;
-    this[internal].canceled = true;
     this[internal].reason = reason!;
     this[internal].resolve(this[internal].reason!);
     void ObjectFreeze(this);
@@ -91,7 +92,7 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
     void ObjectFreeze(this);
   };
   public get canceled(): boolean {
-    return this[internal].canceled;
+    return 'reason' in this[internal];
   }
   public readonly promise = <T>(val: T): AtomicPromise<T> =>
     this[internal].canceled
