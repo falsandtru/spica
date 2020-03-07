@@ -1,4 +1,4 @@
-import { MList } from './list';
+import { Set } from './global';
 import { AtomicPromise } from './promise';
 import { causeAsyncException } from './exception';
 import { Maybe, Just, Nothing } from './monad/maybe';
@@ -22,13 +22,11 @@ class Internal<L> {
   constructor(
     public resolve: (reason: L | PromiseLike<never>) => void,
   ) {
-    const list = MList<never>();
-    this.listeners = [list, list];
   }
   public alive: boolean = true;
   public available: boolean = true;
   public reason?: L;
-  public readonly listeners: [MList<(reason: L) => void>, MList<(reason: L) => void>];
+  public readonly listeners: Set<(reason: L) => void> = new Set();
   public get canceled(): boolean {
     return 'reason' in this;
   }
@@ -55,11 +53,10 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
       this[internal].canceled && void handler(this[internal].reason!);
       return () => void 0;
     }
-    const node = this[internal].listeners[1];
-    this[internal].listeners[1] = this[internal].listeners[1].append(handler);
+    void this[internal].listeners.add(handler);
     return () =>
-      node.head === handler
-        ? void node.take(1)
+      this[internal].alive
+        ? void this[internal].listeners.delete(handler)
         : void 0;
 
     function handler(reason: L): void {
@@ -75,18 +72,16 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
     if (!this[internal].available) return;
     this[internal].available = false;
     this[internal].reason = reason!;
-    for (let listener; listener = this[internal].listeners[0].take(1).head;) {
+    this[internal].resolve(this[internal].reason!);
+    for (const listener of this[internal].listeners) {
       void listener(reason!);
     }
-    this[internal].listeners[0] = this[internal].listeners[1];
-    this[internal].resolve(this[internal].reason!);
     this[internal].alive = false;
   };
   public readonly close = (reason?: unknown) => {
     if (!this[internal].available) return;
     this[internal].available = false;
     void this[internal].resolve(AtomicPromise.reject(reason));
-    this[internal].listeners[0] = this[internal].listeners[1];
     this[internal].alive = false;
   };
   public get canceled(): boolean {
