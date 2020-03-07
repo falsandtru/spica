@@ -47,7 +47,7 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
       void cancellee.register(this.cancel);
     }
   }
-  public [internal]: Internal<L>;
+  public readonly [internal]: Internal<L>;
   public readonly register = (listener: (reason: L) => void) => {
     assert(listener);
     if (!this[internal].alive) {
@@ -73,10 +73,10 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
   };
   public readonly cancel: Canceller<L>['cancel'] = (reason?: L) => {
     if (!this[internal].available) return;
+    void ObjectFreeze(this);
     this[internal].available = false;
     this[internal].reason = reason!;
     this[internal].resolve(this[internal].reason!);
-    void ObjectFreeze(this);
     for (const listener of this[internal].listeners) {
       void listener(reason!);
     }
@@ -85,11 +85,11 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
   };
   public readonly close = (reason?: unknown) => {
     if (!this[internal].available) return;
+    void ObjectFreeze(this);
     this[internal].available = false;
     void this[internal].resolve(AtomicPromise.reject(reason));
     this[internal].alive = false;
     void ObjectFreeze(this[internal]);
-    void ObjectFreeze(this);
   };
   public get canceled(): boolean {
     return 'reason' in this[internal];
