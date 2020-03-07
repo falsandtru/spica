@@ -27,10 +27,10 @@ class CCons<T> {
   ) {
   }
   public get head(): T {
-    return this.cont!()[0];
+    return this.cont! && this.cont!()[0];
   }
   public get tail(): CCons<T> {
-    return new CCons(this.cont!()[1]);
+    return this.cont! && new CCons(this.cont!()[1]);
   }
   public add(value: T): CCons<T> {
     this.cont = Cont(value, this.cont);

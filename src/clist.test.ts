@@ -11,13 +11,13 @@ describe('Unit: lib/clist', () => {
     });
 
     it('head', () => {
-      assert.throws(() => List().head);
+      assert(List().head === undefined);
       assert(List(0).head === 0);
       assert(List(0, 1).head === 0);
     });
 
     it('tail', () => {
-      assert.throws(() => List().tail);
+      assert(List().tail === undefined);
       assert(List(0).tail);
       assert(List(0, 1).tail.head === 1);
     });
