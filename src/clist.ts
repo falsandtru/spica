@@ -9,8 +9,8 @@ export function Cont<T>(value: T, cont: Cont<T>): NonNullable<Cont<T>> {
 function Result<T>(value: T, cont: Cont<T>): Result<T> {
   return [value, cont];
 }
-export function append<T>(cont: Cont<T>, value: T): Cont<T> {
-  const r = cont!();
+export function append<T>(cont: NonNullable<Cont<T>>, value: T): NonNullable<Cont<T>> {
+  const r = cont();
   assert(!r[1]);
   return r[1] = Cont(value, undefined);
 }
@@ -55,7 +55,7 @@ class CCons<T> {
   }
   public map<U>(f: (value: T) => U): CList<U> {
     const cont = Cont<U>(undefined as never, undefined);
-    this.foldl<Cont<U>>((acc, value) => append(acc, f(value)), cont);
+    this.foldl((acc, value) => append(acc, f(value)), cont);
     return new CCons(cont()[1]);
   }
   public reverse(): CList<T> {
