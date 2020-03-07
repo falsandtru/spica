@@ -117,11 +117,11 @@ class MCons<T> {
     }
     return this.replace(node, count, adds);
   }
-  public convert<U>(f: (value: T) => U): MList<U> {
-    for (let tail: MList<T | U> = this; tail.tail; tail = tail.tail) {
-      tail.replaceWith(f(tail.head as T), tail.tail);
+  public convert(f: (value: T) => T): MList<T> {
+    for (let node: MList<T> = this; node.tail; node = node.tail) {
+      node.replaceWith(f(node.head as T), node.tail);
     }
-    return this as MList<any>;
+    return this;
   }
   public clear(): MList<T> {
     return this.replaceWith(undefined as never, undefined as never);

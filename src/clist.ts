@@ -49,7 +49,7 @@ class CCons<T> {
     return acc;
   }
   public map<U>(f: (value: T) => U): CList<U> {
-    const cont = Cont<U>(undefined as any, undefined)!;
+    const cont = Cont<U>(undefined as never, undefined)!;
     this.foldl<Cont<U>>((acc, value) => this.append(acc, f(value)), cont);
     return new CCons(cont()[1]);
   }
