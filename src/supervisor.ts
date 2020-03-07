@@ -237,10 +237,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     void this.throwErrorIfNotAvailable();
     let result: AtomicPromise<R> | undefined;
     for (name of typeof name === 'string' ? [name] : new NamePool(this.workers, name)) {
-      result = this.workers.has(name)
-        ? this.workers.get(name)!.call([param, Date.now() + timeout])
-        : void 0;
-      if (result) break;
+      if (result = this.workers.get(name)?.call([param, Date.now() + timeout])) break;
     }
     name = name as N;
     assert(name !== void 0);
@@ -320,10 +317,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       let result: AtomicPromise<R> | undefined;
       let name!: N;
       for (name of typeof names === 'string' ? [names] : names) {
-        result = this.workers.has(name)
-          ? this.workers.get(name)!.call([param, expiry])
-          : void 0;
-        if (result) break;
+        if (result = this.workers.get(name)?.call([param, expiry])) break;
       }
       assert(name !== void 0);
       if (result === void 0 && Date.now() < expiry) continue;
