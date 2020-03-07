@@ -10,7 +10,11 @@ describe('Benchmark:', function () {
     });
 
     it('cancel', function (done) {
-      benchmark('Cancellation cancel', () => new Cancellation().cancel(), done);
+      benchmark('Cancellation cancel', () => {
+        const c = new Cancellation();
+        c.register(() => 0);
+        c.cancel();
+      }, done);
     });
 
   });
