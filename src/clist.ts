@@ -9,6 +9,11 @@ function Cont<T>(value: T, cont: Cont<T>): NonNullable<Cont<T>> {
 function Result<T>(value: T, cont: Cont<T>): Result<T> {
   return [value, cont];
 }
+function append<T>(cont: Cont<T>, value: T): Cont<T> {
+  const r = cont!();
+  assert(!r[1]);
+  return r[1] = Cont(value, undefined);
+}
 
 export type CList<T> = CCons<T>;
 export function CList<T>(...values: T[]): CCons<T> {
@@ -49,14 +54,9 @@ class CCons<T> {
     return acc;
   }
   public map<U>(f: (value: T) => U): CList<U> {
-    const cont = Cont<U>(undefined as never, undefined)!;
-    this.foldl<Cont<U>>((acc, value) => this.append(acc, f(value)), cont);
+    const cont = Cont<U>(undefined as never, undefined);
+    this.foldl<Cont<U>>((acc, value) => append(acc, f(value)), cont);
     return new CCons(cont()[1]);
-  }
-  private append<T>(cont: Cont<T>, value: T): Cont<T> {
-    const t = cont!();
-    assert(!t[1]);
-    return t[1] = Cont(value, undefined);
   }
   public reverse(): CList<T> {
     this.cont = this.foldl<Cont<T>>((acc, value) => Cont(value, acc), undefined);

@@ -15,6 +15,10 @@ function Nil<T>(): List<T> {
 }
 // Don't extend any class for performance.
 class Cons<T> {
+  private append(value: T): List<T> {
+    assert(!this.tail);
+    return this.replaceWith(value, List()).tail;
+  }
   constructor(
     public readonly head: T,
     public readonly tail: List<T>,
@@ -47,10 +51,6 @@ class Cons<T> {
     // @ts-ignore
     this.tail = tail;
     return this;
-  }
-  private append(value: T): List<T> {
-    assert(!this.tail);
-    return this.replaceWith(value, List()).tail;
   }
   public reverse(): List<T> {
     return this.foldl((acc, value) => acc.add(value), List());
@@ -92,6 +92,10 @@ class MCons<T> {
   }
   public prepend(value: T): MList<T> {
     return this.replaceWith(value, new MCons(this.head, this.tail));
+  }
+  public append(value: T): MList<T> {
+    //assert(!this.tail);
+    return this.replaceWith(value, MList()).tail;
   }
   private replace(node: MList<T>, count: number, adds?: MList<T>): MList<T> {
     const dels = node.take(count);
@@ -165,10 +169,6 @@ class MCons<T> {
     // @ts-ignore
     this.tail = tail;
     return this;
-  }
-  public append(value: T): MList<T> {
-    //assert(!this.tail);
-    return this.replaceWith(value, MList()).tail;
   }
   public reverse(): MList<T> {
     if (!this.tail) return this;
