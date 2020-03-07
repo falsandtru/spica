@@ -25,6 +25,7 @@ class Internal<L> {
   ) {
   }
   public alive: boolean = true;
+  public available: boolean = true;
   public canceled: boolean = false;
   public reason?: L;
   public readonly listeners: Set<(reason: L) => void> = new Set();
@@ -47,11 +48,15 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
   public [internal]: Internal<L>;
   public readonly register = (listener: (reason: L) => void) => {
     assert(listener);
-    if (this[internal].canceled) return void handler(this[internal].reason!), () => void 0;
-    if (!this[internal].alive) return () => void 0;
+    if (!this[internal].alive) {
+      if (this[internal].canceled) {
+        void handler(this[internal].reason!);
+      }
+      return () => void 0;
+    }
     void this[internal].listeners.add(handler);
     return () =>
-      this[internal].alive
+      this[internal].alive && this[internal].listeners.has(handler)
         ? void this[internal].listeners.delete(handler)
         : void 0;
 
@@ -65,22 +70,24 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
     }
   };
   public readonly cancel: Canceller<L>['cancel'] = (reason?: L) => {
-    if (!this[internal].alive) return;
-    this[internal].alive = false;
+    if (!this[internal].available) return;
+    this[internal].available = false;
     this[internal].canceled = true;
     this[internal].reason = reason!;
     this[internal].resolve(this[internal].reason!);
-    void ObjectFreeze(this[internal].listeners);
     void ObjectFreeze(this);
     for (const listener of this[internal].listeners) {
       void listener(reason!);
     }
+    this[internal].alive = false;
+    void ObjectFreeze(this[internal]);
   };
   public readonly close = (reason?: unknown) => {
-    if (!this[internal].alive) return;
-    this[internal].alive = false;
+    if (!this[internal].available) return;
+    this[internal].available = false;
     void this[internal].resolve(AtomicPromise.reject(reason));
-    void ObjectFreeze(this[internal].listeners);
+    this[internal].alive = false;
+    void ObjectFreeze(this[internal]);
     void ObjectFreeze(this);
   };
   public get canceled(): boolean {
