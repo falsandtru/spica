@@ -1,4 +1,4 @@
-import { Map, WeakMap, Error } from './global';
+import { Number, Map, WeakMap, Error } from './global';
 import type { PartialTuple, DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
 import { push } from './array';
@@ -81,6 +81,7 @@ export class Observation<N extends readonly unknown[], D, R>
     if (typeof monitor !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${monitor}`);
     const { monitors } = this.seekNode(namespace, SeekMode.Extensible);
     if (monitors.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
+    if (id === Number.MAX_SAFE_INTEGER) throw new Error(`Spica: Observation: Max listener ID reached max safe integer.`);
     const item = {
       id: ++id,
       type: ListenerType.Monitor,
@@ -97,6 +98,7 @@ export class Observation<N extends readonly unknown[], D, R>
     if (typeof subscriber !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${subscriber}`);
     const { subscribers } = this.seekNode(namespace, SeekMode.Extensible);
     if (subscribers.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
+    if (id === Number.MAX_SAFE_INTEGER) throw new Error(`Spica: Observation: Max listener ID reached max safe integer.`);
     const item = {
       id: ++id,
       type: ListenerType.Subscriber,
