@@ -11,17 +11,11 @@ export function throttle<T>(interval: number, callback: (last: T, buffer: MList<
       assert(timer > 0);
       assert(buffer.tail);
       timer = 0;
-      const buf = flush();
+      const buf = [buffer, buffer = MList()][0];
       assert(buf.tail);
       void callback(buf.head, buf);
     }, interval);
   };
-
-  function flush(): typeof buffer {
-    const buf = buffer;
-    buffer = MList();
-    return buf;
-  }
 }
 
 export function debounce<T>(delay: number, callback: (last: T, buffer: MList<T>) => void): (arg: T) => void {
@@ -37,16 +31,10 @@ export function debounce<T>(delay: number, callback: (last: T, buffer: MList<T>)
       void setTimeout(() => {
         if (timer > 0) return;
         assert(buffer.tail);
-        const buf = flush();
+        const buf = [buffer, buffer = MList()][0];
         assert(buf.tail);
         void callback(buf.head, buf);
       }, buffer.length > 1 ? delay : 0);
     }, delay);
   };
-
-  function flush(): typeof buffer {
-    const buf = buffer;
-    buffer = MList();
-    return buf;
-  }
 }
