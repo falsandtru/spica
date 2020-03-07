@@ -3,19 +3,31 @@ import { Cancellation } from './cancellation';
 describe('Unit: lib/cancellation', () => {
   describe('Cancellation', () => {
     it('cancel', done => {
-      let cnt = 0;
+      let cnt = 1;
       const cancellation = new Cancellation<number>();
-      cancellation.register(n => (
-        assert(++cnt === 1),
-        assert(n === 0)));
+      const unregister = cancellation.register(n => {
+        assert(cnt === 1 && ++cnt);
+        assert(n === 0);
+        unregister();
+        cancellation.register(n => {
+          assert(cnt === 3 && ++cnt);
+          assert(n === 0);
+        });
+        unregister();
+      });
+      cancellation.register(n => {
+        assert(cnt === 2 && ++cnt);
+        assert(n === 0);
+      });
+      cancellation.register(cancellation.register(() => {
+        done(false);
+      }));
+      cancellation.then(reason => {
+        assert(cnt === 4 && ++cnt);
+        assert(reason === 0);
+        done();
+      });
       cancellation.cancel(0);
-      cancellation.cancel(NaN);
-      cancellation.register(n => (
-        assert(++cnt === 2),
-        assert(n === 0),
-        cancellation.then(reason => (
-          assert(reason === 0),
-          done()))));
       cancellation.cancel(NaN);
     });
 

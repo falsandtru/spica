@@ -51,11 +51,12 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
   public readonly [internal]: Internal<L>;
   public readonly register = (listener: (reason: L) => void) => {
     assert(listener);
-    if (!this[internal].available) {
+    if (!this[internal].alive) {
       this[internal].canceled && void handler(this[internal].reason!);
       return () => void 0;
     }
-    const node = this[internal].listeners[1] = this[internal].listeners[1].append(handler);
+    const node = this[internal].listeners[1];
+    this[internal].listeners[1] = this[internal].listeners[1].append(handler);
     return () =>
       node.head === handler
         ? void node.take(1)
@@ -74,10 +75,11 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
     if (!this[internal].available) return;
     this[internal].available = false;
     this[internal].reason = reason!;
-    this[internal].resolve(this[internal].reason!);
-    void this[internal].listeners[0]
-      .foldl((_, listener) => void listener(reason!), void 0);
+    for (let listener; listener = this[internal].listeners[0].take(1).head;) {
+      void listener(reason!);
+    }
     this[internal].listeners[0] = this[internal].listeners[1];
+    this[internal].resolve(this[internal].reason!);
     this[internal].alive = false;
   };
   public readonly close = (reason?: unknown) => {
