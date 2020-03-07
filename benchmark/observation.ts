@@ -19,10 +19,42 @@ describe('Benchmark:', function () {
       benchmark('Observation monitor', () => subject.emit([], 0), done);
     });
 
+    it('monitor 10', function (done) {
+      const subject = new Observation();
+      for (let i = 0; i < 1e1; ++i) {
+        subject.monitor([i], noop);
+      }
+      benchmark('Observation monitor 10', () => subject.emit([], 0), done);
+    });
+
+    it('monitor 100', function (done) {
+      const subject = new Observation();
+      for (let i = 0; i < 1e2; ++i) {
+        subject.monitor([i], noop);
+      }
+      benchmark('Observation monitor 100', () => subject.emit([], 0), done);
+    });
+
     it('on', function (done) {
       const subject = new Observation();
       subject.on([], noop);
       benchmark('Observation on', () => subject.emit([], 0), done);
+    });
+
+    it('on 10', function (done) {
+      const subject = new Observation();
+      for (let i = 0; i < 1e1; ++i) {
+        subject.on([i], noop);
+      }
+      benchmark('Observation on 10', () => subject.emit([], 0), done);
+    });
+
+    it('on 100', function (done) {
+      const subject = new Observation();
+      for (let i = 0; i < 1e2; ++i) {
+        subject.on([i], noop);
+      }
+      benchmark('Observation on 100', () => subject.emit([], 0), done);
     });
 
     it('reflect', function (done) {
