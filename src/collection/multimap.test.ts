@@ -26,8 +26,8 @@ describe('Unit: lib/multimap', () => {
       assert(map.get(0) === 1);
       assert.deepStrictEqual([...map.ref(0)], [1]);
       assert(map.set(0, 2) === map);
-      assert(map.get(0) === 2);
-      assert.deepStrictEqual([...map.ref(0)], [2, 1]);
+      assert(map.get(0) === 1);
+      assert.deepStrictEqual([...map.ref(0)], [1, 2]);
     });
 
     it('take', () => {
@@ -40,16 +40,11 @@ describe('Unit: lib/multimap', () => {
       assert.deepStrictEqual([...map.ref(0)], []);
       map.set(0, 1);
       map.set(0, 2);
-      assert.deepStrictEqual([...map.take(0, 1)], [2]);
-      assert.deepStrictEqual([...map.ref(0)], [1]);
-      map.set(0, 2);
+      assert.deepStrictEqual([...map.take(0, 1)], [1]);
+      assert.deepStrictEqual([...map.ref(0)], [2]);
+      map.set(0, 1);
       assert.deepStrictEqual([...map.take(0, Infinity)], [2, 1]);
       assert.deepStrictEqual([...map.ref(0)], []);
-      map.set(0, 1);
-      map.set(0, 2);
-      map.set(0, 3);
-      assert.deepStrictEqual([...map.take(0, 1).reverse()], [3]);
-      assert.deepStrictEqual([...map.ref(0)], [2, 1]);
     });
 
   });
