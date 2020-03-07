@@ -13,7 +13,8 @@ function Result<T>(value: T, cont: Cont<T>): Result<T> {
 export type CList<T> = CCons<T>;
 export function CList<T>(...values: T[]): CCons<T> {
   let cont: Cont<T>;
-  for (let i = values.length; i--;) {
+  //for (let i = values.length; i--;) { slower x3-10
+  for (let i = values.length - 1; i >= 0; --i) {
     cont = Cont(values[i], cont);
   }
   return new CCons(cont);

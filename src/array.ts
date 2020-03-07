@@ -18,7 +18,7 @@ export function shift<a>(as: a[], count?: number): [a | undefined | a[], a[]] {
 }
 export function unshift<a>(as: Iterable<a>, bs: a[]): a[] {
   if (isArray(as)) {
-    for (let i = as.length; i--;) {
+    for (let i = as.length - 1; i >= 0; --i) {
       bs.unshift(as[i]);
     }
   }

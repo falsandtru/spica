@@ -3,7 +3,8 @@ import { undefined } from './global';
 export type List<T> = Cons<T>;
 export function List<T>(...values: T[]): List<T> {
   let node = Nil<T>();
-  for (let i = values.length; i--;) {
+  //for (let i = values.length; i--;) { slower x3-10
+  for (let i = values.length - 1; i >= 0; --i) {
     node = node.add(values[i]);
   }
   return node;
@@ -67,7 +68,8 @@ class Cons<T> {
 export type MList<T> = MCons<T>;
 export function MList<T>(...values: T[]): MList<T> {
   let node = MNil<T>();
-  for (let i = values.length; i--;) {
+  //for (let i = values.length; i--;) { slower x3-10
+  for (let i = values.length - 1; i >= 0; --i) {
     node = node.add(values[i]);
   }
   return node;
