@@ -10,7 +10,6 @@ export { uncurry } from './src/uncurry';
 export { flip } from './src/flip';
 export { tuple } from './src/tuple';
 export { List, MList } from './src/list';
-export { CList } from './src/clist';
 export { HList } from './src/hlist';
 export { AtomicPromise } from './src/promise';
 export { Future, AtomicFuture } from './src/future';
