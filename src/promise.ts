@@ -1,3 +1,4 @@
+import { undefined } from './global';
 import { splice } from './array';
 
 const enum State {
@@ -52,23 +53,23 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
       for (let i = 0; i < length; ++i) {
         const value = values[i];
         if (isPromiseLike(value)) {
-          void value.then(
+          value.then(
             value => {
               acc[i] = value;
-              void ++cnt;
-              cnt === length && void resolve(acc);
+              ++cnt;
+              cnt === length && resolve(acc);
             },
             reason => {
               i = length;
-              void reject(reason);
+              reject(reason);
             });
         }
         else {
           acc[i] = value;
-          void ++cnt;
+          ++cnt;
         }
       }
-      cnt === length && void resolve(acc);
+      cnt === length && resolve(acc);
     });
   }
   public static race<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<T> {
@@ -77,19 +78,19 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
       for (const value of values) {
         if (done) break;
         if (isPromiseLike(value)) {
-          void value.then(
+          value.then(
             value => {
               done = true;
-              void resolve(value);
+              resolve(value);
             },
             reason => {
               done = true;
-              void reject(reason);
+              reject(reason);
             });
         }
         else {
           done = true;
-          void resolve(value);
+          resolve(value);
         }
       }
     });
@@ -97,16 +98,16 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
   public static resolve(): AtomicPromise<undefined>;
   public static resolve<T>(value: T | PromiseLike<T>): AtomicPromise<T>;
   public static resolve<T>(value?: T | PromiseLike<T>): AtomicPromise<T> {
-    return new AtomicPromise<T>(resolve => void resolve(value));
+    return new AtomicPromise<T>(resolve => resolve(value));
   }
   public static reject<T = never>(reason?: unknown): AtomicPromise<T> {
-    return new AtomicPromise<T>((_, reject) => void reject(reason));
+    return new AtomicPromise<T>((_, reject) => reject(reason));
   }
   constructor(executor: (resolve: (value?: T | PromiseLike<T>) => void, reject: (reason?: unknown) => void) => void) {
     const intl: typeof internal = internal;
     try {
       const internal = this[intl];
-      void executor(
+      executor(
         value => {
           if (internal.status.state !== State.pending) return;
           if (isPromiseLike(value)) {
@@ -114,14 +115,14 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
               state: State.resolved,
               result: value,
             };
-            void value.then(
+            value.then(
               value => {
                 assert(internal.status.state === State.resolved);
                 internal.status = {
                   state: State.fulfilled,
                   result: value,
                 };
-                void resume(internal);
+                resume(internal);
               },
               reason => {
                 assert(internal.status.state === State.resolved);
@@ -129,7 +130,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
                   state: State.rejected,
                   result: reason,
                 };
-                void resume(internal);
+                resume(internal);
               });
           }
           else {
@@ -137,7 +138,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
               state: State.fulfilled,
               result: value!,
             };
-            void resume(internal);
+            resume(internal);
           }
         },
         reason => {
@@ -146,7 +147,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
             state: State.rejected,
             result: reason,
           };
-          void resume(internal);
+          resume(internal);
         });
     }
     catch (reason) {
@@ -156,7 +157,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
         state: State.rejected,
         result: reason,
       };
-      void resume(internal);
+      resume(internal);
     }
   }
   public readonly [internal]: Internal<T> = new Internal();
@@ -164,32 +165,32 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
     return new AtomicPromise((resolve, reject) => {
       const { fulfillReactions, rejectReactions, status } = this[internal];
       if (status.state !== State.rejected) {
-        void fulfillReactions.push(value => {
-          if (!onfulfilled) return void resolve(value as any);
+        fulfillReactions.push(value => {
+          if (!onfulfilled) return resolve(value as any);
           try {
-            void resolve(onfulfilled(value));
+            resolve(onfulfilled(value));
           }
           catch (reason) {
-            void reject(reason);
+            reject(reason);
           }
         });
       }
       if (status.state !== State.fulfilled) {
-        void rejectReactions.push(reason => {
-          if (!onrejected) return void reject(reason);
+        rejectReactions.push(reason => {
+          if (!onrejected) return reject(reason);
           try {
-            void resolve(onrejected(reason));
+            resolve(onrejected(reason));
           }
           catch (reason) {
-            void reject(reason);
+            reject(reason);
           }
         });
       }
-      void resume(this[internal]);
+      resume(this[internal]);
     });
   }
   public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult> {
-    return this.then(void 0, onrejected);
+    return this.then(undefined, onrejected);
   }
   public finally(onfinally?: (() => void) | undefined | null): AtomicPromise<T> {
     return this.then(onfinally, onfinally).then(() => this);
@@ -209,22 +210,22 @@ function resume<T>(internal: Internal<T>): void {
       return;
     case State.fulfilled:
       if (!internal.isHandled && rejectReactions.length > 0) {
-        void splice(rejectReactions, 0);
+        splice(rejectReactions, 0);
       }
       assert(rejectReactions.length === 0);
       if (fulfillReactions.length === 0) return;
       internal.isHandled = true;
-      void consume(fulfillReactions, status.result);
+      consume(fulfillReactions, status.result);
       assert(fulfillReactions.length + rejectReactions.length === 0);
       return;
     case State.rejected:
       if (!internal.isHandled && fulfillReactions.length > 0) {
-        void splice(fulfillReactions, 0);
+        splice(fulfillReactions, 0);
       }
       assert(fulfillReactions.length === 0);
       if (rejectReactions.length === 0) return;
       internal.isHandled = true;
-      void consume(rejectReactions, status.result);
+      consume(rejectReactions, status.result);
       assert(fulfillReactions.length + rejectReactions.length === 0);
       return;
   }
@@ -232,7 +233,7 @@ function resume<T>(internal: Internal<T>): void {
 
 function consume<a>(fs: ((a: a) => void)[], a: a): void {
   for (let i = 0; i < fs.length; ++i) {
-    void fs[i](a);
+    fs[i](a);
   }
-  void splice(fs, 0);
+  splice(fs, 0);
 }

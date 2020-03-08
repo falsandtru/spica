@@ -1,4 +1,4 @@
-import { Number, Map, WeakMap, Error } from './global';
+import { undefined, Number, Map, WeakMap, Error } from './global';
 import type { PartialTuple, DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
 import { push, splice } from './array';
@@ -70,9 +70,9 @@ let id = 0;
 export class Observation<N extends readonly unknown[], D, R>
   implements Observer<N, D, R>, Publisher<N, D, R> {
   constructor(opts: ObservationOptions = {}) {
-    void extend(this.settings, opts);
+    extend(this.settings, opts);
   }
-  private readonly node: ListenerNode<N, D, R> = new ListenerNode(void 0, void 0);
+  private readonly node: ListenerNode<N, D, R> = new ListenerNode(undefined, undefined);
   private readonly settings: DeepImmutable<DeepRequired<ObservationOptions>> = {
     limit: 10,
     cleanup: false,
@@ -91,7 +91,7 @@ export class Observation<N extends readonly unknown[], D, R>
         once,
       },
     } as const;
-    void monitors.push(item);
+    monitors.push(item);
     return () => void this.off(namespace, item);
   }
   public on(namespace: N, subscriber: Subscriber<N, D, R>, { once = false }: ObserverOptions = {}): () => void {
@@ -108,7 +108,7 @@ export class Observation<N extends readonly unknown[], D, R>
         once,
       },
     } as const;
-    void subscribers.push(item);
+    subscribers.push(item);
     return () => void this.off(namespace, item);
   }
   public once(namespace: N, subscriber: Subscriber<N, D, R>): () => void {
@@ -138,13 +138,13 @@ export class Observation<N extends readonly unknown[], D, R>
   public emit(this: Observation<N, void, R>, type: N, data?: D, tracker?: (data: D, results: R[]) => void): void
   public emit(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void
   public emit(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void {
-    void this.drain(namespace, data, tracker);
+    this.drain(namespace, data, tracker);
   }
   public reflect(this: Observation<N, void, R>, type: N, data?: D): R[]
   public reflect(namespace: N, data: D): R[]
   public reflect(namespace: N, data: D): R[] {
     let results!: R[];
-    void this.emit(namespace, data, (_, r) => results = r);
+    this.emit(namespace, data, (_, r) => results = r);
     assert(results);
     return results;
   }
@@ -156,7 +156,7 @@ export class Observation<N extends readonly unknown[], D, R>
     const unrelay = () => (
       void this.unrelaies.delete(source),
       void unbind());
-    void this.unrelaies.set(source, unrelay);
+    this.unrelaies.set(source, unrelay);
     return unrelay;
   }
   public refs(namespace: PartialTuple<N>): ListenerItem<N, D, R>[] {
@@ -177,14 +177,14 @@ export class Observation<N extends readonly unknown[], D, R>
       for (let i = 0, max = items[items.length - 1].id; i < items.length && items[i].id <= max; ++i) {
         const item = items[i];
         if (item.options.once) {
-          void this.off(item.namespace, item);
+          this.off(item.namespace, item);
         }
         try {
           const result = item.listener(data, namespace);
-          tracker && void results.push(result);
+          tracker && results.push(result);
         }
         catch (reason) {
-          void causeAsyncException(reason);
+          causeAsyncException(reason);
         }
         i = i < items.length ? i : items.length - 1;
         for (; i >= 0; --i) {
@@ -199,13 +199,13 @@ export class Observation<N extends readonly unknown[], D, R>
       for (let i = 0, max = items[items.length - 1].id; i < items.length && items[i].id <= max; ++i) {
         const item = items[i];
         if (item.options.once) {
-          void this.off(item.namespace, item);
+          this.off(item.namespace, item);
         }
         try {
-          void item.listener(data, namespace);
+          item.listener(data, namespace);
         }
         catch (reason) {
-          void causeAsyncException(reason);
+          causeAsyncException(reason);
         }
         i = i < items.length ? i : items.length - 1;
         for (; i >= 0; --i) {
@@ -215,10 +215,10 @@ export class Observation<N extends readonly unknown[], D, R>
     }
     if (tracker) {
       try {
-        void tracker(data, results);
+        tracker(data, results);
       }
       catch (reason) {
-        void causeAsyncException(reason);
+        causeAsyncException(reason);
       }
     }
   }
@@ -229,8 +229,8 @@ export class Observation<N extends readonly unknown[], D, R>
       : [subscribers];
     while (parent) {
       type === ListenerType.Monitor
-        ? void (acc as typeof monitors[]).push(parent.monitors)
-        : void (acc as typeof subscribers[]).push(parent.subscribers);
+        ? (acc as typeof monitors[]).push(parent.monitors)
+        : (acc as typeof subscribers[]).push(parent.subscribers);
       parent = parent.parent;
     }
     return acc;
@@ -242,8 +242,8 @@ export class Observation<N extends readonly unknown[], D, R>
   }
   private refsBelow_({ monitors, subscribers, childrenIndexes, children }: ListenerNode<N, D, R>, type: ListenerType, acc: ListenerItem<N, D, R>[][]): readonly [ListenerItem<N, D, R>[][], number] {
     type === ListenerType.Monitor
-      ? void (acc as typeof monitors[]).push(monitors)
-      : void (acc as typeof subscribers[]).push(subscribers);
+      ? (acc as typeof monitors[]).push(monitors)
+      : (acc as typeof subscribers[]).push(subscribers);
     let count = 0;
     for (let i = 0; i < childrenIndexes.length; ++i) {
       const index = childrenIndexes[i];
@@ -251,9 +251,9 @@ export class Observation<N extends readonly unknown[], D, R>
       const cnt = this.refsBelow_(children.get(index)!, type, acc)[1];
       count += cnt;
       if (cnt === 0 && this.settings.cleanup) {
-        void children.delete(index);
-        void splice(childrenIndexes, i, 1);
-        void --i;
+        children.delete(index);
+        splice(childrenIndexes, i, 1);
+        --i;
       }
     }
     return [acc, monitors.length + subscribers.length + count];
@@ -274,8 +274,8 @@ export class Observation<N extends readonly unknown[], D, R>
             return node;
         }
         child = new ListenerNode(node, index);
-        void childrenIndexes.push(index);
-        void children.set(index, child);
+        childrenIndexes.push(index);
+        children.set(index, child);
       }
       node = child;
     }
@@ -286,10 +286,10 @@ export class Observation<N extends readonly unknown[], D, R>
 function clear<N extends readonly unknown[], D, R>({ monitors, subscribers, childrenIndexes, children }: ListenerNode<N, D, R>): boolean {
   for (let i = 0; i < childrenIndexes.length; ++i) {
     if (!clear(children.get(childrenIndexes[i])!)) continue;
-    void children.delete(childrenIndexes[i]);
-    void splice(childrenIndexes, i, 1);
-    void --i;
+    children.delete(childrenIndexes[i]);
+    splice(childrenIndexes, i, 1);
+    --i;
   }
-  void splice(subscribers, 0);
+  splice(subscribers, 0);
   return monitors.length === 0;
 }
