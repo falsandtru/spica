@@ -1,3 +1,4 @@
+import { undefined, Infinity } from './global';
 import { isArray } from './alias';
 
 export function indexOf<a>(as: readonly a[], a: a): number {
@@ -12,9 +13,9 @@ export function shift<a>(as: [a, ...a[]], count: number): [a[], a[]];
 export function shift<a>(as: a[], count: number): [a[], a[]];
 export function shift<a>(as: a[], count?: number): [a | undefined | a[], a[]] {
   if (count! < 0) throw new Error('Unexpected negative number');
-  return count === void 0
+  return count === undefined
     ? [as.shift(), as]
-    : [as.splice(0, count), as];
+    : [splice(as, 0, count), as];
 }
 export function unshift<a>(as: Iterable<a>, bs: a[]): a[] {
   if (isArray(as)) {
@@ -33,9 +34,9 @@ export function pop<a>(as: [a, ...a[]], count: number): [a[], a[]];
 export function pop<a>(as: a[], count: number): [a[], a[]];
 export function pop<a>(as: a[], count?: number): [a[], a | undefined | a[]] {
   if (count! < 0) throw new Error('Unexpected negative number');
-  return count === void 0
+  return count === undefined
     ? [as, as.pop()]
-    : [as, as.splice(as.length - count, count)];
+    : [as, splice(as, as.length - count, count)];
 }
 export function push<a>(as: a[], bs: Iterable<a>): a[] {
   if (isArray(bs)) {
@@ -61,17 +62,33 @@ export function splice<a>(as: a[], index: number, count?: number, ...inserts: a[
         case 0:
           return [[], unshift(inserts, as)][0];
         case 1:
-          return [[as.shift()!], unshift(inserts, as)][0];
+          return as.length === 0
+            ? [[], unshift(inserts, as)][0]
+            : [[as.shift()!], unshift(inserts, as)][0];
+        case undefined:
+          if (as.length > 1 || arguments.length > 2) break;
+          return as.length === 0
+            ? []
+            : splice(as, index, 1);
       }
       break;
     case -1:
     case as.length - 1:
+    case Infinity:
       switch (count) {
         case 0:
           return [[], push(as, inserts)][0];
         case 1:
-          return [[as.pop()!], push(as, inserts)][0];
+          return as.length === 0
+            ? [[], push(as, inserts)][0]
+            : [[as.pop()!], push(as, inserts)][0];
+        case undefined:
+          if (as.length > 1 || arguments.length > 2) break;
+          return as.length === 0
+            ? []
+            : splice(as, index, 1);
       }
+      break;
   }
   return arguments.length > 2
     ? as.splice(index, count!, ...inserts)
