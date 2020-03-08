@@ -1,3 +1,5 @@
+import { splice } from './array';
+
 const enum State {
   pending,
   resolved,
@@ -207,7 +209,7 @@ function resume<T>(internal: Internal<T>): void {
       return;
     case State.fulfilled:
       if (!internal.isHandled && rejectReactions.length > 0) {
-        rejectReactions.length = 0;
+        void splice(rejectReactions, 0);
       }
       assert(rejectReactions.length === 0);
       if (fulfillReactions.length === 0) return;
@@ -217,7 +219,7 @@ function resume<T>(internal: Internal<T>): void {
       return;
     case State.rejected:
       if (!internal.isHandled && fulfillReactions.length > 0) {
-        fulfillReactions.length = 0;
+        void splice(fulfillReactions, 0);
       }
       assert(fulfillReactions.length === 0);
       if (rejectReactions.length === 0) return;
@@ -229,7 +231,8 @@ function resume<T>(internal: Internal<T>): void {
 }
 
 function consume<a>(fs: ((a: a) => void)[], a: a): void {
-  while (fs.length > 0) {
-    void fs.shift()!(a);
+  for (let i = 0; i < fs.length; ++i) {
+    void fs[i](a);
   }
+  void splice(fs, 0);
 }

@@ -5,6 +5,7 @@ import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future';
 import { Observation, Observer, Publisher } from './observation';
 import type { DeepImmutable, DeepRequired } from './type';
+import { splice } from './array';
 import { extend } from './assign';
 import { tick } from './clock';
 import { sqid } from './sqid';
@@ -321,9 +322,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       }
       assert(name !== void 0);
       if (result === void 0 && Date.now() < expiry) continue;
-      i === 0
-        ? void this.messages.shift()
-        : void this.messages.splice(i, 1);
+      void splice(this.messages, i, 1);
       void --i;
       void --len;
 

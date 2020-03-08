@@ -48,6 +48,35 @@ export function push<a>(as: a[], bs: Iterable<a>): a[] {
   }
   return as;
 }
+export function splice<a>(as: a[], index: number, count?: number): a[];
+export function splice<a>(as: a[], index: number, count: number, ...inserts: a[]): a[];
+export function splice<a>(as: a[], index: number, count?: number, ...inserts: a[]): a[] {
+  if (count === 0 && inserts.length === 0) return [];
+  count = count! > as.length
+    ? as.length
+    : count;
+  switch (index) {
+    case 0:
+      switch (count) {
+        case 0:
+          return [[], unshift(inserts, as)][0];
+        case 1:
+          return [[as.shift()!], unshift(inserts, as)][0];
+      }
+      break;
+    case -1:
+    case as.length - 1:
+      switch (count) {
+        case 0:
+          return [[], push(as, inserts)][0];
+        case 1:
+          return [[as.pop()!], push(as, inserts)][0];
+      }
+  }
+  return arguments.length > 2
+    ? as.splice(index, count!, ...inserts)
+    : as.splice(index);
+}
 
 export function join(as: readonly (string | number)[], sep = ''): string {
   let acc = '';

@@ -1,7 +1,7 @@
 import { Number, Map, WeakMap, Error } from './global';
 import type { PartialTuple, DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
-import { push } from './array';
+import { push, splice } from './array';
 import { causeAsyncException } from './exception';
 
 export interface Observer<N extends readonly unknown[], D, R> {
@@ -125,11 +125,11 @@ export class Observation<N extends readonly unknown[], D, R>
           ? node.monitors
           : node.subscribers;
         if (items.length === 0 || subscriber.id < items[0].id || subscriber.id > items[items.length - 1].id) return;
-        return void remove(items, items.indexOf(subscriber));
+        return void splice(items, items.indexOf(subscriber), 1);
       }
       case 'function': {
         const items = node.subscribers;
-        return void remove(items, items.findIndex(item => item.listener === subscriber));
+        return void splice(items, items.findIndex(item => item.listener === subscriber), 1);
       }
       case 'undefined':
         return void clear(node);
@@ -252,7 +252,7 @@ export class Observation<N extends readonly unknown[], D, R>
       count += cnt;
       if (cnt === 0 && this.settings.cleanup) {
         void children.delete(index);
-        void remove(childrenIndexes, i);
+        void splice(childrenIndexes, i, 1);
         void --i;
       }
     }
@@ -283,28 +283,13 @@ export class Observation<N extends readonly unknown[], D, R>
   }
 }
 
-function remove(target: unknown[], index: number): void {
-  switch (index) {
-    case -1:
-      return;
-    case 0:
-      return void target.shift();
-    case target.length - 1:
-      return void target.pop();
-    default:
-      return void target.splice(index, 1);
-  }
-}
-
 function clear<N extends readonly unknown[], D, R>({ monitors, subscribers, childrenIndexes, children }: ListenerNode<N, D, R>): boolean {
   for (let i = 0; i < childrenIndexes.length; ++i) {
     if (!clear(children.get(childrenIndexes[i])!)) continue;
     void children.delete(childrenIndexes[i]);
-    void remove(childrenIndexes, i);
+    void splice(childrenIndexes, i, 1);
     void --i;
   }
-  if (subscribers.length > 0) {
-    subscribers.length = 0;
-  }
+  void splice(subscribers, 0);
   return monitors.length === 0;
 }

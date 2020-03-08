@@ -1,6 +1,6 @@
 import { Map } from './global';
 import { extend } from './assign';
-import { indexOf, push } from './array';
+import { indexOf, push, splice } from './array';
 import type { DeepImmutable, DeepRequired } from './type';
 
 export interface CacheOptions<K, V = undefined> {
@@ -106,7 +106,7 @@ export class Cache<K, V = undefined> {
       const index = indexOf(stat, key);
       if (index === -1) continue;
       const val = this.store.get(key)!;
-      void this.store.delete(stat.splice(index, 1)[0]);
+      void this.store.delete(splice(stat, index, 1)[0]);
       if (this.settings.ignore.delete) return true;
       void this.callback(key, val);
       return true;
@@ -154,7 +154,7 @@ export class Cache<K, V = undefined> {
     const index = indexOf(LRU, key);
     if (index === -1) return false;
     const { LFU } = this.stats;
-    void LFU.unshift(...LRU.splice(index, 1));
+    void LFU.unshift(...splice(LRU, index, 1));
     return true;
   }
   private accessLFU(key: K): boolean {
@@ -162,7 +162,7 @@ export class Cache<K, V = undefined> {
     const { LFU } = this.stats;
     const index = indexOf(LFU, key);
     if (index === -1) return false;
-    void LFU.unshift(...LFU.splice(index, 1));
+    void LFU.unshift(...splice(LFU, index, 1));
     return true;
   }
 }
