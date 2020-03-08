@@ -1,5 +1,3 @@
-import { Array } from './global';
-
 const enum State {
   pending,
   resolved,
@@ -47,7 +45,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
     return new AtomicPromise<T[]>((resolve, reject) => {
       const values = [...vs];
       const length = values.length;
-      const acc = Array<T>(length);
+      const acc: T[] = [];
       let cnt = 0;
       for (let i = 0; i < length; ++i) {
         const value = values[i];
