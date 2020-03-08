@@ -82,7 +82,7 @@ export class Observation<N extends readonly unknown[], D, R>
     const { monitors } = this.seekNode(namespace, SeekMode.Extensible);
     if (monitors.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
     if (id === Number.MAX_SAFE_INTEGER) throw new Error(`Spica: Observation: Max listener ID reached max safe integer.`);
-    const item = {
+    const item: MonitorItem<N, D> = {
       id: ++id,
       type: ListenerType.Monitor,
       namespace,
@@ -90,7 +90,7 @@ export class Observation<N extends readonly unknown[], D, R>
       options: {
         once,
       },
-    } as const;
+    };
     monitors.push(item);
     return () => void this.off(namespace, item);
   }
@@ -99,7 +99,7 @@ export class Observation<N extends readonly unknown[], D, R>
     const { subscribers } = this.seekNode(namespace, SeekMode.Extensible);
     if (subscribers.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
     if (id === Number.MAX_SAFE_INTEGER) throw new Error(`Spica: Observation: Max listener ID reached max safe integer.`);
-    const item = {
+    const item: SubscriberItem<N, D, R> = {
       id: ++id,
       type: ListenerType.Subscriber,
       namespace,
@@ -107,7 +107,7 @@ export class Observation<N extends readonly unknown[], D, R>
       options: {
         once,
       },
-    } as const;
+    };
     subscribers.push(item);
     return () => void this.off(namespace, item);
   }
@@ -187,9 +187,7 @@ export class Observation<N extends readonly unknown[], D, R>
           causeAsyncException(reason);
         }
         i = i < items.length ? i : items.length - 1;
-        for (; i >= 0; --i) {
-          if (items[i].id <= item.id) break;
-        }
+        for (; i >= 0 && items[i].id > item.id; --i);
       }
     }
     const mss = this.refsAbove(node || this.seekNode(namespace, SeekMode.Closest), ListenerType.Monitor);
@@ -208,9 +206,7 @@ export class Observation<N extends readonly unknown[], D, R>
           causeAsyncException(reason);
         }
         i = i < items.length ? i : items.length - 1;
-        for (; i >= 0; --i) {
-          if (items[i].id <= item.id) break;
-        }
+        for (; i >= 0 && items[i].id > item.id; --i);
       }
     }
     if (tracker) {
