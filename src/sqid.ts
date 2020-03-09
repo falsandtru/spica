@@ -10,7 +10,7 @@ export function sqid(id?: number): string {
     if (typeof id !== 'number') throw new TypeError(`Spica: sqid: A parameter value must be a number: ${id}`);
     if (id >= 0 === false) throw new TypeError(`Spica: sqid: A parameter value must be a positive number: ${id}`);
     if (id % 1 !== 0) throw new TypeError(`Spica: sqid: A parameter value must be an integer: ${id}`);
-    return (zeros + id).slice(-15);
+    return (zeros + id).slice(-16);
   }
   else {
     if (cnt === Number.MAX_SAFE_INTEGER) throw new TypeError(`Spica: sqid: sqid reached max safe integer.`);
