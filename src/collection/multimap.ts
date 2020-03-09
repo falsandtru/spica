@@ -27,6 +27,10 @@ export class MultiMap<K, V> implements Collection<K, V> {
     return splice(this.store.get(key) || [], 0, count);
   }
   public ref(key: K): V[] {
-    return this.store.get(key) || [];
+    let vs = this.store.get(key);
+    if (vs) return vs;
+    vs = [];
+    this.store.set(key, vs);
+    return vs;
   }
 }
