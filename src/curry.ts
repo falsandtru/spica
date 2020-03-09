@@ -1,3 +1,5 @@
+import { undefined } from './global';
+
 export interface Curried1<a, z> {
   (a: a): z;
 }
