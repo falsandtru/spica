@@ -35,7 +35,21 @@ export const curry: Curry = <Curry>(<z>(f: () => z) =>
   apply(f));
 
 function apply(f: (...xs: unknown[]) => unknown, ...xs: unknown[]) {
-  return xs.length >= f.length
-    ? f(...xs)
-    : (...ys: unknown[]) => apply(f, ...xs, ...ys);
+  let g: typeof f;
+  return xs.length < f.length
+    ? (y: unknown, ...ys: unknown[]) => apply(g = g || f.bind(undefined, ...xs), y, ...ys)
+    : f(...xs);
 }
+
+interface Uncurry {
+  <a, b, c, d, e, z>(f: (a: a) => (b: b) => (c: c) => (d: d) => (e: e) => z): (a: a, b: b, c: c, d: d, e: e) => z;
+  <a, b, c, d, z>(f: (a: a) => (b: b) => (c: c) => (d: d) => z): (a: a, b: b, c: c, d: d) => z;
+  <a, b, c, z>(f: (a: a) => (b: b) => (c: c) => z): (a: a, b: b, c: c) => z;
+  <a, b, z>(f: (a: a) => (b: b) => z): (a: a, b: b) => z;
+  <a, z>(f: (a: a) => z): (a: a) => z;
+}
+
+export const uncurry: Uncurry = (f: (...xs: any[]) => any) => (...xs: any[]) =>
+  f.length === 0
+    ? f(...xs)
+    : xs.reduce((f, x) => f(x), f);

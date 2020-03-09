@@ -6,7 +6,6 @@ export { Sequence } from './src/sequence';
 export { Maybe, Just, Nothing } from './src/maybe';
 export { Either, Left, Right } from './src/either';
 export { curry } from './src/curry';
-export { uncurry } from './src/uncurry';
 export { flip } from './src/flip';
 export { tuple } from './src/tuple';
 export { List, MList } from './src/list';

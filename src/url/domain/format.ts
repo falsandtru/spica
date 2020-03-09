@@ -4,7 +4,7 @@ import { Normalized } from '../attribute/normalize';
 import { memoize } from '../../memoize';
 import { Cache } from '../../cache';
 import { flip } from '../../flip';
-import { uncurry } from '../../uncurry';
+import { uncurry } from '../../curry';
 
 namespace Identifier {
   declare class Identity<T> {
