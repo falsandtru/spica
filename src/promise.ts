@@ -1,4 +1,5 @@
 import { undefined } from './global';
+import { isArray } from './alias';
 import { splice } from './array';
 
 const enum State {
@@ -44,9 +45,9 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
   public static all<T1, T2, T3>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>]): AtomicPromise<[T1, T2, T3]>;
   public static all<T1, T2>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>]): AtomicPromise<[T1, T2]>;
   public static all<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<T[]>;
-  public static all<T>(vs: Iterable<T | PromiseLike<T>>): AtomicPromise<T[]> {
+  public static all<T>(vs: Iterable<T | PromiseLike<T>> | T[]): AtomicPromise<T[]> {
     return new AtomicPromise<T[]>((resolve, reject) => {
-      const values = [...vs];
+      const values = isArray(vs) ? vs : [...vs];
       const length = values.length;
       const acc: T[] = [];
       let cnt = 0;

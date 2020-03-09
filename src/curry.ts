@@ -32,10 +32,10 @@ export interface Curry {
 }
 
 export const curry: Curry = <Curry>(<z>(f: () => z) =>
-  apply(f, []));
+  apply(f));
 
-function apply(f: (...xs: any[]) => any, xs: any[]) {
+function apply(f: (...xs: unknown[]) => unknown, ...xs: unknown[]) {
   return xs.length >= f.length
     ? f(...xs)
-    : (...ys: any[]) => apply(f, [...xs, ...ys]);
+    : (...ys: unknown[]) => apply(f, ...xs, ...ys);
 }
