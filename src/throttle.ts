@@ -11,7 +11,8 @@ export function throttle<T>(interval: number, callback: (last: T, buffer: MList<
       assert(timer > 0);
       assert(buffer.tail);
       timer = 0;
-      const buf = [buffer, buffer = MList()][0];
+      const buf = buffer;
+      buffer = MList();
       assert(buf.tail);
       void callback(buf.head, buf);
     }, interval);
@@ -31,7 +32,8 @@ export function debounce<T>(delay: number, callback: (last: T, buffer: MList<T>)
       void setTimeout(() => {
         if (timer > 0) return;
         assert(buffer.tail);
-        const buf = [buffer, buffer = MList()][0];
+        const buf = buffer;
+        buffer = MList();
         assert(buf.tail);
         void callback(buf.head, buf);
       }, buffer.length > 1 ? delay : 0);
