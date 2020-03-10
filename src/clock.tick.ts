@@ -30,7 +30,7 @@ function run(): void {
     }
     catch (reason) {
       node = node.tail;
-      void causeAsyncException(reason);
+      causeAsyncException(reason);
       continue;
     }
   }
