@@ -29,7 +29,7 @@ export const isEnumerable = Object.prototype.propertyIsEnumerable.call.bind(Obje
 export const toString = Object.prototype.toString.call.bind(Object.prototype.toString) as (target: unknown) => string;
 export const ObjectAssign = Object.assign;
 export const ObjectCreate: {
-  (o: null, properties?: PropertyDescriptorMap & ThisType<any>): object;
+  (o: null, properties?: PropertyDescriptorMap & ThisType<any>): {};
   <T extends object>(o: T, properties?: PropertyDescriptorMap & ThisType<any>): T;
 } = Object.create;
 export const ObjectDefineProperties: <T extends object>(o: T, properties: PropertyDescriptorMap & ThisType<any>) => T = Object.defineProperties;
