@@ -48,7 +48,7 @@ export const isSealed = Object.isSealed;
 export const ObjectKeys = Object.keys;
 export const ObjectPreventExtensions = Object.preventExtensions;
 export const ObjectSeal = Object.seal;
-export const ObjectSetPrototypeOf: <T>(o: T, proto: object | null) => T = Object.setPrototypeOf;
+export const ObjectSetPrototypeOf: <T extends object>(o: T, proto: object | null) => T = Object.setPrototypeOf;
 export const ObjectValues = Object.values;
 
 export const isArray = Array.isArray;
