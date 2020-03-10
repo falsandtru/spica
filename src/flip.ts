@@ -4,8 +4,7 @@ export function flip<a, b, c>(f: (a: a) => (b: b) => c): (b: b) => (a: a) => c
 export function flip<a, b, c>(f: (a: a, b: b) => c): (b: b, a: a) => c
 export function flip<a, b, c>(f: ((a: a, b: b) => c) | ((a: a) => (b: b) => c)): Curried2<b, a, c>
 export function flip<a, b, c>(f: ((a: a, b: b) => c) | ((a: a) => (b: b) => c)): Curried2<b, a, c> {
-  return curry((b: b, a: a) =>
-    f.length > 1
-      ? (<(a: a, b: b) => c>f)(a, b)
-      : (<(a: a) => (b: b) => c>f)(a)(b));
+  return f.length > 1
+    ? curry((b: b, a: a) => (<(a: a, b: b) => c>f)(a, b))
+    : curry((b: b, a: a) => (<(a: a) => (b: b) => c>f)(a)(b));
 }

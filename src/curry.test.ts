@@ -55,6 +55,11 @@ describe('Unit: lib/curry', () => {
         [1, 2, 3]);
     });
 
+    it('extra parameters', () => {
+      assert.deepStrictEqual([1].map(uncurry(curry((a: number) => a))), [1]);
+      assert.deepStrictEqual([1].map(uncurry(curry((a: number, b: number = NaN) => [a, b]))), [[1, 0]]);
+    });
+
   });
 
 });
