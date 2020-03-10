@@ -28,9 +28,12 @@ export const isPrototypeOf = Object.prototype.isPrototypeOf.call.bind(Object.pro
 export const isEnumerable = Object.prototype.propertyIsEnumerable.call.bind(Object.prototype.propertyIsEnumerable) as (target: unknown, prop: string | number | symbol) => boolean;
 export const toString = Object.prototype.toString.call.bind(Object.prototype.toString) as (target: unknown) => string;
 export const ObjectAssign = Object.assign;
-export const ObjectCreate = Object.create;
-export const ObjectDefineProperties = Object.defineProperties;
-export const ObjectDefineProperty = Object.defineProperty;
+export const ObjectCreate: {
+  (o: null, properties?: PropertyDescriptorMap & ThisType<any>): object;
+  <T extends object>(o: T, properties?: PropertyDescriptorMap & ThisType<any>): T;
+} = Object.create;
+export const ObjectDefineProperties: <T extends object>(o: T, properties: PropertyDescriptorMap & ThisType<any>) => T = Object.defineProperties;
+export const ObjectDefineProperty: <T extends object>(o: T, p: string | number | symbol, attributes: PropertyDescriptor & ThisType<any>) => T = Object.defineProperty;
 export const ObjectEntries = Object.entries;
 export const ObjectFreeze = Object.freeze;
 export const ObjectGetOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
@@ -45,7 +48,7 @@ export const isSealed = Object.isSealed;
 export const ObjectKeys = Object.keys;
 export const ObjectPreventExtensions = Object.preventExtensions;
 export const ObjectSeal = Object.seal;
-export const ObjectSetPrototypeOf = Object.setPrototypeOf;
+export const ObjectSetPrototypeOf: <T>(o: T, proto: object | null) => T = Object.setPrototypeOf;
 export const ObjectValues = Object.values;
 
 export const isArray = Array.isArray;
