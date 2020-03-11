@@ -37,10 +37,10 @@ export interface Curry {
 export const curry: Curry = <Curry>(<z>(f: () => z) =>
   curry_(f, f.length));
 
-function curry_(f: (...xs: unknown[]) => unknown, len: number, ...xs: unknown[]) {
+function curry_(f: (...xs: unknown[]) => unknown, arity: number, ...xs: unknown[]) {
   let g: typeof f;
-  return xs.length < len
-    ? (...ys: unknown[]) => curry_(g = g || xs.length && f.bind(undefined, ...xs) || f, len - xs.length, ...ys)
+  return xs.length < arity
+    ? (...ys: unknown[]) => curry_(g = g || xs.length && f.bind(undefined, ...xs) || f, arity - xs.length, ...ys)
     : f(...xs);
 }
 
@@ -56,9 +56,9 @@ export const uncurry: Uncurry = (f: (...xs: any[]) => any) =>
   uncurry_(f);
 
 function uncurry_(f: (...xs: any[]) => any): any {
-  const len = f.length;
+  const arity = f.length;
   return (...xs: any[]) =>
-    len === 0 || xs.length <= len
+    arity === 0 || xs.length < 2 || xs.length <= arity
       ? f(...xs)
-      : uncurry_(f(...shift(xs, len)[0]))(...xs);
+      : uncurry_(f(...shift(xs, arity)[0]))(...xs);
 }
