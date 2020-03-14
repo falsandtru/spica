@@ -1,5 +1,5 @@
-import { global, location } from './global';
-import { NormalizedURL, newURL } from './url/domain/format';
+import { location } from './global';
+import { NormalizedURL, ReadonlyURL } from './url/domain/format';
 
 export { StandardURL, standardize } from './url/domain/format';
 
@@ -9,7 +9,7 @@ export class URL<T extends string> {
   constructor(url: URLSegment<string> & T, base: T)
   constructor(url: T, base?: T extends NormalizedURL ? string : T)
   constructor(url: string, base: string = location.href) {
-    this.url = newURL(url, base);
+    this.url = new ReadonlyURL(url, base);
     assert(this.url.href.endsWith(`${this.port}${this.path}${this.fragment}`));
     assert(this.reference === this.url.href);
     assert(this.reference.startsWith(this.resource));
@@ -19,7 +19,7 @@ export class URL<T extends string> {
     assert(this.hostname === this.url.hostname);
     assert(this.port === this.url.port);
   }
-  private readonly url: global.URL;
+  private readonly url: ReadonlyURL;
   private reference_!: URL.Reference<T>;
   public get reference(): URL.Reference<T> {
     return this.reference_ = this.reference_ ?? this.url.href as any;

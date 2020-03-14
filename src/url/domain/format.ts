@@ -63,10 +63,17 @@ export type NormalizedURL = URL<Normalized>;
 function normalize(url: URL<unknown>, base: string): void
 function normalize(url: string, base: string): NormalizedURL
 function normalize(url: string, base: string): NormalizedURL {
-  return newURL(url, base).href as NormalizedURL;
+  return new ReadonlyURL(url, base).href as NormalizedURL;
 }
 
-export const newURL: (url: string, base: string) => Readonly<global.URL> = flip(uncurry(memoize((base: string) => memoize((url: string) => new global.URL(formatURLForEdge(url, base), base), new Cache(100)), new Cache(100))));
+export interface ReadonlyURL extends Readonly<global.URL> {
+}
+export class ReadonlyURL {
+  private static new: (url: string, base: string) => ReadonlyURL = flip(uncurry(memoize((base: string) => memoize((url: string) => new global.URL(formatURLForEdge(url, base), base), new Cache(100)), new Cache(100))));
+  constructor(url: string, base: string) {
+    return ReadonlyURL.new(url, base);
+  }
+}
 
 function formatURLForEdge(url: string, base: string): string {
   return url.trim() || base;
