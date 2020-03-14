@@ -1,4 +1,5 @@
 import { global, location } from '../../global';
+import { ObjectFreeze } from '../../alias';
 import { Encoded } from '../attribute/encode';
 import { Normalized } from '../attribute/normalize';
 import { memoize } from '../../memoize';
@@ -69,7 +70,7 @@ function normalize(url: string, base: string): NormalizedURL {
 export interface ReadonlyURL extends Readonly<global.URL> {
 }
 export class ReadonlyURL {
-  private static new: (url: string, base: string) => ReadonlyURL = flip(uncurry(memoize((base: string) => memoize((url: string) => new global.URL(formatURLForEdge(url, base), base), new Cache(100)), new Cache(100))));
+  private static new: (url: string, base: string) => ReadonlyURL = flip(uncurry(memoize((base: string) => memoize((url: string) => ObjectFreeze(new global.URL(formatURLForEdge(url, base), base)), new Cache(100)), new Cache(100))));
   constructor(url: string, base: string) {
     return ReadonlyURL.new(url, base);
   }
