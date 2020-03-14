@@ -22,7 +22,7 @@ describe('Benchmark:', function () {
           yield;
         }
       }, { size: 1 })[Symbol.asyncIterator]();
-      benchmark('Coroutine iterate', () => void iter.next(), done);
+      benchmark('Coroutine iterate', done => void iter.next().finally(done), done, { defer: true });
     });
 
     it.skip('iterate async', function (done) {
@@ -32,7 +32,7 @@ describe('Benchmark:', function () {
           yield;
         }
       }, { size: 1 })[Symbol.asyncIterator]();
-      benchmark('Coroutine iterate async', () => void iter.next(), done);
+      benchmark('Coroutine iterate async', done => void iter.next().finally(done), done, { defer: true });
     });
 
   });
