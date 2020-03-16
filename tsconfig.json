@@ -9,7 +9,6 @@
     "noUnusedParameters": true,
     "noUnusedLocals": true,
     "noFallthroughCasesInSwitch": true,
-    "preserveConstEnums": true,
     "suppressImplicitAnyIndexErrors": true,
     "rootDir": "./",
     "forceConsistentCasingInFileNames": true,
