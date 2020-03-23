@@ -5,7 +5,7 @@ export class Future<T = undefined> extends Promise<T> {
     return Promise;
   }
   constructor(strict = true) {
-    let bind!: (value: T | PromiseLike<awaited T | T>) => Promise<awaited T>;
+    let bind!: (value: T | PromiseLike<T>) => Promise<awaited T>;
     let state = true;
     super(resolve =>
       bind = value => {
@@ -18,8 +18,8 @@ export class Future<T = undefined> extends Promise<T> {
     this.bind = bind;
   }
   public readonly bind: {
-    (this: Future<undefined>, value?: T | PromiseLike<awaited T | T>): Promise<awaited T>;
-    (value: T | PromiseLike<awaited T | T>): Promise<awaited T>;
+    (this: Future<undefined>, value?: awaited T | T | PromiseLike<T>): Promise<awaited T>;
+    (value: awaited T | T | PromiseLike<T>): Promise<awaited T>;
   };
 }
 
@@ -28,7 +28,7 @@ export class AtomicFuture<T = undefined> extends AtomicPromise<T> implements Fut
     return AtomicPromise;
   }
   constructor(strict = true) {
-    let bind!: (value: T | PromiseLike<awaited T | T>) => AtomicPromise<awaited T>;
+    let bind!: (value: T | PromiseLike<T>) => AtomicPromise<awaited T>;
     let state = true;
     super(resolve =>
       bind = value => {
@@ -41,7 +41,7 @@ export class AtomicFuture<T = undefined> extends AtomicPromise<T> implements Fut
     this.bind = bind;
   }
   public readonly bind: {
-    (this: AtomicFuture<undefined>, value?: T | PromiseLike<awaited T | T>): AtomicPromise<awaited T>;
-    (value: T | PromiseLike<awaited T | T>): AtomicPromise<awaited T>;
+    (this: AtomicFuture<undefined>, value?: awaited T | T | PromiseLike<T>): AtomicPromise<awaited T>;
+    (value: awaited T | T | PromiseLike<T>): AtomicPromise<awaited T>;
   };
 }

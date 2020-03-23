@@ -105,7 +105,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
   public static reject<T = never>(reason?: unknown): AtomicPromise<awaited T> {
     return new AtomicPromise<T>((_, reject) => reject(reason));
   }
-  constructor(executor: (resolve: (value?: awaited T | T | PromiseLike<awaited T | T>) => void, reject: (reason?: unknown) => void) => void) {
+  constructor(executor: (resolve: (value?: awaited T | T | PromiseLike<T>) => void, reject: (reason?: unknown) => void) => void) {
     const intl: typeof internal = internal;
     try {
       const internal = this[intl];
@@ -199,7 +199,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
   }
 }
 
-export function isPromiseLike(value: any): value is PromiseLike<awaited any> {
+export function isPromiseLike(value: any): value is PromiseLike<any> {
   return value !== null && typeof value === 'object'
       && 'then' in value && typeof value.then === 'function';
 }

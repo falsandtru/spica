@@ -16,7 +16,7 @@ export interface CoroutineOptions {
   readonly trigger?: string | symbol | ReadonlyArray<string | symbol>;
 }
 
-export interface CoroutineInterface<T = unknown, R = T, _ = unknown> extends Promise<awaited T>, AsyncIterable<awaited R> {
+export interface CoroutineInterface<T = unknown, R = T, _ = unknown> extends Promise<T>, AsyncIterable<awaited R> {
   readonly constructor: {
     readonly alive: symbol;
     readonly exit: symbol;
@@ -55,7 +55,7 @@ class Internal<T, R, S> {
   public alive = true;
   public state = new AtomicFuture<IteratorResult<awaited R, undefined>>();
   public resume = new AtomicFuture<undefined>();
-  public readonly result = new AtomicFuture<awaited T>();
+  public readonly result = new AtomicFuture<T>();
   public readonly msgs: [S, Reply<R, T>][] = [];
   public readonly settings: DeepImmutable<DeepRequired<CoroutineOptions>> = {
     autorun: true,
@@ -69,10 +69,10 @@ type Reply<R, T> = (msg: IteratorResult<awaited R, awaited T> | PromiseLike<neve
 
 const internal = Symbol.for('spica/coroutine::internal');
 
-export interface Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<awaited T>, AsyncIterable<awaited R> {
+export interface Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>, AsyncIterable<awaited R> {
   constructor: typeof Coroutine;
 }
-export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<awaited T> implements Promise<awaited T>, AsyncIterable<awaited R>, CoroutineInterface<T, R, S> {
+export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T> implements Promise<T>, AsyncIterable<awaited R>, CoroutineInterface<T, R, S> {
   public static readonly alive: typeof alive = alive;
   protected static readonly init: typeof init = init;
   public static readonly exit: typeof exit = exit;
@@ -82,11 +82,11 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<aw
     return AtomicPromise;
   }
   constructor(
-    gen: (this: Coroutine<T, R, S>) => Generator<R, T | PromiseLike<awaited T | T>, S> | AsyncGenerator<awaited R | R, awaited T | T, S>,
+    gen: (this: Coroutine<T, R, S>) => Generator<R, T | PromiseLike<T>, S> | AsyncGenerator<R, T, S>,
     opts: CoroutineOptions = {},
   ) {
     super(resolve => res = resolve);
-    var res!: (v: awaited T | AtomicPromise<awaited T>) => void;
+    var res!: (v: T | AtomicPromise<T>) => void;
     this[internal] = new Internal(opts);
     this[port] = new Port(this, this[internal]);
     void res(this[internal].result);
@@ -186,7 +186,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<aw
     return this[internal].alive;
   }
   public [init]: () => void;
-  public [exit](result: T | PromiseLike<awaited T | T>): void {
+  public [exit](result: T | PromiseLike<T>): void {
     if (!this[internal].alive) return;
     void AtomicPromise.resolve(result)
       .then(
