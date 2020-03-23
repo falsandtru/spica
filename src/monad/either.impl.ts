@@ -75,10 +75,10 @@ export namespace Either {
   export declare function bind<e, a, b>(m: Either<e, a>, f: (a: a) => Either<e, b>): Either<e, b>
   export declare function bind<e, a>(m: Either<e, a>): <b>(f: (a: a) => Either<e, b>) => Either<e, b>
   export function sequence<a, b>(fm: Either<a, b>[]): Either<a, b[]>;
-  export function sequence<a, b>(fm: Either<a, PromiseLike<b>>): AtomicPromise<Either<a, b>>;
-  export function sequence<a, b>(fm: Either<a, b>[] | Either<a, PromiseLike<b>>): Either<a, b[]> | AtomicPromise<Either<a, b>> {
+  export function sequence<a, b>(fm: Either<a, PromiseLike<awaited b>>): AtomicPromise<Either<a, awaited b>>;
+  export function sequence<a, b>(fm: Either<a, b>[] | Either<a, PromiseLike<awaited b>>): Either<a, b[]> | AtomicPromise<Either<a, awaited b>> {
     return fm instanceof Either
-      ? fm.extract(b => AtomicPromise.resolve(new Left(b)), a => AtomicPromise.resolve(a).then<Either<a, b>>(Return))
+      ? fm.extract(b => AtomicPromise.resolve(new Left(b)), a => AtomicPromise.resolve(a).then<Either<a, awaited b>>(Return))
       : fm.reduce((acc, m) =>
           acc.bind(as =>
             m.fmap(a =>
