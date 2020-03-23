@@ -1,7 +1,7 @@
 import { AtomicFuture } from './future';
 import { Coroutine, CoroutineOptions } from './coroutine';
 
-export class Colistener<T, U = undefined> extends Coroutine<U, T> {
+export class Colistener<T, U = undefined> extends Coroutine<U, awaited T> {
   constructor(
     listen: (this: Colistener<T, U>, listener: (value: T) => void) => () => void,
     opts: CoroutineOptions = {},

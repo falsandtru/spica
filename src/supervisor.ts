@@ -237,7 +237,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
   }
   public cast(name: N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), param: P, timeout = this.settings.timeout): boolean {
     void this.throwErrorIfNotAvailable();
-    let result: AtomicPromise<R> | undefined;
+    let result: AtomicPromise<unknown> | undefined;
     for (name of typeof name === 'string' ? [name] : new NamePool(this.workers, name)) {
       if (result = this.workers.get(name)?.call([param, Date.now() + timeout])) break;
     }
@@ -316,7 +316,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     for (let i = 0, len = this.messages.length; this.available && i < len; ++i) {
       if (this.settings.resource - (Date.now() - since) <= 0) return void this.schedule();
       const [names, param, callback, expiry] = this.messages[i];
-      let result: AtomicPromise<R> | undefined;
+      let result: AtomicPromise<{ reply: R }> | undefined;
       let name!: N;
       for (name of typeof names === 'string' ? [names] : names) {
         if (result = this.workers.get(name)?.call([param, expiry])) break;
@@ -339,7 +339,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       else {
         void result
           .then(
-            reply =>
+            ({ reply }) =>
               void callback(reply),
             () =>
               void callback(void 0 as any, new Error(`Spica: Supervisor: A process has failed.`)));
@@ -364,9 +364,9 @@ export namespace Supervisor {
     export type GeneratorFunction<P, R, S> = (state: S, kill: (reason?: unknown) => void) => global.Generator<R, R, P>;
     export type AsyncGeneratorFunction<P, R, S> = (state: S, kill: (reason?: unknown) => void) => global.AsyncGenerator<R, R, P>;
     export type Coroutine<P, R> = CoroutineInterface<R, R, P>;
-    export type Result<R, S> = readonly [awaited R | R, S];
+    export type Result<R, S> = readonly [R, S];
   }
-  export type Callback<R> = (reply: awaited R, error?: Error) => void;
+  export type Callback<R> = (reply: R, error?: Error) => void;
   export namespace Event {
     export namespace Data {
       export type Init<N extends string, P, R, S> = readonly [N, Process.Regular<P, R, S>, S];
@@ -453,7 +453,7 @@ class Worker<N extends string, P, R, S> {
       void this.sv.terminate(reason_);
     }
   }
-  public call([param, expiry]: [P, number]): AtomicPromise<R> | undefined {
+  public call([param, expiry]: [P, number]): AtomicPromise<{ reply: R }> | undefined {
     const now = Date.now();
     if (!this.available || now > expiry) return;
     return new AtomicPromise<Supervisor.Process.Result<R, S>>((resolve, reject) => {
@@ -477,7 +477,7 @@ class Worker<N extends string, P, R, S> {
           this.state = state;
           this.available = true;
         }
-        return reply;
+        return { reply };
       })
       .catch(reason => {
         void this.schedule();

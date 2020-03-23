@@ -53,9 +53,9 @@ class Internal<T, R, S> {
     });
   }
   public alive = true;
-  public state = new AtomicFuture<IteratorResult<awaited R, undefined>>();
+  public state = new AtomicFuture<IteratorResult<R, unknown>>();
   public resume = new AtomicFuture<undefined>();
-  public readonly result = new AtomicFuture<T>();
+  public readonly result = new AtomicFuture<{ value: T }>();
   public readonly msgs: [S, Reply<R, T>][] = [];
   public readonly settings: DeepImmutable<DeepRequired<CoroutineOptions>> = {
     autorun: true,
@@ -65,7 +65,7 @@ class Internal<T, R, S> {
     trigger: void 0 as any,
   };
 }
-type Reply<R, T> = (msg: IteratorResult<awaited R, awaited T> | PromiseLike<never>) => void;
+type Reply<R, T> = (msg: IteratorResult<R, T> | PromiseLike<never>) => void;
 
 const internal = Symbol.for('spica/coroutine::internal');
 
@@ -82,14 +82,14 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     return AtomicPromise;
   }
   constructor(
-    gen: (this: Coroutine<T, R, S>) => Generator<R, T | PromiseLike<T>, S> | AsyncGenerator<R, T, S>,
+    gen: (this: Coroutine<T, R, S>) => Generator<R, T, S> | AsyncGenerator<R, T, S>,
     opts: CoroutineOptions = {},
   ) {
     super(resolve => res = resolve);
     var res!: (v: T | AtomicPromise<T>) => void;
     this[internal] = new Internal(opts);
     this[port] = new Port(this, this[internal]);
-    void res(this[internal].result);
+    void res(this[internal].result.then(({ value }) => value));
     this[Coroutine.init] = async () => {
       let reply: Reply<R, T> = noop;
       try {
@@ -126,26 +126,24 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
           // Block.
           // `value` can be Promise when using iterator.
           // `value` will never be Promise when using async iterator.
-          const { value, done } = await iter.next(msg!);
+          const result = await iter.next(msg!);
+          // Block.
+          try { await result.value; } catch { }
           if (!this[internal].alive) break;
-          if (!done) {
-            // Block.
-            const result = await value as awaited R;
+          if (!result.done) {
             // Don't block.
-            void this[internal].state.bind({ value: result, done });
-            void reply({ value: result, done });
+            const { state } = this[internal];
             this[internal].state = new AtomicFuture();
+            void reply({ value: result.value, done: result.done });
+            void state.bind(result);
             continue;
           }
           else {
-            // Block.
-            const result = await value as awaited T;
-            if (!this[internal].alive) break;
-            this[internal].alive = false;
             // Don't block.
-            void this[internal].state.bind({ value: void 0, done });
+            this[internal].alive = false;
+            void reply({ value: result.value, done: result.done });
+            void this[internal].state.bind(result);
             void this[internal].result.bind(result);
-            void reply({ value: result, done });
             return;
           }
         }
@@ -186,16 +184,16 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     return this[internal].alive;
   }
   public [init]: () => void;
-  public [exit](result: T | PromiseLike<T>): void {
+  public [exit](result: T | PromiseLike<never>): void {
     if (!this[internal].alive) return;
     void AtomicPromise.resolve(result)
       .then(
-        result => {
+        () => {
           if (!this[internal].alive) return;
           this[internal].alive = false;
           // Don't block.
           void this[internal].state.bind({ value: void 0, done: true });
-          void this[internal].result.bind(result);
+          void this[internal].result.bind({ value: result as T });
         },
         reason => {
           if (!this[internal].alive) return;
@@ -210,9 +208,9 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
   }
   public async *[Symbol.asyncIterator](): AsyncIterator<awaited R, undefined, undefined> {
     while (this[internal].alive) {
-      const { value } = await this[internal].state;
-      if (!this[internal].alive) break;
-      yield value!;
+      const state = await this[internal].state;
+      if (state.done || !this[internal].alive) break;
+      yield state.value;
     }
     return this.then(() => void 0);
   }
@@ -225,16 +223,17 @@ class Port<T, R, S> {
     private internal: Internal<T, R, S>,
   ) {
   }
-  public recv(): AtomicPromise<IteratorResult<awaited R, awaited T>> {
-    return this.internal.state
-      .then(({ value, done }) =>
-        done
-          ? this.co.then(value => ({ value, done }))
-          : { value: value!, done });
-  }
-  public send(msg: S): AtomicPromise<IteratorResult<awaited R, awaited T>> {
+  public recv(): AtomicPromise<IteratorResult<R, T>> {
     if (!this.internal.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
-    const res = new AtomicFuture<IteratorResult<awaited R, awaited T>>();
+    return this.internal.state
+      .then(state =>
+        state.done
+          ? this.internal.result.then(({ value }) => ({ value, done: state.done }))
+          : { value: state.value, done: state.done });
+  }
+  public send(msg: S): AtomicPromise<IteratorResult<R, T>> {
+    if (!this.internal.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
+    const res = new AtomicFuture<IteratorResult<R, T>>();
     // Don't block.
     void this.internal.msgs.push([msg, res.bind]);
     void this.internal.resume.bind();
@@ -246,13 +245,14 @@ class Port<T, R, S> {
     }
     return res.then();
   }
-  public async connect<U>(com: (this: Coroutine<T, R, S>) => Generator<S, U, awaited T | awaited R> | AsyncGenerator<S, U, awaited T | awaited R>): Promise<awaited U> {
+  public async connect<U>(com: (this: Coroutine<T, R, S>) => Generator<S, U, R | T> | AsyncGenerator<S, U, R | T>): Promise<awaited U> {
+    if (!this.internal.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
     const iter = com.call(this.co);
-    let reply: awaited T | awaited R | undefined;
+    let reply: R | T | undefined;
     while (true) {
-      const { value, done } = await iter.next(reply!);
-      if (done) return value as U;
-      reply = (await this.send(value as S)).value;
+      const result = await iter.next(reply!);
+      if (result.done) return result.value;
+      reply = (await this.send(result.value)).value;
     }
   }
 }
