@@ -15,24 +15,24 @@ describe('Benchmark:', function () {
       benchmark('Coroutine new async', () => new Coroutine(async function* () { }, { size: 1 }), done);
     });
 
-    it.skip('iterate', function (done) {
+    it('iterate', function (done) {
       this.timeout(90 * 1e3);
-      const iter = new Coroutine(function* () {
+      const port = new Coroutine(function* () {
         while (true) {
           yield;
         }
-      }, { size: 1 })[Symbol.asyncIterator]();
-      benchmark('Coroutine iterate', done => void iter.next().finally(done), done, { defer: true, async: true });
+      }, { size: 1 })[Coroutine.port];
+      benchmark('Coroutine iterate', done => void port.send(0).then(done), done, { defer: true, async: true });
     });
 
-    it.skip('iterate async', function (done) {
+    it('iterate async', function (done) {
       this.timeout(90 * 1e3);
-      const iter = new Coroutine(async function* () {
+      const port = new Coroutine(async function* () {
         while (true) {
           yield;
         }
-      }, { size: 1 })[Symbol.asyncIterator]();
-      benchmark('Coroutine iterate async', done => void iter.next().finally(done), done, { defer: true, async: true });
+      }, { size: 1 })[Coroutine.port];
+      benchmark('Coroutine iterate async', done => void port.send(0).then(done), done, { defer: true, async: true });
     });
 
   });
