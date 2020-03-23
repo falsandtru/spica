@@ -16,7 +16,7 @@ export interface CoroutineOptions {
   readonly trigger?: string | symbol | ReadonlyArray<string | symbol>;
 }
 
-export interface CoroutineInterface<T = unknown, R = T, _ = unknown> extends Promise<T>, AsyncIterable<R> {
+export interface CoroutineInterface<T = unknown, R = T, _ = unknown> extends Promise<awaited T>, AsyncIterable<awaited R> {
   readonly constructor: {
     readonly alive: symbol;
     readonly exit: symbol;
@@ -53,10 +53,10 @@ class Internal<T, R, S> {
     });
   }
   public alive = true;
-  public state = new AtomicFuture<IteratorResult<R, undefined>>();
+  public state = new AtomicFuture<IteratorResult<awaited R, undefined>>();
   public resume = new AtomicFuture<undefined>();
-  public readonly result = new AtomicFuture<T>();
-  public readonly msgs: [S | PromiseLike<S>, Reply<R, T>][] = [];
+  public readonly result = new AtomicFuture<awaited T>();
+  public readonly msgs: [S, Reply<R, T>][] = [];
   public readonly settings: DeepImmutable<DeepRequired<CoroutineOptions>> = {
     autorun: true,
     size: 0,
@@ -65,14 +65,14 @@ class Internal<T, R, S> {
     trigger: void 0 as any,
   };
 }
-type Reply<R, T> = (msg: IteratorResult<R, T> | PromiseLike<never>) => void;
+type Reply<R, T> = (msg: IteratorResult<awaited R, awaited T> | PromiseLike<never>) => void;
 
 const internal = Symbol.for('spica/coroutine::internal');
 
-export interface Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>, AsyncIterable<R> {
+export interface Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<awaited T>, AsyncIterable<awaited R> {
   constructor: typeof Coroutine;
 }
-export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T> implements Promise<T>, AsyncIterable<R>, CoroutineInterface<T, R, S> {
+export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<awaited T> implements Promise<awaited T>, AsyncIterable<awaited R>, CoroutineInterface<T, R, S> {
   public static readonly alive: typeof alive = alive;
   protected static readonly init: typeof init = init;
   public static readonly exit: typeof exit = exit;
@@ -82,11 +82,11 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     return AtomicPromise;
   }
   constructor(
-    gen: (this: Coroutine<T, R, S>) => Generator<R, T | PromiseLike<T>, S> | AsyncGenerator<R, T, S>,
+    gen: (this: Coroutine<T, R, S>) => Generator<R, T | PromiseLike<awaited T | T>, S> | AsyncGenerator<awaited R | R, awaited T | T, S>,
     opts: CoroutineOptions = {},
   ) {
     super(resolve => res = resolve);
-    var res!: (v: T | AtomicPromise<T>) => void;
+    var res!: (v: awaited T | AtomicPromise<awaited T>) => void;
     this[internal] = new Internal(opts);
     this[port] = new Port(this, this[internal]);
     void res(this[internal].result);
@@ -95,22 +95,22 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
       try {
         this[Coroutine.init] = noop;
         if (!this[internal].alive) return;
-        const resume = (): S | PromiseLike<S> =>
+        const resume = (): [S] | PromiseLike<[S]> =>
           this[internal].msgs.length > 0
-            ? ([, reply] = this[internal].msgs.shift()!)[0]
+            ? [([, reply] = this[internal].msgs.shift()!)[0]]
             : this[internal].resume.then(resume);
         const iter = gen.call(this);
         let cnt = 0;
         while (this[internal].alive) {
           void ++cnt;
-          const [msg] = cnt === 1
+          const [[msg]] = cnt === 1
             // Don't block.
-            ? [void 0]
+            ? [[void 0]]
             // Block.
             : await AtomicPromise.all([
                 // Don't block.
                 this[internal].settings.size === 0
-                  ? void 0
+                  ? [void 0]
                   : resume(),
                 // Don't block.
                 AtomicPromise.all([
@@ -129,16 +129,17 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
           const { value, done } = await iter.next(msg!);
           if (!this[internal].alive) break;
           if (!done) {
-            const state = this[internal].state;
-            this[internal].state = new AtomicFuture();
+            // Block.
+            const result = await value as awaited R;
             // Don't block.
-            void state.bind({ value: value as R, done });
-            void reply({ value: value as R, done });
+            void this[internal].state.bind({ value: result, done });
+            void reply({ value: result, done });
+            this[internal].state = new AtomicFuture();
             continue;
           }
           else {
             // Block.
-            const result = await value as T;
+            const result = await value as awaited T;
             if (!this[internal].alive) break;
             this[internal].alive = false;
             // Don't block.
@@ -185,7 +186,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     return this[internal].alive;
   }
   public [init]: () => void;
-  public [exit](result: T | PromiseLike<T>): void {
+  public [exit](result: T | PromiseLike<awaited T | T>): void {
     if (!this[internal].alive) return;
     void AtomicPromise.resolve(result)
       .then(
@@ -207,7 +208,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
   public [terminate](reason?: unknown): void {
     return this[exit](AtomicPromise.reject(reason));
   }
-  public async *[Symbol.asyncIterator](): AsyncIterator<R, undefined, undefined> {
+  public async *[Symbol.asyncIterator](): AsyncIterator<awaited R, undefined, undefined> {
     while (this[internal].alive) {
       const { value } = await this[internal].state;
       if (!this[internal].alive) break;
@@ -224,16 +225,16 @@ class Port<T, R, S> {
     private internal: Internal<T, R, S>,
   ) {
   }
-  public recv(): AtomicPromise<IteratorResult<R, T>> {
+  public recv(): AtomicPromise<IteratorResult<awaited R, awaited T>> {
     return this.internal.state
       .then(({ value, done }) =>
         done
           ? this.co.then(value => ({ value, done }))
           : { value: value!, done });
   }
-  public send(msg: S | PromiseLike<S>): AtomicPromise<IteratorResult<R, T>> {
+  public send(msg: S): AtomicPromise<IteratorResult<awaited R, awaited T>> {
     if (!this.internal.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
-    const res = new AtomicFuture<IteratorResult<R, T>>();
+    const res = new AtomicFuture<IteratorResult<awaited R, awaited T>>();
     // Don't block.
     void this.internal.msgs.push([msg, res.bind]);
     void this.internal.resume.bind();
@@ -245,9 +246,9 @@ class Port<T, R, S> {
     }
     return res.then();
   }
-  public async connect<U>(com: (this: Coroutine<T, R, S>) => Generator<S, U, T | R> | AsyncGenerator<S, U, T | R>): Promise<U> {
+  public async connect<U>(com: (this: Coroutine<T, R, S>) => Generator<S, U, awaited T | awaited R> | AsyncGenerator<S, U, awaited T | awaited R>): Promise<awaited U> {
     const iter = com.call(this.co);
-    let reply: T | R | undefined;
+    let reply: awaited T | awaited R | undefined;
     while (true) {
       const { value, done } = await iter.next(reply!);
       if (done) return value as U;

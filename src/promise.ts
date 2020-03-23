@@ -15,7 +15,7 @@ type Status<T> =
       readonly result: PromiseLike<T>;
     }
   | { readonly state: State.fulfilled;
-      readonly result: T;
+      readonly result: awaited T;
     }
   | { readonly state: State.rejected;
       readonly result: unknown;
@@ -23,7 +23,7 @@ type Status<T> =
 
 class Internal<T> {
   public status: Status<T> = { state: State.pending };
-  public readonly fulfillReactions: ((value: T) => void)[] = [];
+  public readonly fulfillReactions: ((value: awaited T) => void)[] = [];
   public readonly rejectReactions: ((reason: unknown) => void)[] = [];
   public isHandled: boolean = false;
 }
@@ -35,21 +35,22 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
     return AtomicPromise;
   }
   public readonly [Symbol.toStringTag] = 'Promise';
-  public static all<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>, T10 | PromiseLike<T10>]): AtomicPromise<[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]>;
-  public static all<T1, T2, T3, T4, T5, T6, T7, T8, T9>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>]): AtomicPromise<[T1, T2, T3, T4, T5, T6, T7, T8, T9]>;
-  public static all<T1, T2, T3, T4, T5, T6, T7, T8>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>]): AtomicPromise<[T1, T2, T3, T4, T5, T6, T7, T8]>;
-  public static all<T1, T2, T3, T4, T5, T6, T7>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>]): AtomicPromise<[T1, T2, T3, T4, T5, T6, T7]>;
-  public static all<T1, T2, T3, T4, T5, T6>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>]): AtomicPromise<[T1, T2, T3, T4, T5, T6]>;
-  public static all<T1, T2, T3, T4, T5>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>, T5 | PromiseLike<T5>]): AtomicPromise<[T1, T2, T3, T4, T5]>;
-  public static all<T1, T2, T3, T4>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike <T4>]): AtomicPromise<[T1, T2, T3, T4]>;
-  public static all<T1, T2, T3>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>]): AtomicPromise<[T1, T2, T3]>;
-  public static all<T1, T2>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>]): AtomicPromise<[T1, T2]>;
-  public static all<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<T[]>;
-  public static all<T>(vs: Iterable<T | PromiseLike<T>> | T[]): AtomicPromise<T[]> {
-    return new AtomicPromise<T[]>((resolve, reject) => {
+  public static all<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>, T10 | PromiseLike<T10>]): AtomicPromise<[awaited T1, awaited T2, awaited T3, awaited T4, awaited T5, awaited T6, awaited T7, awaited T8, awaited T9, awaited T10]>;
+  public static all<T1, T2, T3, T4, T5, T6, T7, T8, T9>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>]): AtomicPromise<[awaited T1, awaited T2, awaited T3, awaited T4, awaited T5, awaited T6, awaited T7, awaited T8, awaited T9]>;
+  public static all<T1, T2, T3, T4, T5, T6, T7, T8>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>]): AtomicPromise<[awaited T1, awaited T2, awaited T3, awaited T4, awaited T5, awaited T6, awaited T7, awaited T8]>;
+  public static all<T1, T2, T3, T4, T5, T6, T7>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>]): AtomicPromise<[awaited T1, awaited T2, awaited T3, awaited T4, awaited T5, awaited T6, awaited T7]>;
+  public static all<T1, T2, T3, T4, T5, T6>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>]): AtomicPromise<[awaited T1, awaited T2, awaited T3, awaited T4, awaited T5, awaited T6]>;
+  public static all<T1, T2, T3, T4, T5>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>]): AtomicPromise<[awaited T1, awaited T2, awaited T3, awaited T4, awaited T5]>;
+  public static all<T1, T2, T3, T4>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>]): AtomicPromise<[awaited T1, awaited T2, awaited T3, awaited T4]>;
+  public static all<T1, T2, T3>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>]): AtomicPromise<[awaited T1, awaited T2, awaited T3]>;
+  public static all<T1, T2>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>]): AtomicPromise<[awaited T1, awaited T2]>;
+  public static all<T extends readonly unknown[] | []>(values: T): AtomicPromise<{ -readonly [P in keyof T]: awaited T[P] }>;
+  public static all<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<(awaited T)[]>;
+  public static all<T>(vs: Iterable<T | PromiseLike<T>>): AtomicPromise<(awaited T)[]> {
+    return new AtomicPromise<(awaited T)[]>((resolve, reject) => {
       const values = isArray(vs) ? vs : [...vs];
       const length = values.length;
-      const acc: T[] = [];
+      const acc: (awaited T)[] = [];
       let cnt = 0;
       for (let i = 0; i < length; ++i) {
         const value = values[i];
@@ -73,7 +74,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
       cnt === length && resolve(acc);
     });
   }
-  public static race<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<T> {
+  public static race<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<awaited T> {
     return new AtomicPromise<T>((resolve, reject) => {
       let done = false;
       for (const value of values) {
@@ -97,14 +98,14 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
     });
   }
   public static resolve(): AtomicPromise<undefined>;
-  public static resolve<T>(value: T | PromiseLike<T>): AtomicPromise<T>;
-  public static resolve<T>(value?: T | PromiseLike<T>): AtomicPromise<T> {
+  public static resolve<T>(value: T | PromiseLike<T>): AtomicPromise<awaited T>;
+  public static resolve<T>(value?: T | PromiseLike<T>): AtomicPromise<awaited T> {
     return new AtomicPromise<T>(resolve => resolve(value));
   }
-  public static reject<T = never>(reason?: unknown): AtomicPromise<T> {
+  public static reject<T = never>(reason?: unknown): AtomicPromise<awaited T> {
     return new AtomicPromise<T>((_, reject) => reject(reason));
   }
-  constructor(executor: (resolve: (value?: T | PromiseLike<T>) => void, reject: (reason?: unknown) => void) => void) {
+  constructor(executor: (resolve: (value?: awaited T | T | PromiseLike<awaited T | T>) => void, reject: (reason?: unknown) => void) => void) {
     const intl: typeof internal = internal;
     try {
       const internal = this[intl];
@@ -137,7 +138,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
           else {
             internal.status = {
               state: State.fulfilled,
-              result: value!,
+              result: value as awaited T,
             };
             resume(internal);
           }
@@ -162,8 +163,8 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
     }
   }
   public readonly [internal]: Internal<T> = new Internal();
-  public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
-    return new AtomicPromise((resolve, reject) => {
+  public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: awaited T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<awaited TResult1 | awaited TResult2> {
+    return new AtomicPromise<TResult1 | TResult2>((resolve, reject) => {
       const { fulfillReactions, rejectReactions, status } = this[internal];
       if (status.state !== State.rejected) {
         fulfillReactions.push(value => {
@@ -190,15 +191,15 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
       resume(this[internal]);
     });
   }
-  public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult> {
+  public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<awaited T | awaited TResult> {
     return this.then(undefined, onrejected);
   }
-  public finally(onfinally?: (() => void) | undefined | null): AtomicPromise<T> {
+  public finally(onfinally?: (() => void) | undefined | null): AtomicPromise<awaited T> {
     return this.then(onfinally, onfinally).then(() => this);
   }
 }
 
-export function isPromiseLike(value: any): value is PromiseLike<unknown> {
+export function isPromiseLike(value: any): value is PromiseLike<awaited any> {
   return value !== null && typeof value === 'object'
       && 'then' in value && typeof value.then === 'function';
 }
@@ -232,7 +233,7 @@ function resume<T>(internal: Internal<T>): void {
   }
 }
 
-function consume<a>(fs: ((a: a) => void)[], a: a): void {
+function consume<a>(fs: ((a: awaited a) => void)[], a: awaited a): void {
   if (fs.length > 5) {
     for (let i = 0; i < fs.length; ++i) {
       fs[i](a);

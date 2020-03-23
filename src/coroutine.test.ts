@@ -110,11 +110,11 @@ describe('Unit: lib/coroutine', () => {
       assert.deepStrictEqual(
         await Promise.all([
           port.recv(),
-          port.send(Promise.resolve(1)),
-          port.send(Promise.resolve(3)),
-          port.send(Promise.resolve(5)).catch(e => e instanceof Error),
+          port.send(1),
+          port.send(3),
+          port.send(5).catch(e => e instanceof Error),
           await co,
-          port.send(Promise.resolve(6)).catch(e => e instanceof Error),
+          port.send(6).catch(e => e instanceof Error),
         ]),
         [
           { value: 0, done: false },
