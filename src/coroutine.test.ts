@@ -4,7 +4,7 @@ import { wait, never } from './clock';
 describe('Unit: lib/coroutine', () => {
   describe('Coroutine', () => {
     it('basic', async () => {
-      assert(1 === await new Coroutine(function* () {
+      assert(1 === await new Coroutine(async function* () {
         yield;
         return Promise.resolve(1);
       }));
@@ -17,7 +17,7 @@ describe('Unit: lib/coroutine', () => {
 
     it('terminate', done => {
       let cnt = 0;
-      const co = new Coroutine(function* () {
+      const co = new Coroutine(async function* () {
         assert(false);
         return;
       });
@@ -32,7 +32,7 @@ describe('Unit: lib/coroutine', () => {
         assert(reason === 0);
       });
       assert(cnt === 3 && ++cnt);
-      new Coroutine(function* () {
+      new Coroutine(async function* () {
         return 0;
       }, { autorun: true })
         .then(value => {
@@ -41,7 +41,7 @@ describe('Unit: lib/coroutine', () => {
         });
       co[Coroutine.terminate](never);
       assert(cnt === 4 && ++cnt);
-      new Coroutine(function* () {
+      new Coroutine(async function* () {
         wait(1).then(() => this[Coroutine.terminate](0));
         return never;
       }, { autorun: true })
@@ -129,14 +129,14 @@ describe('Unit: lib/coroutine', () => {
         yield Promise.resolve(2);
         assert(false);
         throw 1;
-      }, { size: 1 })[Coroutine.port].connect(function* () {
+      }, { size: 1 })[Coroutine.port].connect(async function* () {
         assert(2 === (yield 1));
         return 3;
       }));
       assert(true === await new Coroutine<number, number, number>(async function* () {
         assert(1 === (yield Promise.resolve(0)));
         return Promise.resolve(2);
-      }, { size: 1 })[Coroutine.port].connect(function* () {
+      }, { size: 1 })[Coroutine.port].connect(async function* () {
         assert(2 === (yield 1));
         try {
           yield 3;
@@ -150,7 +150,7 @@ describe('Unit: lib/coroutine', () => {
         assert(1 === (yield Promise.resolve(0)));
         assert(3 === (yield Promise.resolve(2)));
         return Promise.resolve(4);
-      }, { size: 1 })[Coroutine.port].connect(function* () {
+      }, { size: 1 })[Coroutine.port].connect(async function* () {
         assert(2 === (yield 1));
         assert(4 === (yield 3));
         return 5;

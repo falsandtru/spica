@@ -323,7 +323,7 @@ describe('Unit: lib/supervisor', function () {
       await wait(100);
       assert(sv.kill('') === true);
       assert(await co.catch(() => 0) === 0);
-      sv.register('', new Coroutine<number, number, number>(function* () {
+      sv.register('', new Coroutine<number, number, number>(async function* () {
         throw 1;
       }));
       assert(sv.refs('').length === 1);

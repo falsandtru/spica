@@ -8,31 +8,17 @@ describe('Benchmark:', function () {
 
   describe('Coroutine', function () {
     it('new', function (done) {
-      benchmark('Coroutine new', () => new Coroutine(function* () { }, { size: 1 }), done);
-    });
-
-    it('new async', function (done) {
-      benchmark('Coroutine new async', () => new Coroutine(async function* () { }, { size: 1 }), done);
+      benchmark('Coroutine new', () => new Coroutine(async function* () { }, { size: 1 }), done);
     });
 
     it('iterate', function (done) {
-      this.timeout(90 * 1e3);
-      const port = new Coroutine(function* () {
-        while (true) {
-          yield;
-        }
-      }, { size: 1 })[Coroutine.port];
-      benchmark('Coroutine iterate', done => void port.send(0).then(done), done, { defer: true, async: true });
-    });
-
-    it('iterate async', function (done) {
       this.timeout(90 * 1e3);
       const port = new Coroutine(async function* () {
         while (true) {
           yield;
         }
       }, { size: 1 })[Coroutine.port];
-      benchmark('Coroutine iterate async', done => void port.send(0).then(done), done, { defer: true, async: true });
+      benchmark('Coroutine iterate', done => void port.send(0).then(done), done, { defer: true, async: true });
     });
 
   });
