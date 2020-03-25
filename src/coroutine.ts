@@ -1,6 +1,6 @@
 import { Array, Error } from './global';
 import { ObjectDefineProperty, ObjectGetOwnPropertyDescriptor } from './alias';
-import { AtomicPromise } from './promise';
+import { AtomicPromise, isPromiseLike } from './promise';
 import { AtomicFuture } from './future';
 import type { Structural, DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
@@ -142,9 +142,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
           // `value` can be Promise when using iterator.
           // `value` will never be Promise when using async iterator.
           const result = await iter.next(msg!);
-          // Block.
-          try { await result.value; } catch { }
-          if (!this[internal].alive) break;
+          assert(!isPromiseLike(result.value));
           if (!result.done) {
             // Don't block.
             void reply({ ...result });
