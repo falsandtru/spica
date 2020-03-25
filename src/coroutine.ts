@@ -147,16 +147,15 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
           if (!this[internal].alive) break;
           if (!result.done) {
             // Don't block.
-            const { state } = this[internal];
+            void reply({ ...result });
+            void this[internal].state.bind(result);
             this[internal].state = new AtomicFuture();
-            void reply({ value: result.value, done: result.done });
-            void state.bind(result);
             continue;
           }
           else {
             // Don't block.
             this[internal].alive = false;
-            void reply({ value: result.value, done: result.done });
+            void reply({ ...result });
             void this[internal].state.bind(result);
             void this[internal].result.bind(result);
             return;
@@ -232,6 +231,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
   public readonly [port]: Structural<Port<T, R, S>>;
 }
 
+// All responses will be deferred.
 class Port<T, R, S> {
   constructor(
     private co: Coroutine<T, R, S>,
@@ -241,10 +241,10 @@ class Port<T, R, S> {
   public recv(): AtomicPromise<IteratorResult<awaited R, awaited T>> {
     if (!this.internal.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
     return this.internal.state
-      .then(state =>
+      .then(async state =>
         state.done
           ? this.internal.result.then(({ value }) => ({ value, done: state.done }))
-          : { value: state.value, done: state.done });
+          : { ...state });
   }
   public send(msg: awaited S | S): AtomicPromise<IteratorResult<awaited R, awaited T>> {
     if (!this.internal.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
@@ -258,7 +258,7 @@ class Port<T, R, S> {
       const [, reply] = this.internal.msgs.shift()!;
       void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`)));
     }
-    return res.then();
+    return res.then(async r => r);
   }
   public async connect<U>(com: (this: Coroutine<T, R, S>) => AsyncGenerator<S, U, awaited R | awaited T>): Promise<awaited U> {
     if (!this.internal.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
