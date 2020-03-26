@@ -44,7 +44,6 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
   public static all<T1, T2, T3, T4>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>]): AtomicPromise<[T1, T2, T3, T4]>;
   public static all<T1, T2, T3>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>]): AtomicPromise<[T1, T2, T3]>;
   public static all<T1, T2>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>]): AtomicPromise<[T1, T2]>;
-  public static all<T extends readonly unknown[] | []>(values: T): AtomicPromise<{ -readonly [P in keyof T]: T[P] }>;
   public static all<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<T[]>;
   public static all<T>(vs: Iterable<T | PromiseLike<T>>): AtomicPromise<T[]> {
     return new AtomicPromise<T[]>((resolve, reject) => {
