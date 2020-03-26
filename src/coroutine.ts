@@ -8,21 +8,6 @@ import { wait, tick } from './clock';
 import { causeAsyncException } from './exception';
 import { noop } from './noop';
 
-interface AsyncGenerator<T = unknown, TReturn = any, TNext = unknown> extends AsyncIterator<T, TReturn, TNext> {
-  next(...args: [] | [TNext]): Promise<IteratorResult<T, TReturn>>;
-  return(value: TReturn | PromiseLike<TReturn>): Promise<IteratorResult<T, TReturn>>;
-  throw(e: any): Promise<IteratorResult<T, TReturn>>;
-  [Symbol.asyncIterator](): AsyncGenerator<T, TReturn, TNext>;
-}
-interface AsyncIterator<T, TReturn = any, TNext = undefined> {
-  next(...args: [] | [TNext]): Promise<IteratorResult<T, TReturn>>;
-  return?(value: TReturn | PromiseLike<TReturn>): Promise<IteratorResult<T, TReturn>>;
-  throw?(e: any): Promise<IteratorResult<T, TReturn>>;
-}
-interface AsyncIterable<T> {
-  [Symbol.asyncIterator](): AsyncIterator<T>;
-}
-
 export interface CoroutineOptions {
   readonly autorun?: boolean;
   readonly debug?: boolean;
