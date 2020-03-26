@@ -20,7 +20,7 @@ export interface SupervisorOptions {
   readonly resource?: number;
 }
 
-export interface Supervisor<N extends string, P = undefined, R = P, S = undefined> extends Coroutine<undefined, undefined, undefined> {
+export interface Supervisor<N extends string = string, P = undefined, R = P, S = undefined> extends Coroutine<undefined, undefined, undefined> {
   // #36218
   constructor: typeof Supervisor & typeof Coroutine;
 }
