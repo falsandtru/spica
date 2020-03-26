@@ -196,7 +196,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     return this[internal].alive;
   }
   public [init]: () => void;
-  public [exit](result: T | PromiseLike<T>): void {
+  public [exit](result: awaited T | T | PromiseLike<T>): void {
     if (!this[internal].alive) return;
     void AtomicPromise.resolve(result)
       .then(
