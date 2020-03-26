@@ -9,15 +9,15 @@ import { causeAsyncException } from './exception';
 import { noop } from './noop';
 
 interface AsyncGenerator<T = unknown, TReturn = any, TNext = unknown> extends AsyncIterator<T, TReturn, TNext> {
-  next(...args: [] | [TNext]): Promise<IteratorResult<awaited T, awaited TReturn>>;
-  return(value: TReturn | PromiseLike<TReturn>): Promise<IteratorResult<awaited T, awaited TReturn>>;
-  throw(e: any): Promise<IteratorResult<awaited T, awaited TReturn>>;
-  [Symbol.asyncIterator](): AsyncGenerator<T, awaited TReturn, awaited TNext>;
+  next(...args: [] | [TNext]): Promise<IteratorResult<T, TReturn>>;
+  return(value: TReturn | PromiseLike<TReturn>): Promise<IteratorResult<T, TReturn>>;
+  throw(e: any): Promise<IteratorResult<T, TReturn>>;
+  [Symbol.asyncIterator](): AsyncGenerator<T, TReturn, TNext>;
 }
 interface AsyncIterator<T, TReturn = any, TNext = undefined> {
-  next(...args: [] | [TNext]): Promise<IteratorResult<awaited T, awaited  TReturn>>;
-  return?(value: TReturn | PromiseLike<TReturn>): Promise<IteratorResult<awaited T, awaited TReturn>>;
-  throw?(e: any): Promise<IteratorResult<awaited T, awaited TReturn>>;
+  next(...args: [] | [TNext]): Promise<IteratorResult<T, TReturn>>;
+  return?(value: TReturn | PromiseLike<TReturn>): Promise<IteratorResult<T, TReturn>>;
+  throw?(e: any): Promise<IteratorResult<T, TReturn>>;
 }
 interface AsyncIterable<T> {
   [Symbol.asyncIterator](): AsyncIterator<T>;
@@ -69,10 +69,10 @@ class Internal<T, R, S> {
     });
   }
   public alive = true;
-  public state = new AtomicFuture<IteratorResult<awaited R, unknown>>();
+  public state = new AtomicFuture<IteratorResult<R, unknown>>();
   public resume = new AtomicFuture<undefined>();
-  public readonly result = new AtomicFuture<{ value: awaited T }>();
-  public readonly msgs: [awaited S | S, Reply<R, T>][] = [];
+  public readonly result = new AtomicFuture<{ value: T }>();
+  public readonly msgs: [S, Reply<R, T>][] = [];
   public readonly settings: DeepImmutable<DeepRequired<CoroutineOptions>> = {
     autorun: true,
     debug: false,
@@ -82,7 +82,7 @@ class Internal<T, R, S> {
     trigger: void 0 as any,
   };
 }
-type Reply<R, T> = (msg: IteratorResult<awaited R, awaited T> | PromiseLike<never>) => void;
+type Reply<R, T> = (msg: IteratorResult<R, T> | PromiseLike<never>) => void;
 
 const internal = Symbol.for('spica/coroutine::internal');
 
@@ -99,7 +99,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     return AtomicPromise;
   }
   constructor(
-    gen: (this: Coroutine<T, R, S>) => AsyncGenerator<awaited R | R, awaited T | T, awaited S | S>,
+    gen: (this: Coroutine<T, R, S>) => AsyncGenerator<R, T, S>,
     opts: CoroutineOptions = {},
   ) {
     super(resolve => res = resolve);
@@ -112,7 +112,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
       try {
         this[Coroutine.init] = noop;
         if (!this[internal].alive) return;
-        const resume = (): [awaited S | S] | PromiseLike<[awaited S | S]> =>
+        const resume = (): [S] | PromiseLike<[S]> =>
           this[internal].msgs.length > 0
             ? [([, reply] = this[internal].msgs.shift()!)[0]]
             : this[internal].resume.then(resume);
@@ -199,7 +199,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     return this[internal].alive;
   }
   public [init]: () => void;
-  public [exit](result: awaited T | T | PromiseLike<T>): void {
+  public [exit](result: T | PromiseLike<T>): void {
     if (!this[internal].alive) return;
     void AtomicPromise.resolve(result)
       .then(
@@ -221,7 +221,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
   public [terminate](reason?: unknown): void {
     return this[exit](AtomicPromise.reject(reason));
   }
-  public async *[Symbol.asyncIterator](): AsyncIterator<awaited R, undefined, undefined> {
+  public async *[Symbol.asyncIterator](): AsyncIterator<R, undefined, undefined> {
     while (this[internal].alive) {
       const state = await this[internal].state;
       if (state.done || !this[internal].alive) break;
@@ -239,7 +239,7 @@ class Port<T, R, S> {
     private internal: Internal<T, R, S>,
   ) {
   }
-  public recv(): AtomicPromise<IteratorResult<awaited R, awaited T>> {
+  public recv(): AtomicPromise<IteratorResult<R, T>> {
     if (!this.internal.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
     return this.internal.state
       .then(async state =>
@@ -247,10 +247,10 @@ class Port<T, R, S> {
           ? this.internal.result.then(({ value }) => ({ value, done: state.done }))
           : { ...state });
   }
-  public send(msg: awaited S | S): AtomicPromise<IteratorResult<awaited R, awaited T>> {
+  public send(msg: S): AtomicPromise<IteratorResult<R, T>> {
     if (!this.internal.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
     if (this.internal.settings.size === 0) return this.recv();
-    const res = new AtomicFuture<IteratorResult<awaited R, awaited T>>();
+    const res = new AtomicFuture<IteratorResult<R, T>>();
     // Don't block.
     void this.internal.msgs.push([msg, res.bind]);
     void this.internal.resume.bind();
@@ -262,10 +262,10 @@ class Port<T, R, S> {
     }
     return res.then(async r => r);
   }
-  public async connect<U>(com: (this: Coroutine<T, R, S>) => AsyncGenerator<S, U, awaited R | awaited T>): Promise<awaited U> {
+  public async connect<U>(com: (this: Coroutine<T, R, S>) => AsyncGenerator<S, U, R | T>): Promise<U> {
     if (!this.internal.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
     const iter = com.call(this.co);
-    let reply: awaited R | awaited T | undefined;
+    let reply: R | T | undefined;
     while (true) {
       const result = await iter.next(reply!);
       if (result.done) return result.value;

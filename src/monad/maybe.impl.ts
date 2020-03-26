@@ -80,8 +80,8 @@ export namespace Maybe {
     <b>(f: (a: a) => Maybe<b>): Maybe<b>;
   };
   export function sequence<a>(fm: Maybe<a>[]): Maybe<a[]>;
-  export function sequence<a>(fm: Maybe<PromiseLike<a>>): AtomicPromise<Maybe<awaited a>>;
-  export function sequence<a>(fm: Maybe<a>[] | Maybe<PromiseLike<a>>): Maybe<a[]> | AtomicPromise<Maybe<awaited a>> {
+  export function sequence<a>(fm: Maybe<PromiseLike<a>>): AtomicPromise<Maybe<a>>;
+  export function sequence<a>(fm: Maybe<a>[] | Maybe<PromiseLike<a>>): Maybe<a[]> | AtomicPromise<Maybe<a>> {
     return fm instanceof Maybe
       ? fm.extract(() => AtomicPromise.resolve(Maybe.mzero), a => AtomicPromise.resolve(a).then(Return))
       : fm.reduce((acc, m) =>

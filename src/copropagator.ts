@@ -6,9 +6,9 @@ import { Error } from './global';
 export class Copropagator<T, R = T, S = unknown> extends Coroutine<T, R, S> {
   constructor(
     coroutines: Iterable<Coroutine<T, R, S>>,
-    reducer: (results: (awaited T)[]) => awaited T = results => results[0],
+    reducer: (results: T[]) => T = results => results[0],
   ) {
-    super(async function* (): AsyncGenerator<awaited R, awaited T, awaited S | S> {
+    super(async function* (): AsyncGenerator<R, T, S> {
       void this.then(
         result => {
           for (const co of coroutines) {

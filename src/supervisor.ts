@@ -364,9 +364,9 @@ export namespace Supervisor {
     export type GeneratorFunction<P, R, S> = (state: S, kill: (reason?: unknown) => void) => global.Generator<R, R, P>;
     export type AsyncGeneratorFunction<P, R, S> = (state: S, kill: (reason?: unknown) => void) => global.AsyncGenerator<R, R, P>;
     export type Coroutine<P, R> = CoroutineInterface<R, R, P>;
-    export type Result<R, S> = readonly [awaited R | R, S];
+    export type Result<R, S> = readonly [R, S];
   }
-  export type Callback<R> = (reply: awaited R, error?: Error) => void;
+  export type Callback<R> = (reply: R, error?: Error) => void;
   export namespace Event {
     export namespace Data {
       export type Init<N extends string, P, R, S> = readonly [N, Process.Regular<P, R, S>, S];
@@ -453,7 +453,7 @@ class Worker<N extends string, P, R, S> {
       void this.sv.terminate(reason_);
     }
   }
-  public call([param, expiry]: [P, number]): AtomicPromise<awaited R> | undefined {
+  public call([param, expiry]: [P, number]): AtomicPromise<R> | undefined {
     const now = Date.now();
     if (!this.available || now > expiry) return;
     return new AtomicPromise<Supervisor.Process.Result<R, S>>((resolve, reject) => {
