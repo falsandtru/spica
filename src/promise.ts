@@ -47,7 +47,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
   public static all<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<T[]>;
   public static all<T>(vs: Iterable<T | PromiseLike<T>>): AtomicPromise<T[]> {
     return new AtomicPromise<T[]>((resolve, reject) => {
-      const values = isArray(vs) ? vs : [...vs];
+      const values = isArray(vs) ? vs as T[] : [...vs];
       const length = values.length;
       const acc: T[] = [];
       let cnt = 0;
