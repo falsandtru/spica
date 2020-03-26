@@ -25,6 +25,7 @@ interface AsyncIterable<T> {
 
 export interface CoroutineOptions {
   readonly autorun?: boolean;
+  readonly debug?: boolean;
   readonly size?: number;
   readonly interval?: number;
   readonly resume?: () => PromiseLike<void> | void;
@@ -74,6 +75,7 @@ class Internal<T, R, S> {
   public readonly msgs: [awaited S | S, Reply<R, T>][] = [];
   public readonly settings: DeepImmutable<DeepRequired<CoroutineOptions>> = {
     autorun: true,
+    debug: false,
     size: 0,
     interval: 0,
     resume: () => void 0,
@@ -189,6 +191,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
         });
       }
     }
+    this[internal].settings.debug && void this[Coroutine.init]();
     this[internal].settings.autorun && void tick(() => void this[Coroutine.init]());
   }
   public readonly [internal]: Internal<T, R, S>;
