@@ -262,6 +262,11 @@ class Port<T, R, S> {
 export function isCoroutine(target: unknown): target is CoroutineInterface<unknown, unknown, unknown> {
   return typeof target === 'object'
       && target !== null
+      && typeof target.constructor === 'function'
+      && typeof target.constructor['alive'] === 'symbol'
+      && typeof target[target.constructor['alive']] === 'boolean'
+      && typeof target.constructor['init'] === 'symbol'
+      && typeof target[target.constructor['init']] === 'function'
       && typeof target.constructor['exit'] === 'symbol'
       && typeof target[target.constructor['exit']] === 'function'
       && typeof target.constructor['terminate'] === 'symbol'
