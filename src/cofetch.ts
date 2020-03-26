@@ -30,6 +30,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
   ) {
     super(async function* (this: Cofetch) {
       void this.finally(this.cancel);
+      assert(this.catch(console.error));
       url = new URL(url).reference;
       opts = { ...opts };
       opts.method = (opts.method || 'GET').toUpperCase();
