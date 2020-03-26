@@ -1,7 +1,10 @@
-import { Error } from './global';
+import { Error, Map } from './global';
+import { isArray } from './alias';
 import { Coroutine } from './coroutine';
 import { AtomicPromise } from './promise';
 import { never } from './clock';
+
+// Must support living iterables.
 
 export class Copropagator<T = unknown, R = T, S = unknown> extends Coroutine<T, R, S> {
   constructor(
@@ -21,7 +24,7 @@ export class Copropagator<T = unknown, R = T, S = unknown> extends Coroutine<T, 
             void co[Coroutine.exit](rejection);
           }
         });
-      void AtomicPromise.all(coroutines).then(
+      void all(coroutines).then(
         results =>
           results.length === 0
             ? void this[Coroutine.terminate](new Error(`Spica: Copropagator: No result.`))
@@ -32,4 +35,24 @@ export class Copropagator<T = unknown, R = T, S = unknown> extends Coroutine<T, 
     }, { autorun: false });
     void this[Coroutine.init]();
   }
+}
+
+function all<T>(sources: Iterable<T | PromiseLike<T>>, memory?: Map<T | PromiseLike<T>, T>): AtomicPromise<T[]> {
+  const before = isArray(sources)
+    ? sources as T[]
+    : [...sources];
+  return AtomicPromise.all(before).then(values => {
+    const after = isArray(sources)
+      ? sources as T[]
+      : [...sources];
+    const same = after.length === before.length && after.every((_, i) => after[i] === before[i]);
+    if (!memory && same) return values;
+    memory = memory || new Map();
+    for (let i = 0; i < values.length; ++i) {
+      void memory.set(before[i], values[i]);
+    }
+    return same
+      ? [...memory.values()]
+      : all(after, memory);
+  });
 }
