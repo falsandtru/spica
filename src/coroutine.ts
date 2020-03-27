@@ -126,8 +126,8 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
           assert(msg instanceof AtomicPromise === false);
           if (!this[internal].alive) break;
           // Block.
-          // `value` can be Promise when using iterator.
-          // `value` will never be Promise when using async iterator.
+          // `result.value` can be a Promise value when using iterators.
+          // `result.value` will never be a Promise value when using async iterators.
           const result = await iter.next(msg!);
           assert(!isPromiseLike(result.value));
           if (!result.done) {
