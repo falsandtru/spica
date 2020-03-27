@@ -11,6 +11,7 @@ export class Copropagator<T = unknown, R = T, S = unknown> extends Coroutine<T, 
     coroutines: Iterable<Coroutine<T, R, S>>,
     reducer: (results: T[]) => T = results => results[0],
   ) {
+    assert(new Set(coroutines).size === [...coroutines].length);
     super(async function* () {
       void this.then(
         result => {
