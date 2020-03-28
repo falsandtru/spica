@@ -209,7 +209,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
   public async *[Symbol.asyncIterator](): AsyncIterator<R, undefined, undefined> {
     while (this[internal].alive) {
       const state = await this[internal].state;
-      if (state.done || !this[internal].alive) break;
+      if (state.done) break;
       yield state.value;
     }
     return this.then(() => void 0);
@@ -220,8 +220,8 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
 // All responses will be deferred.
 class Port<T, R, S> {
   constructor(
-    private co: Coroutine<T, R, S>,
-    private internal: Internal<T, R, S>,
+    private readonly co: Coroutine<T, R, S>,
+    private readonly internal: Internal<T, R, S>,
   ) {
   }
   public recv(): AtomicPromise<IteratorResult<R, T>> {
