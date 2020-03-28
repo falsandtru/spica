@@ -98,6 +98,14 @@ describe('Unit: lib/coroutine', () => {
         assert(cnt === 3 && ++cnt);
       }, { trigger: ['trigger', 'trigger'] });
       assert(cnt === 4 && ++cnt);
+      new Coroutine(async function* () {
+        assert(cnt === 5 && ++cnt);
+      }, { trigger: 'then' }).then;
+      assert(cnt === 6 && ++cnt);
+      new Coroutine(async function* () {
+        assert(cnt === 7 && ++cnt);
+      }, { trigger: Symbol.asyncIterator })[Symbol.asyncIterator];
+      assert(cnt === 8 && ++cnt);
     });
 
     it('port', async () => {

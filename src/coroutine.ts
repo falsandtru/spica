@@ -156,24 +156,42 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     };
     if (this[internal].settings.trigger !== void 0) {
       for (const prop of Array<string | symbol>().concat(this[internal].settings.trigger)) {
-        if (prop in this) continue;
-        const desc = ObjectGetOwnPropertyDescriptor(this, prop) || {
-          value: this[prop],
-          enumerable: true,
-          configurable: true,
-          writable: true,
-        };
-        void ObjectDefineProperty(this, prop, {
-          set(this: Coroutine, value: unknown) {
-            void ObjectDefineProperty(this, prop, { ...desc, value });
-            void this[init]();
-          },
-          get(this: Coroutine) {
-            return this[prop];
-          },
-          enumerable: true,
-          configurable: true,
-        });
+        if (prop in this && this.hasOwnProperty(prop)) continue;
+        if (prop in this) {
+          void ObjectDefineProperty(this, prop, {
+            set(this: Coroutine, value: unknown) {
+              delete this[prop];
+              this[prop] = value;
+              void this[init]();
+            },
+            get(this: Coroutine) {
+              delete this[prop];
+              void this[init]();
+              return this[prop];
+            },
+            enumerable: true,
+            configurable: true,
+          });
+        }
+        else {
+          const desc = ObjectGetOwnPropertyDescriptor(this, prop) || {
+            value: this[prop],
+            enumerable: true,
+            configurable: true,
+            writable: true,
+          };
+          void ObjectDefineProperty(this, prop, {
+            set(this: Coroutine, value: unknown) {
+              void ObjectDefineProperty(this, prop, { ...desc, value });
+              void this[init]();
+            },
+            get(this: Coroutine) {
+              return this[prop];
+            },
+            enumerable: true,
+            configurable: true,
+          });
+        }
       }
     }
     this[internal].settings.debug && void this[Coroutine.init]();
