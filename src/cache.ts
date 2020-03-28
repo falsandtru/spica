@@ -17,7 +17,7 @@ export interface CacheOptions<K, V = undefined> {
 
 export class Cache<K, V = undefined> implements Collection<K, V> {
   constructor(
-    private readonly size: number,
+    private readonly capacity: number,
     private readonly callback: (key: K, value: V) => void = () => undefined,
     opts: {
       ignore?: {
@@ -30,11 +30,11 @@ export class Cache<K, V = undefined> implements Collection<K, V> {
       };
     } = {},
   ) {
-    if (size > 0 === false) throw new Error(`Spica: Cache: Cache size must be greater than 0.`);
+    if (capacity > 0 === false) throw new Error(`Spica: Cache: Cache capacity must be greater than 0.`);
     extend(this.settings, opts);
     const { stats, entries } = this.settings.data;
-    const LFU = stats[1].slice(0, size);
-    const LRU = stats[0].slice(0, size - LFU.length);
+    const LFU = stats[1].slice(0, capacity);
+    const LRU = stats[0].slice(0, capacity - LFU.length);
     this.stats = {
       LRU,
       LFU,
@@ -69,7 +69,7 @@ export class Cache<K, V = undefined> implements Collection<K, V> {
     if (hit && this.access(key)) return this.store.set(key, value), true;
 
     const { LRU, LFU } = this.stats;
-    if (LRU.length + LFU.length === this.size && LRU.length < LFU.length) {
+    if (LRU.length + LFU.length === this.capacity && LRU.length < LFU.length) {
       assert(LFU.length > 0);
       const key = LFU.pop()!;
       assert(this.store.has(key));
@@ -81,7 +81,7 @@ export class Cache<K, V = undefined> implements Collection<K, V> {
     LRU.unshift(key);
     this.store.set(key, value);
 
-    if (LRU.length + LFU.length > this.size) {
+    if (LRU.length + LFU.length > this.capacity) {
       assert(LRU.length > 0);
       const key = LRU.pop()!;
       assert(this.store.has(key));
@@ -133,6 +133,9 @@ export class Cache<K, V = undefined> implements Collection<K, V> {
     for (const kv of store) {
       this.callback(kv[0], kv[1]);
     }
+  }
+  public get size(): number {
+    return this.store.size;
   }
   public [Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
     return this.store[Symbol.iterator]();

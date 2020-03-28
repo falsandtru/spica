@@ -10,72 +10,72 @@ describe('Benchmark:', function () {
     });
 
     it('put 10', function (done) {
-      const size = 10;
-      const cache = new Cache<number, number>(size);
+      const capacity = 10;
+      const cache = new Cache<number, number>(capacity);
       let i = 0;
-      benchmark('Cache put 10', () => cache.put(++i % (size * 3), i), done);
+      benchmark('Cache put 10', () => cache.put(++i % (capacity * 3), i), done);
     });
 
     it('put 100', function (done) {
-      const size = 100;
-      const cache = new Cache<number, number>(size);
+      const capacity = 100;
+      const cache = new Cache<number, number>(capacity);
       let i = 0;
-      benchmark('Cache put 100', () => cache.put(++i % (size * 3), i), done);
+      benchmark('Cache put 100', () => cache.put(++i % (capacity * 3), i), done);
     });
 
     it('put 1000', function (done) {
-      const size = 1000;
-      const cache = new Cache<number, number>(size);
+      const capacity = 1000;
+      const cache = new Cache<number, number>(capacity);
       let i = 0;
-      benchmark('Cache put 1000', () => cache.put(++i % (size * 3), i), done);
+      benchmark('Cache put 1000', () => cache.put(++i % (capacity * 3), i), done);
     });
 
     it('get 10', function (done) {
-      const size = 10;
-      const cache = new Cache<number, number>(size);
-      for (let i = 0; i < size; ++i) cache.put(i, i);
+      const capacity = 10;
+      const cache = new Cache<number, number>(capacity);
+      for (let i = 0; i < capacity; ++i) cache.put(i, i);
       let i = 0;
-      benchmark('Cache get 10', () => cache.get(++i % (size * 3)), done);
+      benchmark('Cache get 10', () => cache.get(++i % (capacity * 3)), done);
     });
 
     it('get 100', function (done) {
-      const size = 100;
-      const cache = new Cache<number, number>(size);
-      for (let i = 0; i < size; ++i) cache.put(i, i);
+      const capacity = 100;
+      const cache = new Cache<number, number>(capacity);
+      for (let i = 0; i < capacity; ++i) cache.put(i, i);
       let i = 0;
-      benchmark('Cache get 100', () => cache.get(++i % (size * 3)), done);
+      benchmark('Cache get 100', () => cache.get(++i % (capacity * 3)), done);
     });
 
     it('get 1000', function (done) {
-      const size = 1000;
-      const cache = new Cache<number, number>(size);
-      for (let i = 0; i < size; ++i) cache.put(i, i);
+      const capacity = 1000;
+      const cache = new Cache<number, number>(capacity);
+      for (let i = 0; i < capacity; ++i) cache.put(i, i);
       let i = 0;
-      benchmark('Cache get 1000', () => cache.get(++i % (size * 3)), done);
+      benchmark('Cache get 1000', () => cache.get(++i % (capacity * 3)), done);
     });
 
     it('has 10', function (done) {
-      const size = 10;
-      const cache = new Cache<number, number>(size);
-      for (let i = 0; i < size; ++i) cache.put(i, i);
+      const capacity = 10;
+      const cache = new Cache<number, number>(capacity);
+      for (let i = 0; i < capacity; ++i) cache.put(i, i);
       let i = 0;
-      benchmark('Cache has 10', () => cache.has(++i % (size * 3)), done);
+      benchmark('Cache has 10', () => cache.has(++i % (capacity * 3)), done);
     });
 
     it('has 100', function (done) {
-      const size = 100;
-      const cache = new Cache<number, number>(size);
-      for (let i = 0; i < size; ++i) cache.put(i, i);
+      const capacity = 100;
+      const cache = new Cache<number, number>(capacity);
+      for (let i = 0; i < capacity; ++i) cache.put(i, i);
       let i = 0;
-      benchmark('Cache has 100', () => cache.has(++i % (size * 3)), done);
+      benchmark('Cache has 100', () => cache.has(++i % (capacity * 3)), done);
     });
 
     it('has 1000', function (done) {
-      const size = 1000;
-      const cache = new Cache<number, number>(size);
-      for (let i = 0; i < size; ++i) cache.put(i, i);
+      const capacity = 1000;
+      const cache = new Cache<number, number>(capacity);
+      for (let i = 0; i < capacity; ++i) cache.put(i, i);
       let i = 0;
-      benchmark('Cache has 1000', () => cache.has(++i % (size * 3)), done);
+      benchmark('Cache has 1000', () => cache.has(++i % (capacity * 3)), done);
     });
 
   });

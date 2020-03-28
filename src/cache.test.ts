@@ -180,43 +180,43 @@ describe('Unit: lib/cache', () => {
     });
 
     it('condition', () => {
-      const size = 10;
-      const cache = new Cache<number, number>(size);
+      const capacity = 10;
+      const cache = new Cache<number, number>(capacity);
 
       for (let i = 0; i < 10000; ++i) {
-        cache.put((Math.random() * size * 4 | 0) + i, i);
+        cache.put((Math.random() * capacity * 4 | 0) + i, i);
       }
       const [LRU, LFU] = cache.inspect();
       assert(LRU.every(k => cache.has(k)));
       assert(LFU.every(k => cache.has(k)));
-      assert(LRU.length + LFU.length === size);
-      assert([...cache].length === size);
+      assert(LRU.length + LFU.length === capacity);
+      assert([...cache].length === capacity);
       assert(
         Sequence.union(Sequence.from(LRU).sort(), Sequence.from(LFU).sort(), (a, b) => a - b)
           .extract()
-          .length === size);
+          .length === capacity);
     });
 
     it('rate', function () {
       this.timeout(10 * 1e3);
       this.retries(3);
 
-      const size = 10;
-      const cache = new Cache<number, number>(size);
+      const capacity = 10;
+      const cache = new Cache<number, number>(capacity);
 
-      const repeat = size * 10000;
+      const repeat = capacity * 10000;
       let lrf = 0;
       let lru = 0;
       const LRU: number[] = [];
       for (let i = 0; i < repeat; ++i) {
-        let key = Math.random() * size * 10 | 0;
-        key = key < size * 8 ? key % (size * 4) | 0 : key;
+        let key = Math.random() * capacity * 10 | 0;
+        key = key < capacity * 8 ? key % (capacity * 4) | 0 : key;
         lrf += +cache.put(key, i);
         {
           const idx = LRU.indexOf(key);
           lru += +(idx > -1);
           LRU.unshift(idx === -1 ? key : LRU.splice(idx, 1)[0]);
-          LRU.length = size;
+          LRU.length = capacity;
         }
       }
       console.debug('LRF cache hit rate', lrf / repeat * 100);
