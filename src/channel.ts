@@ -24,19 +24,19 @@ export async function* select
       gens[name] = chan[Symbol.asyncIterator](),
       gens
     ), {});
-  const jobs = new Set(ObjectEntries(gens).map(([name, chan]) => Job(name, chan)));
+  const jobs = new Set(ObjectEntries(gens).map(([name, chan]) => take(chan, name)));
   while (jobs.size > 0) {
     const [name, result, job] = await Promise.race(jobs);
     assert(jobs.has(job));
     void jobs.delete(job);
-    !result.done && void jobs.add(Job(name, gens[name]));
+    !result.done && void jobs.add(take(gens[name], name));
     yield [name as keyof T, result as ChannelIteratorResult<T[keyof T]>];
   }
   return;
 }
 
 type Job = Promise<readonly [string, IteratorResult<unknown, unknown>, Job]>;
-function Job(name: string, chan: AsyncIterator<unknown, unknown, undefined>): Job {
+function take(chan: AsyncIterator<unknown, unknown, undefined>, name: string): Job {
   const job: Job = chan.next().then(result => [name, result, job]);
   return job;
 }
