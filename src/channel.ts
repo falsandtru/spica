@@ -5,7 +5,9 @@ interface AsyncIterable<T = unknown, U = any, S = unknown> {
   [Symbol.asyncIterator](): AsyncIterator<T, U, S>;
 }
 
-type Channel = (() => AsyncIterable<unknown, unknown, undefined>) | AsyncIterable<unknown, unknown, undefined>;
+type Channel =
+  | AsyncIterable<unknown, unknown, undefined>
+  | (() => AsyncIterable<unknown, unknown, undefined>);
 type ChannelResult<T extends Record<string, Channel>> =
   { [P in keyof T]: readonly [P, ChannelIteratorResult<T[P]>]; }[keyof T];
 type ChannelIteratorResult<G extends Channel> =
