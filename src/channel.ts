@@ -1,6 +1,5 @@
-import { Map } from './global';
+import { Map, Promise } from './global';
 import { ObjectEntries } from './alias';
-import { AtomicPromise } from './promise';
 
 interface AsyncIterable<T = unknown, U = any> {
   [Symbol.asyncIterator](): AsyncIterator<T, U>;
@@ -17,7 +16,7 @@ export async function* select<T extends Record<string, AsyncIterable<unknown, un
     .reduce((o, [k, v]) => (o[k] = v[Symbol.asyncIterator](), o), {});
   const cs = new Map(ObjectEntries(gs).map(([k, v]) => [k, v.next().then(r => [k, r] as const)]));
   while (cs.size > 0) {
-    yield AtomicPromise.race([...cs.values()]).then(
+    yield Promise.race(cs.values()).then(
       ([k, r]) => {
         cs.delete(k);
         !r.done && cs.set(k, gs[k].next().then(r => [k, r]));
