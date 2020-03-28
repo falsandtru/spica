@@ -8,7 +8,7 @@ import { never } from './clock';
 
 export class Copropagator<T = unknown, R = T, S = unknown> extends Coroutine<T, R, S> {
   constructor(
-    coroutines: Iterable<Coroutine<T, R, S>>,
+    coroutines: Iterable<Coroutine<T, R, unknown>>,
     reducer: (results: T[]) => T = results => results[0],
   ) {
     assert(new Set(coroutines).size === [...coroutines].length);
