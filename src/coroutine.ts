@@ -206,13 +206,13 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
   public [terminate](reason?: unknown): void {
     return this[exit](AtomicPromise.reject(reason));
   }
-  public async *[Symbol.asyncIterator](): AsyncIterator<R, undefined, undefined> {
+  public async *[Symbol.asyncIterator](): AsyncIterator<R, T, undefined> {
     while (this[internal].alive) {
       const state = await this[internal].state;
       if (state.done) break;
       yield state.value;
     }
-    return this.then(() => void 0);
+    return this;
   }
   public readonly [port]: Structural<Port<T, R, S>>;
 }
