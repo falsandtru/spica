@@ -6,7 +6,7 @@ describe('Unit: lib/channel', function () {
   describe('select', function () {
     it('generator', async function () {
       const gen = select({
-        a: async function* () { yield* [0, 2] }(),
+        a: async function* () { yield* [0, 2] },
         b: async function* () { yield* [1] }(),
       });
       assert.deepStrictEqual(
