@@ -56,15 +56,18 @@ describe('Unit: lib/channel', function () {
         a: co,
       });
       await wait(100);
-      co[Coroutine.port].send(0);
+      (async () => {
+        await 0;
+        await co[Coroutine.port].send(0);
+        co[Coroutine.port].send(0);
+        co[Coroutine.port].send(0);
+      })();
       assert.deepStrictEqual(
         await gen.next(),
         {
           value: ['a', { value: 0, done: false }],
           done: false
         });
-      co[Coroutine.port].send(0);
-      co[Coroutine.port].send(0);
       assert.deepStrictEqual(
         await gen.next(),
         {
