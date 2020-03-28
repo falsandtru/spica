@@ -15,28 +15,25 @@ type ChannelIteratorResult<G extends Channel> =
   G extends AsyncIterable<infer T, infer U> ? IteratorResult<T, U> :
   never;
 
-export async function* select
-  <T extends Record<string, Channel>>
-  (channels: T): AsyncGenerator<ChannelResult<T>, undefined, undefined> {
-  const gens: Record<string, AsyncGenerator<unknown, unknown, undefined>> = ObjectEntries(channels)
-    .reduce((gens, [name, chan]) => (
+export async function* select<T extends Record<string, Channel>>(
+  channels: T,
+): AsyncGenerator<ChannelResult<T>, undefined, undefined> {
+  const jobs = new Set(ObjectEntries(channels)
+    .map(([name, chan]) => (
       chan = typeof chan === 'function' ? chan() : chan,
-      gens[name] = chan[Symbol.asyncIterator](),
-      gens
-    ), {});
-  const jobs = new Set(ObjectEntries(gens).map(([name, chan]) => take(chan, name)));
+      take(name, chan[Symbol.asyncIterator]()))));
   while (jobs.size > 0) {
-    const [name, result, job] = await Promise.race(jobs);
+    const [name, chan, job, result] = await Promise.race(jobs);
     assert(jobs.has(job));
     void jobs.delete(job);
-    !result.done && void jobs.add(take(gens[name], name));
-    yield [name as keyof T, result as ChannelIteratorResult<T[keyof T]>];
+    !result.done && void jobs.add(take(name, chan));
+    yield [name, result as ChannelIteratorResult<T[keyof T]>];
   }
   return;
 }
 
-type Job = Promise<readonly [string, IteratorResult<unknown, unknown>, Job]>;
-function take(chan: AsyncIterator<unknown, unknown, undefined>, name: string): Job {
-  const job: Job = chan.next().then(result => [name, result, job]);
+type Job = Promise<readonly [string, AsyncIterator<unknown, unknown, undefined>, Job, IteratorResult<unknown, unknown>]>;
+function take(name: string, chan: AsyncIterator<unknown, unknown, undefined>): Job {
+  const job: Job = chan.next().then(result => [name, chan, job, result]);
   return job;
 }
