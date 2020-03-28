@@ -55,7 +55,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     void this[Coroutine.init]();
     void extend(this.settings, opts);
     this.name = this.settings.name;
-    // FIXME: Remove any after #37383 is fixed.
+    // FIXME: Remove the next type assertion after #37383 is fixed.
     if (this.constructor === Supervisor as any) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot instantiate abstract classes.`);
     // @ts-ignore #31251
     void this.constructor.instances.add(this);
