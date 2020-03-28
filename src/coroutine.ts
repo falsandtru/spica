@@ -90,7 +90,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     super(resolve => res = resolve);
     var res!: (v: T | AtomicPromise<T>) => void;
     this[internal] = new Internal(opts);
-    this[port] = new Port(this, this[internal]);
+    this[port] = new Port(this, this[internal], () => void this[Coroutine.init]());
     void res(this[internal].result.then(({ value }) => value));
     let cnt = 0;
     this[Coroutine.init] = async () => {
@@ -196,7 +196,6 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     }
     this[internal].settings.debug && void this[Coroutine.init]();
     this[internal].settings.autorun && void tick(this[Coroutine.init]);
-    void this[internal].resume.then(this[Coroutine.init]);
   }
   public readonly [internal]: Internal<T, R, S>;
   public get [alive](): boolean {
@@ -241,10 +240,12 @@ class Port<T, R, S> {
   constructor(
     private readonly co: Coroutine<T, R, S>,
     private readonly internal: Internal<T, R, S>,
+    private readonly init: () => void,
   ) {
   }
   public recv(): AtomicPromise<IteratorResult<R, T>> {
     if (!this.internal.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
+    void this.init();
     return this.internal.state
       .then(async state =>
         state.done
@@ -253,6 +254,7 @@ class Port<T, R, S> {
   }
   public send(msg: S): AtomicPromise<IteratorResult<R, T>> {
     if (!this.internal.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
+    void this.init();
     if (this.internal.settings.size === 0) return this.recv();
     const res = new AtomicFuture<IteratorResult<R, T>>();
     // Don't block.
@@ -268,6 +270,7 @@ class Port<T, R, S> {
   }
   public async connect<U>(com: (this: Coroutine<T, R, S>) => AsyncGenerator<S, U, R | T>): Promise<U> {
     if (!this.internal.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
+    void this.init();
     const iter = com.call(this.co);
     let reply: R | T | undefined;
     while (true) {
