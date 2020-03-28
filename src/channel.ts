@@ -14,14 +14,14 @@ type AsyncGeneratorResult<G extends AsyncIterable> =
 export async function* select<T extends Record<string, AsyncIterable<unknown, unknown>>>(channels: T): AsyncGenerator<Result<T>, undefined, undefined> {
   const gs: Record<string, AsyncGenerator<unknown, unknown, undefined>> = ObjectEntries(channels)
     .reduce((o, [k, v]) => (o[k] = v[Symbol.asyncIterator](), o), {});
-  const cs = new Map(ObjectEntries(gs).map(([k, v]) => [k, v.next().then(r => [k, r] as const)]));
+  const cs = new Map(ObjectEntries(gs)
+    .map(([k, v]) =>
+      [k, v.next().then(r => [k, r] as const)]));
   while (cs.size > 0) {
-    yield Promise.race(cs.values()).then(
-      ([k, r]) => {
-        cs.delete(k);
-        !r.done && cs.set(k, gs[k].next().then(r => [k, r]));
-        return [k as keyof T, r as any] as const;
-      });
+    const [k, r] = await Promise.race(cs.values());
+    void cs.delete(k);
+    !r.done && void cs.set(k, gs[k].next().then(r => [k, r]));
+    yield [k as keyof T, r as AsyncGeneratorResult<T[keyof T]>];
   }
   return;
 }
