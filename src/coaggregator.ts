@@ -25,6 +25,7 @@ export class Coaggregator<T = unknown, R = T, S = unknown> extends Coroutine<T, 
       const results: T[] = [];
       // FIXME: Remove the next type assertion after #28801 is fixed.
       for await (const [i, result] of select({ ...coroutines } as unknown as Record<string, Coroutine<T, R, S>>)) {
+        assert(Number.isSafeInteger(+i));
         if (result.done) {
           results[i] = result.value;
         }
@@ -33,6 +34,7 @@ export class Coaggregator<T = unknown, R = T, S = unknown> extends Coroutine<T, 
         }
       }
       assert(results.length === coroutines.length);
+      assert(Object.keys(results).length === coroutines.length);
       results.length === 0
         ? void this[Coroutine.terminate](new Error(`Spica: Coaggregator: No result.`))
         : void this[Coroutine.exit](reducer(results));
