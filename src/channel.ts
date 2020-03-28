@@ -8,14 +8,15 @@ interface AsyncIterable<T = unknown, U = any, S = unknown> {
 type Channel =
   | AsyncIterable<unknown, unknown, undefined>
   | (() => AsyncIterable<unknown, unknown, undefined>);
-type ChannelResult<T extends Record<string, Channel>> =
+type Channels = Record<string, Channel>;
+type ChannelResult<T extends Channels> =
   { [P in keyof T]: readonly [P, ChannelIteratorResult<T[P]>]; }[keyof T];
 type ChannelIteratorResult<C extends Channel> =
   C extends () => AsyncIterable<infer T, infer U> ? IteratorResult<T, U> :
   C extends AsyncIterable<infer T, infer U> ? IteratorResult<T, U> :
   never;
 
-export async function* select<T extends Record<string, Channel>>(
+export async function* select<T extends Channels>(
   channels: T,
 ): AsyncGenerator<ChannelResult<T>, undefined, undefined> {
   const reqs = new Set(ObjectEntries(channels)
