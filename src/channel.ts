@@ -12,8 +12,8 @@ type AsyncGeneratorResult<G extends AsyncIterable> =
   G extends AsyncIterable<infer T, infer U> ? IteratorResult<T, U> :
   never;
 
-export async function* select<T extends Record<string, AsyncIterable<unknown, unknown>>>(iters: T): AsyncGenerator<Result<T>, undefined, undefined> {
-  const gs: Record<string, AsyncGenerator<unknown, unknown, undefined>> = ObjectEntries(iters)
+export async function* select<T extends Record<string, AsyncIterable<unknown, unknown>>>(channels: T): AsyncGenerator<Result<T>, undefined, undefined> {
+  const gs: Record<string, AsyncGenerator<unknown, unknown, undefined>> = ObjectEntries(channels)
     .reduce((o, [k, v]) => (o[k] = v[Symbol.asyncIterator](), o), {});
   const cs = new Map(ObjectEntries(gs).map(([k, v]) => [k, v.next().then(r => [k, r] as const)]));
   while (cs.size > 0) {
