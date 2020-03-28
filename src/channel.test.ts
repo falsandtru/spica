@@ -1,5 +1,6 @@
 import { select } from './channel';
 import { Coroutine } from './coroutine';
+import { wait } from './clock';
 
 describe('Unit: lib/channel', function () {
   describe('select', function () {
@@ -47,10 +48,14 @@ describe('Unit: lib/channel', function () {
     });
 
     it('coroutine', async function () {
-      const co = new Coroutine<number>(async function* () { yield* [0, 1, 2]; return 3; }, { size: Infinity });
+      const co = new Coroutine<number>(async function* () {
+        yield* [0, 1, 2];
+        return 3;
+      }, { size: Infinity, autorun: false });
       const gen = select({
         a: co,
       });
+      await wait(100);
       co[Coroutine.port].send(0);
       assert.deepStrictEqual(
         await gen.next(),

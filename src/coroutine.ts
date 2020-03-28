@@ -92,17 +92,17 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     this[internal] = new Internal(opts);
     this[port] = new Port(this, this[internal]);
     void res(this[internal].result.then(({ value }) => value));
+    let cnt = 0;
     this[Coroutine.init] = async () => {
+      if (cnt !== 0) return;
       let reply: Reply<R, T> = noop;
       try {
-        this[Coroutine.init] = noop;
         if (!this[internal].alive) return;
         const resume = (): [S] | PromiseLike<[S]> =>
           this[internal].msgs.length > 0
             ? [([, reply] = this[internal].msgs.shift()!)[0]]
             : this[internal].resume.then(resume);
         const iter = gen.call(this);
-        let cnt = 0;
         while (this[internal].alive) {
           void ++cnt;
           const [[msg]] = cnt === 1
@@ -195,13 +195,14 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
       }
     }
     this[internal].settings.debug && void this[Coroutine.init]();
-    this[internal].settings.autorun && void tick(() => void this[Coroutine.init]());
+    this[internal].settings.autorun && void tick(this[Coroutine.init]);
+    void this[internal].resume.then(this[Coroutine.init]);
   }
   public readonly [internal]: Internal<T, R, S>;
   public get [alive](): boolean {
     return this[internal].alive;
   }
-  public [init]: () => void;
+  public readonly [init]: () => void;
   public [exit](result: T | PromiseLike<T>): void {
     if (!this[internal].alive) return;
     void AtomicPromise.resolve(result)
