@@ -1,37 +1,31 @@
-import { MList } from './list';
 import { causeAsyncException } from './exception';
+import { splice } from './array';
 
 type Callback = () => void;
 
-let list = MList<Callback>();
-let last = list;
-
-export function tick(cb: Callback): void {
-  schedule();
-  last = last.append(cb);
-}
+let queue: Callback[] = [];
+let jobs: Callback[] = [];
+let index = 0;
 
 const scheduler = Promise.resolve();
 
-function schedule(): void {
-  if (list.tail) return;
-  scheduler.then(run);
+export function tick(cb: Callback): void {
+  index === 0 && scheduler.then(run);
+  index++ === queue.length
+    ? queue.push(cb)
+    : queue[index - 1] = cb;
 }
 
 function run(): void {
-  let node = list;
-  list = last = MList();
-  while (true) {
+  const count = index;
+  [index, queue, jobs] = [0, jobs, queue];
+  for (let i = 0; i < count; ++i) {
     try {
-      for (; node.tail; node = node.tail) {
-        node.head();
-      }
-      return;
+      jobs[i]();
     }
     catch (reason) {
-      node = node.tail;
       causeAsyncException(reason);
-      continue;
     }
   }
+  jobs.length > 1000 && count < jobs.length * 0.5 && splice(jobs, jobs.length * 0.9 | 0, jobs.length);
 }
