@@ -17,6 +17,7 @@ export { Coaggregator } from './src/coaggregator';
 export { Copropagator } from './src/copropagator';
 export { Colistener } from './src/colistener';
 export { cofetch } from './src/cofetch';
+export { Channel } from './src/channel';
 export { select } from './src/select';
 export { DataMap } from './src/datamap';
 export { MultiMap } from './src/multimap';

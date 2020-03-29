@@ -13,6 +13,8 @@
     "actor",
     "observation",
     "coroutine",
+    "channel",
+    "select",
     "cancellation",
     "sequence",
     "generator",

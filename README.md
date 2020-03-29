@@ -19,6 +19,7 @@ $ npm i spica
 - Observation
 - AtomicPromise
 - Coroutine, Coaggregator, Copropagator, Colistener, cofetch
+- Channel
 - select
 - Cancellation
 - Sequence
