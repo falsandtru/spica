@@ -255,7 +255,7 @@ class Port<T, R, S> {
   public send(msg: S): AtomicPromise<IteratorResult<R, T>> {
     if (!this.internal.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
     void this.init();
-    if (this.internal.settings.size === 0) return this.recv();
+    if (this.internal.settings.size === 0) return AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`));
     const res = new AtomicFuture<IteratorResult<R, T>>();
     // Don't block.
     void this.internal.msgs.push([msg, res.bind]);
