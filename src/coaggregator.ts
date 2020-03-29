@@ -1,7 +1,7 @@
 import { Error } from './global';
 import { Coroutine } from './coroutine';
 import { AtomicPromise } from './promise';
-import { select } from './channel';
+import { select } from './select';
 import { never } from './clock';
 
 export class Coaggregator<T = unknown, R = T, S = unknown> extends Coroutine<T, R, S> {
