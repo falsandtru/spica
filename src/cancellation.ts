@@ -13,6 +13,7 @@ export interface Canceller<L = undefined> {
   readonly close: (reason: unknown) => void;
 }
 export interface Cancellee<L = undefined> {
+  readonly alive: boolean;
   readonly canceled: boolean;
   readonly register: (listener: Listener<L>) => () => void;
   readonly promise: <T>(val: T) => AtomicPromise<T>;
@@ -36,6 +37,9 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
     }
   }
   public readonly [internal]: Internal<L>;
+  public get alive(): boolean {
+    return this[internal].alive;
+  }
   public get canceled(): boolean {
     return this[internal].canceled;
   }

@@ -35,12 +35,24 @@ describe('Unit: lib/cancellation', () => {
       const cancellation = new Cancellation();
       cancellation.register(() =>
         done(false));
+      assert(cancellation.alive === true);
+      assert(cancellation.canceled === false);
       cancellation.close();
+      assert(cancellation.alive === false);
+      assert(cancellation.canceled === false);
       cancellation.close();
+      assert(cancellation.alive === false);
+      assert(cancellation.canceled === false);
       cancellation.cancel();
+      assert(cancellation.alive === false);
+      assert(cancellation.canceled === false);
       cancellation.register(() =>
         done(false));
+      assert(cancellation.alive === false);
+      assert(cancellation.canceled === false);
       cancellation.close();
+      assert(cancellation.alive === false);
+      assert(cancellation.canceled === false);
       cancellation.catch(done);
     });
 
@@ -53,8 +65,11 @@ describe('Unit: lib/cancellation', () => {
       b.register(() => assert(cnt === 1 && ++cnt));
       c.register(() => assert(cnt === 0 && ++cnt));
       b.cancel();
+      assert(a.alive === true);
       assert(a.canceled === false);
+      assert(b.alive === false);
       assert(b.canceled === true);
+      assert(c.alive === false);
       assert(c.canceled === true);
       assert(cnt === 2);
       done();
