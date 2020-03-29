@@ -18,7 +18,8 @@ $ npm i spica
 - Supervisor
 - Observation
 - AtomicPromise
-- Coroutine, Cofetch, Colistener
+- Coroutine, Coaggregator, Copropagator, Colistener, cofetch
+- select
 - Cancellation
 - Sequence
 - Maybe, Just, Nothing
