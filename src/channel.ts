@@ -38,7 +38,7 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
         return success;
       default:
         return this.senders[this.senders.push(new AtomicFuture()) - 1]
-          .then(() => void this.send(msg));
+          .then(() => this.send(msg));
     }
   }
   public take(): AtomicPromise<T> {
