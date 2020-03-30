@@ -1,4 +1,4 @@
-import { undefined } from './global';
+import { undefined, Array } from './global';
 import { isArray } from './alias';
 import { splice } from './array';
 
@@ -48,37 +48,36 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
   public static all<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<T[]>;
   public static all<T>(vs: Iterable<T | PromiseLike<T>>): AtomicPromise<T[]> {
     return new AtomicPromise<T[]>((resolve, reject) => {
-      const values = isArray(vs) ? vs as T[] : [...vs];
-      const length = values.length;
-      const acc: T[] = [];
-      let cnt = 0;
-      for (let i = 0; i < length; ++i) {
+      const values = isArray(vs) ? vs.slice() as T[] : [...vs];
+      const results: T[] = Array(values.length);
+      let count = 0;
+      for (let i = 0; i < values.length; ++i) {
         const value = values[i];
         if (!isPromiseLike(value)) {
-          acc[i] = value;
-          ++cnt;
+          results[i] = value;
+          ++count;
         }
         else {
           value.then(
             value => {
-              acc[i] = value;
-              ++cnt;
-              cnt === length && resolve(acc);
+              results[i] = value;
+              ++count;
+              count === values.length && resolve(results);
             },
             reason => {
-              i = length;
+              i = values.length;
               reject(reason);
             });
         }
       }
-      cnt === length && resolve(acc);
+      count === values.length && resolve(results);
     });
   }
   public static race<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<T> {
     return new AtomicPromise<T>((resolve, reject) => {
       let done = false;
       for (const value of values) {
-        if (done) break;
+        assert(!done);
         if (!isPromiseLike(value)) {
           done = true;
           resolve(value);
@@ -94,6 +93,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
               reject(reason);
             });
         }
+        if (done) break;
       }
     });
   }

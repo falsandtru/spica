@@ -1,4 +1,4 @@
-import { Error } from './global';
+import { Array, Error } from './global';
 import { Coroutine } from './coroutine';
 import { AtomicPromise } from './promise';
 import { select } from './select';
@@ -22,7 +22,7 @@ export class Coaggregator<T = unknown, R = T, S = unknown> extends Coroutine<T, 
             void co[Coroutine.exit](rejection);
           }
         });
-      const results: T[] = [];
+      const results: T[] = Array(coroutines.length);
       // FIXME: Remove the next type assertion after #28801 is fixed.
       for await (const [i, result] of select({ ...coroutines } as unknown as Record<string, Coroutine<T, R, S>>)) {
         assert(Number.isSafeInteger(+i));
