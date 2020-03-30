@@ -164,7 +164,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
   public readonly [internal]: Internal<T> = new Internal();
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
     return new AtomicPromise<TResult1 | TResult2>((resolve, reject) => {
-      const { fulfillReactions, rejectReactions, status } = this[internal];
+      const { status, fulfillReactions, rejectReactions } = this[internal];
       if (status.state !== State.rejected) {
         fulfillReactions.push(value => {
           if (!onfulfilled) return resolve(value as any);
