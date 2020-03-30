@@ -1,9 +1,8 @@
-import { ObjectFreeze } from './alias';
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future';
 
 const success = AtomicPromise.resolve();
-const failure = AtomicPromise.reject(ObjectFreeze(new Error('Spica: Channel: Closed.')));
+const fail = () => AtomicPromise.reject(new Error('Spica: Channel: Closed.'));
 
 export class Channel<T = undefined> implements AsyncIterable<T> {
   constructor(
@@ -21,8 +20,8 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
 
     this.buffer.splice(0, this.buffer.length);
     for (let i = 0; this.producers[i] || this.consumers[i]; ++i) {
-      this.producers[i]?.bind(failure);
-      this.consumers[i]?.bind(failure);
+      this.producers[i]?.bind(fail());
+      this.consumers[i]?.bind(fail());
     }
     this.producers.splice(0, this.producers.length);
     this.consumers.splice(0, this.consumers.length);
@@ -30,7 +29,7 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
   public put(this: Channel<undefined>, msg?: T): AtomicPromise<undefined>;
   public put(msg: T): AtomicPromise<undefined>;
   public put(msg: T): AtomicPromise<undefined> {
-    if (!this.alive) return failure;
+    if (!this.alive) return fail();
     switch (true) {
       case this.buffer.length < this.size:
       case this.consumers.length > 0:
@@ -47,7 +46,7 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
     }
   }
   public take(): AtomicPromise<T> {
-    if (!this.alive) return failure;
+    if (!this.alive) return fail();
     switch (true) {
       case this.buffer.length > 0:
         assert(this.consumers.length === 0);
