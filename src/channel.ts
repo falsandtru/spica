@@ -1,8 +1,9 @@
+import { ObjectFreeze } from './alias';
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future';
 
 const success = AtomicPromise.resolve();
-const failure = AtomicPromise.reject(new Error('Spica: Channel: Closed.'));
+const failure = AtomicPromise.reject(ObjectFreeze(new Error('Spica: Channel: Closed.')));
 
 export class Channel<T = undefined> implements AsyncIterable<T> {
   constructor(
