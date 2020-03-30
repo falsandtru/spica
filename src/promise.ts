@@ -23,6 +23,7 @@ type Status<T> =
 
 class Internal<T> {
   public status: Status<T> = { state: State.pending };
+  public reactable: boolean = true;
   public readonly fulfillReactions: ((value: T) => void)[] = [];
   public readonly rejectReactions: ((reason: unknown) => void)[] = [];
   public isHandled: boolean = false;
@@ -204,6 +205,7 @@ export function isPromiseLike(value: any): value is PromiseLike<any> {
 }
 
 function resume<T>(internal: Internal<T>): void {
+  if (!internal.reactable) return;
   const { status, fulfillReactions, rejectReactions } = internal;
   switch (status.state) {
     case State.pending:
@@ -216,7 +218,9 @@ function resume<T>(internal: Internal<T>): void {
       assert(rejectReactions.length === 0);
       if (fulfillReactions.length === 0) return;
       internal.isHandled = true;
+      internal.reactable = false;
       react(fulfillReactions, status.result);
+      internal.reactable = true;
       assert(fulfillReactions.length + rejectReactions.length === 0);
       return;
     case State.rejected:
@@ -226,7 +230,9 @@ function resume<T>(internal: Internal<T>): void {
       assert(fulfillReactions.length === 0);
       if (rejectReactions.length === 0) return;
       internal.isHandled = true;
+      internal.reactable = false;
       react(rejectReactions, status.result);
+      internal.reactable = true;
       assert(fulfillReactions.length + rejectReactions.length === 0);
       return;
   }
