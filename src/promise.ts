@@ -53,7 +53,11 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
       let cnt = 0;
       for (let i = 0; i < length; ++i) {
         const value = values[i];
-        if (isPromiseLike(value)) {
+        if (!isPromiseLike(value)) {
+          acc[i] = value;
+          ++cnt;
+        }
+        else {
           value.then(
             value => {
               acc[i] = value;
@@ -65,10 +69,6 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
               reject(reason);
             });
         }
-        else {
-          acc[i] = value;
-          ++cnt;
-        }
       }
       cnt === length && resolve(acc);
     });
@@ -78,7 +78,11 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
       let done = false;
       for (const value of values) {
         if (done) break;
-        if (isPromiseLike(value)) {
+        if (!isPromiseLike(value)) {
+          done = true;
+          resolve(value);
+        }
+        else {
           value.then(
             value => {
               done = true;
@@ -88,10 +92,6 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
               done = true;
               reject(reason);
             });
-        }
-        else {
-          done = true;
-          resolve(value);
         }
       }
     });
@@ -111,7 +111,14 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
       executor(
         value => {
           if (internal.status.state !== State.pending) return;
-          if (isPromiseLike(value)) {
+          if (!isPromiseLike(value)) {
+            internal.status = {
+              state: State.fulfilled,
+              result: value!,
+            };
+            resume(internal);
+          }
+          else {
             internal.status = {
               state: State.resolved,
               result: value,
@@ -133,13 +140,6 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
                 };
                 resume(internal);
               });
-          }
-          else {
-            internal.status = {
-              state: State.fulfilled,
-              result: value!,
-            };
-            resume(internal);
           }
         },
         reason => {
