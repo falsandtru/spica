@@ -1,9 +1,10 @@
+import { undefined } from './global';
 import { causeAsyncException } from './exception';
 
 type Callback = () => void;
 
-let queue: Callback[] = [];
-let jobs: Callback[] = [];
+let queue: (Callback | undefined)[] = [];
+let jobs: (Callback | undefined)[] = [];
 let index = 0;
 
 const scheduler = Promise.resolve();
@@ -20,7 +21,8 @@ function run(): void {
   [index, queue, jobs] = [0, jobs, queue];
   for (let i = 0; i < count; ++i) {
     try {
-      jobs[i]();
+      jobs[i]!();
+      jobs[i] = undefined;
     }
     catch (reason) {
       causeAsyncException(reason);
@@ -28,6 +30,4 @@ function run(): void {
   }
   // Gradually reduce the unused buffer space.
   jobs.length > 1000 && count < jobs.length * 0.5 && jobs.splice(jobs.length * 0.9 | 0, jobs.length);
-  // Gradually release the references and pay the cost of Array#push x100 at a maximum.
-  jobs.splice(jobs.length > 100 ? jobs.length - 100 : 0, 100);
 }
