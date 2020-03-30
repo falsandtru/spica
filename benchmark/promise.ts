@@ -21,19 +21,19 @@ describe('Benchmark:', function () {
       benchmark('AtomicPromise resolve', () => void AtomicPromise.resolve(0), done);
     });
 
-    it('then 1', function (done) {
+    it('then', function (done) {
       const p = AtomicPromise.resolve(0);
-      benchmark(`AtomicPromise then 1`, () => void chain(p, 1), done);
+      benchmark(`AtomicPromise then`, () => void p.then(a => a), done);
     });
 
-    it('then 10', function (done) {
+    it('chain 10', function (done) {
       const p = AtomicPromise.resolve(0);
-      benchmark(`AtomicPromise then 10`, () => void chain(p, 10), done);
+      benchmark(`AtomicPromise chain 10`, () => void chain(p, 10), done);
     });
 
-    it('then 100', function (done) {
+    it('chain 100', function (done) {
       const p = AtomicPromise.resolve(0);
-      benchmark(`AtomicPromise then 100`, () => void chain(p, 100), done);
+      benchmark(`AtomicPromise chain 100`, () => void chain(p, 100), done);
     });
 
   });
@@ -47,19 +47,19 @@ describe('Benchmark:', function () {
       benchmark('Promise resolve', () => void Promise.resolve(0), done);
     });
 
-    it('then 1', function (done) {
+    it('then', function (done) {
       const p = Promise.resolve(0);
-      benchmark(`Promise then 1`, done => void chain(p, 0).then(done), done, { defer: true, async: true });
+      benchmark(`Promise then`, done => void p.then(done), done, { defer: true, async: true });
     });
 
-    it('then 10', function (done) {
+    it('chain 10', function (done) {
       const p = Promise.resolve(0);
-      benchmark(`Promise then 10`, done => void chain(p, 9).then(done), done, { defer: true, async: true });
+      benchmark(`Promise chain 10`, done => void chain(p, 9).then(done), done, { defer: true, async: true });
     });
 
-    it('then 100', function (done) {
+    it('chain 100', function (done) {
       const p = Promise.resolve(0);
-      benchmark(`Promise then 100`, done => void chain(p, 99).then(done), done, { defer: true, async: true });
+      benchmark(`Promise chain 100`, done => void chain(p, 99).then(done), done, { defer: true, async: true });
     });
 
   });
