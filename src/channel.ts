@@ -11,20 +11,20 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
   }
   private readonly alive: boolean = true;
   private readonly buffer: T[] = [];
-  private readonly senders: AtomicFuture<undefined>[] = [];
-  private readonly takers: AtomicFuture<undefined>[] = [];
+  private readonly providers: AtomicFuture<undefined>[] = [];
+  private readonly consumers: AtomicFuture<undefined>[] = [];
   public close(): void {
     if (!this.alive) return;
     // @ts-expect-error
     this.alive = false;
 
     this.buffer.splice(0, this.buffer.length);
-    for (let i = 0; this.takers[i] || this.senders[i]; ++i) {
-      this.takers[i]?.bind(failure);
-      this.senders[i]?.bind(failure);
+    for (let i = 0; this.providers[i] || this.consumers[i]; ++i) {
+      this.providers[i]?.bind(failure);
+      this.consumers[i]?.bind(failure);
     }
-    this.takers.splice(0, this.takers.length);
-    this.senders.splice(0, this.senders.length);
+    this.providers.splice(0, this.providers.length);
+    this.consumers.splice(0, this.consumers.length);
   }
   public put(this: Channel<undefined>, msg?: T): AtomicPromise<undefined>;
   public put(msg: T): AtomicPromise<undefined>;
@@ -32,12 +32,12 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
     if (!this.alive) return failure;
     switch (true) {
       case this.buffer.length < this.size:
-      case this.size === 0 && this.buffer.length === 0 && this.takers.length > 0:
+      case this.size === 0 && this.buffer.length === 0 && this.consumers.length > 0:
         this.buffer.push(msg);
-        this.takers.length > 0 && this.takers.shift()!.bind();
+        this.consumers.length > 0 && this.consumers.shift()!.bind();
         return success;
       default:
-        return this.senders[this.senders.push(new AtomicFuture()) - 1]
+        return this.providers[this.providers.push(new AtomicFuture()) - 1]
           .then(() => this.put(msg));
     }
   }
@@ -46,15 +46,15 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
     switch (true) {
       case this.buffer.length > 0:
         const msg = this.buffer.shift()!;
-        this.senders.length > 0 && this.senders.shift()!.bind();
+        this.providers.length > 0 && this.providers.shift()!.bind();
         return AtomicPromise.resolve(msg);
-      case this.size === 0 && this.senders.length > 0:
-        this.takers.push(new AtomicFuture());
-        this.senders.shift()!.bind();
+      case this.size === 0 && this.providers.length > 0:
+        this.consumers.push(new AtomicFuture());
+        this.providers.shift()!.bind();
         assert(this.buffer.length === 1);
         return AtomicPromise.resolve(this.buffer.shift()!);
       default:
-        return this.takers[this.takers.push(new AtomicFuture()) - 1]
+        return this.consumers[this.consumers.push(new AtomicFuture()) - 1]
           .then(() => this.take());
     }
   }
