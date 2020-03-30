@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/falsandtru/spica.svg?branch=master)](https://travis-ci.org/falsandtru/spica)
 [![Coverage Status](https://coveralls.io/repos/falsandtru/spica/badge.svg?branch=master&service=github)](https://coveralls.io/github/falsandtru/spica?branch=master)
 
-Supervisor/Actor, AtomicPromise, Coroutine, Cancellation, Sequence, Maybe, Either, and some utils.
+Supervisor, Coroutine, Channel, select, AtomicPromise, Cancellation, Sequence, Maybe, Either, and some utils.
 
 ## Install
 
@@ -13,15 +13,13 @@ $ npm i spica
 
 ## APIs
 
-[index.d.ts](index.d.ts)
-
 - Supervisor
-- Observation
-- AtomicPromise
 - Coroutine, Coaggregator, Copropagator, Colistener, cofetch
 - Channel
 - select
+- AtomicPromise
 - Cancellation
+- Observation
 - Sequence
 - Maybe, Just, Nothing
 - Either, Left, Right
