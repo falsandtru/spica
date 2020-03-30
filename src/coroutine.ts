@@ -37,18 +37,14 @@ class Internal<T, R, S> {
   constructor(opts: CoroutineOptions) {
     void extend(this.settings, opts);
     void this.result.finally(() => {
-      while (true) {
+      while (this.msgs.length > 0) {
+        // Don't block.
+        const [, reply] = this.msgs.shift()!;
         try {
-          while (this.msgs.length > 0) {
-            // Don't block.
-            const [, reply] = this.msgs.shift()!;
-            void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
-          }
-          return;
+          void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
         }
         catch (reason) {
           void causeAsyncException(reason);
-          continue;
         }
       }
     });
