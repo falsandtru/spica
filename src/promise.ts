@@ -233,15 +233,15 @@ function resume<T>(internal: Internal<T>): void {
 }
 
 function consume<a>(fs: ((a: a) => void)[], a: a): void {
-  if (fs.length > 5) {
+  if (fs.length < 5) {
+    while (fs.length > 0) {
+      fs.shift()!(a);
+    }
+  }
+  else {
     for (let i = 0; i < fs.length; ++i) {
       fs[i](a);
     }
     splice(fs, 0);
-  }
-  else {
-    while (fs.length > 0) {
-      fs.shift()!(a);
-    }
   }
 }
