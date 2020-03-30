@@ -37,9 +37,11 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
         assert(this.size === 0 ? this.buffer.length === 0 : true);
         this.buffer.push(msg);
         this.consumers.length > 0 && this.consumers.shift()!.bind(this.buffer.shift()!)
+        assert(this.buffer.length <= this.size);
         assert(this.buffer.length > 0 ? this.consumers.length === 0 : true);
         return success;
       default:
+        assert(this.buffer.length === this.size);
         assert(this.consumers.length === 0);
         return this.producers[this.producers.push(new AtomicFuture()) - 1]
           .then(() => this.put(msg));
@@ -59,6 +61,7 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
         this.producers.shift()!.bind();
         return consumer.then();
       default:
+        assert(this.buffer.length === 0);
         assert(this.producers.length === 0);
         return this.consumers[this.consumers.push(new AtomicFuture()) - 1]
           .then();
