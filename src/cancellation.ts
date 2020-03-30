@@ -1,9 +1,9 @@
 import { Set } from './global';
-import { noop } from './noop';
 import { AtomicPromise } from './promise';
 import { causeAsyncException } from './exception';
 import { Maybe, Just, Nothing } from './monad/maybe';
 import { Either, Left, Right } from './monad/either';
+import { noop } from './noop';
 
 export interface Canceller<L = undefined> {
   readonly cancel: {
