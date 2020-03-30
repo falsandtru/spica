@@ -1,5 +1,4 @@
 import { causeAsyncException } from './exception';
-import { splice } from './array';
 
 type Callback = () => void;
 
@@ -27,5 +26,8 @@ function run(): void {
       causeAsyncException(reason);
     }
   }
-  jobs.length > 1000 && count < jobs.length * 0.5 && splice(jobs, jobs.length * 0.9 | 0, jobs.length);
+  // Gradually reduce the unused buffer space.
+  jobs.length > 1000 && count < jobs.length * 0.5 && jobs.splice(jobs.length * 0.9 | 0, jobs.length);
+  // Gradually release the references and pay the cost of Array#push x100 at a maximum.
+  jobs.splice(jobs.length > 100 ? jobs.length - 100 : 0, 100);
 }
