@@ -33,11 +33,15 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
     if (!this.alive) return failure;
     switch (true) {
       case this.buffer.length < this.size:
-      case this.size === 0 && this.buffer.length === 0 && this.consumers.length > 0:
+      case this.consumers.length > 0:
+        assert(this.buffer.length + 1 < this.size ? this.producers.length === 0 : true);
+        assert(this.size === 0 ? this.buffer.length === 0 : true);
         this.buffer.push(msg);
         this.consumers.length > 0 && this.consumers.shift()!.bind(this.buffer.shift()!)
+        assert(this.buffer.length > 0 ? this.consumers.length === 0 : true);
         return success;
       default:
+        assert(this.consumers.length === 0);
         return this.producers[this.producers.push(new AtomicFuture()) - 1]
           .then(() => this.put(msg));
     }
@@ -46,14 +50,17 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
     if (!this.alive) return failure;
     switch (true) {
       case this.buffer.length > 0:
+        assert(this.consumers.length === 0);
         const msg = this.buffer.shift()!;
         this.producers.length > 0 && this.producers.shift()!.bind();
         return AtomicPromise.resolve(msg);
-      case this.size === 0 && this.producers.length > 0:
+      case this.producers.length > 0:
+        assert(this.consumers.length === 0);
         const consumer = this.consumers[this.consumers.push(new AtomicFuture()) - 1];
         this.producers.shift()!.bind();
         return consumer.then();
       default:
+        assert(this.producers.length === 0);
         return this.consumers[this.consumers.push(new AtomicFuture()) - 1]
           .then();
     }
