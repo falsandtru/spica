@@ -12,7 +12,7 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
   }
   private readonly alive: boolean = true;
   private readonly buffer: T[] = [];
-  private readonly providers: AtomicFuture<undefined>[] = [];
+  private readonly producers: AtomicFuture<undefined>[] = [];
   private readonly consumers: AtomicFuture<T>[] = [];
   public close(): void {
     if (!this.alive) return;
@@ -20,11 +20,11 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
     this.alive = false;
 
     this.buffer.splice(0, this.buffer.length);
-    for (let i = 0; this.providers[i] || this.consumers[i]; ++i) {
-      this.providers[i]?.bind(failure);
+    for (let i = 0; this.producers[i] || this.consumers[i]; ++i) {
+      this.producers[i]?.bind(failure);
       this.consumers[i]?.bind(failure);
     }
-    this.providers.splice(0, this.providers.length);
+    this.producers.splice(0, this.producers.length);
     this.consumers.splice(0, this.consumers.length);
   }
   public put(this: Channel<undefined>, msg?: T): AtomicPromise<undefined>;
@@ -38,7 +38,7 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
         this.consumers.length > 0 && this.consumers.shift()!.bind(this.buffer.shift()!)
         return success;
       default:
-        return this.providers[this.providers.push(new AtomicFuture()) - 1]
+        return this.producers[this.producers.push(new AtomicFuture()) - 1]
           .then(() => this.put(msg));
     }
   }
@@ -47,11 +47,11 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
     switch (true) {
       case this.buffer.length > 0:
         const msg = this.buffer.shift()!;
-        this.providers.length > 0 && this.providers.shift()!.bind();
+        this.producers.length > 0 && this.producers.shift()!.bind();
         return AtomicPromise.resolve(msg);
-      case this.size === 0 && this.providers.length > 0:
+      case this.size === 0 && this.producers.length > 0:
         const consumer = this.consumers[this.consumers.push(new AtomicFuture()) - 1];
-        this.providers.shift()!.bind();
+        this.producers.shift()!.bind();
         return consumer.then();
       default:
         return this.consumers[this.consumers.push(new AtomicFuture()) - 1]
