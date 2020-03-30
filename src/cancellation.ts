@@ -43,8 +43,9 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
   public get canceled(): boolean {
     return this[internal].canceled;
   }
-  public readonly register = (listener: (reason: L) => void) =>
-    this[internal].register(listener);
+  public register(listener: Listener<L>): () => void {
+    return this[internal].register(listener);
+  }
   public readonly cancel: Canceller<L>['cancel'] = (reason?: L) =>
     this[internal].cancel(reason);
   public readonly close = (reason?: unknown) =>
