@@ -1,7 +1,6 @@
 import { select } from './select';
 import { Channel } from './channel';
 import { Coroutine } from './coroutine';
-import { wait } from './clock';
 
 describe('Unit: lib/select', function () {
   describe('select', function () {
@@ -49,17 +48,19 @@ describe('Unit: lib/select', function () {
     });
 
     it('channel', async function () {
-      const ch = new Channel<number>();
+      const ch1 = new Channel<number>();
+      const ch2 = new Channel<number>();
       const gen = select({
-        a: ch,
+        a: ch1,
+        b: ch2,
       });
       (async () => {
         await 0;
-        await ch.put(0);
-        ch.put(1);
-        ch.put(2);
-        await wait(10);
-        ch.close();
+        ch1.put(0);
+        ch2.put(1);
+        await ch1.put(2);
+        ch2.close();
+        ch1.close();
       })();
       assert.deepStrictEqual(
         await gen.next(),
@@ -70,13 +71,19 @@ describe('Unit: lib/select', function () {
       assert.deepStrictEqual(
         await gen.next(),
         {
-          value: ['a', { value: 1, done: false }],
+          value: ['b', { value: 1, done: false }],
           done: false
         });
       assert.deepStrictEqual(
         await gen.next(),
         {
           value: ['a', { value: 2, done: false }],
+          done: false
+        });
+      assert.deepStrictEqual(
+        await gen.next(),
+        {
+          value: ['b', { value: undefined, done: true }],
           done: false
         });
       assert.deepStrictEqual(
