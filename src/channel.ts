@@ -13,7 +13,7 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
   private readonly alive: boolean = true;
   private readonly buffer: T[] = [];
   private readonly providers: AtomicFuture<undefined>[] = [];
-  private readonly consumers: AtomicFuture<undefined>[] = [];
+  private readonly consumers: AtomicFuture<T>[] = [];
   public close(): void {
     if (!this.alive) return;
     // @ts-expect-error
@@ -35,7 +35,7 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
       case this.buffer.length < this.size:
       case this.size === 0 && this.buffer.length === 0 && this.consumers.length > 0:
         this.buffer.push(msg);
-        this.consumers.length > 0 && this.consumers.shift()!.bind();
+        this.consumers.length > 0 && this.consumers.shift()!.bind(this.buffer.shift()!)
         return success;
       default:
         return this.providers[this.providers.push(new AtomicFuture()) - 1]
@@ -50,13 +50,12 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
         this.providers.length > 0 && this.providers.shift()!.bind();
         return AtomicPromise.resolve(msg);
       case this.size === 0 && this.providers.length > 0:
-        this.consumers.push(new AtomicFuture());
+        const consumer = this.consumers[this.consumers.push(new AtomicFuture()) - 1];
         this.providers.shift()!.bind();
-        assert(this.buffer.length === 1);
-        return AtomicPromise.resolve(this.buffer.shift()!);
+        return consumer.then();
       default:
         return this.consumers[this.consumers.push(new AtomicFuture()) - 1]
-          .then(() => this.take());
+          .then();
     }
   }
   public async *[Symbol.asyncIterator](): AsyncGenerator<T, undefined, undefined> {
