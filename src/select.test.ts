@@ -55,9 +55,9 @@ describe('Unit: lib/select', function () {
       });
       (async () => {
         await 0;
-        await ch.send(0);
-        ch.send(1);
-        ch.send(2);
+        await ch.put(0);
+        ch.put(1);
+        ch.put(2);
         await wait(10);
         ch.close();
       })();

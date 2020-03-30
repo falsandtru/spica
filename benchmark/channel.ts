@@ -9,26 +9,26 @@ describe('Benchmark:', function () {
       benchmark('Channel new', () => new Channel(), done);
     });
 
-    it('send/take', function (done) {
+    it('put/take', function (done) {
       const ch = new Channel();
-      benchmark('Channel send/take', () => (ch.send(), ch.take()), done);
+      benchmark('Channel put/take', () => (ch.put(), ch.take()), done);
     });
 
-    it('take/send', function (done) {
+    it('take/put', function (done) {
       const ch = new Channel();
-      benchmark('Channel take/send', () => (ch.take(), ch.send()), done);
+      benchmark('Channel take/put', () => (ch.take(), ch.put()), done);
     });
 
-    it('send/iterate', function (done) {
+    it('put/iterate', function (done) {
       const ch = new Channel();
       const iter = ch[Symbol.asyncIterator]();
-      benchmark('Channel send/iterate', done => (ch.send(), iter.next().then(done)), done, { defer: true, async: true });
+      benchmark('Channel put/iterate', done => (ch.put(), iter.next().then(done)), done, { defer: true, async: true });
     });
 
-    it('iterate/send', function (done) {
+    it('iterate/put', function (done) {
       const ch = new Channel();
       const iter = ch[Symbol.asyncIterator]();
-      benchmark('Channel iterate/send', done => (iter.next(), ch.send().then(done)), done, { defer: true, async: true });
+      benchmark('Channel iterate/put', done => (iter.next(), ch.put().then(done)), done, { defer: true, async: true });
     });
 
   });

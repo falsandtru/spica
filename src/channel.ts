@@ -26,9 +26,9 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
     this.takers.splice(0, this.takers.length);
     this.senders.splice(0, this.senders.length);
   }
-  public send(this: Channel<undefined>, msg?: T): AtomicPromise<undefined>;
-  public send(msg: T): AtomicPromise<undefined>;
-  public send(msg: T): AtomicPromise<undefined> {
+  public put(this: Channel<undefined>, msg?: T): AtomicPromise<undefined>;
+  public put(msg: T): AtomicPromise<undefined>;
+  public put(msg: T): AtomicPromise<undefined> {
     if (!this.alive) return failure;
     switch (true) {
       case this.buffer.length < this.size:
@@ -38,7 +38,7 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
         return success;
       default:
         return this.senders[this.senders.push(new AtomicFuture()) - 1]
-          .then(() => this.send(msg));
+          .then(() => this.put(msg));
     }
   }
   public take(): AtomicPromise<T> {
