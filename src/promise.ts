@@ -216,7 +216,7 @@ function resume<T>(internal: Internal<T>): void {
       assert(rejectReactions.length === 0);
       if (fulfillReactions.length === 0) return;
       internal.isHandled = true;
-      consume(fulfillReactions, status.result);
+      react(fulfillReactions, status.result);
       assert(fulfillReactions.length + rejectReactions.length === 0);
       return;
     case State.rejected:
@@ -226,22 +226,22 @@ function resume<T>(internal: Internal<T>): void {
       assert(fulfillReactions.length === 0);
       if (rejectReactions.length === 0) return;
       internal.isHandled = true;
-      consume(rejectReactions, status.result);
+      react(rejectReactions, status.result);
       assert(fulfillReactions.length + rejectReactions.length === 0);
       return;
   }
 }
 
-function consume<a>(fs: ((a: a) => void)[], a: a): void {
-  if (fs.length < 5) {
-    while (fs.length > 0) {
-      fs.shift()!(a);
+function react<T>(reactions: ((result: T) => void)[], result: T): void {
+  if (reactions.length < 5) {
+    while (reactions.length > 0) {
+      reactions.shift()!(result);
     }
   }
   else {
-    for (let i = 0; i < fs.length; ++i) {
-      fs[i](a);
+    for (let i = 0; i < reactions.length; ++i) {
+      reactions[i](result);
     }
-    splice(fs, 0);
+    splice(reactions, 0);
   }
 }
