@@ -2,7 +2,7 @@ import { undefined, Array } from './global';
 import { isArray } from './alias';
 import { splice } from './array';
 
-const enum State {
+export const enum State {
   pending,
   resolved,
   fulfilled,
@@ -21,7 +21,7 @@ type Status<T> =
       readonly result: unknown;
     };
 
-class Internal<T> {
+export class Internal<T> {
   public status: Status<T> = { state: State.pending };
   public reactable: boolean = true;
   public readonly fulfillReactions: ((value: T) => void)[] = [];
@@ -32,7 +32,6 @@ class Internal<T> {
 const internal = Symbol.for('spica/promise::internal');
 
 export class AtomicPromise<T = undefined> implements Promise<T> {
-  private static readonly internal: typeof internal = internal;
   public static get [Symbol.species]() {
     return AtomicPromise;
   }
@@ -111,112 +110,17 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
   ) {
     try {
       executor(
-        value => {
-          const internal = this[AtomicPromise.internal];
-          if (internal.status.state !== State.pending) return;
-          if (!isPromiseLike(value)) {
-            internal.status = {
-              state: State.fulfilled,
-              result: value!,
-            };
-            resume(internal);
-          }
-          else {
-            internal.status = {
-              state: State.resolved,
-              result: value,
-            };
-            value.then(
-              value => {
-                assert(internal.status.state === State.resolved);
-                internal.status = {
-                  state: State.fulfilled,
-                  result: value,
-                };
-                resume(internal);
-              },
-              reason => {
-                assert(internal.status.state === State.resolved);
-                internal.status = {
-                  state: State.rejected,
-                  result: reason,
-                };
-                resume(internal);
-              });
-          }
-        },
-        reason => {
-          const internal = this[AtomicPromise.internal];
-          if (internal.status.state !== State.pending) return;
-          internal.status = {
-            state: State.rejected,
-            result: reason,
-          };
-          resume(internal);
-        });
+        value => resolve(this[internal], value),
+        reason => reject(this[internal], reason));
     }
     catch (reason) {
-      const internal = this[AtomicPromise.internal];
-      if (internal.status.state !== State.pending) return;
-      internal.status = {
-        state: State.rejected,
-        result: reason,
-      };
-      resume(internal);
+      reject(this[internal], reason);
     }
   }
   public readonly [internal]: Internal<T> = new Internal();
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
-    return new AtomicPromise<TResult1 | TResult2>((resolve, reject) => {
-      const { status, fulfillReactions, rejectReactions } = this[internal];
-      switch (status.state) {
-        case State.fulfilled:
-          if (fulfillReactions.length > 0) break;
-          try {
-            return onfulfilled
-              ? resolve(onfulfilled(status.result))
-              : resolve(status.result as any);
-          }
-          catch (reason) {
-            return reject(reason);
-          }
-        case State.rejected:
-          if (rejectReactions.length > 0) break;
-          try {
-            return onrejected
-              ? resolve(onrejected(status.result))
-              : reject(status.result);
-          }
-          catch (reason) {
-            return reject(reason);
-          }
-      }
-      if (status.state !== State.rejected) {
-        fulfillReactions.push(value => {
-          try {
-            onfulfilled
-              ? resolve(onfulfilled(value))
-              : resolve(value as any);
-          }
-          catch (reason) {
-            reject(reason);
-          }
-        });
-      }
-      if (status.state !== State.fulfilled) {
-        rejectReactions.push(reason => {
-          try {
-            onrejected
-              ? resolve(onrejected(reason))
-              : reject(reason);
-          }
-          catch (reason) {
-            reject(reason);
-          }
-        });
-      }
-      resume(this[internal]);
-    });
+    return new AtomicPromise((resolve, reject) =>
+      then(this[internal], onfulfilled, onrejected, resolve, reject));
   }
   public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult> {
     return this.then(undefined, onrejected);
@@ -231,7 +135,107 @@ export function isPromiseLike(value: any): value is PromiseLike<any> {
       && 'then' in value && typeof value.then === 'function';
 }
 
-function resume<T>(internal: Internal<T>): void {
+export function resolve<T>(internal: Internal<T>, value: T): void {
+  if (internal.status.state !== State.pending) return;
+  if (!isPromiseLike(value)) {
+    internal.status = {
+      state: State.fulfilled,
+      result: value!,
+    };
+    return void resume(internal);
+  }
+  else {
+    internal.status = {
+      state: State.resolved,
+      result: value,
+    };
+    return void value.then(
+      value => {
+        assert(internal.status.state === State.resolved);
+        internal.status = {
+          state: State.fulfilled,
+          result: value,
+        };
+        resume(internal);
+      },
+      reason => {
+        assert(internal.status.state === State.resolved);
+        internal.status = {
+          state: State.rejected,
+          result: reason,
+        };
+        resume(internal);
+      });
+  }
+}
+
+function reject(internal: Internal<unknown>, reason: unknown): void {
+  if (internal.status.state !== State.pending) return;
+  internal.status = {
+    state: State.rejected,
+    result: reason,
+  };
+  return void resume(internal);
+}
+
+export function then<T, TResult1, TResult2>(
+  internal: Internal<T>,
+  onfulfilled: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null,
+  onrejected: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null,
+  resolve: (value: TResult1 | TResult2 | PromiseLike<TResult1 | TResult2>) => void,
+  reject: (reason: unknown) => void,
+): void {
+  const { status, fulfillReactions, rejectReactions } = internal;
+  switch (status.state) {
+    case State.fulfilled:
+      if (fulfillReactions.length > 0) break;
+      try {
+        return onfulfilled
+          ? resolve(onfulfilled(status.result))
+          : resolve(status.result as any);
+      }
+      catch (reason) {
+        return reject(reason);
+      }
+    case State.rejected:
+      if (rejectReactions.length > 0) break;
+      try {
+        return onrejected
+          ? resolve(onrejected(status.result))
+          : reject(status.result);
+      }
+      catch (reason) {
+        return reject(reason);
+      }
+  }
+  if (status.state !== State.rejected) {
+    fulfillReactions.push(value => {
+      try {
+        onfulfilled
+          ? resolve(onfulfilled(value))
+          : resolve(value as any);
+      }
+      catch (reason) {
+        reject(reason);
+      }
+    });
+  }
+  if (status.state !== State.fulfilled) {
+    rejectReactions.push(reason => {
+      try {
+        onrejected
+          ? resolve(onrejected(reason))
+          : reject(reason);
+      }
+      catch (reason) {
+        reject(reason);
+      }
+    });
+  }
+  resume(internal);
+}
+
+export function resume<T>(internal: Internal<T>): void {
   if (!internal.reactable) return;
   const { status, fulfillReactions, rejectReactions } = internal;
   switch (status.state) {
