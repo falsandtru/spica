@@ -110,9 +110,9 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
     executor: (resolve: (value?: T | PromiseLike<T>) => void, reject: (reason?: unknown) => void) => void,
   ) {
     try {
-      const internal = this[AtomicPromise.internal];
       executor(
         value => {
+          const internal = this[AtomicPromise.internal];
           if (internal.status.state !== State.pending) return;
           if (!isPromiseLike(value)) {
             internal.status = {
@@ -146,6 +146,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
           }
         },
         reason => {
+          const internal = this[AtomicPromise.internal];
           if (internal.status.state !== State.pending) return;
           internal.status = {
             state: State.rejected,
