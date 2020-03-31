@@ -235,24 +235,20 @@ export class Internal<T> {
       case State.resolved:
         return;
       case State.fulfilled:
-        if (!this.isHandled && this.rejectReactions.length > 0) {
+        if (this.isHandled && this.rejectReactions.length > 0) {
           splice(rejectReactions, 0);
         }
-        assert(rejectReactions.length === 0);
         if (fulfillReactions.length === 0) return;
         this.isHandled = true;
         this.react(fulfillReactions, status.result);
-        assert(fulfillReactions.length + rejectReactions.length === 0);
         return;
       case State.rejected:
-        if (!this.isHandled && this.fulfillReactions.length > 0) {
+        if (this.isHandled && this.fulfillReactions.length > 0) {
           splice(fulfillReactions, 0);
         }
-        assert(fulfillReactions.length === 0);
         if (rejectReactions.length === 0) return;
         this.isHandled = true;
         this.react(rejectReactions, status.result);
-        assert(fulfillReactions.length + rejectReactions.length === 0);
         return;
     }
   }
