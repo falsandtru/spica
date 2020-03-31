@@ -124,8 +124,8 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
 
 export class Internal<T> {
   public status: Status<T> = { state: State.pending };
-  public get isSettled(): boolean {
-    return this.status.state !== State.pending;
+  public get isPending(): boolean {
+    return this.status.state === State.pending;
   }
   public reactable: boolean = true;
   public readonly fulfillReactions: ((value: T) => void)[] = [];
