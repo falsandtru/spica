@@ -168,9 +168,10 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
       const { status, fulfillReactions, rejectReactions } = this[internal];
       if (status.state !== State.rejected) {
         fulfillReactions.push(value => {
-          if (!onfulfilled) return resolve(value as any);
           try {
-            resolve(onfulfilled(value));
+            onfulfilled
+              ? resolve(onfulfilled(value))
+              : resolve(value as any);
           }
           catch (reason) {
             reject(reason);
@@ -179,9 +180,10 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
       }
       if (status.state !== State.fulfilled) {
         rejectReactions.push(reason => {
-          if (!onrejected) return reject(reason);
           try {
-            resolve(onrejected(reason));
+            onrejected
+              ? resolve(onrejected(reason))
+              : reject(reason);
           }
           catch (reason) {
             reject(reason);
