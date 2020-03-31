@@ -49,7 +49,7 @@
     "@types/mocha": "^7.0.2",
     "@types/power-assert": "1.5.3",
     "benchmark": "^2.1.4",
-    "browserify": "^16.5.0",
+    "browserify": "^16.5.1",
     "del": "4.1.0",
     "gulp": "^4.0.2",
     "gulp-derequire": "^2.1.0",
