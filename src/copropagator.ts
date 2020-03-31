@@ -1,4 +1,4 @@
-import { Error, Map } from './global';
+import { Map, Error } from './global';
 import { isArray } from './alias';
 import { Coroutine } from './coroutine';
 import { AtomicPromise } from './promise';
