@@ -1,4 +1,4 @@
-import { Array, Error } from './global';
+import { Array, Promise, Error } from './global';
 import { ObjectDefineProperty, ObjectGetOwnPropertyDescriptor } from './alias';
 import { AtomicPromise, isPromiseLike } from './promise';
 import { AtomicFuture } from './future';
@@ -102,13 +102,13 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
             // Don't block.
             ? [[void 0]]
             // Block.
-            : await AtomicPromise.all([
+            : await Promise.all([
                 // Don't block.
                 this[internal].settings.size === 0
                   ? [void 0]
                   : resume(),
                 // Don't block.
-                AtomicPromise.all([
+                Promise.all([
                   this[internal].settings.resume(),
                   this[internal].settings.interval > 0
                     ? wait(this[internal].settings.interval)
