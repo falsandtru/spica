@@ -32,6 +32,7 @@ class Internal<T> {
 const internal = Symbol.for('spica/promise::internal');
 
 export class AtomicPromise<T = undefined> implements Promise<T> {
+  private static readonly internal: typeof internal = internal;
   public static get [Symbol.species]() {
     return AtomicPromise;
   }
@@ -105,10 +106,11 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
   public static reject<T = never>(reason?: unknown): AtomicPromise<T> {
     return new AtomicPromise<T>((_, reject) => reject(reason));
   }
-  constructor(executor: (resolve: (value?: T | PromiseLike<T>) => void, reject: (reason?: unknown) => void) => void) {
-    const intl: typeof internal = internal;
+  constructor(
+    executor: (resolve: (value?: T | PromiseLike<T>) => void, reject: (reason?: unknown) => void) => void,
+  ) {
     try {
-      const internal = this[intl];
+      const internal = this[AtomicPromise.internal];
       executor(
         value => {
           if (internal.status.state !== State.pending) return;
@@ -153,7 +155,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
         });
     }
     catch (reason) {
-      const internal = this[intl];
+      const internal = this[AtomicPromise.internal];
       if (internal.status.state !== State.pending) return;
       internal.status = {
         state: State.rejected,
