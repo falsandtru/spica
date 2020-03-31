@@ -1,7 +1,7 @@
 import { AtomicPromise } from './promise';
 
 export class Future<T = undefined> extends Promise<T> {
-  static get [Symbol.species]() {
+  public static get [Symbol.species]() {
     return Promise;
   }
   constructor(strict = true) {
@@ -24,9 +24,6 @@ export class Future<T = undefined> extends Promise<T> {
 }
 
 export class AtomicFuture<T = undefined> extends AtomicPromise<T> implements Future<T> {
-  static get [Symbol.species]() {
-    return AtomicPromise;
-  }
   constructor(strict = true) {
     let bind!: (value: T | PromiseLike<T>) => AtomicPromise<T>;
     let done = false;

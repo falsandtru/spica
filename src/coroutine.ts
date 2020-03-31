@@ -76,9 +76,6 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
   public static readonly exit: typeof exit = exit;
   public static readonly terminate: typeof terminate = terminate;
   public static readonly port: typeof port = port;
-  public static get [Symbol.species]() {
-    return AtomicPromise;
-  }
   constructor(
     gen: (this: Coroutine<T, R, S>) => AsyncGenerator<R, T, S>,
     opts: CoroutineOptions = {},

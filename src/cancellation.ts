@@ -25,9 +25,6 @@ type Listener<L> = (reason: L) => void;
 const internal = Symbol.for('spica/cancellation::internal');
 
 export class Cancellation<L = undefined> extends AtomicPromise<L> implements Canceller<L>, Cancellee<L> {
-  static get [Symbol.species]() {
-    return AtomicPromise;
-  }
   constructor(cancelees: Iterable<Cancellee<L>> = []) {
     super(res => resolve = res);
     var resolve!: (v: L | PromiseLike<never>) => void;
