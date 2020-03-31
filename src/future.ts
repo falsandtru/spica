@@ -15,7 +15,7 @@ export class Future<T = undefined> implements Promise<T> {
       if (status.state !== State.pending) throw new Error(`Spica: Future: Cannot rebind a value.`);
       resolve(this[internal], value);
       resume(this[internal]);
-      return this.then();
+      return new Promise<T>(resolve => resolve(value));
     };
   }
   public readonly [internal]: Internal<T> = new Internal();
@@ -47,7 +47,7 @@ export class AtomicFuture<T = undefined> implements Future<T> {
       if (status.state !== State.pending) throw new Error(`Spica: AtomicFuture: Cannot rebind a value.`);
       resolve(this[internal], value);
       resume(this[internal]);
-      return this.then();
+      return new AtomicPromise<T>(resolve => resolve(value));
     };
   }
   public readonly [internal]: Internal<T> = new Internal();
