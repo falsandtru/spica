@@ -2,7 +2,7 @@ import { undefined, Array } from './global';
 import { isArray } from './alias';
 import { splice } from './array';
 
-export const enum State {
+const enum State {
   pending,
   resolved,
   fulfilled,
@@ -20,14 +20,6 @@ type Status<T> =
   | { readonly state: State.rejected;
       readonly result: unknown;
     };
-
-export class Internal<T> {
-  public status: Status<T> = { state: State.pending };
-  public reactable: boolean = true;
-  public readonly fulfillReactions: ((value: T) => void)[] = [];
-  public readonly rejectReactions: ((reason: unknown) => void)[] = [];
-  public isHandled: boolean = false;
-}
 
 const internal = Symbol.for('spica/promise::internal');
 
@@ -110,17 +102,17 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
   ) {
     try {
       executor(
-        value => resolve(this[internal], value),
-        reason => reject(this[internal], reason));
+        value => this[internal].resolve(value!),
+        reason => this[internal].reject(reason));
     }
     catch (reason) {
-      reject(this[internal], reason);
+      this[internal].reject(reason);
     }
   }
   public readonly [internal]: Internal<T> = new Internal();
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
     return new AtomicPromise((resolve, reject) =>
-      then(this[internal], onfulfilled, onrejected, resolve, reject));
+      this[internal].then(onfulfilled, onrejected, resolve, reject));
   }
   public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult> {
     return this.then(undefined, onrejected);
@@ -130,155 +122,159 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
   }
 }
 
+export class Internal<T> {
+  public status: Status<T> = { state: State.pending };
+  public get isSettled(): boolean {
+    return this.status.state !== State.pending;
+  }
+  public reactable: boolean = true;
+  public readonly fulfillReactions: ((value: T) => void)[] = [];
+  public readonly rejectReactions: ((reason: unknown) => void)[] = [];
+  public isHandled: boolean = false;
+  public resolve(value: T | PromiseLike<T>): void {
+    if (this.status.state !== State.pending) return;
+    if (!isPromiseLike(value)) {
+      this.status = {
+        state: State.fulfilled,
+        result: value!,
+      };
+      return void this.resume();
+    }
+    else {
+      this.status = {
+        state: State.resolved,
+        result: value,
+      };
+      return void value.then(
+        value => {
+          assert(this.status.state === State.resolved);
+          this.status = {
+            state: State.fulfilled,
+            result: value,
+          };
+          this.resume();
+        },
+        reason => {
+          assert(this.status.state === State.resolved);
+          this.status = {
+            state: State.rejected,
+            result: reason,
+          };
+          this.resume();
+        });
+    }
+  }
+  public reject(reason: unknown): void {
+    if (this.status.state !== State.pending) return;
+    this.status = {
+      state: State.rejected,
+      result: reason,
+    };
+    return void this.resume();
+  }
+  public then<TResult1, TResult2>(
+    onfulfilled: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null,
+    onrejected: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null,
+    resolve: (value: TResult1 | TResult2 | PromiseLike<TResult1 | TResult2>) => void,
+    reject: (reason: unknown) => void,
+  ): void {
+    const { status, fulfillReactions, rejectReactions } = this;
+    switch (status.state) {
+      case State.fulfilled:
+        if (this.fulfillReactions.length > 0) break;
+        try {
+          return onfulfilled
+            ? resolve(onfulfilled(status.result))
+            : resolve(status.result as any);
+        }
+        catch (reason) {
+          return reject(reason);
+        }
+      case State.rejected:
+        if (this.rejectReactions.length > 0) break;
+        try {
+          return onrejected
+            ? resolve(onrejected(status.result))
+            : reject(status.result);
+        }
+        catch (reason) {
+          return reject(reason);
+        }
+    }
+    if (status.state !== State.rejected) {
+      fulfillReactions.push(value => {
+        try {
+          onfulfilled
+            ? resolve(onfulfilled(value))
+            : resolve(value as any);
+        }
+        catch (reason) {
+          reject(reason);
+        }
+      });
+    }
+    if (status.state !== State.fulfilled) {
+      rejectReactions.push(reason => {
+        try {
+          onrejected
+            ? resolve(onrejected(reason))
+            : reject(reason);
+        }
+        catch (reason) {
+          reject(reason);
+        }
+      });
+    }
+    this.resume();
+  }
+  public resume(): void {
+    if (!this.reactable) return;
+    const { status, fulfillReactions, rejectReactions } = this;
+    switch (status.state) {
+      case State.pending:
+      case State.resolved:
+        return;
+      case State.fulfilled:
+        if (!this.isHandled && this.rejectReactions.length > 0) {
+          splice(rejectReactions, 0);
+        }
+        assert(rejectReactions.length === 0);
+        if (fulfillReactions.length === 0) return;
+        this.isHandled = true;
+        this.react(fulfillReactions, status.result);
+        assert(fulfillReactions.length + rejectReactions.length === 0);
+        return;
+      case State.rejected:
+        if (!this.isHandled && this.fulfillReactions.length > 0) {
+          splice(fulfillReactions, 0);
+        }
+        assert(fulfillReactions.length === 0);
+        if (rejectReactions.length === 0) return;
+        this.isHandled = true;
+        this.react(rejectReactions, status.result);
+        assert(fulfillReactions.length + rejectReactions.length === 0);
+        return;
+    }
+  }
+  public react<T>(reactions: ((result: T) => void)[], result: T): void {
+    assert(this.reactable);
+    this.reactable = false;
+    if (reactions.length < 5) {
+      while (reactions.length > 0) {
+        reactions.shift()!(result);
+      }
+    }
+    else {
+      for (let i = 0; i < reactions.length; ++i) {
+        reactions[i](result);
+      }
+      splice(reactions, 0);
+    }
+    this.reactable = true;
+  }
+}
+
 export function isPromiseLike(value: any): value is PromiseLike<any> {
   return value !== null && typeof value === 'object'
       && 'then' in value && typeof value.then === 'function';
-}
-
-export function resolve<T>(internal: Internal<T>, value: T): void {
-  if (internal.status.state !== State.pending) return;
-  if (!isPromiseLike(value)) {
-    internal.status = {
-      state: State.fulfilled,
-      result: value!,
-    };
-    return void resume(internal);
-  }
-  else {
-    internal.status = {
-      state: State.resolved,
-      result: value,
-    };
-    return void value.then(
-      value => {
-        assert(internal.status.state === State.resolved);
-        internal.status = {
-          state: State.fulfilled,
-          result: value,
-        };
-        resume(internal);
-      },
-      reason => {
-        assert(internal.status.state === State.resolved);
-        internal.status = {
-          state: State.rejected,
-          result: reason,
-        };
-        resume(internal);
-      });
-  }
-}
-
-function reject(internal: Internal<unknown>, reason: unknown): void {
-  if (internal.status.state !== State.pending) return;
-  internal.status = {
-    state: State.rejected,
-    result: reason,
-  };
-  return void resume(internal);
-}
-
-export function then<T, TResult1, TResult2>(
-  internal: Internal<T>,
-  onfulfilled: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null,
-  onrejected: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null,
-  resolve: (value: TResult1 | TResult2 | PromiseLike<TResult1 | TResult2>) => void,
-  reject: (reason: unknown) => void,
-): void {
-  const { status, fulfillReactions, rejectReactions } = internal;
-  switch (status.state) {
-    case State.fulfilled:
-      if (fulfillReactions.length > 0) break;
-      try {
-        return onfulfilled
-          ? resolve(onfulfilled(status.result))
-          : resolve(status.result as any);
-      }
-      catch (reason) {
-        return reject(reason);
-      }
-    case State.rejected:
-      if (rejectReactions.length > 0) break;
-      try {
-        return onrejected
-          ? resolve(onrejected(status.result))
-          : reject(status.result);
-      }
-      catch (reason) {
-        return reject(reason);
-      }
-  }
-  if (status.state !== State.rejected) {
-    fulfillReactions.push(value => {
-      try {
-        onfulfilled
-          ? resolve(onfulfilled(value))
-          : resolve(value as any);
-      }
-      catch (reason) {
-        reject(reason);
-      }
-    });
-  }
-  if (status.state !== State.fulfilled) {
-    rejectReactions.push(reason => {
-      try {
-        onrejected
-          ? resolve(onrejected(reason))
-          : reject(reason);
-      }
-      catch (reason) {
-        reject(reason);
-      }
-    });
-  }
-  resume(internal);
-}
-
-export function resume<T>(internal: Internal<T>): void {
-  if (!internal.reactable) return;
-  const { status, fulfillReactions, rejectReactions } = internal;
-  switch (status.state) {
-    case State.pending:
-    case State.resolved:
-      return;
-    case State.fulfilled:
-      if (!internal.isHandled && rejectReactions.length > 0) {
-        splice(rejectReactions, 0);
-      }
-      assert(rejectReactions.length === 0);
-      if (fulfillReactions.length === 0) return;
-      internal.isHandled = true;
-      internal.reactable = false;
-      react(fulfillReactions, status.result);
-      internal.reactable = true;
-      assert(fulfillReactions.length + rejectReactions.length === 0);
-      return;
-    case State.rejected:
-      if (!internal.isHandled && fulfillReactions.length > 0) {
-        splice(fulfillReactions, 0);
-      }
-      assert(fulfillReactions.length === 0);
-      if (rejectReactions.length === 0) return;
-      internal.isHandled = true;
-      internal.reactable = false;
-      react(rejectReactions, status.result);
-      internal.reactable = true;
-      assert(fulfillReactions.length + rejectReactions.length === 0);
-      return;
-  }
-}
-
-function react<T>(reactions: ((result: T) => void)[], result: T): void {
-  if (reactions.length < 5) {
-    while (reactions.length > 0) {
-      reactions.shift()!(result);
-    }
-  }
-  else {
-    for (let i = 0; i < reactions.length; ++i) {
-      reactions[i](result);
-    }
-    splice(reactions, 0);
-  }
 }

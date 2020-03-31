@@ -1,5 +1,5 @@
 import { undefined, Promise } from './global';
-import { AtomicPromise, State, Internal, resolve, then, resume } from './promise';
+import { AtomicPromise, Internal } from './promise';
 
 const internal = Symbol.for('spica/future::internal');
 
@@ -10,11 +10,10 @@ export class Future<T = undefined> implements Promise<T> {
   public readonly [Symbol.toStringTag] = 'Promise';
   constructor(strict: boolean = true) {
     this.bind = (value: T) => {
-      const { status } = this[internal];
-      if (status.state !== State.pending && !strict) return this.then();
-      if (status.state !== State.pending) throw new Error(`Spica: Future: Cannot rebind a value.`);
-      resolve(this[internal], value);
-      resume(this[internal]);
+      if (this[internal].isSettled && !strict) return this.then();
+      if (this[internal].isSettled) throw new Error(`Spica: Future: Cannot rebind a value.`);
+      this[internal].resolve(value);
+      this[internal].resume();
       return new Promise<T>(resolve => resolve(value));
     };
   }
@@ -25,7 +24,7 @@ export class Future<T = undefined> implements Promise<T> {
   };
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): Promise<TResult1 | TResult2> {
     return new Promise((resolve, reject) =>
-      then(this[internal], onfulfilled, onrejected, resolve, reject));
+      this[internal].then(onfulfilled, onrejected, resolve, reject));
   }
   public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): Promise<T | TResult> {
     return this.then(undefined, onrejected);
@@ -42,11 +41,10 @@ export class AtomicFuture<T = undefined> implements Future<T> {
   public readonly [Symbol.toStringTag] = 'Promise';
   constructor(strict: boolean = true) {
     this.bind = (value: T) => {
-      const { status } = this[internal];
-      if (status.state !== State.pending && !strict) return this.then();
-      if (status.state !== State.pending) throw new Error(`Spica: AtomicFuture: Cannot rebind a value.`);
-      resolve(this[internal], value);
-      resume(this[internal]);
+      if (this[internal].isSettled && !strict) return this.then();
+      if (this[internal].isSettled) throw new Error(`Spica: AtomicFuture: Cannot rebind a value.`);
+      this[internal].resolve(value);
+      this[internal].resume();
       return new AtomicPromise<T>(resolve => resolve(value));
     };
   }
@@ -57,7 +55,7 @@ export class AtomicFuture<T = undefined> implements Future<T> {
   };
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
     return new AtomicPromise((resolve, reject) =>
-      then(this[internal], onfulfilled, onrejected, resolve, reject));
+      this[internal].then(onfulfilled, onrejected, resolve, reject));
   }
   public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult> {
     return this.then(undefined, onrejected);
