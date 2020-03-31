@@ -46,16 +46,26 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
   public register(listener: Listener<L>): () => void {
     return this[internal].register(listener);
   }
-  public readonly cancel: Canceller<L>['cancel'] = (reason?: L) =>
-    this[internal].cancel(reason);
-  public readonly close = (reason?: unknown) =>
-    this[internal].close(reason);
-  public readonly promise = <T>(val: T): AtomicPromise<T> =>
-    this[internal].promise(val);
-  public readonly maybe = <T>(val: T): Maybe<T> =>
-    this[internal].maybe(val);
-  public readonly either = <R>(val: R): Either<L, R> =>
-    this[internal].either(val);
+  public get cancel(): Canceller<L>['cancel'] {
+    return (reason?: L) =>
+      this[internal].cancel(reason);
+  }
+  public get close(): (reason?: unknown) => void {
+    return (reason?: unknown) =>
+      this[internal].close(reason);
+  }
+  public get promise(): <T>(val: T) => AtomicPromise<T> {
+    return <T>(val: T): AtomicPromise<T> =>
+      this[internal].promise(val);
+  }
+  public get maybe(): <T>(val: T) => Maybe<T> {
+    return <T>(val: T): Maybe<T> =>
+      this[internal].maybe(val);
+  }
+  public get either(): <R>(val: R) => Either<L, R> {
+    return <R>(val: R): Either<L, R> =>
+      this[internal].either(val);
+  }
 }
 
 class Internal<L> implements Canceller<L>, Cancellee<L> {
