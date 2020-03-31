@@ -169,6 +169,28 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
     return new AtomicPromise<TResult1 | TResult2>((resolve, reject) => {
       const { status, fulfillReactions, rejectReactions } = this[internal];
+      switch (status.state) {
+        case State.fulfilled:
+          if (fulfillReactions.length > 0) break;
+          try {
+            return onfulfilled
+              ? resolve(onfulfilled(status.result))
+              : resolve(status.result as any);
+          }
+          catch (reason) {
+            return reject(reason);
+          }
+        case State.rejected:
+          if (rejectReactions.length > 0) break;
+          try {
+            return onrejected
+              ? resolve(onrejected(status.result))
+              : reject(status.result);
+          }
+          catch (reason) {
+            return reject(reason);
+          }
+      }
       if (status.state !== State.rejected) {
         fulfillReactions.push(value => {
           try {
