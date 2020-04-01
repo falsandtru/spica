@@ -166,7 +166,7 @@ export class Internal<T> {
         state: State.fulfilled,
         result: value!,
       };
-      return void this.resume();
+      return this.resume();
     }
     else {
       this.status = {
@@ -198,7 +198,7 @@ export class Internal<T> {
       state: State.rejected,
       result: reason,
     };
-    return void this.resume();
+    return this.resume();
   }
   public then<TResult1, TResult2>(
     onfulfilled: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null,
