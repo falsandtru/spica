@@ -21,9 +21,14 @@ type Status<T> =
       readonly result: unknown;
     };
 
-const internal = Symbol.for('spica/promise::internal');
+export const internal = Symbol.for('spica/promise::internal');
 
-export class AtomicPromise<T = undefined> implements Promise<T> {
+interface AtomicPromiseLike<T> {
+  readonly [internal]: Internal<T>;
+  then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2>;
+}
+
+export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLike<T> {
   public static get [Symbol.species]() {
     return AtomicPromise;
   }
@@ -38,7 +43,7 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
   public static all<T1, T2, T3>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>]): AtomicPromise<[T1, T2, T3]>;
   public static all<T1, T2>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>]): AtomicPromise<[T1, T2]>;
   public static all<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<T[]>;
-  public static all<T>(vs: Iterable<T | PromiseLike<T>>): AtomicPromise<T[]> {
+  public static all<T>(vs: Iterable<T | PromiseLike<T> | AtomicPromiseLike<T>>): AtomicPromise<T[]> {
     return new AtomicPromise<T[]>((resolve, reject) => {
       const values = isArray(vs) ? vs as T[] : [...vs];
       const results: T[] = Array(values.length);
@@ -48,44 +53,67 @@ export class AtomicPromise<T = undefined> implements Promise<T> {
         if (!isPromiseLike(value)) {
           results[i] = value;
           ++count;
+          continue;
         }
-        else {
-          value.then(
-            value => {
-              results[i] = value;
+        if (isAtomicPromiseLike(value)) {
+          const { status } = value[internal];
+          switch (status.state) {
+            case State.fulfilled:
+              results[i] = status.result;
               ++count;
-              count === values.length && resolve(results);
-            },
-            reason => {
+              continue;
+            case State.rejected:
+              reject(status.result);
               i = values.length;
-              reject(reason);
-            });
+              continue;
+          }
         }
+        (value as PromiseLike<T>).then(
+          value => {
+            results[i] = value;
+            ++count;
+            count === values.length && resolve(results);
+          },
+          reason => {
+            reject(reason);
+            i = values.length;
+          });
       }
       count === values.length && resolve(results);
     });
   }
-  public static race<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<T> {
+  public static race<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<T>;
+  public static race<T>(vs: Iterable<T | PromiseLike<T> | AtomicPromiseLike<T>>): AtomicPromise<T> {
     return new AtomicPromise<T>((resolve, reject) => {
-      let done = false;
-      for (const value of values) {
-        assert(!done);
+      const values = isArray(vs) ? vs as T[] : [...vs];
+      for (let i = 0; i < values.length; ++i) {
+        const value = values[i];
         if (!isPromiseLike(value)) {
-          done = true;
-          resolve(value);
+          return resolve(value);
         }
-        else {
-          value.then(
-            value => {
-              done = true;
-              resolve(value);
-            },
-            reason => {
-              done = true;
-              reject(reason);
-            });
+        if (isAtomicPromiseLike(value)) {
+          const { status } = value[internal];
+          switch (status.state) {
+            case State.fulfilled:
+              return resolve(status.result);
+            case State.rejected:
+              return reject(status.result);
+          }
         }
-        if (done) break;
+      }
+      let done = false;
+      for (let i = 0; i < values.length; ++i) {
+        const value = values[i] as PromiseLike<T>;
+        value.then(
+          value => {
+            resolve(value);
+            done = true;
+          },
+          reason => {
+            reject(reason);
+            done = true;
+          });
+        if (done) return;
       }
     });
   }
@@ -273,4 +301,8 @@ export class Internal<T> {
 export function isPromiseLike(value: any): value is PromiseLike<any> {
   return value !== null && typeof value === 'object'
       && 'then' in value && typeof value.then === 'function';
+}
+
+function isAtomicPromiseLike(value: any): value is AtomicPromiseLike<any> {
+  return internal in value;
 }
