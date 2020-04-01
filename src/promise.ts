@@ -304,5 +304,6 @@ export function isPromiseLike(value: any): value is PromiseLike<any> {
 }
 
 function isAtomicPromiseLike(value: any): value is AtomicPromiseLike<any> {
+  assert(isPromiseLike(value));
   return internal in value;
 }
