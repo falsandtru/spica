@@ -65,8 +65,8 @@ describe('Benchmark:', function () {
     it('race 3', function (done) {
       const ps = [
         new AtomicPromise(() => 0),
-        new AtomicPromise(() => 0),
         AtomicPromise.resolve(0),
+        new AtomicPromise(() => 0),
       ];
       benchmark(`AtomicPromise race 3`, () => void AtomicPromise.race(ps).then(noop), done);
     });
@@ -125,8 +125,8 @@ describe('Benchmark:', function () {
     it('race 3', function (done) {
       const ps = [
         new Promise(() => 0),
-        new Promise(() => 0),
         Promise.resolve(0),
+        new Promise(() => 0),
       ];
       benchmark(`Promise race 3`, done => void Promise.race(ps).then(done), done, { defer: true, async: true });
     });
