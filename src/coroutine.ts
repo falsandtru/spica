@@ -33,36 +33,6 @@ const exit = Symbol.for('spica/Coroutine.exit');
 const terminate = Symbol.for('spica/Coroutine.terminate');
 const port = Symbol.for('spica/Coroutine.port');
 
-class Internal<T, R, S> {
-  constructor(opts: CoroutineOptions) {
-    void extend(this.settings, opts);
-    void this.result.finally(() => {
-      while (this.msgs.length > 0) {
-        // Don't block.
-        const [, reply] = this.msgs.shift()!;
-        try {
-          void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
-        }
-        catch (reason) {
-          void causeAsyncException(reason);
-        }
-      }
-    });
-  }
-  public alive = true;
-  public state = new AtomicFuture<IteratorResult<R, unknown>>();
-  public resume = new AtomicFuture<undefined>();
-  public readonly result = new AtomicFuture<{ value: T }>();
-  public readonly msgs: [S, Reply<R, T>][] = [];
-  public readonly settings: DeepImmutable<DeepRequired<CoroutineOptions>> = {
-    autorun: true,
-    debug: false,
-    size: 0,
-    interval: 0,
-    resume: () => void 0,
-    trigger: void 0 as any,
-  };
-}
 type Reply<R, T> = (msg: IteratorResult<R, T> | PromiseLike<never>) => void;
 
 const internal = Symbol.for('spica/coroutine::internal');
@@ -231,6 +201,37 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     return this;
   }
   public readonly [port]: Structural<Port<T, R, S>>;
+}
+
+class Internal<T, R, S> {
+  constructor(opts: CoroutineOptions) {
+    void extend(this.settings, opts);
+    void this.result.finally(() => {
+      while (this.msgs.length > 0) {
+        // Don't block.
+        const [, reply] = this.msgs.shift()!;
+        try {
+          void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
+        }
+        catch (reason) {
+          void causeAsyncException(reason);
+        }
+      }
+    });
+  }
+  public alive = true;
+  public state = new AtomicFuture<IteratorResult<R, unknown>>();
+  public resume = new AtomicFuture<undefined>();
+  public readonly result = new AtomicFuture<{ value: T }>();
+  public readonly msgs: [S, Reply<R, T>][] = [];
+  public readonly settings: DeepImmutable<DeepRequired<CoroutineOptions>> = {
+    autorun: true,
+    debug: false,
+    size: 0,
+    interval: 0,
+    resume: () => void 0,
+    trigger: void 0 as any,
+  };
 }
 
 // All responses will be deferred.
