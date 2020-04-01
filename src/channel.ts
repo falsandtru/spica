@@ -18,53 +18,56 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
   }
   public close(): void {
     if (!this.alive) return;
-    this[internal].alive = false;
-    this[internal].buffer.splice(0, this[internal].buffer.length);
-    for (let i = 0; this[internal].producers[i] || this[internal].consumers[i]; ++i) {
-      this[internal].producers[i]?.bind(fail());
-      this[internal].consumers[i]?.bind(fail());
+    const core = this[internal];
+    core.alive = false;
+    core.buffer.splice(0, core.buffer.length);
+    for (let i = 0; core.producers[i] || core.consumers[i]; ++i) {
+      core.producers[i]?.bind(fail());
+      core.consumers[i]?.bind(fail());
     }
-    this[internal].producers.splice(0, this[internal].producers.length);
-    this[internal].consumers.splice(0, this[internal].consumers.length);
+    core.producers.splice(0, core.producers.length);
+    core.consumers.splice(0, core.consumers.length);
   }
   public put(this: Channel<undefined>, msg?: T): AtomicPromise<undefined>;
   public put(msg: T): AtomicPromise<undefined>;
   public put(msg: T): AtomicPromise<undefined> {
     if (!this.alive) return fail();
+    const core = this[internal];
     switch (true) {
-      case this[internal].buffer.length < this[internal].size:
-      case this[internal].consumers.length > 0:
-        assert(this[internal].buffer.length + 1 < this[internal].size ? this[internal].producers.length === 0 : true);
-        assert(this[internal].size === 0 ? this[internal].buffer.length === 0 : true);
-        this[internal].buffer.push(msg);
-        this[internal].consumers.length > 0 && this[internal].consumers.shift()!.bind(this[internal].buffer.shift()!)
-        assert(this[internal].buffer.length <= this[internal].size);
-        assert(this[internal].buffer.length > 0 ? this[internal].consumers.length === 0 : true);
+      case core.buffer.length < core.size:
+      case core.consumers.length > 0:
+        assert(core.buffer.length + 1 < core.size ? core.producers.length === 0 : true);
+        assert(core.size === 0 ? core.buffer.length === 0 : true);
+        core.buffer.push(msg);
+        core.consumers.length > 0 && core.consumers.shift()!.bind(core.buffer.shift()!)
+        assert(core.buffer.length <= core.size);
+        assert(core.buffer.length > 0 ? core.consumers.length === 0 : true);
         return success;
       default:
-        assert(this[internal].buffer.length === this[internal].size);
-        assert(this[internal].consumers.length === 0);
-        return this[internal].producers[this[internal].producers.push(new AtomicFuture()) - 1]
+        assert(core.buffer.length === core.size);
+        assert(core.consumers.length === 0);
+        return core.producers[core.producers.push(new AtomicFuture()) - 1]
           .then(() => this.put(msg));
     }
   }
   public take(): AtomicPromise<T> {
     if (!this.alive) return fail();
+    const core = this[internal];
     switch (true) {
-      case this[internal].buffer.length > 0:
-        assert(this[internal].consumers.length === 0);
-        const msg = this[internal].buffer.shift()!;
-        this[internal].producers.length > 0 && this[internal].producers.shift()!.bind();
+      case core.buffer.length > 0:
+        assert(core.consumers.length === 0);
+        const msg = core.buffer.shift()!;
+        core.producers.length > 0 && core.producers.shift()!.bind();
         return AtomicPromise.resolve(msg);
-      case this[internal].producers.length > 0:
-        assert(this[internal].consumers.length === 0);
-        const consumer = this[internal].consumers[this[internal].consumers.push(new AtomicFuture()) - 1];
-        this[internal].producers.shift()!.bind();
+      case core.producers.length > 0:
+        assert(core.consumers.length === 0);
+        const consumer = core.consumers[core.consumers.push(new AtomicFuture()) - 1];
+        core.producers.shift()!.bind();
         return consumer.then();
       default:
-        assert(this[internal].buffer.length === 0);
-        assert(this[internal].producers.length === 0);
-        return this[internal].consumers[this[internal].consumers.push(new AtomicFuture()) - 1]
+        assert(core.buffer.length === 0);
+        assert(core.producers.length === 0);
+        return core.consumers[core.consumers.push(new AtomicFuture()) - 1]
           .then();
     }
   }

@@ -8,10 +8,11 @@ export class Future<T = undefined> implements Promise<T> {
   public readonly [Symbol.toStringTag] = 'Promise';
   constructor(strict: boolean = true) {
     this.bind = (value: T) => {
-      if (!this[internal].isPending && !strict) return this.then();
-      if (!this[internal].isPending) throw new Error(`Spica: Future: Cannot rebind a value.`);
-      this[internal].resolve(value);
-      this[internal].resume();
+      const core = this[internal];
+      if (!core.isPending && !strict) return this.then();
+      if (!core.isPending) throw new Error(`Spica: Future: Cannot rebind a value.`);
+      core.resolve(value);
+      core.resume();
       return new Promise<T>(resolve => resolve(value));
     };
   }
