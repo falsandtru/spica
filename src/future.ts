@@ -51,8 +51,8 @@ export class AtomicFuture<T = undefined> implements Future<T> {
   }
   public readonly [internal]: Internal<T> = new Internal();
   public readonly bind: {
-    (this: AtomicFuture<undefined>, value?: T | PromiseLike<T>): Promise<T>;
-    (value: T | PromiseLike<T>): Promise<T>;
+    (this: AtomicFuture<undefined>, value?: T | PromiseLike<T>): AtomicPromise<T>;
+    (value: T | PromiseLike<T>): AtomicPromise<T>;
   };
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
     return new AtomicPromise((resolve, reject) =>
