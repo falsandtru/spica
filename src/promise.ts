@@ -168,29 +168,27 @@ export class Internal<T> {
       };
       return this.resume();
     }
-    else {
-      this.status = {
-        state: State.resolved,
-        result: value,
-      };
-      return void value.then(
-        value => {
-          assert(this.status.state === State.resolved);
-          this.status = {
-            state: State.fulfilled,
-            result: value,
-          };
-          this.resume();
-        },
-        reason => {
-          assert(this.status.state === State.resolved);
-          this.status = {
-            state: State.rejected,
-            result: reason,
-          };
-          this.resume();
-        });
-    }
+    this.status = {
+      state: State.resolved,
+      result: value,
+    };
+    return void value.then(
+      value => {
+        assert(this.status.state === State.resolved);
+        this.status = {
+          state: State.fulfilled,
+          result: value,
+        };
+        this.resume();
+      },
+      reason => {
+        assert(this.status.state === State.resolved);
+        this.status = {
+          state: State.rejected,
+          result: reason,
+        };
+        this.resume();
+      });
   }
   public reject(reason: unknown): void {
     if (this.status.state !== State.pending) return;
