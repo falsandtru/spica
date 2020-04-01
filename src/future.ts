@@ -1,5 +1,7 @@
 import { undefined, Promise } from './global';
-import { AtomicPromise, Internal, internal } from './promise';
+import { AtomicPromise, Internal } from './promise';
+
+const internal = Symbol.for('spica/promise::internal');
 
 export class Future<T = undefined> implements Promise<T> {
   public static get [Symbol.species]() {
