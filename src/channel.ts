@@ -19,55 +19,56 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
   public close(): void {
     if (!this.alive) return;
     const core = this[internal];
+    const { buffer, producers, consumers } = core;
     core.alive = false;
-    core.buffer.splice(0, core.buffer.length);
-    for (let i = 0; core.producers[i] || core.consumers[i]; ++i) {
-      core.producers[i]?.bind(fail());
-      core.consumers[i]?.bind(fail());
+    buffer.splice(0, buffer.length);
+    for (let i = 0; producers[i] || consumers[i]; ++i) {
+      producers[i]?.bind(fail());
+      consumers[i]?.bind(fail());
     }
-    core.producers.splice(0, core.producers.length);
-    core.consumers.splice(0, core.consumers.length);
+    producers.splice(0, producers.length);
+    consumers.splice(0, consumers.length);
   }
   public put(this: Channel<undefined>, msg?: T): AtomicPromise<undefined>;
   public put(msg: T): AtomicPromise<undefined>;
   public put(msg: T): AtomicPromise<undefined> {
     if (!this.alive) return fail();
-    const core = this[internal];
+    const { size, buffer, producers, consumers } = this[internal];
     switch (true) {
-      case core.buffer.length < core.size:
-      case core.consumers.length > 0:
-        assert(core.buffer.length + 1 < core.size ? core.producers.length === 0 : true);
-        assert(core.size === 0 ? core.buffer.length === 0 : true);
-        core.buffer.push(msg);
-        core.consumers.length > 0 && core.consumers.shift()!.bind(core.buffer.shift()!)
-        assert(core.buffer.length <= core.size);
-        assert(core.buffer.length > 0 ? core.consumers.length === 0 : true);
+      case buffer.length < size:
+      case consumers.length > 0:
+        assert(buffer.length + 1 < size ? producers.length === 0 : true);
+        assert(size === 0 ? buffer.length === 0 : true);
+        buffer.push(msg);
+        consumers.length > 0 && consumers.shift()!.bind(buffer.shift()!)
+        assert(buffer.length <= size);
+        assert(buffer.length > 0 ? consumers.length === 0 : true);
         return success;
       default:
-        assert(core.buffer.length === core.size);
-        assert(core.consumers.length === 0);
-        return core.producers[core.producers.push(new AtomicFuture()) - 1]
+        assert(buffer.length === size);
+        assert(consumers.length === 0);
+        return producers[producers.push(new AtomicFuture()) - 1]
           .then(() => this.put(msg));
     }
   }
   public take(): AtomicPromise<T> {
     if (!this.alive) return fail();
-    const core = this[internal];
+    const { buffer, producers, consumers } = this[internal];
     switch (true) {
-      case core.buffer.length > 0:
-        assert(core.consumers.length === 0);
-        const msg = core.buffer.shift()!;
-        core.producers.length > 0 && core.producers.shift()!.bind();
+      case buffer.length > 0:
+        assert(consumers.length === 0);
+        const msg = buffer.shift()!;
+        producers.length > 0 && producers.shift()!.bind();
         return AtomicPromise.resolve(msg);
-      case core.producers.length > 0:
-        assert(core.consumers.length === 0);
-        const consumer = core.consumers[core.consumers.push(new AtomicFuture()) - 1];
-        core.producers.shift()!.bind();
+      case producers.length > 0:
+        assert(consumers.length === 0);
+        const consumer = consumers[consumers.push(new AtomicFuture()) - 1];
+        producers.shift()!.bind();
         return consumer.then();
       default:
-        assert(core.buffer.length === 0);
-        assert(core.producers.length === 0);
-        return core.consumers[core.consumers.push(new AtomicFuture()) - 1]
+        assert(buffer.length === 0);
+        assert(producers.length === 0);
+        return consumers[consumers.push(new AtomicFuture()) - 1]
           .then();
     }
   }
