@@ -65,13 +65,12 @@ export interface ObservationOptions {
   readonly cleanup?: boolean;
 }
 
-let id = 0;
-
 export class Observation<N extends readonly unknown[], D, R>
   implements Observer<N, D, R>, Publisher<N, D, R> {
   constructor(opts: ObservationOptions = {}) {
     extend(this.settings, opts);
   }
+  private id: number = 0;
   private readonly node: ListenerNode<N, D, R> = new ListenerNode(undefined, undefined);
   private readonly settings: DeepImmutable<DeepRequired<ObservationOptions>> = {
     limit: 10,
@@ -81,9 +80,9 @@ export class Observation<N extends readonly unknown[], D, R>
     if (typeof monitor !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${monitor}`);
     const { monitors } = this.seekNode(namespace, SeekMode.Extensible);
     if (monitors.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
-    if (id === Number.MAX_SAFE_INTEGER) throw new Error(`Spica: Observation: Max listener ID reached max safe integer.`);
+    if (this.id === Number.MAX_SAFE_INTEGER) throw new Error(`Spica: Observation: Max listener ID reached max safe integer.`);
     const item: MonitorItem<N, D> = {
-      id: ++id,
+      id: ++this.id,
       type: ListenerType.Monitor,
       namespace,
       listener: monitor,
@@ -98,9 +97,9 @@ export class Observation<N extends readonly unknown[], D, R>
     if (typeof subscriber !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${subscriber}`);
     const { subscribers } = this.seekNode(namespace, SeekMode.Extensible);
     if (subscribers.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
-    if (id === Number.MAX_SAFE_INTEGER) throw new Error(`Spica: Observation: Max listener ID reached max safe integer.`);
+    if (this.id === Number.MAX_SAFE_INTEGER) throw new Error(`Spica: Observation: Max listener ID reached max safe integer.`);
     const item: SubscriberItem<N, D, R> = {
-      id: ++id,
+      id: ++this.id,
       type: ListenerType.Subscriber,
       namespace,
       listener: subscriber,
