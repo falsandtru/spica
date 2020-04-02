@@ -204,7 +204,7 @@ export class Internal<T> {
     resolve: (value: TResult1 | TResult2 | PromiseLike<TResult1 | TResult2>) => void,
     reject: (reason: unknown) => void,
   ): void {
-    const { status, fulfillReactions, rejectReactions } = this;
+    const { status } = this;
     switch (status.state) {
       case State.fulfilled:
         if (this.fulfillReactions.length > 0) break;
@@ -228,7 +228,7 @@ export class Internal<T> {
         }
     }
     if (status.state !== State.rejected) {
-      fulfillReactions.push(value => {
+      this.fulfillReactions.push(value => {
         try {
           onfulfilled
             ? resolve(onfulfilled(value))
@@ -240,7 +240,7 @@ export class Internal<T> {
       });
     }
     if (status.state !== State.fulfilled) {
-      rejectReactions.push(reason => {
+      this.rejectReactions.push(reason => {
         try {
           onrejected
             ? resolve(onrejected(reason))
@@ -255,26 +255,26 @@ export class Internal<T> {
   }
   public resume(): void {
     if (!this.reactable) return;
-    const { status, fulfillReactions, rejectReactions } = this;
+    const { status } = this;
     switch (status.state) {
       case State.pending:
       case State.resolved:
         return;
       case State.fulfilled:
         if (this.isHandled && this.rejectReactions.length > 0) {
-          splice(rejectReactions, 0);
+          splice(this.rejectReactions, 0);
         }
-        if (fulfillReactions.length === 0) return;
+        if (this.fulfillReactions.length === 0) return;
         this.isHandled = true;
-        this.react(fulfillReactions, status.result);
+        this.react(this.fulfillReactions, status.result);
         return;
       case State.rejected:
         if (this.isHandled && this.fulfillReactions.length > 0) {
-          splice(fulfillReactions, 0);
+          splice(this.fulfillReactions, 0);
         }
-        if (rejectReactions.length === 0) return;
+        if (this.rejectReactions.length === 0) return;
         this.isHandled = true;
-        this.react(rejectReactions, status.result);
+        this.react(this.rejectReactions, status.result);
         return;
     }
   }
