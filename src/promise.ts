@@ -204,10 +204,10 @@ export class Internal<T> {
     resolve: (value: TResult1 | TResult2 | PromiseLike<TResult1 | TResult2>) => void,
     reject: (reason: unknown) => void,
   ): void {
-    const { status } = this;
+    const { status, fulfillReactions, rejectReactions } = this;
     switch (status.state) {
       case State.fulfilled:
-        if (this.fulfillReactions.length > 0) break;
+        if (fulfillReactions.length > 0) break;
         try {
           return onfulfilled
             ? resolve(onfulfilled(status.result))
@@ -217,7 +217,7 @@ export class Internal<T> {
           return reject(reason);
         }
       case State.rejected:
-        if (this.rejectReactions.length > 0) break;
+        if (rejectReactions.length > 0) break;
         try {
           return onrejected
             ? resolve(onrejected(status.result))
@@ -228,7 +228,7 @@ export class Internal<T> {
         }
     }
     if (status.state !== State.rejected) {
-      this.fulfillReactions.push(value => {
+      fulfillReactions.push(value => {
         try {
           onfulfilled
             ? resolve(onfulfilled(value))
@@ -240,7 +240,7 @@ export class Internal<T> {
       });
     }
     if (status.state !== State.fulfilled) {
-      this.rejectReactions.push(reason => {
+      rejectReactions.push(reason => {
         try {
           onrejected
             ? resolve(onrejected(reason))
@@ -255,26 +255,26 @@ export class Internal<T> {
   }
   public resume(): void {
     if (!this.reactable) return;
-    const { status } = this;
+    const { status, fulfillReactions, rejectReactions } = this;
     switch (status.state) {
       case State.pending:
       case State.resolved:
         return;
       case State.fulfilled:
-        if (this.isHandled && this.rejectReactions.length > 0) {
-          splice(this.rejectReactions, 0);
+        if (this.isHandled && rejectReactions.length > 0) {
+          splice(rejectReactions, 0);
         }
-        if (this.fulfillReactions.length === 0) return;
+        if (fulfillReactions.length === 0) return;
         this.isHandled = true;
-        this.react(this.fulfillReactions, status.result);
+        this.react(fulfillReactions, status.result);
         return;
       case State.rejected:
-        if (this.isHandled && this.fulfillReactions.length > 0) {
-          splice(this.fulfillReactions, 0);
+        if (this.isHandled && fulfillReactions.length > 0) {
+          splice(fulfillReactions, 0);
         }
-        if (this.rejectReactions.length === 0) return;
+        if (rejectReactions.length === 0) return;
         this.isHandled = true;
-        this.react(this.rejectReactions, status.result);
+        this.react(rejectReactions, status.result);
         return;
     }
   }
