@@ -54,15 +54,16 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
   ) {
     super(resolve => res = resolve);
     var res!: (v: T | AtomicPromise<T>) => void;
+    let count = 0;
     this[Coroutine.init] = async () => {
       const core = this[internal];
       if (!core.alive) return;
-      if (core.iteration !== 0) return;
+      if (count !== 0) return;
       let reply: Reply<R, T> = noop;
       try {
         const iter = gen.call(this);
         while (core.alive) {
-          const [[msg, rpy]] = ++core.iteration === 1
+          const [[msg, rpy]] = ++count === 1
             // Don't block.
             ? [[undefined, noop]]
             // Block.
@@ -234,7 +235,7 @@ class Internal<T, R, S> {
     trigger: undefined as any,
   }, this.opts);
   public alive = true;
-  public iteration = 0;
+  public reception = 0;
   public readonly sendBuffer: Channel<[S, Reply<R, T>]> | FakeChannel<[S, Reply<R, T>]> =
     this.settings.sendBufferSize >= 0
       ? new Channel(this.settings.sendBufferSize)
@@ -264,12 +265,14 @@ class Port<T, R, S> {
   public ask(msg: S): Promise<IteratorResult<R, T>> {
     const core = this[internal].co[internal];
     if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
-    void this[internal].init();
     if (core.settings.sendBufferSize < 0) return AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`));
     assert(core.sendBuffer instanceof Channel);
-    const ret = new Future<IteratorResult<R, T>>();
-    void core.sendBuffer.put([msg, ret.bind]);
-    return ESPromise.all([ret, core.recvBuffer.take()])
+    core.settings.sendBufferSize >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
+    this[internal].init();
+    const future = new Future<IteratorResult<R, T>>();
+    core.sendBuffer.put([msg, future.bind]);
+    ++core.reception;
+    return ESPromise.all([future, core.recvBuffer.take()])
       .then(([result]) =>
         result.done
           ? core.result.then(({ value }) => ({ ...result, value }))
@@ -278,7 +281,8 @@ class Port<T, R, S> {
   public recv(): Promise<IteratorResult<R, T>> {
     const core = this[internal].co[internal];
     if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
-    void this[internal].init();
+    this[internal].init();
+    ++core.reception;
     return ESPromise.resolve(core.recvBuffer.take())
       .then(result =>
         result.done
@@ -288,15 +292,18 @@ class Port<T, R, S> {
   public send(msg: S): Promise<undefined> {
     const core = this[internal].co[internal];
     if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
-    void this[internal].init();
     if (core.settings.sendBufferSize < 0) return AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`));
     assert(core.sendBuffer instanceof Channel);
-    const ret = new Future<IteratorResult<R, T>>();
-    return ESPromise.resolve(core.sendBuffer.put([msg, ret.bind]));
+    core.settings.sendBufferSize >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
+    this[internal].init();
+    const future = new Future<IteratorResult<R, T>>();
+    return ESPromise.resolve(core.sendBuffer.put([msg, future.bind]));
   }
   public async connect<U>(com: (this: Coroutine<T, R, S>) => AsyncGenerator<S, U, R | T>): Promise<U> {
-    if (!this[internal].co[internal].alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
-    void this[internal].init();
+    const core = this[internal].co[internal];
+    if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
+    core.settings.sendBufferSize >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
+    this[internal].init();
     const iter = com.call(this[internal].co);
     let reply: R | T | undefined;
     while (true) {
