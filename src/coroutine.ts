@@ -99,14 +99,14 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
           if (!result.done) {
             // Block.
             reply({ ...result });
-            await core.recvBuffer.put(result);
+            await core.recvBuffer.put({ ...result });
             continue;
           }
           else {
             // Don't block.
             core.alive = false;
             reply({ ...result });
-            core.recvBuffer.put(result);
+            core.recvBuffer.put({ ...result });
             core.result.bind(result);
             return;
           }
@@ -266,7 +266,7 @@ class Port<T, R, S> {
     return Promise.resolve(core.recvBuffer.take())
       .then(result =>
         result.done
-          ? core.result.then(({ value }) => ({ value, done: result.done }))
+          ? core.result.then(({ value }) => ({ ...result, value }))
           : { ...result });
   }
   public send(msg: S): Promise<IteratorResult<R, T>> {
@@ -277,7 +277,7 @@ class Port<T, R, S> {
     assert(core.sendBuffer instanceof Channel);
     const ret = new Future<IteratorResult<R, T>>();
     void core.sendBuffer.put([msg, ret.bind]);
-    return ret;
+    return ret.then();
   }
   public async connect<U>(com: (this: Coroutine<T, R, S>) => AsyncGenerator<S, U, R | T>): Promise<U> {
     if (!this[internal].co[internal].alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
