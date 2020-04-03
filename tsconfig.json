@@ -3,7 +3,7 @@
     "target": "ES2018",
     "module": "commonjs",
     "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "strict": true,
     "strictFunctionTypes": false,
     "noUnusedParameters": true,
