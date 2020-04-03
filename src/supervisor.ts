@@ -125,10 +125,11 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     state = state!;
     void this.throwErrorIfNotAvailable();
     if (isCoroutine(process)) {
+      const port = process[process.constructor.port] as Coroutine<R, R, P>[typeof Coroutine.port];
       const proc: Supervisor.Process.Regular<P, R, S> = {
         init: state => state,
         main: (param, state, kill) =>
-          (process[process.constructor.port] as Coroutine<R, R, P>[typeof Coroutine.port]).ask(param)
+          port.ask(param)
             .then(({ value: reply, done }) =>
               done && void kill() || [reply, state]),
         exit: reason => void process[process.constructor.terminate](reason),
