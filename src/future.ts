@@ -1,11 +1,11 @@
-import { undefined, Promise } from './global';
+import { undefined, Promise as ESPromise } from './global';
 import { AtomicPromise, Internal } from './promise';
 
 const internal = Symbol.for('spica/promise::internal');
 
 export class Future<T = undefined> implements Promise<T> {
   public static get [Symbol.species]() {
-    return Promise;
+    return ESPromise;
   }
   public readonly [Symbol.toStringTag] = 'Promise';
   constructor(strict: boolean = true) {
@@ -24,7 +24,7 @@ export class Future<T = undefined> implements Promise<T> {
     (value: T | PromiseLike<T>): Future<T>;
   };
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): Promise<TResult1 | TResult2> {
-    return new Promise((resolve, reject) =>
+    return new ESPromise((resolve, reject) =>
       this[internal].then(onfulfilled, onrejected, resolve, reject));
   }
   public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): Promise<T | TResult> {
