@@ -227,7 +227,9 @@ class Internal<T, R, S> {
     autorun: true,
     debug: false,
     sendBufferSize: -1,
-    recvBufferSize: -1,
+    recvBufferSize: this.opts.recvBufferSize === undefined && this.opts.sendBufferSize! >= 0
+      ? 0
+      : -1,
     interval: 0,
     resume: () => undefined,
     trigger: undefined as any,
@@ -259,6 +261,20 @@ class Port<T, R, S> {
     readonly co: Coroutine<T, R, S>;
     readonly init: () => void;
   };
+  public ask(msg: S): Promise<IteratorResult<R, T>> {
+    const core = this[internal].co[internal];
+    if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
+    void this[internal].init();
+    if (core.settings.sendBufferSize < 0) return AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`));
+    assert(core.sendBuffer instanceof Channel);
+    const ret = new Future<IteratorResult<R, T>>();
+    void core.sendBuffer.put([msg, ret.bind]);
+    return Promise.all([ret, core.recvBuffer.take()])
+      .then(([result]) =>
+        result.done
+          ? core.result.then(({ value }) => ({ ...result, value }))
+          : { ...result });
+  }
   public recv(): Promise<IteratorResult<R, T>> {
     const core = this[internal].co[internal];
     if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
@@ -269,15 +285,14 @@ class Port<T, R, S> {
           ? core.result.then(({ value }) => ({ ...result, value }))
           : { ...result });
   }
-  public send(msg: S): Promise<IteratorResult<R, T>> {
+  public send(msg: S): Promise<undefined> {
     const core = this[internal].co[internal];
     if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
     void this[internal].init();
     if (core.settings.sendBufferSize < 0) return AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`));
     assert(core.sendBuffer instanceof Channel);
     const ret = new Future<IteratorResult<R, T>>();
-    void core.sendBuffer.put([msg, ret.bind]);
-    return ret.then();
+    return Promise.resolve(core.sendBuffer.put([msg, ret.bind]));
   }
   public async connect<U>(com: (this: Coroutine<T, R, S>) => AsyncGenerator<S, U, R | T>): Promise<U> {
     if (!this[internal].co[internal].alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
@@ -287,7 +302,7 @@ class Port<T, R, S> {
     while (true) {
       const result = await iter.next(reply!);
       if (result.done) return result.value;
-      reply = (await this.send(result.value)).value;
+      reply = (await this.ask(result.value)).value;
     }
   }
 }

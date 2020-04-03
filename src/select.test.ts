@@ -104,15 +104,13 @@ describe('Unit: lib/select', function () {
       const co = new Coroutine<number>(async function* () {
         yield* [0, 1, 2];
         return 3;
-      }, { sendBufferSize: Infinity });
+      }, { sendBufferSize: 0 });
       const gen = select({
         a: co,
       });
       (async () => {
         await 0;
-        assert.deepStrictEqual(
-          await co[Coroutine.port].send(0),
-          { value: 1, done: false });
+        await co[Coroutine.port].send(0),
         co[Coroutine.port].send(0);
         co[Coroutine.port].send(0);
       })();

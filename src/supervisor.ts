@@ -128,7 +128,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       const proc: Supervisor.Process.Regular<P, R, S> = {
         init: state => state,
         main: (param, state, kill) =>
-          (process[process.constructor.port] as Coroutine<R, R, P>[typeof Coroutine.port]).send(param)
+          (process[process.constructor.port] as Coroutine<R, R, P>[typeof Coroutine.port]).ask(param)
             .then(({ value: reply, done }) =>
               done && void kill() || [reply, state]),
         exit: reason => void process[process.constructor.terminate](reason),
@@ -290,6 +290,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     void this.terminate(reason);
   }
   public [Coroutine.port] = {
+    ask: () => { throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot use coroutine port.`); },
     recv: () => { throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot use coroutine port.`); },
     send: () => { throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot use coroutine port.`); },
     connect: () => { throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot use coroutine port.`); },

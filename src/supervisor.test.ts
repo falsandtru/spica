@@ -307,7 +307,7 @@ describe('Unit: lib/supervisor', function () {
         assert(1 === (yield 0));
         assert(3 === (yield 2));
         return 4;
-      }, { sendBufferSize: 1 }));
+      }, { sendBufferSize: 0 }));
       assert(await sv.call('', 1) === 2);
       await wait(100);
       assert(sv.refs('').length === 1);

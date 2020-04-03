@@ -1,15 +1,16 @@
 import { AtomicFuture } from './future';
 import { Coroutine, CoroutineOptions } from './coroutine';
 
+interface ColistenerOptions extends CoroutineOptions {
+  readonly size?: number;
+}
+
 export class Colistener<T, U = undefined> extends Coroutine<U, T> {
   constructor(
     listen: (this: Colistener<T, U>, listener: (value: T) => void) => () => void,
-    opts: CoroutineOptions = {},
+    opts: ColistenerOptions = {},
   ) {
     super(async function* (this: Colistener<T, U>) {
-      const size = opts.sendBufferSize! > 0
-        ? opts.sendBufferSize!
-        : 1;
       const queue: T[] = [];
       let notifier: AtomicFuture<undefined> = new AtomicFuture();
       let notifiable: boolean = true;
@@ -20,7 +21,7 @@ export class Colistener<T, U = undefined> extends Coroutine<U, T> {
           notifiable = false;
         }
         void queue.push(value);
-        while (queue.length > size) {
+        while (queue.length > (opts.size || 1)) {
           void queue.shift()!;
         }
         assert(queue.length > 0);
