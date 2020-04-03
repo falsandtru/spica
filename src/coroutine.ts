@@ -193,9 +193,10 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
   }
   public async *[Symbol.asyncIterator](): AsyncIterator<R, T, undefined> {
     const core = this[internal];
+    const port = this[Coroutine.port];
     while (core.alive) {
-      const result = await core.recvBuffer.take();
-      if (result.done) break;
+      const result = await port.recv();
+      if (result.done) return result.value;
       yield result.value;
     }
     return this;
