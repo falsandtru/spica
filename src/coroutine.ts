@@ -54,23 +54,15 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
   ) {
     super(resolve => res = resolve);
     var res!: (v: T | AtomicPromise<T>) => void;
-    this[internal] = new Internal(opts);
-    this[port] = new Port(this, () => this[Coroutine.init]());
-    const core = this[internal];
-    assert(core.settings.sendBufferSize < 0 ? core.sendBuffer instanceof FakeChannel : core.sendBuffer instanceof Channel);
-    assert(core.settings.recvBufferSize < 0 ? core.recvBuffer instanceof FakeChannel : core.recvBuffer instanceof Channel);
-    res(core.result.then(({ value }) => value));
-    let cnt = 0;
     this[Coroutine.init] = async () => {
-      if (cnt !== 0) return;
       const core = this[internal];
+      if (!core.alive) return;
+      if (core.iteration !== 0) return;
       let reply: Reply<R, T> = noop;
       try {
-        if (!core.alive) return;
         const iter = gen.call(this);
         while (core.alive) {
-          ++cnt;
-          const [[msg, rpy]] = cnt === 1
+          const [[msg, rpy]] = ++core.iteration === 1
             // Don't block.
             ? [[undefined, noop]]
             // Block.
@@ -119,6 +111,12 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
         this[Coroutine.terminate](reason);
       }
     };
+    this[internal] = new Internal(opts);
+    this[port] = new Port(this, this[Coroutine.init]);
+    const core = this[internal];
+    assert(core.settings.sendBufferSize < 0 ? core.sendBuffer instanceof FakeChannel : core.sendBuffer instanceof Channel);
+    assert(core.settings.recvBufferSize < 0 ? core.recvBuffer instanceof FakeChannel : core.recvBuffer instanceof Channel);
+    res(core.result.then(({ value }) => value));
     if (core.settings.trigger !== undefined) {
       for (const prop of Array<string | symbol>().concat(core.settings.trigger)) {
         if (prop in this && this.hasOwnProperty(prop)) continue;
@@ -236,6 +234,7 @@ class Internal<T, R, S> {
     trigger: undefined as any,
   }, this.opts);
   public alive = true;
+  public iteration = 0;
   public readonly sendBuffer: Channel<[S, Reply<R, T>]> | FakeChannel<[S, Reply<R, T>]> =
     this.settings.sendBufferSize >= 0
       ? new Channel(this.settings.sendBufferSize)
