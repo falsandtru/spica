@@ -23,7 +23,7 @@ describe('Unit: lib/colistener', () => {
       const co = new Colistener<Event>(listener => {
         document.addEventListener('click', listener);
         return () => void document.removeEventListener('click', listener);
-      }, { size: 2 });
+      }, { sendBufferSize: 2 });
       setTimeout(() => {
         document.body!.click();
         document.body!.click();
@@ -41,7 +41,7 @@ describe('Unit: lib/colistener', () => {
       const co = new Colistener<Event>(listener => {
         document.addEventListener('click', listener);
         return () => void document.removeEventListener('click', listener);
-      }, { size: 1, resume: () => wait(100) });
+      }, { sendBufferSize: 1, resume: () => wait(100) });
       setTimeout(() => {
         document.body!.click();
         document.body!.click();
@@ -68,7 +68,7 @@ describe('Unit: lib/colistener', () => {
       const co = new Colistener<Event, number>(listener => {
         document.addEventListener('click', listener);
         return () => void document.removeEventListener('click', listener);
-      }, { size: Infinity });
+      }, { sendBufferSize: Infinity });
       setTimeout(() => {
         document.body!.click();
         document.body!.click();

@@ -104,7 +104,7 @@ describe('Unit: lib/select', function () {
       const co = new Coroutine<number>(async function* () {
         yield* [0, 1, 2];
         return 3;
-      }, { size: Infinity });
+      }, { sendBufferSize: Infinity });
       const gen = select({
         a: co,
       });

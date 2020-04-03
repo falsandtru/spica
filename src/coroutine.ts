@@ -1,7 +1,8 @@
 import { Array, Promise, Error } from './global';
 import { ObjectDefineProperty, ObjectGetOwnPropertyDescriptor } from './alias';
 import { AtomicPromise, isPromiseLike } from './promise';
-import { AtomicFuture } from './future';
+import { Future, AtomicFuture } from './future';
+import { Channel } from './channel';
 import type { Structural, DeepImmutable, DeepRequired } from './type';
 import { extend } from './assign';
 import { wait, tick } from './clock';
@@ -11,7 +12,8 @@ import { noop } from './noop';
 export interface CoroutineOptions {
   readonly autorun?: boolean;
   readonly debug?: boolean;
-  readonly size?: number;
+  readonly sendBufferSize?: number;
+  readonly recvBufferSize?: number;
   readonly interval?: number;
   readonly resume?: () => PromiseLike<void> | void;
   readonly trigger?: string | symbol | ReadonlyArray<string | symbol>;
@@ -55,6 +57,8 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     this[internal] = new Internal(opts);
     this[port] = new Port(this, () => void this[Coroutine.init]());
     const core = this[internal];
+    assert(core.settings.sendBufferSize < 0 ? core.sendBuffer instanceof FakeChannel : core.sendBuffer instanceof Channel);
+    assert(core.settings.recvBufferSize < 0 ? core.recvBuffer instanceof FakeChannel : core.recvBuffer instanceof Channel);
     void res(core.result.then(({ value }) => value));
     let cnt = 0;
     this[Coroutine.init] = async () => {
@@ -63,22 +67,18 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
       let reply: Reply<R, T> = noop;
       try {
         if (!core.alive) return;
-        const resume = (): [S] | PromiseLike<[S]> =>
-          core.msgs.length > 0
-            ? [([, reply] = core.msgs.shift()!)[0]]
-            : core.resume.then(resume);
         const iter = gen.call(this);
         while (core.alive) {
           void ++cnt;
-          const [[msg]] = cnt === 1
+          const [[msg, rpy]] = cnt === 1
             // Don't block.
-            ? [[void 0]]
+            ? [[void 0, noop]]
             // Block.
             : await Promise.all([
                 // Don't block.
-                core.settings.size === 0
-                  ? [void 0]
-                  : resume(),
+                core.settings.sendBufferSize < 0
+                  ? [void 0, noop] as const
+                  : core.sendBuffer.take() as unknown as [S, Reply<R, T>],
                 // Don't block.
                 Promise.all([
                   core.settings.resume(),
@@ -87,6 +87,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
                     : void 0,
                 ]),
               ]);
+          reply = rpy;
           assert(msg instanceof Promise === false);
           assert(msg instanceof AtomicPromise === false);
           if (!core.alive) break;
@@ -96,17 +97,16 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
           const result = await iter.next(msg!);
           assert(!isPromiseLike(result.value));
           if (!result.done) {
-            // Don't block.
+            // Block.
             void reply({ ...result });
-            void core.state.bind(result);
-            core.state = new AtomicFuture();
+            await core.recvBuffer.put(result);
             continue;
           }
           else {
             // Don't block.
             core.alive = false;
             void reply({ ...result });
-            void core.state.bind(result);
+            core.recvBuffer.put(result);
             void core.result.bind(result);
             return;
           }
@@ -176,7 +176,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
           if (!core.alive) return;
           core.alive = false;
           // Don't block.
-          void core.state.bind({ value: void 0, done: true });
+          void core.recvBuffer.put({ value: void 0, done: true });
           void core.result.bind({ value: result });
         },
         reason => {
@@ -184,7 +184,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
           if (!core.alive) return;
           core.alive = false;
           // Don't block.
-          void core.state.bind({ value: void 0, done: true });
+          void core.recvBuffer.put({ value: void 0, done: true });
           void core.result.bind(AtomicPromise.reject(reason));
         });
   }
@@ -194,9 +194,9 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
   public async *[Symbol.asyncIterator](): AsyncIterator<R, T, undefined> {
     const core = this[internal];
     while (core.alive) {
-      const state = await core.state;
-      if (state.done) break;
-      yield state.value;
+      const result = await core.recvBuffer.take();
+      if (result.done) break;
+      yield result.value;
     }
     return this;
   }
@@ -204,34 +204,44 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
 }
 
 class Internal<T, R, S> {
-  constructor(opts: CoroutineOptions) {
-    void extend(this.settings, opts);
+  constructor(
+    public readonly opts: CoroutineOptions,
+  ) {
     void this.result.finally(() => {
-      while (this.msgs.length > 0) {
-        // Don't block.
-        const [, reply] = this.msgs.shift()!;
-        try {
-          void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
+      this.sendBuffer.close(msgs => {
+        while (msgs.length > 0) {
+          // Don't block.
+          const [, reply] = msgs.shift()!;
+          try {
+            void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
+          }
+          catch (reason) {
+            void causeAsyncException(reason);
+          }
         }
-        catch (reason) {
-          void causeAsyncException(reason);
-        }
-      }
+      });
+      this.recvBuffer.close();
     });
   }
-  public alive = true;
-  public state = new AtomicFuture<IteratorResult<R, unknown>>();
-  public resume = new AtomicFuture<undefined>();
-  public readonly result = new AtomicFuture<{ value: T }>();
-  public readonly msgs: [S, Reply<R, T>][] = [];
-  public readonly settings: DeepImmutable<DeepRequired<CoroutineOptions>> = {
+  public readonly settings: DeepImmutable<DeepRequired<CoroutineOptions>> = extend({
     autorun: true,
     debug: false,
-    size: 0,
+    sendBufferSize: -1,
+    recvBufferSize: -1,
     interval: 0,
     resume: () => void 0,
     trigger: void 0 as any,
-  };
+  }, this.opts);
+  public alive = true;
+  public readonly sendBuffer: Channel<[S, Reply<R, T>]> | FakeChannel<[S, Reply<R, T>]> =
+    this.settings.sendBufferSize >= 0
+      ? new Channel(this.settings.sendBufferSize)
+      : new FakeChannel();
+  public readonly recvBuffer: Channel<IteratorResult<R, T | undefined>> | FakeChannel<IteratorResult<R, T | undefined>> =
+    this.settings.recvBufferSize >= 0
+      ? new Channel(this.settings.recvBufferSize)
+      : new FakeChannel();
+  public readonly result = new AtomicFuture<{ value: T }>();
 }
 
 // All responses will be deferred.
@@ -249,32 +259,25 @@ class Port<T, R, S> {
     readonly co: Coroutine<T, R, S>;
     readonly init: () => void;
   };
-  public recv(): AtomicPromise<IteratorResult<R, T>> {
+  public recv(): Promise<IteratorResult<R, T>> {
     const core = this[internal].co[internal];
     if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
     void this[internal].init();
-    return core.state
-      .then(async state =>
-        state.done
-          ? core.result.then(({ value }) => ({ value, done: state.done }))
-          : { ...state });
+    return Promise.resolve(core.recvBuffer.take())
+      .then(result =>
+        result.done
+          ? core.result.then(({ value }) => ({ value, done: result.done }))
+          : { ...result });
   }
-  public send(msg: S): AtomicPromise<IteratorResult<R, T>> {
+  public send(msg: S): Promise<IteratorResult<R, T>> {
     const core = this[internal].co[internal];
     if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
     void this[internal].init();
-    if (core.settings.size === 0) return AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`));
-    const res = new AtomicFuture<IteratorResult<R, T>>();
-    // Don't block.
-    void core.msgs.push([msg, res.bind]);
-    void core.resume.bind();
-    core.resume = new AtomicFuture();
-    while (core.msgs.length > core.settings.size) {
-      // Don't block.
-      const [, reply] = core.msgs.shift()!;
-      void reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`)));
-    }
-    return res.then(async r => r);
+    if (core.settings.sendBufferSize < 0) return AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`));
+    assert(core.sendBuffer instanceof Channel);
+    const ret = new Future<IteratorResult<R, T>>();
+    void core.sendBuffer.put([msg, ret.bind]);
+    return ret;
   }
   public async connect<U>(com: (this: Coroutine<T, R, S>) => AsyncGenerator<S, U, R | T>): Promise<U> {
     if (!this[internal].co[internal].alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
@@ -303,4 +306,46 @@ export function isCoroutine(target: unknown): target is CoroutineInterface<unkno
       && typeof target[target.constructor['terminate']] === 'function'
       && typeof target.constructor['port'] === 'symbol'
       && typeof target[target.constructor['port']] === 'object';
+}
+
+class FakeChannel<T> {
+  public readonly [internal] = new FakeChannel.Internal<T>();
+  public get alive(): boolean {
+    return this[internal].alive;
+  }
+  public close(finalizer?: (msg: T[]) => void): void {
+    if (!this.alive) return;
+    const core = this[internal];
+    const { consumers } = core;
+    core.alive = false;
+    for (let i = 0; consumers[i]; ++i) {
+      consumers[i]?.bind(FakeChannel.fail());
+    }
+    consumers.splice(0, consumers.length);
+    if (finalizer) {
+      finalizer([]);
+    }
+  }
+  public put(msg: T): AtomicPromise<undefined> {
+    if (!this.alive) return FakeChannel.fail();
+    const { consumers } = this[internal];
+    while (consumers.length > 0) {
+      consumers.shift()!.bind(msg);
+    }
+    return FakeChannel.success;
+  }
+  public take(): AtomicPromise<T> {
+    if (!this.alive) return FakeChannel.fail();
+    const { consumers } = this[internal];
+    return consumers[consumers.push(new AtomicFuture()) - 1]
+      .then();
+  }
+}
+namespace FakeChannel {
+  export const success = AtomicPromise.resolve();
+  export const fail = () => AtomicPromise.reject(new Error('Spica: Channel: Closed.'));
+  export class Internal<T> {
+    public alive: boolean = true;
+    public readonly consumers: AtomicFuture<T>[] = [];
+  }
 }

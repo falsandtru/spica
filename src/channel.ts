@@ -10,24 +10,33 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
   constructor(
     size: number = 0,
   ) {
+    assert(size >= 0);
     this[internal] = new Internal(size);
   }
   public readonly [internal]: Internal<T>;
   public get alive(): boolean {
     return this[internal].alive;
   }
-  public close(): void {
+  public close(finalizer?: (msg: T[]) => void): void {
     if (!this.alive) return;
     const core = this[internal];
     const { buffer, producers, consumers } = core;
     core.alive = false;
-    buffer.splice(0, buffer.length);
     for (let i = 0; producers[i] || consumers[i]; ++i) {
       producers[i]?.bind(fail());
       consumers[i]?.bind(fail());
     }
-    producers.splice(0, producers.length);
     consumers.splice(0, consumers.length);
+    if (finalizer) {
+      AtomicPromise.all([
+        ...buffer.splice(0, buffer.length),
+        ...producers.splice(0, producers.length),
+      ]).then(finalizer);
+    }
+    else {
+      buffer.splice(0, buffer.length);
+      producers.splice(0, producers.length);
+    }
   }
   public put(this: Channel<undefined>, msg?: T): AtomicPromise<undefined>;
   public put(msg: T): AtomicPromise<undefined>;

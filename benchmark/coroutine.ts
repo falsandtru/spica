@@ -8,12 +8,12 @@ describe('Benchmark:', function () {
 
   describe('Coroutine', function () {
     it('new', function (done) {
-      benchmark('Coroutine new', () => void new Coroutine(async function* () { }, { size: 1, autorun: false }), done);
+      benchmark('Coroutine new', () => void new Coroutine(async function* () { }, { sendBufferSize: 1, autorun: false }), done);
     });
 
     it('run', function (done) {
       this.timeout(90 * 1e3);
-      benchmark('Coroutine run', done => void new Coroutine(async function* () { }, { size: 1, debug: true }).then(done), done, { defer: true, async: true });
+      benchmark('Coroutine run', done => void new Coroutine(async function* () { }, { sendBufferSize: 1, debug: true }).then(done), done, { defer: true, async: true });
     });
 
     it('iterate', function (done) {
@@ -22,7 +22,7 @@ describe('Benchmark:', function () {
         while (true) {
           yield;
         }
-      }, { size: 1, autorun: false })[Coroutine.port];
+      }, { sendBufferSize: 1, autorun: false })[Coroutine.port];
       benchmark('Coroutine iterate', done => void port.send(0).then(done), done, { defer: true, async: true });
     });
 

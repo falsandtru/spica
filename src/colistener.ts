@@ -7,6 +7,9 @@ export class Colistener<T, U = undefined> extends Coroutine<U, T> {
     opts: CoroutineOptions = {},
   ) {
     super(async function* (this: Colistener<T, U>) {
+      const size = opts.sendBufferSize! > 0
+        ? opts.sendBufferSize!
+        : 1;
       const queue: T[] = [];
       let notifier: AtomicFuture<undefined> = new AtomicFuture();
       let notifiable: boolean = true;
@@ -17,7 +20,7 @@ export class Colistener<T, U = undefined> extends Coroutine<U, T> {
           notifiable = false;
         }
         void queue.push(value);
-        while (queue.length > (opts.size || 1)) {
+        while (queue.length > size) {
           void queue.shift()!;
         }
         assert(queue.length > 0);
@@ -30,7 +33,7 @@ export class Colistener<T, U = undefined> extends Coroutine<U, T> {
           yield queue.shift()!;
         }
       }
-    }, { ...opts, size: 0 });
+    }, { ...opts, sendBufferSize: -1 });
     void this[Coroutine.init]();
   }
   public close(this: Colistener<T, undefined>, value?: U): void;
