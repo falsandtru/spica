@@ -1,7 +1,7 @@
 import { AtomicFuture } from './future';
 import { Coroutine, CoroutineOptions } from './coroutine';
 
-interface ColistenerOptions extends CoroutineOptions {
+export interface ColistenerOptions extends CoroutineOptions {
   readonly size?: number;
 }
 
