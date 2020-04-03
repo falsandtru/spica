@@ -305,14 +305,14 @@ describe('Unit: lib/supervisor', function () {
       });
       sv.register('', new Coroutine<number, number, number>(async function* () {
         assert(1 === (yield 0));
-        assert(2 === (yield 1));
-        return 2;
+        assert(3 === (yield 2));
+        return 4;
       }, { sendBufferSize: 1 }));
-      assert(await sv.call('', 1) === 1);
+      assert(await sv.call('', 1) === 2);
       await wait(100);
       assert(sv.refs('').length === 1);
       await wait(100);
-      assert(await sv.call('', 2) === 2);
+      assert(await sv.call('', 3) === 4);
       await wait(100);
       assert(sv.kill('') === false);
       assert(sv.refs('').length === 0);
