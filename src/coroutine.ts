@@ -299,18 +299,20 @@ class Port<T, R, S> {
     const future = new Future<IteratorResult<R, T>>();
     return ESPromise.resolve(core.sendBuffer.put([msg, future.bind]));
   }
-  public async connect<U>(com: (this: Coroutine<T, R, S>) => AsyncGenerator<S, U, R | T>): Promise<U> {
+  public connect<U>(com: (this: Coroutine<T, R, S>) => AsyncGenerator<S, U, R | T>): Promise<U> {
     const core = this[internal].co[internal];
     if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
-    core.settings.sendBufferSize >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
-    this[internal].init();
-    const iter = com.call(this[internal].co);
-    let reply: R | T | undefined;
-    while (true) {
-      const result = await iter.next(reply!);
-      if (result.done) return result.value;
-      reply = (await this.ask(result.value)).value;
-    }
+    return (async () => {
+      core.settings.sendBufferSize >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
+      this[internal].init();
+      const iter = com.call(this[internal].co);
+      let reply: R | T | undefined;
+      while (true) {
+        const result = await iter.next(reply!);
+        if (result.done) return result.value;
+        reply = (await this.ask(result.value)).value;
+      }
+    })();
   }
 }
 
