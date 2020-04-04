@@ -247,7 +247,7 @@ class Internal<T, R, S> {
   public readonly result = new AtomicFuture<{ value: T }>();
 }
 
-// All responses will be deferred.
+// All responses of accepted requests must be delayed not to interrupt the current process.
 class Port<T, R, S> {
   constructor(
     co: Coroutine<T, R, S>,
