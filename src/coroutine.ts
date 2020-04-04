@@ -1,4 +1,4 @@
-import { undefined, Infinity, Array, Promise as ESPromise, Error } from './global';
+import { undefined, Array, Promise as ESPromise, Error } from './global';
 import { ObjectDefineProperty, ObjectGetOwnPropertyDescriptor } from './alias';
 import { AtomicPromise, isPromiseLike } from './promise';
 import { Future, AtomicFuture } from './future';
@@ -114,8 +114,8 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     this[internal] = new Internal(opts);
     this[port] = new Port(this, this[Coroutine.init]);
     const core = this[internal];
-    assert(core.settings.size < 0 ? core.sendBuffer instanceof FakeChannel : core.sendBuffer instanceof Channel);
-    assert(core.settings.size < 0 ? core.recvBuffer instanceof FakeChannel : core.recvBuffer instanceof Channel);
+    assert(core.settings.size < 0 ? core.sendBuffer === undefined : core.sendBuffer instanceof Channel);
+    assert(core.settings.size < 0 ? core.recvBuffer instanceof BroadcastChannel : core.recvBuffer instanceof Channel);
     res(core.result.then(({ value }) => value));
     if (core.settings.trigger !== undefined) {
       for (const prop of Array<string | symbol>().concat(core.settings.trigger)) {
@@ -232,14 +232,17 @@ class Internal<T, R, S> {
   }, this.opts);
   public alive = true;
   public reception = 0;
-  public readonly sendBuffer: Channel<[S, Reply<R, T>]> | FakeChannel<[S, Reply<R, T>]> =
+  public readonly sendBuffer: Channel<[S, Reply<R, T>]> =
     this.settings.size >= 0
       ? new Channel(this.settings.size)
-      : new FakeChannel();
-  public readonly recvBuffer: Channel<IteratorResult<R, T | undefined>> | FakeChannel<IteratorResult<R, T | undefined>> =
+      // Never be used.
+      : undefined as never;
+  public readonly recvBuffer: Channel<IteratorResult<R, T | undefined>> | BroadcastChannel<IteratorResult<R, T | undefined>> =
     this.settings.size >= 0
-      ? new Channel(Infinity)
-      : new FakeChannel();
+      // Block the iteration until an yielded value is consumed.
+      ? new Channel(0)
+      // Broadcast an yielded value.
+      : new BroadcastChannel();
   public readonly result = new AtomicFuture<{ value: T }>();
 }
 
@@ -328,8 +331,8 @@ export function isCoroutine(target: unknown): target is CoroutineInterface<unkno
       && typeof target[target.constructor['port']] === 'object';
 }
 
-class FakeChannel<T> {
-  public readonly [internal] = new FakeChannel.Internal<T>();
+class BroadcastChannel<T> {
+  public readonly [internal] = new BroadcastChannel.Internal<T>();
   public get alive(): boolean {
     return this[internal].alive;
   }
@@ -339,7 +342,7 @@ class FakeChannel<T> {
     const { consumers } = core;
     core.alive = false;
     for (let i = 0; consumers[i]; ++i) {
-      consumers[i]?.bind(FakeChannel.fail());
+      consumers[i]?.bind(BroadcastChannel.fail());
     }
     consumers.splice(0, consumers.length);
     if (finalizer) {
@@ -347,21 +350,21 @@ class FakeChannel<T> {
     }
   }
   public put(msg: T): AtomicPromise<undefined> {
-    if (!this.alive) return FakeChannel.fail();
+    if (!this.alive) return BroadcastChannel.fail();
     const { consumers } = this[internal];
     while (consumers.length > 0) {
       consumers.shift()!.bind(msg);
     }
-    return FakeChannel.success;
+    return BroadcastChannel.success;
   }
   public take(): AtomicPromise<T> {
-    if (!this.alive) return FakeChannel.fail();
+    if (!this.alive) return BroadcastChannel.fail();
     const { consumers } = this[internal];
     return consumers[consumers.push(new AtomicFuture()) - 1]
       .then();
   }
 }
-namespace FakeChannel {
+namespace BroadcastChannel {
   export const success = AtomicPromise.resolve();
   export const fail = () => AtomicPromise.reject(new Error('Spica: Channel: Closed.'));
   export class Internal<T> {
