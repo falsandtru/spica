@@ -1,4 +1,4 @@
-import { undefined, Array, Promise as ESPromise, Error } from './global';
+import { undefined, Infinity, Array, Promise as ESPromise, Error } from './global';
 import { ObjectDefineProperty, ObjectGetOwnPropertyDescriptor } from './alias';
 import { AtomicPromise, isPromiseLike } from './promise';
 import { Future, AtomicFuture } from './future';
@@ -12,8 +12,7 @@ import { noop } from './noop';
 export interface CoroutineOptions {
   readonly autorun?: boolean;
   readonly debug?: boolean;
-  readonly sendBufferSize?: number;
-  readonly recvBufferSize?: number;
+  readonly size?: number;
   readonly interval?: number;
   readonly resume?: () => PromiseLike<void> | void;
   readonly trigger?: string | symbol | ReadonlyArray<string | symbol>;
@@ -69,7 +68,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
             // Block.
             : await ESPromise.all([
                 // Don't block.
-                core.settings.sendBufferSize < 0
+                core.settings.size < 0
                   ? [undefined, noop] as const
                   : core.sendBuffer.take() as unknown as [S, Reply<R, T>],
                 // Don't block.
@@ -115,8 +114,8 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     this[internal] = new Internal(opts);
     this[port] = new Port(this, this[Coroutine.init]);
     const core = this[internal];
-    assert(core.settings.sendBufferSize < 0 ? core.sendBuffer instanceof FakeChannel : core.sendBuffer instanceof Channel);
-    assert(core.settings.recvBufferSize < 0 ? core.recvBuffer instanceof FakeChannel : core.recvBuffer instanceof Channel);
+    assert(core.settings.size < 0 ? core.sendBuffer instanceof FakeChannel : core.sendBuffer instanceof Channel);
+    assert(core.settings.size < 0 ? core.recvBuffer instanceof FakeChannel : core.recvBuffer instanceof Channel);
     res(core.result.then(({ value }) => value));
     if (core.settings.trigger !== undefined) {
       for (const prop of Array<string | symbol>().concat(core.settings.trigger)) {
@@ -226,10 +225,7 @@ class Internal<T, R, S> {
   public readonly settings: DeepImmutable<DeepRequired<CoroutineOptions>> = extend({
     autorun: true,
     debug: false,
-    sendBufferSize: -1,
-    recvBufferSize: this.opts.recvBufferSize === undefined && this.opts.sendBufferSize! >= 0
-      ? 0
-      : -1,
+    size: -1,
     interval: 0,
     resume: () => undefined,
     trigger: undefined as any,
@@ -237,12 +233,12 @@ class Internal<T, R, S> {
   public alive = true;
   public reception = 0;
   public readonly sendBuffer: Channel<[S, Reply<R, T>]> | FakeChannel<[S, Reply<R, T>]> =
-    this.settings.sendBufferSize >= 0
-      ? new Channel(this.settings.sendBufferSize)
+    this.settings.size >= 0
+      ? new Channel(this.settings.size)
       : new FakeChannel();
   public readonly recvBuffer: Channel<IteratorResult<R, T | undefined>> | FakeChannel<IteratorResult<R, T | undefined>> =
-    this.settings.recvBufferSize >= 0
-      ? new Channel(this.settings.recvBufferSize)
+    this.settings.size >= 0
+      ? new Channel(Infinity)
       : new FakeChannel();
   public readonly result = new AtomicFuture<{ value: T }>();
 }
@@ -265,9 +261,9 @@ class Port<T, R, S> {
   public ask(msg: S): Promise<IteratorResult<R, T>> {
     const core = this[internal].co[internal];
     if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
-    if (core.settings.sendBufferSize < 0) return AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`));
+    if (core.settings.size < 0) return AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`));
     assert(core.sendBuffer instanceof Channel);
-    core.settings.sendBufferSize >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
+    core.settings.size >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
     this[internal].init();
     const future = new Future<IteratorResult<R, T>>();
     core.sendBuffer.put([msg, future.bind]);
@@ -292,9 +288,9 @@ class Port<T, R, S> {
   public send(msg: S): Promise<undefined> {
     const core = this[internal].co[internal];
     if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
-    if (core.settings.sendBufferSize < 0) return AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`));
+    if (core.settings.size < 0) return AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`));
     assert(core.sendBuffer instanceof Channel);
-    core.settings.sendBufferSize >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
+    core.settings.size >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
     this[internal].init();
     const future = new Future<IteratorResult<R, T>>();
     return ESPromise.resolve(core.sendBuffer.put([msg, future.bind]));
@@ -303,7 +299,7 @@ class Port<T, R, S> {
     const core = this[internal].co[internal];
     if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
     return (async () => {
-      core.settings.sendBufferSize >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
+      core.settings.size >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
       this[internal].init();
       const iter = com.call(this[internal].co);
       let reply: R | T | undefined;

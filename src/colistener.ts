@@ -1,14 +1,10 @@
 import { AtomicFuture } from './future';
 import { Coroutine, CoroutineOptions } from './coroutine';
 
-export interface ColistenerOptions extends CoroutineOptions {
-  readonly size?: number;
-}
-
 export class Colistener<T, U = undefined> extends Coroutine<U, T> {
   constructor(
     listen: (this: Colistener<T, U>, listener: (value: T) => void) => () => void,
-    opts: ColistenerOptions = {},
+    opts: CoroutineOptions = {},
   ) {
     super(async function* (this: Colistener<T, U>) {
       const queue: T[] = [];
@@ -34,7 +30,7 @@ export class Colistener<T, U = undefined> extends Coroutine<U, T> {
           yield queue.shift()!;
         }
       }
-    }, { ...opts, sendBufferSize: -1 });
+    }, { ...opts, size: -1 });
     void this[Coroutine.init]();
   }
   public close(this: Colistener<T, undefined>, value?: U): void;
