@@ -9,7 +9,7 @@ export default class <a, z> extends Sequence<a, z> {
     switch (data.length) {
       case 0:
         return <Sequence.Thunk<a>>[
-          <a><any>void 0,
+          <a><unknown>void 0,
           Sequence.Iterator.done,
           -1
         ];

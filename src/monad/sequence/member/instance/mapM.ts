@@ -1,7 +1,7 @@
 import { Sequence } from '../../core';
 
 export default class <a, z> extends Sequence<a, z> {
-  public mapM<b>(f: (a: a) => Sequence<b, any>): Sequence<b[], [Sequence.Iterator<Sequence<b[], any>>, Sequence.Iterator<b[]>]> {
+  public mapM<b>(f: (a: a) => Sequence<b, unknown>): Sequence<b[], [Sequence.Iterator<Sequence<b[], unknown>>, Sequence.Iterator<b[]>]> {
     return Sequence.from([0])
       .bind<b[]>(() => {
         const xs = this.extract();

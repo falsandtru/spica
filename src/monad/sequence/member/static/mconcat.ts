@@ -1,13 +1,13 @@
 import { Sequence } from '../../core';
 
 export default class <a, z> extends Sequence<a, z> {
-  public static mconcat<a>(as: Iterable<Sequence<a, any>>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]> {
+  public static mconcat<a>(as: Iterable<Sequence<a, unknown>>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]> {
     return [...as]
-      .reduce((a, b) => mconcat(a, b), Sequence.mempty);
+      .reduce<Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>>((a, b) => mconcat(a, b), Sequence.mempty);
   }
 }
 
-function mconcat<a>(a: Sequence<a, any>, b: Sequence<a, any>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]> {
+function mconcat<a>(a: Sequence<a, unknown>, b: Sequence<a, unknown>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]> {
   return new Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>(([ai, bi] = [() => a.iterate(), () => b.iterate()], cons) =>
     Sequence.Iterator.when(
       ai(),

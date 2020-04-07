@@ -1,3 +1,4 @@
+import { Map } from '../../../../global';
 import { Sequence } from '../../core';
 
 export default class <a, z> extends Sequence<a, z> {

@@ -1,7 +1,7 @@
 import { Sequence } from '../../core';
 
 export default class <a, z> extends Sequence<a, z> {
-  public permutations(): Sequence<a[], [Sequence.Iterator<Sequence<a[], any>>, Sequence.Iterator<a[]>]> {
+  public permutations(): Sequence<a[], [Sequence.Iterator<Sequence<a[], unknown>>, Sequence.Iterator<a[]>]> {
     return Sequence.from([0])
       .bind<a[]>(() => {
         const xs = this.extract();
@@ -16,12 +16,12 @@ export default class <a, z> extends Sequence<a, z> {
   }
 }
 
-function perms<a>(ts: Sequence<a, any>, is: Sequence<a, any>): Sequence<a[], [Sequence.Iterator<Sequence<a[], undefined>>, Sequence.Iterator<a[]>]> {
-  return Sequence.Iterator.when<a, Sequence<a[], [Sequence.Iterator<Sequence<a[], undefined>>, Sequence.Iterator<a[]>]>>(
+function perms<a>(ts: Sequence<a, unknown>, is: Sequence<a, unknown>): Sequence<a[], [Sequence.Iterator<Sequence<a[], unknown>>, Sequence.Iterator<a[]>]> {
+  return Sequence.Iterator.when<a, Sequence<a[], [Sequence.Iterator<Sequence<a[], unknown>>, Sequence.Iterator<a[]>]>>(
     ts.iterate(),
     () => Sequence.mempty,
     tt =>
-      new Sequence<Sequence<a[], [Sequence.Iterator<Sequence<a[], undefined>>, Sequence.Iterator<a[]>]>, undefined>((_, cons) =>
+      new Sequence<Sequence<a[], [Sequence.Iterator<Sequence<a[], unknown>>, Sequence.Iterator<a[]>]>, unknown>((_, cons) =>
         Sequence.Iterator.when(
           tt,
           () => cons(),
@@ -37,15 +37,15 @@ function perms<a>(ts: Sequence<a, any>, is: Sequence<a, any>): Sequence<a[], [Se
                   Sequence.mappend(Sequence.from([t]), is))));
 
             function interleave(
-              xs: Sequence<a, any>,
-              r: Sequence<a[], any>
+              xs: Sequence<a, unknown>,
+              r: Sequence<a[], unknown>
             ): Sequence<a[], [Sequence.Iterator<a[]>, Sequence.Iterator<a[]>]> {
               return interleave_(as => as, xs, r)[1];
             }
             function interleave_(
-              f: (as: Sequence<a, any>) => Sequence<a, any>,
-              ys: Sequence<a, any>,
-              r: Sequence<a[], any>
+              f: (as: Sequence<a, unknown>) => Sequence<a, unknown>,
+              ys: Sequence<a, unknown>,
+              r: Sequence<a[], unknown>
             ): [Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a[]>]>, Sequence<a[], [Sequence.Iterator<a[]>, Sequence.Iterator<a[]>]>] {
               return Sequence.Iterator.when<a, [Sequence<a, any>, Sequence<a[], any>]>(
                 ys.iterate(),

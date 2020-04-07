@@ -1,7 +1,7 @@
 import { Sequence } from '../../core';
 
 export default class <a, z> extends Sequence<a, z> {
-  public filterM(f: (a: a) => Sequence<boolean, any>): Sequence<a[], [Sequence.Iterator<Sequence<a[], any>>, Sequence.Iterator<a[]>]> {
+  public filterM(f: (a: a) => Sequence<boolean, unknown>): Sequence<a[], [Sequence.Iterator<Sequence<a[], unknown>>, Sequence.Iterator<a[]>]> {
     return Sequence.from([0])
       .bind<a[]>(() => {
         const xs = this.extract();

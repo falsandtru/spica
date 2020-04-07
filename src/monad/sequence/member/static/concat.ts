@@ -1,8 +1,8 @@
 import { Sequence } from '../../core';
 
 export default class <a, z> extends Sequence<a, z> {
-  public static concat<a>(as: Sequence<Sequence<a, any>, any>): Sequence<a, [Sequence.Iterator<Sequence<a, any>>, Sequence.Iterator<a>]> {
-    return new Sequence<a, [Sequence.Iterator<Sequence<a, any>>, Sequence.Iterator<a>]>(([ai, bi] = [() => as.iterate(), Sequence.Iterator.done], cons) =>
+  public static concat<a>(as: Sequence<Sequence<a, unknown>, unknown>): Sequence<a, [Sequence.Iterator<Sequence<a, unknown>>, Sequence.Iterator<a>]> {
+    return new Sequence<a, [Sequence.Iterator<Sequence<a, unknown>>, Sequence.Iterator<a>]>(([ai, bi] = [() => as.iterate(), Sequence.Iterator.done], cons) =>
       Sequence.Iterator.when(
         ai(),
         () => cons(),

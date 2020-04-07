@@ -27,50 +27,50 @@ export namespace Sequence {
   export declare function random(): Sequence<number, [number, Map<number, Sequence.Thunk<number>>]>;
   export declare function random<a>(gen: () => a): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]>;
   export declare function random<a>(as: a[]): Sequence<a, Sequence.Iterator<number>>;
-  export declare function concat<a>(as: Sequence<Sequence<a, any>, any>): Sequence<a, [Sequence.Iterator<Sequence<a, any>>, Sequence.Iterator<a>]>;
-  export declare function zip<a, b>(a: Sequence<a, any>, b: Sequence<b, any>): Sequence<[a, b], [Sequence.Iterator<a>, Sequence.Iterator<b>]>;
-  export declare function difference<a>(a: Sequence<a, any>, b: Sequence<a, any>, cmp: (l: a, r: a) => number): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
-  export declare function union<a>(a: Sequence<a, any>, b: Sequence<a, any>, cmp: (l: a, r: a) => number): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
-  export declare function intersect<a>(a: Sequence<a, any>, b: Sequence<a, any>, cmp: (l: a, r: a) => number): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
-  export declare function fmap<a, b>(m: Sequence<a, any>, f: (a: a) => b): Sequence<b, Sequence.Iterator<a>>;
-  export declare function fmap<a>(m: Sequence<a, any>): <b>(f: (a: a) => b) => Sequence<b, Sequence.Iterator<a>>;
+  export declare function concat<a>(as: Sequence<Sequence<a, unknown>, unknown>): Sequence<a, [Sequence.Iterator<Sequence<a, unknown>>, Sequence.Iterator<a>]>;
+  export declare function zip<a, b>(a: Sequence<a, unknown>, b: Sequence<b, unknown>): Sequence<[a, b], [Sequence.Iterator<a>, Sequence.Iterator<b>]>;
+  export declare function difference<a>(a: Sequence<a, unknown>, b: Sequence<a, unknown>, cmp: (l: a, r: a) => number): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
+  export declare function union<a>(a: Sequence<a, unknown>, b: Sequence<a, unknown>, cmp: (l: a, r: a) => number): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
+  export declare function intersect<a>(a: Sequence<a, unknown>, b: Sequence<a, unknown>, cmp: (l: a, r: a) => number): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
+  export declare function fmap<a, b>(m: Sequence<a, unknown>, f: (a: a) => b): Sequence<b, Sequence.Iterator<a>>;
+  export declare function fmap<a>(m: Sequence<a, unknown>): <b>(f: (a: a) => b) => Sequence<b, Sequence.Iterator<a>>;
   export declare function pure<a>(a: a): Sequence<a, number>;
-  export declare function ap<a, b>(mf: Sequence<(a: a) => b, any>, ma: Sequence<a, any>): Sequence<b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]>;
-  export declare function ap<a, b>(mf: Sequence<(a: a) => b, any>): (ma: Sequence<a, any>) => Sequence<b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]>;
+  export declare function ap<a, b>(mf: Sequence<(a: a) => b, unknown>, ma: Sequence<a, unknown>): Sequence<b, [Sequence.Iterator<Sequence<b, unknown>>, Sequence.Iterator<b>]>;
+  export declare function ap<a, b>(mf: Sequence<(a: a) => b, unknown>): (ma: Sequence<a, unknown>) => Sequence<b, [Sequence.Iterator<Sequence<b, unknown>>, Sequence.Iterator<b>]>;
   export declare const Return: typeof pure;
-  export declare function bind<a, b>(m: Sequence<a, any>, f: (a: a) => Sequence<b, any>): Sequence<b, Sequence.Iterator<a>>;
-  export declare function bind<a>(m: Sequence<a, any>): <b>(f: (a: a) => Sequence<b, any>) => Sequence<b, Sequence.Iterator<a>>;
-  export declare function sequence<b>(ms: Sequence<b, any>[]): Sequence<Sequence<b, [Sequence.Iterator<b>, Sequence.Iterator<b>]>, Sequence.Iterator<Sequence<b, [Sequence.Iterator<b>, Sequence.Iterator<b>]>>>;
-  export declare const mempty: Sequence<any, any>;
-  export declare function mappend<a>(l: Sequence<a, any>, r: Sequence<a, any>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
-  export declare function mconcat<a>(as: Iterable<Sequence<a, any>>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
-  export declare const mzero: Sequence<any, any>;
-  export declare function mplus<a>(l: Sequence<a, any>, r: Sequence<a, any>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
+  export declare function bind<a, b>(m: Sequence<a, unknown>, f: (a: a) => Sequence<b, unknown>): Sequence<b, Sequence.Iterator<a>>;
+  export declare function bind<a>(m: Sequence<a, unknown>): <b>(f: (a: a) => Sequence<b, unknown>) => Sequence<b, Sequence.Iterator<a>>;
+  export declare function sequence<b>(ms: Sequence<b, unknown>[]): Sequence<Sequence<b, [Sequence.Iterator<b>, Sequence.Iterator<b>]>, Sequence.Iterator<Sequence<b, [Sequence.Iterator<b>, Sequence.Iterator<b>]>>>;
+  export declare const mempty: Sequence<never, never>;
+  export declare function mappend<a>(l: Sequence<a, unknown>, r: Sequence<a, unknown>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
+  export declare function mconcat<a>(as: Iterable<Sequence<a, unknown>>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
+  export declare const mzero: Sequence<never, never>;
+  export declare function mplus<a>(l: Sequence<a, unknown>, r: Sequence<a, unknown>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
 }
 export interface Sequence<a, z> {
   extract(): a[];
   [Symbol.iterator](): Iterator<a>;
   iterate(): Sequence.Thunk<a>;
   fmap<b>(f: (a: a) => b): Sequence<b, Sequence.Iterator<a>>;
-  ap<a, z>(this: Sequence<(a: a) => z, any>, a: Sequence<a, any>): Sequence<z, [Sequence.Iterator<Sequence<z, any>>, Sequence.Iterator<z>]>;
-  ap<a, b, z>(this: Sequence<(a: a, b: b) => z, any>, a: Sequence<a, any>): Sequence<(b: b) => z, [Sequence.Iterator<Sequence<z, any>>, Sequence.Iterator<z>]>;
-  ap<a, b, c, z>(this: Sequence<(a: a, b: b, c: c) => z, any>, a: Sequence<a, any>): Sequence<(b: b, c: c) => z, [Sequence.Iterator<Sequence<z, any>>, Sequence.Iterator<z>]>;
-  ap<a, b, c, d, z>(this: Sequence<(a: a, b: b, c: c, d: d) => z, any>, a: Sequence<a, any>): Sequence<(b: b, c: c, d: d) => z, [Sequence.Iterator<Sequence<z, any>>, Sequence.Iterator<z>]>;
-  ap<a, b, c, d, e, z>(this: Sequence<(a: a, b: b, c: c, d: d, e: e) => z, any>, a: Sequence<a, any>): Sequence<(b: b, c: c, d: d, e: e) => z, [Sequence.Iterator<Sequence<z, any>>, Sequence.Iterator<z>]>;
-  bind<b>(f: (a: a) => Sequence<b, any>): Sequence<b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]>;
-  join<b>(this: Sequence<Sequence<b, any>, any>): Sequence<b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]>;
-  mapM<b>(f: (a: a) => Sequence<b, any>): Sequence<b[], [Sequence.Iterator<Sequence<b[], any>>, Sequence.Iterator<b[]>]>;
-  filterM(f: (a: a) => Sequence<boolean, any>): Sequence<a[], [Sequence.Iterator<Sequence<a[], any>>, Sequence.Iterator<a[]>]>;
+  ap<a, z>(this: Sequence<(a: a) => z, unknown>, a: Sequence<a, unknown>): Sequence<z, [Sequence.Iterator<Sequence<z, unknown>>, Sequence.Iterator<z>]>;
+  ap<a, b, z>(this: Sequence<(a: a, b: b) => z, unknown>, a: Sequence<a, unknown>): Sequence<(b: b) => z, [Sequence.Iterator<Sequence<z, unknown>>, Sequence.Iterator<z>]>;
+  ap<a, b, c, z>(this: Sequence<(a: a, b: b, c: c) => z, unknown>, a: Sequence<a, unknown>): Sequence<(b: b, c: c) => z, [Sequence.Iterator<Sequence<z, unknown>>, Sequence.Iterator<z>]>;
+  ap<a, b, c, d, z>(this: Sequence<(a: a, b: b, c: c, d: d) => z, unknown>, a: Sequence<a, unknown>): Sequence<(b: b, c: c, d: d) => z, [Sequence.Iterator<Sequence<z, unknown>>, Sequence.Iterator<z>]>;
+  ap<a, b, c, d, e, z>(this: Sequence<(a: a, b: b, c: c, d: d, e: e) => z, unknown>, a: Sequence<a, unknown>): Sequence<(b: b, c: c, d: d, e: e) => z, [Sequence.Iterator<Sequence<z, unknown>>, Sequence.Iterator<z>]>;
+  bind<b>(f: (a: a) => Sequence<b, unknown>): Sequence<b, [Sequence.Iterator<Sequence<b, unknown>>, Sequence.Iterator<b>]>;
+  join<b>(this: Sequence<Sequence<b, unknown>, unknown>): Sequence<b, [Sequence.Iterator<Sequence<b, unknown>>, Sequence.Iterator<b>]>;
+  mapM<b>(f: (a: a) => Sequence<b, unknown>): Sequence<b[], [Sequence.Iterator<Sequence<b[], unknown>>, Sequence.Iterator<b[]>]>;
+  filterM(f: (a: a) => Sequence<boolean, unknown>): Sequence<a[], [Sequence.Iterator<Sequence<a[], unknown>>, Sequence.Iterator<a[]>]>;
   map<b>(f: (a: a, i: number) => b): Sequence<b, Sequence.Iterator<a>>;
   filter(f: (a: a, i: number) => boolean): Sequence<a, Sequence.Iterator<a>>;
   scanl<b>(f: (b: b, a: a) => b, z: b): Sequence<b, [b, Sequence.Iterator<a>, number]>;
-  foldr<b>(f: (a: a, b: Sequence<b, any>) => Sequence<b, any>, z: Sequence<b, any>): Sequence<b, [Sequence.Iterator<Sequence<b, any>>, Sequence.Iterator<b>]>;
+  foldr<b>(f: (a: a, b: Sequence<b, unknown>) => Sequence<b, unknown>, z: Sequence<b, unknown>): Sequence<b, [Sequence.Iterator<Sequence<b, unknown>>, Sequence.Iterator<b>]>;
   group(f: (x: a, y: a) => boolean): Sequence<a[], [Sequence.Iterator<a>, a[]]>;
   inits(): Sequence<a[], [Sequence.Iterator<a[]>, Sequence.Iterator<a[]>]>
   tails(): Sequence<a[], [Sequence.Iterator<a[]>, Sequence.Iterator<a[]>]>
   segs(): Sequence<a[], [Sequence.Iterator<a[]>, Sequence.Iterator<a[]>]>;
   subsequences(): Sequence<a[], [Sequence.Iterator<a[]>, Sequence.Iterator<a[]>]>;
-  permutations(): Sequence<a[], [Sequence.Iterator<Sequence<a[], any>>, Sequence.Iterator<a[]>]>;
+  permutations(): Sequence<a[], [Sequence.Iterator<Sequence<a[], unknown>>, Sequence.Iterator<a[]>]>;
   take(n: number): Sequence<a, Sequence.Iterator<a>>;
   drop(n: number): Sequence<a, Sequence.Iterator<a>>;
   takeWhile(f: (a: a) => boolean): Sequence<a, Sequence.Iterator<a>>;
@@ -116,7 +116,7 @@ export namespace Sequence {
   }
   export type Iterator<a> = () => Thunk<a>;
   export namespace Iterator {
-    export const done: Sequence.Iterator<any> = () => <Sequence.Thunk<any>>[void 0, done, -1];
+    export const done: Sequence.Iterator<never> = () => <Sequence.Thunk<never>>[void 0, done, -1];
     export function when<a, b>(
       thunk: Thunk<a>,
       caseDone: (thunk: Thunk<a>) => b,
@@ -127,7 +127,7 @@ export namespace Sequence {
         : caseDone(thunk);
     }
   }
-  export function isIterable(thunk: Thunk<any>): boolean {
+  export function isIterable(thunk: Thunk<unknown>): boolean {
     return Thunk.iterator(thunk) !== Iterator.done;
   }
   export namespace Exception {
@@ -135,11 +135,11 @@ export namespace Sequence {
       console.error(args, args.length, args[0], args[1]);
       return new TypeError(`Spica: Sequence: Invalid parameters of cons.`);
     }
-    export function invalidDataError(data: any[]): TypeError {
+    export function invalidDataError(data: unknown[]): TypeError {
       console.error(data);
       return new TypeError(`Spica: Sequence: Invalid data.`);
     }
-    export function invalidThunkError(thunk: Sequence.Thunk<any>): TypeError {
+    export function invalidThunkError(thunk: Sequence.Thunk<unknown>): TypeError {
       console.error(thunk);
       return new TypeError(`Spica: Sequence: Invalid thunk.`);
     }
