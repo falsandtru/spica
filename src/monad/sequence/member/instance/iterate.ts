@@ -1,6 +1,7 @@
 import { Sequence } from '../../core';
+import { compose } from '../../../../helper/compose';
 
-export default class <a, z> extends Sequence<a, z> {
+compose(Sequence, class <a, z> extends Sequence<a, z> {
   public iterate(): Sequence.Thunk<a> {
     return this.iterate_();
   }
@@ -29,4 +30,4 @@ export default class <a, z> extends Sequence<a, z> {
         throw Sequence.Exception.invalidDataError(data);
     }
   }
-}
+});

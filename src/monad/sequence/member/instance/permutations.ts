@@ -1,6 +1,7 @@
 import { Sequence } from '../../core';
+import { compose } from '../../../../helper/compose';
 
-export default class <a, z> extends Sequence<a, z> {
+compose(Sequence, class <a, z> extends Sequence<a, z> {
   public permutations(): Sequence<a[], [Sequence.Iterator<Sequence<a[], unknown>>, Sequence.Iterator<a[]>]> {
     return Sequence.from([0])
       .bind<a[]>(() => {
@@ -14,7 +15,7 @@ export default class <a, z> extends Sequence<a, z> {
           Sequence.from([xs]),
           perms<a>(Sequence.from(xs), Sequence.mempty)));
   }
-}
+});
 
 function perms<a>(ts: Sequence<a, unknown>, is: Sequence<a, unknown>): Sequence<a[], [Sequence.Iterator<Sequence<a[], unknown>>, Sequence.Iterator<a[]>]> {
   return Sequence.Iterator.when<a, Sequence<a[], [Sequence.Iterator<Sequence<a[], unknown>>, Sequence.Iterator<a[]>]>>(

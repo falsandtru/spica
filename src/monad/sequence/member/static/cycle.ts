@@ -1,6 +1,7 @@
 import { Sequence } from '../../core';
+import { compose } from '../../../../helper/compose';
 
-export default class <a, z> extends Sequence<a, z> {
+compose(Sequence, class <a, z> extends Sequence<a, z> {
   public static cycle<a>(as: Iterable<a>): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]> {
     return new Sequence<a, [Iterator<a>, number]>(
       function cycle(
@@ -14,4 +15,4 @@ export default class <a, z> extends Sequence<a, z> {
     })
     .reduce();
   }
-}
+});

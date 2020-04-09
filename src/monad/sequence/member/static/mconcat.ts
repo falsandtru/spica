@@ -1,11 +1,12 @@
 import { Sequence } from '../../core';
+import { compose } from '../../../../helper/compose';
 
-export default class <a, z> extends Sequence<a, z> {
+compose(Sequence, class <a, z> extends Sequence<a, z> {
   public static mconcat<a>(as: Iterable<Sequence<a, unknown>>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]> {
     return [...as]
       .reduce<Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>>((a, b) => mconcat(a, b), Sequence.mempty);
   }
-}
+});
 
 function mconcat<a>(a: Sequence<a, unknown>, b: Sequence<a, unknown>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]> {
   return new Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>(([ai, bi] = [() => a.iterate(), () => b.iterate()], cons) =>

@@ -1,6 +1,7 @@
 import { Sequence } from '../../core';
+import { compose } from '../../../../helper/compose';
 
-export default class <a, z> extends Sequence<a, z> {
+compose(Sequence, class <a, z> extends Sequence<a, z> {
   public scanl<b>(f: (b: b, a: a) => b, z: b): Sequence<b, [b, Sequence.Iterator<a>, number]> {
     return new Sequence<b, [b, Sequence.Iterator<a>, number]>(([prev, iter, i] = [z, () => this.iterate(), 0]) =>
       Sequence.Iterator.when<a, Sequence.Data<b, [b, Sequence.Iterator<a>, number]>>(
@@ -14,4 +15,4 @@ export default class <a, z> extends Sequence<a, z> {
             prev = f(prev, Sequence.Thunk.value(thunk)),
             [prev, Sequence.Thunk.iterator(thunk), Sequence.Thunk.index(thunk) + 1])));
   }
-}
+});

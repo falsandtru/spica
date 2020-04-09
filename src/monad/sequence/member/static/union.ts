@@ -1,6 +1,7 @@
 import { Sequence } from '../../core';
+import { compose } from '../../../../helper/compose';
 
-export default class <a, z> extends Sequence<a, z> {
+compose(Sequence, class <a, z> extends Sequence<a, z> {
   public static union<a>(a: Sequence<a, unknown>, b: Sequence<a, unknown>, cmp: (a: a, b: a) => number): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]> {
     return new Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>(([ai, bi] = [() => a.iterate(), () => b.iterate()], cons) =>
       Sequence.Iterator.when(
@@ -21,4 +22,4 @@ export default class <a, z> extends Sequence<a, z> {
               return cons(Sequence.Thunk.value(at), [Sequence.Thunk.iterator(at), Sequence.Thunk.iterator(bt)]);
             })));
   }
-}
+});

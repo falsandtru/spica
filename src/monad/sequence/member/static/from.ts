@@ -1,6 +1,7 @@
 import { Sequence } from '../../core';
+import { compose } from '../../../../helper/compose';
 
-export default class <a, z> extends Sequence<a, z> {
+compose(Sequence, class <a, z> extends Sequence<a, z> {
   public static from<a>(as: Iterable<a>): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]> {
     return new Sequence<a, [Iterator<a>, number]>(
       ([iter, i] = [as[Symbol.iterator](), 0], cons) => {
@@ -11,4 +12,4 @@ export default class <a, z> extends Sequence<a, z> {
       })
       .reduce();
   }
-}
+});

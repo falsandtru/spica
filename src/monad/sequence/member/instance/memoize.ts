@@ -1,10 +1,11 @@
 import { Map } from '../../../../global';
 import { Sequence } from '../../core';
+import { compose } from '../../../../helper/compose';
 import { memoize } from '../../../../memoize';
 
 const memory = memoize(<a>(_: Sequence<a, unknown>): Map<number, Sequence.Thunk<a>> => new Map());
 
-export default class <a, z> extends Sequence<a, z> {
+compose(Sequence, class <a, z> extends Sequence<a, z> {
   public memoize(): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]> {
     return new Sequence<a, [number, Map<number, Sequence.Thunk<a>>]>(
       ([i, memo] = [0, memory(this)], cons) =>
@@ -13,4 +14,4 @@ export default class <a, z> extends Sequence<a, z> {
           () => cons(),
           thunk => cons(Sequence.Thunk.value(thunk), [i + 1, memo])));
   }
-}
+});

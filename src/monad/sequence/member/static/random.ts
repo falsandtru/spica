@@ -1,6 +1,7 @@
 import { Sequence } from '../../core';
+import { compose } from '../../../../helper/compose';
 
-export default class <a, z> extends Sequence<a, z> {
+compose(Sequence, class <a, z> extends Sequence<a, z> {
   public static random(): Sequence<number, [number, Map<number, Sequence.Thunk<number>>]>
   public static random<a>(gen: () => a): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]>
   public static random<a>(as: a[]): Sequence<a, Sequence.Iterator<number>>
@@ -9,4 +10,4 @@ export default class <a, z> extends Sequence<a, z> {
       ? Sequence.from(new Sequence<number | a, undefined>((_, cons) => cons(p(), _)))
       : this.random().map(r => p[r * p.length | 0]);
   }
-}
+});

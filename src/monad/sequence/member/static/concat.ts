@@ -1,6 +1,7 @@
 import { Sequence } from '../../core';
+import { compose } from '../../../../helper/compose';
 
-export default class <a, z> extends Sequence<a, z> {
+compose(Sequence, class <a, z> extends Sequence<a, z> {
   public static concat<a>(as: Sequence<Sequence<a, unknown>, unknown>): Sequence<a, [Sequence.Iterator<Sequence<a, unknown>>, Sequence.Iterator<a>]> {
     return new Sequence<a, [Sequence.Iterator<Sequence<a, unknown>>, Sequence.Iterator<a>]>(([ai, bi] = [() => as.iterate(), Sequence.Iterator.done], cons) =>
       Sequence.Iterator.when(
@@ -15,4 +16,4 @@ export default class <a, z> extends Sequence<a, z> {
             () => (bi = Sequence.Iterator.done, ar()),
             bt => cons(Sequence.Thunk.value(bt), [() => at, Sequence.Thunk.iterator(bt)])))));
   }
-}
+});

@@ -1,6 +1,7 @@
 import { Sequence } from '../../core';
+import { compose } from '../../../../helper/compose';
 
-export default class <a, z> extends Sequence<a, z> {
+compose(Sequence, class <a, z> extends Sequence<a, z> {
   public extract(): a[] {
     const acc: a[] = [];
     let iter = () => this.iterate();
@@ -11,4 +12,4 @@ export default class <a, z> extends Sequence<a, z> {
       iter = Sequence.Thunk.iterator(thunk);
     }
   }
-}
+});

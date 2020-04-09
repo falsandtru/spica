@@ -1,6 +1,7 @@
 import { Sequence } from '../../core';
+import { compose } from '../../../../helper/compose';
 
-export default class <a, z> extends Sequence<a, z> {
+compose(Sequence, class <a, z> extends Sequence<a, z> {
   public inits(): Sequence<a[], [Sequence.Iterator<a[]>, Sequence.Iterator<a[]>]> {
     return Sequence.mappend(
       Sequence.from([[]]),
@@ -8,4 +9,4 @@ export default class <a, z> extends Sequence<a, z> {
         .scanl<a[]>(((b, a) => [...b, a]), [])
         .dropWhile(as => as.length === 0));
   }
-}
+});

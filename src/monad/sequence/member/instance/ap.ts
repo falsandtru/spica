@@ -1,6 +1,7 @@
 import { Sequence } from '../../core';
+import { compose } from '../../../../helper/compose';
 
-export default class <a, z> extends Sequence<a, z> {
+compose(Sequence, class <a, z> extends Sequence<a, z> {
   public ap<a, z>(this: Sequence<(a: a) => z, unknown>, a: Sequence<a, unknown>): Sequence<z, [Sequence.Iterator<Sequence<z, unknown>>, Sequence.Iterator<z>]>
   public ap<a, b, z>(this: Sequence<(a: a, b: b) => z, unknown>, a: Sequence<a, unknown>): Sequence<(b: b) => z, [Sequence.Iterator<Sequence<z, unknown>>, Sequence.Iterator<z>]>
   public ap<a, b, c, z>(this: Sequence<(a: a, b: b, c: c) => z, unknown>, a: Sequence<a, unknown>): Sequence<(b: b, c: c) => z, [Sequence.Iterator<Sequence<z, unknown>>, Sequence.Iterator<z>]>
@@ -9,4 +10,4 @@ export default class <a, z> extends Sequence<a, z> {
   public ap<a, z>(this: Sequence<(...as: unknown[]) => z, unknown>, a: Sequence<a, unknown>): Sequence<z, [Sequence.Iterator<Sequence<z, unknown>>, Sequence.Iterator<z>]> {
     return Sequence.ap(this, a);
   }
-}
+});

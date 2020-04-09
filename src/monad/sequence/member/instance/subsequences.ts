@@ -1,6 +1,7 @@
 import { Sequence } from '../../core';
+import { compose } from '../../../../helper/compose';
 
-export default class <a, z> extends Sequence<a, z> {
+compose(Sequence, class <a, z> extends Sequence<a, z> {
   public subsequences(): Sequence<a[], [Sequence.Iterator<a[]>, Sequence.Iterator<a[]>]> {
     return Sequence.mappend<a[]>(
       Sequence.from([[]]),
@@ -8,7 +9,7 @@ export default class <a, z> extends Sequence<a, z> {
         .bind(() =>
           nonEmptySubsequences(this)));
   }
-}
+});
 
 function nonEmptySubsequences<a, z>(xs: Sequence<a, z>): Sequence<a[], [Sequence.Iterator<a[]>, Sequence.Iterator<a[]>]> {
   return Sequence.Iterator.when<a, Sequence<a[], [Sequence.Iterator<a[]>, Sequence.Iterator<a[]>]>>(
