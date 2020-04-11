@@ -40,11 +40,11 @@ export class Copropagator<T = unknown, R = T, S = unknown> extends Coroutine<T, 
 
 function all<T>(sources: Iterable<PromiseLike<T>>, memory?: Map<PromiseLike<T>, T>): AtomicPromise<T[]> {
   const before = isArray(sources)
-    ? sources as PromiseLike<T>[]
+    ? sources
     : [...sources];
   return AtomicPromise.all(before).then(values => {
     const after = isArray(sources)
-      ? sources as PromiseLike<T>[]
+      ? sources
       : [...sources];
     const same = after.length === before.length && after.every((_, i) => after[i] === before[i]);
     if (!memory && same) return values;

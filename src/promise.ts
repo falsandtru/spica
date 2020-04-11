@@ -45,7 +45,7 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
   public static all<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<T[]>;
   public static all<T>(vs: Iterable<T | PromiseLike<T> | AtomicPromiseLike<T>>): AtomicPromise<T[]> {
     return new AtomicPromise<T[]>((resolve, reject) => {
-      const values = isArray(vs) ? vs as T[] : [...vs];
+      const values = isArray(vs) ? vs : [...vs];
       const results: T[] = Array(values.length);
       let count = 0;
       for (let i = 0; i < values.length; ++i) {
@@ -85,7 +85,7 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
   public static race<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<T>;
   public static race<T>(vs: Iterable<T | PromiseLike<T> | AtomicPromiseLike<T>>): AtomicPromise<T> {
     return new AtomicPromise<T>((resolve, reject) => {
-      const values = isArray(vs) ? vs as T[] : [...vs];
+      const values = isArray(vs) ? vs : [...vs];
       for (let i = 0; i < values.length; ++i) {
         const value = values[i];
         if (!isPromiseLike(value)) {
