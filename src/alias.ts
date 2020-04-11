@@ -52,8 +52,6 @@ export const ObjectSetPrototypeOf: <T extends object>(o: T, proto: object | null
 export const ObjectValues = Object.values;
 
 export const isArray = Array.isArray as {
-  (arg: any[]): arg is any[];
-  (arg: readonly any[]): arg is readonly any[];
   <T>(arg: Iterable<T>): arg is T[];
-  (arg: any): arg is any[];
+  (arg: any): arg is readonly any[];
 };
