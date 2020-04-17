@@ -1,6 +1,6 @@
 import { Map, Error } from './global';
 import { isArray } from './alias';
-import { Coroutine } from './coroutine';
+import { Coroutine, CoroutineOptions } from './coroutine';
 import { AtomicPromise } from './promise';
 import { never } from './clock';
 
@@ -10,6 +10,7 @@ export class Copropagator<T = unknown, R = T, S = unknown> extends Coroutine<T, 
   constructor(
     coroutines: Iterable<Coroutine<T, R, unknown>>,
     reducer: (results: T[]) => T = results => results[0],
+    opts?: CoroutineOptions,
   ) {
     assert(new Set(coroutines).size === [...coroutines].length);
     super(async function* () {
@@ -33,8 +34,7 @@ export class Copropagator<T = unknown, R = T, S = unknown> extends Coroutine<T, 
         reason =>
           void this[Coroutine.terminate](reason));
       return never;
-    }, { autorun: false });
-    void this[Coroutine.init]();
+    }, { ...opts, delay: false });
   }
 }
 

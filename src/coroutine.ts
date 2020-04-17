@@ -10,8 +10,8 @@ import { causeAsyncException } from './exception';
 import { noop } from './noop';
 
 export interface CoroutineOptions {
-  readonly autorun?: boolean;
-  readonly debug?: boolean;
+  readonly run?: boolean;
+  readonly delay?: boolean;
   readonly size?: number;
   readonly interval?: number;
   readonly resume?: () => PromiseLike<void> | void;
@@ -53,6 +53,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
   ) {
     super(resolve => res = resolve);
     var res!: (v: T | AtomicPromise<T>) => void;
+    this[internal] = new Internal(opts);
     let count = 0;
     this[Coroutine.init] = async () => {
       const core = this[internal];
@@ -111,8 +112,6 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
         this[Coroutine.terminate](reason);
       }
     };
-    this[internal] = new Internal(opts);
-    this[port] = new Port(this, this[Coroutine.init]);
     const core = this[internal];
     assert(core.settings.size < 0 ? core.sendBuffer === undefined : core.sendBuffer instanceof Channel);
     assert(core.settings.size < 0 ? core.recvBuffer instanceof BroadcastChannel : core.recvBuffer instanceof Channel);
@@ -157,8 +156,11 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
         }
       }
     }
-    this[internal].settings.debug && this[Coroutine.init]();
-    this[internal].settings.autorun && tick(this[Coroutine.init]);
+    if (this[internal].settings.run) {
+      this[internal].settings.delay
+        ? tick(this[Coroutine.init])
+        : this[Coroutine.init]();
+    }
   }
   public readonly [internal]: Internal<T, R, S>;
   public get [alive](): boolean {
@@ -199,7 +201,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     }
     return this;
   }
-  public readonly [port]: Structural<Port<T, R, S>>;
+  public readonly [port]: Structural<Port<T, R, S>> = new Port(this);
 }
 
 class Internal<T, R, S> {
@@ -223,8 +225,8 @@ class Internal<T, R, S> {
     });
   }
   public readonly settings: DeepImmutable<DeepRequired<CoroutineOptions>> = extend({
-    autorun: true,
-    debug: false,
+    run: true,
+    delay: true,
     size: -1,
     interval: 0,
     resume: () => undefined,
@@ -250,16 +252,13 @@ class Internal<T, R, S> {
 class Port<T, R, S> {
   constructor(
     co: Coroutine<T, R, S>,
-    init: () => void,
   ) {
     this[internal] = {
       co,
-      init,
     };
   }
   public readonly [internal]: {
     readonly co: Coroutine<T, R, S>;
-    readonly init: () => void;
   };
   public ask(msg: S): Promise<IteratorResult<R, T>> {
     const core = this[internal].co[internal];
@@ -267,7 +266,6 @@ class Port<T, R, S> {
     if (core.settings.size < 0) return AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`));
     assert(core.sendBuffer instanceof Channel);
     core.settings.size >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
-    this[internal].init();
     const future = new Future<IteratorResult<R, T>>();
     core.sendBuffer.put([msg, future.bind]);
     ++core.reception;
@@ -280,7 +278,6 @@ class Port<T, R, S> {
   public recv(): Promise<IteratorResult<R, T>> {
     const core = this[internal].co[internal];
     if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
-    this[internal].init();
     ++core.reception;
     return ESPromise.resolve(core.recvBuffer.take())
       .then(result =>
@@ -294,7 +291,6 @@ class Port<T, R, S> {
     if (core.settings.size < 0) return AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`));
     assert(core.sendBuffer instanceof Channel);
     core.settings.size >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
-    this[internal].init();
     const future = new Future<IteratorResult<R, T>>();
     return ESPromise.resolve(core.sendBuffer.put([msg, future.bind]));
   }
@@ -303,7 +299,6 @@ class Port<T, R, S> {
     if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
     return (async () => {
       core.settings.size >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
-      this[internal].init();
       const iter = com.call(this[internal].co);
       let reply: R | T | undefined;
       while (true) {

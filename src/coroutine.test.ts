@@ -34,7 +34,7 @@ describe('Unit: lib/coroutine', () => {
       assert(cnt === 3 && ++cnt);
       new Coroutine(async function* () {
         return 0;
-      }, { autorun: true })
+      }, { delay: true })
         .then(value => {
           assert(cnt === 5 && ++cnt);
           assert(value === 0);
@@ -44,7 +44,7 @@ describe('Unit: lib/coroutine', () => {
       new Coroutine(async function* () {
         wait(1).then(() => this[Coroutine.terminate](0));
         return never;
-      }, { autorun: true })
+      }, { delay: true })
         .catch(reason => {
           assert(cnt === 6 && ++cnt);
           assert(reason === 0);

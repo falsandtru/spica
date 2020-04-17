@@ -51,8 +51,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
   constructor(opts: SupervisorOptions = {}) {
     super(async function* (this: Supervisor<N, P, R, S>) {
       return this.state;
-    });
-    void this[Coroutine.init]();
+    }, { delay: false });
     void extend(this.settings, opts);
     this.name = this.settings.name;
     // FIXME: Remove the next type assertion after #37383 is fixed.

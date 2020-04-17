@@ -13,14 +13,14 @@ describe('Unit: lib/coaggregator', () => {
             assert(cnt === 0 && ++cnt);
           });
           return never;
-        }, { debug: true }),
+        }, { delay: false }),
         new Coroutine(async function* () {
           this.then(reason => {
             assert(reason === 0);
             assert(cnt === 1 && ++cnt);
           });
           return never;
-        }, { debug: true }),
+        }, { delay: false }),
       ]);
       co.then(reason => {
         assert(reason === 0);
@@ -39,14 +39,14 @@ describe('Unit: lib/coaggregator', () => {
             assert(cnt === 0 && ++cnt);
           });
           return never;
-        }, { debug: true }),
+        }, { delay: false }),
         new Coroutine(async function* () {
           this.catch(reason => {
             assert(reason === 0);
             assert(cnt === 1 && ++cnt);
           });
           return never;
-        }, { debug: true }),
+        }, { delay: false }),
       ]);
       co.catch(reason => {
         assert(reason === 0);

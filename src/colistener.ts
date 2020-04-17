@@ -30,7 +30,7 @@ export class Colistener<T, U = undefined> extends Coroutine<U, T> {
           yield queue.shift()!;
         }
       }
-    }, { ...opts, size: -1 });
+    }, { ...opts, size: -1, run: false });
     void this[Coroutine.init]();
   }
   public close(this: Colistener<T, undefined>, value?: U): void;
