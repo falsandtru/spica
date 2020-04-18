@@ -34,7 +34,7 @@ export class Copropagator<T = unknown, R = T, S = unknown> extends Coroutine<T, 
         reason =>
           void this[Coroutine.terminate](reason));
       return never;
-    }, { ...opts, delay: false });
+    }, { delay: false, ...opts });
   }
 }
 

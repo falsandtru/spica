@@ -40,6 +40,6 @@ export class Coaggregator<T = unknown, R = T, S = unknown> extends Coroutine<T, 
         ? void this[Coroutine.terminate](new Error(`Spica: Coaggregator: No result.`))
         : void this[Coroutine.exit](reducer(results));
       return never;
-    }, { ...opts, delay: false });
+    }, { delay: false, ...opts });
   }
 }
