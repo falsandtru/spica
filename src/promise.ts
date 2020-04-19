@@ -226,32 +226,29 @@ export class Internal<T> {
         catch (reason) {
           return reject(reason);
         }
+      default:
+        fulfillReactions.push(value => {
+          try {
+            onfulfilled
+              ? resolve(onfulfilled(value))
+              : resolve(value as any);
+          }
+          catch (reason) {
+            reject(reason);
+          }
+        });
+        rejectReactions.push(reason => {
+          try {
+            onrejected
+              ? resolve(onrejected(reason))
+              : reject(reason);
+          }
+          catch (reason) {
+            reject(reason);
+          }
+        });
+        return this.resume();
     }
-    if (status.state !== State.rejected) {
-      fulfillReactions.push(value => {
-        try {
-          onfulfilled
-            ? resolve(onfulfilled(value))
-            : resolve(value as any);
-        }
-        catch (reason) {
-          reject(reason);
-        }
-      });
-    }
-    if (status.state !== State.fulfilled) {
-      rejectReactions.push(reason => {
-        try {
-          onrejected
-            ? resolve(onrejected(reason))
-            : reject(reason);
-        }
-        catch (reason) {
-          reject(reason);
-        }
-      });
-    }
-    this.resume();
   }
   public resume(): void {
     if (!this.reactable) return;
