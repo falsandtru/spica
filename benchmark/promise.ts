@@ -1,6 +1,7 @@
 import { benchmark } from './benchmark';
 import { AtomicPromise } from '../';
 import { Promise } from '../src/global';
+import Bluebird from 'bluebird';
 import { clock } from '../src/clock';
 import { noop } from '../src/noop';
 
@@ -138,6 +139,74 @@ describe('Benchmark:', function () {
         new Promise(() => 0),
       ];
       benchmark(`Promise race 3`, done => void Promise.race(ps).then(done), done, { defer: true, async: true });
+    });
+
+  });
+
+  describe('Bluebird', function () {
+    Bluebird.config({
+      longStackTraces: false,
+    });
+
+    it('resolve', function (done) {
+      benchmark('Bluebird resolve', () => void Bluebird.resolve(), done);
+    });
+
+    it('new', function (done) {
+      benchmark('Bluebird new', () => void new Bluebird(resolve => resolve()), done);
+    });
+
+    it('run', function (done) {
+      benchmark(`Bluebird run`, done => void new Bluebird(resolve => clock.then(resolve)).then(done), done, { defer: true, async: true });
+    });
+
+    it('then', function (done) {
+      const p = Bluebird.resolve();
+      benchmark(`Bluebird then`, done => void p.then(done), done, { defer: true, async: true });
+    });
+
+    it('chain 10', function (done) {
+      const p = Bluebird.resolve();
+      benchmark(`Bluebird chain 10`, done => void chain(p, 9).then(done), done, { defer: true, async: true });
+    });
+
+    it('chain 100', function (done) {
+      const p = Bluebird.resolve();
+      benchmark(`Bluebird chain 100`, done => void chain(p, 99).then(done), done, { defer: true, async: true });
+    });
+
+    it('all 2', function (done) {
+      const ps = [
+        Bluebird.resolve(),
+        Bluebird.resolve(),
+      ];
+      benchmark(`Bluebird all 2`, done => void Bluebird.all(ps).then(done), done, { defer: true, async: true });
+    });
+
+    it('all 3', function (done) {
+      const ps = [
+        Bluebird.resolve(),
+        Bluebird.resolve(),
+        Bluebird.resolve(),
+      ];
+      benchmark(`Bluebird all 3`, done => void Bluebird.all(ps).then(done), done, { defer: true, async: true });
+    });
+
+    it('race 2', function (done) {
+      const ps = [
+        new Bluebird(() => 0),
+        Bluebird.resolve(),
+      ];
+      benchmark(`Bluebird race 2`, done => void Bluebird.race(ps).then(done), done, { defer: true, async: true });
+    });
+
+    it('race 3', function (done) {
+      const ps = [
+        new Bluebird(resolve => clock.then(resolve)),
+        Bluebird.resolve(),
+        new Bluebird(() => 0),
+      ];
+      benchmark(`Bluebird race 3`, done => void Bluebird.race(ps).then(done), done, { defer: true, async: true });
     });
 
   });

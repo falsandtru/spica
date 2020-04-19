@@ -46,9 +46,11 @@
   "dependencies": {},
   "devDependencies": {
     "@types/benchmark": "^1.0.31",
+    "@types/bluebird": "^3.5.30",
     "@types/mocha": "^7.0.2",
     "@types/power-assert": "1.5.3",
     "benchmark": "^2.1.4",
+    "bluebird": "^3.7.2",
     "browserify": "^16.5.1",
     "del": "4.1.0",
     "gulp": "^4.0.2",
