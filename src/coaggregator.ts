@@ -34,8 +34,8 @@ export class Coaggregator<T = unknown, R = T, S = unknown> extends Coroutine<T, 
           yield result.value;
         }
       }
+      assert(Object.keys(results).length === results.length);
       assert(results.length === coroutines.length);
-      assert(Object.keys(results).length === coroutines.length);
       results.length === 0
         ? void this[Coroutine.terminate](new Error(`Spica: Coaggregator: No result.`))
         : void this[Coroutine.exit](reducer(results));
