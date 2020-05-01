@@ -66,7 +66,7 @@ describe('Unit: lib/promise', () => {
         await AtomicPromise.all([
           1,
           Promise.resolve(2),
-          3,
+          AtomicPromise.resolve(3),
         ]),
         [
           1,
@@ -76,12 +76,23 @@ describe('Unit: lib/promise', () => {
       assert.deepStrictEqual(
         await AtomicPromise.all([
           1,
+          Promise.reject(2),
+          3,
+        ]).catch(r => [r]),
+        [
           2,
+        ]);
+      assert.deepStrictEqual(
+        await AtomicPromise.all([
+          1,
+          Promise.reject(2),
           AtomicPromise.reject(3),
           4,
           5,
-        ]).catch(r => r),
-        3);
+        ]).catch(r => [r]),
+        [
+          3,
+        ]);
     });
 
     it('race', async () => {
