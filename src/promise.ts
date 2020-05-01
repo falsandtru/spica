@@ -23,6 +23,19 @@ type Status<T> =
 
 const internal = Symbol.for('spica/promise::internal');
 
+
+interface PromiseFulfilledResult<T> {
+  status: "fulfilled";
+  value: T;
+}
+
+interface PromiseRejectedResult {
+  status: "rejected";
+  reason: unknown;
+}
+
+export type PromiseSettledResult<T> = PromiseFulfilledResult<T> | PromiseRejectedResult;
+
 interface AtomicPromiseLike<T> {
   readonly [internal]: Internal<T>;
   then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2>;
@@ -115,6 +128,64 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
           });
         if (done) return;
       }
+    });
+  }
+  public static allSettled<T extends readonly unknown[] | readonly [unknown]>(values: T):
+    Promise<{ -readonly [P in keyof T]: PromiseSettledResult<T[P] extends PromiseLike<infer U> ? U : T[P]> }>;
+  public static allSettled<T>(values: Iterable<T>): Promise<PromiseSettledResult<T extends PromiseLike<infer U> ? U : T>[]>;
+  public static allSettled<T>(vs: Iterable<T>): Promise<unknown> {
+    return new AtomicPromise<PromiseSettledResult<T extends PromiseLike<infer U> ? U : T>[]>(resolve => {
+      const values = isArray(vs) ? vs : [...vs];
+      const results: PromiseSettledResult<T extends PromiseLike<infer U> ? U : T>[] = Array(values.length);
+      let count = 0;
+      for (let i = 0; i < values.length; ++i) {
+        const value = values[i];
+        if (!isPromiseLike(value)) {
+          results[i] = {
+            status: 'fulfilled',
+            value: value as any,
+          };
+          ++count;
+          continue;
+        }
+        if (isAtomicPromiseLike(value)) {
+          const { status } = value[internal];
+          switch (status.state) {
+            case State.fulfilled:
+              results[i] = {
+                status: 'fulfilled',
+                value: status.result,
+              };
+              ++count;
+              continue;
+            case State.rejected:
+              results[i] = {
+                status: 'rejected',
+                reason: status.result,
+              };
+              ++count;
+              continue;
+          }
+        }
+        (value as PromiseLike<T>).then(
+          value => {
+            results[i] = {
+              status: 'fulfilled',
+              value: value as any,
+            };
+            ++count;
+            count === values.length && resolve(results);
+          },
+          reason => {
+            results[i] = {
+              status: 'rejected',
+              reason,
+            };
+            ++count;
+            count === values.length && resolve(results);
+          });
+      }
+      count === values.length && resolve(results);
     });
   }
   public static resolve(): AtomicPromise<undefined>;

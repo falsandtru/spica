@@ -103,6 +103,21 @@ describe('Unit: lib/promise', () => {
       //assert(await AtomicPromise.race([Promise.reject(1), 2]).catch(r => r) === 2); // Incompatible!
     });
 
+    it('allSettled', async () => {
+      assert.deepStrictEqual(await AtomicPromise.allSettled([]), []);
+      assert.deepStrictEqual(
+        await AtomicPromise.allSettled([
+          1,
+          Promise.reject(2),
+          Promise.resolve(3),
+        ]),
+        [
+          { status: 'fulfilled', value: 1 },
+          { status: 'rejected', reason: 2 },
+          { status: 'fulfilled', value: 3 },
+        ]);
+    });
+
     it('promise', async () => {
       (): Promise<void> => AtomicPromise.resolve();
       assert(await Promise.resolve(AtomicPromise.resolve(0)) === 0);
