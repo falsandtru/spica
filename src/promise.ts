@@ -12,13 +12,13 @@ type Status<T> =
   | { readonly state: State.pending;
     }
   | { readonly state: State.resolved;
-      readonly result: PromiseLike<T>;
+      readonly promise: PromiseLike<T>;
     }
   | { readonly state: State.fulfilled;
-      readonly result: T;
+      readonly value: T;
     }
   | { readonly state: State.rejected;
-      readonly result: unknown;
+      readonly reason: unknown;
     };
 
 const internal = Symbol.for('spica/promise::internal');
@@ -72,11 +72,11 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
           const { status } = value[internal];
           switch (status.state) {
             case State.fulfilled:
-              results[i] = status.result;
+              results[i] = status.value;
               ++count;
               continue;
             case State.rejected:
-              reject(status.result);
+              reject(status.reason);
               i = values.length;
               continue;
           }
@@ -108,9 +108,9 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
           const { status } = value[internal];
           switch (status.state) {
             case State.fulfilled:
-              return resolve(status.result);
+              return resolve(status.value);
             case State.rejected:
-              return reject(status.result);
+              return reject(status.reason);
           }
         }
       }
@@ -154,14 +154,14 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
             case State.fulfilled:
               results[i] = {
                 status: 'fulfilled',
-                value: status.result,
+                value: status.value,
               };
               ++count;
               continue;
             case State.rejected:
               results[i] = {
                 status: 'rejected',
-                reason: status.result,
+                reason: status.reason,
               };
               ++count;
               continue;
@@ -235,20 +235,20 @@ export class Internal<T> {
     if (!isPromiseLike(value)) {
       this.status = {
         state: State.fulfilled,
-        result: value!,
+        value: value!,
       };
       return this.resume();
     }
     this.status = {
       state: State.resolved,
-      result: value,
+      promise: value,
     };
     return void value.then(
       value => {
         assert(this.status.state === State.resolved);
         this.status = {
           state: State.fulfilled,
-          result: value,
+          value: value,
         };
         this.resume();
       },
@@ -256,7 +256,7 @@ export class Internal<T> {
         assert(this.status.state === State.resolved);
         this.status = {
           state: State.rejected,
-          result: reason,
+          reason: reason,
         };
         this.resume();
       });
@@ -265,7 +265,7 @@ export class Internal<T> {
     if (this.status.state !== State.pending) return;
     this.status = {
       state: State.rejected,
-      result: reason,
+      reason: reason,
     };
     return this.resume();
   }
@@ -281,8 +281,8 @@ export class Internal<T> {
         if (fulfillReactions.length > 0) break;
         try {
           return onfulfilled
-            ? resolve(onfulfilled(status.result))
-            : resolve(status.result as any);
+            ? resolve(onfulfilled(status.value))
+            : resolve(status.value as any);
         }
         catch (reason) {
           return reject(reason);
@@ -291,8 +291,8 @@ export class Internal<T> {
         if (rejectReactions.length > 0) break;
         try {
           return onrejected
-            ? resolve(onrejected(status.result))
-            : reject(status.result);
+            ? resolve(onrejected(status.reason))
+            : reject(status.reason);
         }
         catch (reason) {
           return reject(reason);
@@ -334,7 +334,7 @@ export class Internal<T> {
         }
         if (fulfillReactions.length === 0) return;
         this.isHandled = true;
-        this.react(fulfillReactions, status.result);
+        this.react(fulfillReactions, status.value);
         return;
       case State.rejected:
         if (this.isHandled && fulfillReactions.length > 0) {
@@ -342,21 +342,21 @@ export class Internal<T> {
         }
         if (rejectReactions.length === 0) return;
         this.isHandled = true;
-        this.react(rejectReactions, status.result);
+        this.react(rejectReactions, status.reason);
         return;
     }
   }
-  public react<T>(reactions: ((result: T) => void)[], result: T): void {
+  public react<T>(reactions: ((param: T) => void)[], param: T): void {
     assert(this.reactable);
     this.reactable = false;
     if (reactions.length < 5) {
       while (reactions.length > 0) {
-        reactions.shift()!(result);
+        reactions.shift()!(param);
       }
     }
     else {
       for (let i = 0; i < reactions.length; ++i) {
-        reactions[i](result);
+        reactions[i](param);
       }
       splice(reactions, 0);
     }
