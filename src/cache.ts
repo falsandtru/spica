@@ -97,9 +97,8 @@ export class Cache<K, V = undefined> implements Collection<K, V> {
     this.put(key, value, log);
     return value;
   }
-  public get(key: K, log = true): V | undefined {
+  public get(key: K): V | undefined {
     const val = this.store.get(key);
-    if (!log) return val;
     const hit = val !== undefined || this.nullish && this.store.has(key);
     return hit && this.access(key)
       ? val
