@@ -58,14 +58,13 @@ export class Cache<K, V = undefined> implements Collection<K, V> {
     },
   };
   private nullish = false;
-  public put(key: K, value: V, log?: boolean): boolean;
+  public put(key: K, value: V): boolean;
   public put(this: Cache<K, undefined>, key: K, value?: V): boolean;
-  public put(key: K, value: V, log = true): boolean {
+  public put(key: K, value: V): boolean {
     !this.nullish && value === undefined
       ? this.nullish = true
       : undefined;
     const hit = this.store.has(key);
-    if (!log && hit) return this.store.set(key, value), true;
     if (hit && this.access(key)) return this.store.set(key, value), true;
 
     const { LRU, LFU } = this.stats;
@@ -92,9 +91,9 @@ export class Cache<K, V = undefined> implements Collection<K, V> {
     return false;
   }
   public set<W extends V>(this: Cache<K, undefined>, key: K, value?: W): W;
-  public set<W extends V>(key: K, value: W, log?: boolean): W;
-  public set<W extends V>(key: K, value: W, log?: boolean): W {
-    this.put(key, value, log);
+  public set<W extends V>(key: K, value: W): W;
+  public set<W extends V>(key: K, value: W): W {
+    this.put(key, value);
     return value;
   }
   public get(key: K): V | undefined {
