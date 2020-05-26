@@ -70,9 +70,22 @@ function normalize(url: string, base: string): NormalizedURL {
 export interface ReadonlyURL extends Readonly<global.URL> {
 }
 export class ReadonlyURL {
-  private static new: (url: string, base: string) => ReadonlyURL = flip(uncurry(memoize((base: string) => memoize((url: string) => ObjectFreeze(new global.URL(formatURLForEdge(url, base), base)), new Cache(100)), new Cache(100))));
+  // Can't freeze URL object in the Firefox extension environment.
+  // ref: https://github.com/falsandtru/pjax-api/issues/44#issuecomment-633915035
+  private static readonly freezable = (() => {
+    try {
+      ObjectFreeze(new global.URL(location.href));
+      return true;
+    }
+    catch {
+      return false;
+    }
+  })();
+  private static readonly new: (url: string, base: string) => ReadonlyURL = flip(uncurry(memoize((base: string) => memoize((url: string) => new global.URL(formatURLForEdge(url, base), base), new Cache(100)), new Cache(100))));
   constructor(url: string, base: string) {
-    return ReadonlyURL.new(url, base);
+    return ReadonlyURL.freezable
+      ? ObjectFreeze(ReadonlyURL.new(url, base))
+      : ReadonlyURL.new(url, base);
   }
 }
 
