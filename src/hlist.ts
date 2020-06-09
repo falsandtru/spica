@@ -1,4 +1,5 @@
 import type { Prepend, Split, AtLeast, Reverse } from './type';
+import { unshift } from './array';
 
 export type HList<as extends unknown[]> =
   as extends [unknown, ...unknown[]] ? HCons<as> :
@@ -51,8 +52,6 @@ class HCons<as extends unknown[]> {
     return this.tuple().reverse() as any;
   }
   public tuple(): as {
-    const t = this.tail.tuple();
-    t.unshift(this.head);
-    return t as as;
+    return unshift([this.head], this.tail.tuple()) as as;
   }
 }
