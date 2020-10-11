@@ -208,7 +208,7 @@ describe('Unit: lib/supervisor', function () {
     it('validation of returned values', function (done) {
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> {
       }();
-      sv.register('', () => new Promise<[number, number]>(resolve => void resolve()), 0);
+      sv.register('', () => new Promise<any>(resolve => void resolve(undefined)), 0);
       sv.call('', 0, (r, e) => void assert(r === undefined) || void assert(e instanceof Error) || done());
     });
 
@@ -435,7 +435,7 @@ describe('Unit: lib/supervisor', function () {
       let cnt = 0;
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
       });
-      sv.register('', n => new Promise<[number, number]>(resolve => void setTimeout(() => void resolve([n, 0]), 100)), 0);
+      sv.register('', n => new Promise(resolve => void setTimeout(() => void resolve([n, 0]), 100)), 0);
       sv.events.loss.on([''], ([, param]) => assert(cnt === 0 && param === 2 && ++cnt));
       sv.call('', 1, r => void assert(r === 1) || assert(cnt === 2 && ++cnt), 1000);
       sv.call('', 2, (r, e) => void assert(r === undefined) || void assert(e instanceof Error) || assert(cnt === 1 && ++cnt), 0);

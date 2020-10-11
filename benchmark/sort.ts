@@ -16,10 +16,10 @@ describe('Benchmark:', function () {
         .then(() => new Promise(resolve => native(array(n), resolve)))
         .then(() => new Promise(resolve => partial(array(n), resolve)));
 
-      function native(arr: number[], done: () => void) {
+      function native(arr: number[], done: (_: unknown) => void) {
         benchmark(`sort native ${arr.length}`, () => arr.sort(), done);
       }
-      function partial(arr: number[], done: () => void) {
+      function partial(arr: number[], done: (_: unknown) => void) {
         function cmp(a: number, b: number): number {
           return a - b;
         }
