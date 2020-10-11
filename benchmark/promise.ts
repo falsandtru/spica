@@ -21,7 +21,7 @@ describe('Benchmark:', function () {
     });
 
     it('new', function (done) {
-      benchmark('AtomicPromise new', () => void new AtomicPromise(resolve => resolve()), done);
+      benchmark('AtomicPromise new', () => void new AtomicPromise(resolve => resolve(undefined)), done);
     });
 
     it('run', function (done) {
