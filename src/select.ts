@@ -28,7 +28,7 @@ export async function* select<T extends Channels>(
     assert(reqs.has(req));
     void reqs.delete(req);
     !result.done && void reqs.add(take(name, chan));
-    yield [name, result as ChannelIteratorResult<T[keyof T]>];
+    yield [name as keyof T, result as ChannelIteratorResult<T[keyof T]>];
   }
   return;
 }
