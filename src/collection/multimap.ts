@@ -1,10 +1,10 @@
-import { Collection } from '../collection';
+import { IterableCollection } from '../collection';
 import { splice } from '../array';
 
-export class MultiMap<K, V> implements Collection<K, V> {
+export class MultiMap<K, V> implements IterableCollection<K, V> {
   constructor(
     entries: Iterable<[K, V]> = [],
-    private readonly store: Collection<K, V[]> = new Map(),
+    private readonly store: IterableCollection<K, V[]> = new Map(),
   ) {
     for (const [k, v] of entries) {
       void this.set(k, v);
@@ -32,5 +32,13 @@ export class MultiMap<K, V> implements Collection<K, V> {
     vs = [];
     this.store.set(key, vs);
     return vs;
+  }
+  public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
+    for (const [k, vs] of this.store) {
+      for (let i = 0; i < vs.length; ++i) {
+        yield [k, vs[i]];
+      }
+    }
+    return;
   }
 }

@@ -1,5 +1,5 @@
 import { undefined, Map } from './global';
-import { Collection } from './collection';
+import { IterableCollection } from './collection';
 import { extend } from './assign';
 import { indexOf, push, splice } from './array';
 import type { DeepImmutable, DeepRequired } from './type';
@@ -15,7 +15,7 @@ export interface CacheOptions<K, V = undefined> {
   };
 }
 
-export class Cache<K, V = undefined> implements Collection<K, V> {
+export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   constructor(
     private readonly capacity: number,
     private readonly callback: (key: K, value: V) => void = () => undefined,

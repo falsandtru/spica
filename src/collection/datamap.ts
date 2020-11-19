@@ -1,9 +1,9 @@
 import { hasOwnProperty } from '../alias';
-import { Collection } from '../collection';
+import { IterableCollection } from '../collection';
 import { sqid } from '../sqid';
 import { type } from '../type';
 
-export class DataMap<K, V> implements Collection<K, V> {
+export class DataMap<K, V> implements IterableCollection<K, V> {
   constructor(
     entries: Iterable<[K, V]> = [],
     private indentify: (key: K) => unknown = stringify,
