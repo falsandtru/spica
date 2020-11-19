@@ -411,7 +411,6 @@ class Worker<N extends string, P, R, S> {
     },
     private readonly destructor_: () => void,
   ) {
-    assert(process.init && process.exit);
     initiated && void this.init();
   }
   private destructor(reason: unknown): void {
