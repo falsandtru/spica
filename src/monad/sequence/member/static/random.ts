@@ -1,3 +1,4 @@
+import { Math } from '../../../../global';
 import { Sequence } from '../../core';
 import { compose } from '../../../../helper/compose';
 
@@ -8,6 +9,6 @@ compose(Sequence, class <a, z> extends Sequence<a, z> {
   public static random<a>(p: (() => number) | (() => a) | a[] = () => Math.random()): Sequence<number | a, [number, Map<number, Sequence.Thunk<number | a>>]> | Sequence<a, Sequence.Iterator<number>> {
     return typeof p === 'function'
       ? Sequence.from(new Sequence<number | a, undefined>((_, cons) => cons(p(), _)))
-      : this.random().map(r => p[r * p.length | 0]);
+      : this.random().map(r => p[Math.floor(r * p.length)]);
   }
 });
