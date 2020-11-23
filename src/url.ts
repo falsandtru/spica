@@ -1,8 +1,10 @@
-import { location } from './global';
+import { undefined, location } from './global';
 import { NormalizedURL, ReadonlyURL } from './url/domain/format';
 
 export { StandardURL, standardize } from './url/domain/format';
 export { ReadonlyURL } from './url/domain/format';
+
+const internal = Symbol();
 
 export class URL<T extends string> {
   constructor(url: URL.Reference<T> | URL.Resource<T> | URL.Origin<T> | URL.Path<T> | URL.Pathname<T>, base?: string)
@@ -10,69 +12,77 @@ export class URL<T extends string> {
   constructor(url: URLSegment<string> & T, base: T)
   constructor(url: T, base?: T extends NormalizedURL ? string : T)
   constructor(url: string, base: string = location.href) {
-    this.url = new ReadonlyURL(url, base);
-    assert(this.url.href.endsWith(`${this.port}${this.path}${this.fragment}`));
-    assert(this.reference === this.url.href);
+    this[internal].url = new ReadonlyURL(url, base);
+    assert(this[internal].url!.href.endsWith(`${this.port}${this.path}${this.fragment}`));
+    assert(this.reference === this[internal].url!.href);
     assert(this.reference.startsWith(this.resource));
-    assert(this.origin === this.url.origin);
-    assert(this.protocol === this.url.protocol);
-    assert(this.host === this.url.host);
-    assert(this.hostname === this.url.hostname);
-    assert(this.port === this.url.port);
+    assert(this.origin === this[internal].url!.origin);
+    assert(this.protocol === this[internal].url!.protocol);
+    assert(this.host === this[internal].url!.host);
+    assert(this.hostname === this[internal].url!.hostname);
+    assert(this.port === this[internal].url!.port);
   }
-  private readonly url: ReadonlyURL;
+  private readonly [internal]: Partial<{
+    url: ReadonlyURL;
+    resource: URL.Resource<T>;
+    path: URL.Path<T>;
+    query: URL.Query<T>;
+    fragment: URL.Fragment<T>;
+  }> = {
+    url: undefined,
+    resource: undefined,
+    path: undefined,
+    query: undefined,
+    fragment: undefined,
+  };
   public get reference(): URL.Reference<T> {
-    return this.url.href as any;
+    return this[internal].url!.href as any;
   }
-  private resource_!: URL.Resource<T>;
   public get resource(): URL.Resource<T> {
-    return this.resource_ = this.resource_ === void 0
+    return this[internal].resource = this[internal].resource === undefined
       ? this.reference.slice(
           0,
           this.query === '?'
             ? this.fragment ? -this.fragment.length - 1 : -1
             : -this.fragment.length || this.reference.length) as any
-      : this.resource_;
+      : this[internal].resource;
   }
   public get origin(): URL.Origin<T> {
-    return this.url.origin as any;
+    return this[internal].url!.origin as any;
   }
   public get scheme(): URL.Scheme {
-    return this.url.protocol.slice(0, -1) as any;
+    return this[internal].url!.protocol.slice(0, -1) as any;
   }
   public get protocol(): URL.Protocol {
-    return this.reference.slice(0, this.reference.indexOf(':') + 1) as any;
+    return this[internal].url!.protocol as any;
   }
   public get host(): URL.Host {
-    return this.url.host as any;
+    return this[internal].url!.host as any;
   }
   public get hostname(): URL.Hostname {
-    return this.url.hostname as any;
+    return this[internal].url!.hostname as any;
   }
   public get port(): URL.Port {
-    return this.url.port as any;
+    return this[internal].url!.port as any;
   }
-  private path_!: URL.Path<T>;
   public get path(): URL.Path<T> {
-    return this.path_ = this.path_ ?? `${this.pathname}${this.query}` as any;
+    return this[internal].path = this[internal].path ?? `${this.pathname}${this.query}` as any;
   }
   public get pathname(): URL.Pathname<T> {
-    return this.url.pathname as any;
+    return this[internal].url!.pathname as any;
   }
-  private query_!: URL.Query<T>;
   public get query(): URL.Query<T> {
-    return this.query_ = this.query_ === void 0
+    return this[internal].query = this[internal].query === undefined
       ? this.reference
           .slice(
             ~(~this.reference.slice(0, -this.fragment.length || this.reference.length).indexOf('?') || ~this.reference.length),
             -this.fragment.length || this.reference.length) as any
-      : this.query_;
+      : this[internal].query;
   }
-  private fragment_!: URL.Fragment<T>;
   public get fragment(): URL.Fragment<T> {
-    return this.fragment_ = this.fragment_ === void 0
+    return this[internal].fragment = this[internal].fragment === undefined
       ? this.reference.slice((~(~this.reference.indexOf('#') || ~this.reference.length))) as any
-      : this.fragment_;
+      : this[internal].fragment;
   }
 }
 export namespace URL {

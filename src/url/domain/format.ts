@@ -68,6 +68,8 @@ function normalize(url: string, base: string): NormalizedURL {
   return new ReadonlyURL(url, base).href as NormalizedURL;
 }
 
+const internal = Symbol();
+
 export interface ReadonlyURL extends Readonly<global.URL> {
 }
 export class ReadonlyURL {
@@ -84,72 +86,86 @@ export class ReadonlyURL {
   })();
   private static readonly new: (url: string, base: string | undefined) => global.URL = flip(uncurry(memoize((base: string | undefined) => memoize((url: string) => new global.URL(formatURLForEdge(url, base), base), new Cache(100)), new Cache(100))));
   constructor(url: string, base?: string) {
-    this._cache.url = ReadonlyURL.freezable
+    this[internal].url = ReadonlyURL.freezable
       ? ObjectFreeze(ReadonlyURL.new(url, base))
       : ReadonlyURL.new(url, base);
   }
-  private _cache: Partial<Mutable<global.URL>> & {
+  private readonly [internal]: Partial<Mutable<global.URL>> & {
     url: global.URL;
-  } = {} as any;
+  } = {
+    url: undefined as any,
+    href: undefined,
+    origin: undefined,
+    protocol: undefined,
+    username: undefined,
+    password: undefined,
+    host: undefined,
+    hostname: undefined,
+    port: undefined,
+    pathname: undefined,
+    search: undefined,
+    hash: undefined,
+    searchParams: undefined,
+  };
   public get href(): string {
-    return this._cache.href === undefined
-      ? this._cache.href = this._cache.url.href
-      : this._cache.href;
+    return this[internal].href === undefined
+      ? this[internal].href = this[internal].url.href
+      : this[internal].href!;
   }
   public get origin(): string {
-    return this._cache.origin === undefined
-      ? this._cache.origin = this._cache.url.origin
-      : this._cache.origin;
+    return this[internal].origin === undefined
+      ? this[internal].origin = this[internal].url.origin
+      : this[internal].origin!;
   }
   public get protocol(): string {
-    return this._cache.protocol === undefined
-      ? this._cache.protocol = this._cache.url.protocol
-      : this._cache.protocol;
+    return this[internal].protocol === undefined
+      ? this[internal].protocol = this[internal].url.protocol
+      : this[internal].protocol!;
   }
   public get username(): string {
-    return this._cache.username === undefined
-      ? this._cache.username = this._cache.url.username
-      : this._cache.username;
+    return this[internal].username === undefined
+      ? this[internal].username = this[internal].url.username
+      : this[internal].username!;
   }
   public get password(): string {
-    return this._cache.password === undefined
-      ? this._cache.password = this._cache.url.password
-      : this._cache.password;
+    return this[internal].password === undefined
+      ? this[internal].password = this[internal].url.password
+      : this[internal].password!;
   }
   public get host(): string {
-    return this._cache.host === undefined
-      ? this._cache.host = this._cache.url.host
-      : this._cache.host;
+    return this[internal].host === undefined
+      ? this[internal].host = this[internal].url.host
+      : this[internal].host!;
   }
   public get hostname(): string {
-    return this._cache.hostname === undefined
-      ? this._cache.hostname = this._cache.url.hostname
-      : this._cache.hostname;
+    return this[internal].hostname === undefined
+      ? this[internal].hostname = this[internal].url.hostname
+      : this[internal].hostname!;
   }
   public get port(): string {
-    return this._cache.port === undefined
-      ? this._cache.port = this._cache.url.port
-      : this._cache.port;
+    return this[internal].port === undefined
+      ? this[internal].port = this[internal].url.port
+      : this[internal].port!;
   }
   public get pathname(): string {
-    return this._cache.pathname === undefined
-      ? this._cache.pathname = this._cache.url.pathname
-      : this._cache.pathname;
+    return this[internal].pathname === undefined
+      ? this[internal].pathname = this[internal].url.pathname
+      : this[internal].pathname!;
   }
   public get search(): string {
-    return this._cache.search === undefined
-      ? this._cache.search = this._cache.url.search
-      : this._cache.search;
+    return this[internal].search === undefined
+      ? this[internal].search = this[internal].url.search
+      : this[internal].search!;
   }
   public get hash(): string {
-    return this._cache.hash === undefined
-      ? this._cache.hash = this._cache.url.hash
-      : this._cache.hash;
+    return this[internal].hash === undefined
+      ? this[internal].hash = this[internal].url.hash
+      : this[internal].hash!;
   }
   public get searchParams(): URLSearchParams {
-    return this._cache.searchParams === undefined
-      ? this._cache.searchParams = this._cache.url.searchParams
-      : this._cache.searchParams;
+    return this[internal].searchParams === undefined
+      ? this[internal].searchParams = this[internal].url.searchParams
+      : this[internal].searchParams!;
   }
   public toString(): string {
     return this.href;
