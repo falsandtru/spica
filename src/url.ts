@@ -2,6 +2,7 @@ import { location } from './global';
 import { NormalizedURL, ReadonlyURL } from './url/domain/format';
 
 export { StandardURL, standardize } from './url/domain/format';
+export { ReadonlyURL } from './url/domain/format';
 
 export class URL<T extends string> {
   constructor(url: URL.Reference<T> | URL.Resource<T> | URL.Origin<T> | URL.Path<T> | URL.Pathname<T>, base?: string)
@@ -20,9 +21,8 @@ export class URL<T extends string> {
     assert(this.port === this.url.port);
   }
   private readonly url: ReadonlyURL;
-  private reference_!: URL.Reference<T>;
   public get reference(): URL.Reference<T> {
-    return this.reference_ = this.reference_ ?? this.url.href as any;
+    return this.url.href as any;
   }
   private resource_!: URL.Resource<T>;
   public get resource(): URL.Resource<T> {
@@ -34,38 +34,30 @@ export class URL<T extends string> {
             : -this.fragment.length || this.reference.length) as any
       : this.resource_;
   }
-  private origin_!: URL.Origin<T>;
   public get origin(): URL.Origin<T> {
-    return this.origin_ = this.origin_ ?? this.url.origin as any;
+    return this.url.origin as any;
   }
-  private scheme_!: URL.Scheme;
   public get scheme(): URL.Scheme {
-    return this.scheme_ = this.scheme_ ?? this.url.protocol.slice(0, -1) as any;
+    return this.url.protocol.slice(0, -1) as any;
   }
-  private protocol_!: URL.Protocol;
   public get protocol(): URL.Protocol {
-    return this.protocol_ = this.protocol_
-        ?? this.reference.slice(0, this.reference.indexOf(':') + 1) as any;
+    return this.reference.slice(0, this.reference.indexOf(':') + 1) as any;
   }
-  private host_!: URL.Host;
   public get host(): URL.Host {
-    return this.host_ = this.host_ ?? this.url.host as any;
+    return this.url.host as any;
   }
-  private hostname_!: URL.Hostname;
   public get hostname(): URL.Hostname {
-    return this.hostname_ = this.hostname_ ?? this.url.hostname;
+    return this.url.hostname as any;
   }
-  private port_!: URL.Port;
   public get port(): URL.Port {
-    return this.port_ = this.port_ ?? this.url.port;
+    return this.url.port as any;
   }
   private path_!: URL.Path<T>;
   public get path(): URL.Path<T> {
     return this.path_ = this.path_ ?? `${this.pathname}${this.query}` as any;
   }
-  private pathname_!: URL.Pathname<T>;
   public get pathname(): URL.Pathname<T> {
-    return this.pathname_ = this.pathname_ ?? this.url.pathname as any;
+    return this.url.pathname as any;
   }
   private query_!: URL.Query<T>;
   public get query(): URL.Query<T> {

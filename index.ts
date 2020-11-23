@@ -23,7 +23,7 @@ export { DataMap } from './src/datamap';
 export { MultiMap } from './src/multimap';
 export { AttrMap } from './src/attrmap';
 export { Cache } from './src/cache';
-export { URL, StandardURL, standardize } from './src/url';
+export { ReadonlyURL, URL, StandardURL, standardize } from './src/url';
 export { tick, wait } from './src/clock';
 export { throttle, debounce } from './src/throttle';
 export { uuid } from './src/uuid';

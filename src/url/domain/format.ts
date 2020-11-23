@@ -1,4 +1,5 @@
-import { global, location } from '../../global';
+import { global, undefined, location } from '../../global';
+import { Mutable } from '../../type';
 import { ObjectFreeze } from '../../alias';
 import { Encoded } from '../attribute/encode';
 import { Normalized } from '../attribute/normalize';
@@ -81,14 +82,83 @@ export class ReadonlyURL {
       return false;
     }
   })();
-  private static readonly new: (url: string, base: string) => ReadonlyURL = flip(uncurry(memoize((base: string) => memoize((url: string) => new global.URL(formatURLForEdge(url, base), base), new Cache(100)), new Cache(100))));
-  constructor(url: string, base: string) {
-    return ReadonlyURL.freezable
+  private static readonly new: (url: string, base: string | undefined) => global.URL = flip(uncurry(memoize((base: string | undefined) => memoize((url: string) => new global.URL(formatURLForEdge(url, base), base), new Cache(100)), new Cache(100))));
+  constructor(url: string, base?: string) {
+    this._cache.url = ReadonlyURL.freezable
       ? ObjectFreeze(ReadonlyURL.new(url, base))
       : ReadonlyURL.new(url, base);
   }
+  private _cache: Partial<Mutable<global.URL>> & {
+    url: global.URL;
+  } = {} as any;
+  public get href(): string {
+    return this._cache.href === undefined
+      ? this._cache.href = this._cache.url.href
+      : this._cache.href;
+  }
+  public get origin(): string {
+    return this._cache.origin === undefined
+      ? this._cache.origin = this._cache.url.origin
+      : this._cache.origin;
+  }
+  public get protocol(): string {
+    return this._cache.protocol === undefined
+      ? this._cache.protocol = this._cache.url.protocol
+      : this._cache.protocol;
+  }
+  public get username(): string {
+    return this._cache.username === undefined
+      ? this._cache.username = this._cache.url.username
+      : this._cache.username;
+  }
+  public get password(): string {
+    return this._cache.password === undefined
+      ? this._cache.password = this._cache.url.password
+      : this._cache.password;
+  }
+  public get host(): string {
+    return this._cache.host === undefined
+      ? this._cache.host = this._cache.url.host
+      : this._cache.host;
+  }
+  public get hostname(): string {
+    return this._cache.hostname === undefined
+      ? this._cache.hostname = this._cache.url.hostname
+      : this._cache.hostname;
+  }
+  public get port(): string {
+    return this._cache.port === undefined
+      ? this._cache.port = this._cache.url.port
+      : this._cache.port;
+  }
+  public get pathname(): string {
+    return this._cache.pathname === undefined
+      ? this._cache.pathname = this._cache.url.pathname
+      : this._cache.pathname;
+  }
+  public get search(): string {
+    return this._cache.search === undefined
+      ? this._cache.search = this._cache.url.search
+      : this._cache.search;
+  }
+  public get hash(): string {
+    return this._cache.hash === undefined
+      ? this._cache.hash = this._cache.url.hash
+      : this._cache.hash;
+  }
+  public get searchParams(): URLSearchParams {
+    return this._cache.searchParams === undefined
+      ? this._cache.searchParams = this._cache.url.searchParams
+      : this._cache.searchParams;
+  }
+  public toString(): string {
+    return this.href;
+  }
+  public toJSON(): string {
+    return this.href;
+  }
 }
 
-function formatURLForEdge(url: string, base: string): string {
-  return url.trim() || base;
+function formatURLForEdge(url: string, base: string | undefined): string {
+  return url.trim() || base || '';
 }
