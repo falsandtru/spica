@@ -50,7 +50,7 @@ describe('Unit: lib/cache', () => {
     });
 
     it('set', () => {
-      assert(new Cache<number, number>(1).set(0, 1) === 1);
+      assert(new Cache<number, number>(1).set(0, 1) instanceof Cache);
     });
 
     it('LRU', () => {
