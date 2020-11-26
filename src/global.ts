@@ -1,5 +1,5 @@
 /// <reference path="./global.d.ts" />
-const global: typeof globalThis & { undefined: undefined } = void 0
+const global: { undefined: undefined } & typeof globalThis = void 0
   || typeof globalThis !== 'undefined' && globalThis
   || typeof self !== 'undefined' && self
   || Function('return this')();
