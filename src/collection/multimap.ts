@@ -7,7 +7,7 @@ export class MultiMap<K, V> implements IterableCollection<K, V> {
     private readonly store: IterableCollection<K, V[]> = new Map(),
   ) {
     for (const [k, v] of entries) {
-      void this.set(k, v);
+      this.set(k, v);
     }
   }
   public get(key: K): V | undefined {

@@ -7,7 +7,7 @@ export class AttrMap<C, K, V> {
     private readonly ValueMap: new <K, V>(entries?: Iterable<[K, V]>) => Collection<K, V> = Map
   ) {
     for (const [c, k, v] of entries) {
-      void this.set(c, k, v);
+      this.set(c, k, v);
     }
   }
   private readonly store = new this.KeyMap<C, Collection<K, V>>();

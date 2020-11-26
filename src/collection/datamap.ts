@@ -9,7 +9,7 @@ export class DataMap<K, V> implements IterableCollection<K, V> {
     private indentify: (key: K) => unknown = stringify,
   ) {
     for (const [k, v] of entries) {
-      void this.set(k, v);
+      this.set(k, v);
     }
   }
   private readonly store = new Map<unknown, [K, V]>();
@@ -17,7 +17,7 @@ export class DataMap<K, V> implements IterableCollection<K, V> {
     return this.store.get(this.indentify(key))?.[1];
   }
   public set(key: K, val: V): this {
-    void this.store.set(this.indentify(key), [key, val]);
+    this.store.set(this.indentify(key), [key, val]);
     return this;
   }
   public has(key: K): boolean {
