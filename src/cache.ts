@@ -58,8 +58,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     },
   };
   private nullish = false;
-  public put(key: K, value: V): boolean;
   public put(this: Cache<K, undefined>, key: K, value?: V): boolean;
+  public put(key: K, value: V): boolean;
   public put(key: K, value: V): boolean {
     !this.nullish && value === undefined
       ? this.nullish = true
