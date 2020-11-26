@@ -84,11 +84,14 @@ export class ReadonlyURL {
       return false;
     }
   })();
-  private static readonly new: (url: string, base: string | undefined) => global.URL = flip(uncurry(memoize((base: string | undefined) => memoize((url: string) => new global.URL(formatURLForEdge(url, base), base), new Cache(100)), new Cache(100))));
+  private static readonly get: (url: string, base: string | undefined) => global.URL
+    = flip(uncurry(memoize((base: string | undefined) => memoize((url: string) =>
+        ReadonlyURL.freezable
+          ? ObjectFreeze(new global.URL(formatURLForEdge(url, base), base))
+          : new global.URL(formatURLForEdge(url, base), base)
+      , new Cache(100)), new Cache(100))));
   constructor(url: string, base?: string) {
-    this[internal].url = ReadonlyURL.freezable
-      ? ObjectFreeze(ReadonlyURL.new(url, base))
-      : ReadonlyURL.new(url, base);
+    this[internal].url = ReadonlyURL.get(url, base);
   }
   private readonly [internal]: Partial<Mutable<global.URL>> & {
     url: global.URL;
