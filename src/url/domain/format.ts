@@ -72,9 +72,7 @@ const internal = Symbol();
 type CachedURL = Partial<Mutable<global.URL>> & {
   url: global.URL;
 };
-export interface ReadonlyURL extends Readonly<global.URL> {
-}
-export class ReadonlyURL {
+export class ReadonlyURL implements Readonly<global.URL> {
   // Can't freeze URL object in the Firefox extension environment.
   // ref: https://github.com/falsandtru/pjax-api/issues/44#issuecomment-633915035
   private static readonly get: (url: string, base: string | undefined) => CachedURL
