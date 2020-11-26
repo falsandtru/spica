@@ -78,7 +78,7 @@ export class ReadonlyURL implements Readonly<global.URL> {
   private static readonly get: (url: string, base: string | undefined) => CachedURL
     = flip(uncurry(memoize((base: string | undefined) => memoize((url: string) =>
       ({
-        url: new global.URL(formatURLForEdge(url, base), base),
+        url: new global.URL(url, base),
         href: undefined,
         origin: undefined,
         protocol: undefined,
@@ -163,8 +163,4 @@ export class ReadonlyURL implements Readonly<global.URL> {
   public toJSON(): string {
     return this.href;
   }
-}
-
-function formatURLForEdge(url: string, base: string | undefined): string {
-  return url.trim() || base || '';
 }
