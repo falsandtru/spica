@@ -1,6 +1,5 @@
 import { global, undefined, location } from '../../global';
 import { Mutable } from '../../type';
-import { ObjectFreeze } from '../../alias';
 import { Encoded } from '../attribute/encode';
 import { Normalized } from '../attribute/normalize';
 import { memoize } from '../../memoize';
@@ -70,46 +69,36 @@ function normalize(url: string, base: string): NormalizedURL {
 
 const internal = Symbol();
 
+type CachedURL = Partial<Mutable<global.URL>> & {
+  url: global.URL;
+};
 export interface ReadonlyURL extends Readonly<global.URL> {
 }
 export class ReadonlyURL {
   // Can't freeze URL object in the Firefox extension environment.
   // ref: https://github.com/falsandtru/pjax-api/issues/44#issuecomment-633915035
-  private static readonly freezable = (() => {
-    try {
-      ObjectFreeze(new global.URL(location.href));
-      return true;
-    }
-    catch {
-      return false;
-    }
-  })();
-  private static readonly get: (url: string, base: string | undefined) => global.URL
+  private static readonly get: (url: string, base: string | undefined) => CachedURL
     = flip(uncurry(memoize((base: string | undefined) => memoize((url: string) =>
-        ReadonlyURL.freezable
-          ? ObjectFreeze(new global.URL(formatURLForEdge(url, base), base))
-          : new global.URL(formatURLForEdge(url, base), base)
+      ({
+        url: new global.URL(formatURLForEdge(url, base), base),
+        href: undefined,
+        origin: undefined,
+        protocol: undefined,
+        username: undefined,
+        password: undefined,
+        host: undefined,
+        hostname: undefined,
+        port: undefined,
+        pathname: undefined,
+        search: undefined,
+        hash: undefined,
+        searchParams: undefined,
+      })
       , new Cache(100)), new Cache(100))));
   constructor(url: string, base?: string) {
-    this[internal].url = ReadonlyURL.get(url, base);
+    this[internal] = ReadonlyURL.get(url, base);
   }
-  private readonly [internal]: Partial<Mutable<global.URL>> & {
-    url: global.URL;
-  } = {
-    url: undefined as any,
-    href: undefined,
-    origin: undefined,
-    protocol: undefined,
-    username: undefined,
-    password: undefined,
-    host: undefined,
-    hostname: undefined,
-    port: undefined,
-    pathname: undefined,
-    search: undefined,
-    hash: undefined,
-    searchParams: undefined,
-  };
+  private readonly [internal]: CachedURL;
   public get href(): string {
     return this[internal].href === undefined
       ? this[internal].href = this[internal].url.href
