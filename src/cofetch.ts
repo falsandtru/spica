@@ -1,9 +1,10 @@
+import { location } from './global';
 import { ObjectKeys } from './alias';
 import { Coroutine } from './coroutine';
 import { Colistener } from './colistener';
 import { Cancellation } from './cancellation';
 import { Collection } from './collection';
-import { URL } from './url';
+import { ReadonlyURL } from './url';
 
 export interface CofetchOptions {
   method?: string;
@@ -31,7 +32,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
     super(async function* (this: Cofetch) {
       void this.finally(this.cancel);
       assert(this.catch(console.error));
-      url = new URL(url).reference;
+      url = new ReadonlyURL(url, location.href).href;
       opts = { ...opts };
       opts.method = (opts.method || 'GET').toUpperCase();
       opts.headers = new Headers(opts.headers);

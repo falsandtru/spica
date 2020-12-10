@@ -67,10 +67,12 @@ function normalize(url: string, base: string): NormalizedURL {
   return new ReadonlyURL(url, base).href as NormalizedURL;
 }
 
-const internal = Symbol();
+const internal = Symbol.for('spica/url::internal');
 
 type CachedURL = Partial<Mutable<global.URL>> & {
   url: global.URL;
+  resource?: string;
+  path?: string;
 };
 export class ReadonlyURL implements Readonly<global.URL> {
   // Can't freeze URL object in the Firefox extension environment.
@@ -80,6 +82,7 @@ export class ReadonlyURL implements Readonly<global.URL> {
       ({
         url: new global.URL(url, base),
         href: undefined,
+        resource: undefined,
         origin: undefined,
         protocol: undefined,
         username: undefined,
@@ -87,20 +90,37 @@ export class ReadonlyURL implements Readonly<global.URL> {
         host: undefined,
         hostname: undefined,
         port: undefined,
+        path: undefined,
         pathname: undefined,
         search: undefined,
         hash: undefined,
         searchParams: undefined,
       })
       , new Cache(100)), new Cache(100))));
-  constructor(url: string, base?: string) {
-    this[internal] = ReadonlyURL.get(url, base);
+  constructor(
+    public readonly src: string,
+    public readonly base?: string,
+  ) {
+    const i = base?.indexOf('#') ?? -1;
+    if (i > -1) {
+      base = base?.slice(0, i);
+    }
+    const j = base?.indexOf('?') ?? -1;
+    if (i > -1 && src.indexOf('#') === -1) {
+      base = base?.slice(0, j);
+    }
+    this[internal] = ReadonlyURL.get(src, base);
   }
   private readonly [internal]: CachedURL;
   public get href(): string {
     return this[internal].href === undefined
       ? this[internal].href = this[internal].url.href
       : this[internal].href!;
+  }
+  public get resource(): string {
+    return this[internal].resource === undefined
+      ? this[internal].resource = `${this.origin}${this.path}`
+      : this[internal].resource!;
   }
   public get origin(): string {
     return this[internal].origin === undefined
@@ -136,6 +156,11 @@ export class ReadonlyURL implements Readonly<global.URL> {
     return this[internal].port === undefined
       ? this[internal].port = this[internal].url.port
       : this[internal].port!;
+  }
+  public get path(): string {
+    return this[internal].path === undefined
+      ? this[internal].path = `${this.pathname}${this.search}`
+      : this[internal].path!;
   }
   public get pathname(): string {
     return this[internal].pathname === undefined

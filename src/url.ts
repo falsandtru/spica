@@ -4,7 +4,7 @@ import { NormalizedURL, ReadonlyURL } from './url/domain/format';
 export { StandardURL, standardize } from './url/domain/format';
 export { ReadonlyURL } from './url/domain/format';
 
-const internal = Symbol();
+const internal = Symbol.for('spica/url::internal');
 
 export class URL<T extends string> {
   constructor(url: URL.Reference<T> | URL.Resource<T> | URL.Origin<T> | URL.Path<T> | URL.Pathname<T>, base?: string)
@@ -39,12 +39,13 @@ export class URL<T extends string> {
     return this[internal].url!.href as any;
   }
   public get resource(): URL.Resource<T> {
-    return this[internal].resource = this[internal].resource === undefined
-      ? this.reference.slice(
-          0,
-          this.query === '?'
-            ? this.fragment ? -this.fragment.length - 1 : -1
-            : -this.fragment.length || this.reference.length) as any
+    return this[internal].resource === undefined
+      ? this[internal].resource = this.reference
+          .slice(
+            0,
+            this.query === '?'
+              ? -this.fragment.length - 1
+              : -this.fragment.length || this.reference.length) as any
       : this[internal].resource;
   }
   public get origin(): URL.Origin<T> {
@@ -66,22 +67,25 @@ export class URL<T extends string> {
     return this[internal].url!.port as any;
   }
   public get path(): URL.Path<T> {
-    return this[internal].path = this[internal].path ?? `${this.pathname}${this.query}` as any;
+    return this[internal].path === undefined
+      ? this[internal].path = `${this.pathname}${this.query}` as any
+      : this[internal].path;
   }
   public get pathname(): URL.Pathname<T> {
     return this[internal].url!.pathname as any;
   }
   public get query(): URL.Query<T> {
-    return this[internal].query = this[internal].query === undefined
-      ? this.reference
+    return this[internal].query === undefined
+      ? this[internal].query = this.reference
           .slice(
             ~(~this.reference.slice(0, -this.fragment.length || this.reference.length).indexOf('?') || ~this.reference.length),
             -this.fragment.length || this.reference.length) as any
       : this[internal].query;
   }
   public get fragment(): URL.Fragment<T> {
-    return this[internal].fragment = this[internal].fragment === undefined
-      ? this.reference.slice((~(~this.reference.indexOf('#') || ~this.reference.length))) as any
+    return this[internal].fragment === undefined
+      ? this[internal].fragment = this.reference
+          .slice(~(~this.reference.indexOf('#') || ~this.reference.length)) as any
       : this[internal].fragment;
   }
 }
