@@ -18,9 +18,9 @@ const internal = Symbol.for('spica/url::internal');
 export class URL<T extends string> implements Readonly<global.URL> {
   constructor(url: T, ...base:
     T extends URL.Href<string> | URL.Resource<string> | URL.Origin<string> | `${Protocol}${infer _}` ? [string?] :
-    T extends URLSegment<infer U> ? [URL.Href<U> | URL.Resource<U> | URL.Origin<U>] :
+    T extends URLSegment<infer U> ? [U] :
     T extends NormalizedURL ? [string?] :
-    string extends T ? [T] : [string])
+    T extends `${infer _}` ? [string] : [T])
   constructor(
     public readonly url: string,
     public readonly base?: string,
