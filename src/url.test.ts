@@ -73,6 +73,7 @@ describe('Unit: lib/url', () => {
       assert(new URL(origin + dir + file + '?' as any).resource === origin + dir + file);
       assert(new URL(origin + dir + file + '??' as any).resource === origin + dir + file + '??');
       assert(new URL(origin + dir + file + '?#' as any).resource === origin + dir + file);
+      assert(new URL('file:///' as any).resource === 'file:///');
     });
 
     it('path', () => {

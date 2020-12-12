@@ -123,7 +123,9 @@ export class ReadonlyURL implements Readonly<global.URL> {
   }
   public get resource(): string {
     return this[internal].resource === undefined
-      ? this[internal].resource = `${this.origin}${this.pathname === '/' ? '' : this.pathname}${this.search}`
+      ? this[internal].resource = this.host
+        ? `${this.origin}${this.pathname === '/' ? '' : this.pathname}${this.search}`
+        : this.href
       : this[internal].resource!;
   }
   public get origin(): string {
