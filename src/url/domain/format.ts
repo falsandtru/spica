@@ -73,6 +73,8 @@ type CachedURL = Partial<Mutable<global.URL>> & {
   url: global.URL;
   resource?: string;
   path?: string;
+  query?: string;
+  fragment?: string;
 };
 export class ReadonlyURL implements Readonly<global.URL> {
   // Can't freeze URL object in the Firefox extension environment.
@@ -93,7 +95,9 @@ export class ReadonlyURL implements Readonly<global.URL> {
         path: undefined,
         pathname: undefined,
         search: undefined,
+        query: undefined,
         hash: undefined,
+        fragment: undefined,
         searchParams: undefined,
       })
       , new Cache(100)), new Cache(100))));
@@ -119,7 +123,7 @@ export class ReadonlyURL implements Readonly<global.URL> {
   }
   public get resource(): string {
     return this[internal].resource === undefined
-      ? this[internal].resource = `${this.origin}${this.path}`
+      ? this[internal].resource = `${this.origin}${this.pathname === '/' ? '' : this.pathname}${this.search}`
       : this[internal].resource!;
   }
   public get origin(): string {
@@ -172,10 +176,20 @@ export class ReadonlyURL implements Readonly<global.URL> {
       ? this[internal].search = this[internal].url.search
       : this[internal].search!;
   }
+  public get query(): string {
+    return this[internal].query === undefined
+      ? this[internal].query = this.search || this.href[this.href.length - this.fragment.length - 1] === '?' && '?' || '' as any
+      : this[internal].query;
+  }
   public get hash(): string {
     return this[internal].hash === undefined
       ? this[internal].hash = this[internal].url.hash
       : this[internal].hash!;
+  }
+  public get fragment(): string {
+    return this[internal].fragment === undefined
+      ? this[internal].fragment = this.hash || this.href[this.href.length - 1] === '#' && '#' || '' as any
+      : this[internal].fragment;
   }
   public get searchParams(): URLSearchParams {
     return this[internal].searchParams === undefined

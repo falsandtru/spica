@@ -41,10 +41,10 @@ describe('Benchmark:', function () {
     });
 
     describe('custom', function () {
-      const url = new URL('');
+      const url = new URL('', origin);
 
       it('new', function (done) {
-        benchmark('URL custom new', () => new URL(''), done);
+        benchmark('URL custom new', () => new URL('', origin), done);
       });
 
       it('href', function (done) {
