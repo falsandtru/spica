@@ -11,12 +11,14 @@ type Protocol
   | 'mailto:'
   | 'tel:';
 
+type Fix<T> = T extends `${infer _}` ? string : T;
+
 const internal = Symbol.for('spica/url::internal');
 
-export class URL<T extends string> {
+export class URL<T extends string> implements Readonly<global.URL> {
   constructor(url: T, ...base:
-    T extends URL.Reference<T> | URL.Resource<T> | URL.Origin<T> | `${Protocol}${infer _}` ? [string?] :
-    T extends URLSegment<infer U> ? [URL.Reference<U> | URL.Resource<U> | URL.Origin<U>] :
+    T extends URL.Href<string> | URL.Resource<string> | URL.Origin<string> | `${Protocol}${infer _}` ? [string?] :
+    T extends URLSegment<infer U> ? [URL.Href<U> | URL.Resource<U> | URL.Origin<U>] :
     T extends NormalizedURL ? [string?] :
     string extends T ? [T] : [string])
   constructor(
@@ -24,9 +26,9 @@ export class URL<T extends string> {
     public readonly base?: string,
   ) {
     this[internal] = new ReadonlyURL(url, base);
-    //assert(this[internal].url!.href.endsWith(`${this.port}${this.path}${this.fragment}`));
-    assert(this.reference === this[internal].href);
-    //assert(this.reference.startsWith(this.resource));
+    assert(this[internal].href.endsWith(`${this.port}${this.pathname}${this.query}${this.fragment}`));
+    assert(this.href === this[internal].href);
+    //assert(this.href.startsWith(this.resource));
     assert(this.origin === this[internal].origin);
     assert(this.protocol === this[internal].protocol);
     assert(this.host === this[internal].host);
@@ -34,7 +36,7 @@ export class URL<T extends string> {
     assert(this.port === this[internal].port);
   }
   private readonly [internal]: ReadonlyURL;
-  public get reference(): URL.Reference<T> {
+  public get href(): URL.Href<T> {
     return this[internal].href as any;
   }
   public get resource(): URL.Resource<T> {
@@ -49,10 +51,16 @@ export class URL<T extends string> {
   public get protocol(): URL.Protocol {
     return this[internal].protocol as any;
   }
-  public get host(): URL.Host {
+  public get username(): URL.Username {
+    return this[internal].username as any;
+  }
+  public get password(): URL.Password {
+    return this[internal].password as any;
+  }
+  public get host(): URL.Host<T> {
     return this[internal].host as any;
   }
-  public get hostname(): URL.Hostname {
+  public get hostname(): URL.Hostname<T> {
     return this[internal].hostname as any;
   }
   public get port(): URL.Port {
@@ -64,7 +72,7 @@ export class URL<T extends string> {
   public get pathname(): URL.Pathname<T> {
     return this[internal].pathname as any;
   }
-  public get seach(): URL.Search<T> {
+  public get search(): URL.Search<T> {
     return this[internal].search as any;
   }
   public get query(): URL.Query<T> {
@@ -76,31 +84,33 @@ export class URL<T extends string> {
   public get fragment(): URL.Fragment<T> {
     return this[internal].fragment as any;
   }
-  public get params(): URLSearchParams {
+  public get searchParams(): URLSearchParams {
     return this[internal].searchParams;
   }
   public toString(): string {
-    return this.reference;
+    return this.href;
   }
   public toJSON(): string {
-    return this.reference;
+    return this.href;
   }
 }
 export namespace URL {
-  export type Reference<T extends string> = URLSegment<'reference'> & T;
-  export type Resource<T extends string> = URLSegment<'resource'> & T;
-  export type Origin<T extends string> = URLSegment<'origin'> & T;
+  export type Href<T extends string> = URLSegment<'href'> & Fix<T>;
+  export type Resource<T extends string> = URLSegment<'resource'> & Fix<T>;
+  export type Origin<T extends string> = URLSegment<'origin'> & Fix<T>;
   export type Scheme = URLSegment<'scheme'> & string;
   export type Protocol = URLSegment<'protocol'> & string;
-  export type Host = URLSegment<'host'> & string;
-  export type Hostname = URLSegment<'hostname'> & string;
+  export type Username = URLSegment<'username'> & string;
+  export type Password = URLSegment<'password'> & string;
+  export type Host<T extends string> = URLSegment<'host'> & Fix<T>;
+  export type Hostname<T extends string> = URLSegment<'hostname'> & Fix<T>;
   export type Port = URLSegment<'port'> & string;
-  export type Path<T extends string> = URLSegment<'path'> & T;
-  export type Pathname<T extends string> = URLSegment<'pathname'> & T;
-  export type Search<T extends string> = URLSegment<'search'> & T;
-  export type Query<T extends string> = URLSegment<'query'> & T;
-  export type Hash<T extends string> = URLSegment<'hash'> & T;
-  export type Fragment<T extends string> = URLSegment<'fragment'> & T;
+  export type Path<T extends string> = URLSegment<'path'> & Fix<T>;
+  export type Pathname<T extends string> = URLSegment<'pathname'> & Fix<T>;
+  export type Search<T extends string> = URLSegment<'search'> & Fix<T>;
+  export type Query<T extends string> = URLSegment<'query'> & Fix<T>;
+  export type Hash<T extends string> = URLSegment<'hash'> & Fix<T>;
+  export type Fragment<T extends string> = URLSegment<'fragment'> & Fix<T>;
 }
 
 declare class URLSegment<T extends string> {

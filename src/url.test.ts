@@ -16,10 +16,10 @@ describe('Unit: lib/url', () => {
     it('relative', () => {
       // @ts-expect-error
       assert.throws(() => new URL(''));
-      assert(new URL('', location.href).reference === location.href);
-      assert(new URL('', location.href).reference === new global.URL('', location.href).href);
-      assert(new URL(' ', location.href).reference === location.href);
-      assert(new URL(' ', location.href).reference === new global.URL(' ', location.href).href);
+      assert(new URL('', location.href).href === location.href);
+      assert(new URL('', location.href).href === new global.URL('', location.href).href);
+      assert(new URL(' ', location.href).href === location.href);
+      assert(new URL(' ', location.href).href === new global.URL(' ', location.href).href);
     });
 
     it('origin', () => {
@@ -59,9 +59,9 @@ describe('Unit: lib/url', () => {
       assert(new URL(origin + ':443' as any).port === '');
     });
 
-    it('reference', () => {
-      assert(new URL(origin + dir + file as any).reference === origin + dir + file);
-      assert(new URL(origin + dir + file + query + fragment as any).reference === origin + dir + file + query + fragment);
+    it('href', () => {
+      assert(new URL(origin + dir + file as any).href === origin + dir + file);
+      assert(new URL(origin + dir + file + query + fragment as any).href === origin + dir + file + query + fragment);
     });
 
     it('resource', () => {
@@ -76,13 +76,13 @@ describe('Unit: lib/url', () => {
     });
 
     it('path', () => {
-      assert(new URL(origin).path as string === '/');
+      assert(new URL(origin).path === '/');
       assert(new URL(dir + file + query + fragment, location.href).path === dir + file + query);
       assert(new URL('/', location.href).path === '/');
     });
 
     it('pathname', () => {
-      assert(new URL(origin).pathname as string === '/');
+      assert(new URL(origin).pathname === '/');
       assert(new URL(dir + file + query + fragment, location.href).pathname === dir + file);
       assert(new URL('/', location.href).pathname === '/');
     });
@@ -105,7 +105,7 @@ describe('Unit: lib/url', () => {
 
     it('standard', () => {
       assert((): URL<StandardURL> => new URL(standardize('')));
-      assert((): URL<StandardURL> => new URL(new URL(standardize('')).reference));
+      assert((): URL<StandardURL> => new URL(new URL(standardize('')).href));
       // @ts-expect-error
       assert.throws((): URL<StandardURL> => new URL(new URL(standardize('')).query));
       // @ts-expect-error

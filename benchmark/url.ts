@@ -48,7 +48,7 @@ describe('Benchmark:', function () {
       });
 
       it('href', function (done) {
-        benchmark('URL custom href', () => url.reference, done);
+        benchmark('URL custom href', () => url.href, done);
       });
 
       it('origin', function (done) {
