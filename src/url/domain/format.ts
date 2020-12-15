@@ -36,9 +36,8 @@ function encode(url: EncodedURL): void
 function encode<T>(url: URL<T>): EncodedURL<T>
 function encode(url: string): EncodedURL
 function encode(url: string): EncodedURL {
+  assert(url === url.trim());
   return url
-    // Trim
-    .trim()
     // Percent-encoding
     .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]?|[\uDC00-\uDFFF]/g, str =>
       str.length === 2
@@ -48,13 +47,13 @@ function encode(url: string): EncodedURL {
     .replace(/\?[^#]+/, query =>
       '?' +
       query.slice(1)
-        .replace(/%[0-9A-F]{2}|[^=&]/ig, str =>
-          str.length < 3
-            ? encodeURIComponent(str)
-            : str))
+        .replace(/%[0-9A-F]{2}|%|[^=&]+/ig, str =>
+          str[0] === '%' && str.length === 3
+            ? str
+            : encodeURIComponent(str)))
     // Use uppercase letters within percent-encoding triplets
     .replace(/%[0-9A-F]{2}/ig, str => str.toUpperCase())
-    .replace(/#.+/, url.slice(url.indexOf('#')).trim()) as EncodedURL;
+    .replace(/#.+/, url.slice(url.indexOf('#'))) as EncodedURL;
 }
 export { encode as _encode }
 
