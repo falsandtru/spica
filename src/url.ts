@@ -1,13 +1,14 @@
-import { NormalizedURL, ReadonlyURL } from './url/domain/format';
+import { AbsoluteURL, ReadonlyURL } from './url/format';
 
-export { StandardURL, standardize } from './url/domain/format';
-export { ReadonlyURL } from './url/domain/format';
+export { StandardURL, standardize } from './url/format';
+export { ReadonlyURL } from './url/format';
 
 type Protocol
   = 'http://'
   | 'https://'
   | 'blob:'
   | 'data:'
+  | 'file:'
   | 'mailto:'
   | 'tel:';
 
@@ -19,7 +20,7 @@ export class URL<T extends string> implements Readonly<global.URL> {
   constructor(url: T, ...base:
     T extends URL.Href<string> | URL.Resource<string> | URL.Origin<string> | `${Protocol}${infer _}` ? [string?] :
     T extends URLSegment<infer U> ? [U] :
-    T extends NormalizedURL ? [string?] :
+    T extends AbsoluteURL ? [string?] :
     T extends `${infer _}` ? [string] : [T])
   constructor(
     public readonly url: string,

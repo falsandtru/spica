@@ -1,32 +1,41 @@
-import { global, undefined, location } from '../../global';
-import { Mutable } from '../../type';
-import { Encoded } from '../attribute/encode';
-import { Normalized } from '../attribute/normalize';
-import { memoize } from '../../memoize';
-import { Cache } from '../../cache';
-import { flip } from '../../flip';
-import { uncurry } from '../../curry';
+import { global, undefined } from '../global';
+import { Mutable } from '../type';
+import { memoize } from '../memoize';
+import { Cache } from '../cache';
+import { flip } from '../flip';
+import { uncurry } from '../curry';
 
-namespace Identifier {
-  declare class Identity<T> {
-    private static readonly IDENTITY: unique symbol;
-    private readonly [Identity.IDENTITY]: T;
-  }
-
-  export type URL<T> = Identity<T> & string;
+declare class Absolute {
+  private static readonly IDENTITY: unique symbol;
+  private readonly [Absolute.IDENTITY];
 }
 
-type URL<T> = Identifier.URL<T>;
+declare class Encoded {
+  private static readonly IDENTITY: unique symbol;
+  private readonly [Encoded.IDENTITY];
+}
+
+declare class Identity<T> {
+  private static readonly IDENTITY: unique symbol;
+  private readonly [Identity.IDENTITY]: T;
+}
+
+type URL<T> = Identity<T> & string;
 
 
 // https://www.ietf.org/rfc/rfc3986.txt
 
-export type StandardURL = URL<Encoded & Normalized>;
+export type StandardURL = URL<Encoded & Absolute>;
+export type AbsoluteURL = URL<Absolute>;
 
 export function standardize(url: URL<unknown>, base?: string): void
 export function standardize(url: string, base?: string): StandardURL
-export function standardize(url: string, base: string = location.href): StandardURL {
-  return encode(normalize(url, base));
+export function standardize(url: string, base?: string): StandardURL {
+  const u = new ReadonlyURL(url, base);
+  url = u.origin !== 'null'
+    ? u.origin.toLowerCase() + u.href.slice(u.origin.length)
+    : u.protocol.toLowerCase() + u.href.slice(u.protocol.length);
+  return encode(url as AbsoluteURL);
 }
 
 
@@ -57,14 +66,6 @@ function encode(url: string): EncodedURL {
 }
 export { encode as _encode }
 
-
-export type NormalizedURL = URL<Normalized>;
-
-function normalize(url: URL<unknown>, base: string): void
-function normalize(url: string, base: string): NormalizedURL
-function normalize(url: string, base: string): NormalizedURL {
-  return new ReadonlyURL(url, base).href as NormalizedURL;
-}
 
 const internal = Symbol.for('spica/url::internal');
 

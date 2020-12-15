@@ -73,7 +73,7 @@ describe('Unit: lib/url', () => {
       assert(new URL(origin + dir + file + '?' as any).resource === origin + dir + file);
       assert(new URL(origin + dir + file + '??' as any).resource === origin + dir + file + '??');
       assert(new URL(origin + dir + file + '?#' as any).resource === origin + dir + file);
-      assert(new URL('file:///' as any).resource === 'file:///');
+      assert(new URL('file:///').resource === 'file:///');
     });
 
     it('path', () => {
@@ -105,13 +105,13 @@ describe('Unit: lib/url', () => {
     });
 
     it('standard', () => {
-      assert((): URL<StandardURL> => new URL(standardize('')));
-      assert((): URL<StandardURL> => new URL(new URL(standardize('')).href));
+      assert((): URL<StandardURL> => new URL(standardize('', location.href)));
+      assert((): URL<StandardURL> => new URL(new URL(standardize('', location.href)).href));
       // @ts-expect-error
-      assert.throws((): URL<StandardURL> => new URL(new URL(standardize('')).query));
+      assert.throws((): URL<StandardURL> => new URL(new URL(standardize('', location.href)).query));
       // @ts-expect-error
-      assert((): URL<StandardURL> => new URL(new URL(standardize('')).query, location.href));
-      assert((): URL<StandardURL> => new URL(new URL(standardize('')).query, standardize(location.href)));
+      assert((): URL<StandardURL> => new URL(new URL(standardize('', location.href)).query, location.href));
+      assert((): URL<StandardURL> => new URL(new URL(standardize('', location.href)).query, standardize(location.href)));
     });
 
   });
