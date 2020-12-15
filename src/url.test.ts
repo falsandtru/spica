@@ -66,10 +66,10 @@ describe('Unit: lib/url', () => {
 
     it('resource', () => {
       assert(new URL(origin + dir + file + query + fragment as any).resource === origin + dir + file + query);
-      assert(new URL(origin + '/' as any).resource === origin);
-      assert(new URL(origin + '/?' as any).resource === origin);
-      assert(new URL(origin + '/??' as any).resource === origin + '??');
-      assert(new URL(origin + '/?#' as any).resource === origin);
+      assert(new URL(origin + '/' as any).resource === origin + '/');
+      assert(new URL(origin + '/?' as any).resource === origin + '/');
+      assert(new URL(origin + '/??' as any).resource === origin + '/??');
+      assert(new URL(origin + '/?#' as any).resource === origin + '/');
       assert(new URL(origin + dir + file + '?' as any).resource === origin + dir + file);
       assert(new URL(origin + dir + file + '??' as any).resource === origin + dir + file + '??');
       assert(new URL(origin + dir + file + '?#' as any).resource === origin + dir + file);
