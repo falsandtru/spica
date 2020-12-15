@@ -8,7 +8,7 @@ describe('Benchmark:', function () {
     it('new', function (done) {
       class SV extends Supervisor<string, number> {
       }
-      benchmark('Supervisor new', () => new SV(), done);
+      benchmark('Supervisor new', () => new SV().terminate(), done);
     });
 
     it('cast', function (done) {
