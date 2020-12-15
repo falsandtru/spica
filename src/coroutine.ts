@@ -71,7 +71,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
                 // Don't block.
                 core.settings.size < 0
                   ? [undefined, noop] as const
-                  : core.sendBuffer.take() as unknown as [S, Reply<R, T>],
+                  : core.sendBuffer!.take() as unknown as [S, Reply<R, T>],
                 // Don't block.
                 ESPromise.all([
                   core.settings.resume(),
@@ -209,7 +209,7 @@ class Internal<T, R, S> {
     public readonly opts: CoroutineOptions,
   ) {
     this.result.finally(() => {
-      this.sendBuffer.close(msgs => {
+      this.sendBuffer?.close(msgs => {
         while (msgs.length > 0) {
           // Don't block.
           const [, reply] = msgs.shift()!;
@@ -234,11 +234,10 @@ class Internal<T, R, S> {
   }, this.opts);
   public alive = true;
   public reception = 0;
-  public readonly sendBuffer: Channel<[S, Reply<R, T>]> =
+  public readonly sendBuffer?: Channel<[S, Reply<R, T>]> =
     this.settings.size >= 0
       ? new Channel(this.settings.size)
-      // Never be used.
-      : undefined as never;
+      : undefined;
   public readonly recvBuffer: Channel<IteratorResult<R, T | undefined>> | BroadcastChannel<IteratorResult<R, T | undefined>> =
     this.settings.size >= 0
       // Block the iteration until an yielded value is consumed.
@@ -267,7 +266,7 @@ class Port<T, R, S> {
     assert(core.sendBuffer instanceof Channel);
     core.settings.size >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
     const future = new Future<IteratorResult<R, T>>();
-    core.sendBuffer.put([msg, future.bind]);
+    core.sendBuffer!.put([msg, future.bind]);
     ++core.reception;
     return ESPromise.all([future, core.recvBuffer.take()])
       .then(([result]) =>
@@ -292,7 +291,7 @@ class Port<T, R, S> {
     assert(core.sendBuffer instanceof Channel);
     core.settings.size >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
     const future = new Future<IteratorResult<R, T>>();
-    return ESPromise.resolve(core.sendBuffer.put([msg, future.bind]));
+    return ESPromise.resolve(core.sendBuffer!.put([msg, future.bind]));
   }
   public connect<U>(com: (this: Coroutine<T, R, S>) => AsyncGenerator<S, U, R | T>): Promise<U> {
     const core = this[internal].co[internal];
