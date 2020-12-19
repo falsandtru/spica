@@ -5,7 +5,6 @@ describe('Unit: lib/arrow', function () {
     it('', () => {
       const a = (s: string) => s;
       const b = (n: number) => n * 2;
-      const c = () => undefined;
       assert.deepStrictEqual(
         bundle(a)(''),
         ['']);
@@ -15,9 +14,6 @@ describe('Unit: lib/arrow', function () {
       assert.deepStrictEqual(
         bundle(a, b, s => s)('1', 2, ''),
         ['1', 4, '']);
-      assert.deepStrictEqual(
-        bundle(c, c)(),
-        [undefined, undefined]);
     });
 
   });
