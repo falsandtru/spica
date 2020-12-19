@@ -1,22 +1,43 @@
-import { fanOut } from './arrow';
+import { bundle, aggregate } from './arrow';
 
 describe('Unit: lib/arrow', function () {
-  describe('fanOut', function () {
+  describe('bundle', function () {
     it('', () => {
-      const a = (s: string) => s.length;
+      const a = (s: string) => s;
+      const b = (n: number) => n * 2;
+      const c = () => undefined;
+      assert.deepStrictEqual(
+        bundle(a)(''),
+        ['']);
+      assert.deepStrictEqual(
+        bundle(a, b)('1', 2),
+        ['1', 4]);
+      assert.deepStrictEqual(
+        bundle(a, b, s => s)('1', 2, ''),
+        ['1', 4, '']);
+      assert.deepStrictEqual(
+        bundle(c, c)(),
+        [undefined, undefined]);
+    });
+
+  });
+
+  describe('aggregate', function () {
+    it('', () => {
+      const a = (s: string) => s;
       const b = (s: string) => s.length * 2;
       const c = () => undefined;
       assert.deepStrictEqual(
-        fanOut(a)(''),
-        [0]);
+        aggregate(a)(''),
+        ['']);
       assert.deepStrictEqual(
-        fanOut(a, s => s)('1'),
-        [1, '1']);
+        aggregate(a, b)('1'),
+        ['1', 2]);
       assert.deepStrictEqual(
-        fanOut(a, b, a)('1'),
-        [1, 2, 1]);
+        aggregate(a, b, s => s)('1'),
+        ['1', 2, '1']);
       assert.deepStrictEqual(
-        fanOut(c, c)(),
+        aggregate(c, c)(),
         [undefined, undefined]);
     });
 

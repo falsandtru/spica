@@ -1,9 +1,14 @@
-import { RewriteProp } from './type';
+type Functions2Parameters<FS extends readonly ((..._: unknown[]) => unknown)[]> = { [P in keyof FS]: FS[P] extends FS[number] ? Parameters<FS[P]>[0] : FS[P]; };
+type Functions2Returns<FS extends readonly ((..._: unknown[]) => unknown)[]> = { [P in keyof FS]: FS[P] extends FS[number] ? ReturnType<FS[P]> : FS[P]; };
 
-export function fanOut<c1, c2>(a1: () => c1, a2: () => c2): () => [c1, c2];
-export function fanOut<as extends readonly (() => unknown)[]>(...as: as): () => RewriteProp<as, [as[0], ReturnType<as[0]>]>;
-export function fanOut<b, c1, c2>(a1: (b: b) => c1, a2: (b: b) => c2): (b: b) => [c1, c2];
-export function fanOut<as extends readonly ((b: unknown) => unknown)[]>(...as: as): (b: Parameters<as[0]>[0]) => RewriteProp<as, [as[0], ReturnType<as[0]>]>;
-export function fanOut<as extends readonly ((b: unknown) => unknown)[]>(...as: as): (b: Parameters<as[0]>[0]) => RewriteProp<as, [as[0], ReturnType<as[0]>]> {
+export function bundle<as extends (() => unknown)[]>(...as: as): () => Functions2Returns<as>;
+export function bundle<as extends ((b: unknown) => unknown)[]>(...as: as): (...bs: Functions2Parameters<as>) => Functions2Returns<as>;
+export function bundle<as extends ((b: unknown) => unknown)[]>(...as: as): (...bs: Functions2Parameters<as>) => Functions2Returns<as> {
+  return (...bs) => as.map((f, i) => f(bs[i])) as any;
+}
+
+export function aggregate<as extends (() => unknown)[]>(...as: as): () => Functions2Returns<as>;
+export function aggregate<as extends ((b: unknown) => unknown)[]>(...as: as): (...b: [Functions2Parameters<as>[0]]) => Functions2Returns<as>;
+export function aggregate<as extends ((b: unknown) => unknown)[]>(...as: as): (...b: [Functions2Parameters<as>[0]]) => Functions2Returns<as> {
   return b => as.map(f => f(b)) as any;
 }
