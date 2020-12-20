@@ -1,16 +1,17 @@
 import { Set } from './global';
+import { once } from './function';
+import { noop } from './noop';
 import { AtomicPromise } from './promise';
 import { causeAsyncException } from './exception';
 import { Maybe, Just, Nothing } from './monad/maybe';
 import { Either, Left, Right } from './monad/either';
-import { noop } from './noop';
 
 export interface Canceller<L = undefined> {
   readonly cancel: {
     (this: Canceller<undefined>, reason?: L): void;
     (reason: L): void;
   };
-  readonly close: (reason: unknown) => void;
+  readonly close: (reason?: unknown) => void;
 }
 export interface Cancellee<L = undefined> {
   readonly alive: boolean;
@@ -40,8 +41,9 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
   public get canceled(): boolean {
     return this[internal].canceled;
   }
-  public register(listener: Listener<L>): () => void {
-    return this[internal].register(listener);
+  public get register(): (listener: Listener<L>) => () => void {
+    return (listener: Listener<L>) =>
+      this[internal].register(listener);
   }
   public get cancel(): Canceller<L>['cancel'] {
     return (reason?: L) =>
@@ -83,7 +85,7 @@ class Internal<L> implements Canceller<L>, Cancellee<L> {
       return noop;
     }
     this.listeners.add(handler);
-    return () => void this.listeners.delete(handler);
+    return once(() => void this.listeners.delete(handler));
 
     function handler(reason: L): void {
       try {
