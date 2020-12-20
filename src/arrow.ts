@@ -6,7 +6,7 @@ export function bundle<as extends ((b: unknown) => unknown)[]>(...as: as): (...b
 }
 
 export function aggregate<as extends (() => unknown)[]>(...as: as): () => Functions2Returns<as>;
-export function aggregate<as extends ((b: unknown) => unknown)[]>(...as: as): (...b: [Functions2Parameters<as>[0]]) => Functions2Returns<as>;
-export function aggregate<as extends ((b: unknown) => unknown)[]>(...as: as): (...b: [Functions2Parameters<as>[0]]) => Functions2Returns<as> {
+export function aggregate<as extends ((b: unknown) => unknown)[]>(...as: as): (b: Parameters<as[0]>[0]) => Functions2Returns<as>;
+export function aggregate<as extends ((b: unknown) => unknown)[]>(...as: as): (b: Parameters<as[0]>[0]) => Functions2Returns<as> {
   return b => as.map(f => f(b)) as any;
 }
