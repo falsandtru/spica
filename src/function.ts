@@ -1,4 +1,4 @@
-import { undefined } from './global';
+import { noop } from './noop';
 
 export function mapParameters<as extends unknown[], bs extends readonly unknown[], c>(f: (...b: bs) => c, g: (...as: as) => bs): (...as: as) => c {
   return (...as) => f(...g(...as));
@@ -14,10 +14,9 @@ export function clear<as extends unknown[], b>(f: (...as: as) => b): (...as: as)
 
 export function once<f extends (..._: unknown[]) => undefined>(f: f): f {
   return ((...as) => {
-    if (!f) return;
+    if (f === noop) return;
     f(...as);
-    // @ts-expect-error
-    f = undefined;
+    f = noop as f;
     as = [];
   }) as f;
 }
