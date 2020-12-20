@@ -8,6 +8,10 @@ export function mapReturn<as extends unknown[], b, c>(f: (...as: as) => b, g: (b
   return (...as) => g(f(...as));
 }
 
+export function clear<as extends unknown[], b>(f: (...as: as) => b): (...as: as) => undefined {
+  return (...as) => void f(...as);
+}
+
 export function once<f extends (..._: unknown[]) => undefined>(f: f): f {
   return ((...as) => {
     if (!f) return;
