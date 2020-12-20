@@ -20,3 +20,24 @@ export function once<f extends (..._: unknown[]) => undefined>(f: f): f {
     as = [];
   }) as f;
 }
+
+export function run(fs: readonly (() => () => void)[]): () => undefined {
+  const gs: (() => void)[] = [];
+  try {
+    for (let i = 0; i < fs.length; ++i) {
+      gs.push(fs[i]());
+    }
+  }
+  catch (reason) {
+    for (let i = 0; i < gs.length; ++i) {
+      gs[i]();
+    }
+    throw reason;
+  }
+  // @ts-ignore
+  return () => {
+    for (let i = 0; i < gs.length; ++i) {
+      gs[i]();
+    }
+  };
+}
