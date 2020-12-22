@@ -1,7 +1,8 @@
-import { hasOwnProperty } from '../alias';
+import { encodeURIComponent } from '../global';
 import { IterableCollection } from '../collection';
-import { sqid } from '../sqid';
 import { type } from '../type';
+import { memoize } from '../memoize';
+import { sqid } from '../sqid';
 
 export class DataMap<K, V> implements IterableCollection<K, V> {
   constructor(
@@ -37,8 +38,6 @@ export class DataMap<K, V> implements IterableCollection<K, V> {
   }
 }
 
-const oids = new WeakMap<object, string>();
-
 function stringify(target: any): string {
   switch (type(target)) {
     case 'undefined':
@@ -49,18 +48,19 @@ function stringify(target: any): string {
     case 'number':
       return `2:${target}`;
     case 'bigint':
-      return `3:${encodeURIComponent(target)}`;
+      return `3:${target}n`;
     case 'string':
       return `4:${encodeURIComponent(target)}`;
     case 'symbol':
-      return `5:${encodeURIComponent(target.toString().replace(/^Symbol\((.*?)\)$/, '$1'))}`;
+      return `5:${encodeURIComponent(target.toString())}`;
+    case 'Function':
+      return `8:${target}`;
     case 'Array':
       return `9:${stringifyArray(target)}`;
+    case 'Object':
+      return `9:${stringifyObject(target)}`;
     default:
-      return `9:${
-        stringifyObject(target) ||
-        oids.get(target) || oids.set(target, sqid()).get(target)!
-      }`;
+      return `9:${type(target)}-${identify(target)}`;
   }
 }
 
@@ -74,11 +74,11 @@ function stringifyArray(arr: unknown[]): string {
 }
 
 function stringifyObject(obj: object): string {
-  if (typeof obj === 'function') return '';
   let acc = '';
   for (const k in obj) {
-    if (!hasOwnProperty(obj, k)) continue;
     acc += `${stringify(k)}:${stringify(obj[k])},`;
   }
   return `{${acc}}`;
 }
+
+const identify = memoize(_ => sqid(), new WeakMap());
