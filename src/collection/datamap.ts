@@ -38,7 +38,8 @@ export class DataMap<K, V> implements IterableCollection<K, V> {
 }
 
 function stringify(target: any): string {
-  switch (type(target)) {
+  const t = type(target);
+  switch (t) {
     case 'undefined':
     case 'null':
       return `0:${target}`;
@@ -59,7 +60,7 @@ function stringify(target: any): string {
     case 'Object':
       return `8:${stringifyObject(target)}`;
     default:
-      return `9:${escape(type(target))}(${identify(target)})`;
+      return `9:${escape(t)}(${identify(target)})`;
   }
 }
 
