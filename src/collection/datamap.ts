@@ -44,23 +44,23 @@ function stringify(target: any): string {
     case 'null':
       return `0:${target}`;
     case 'boolean':
-      return `1:${target}`;
+      return `0:${target}`;
     case 'number':
-      return `2:${target}`;
+      return `0:${target}`;
     case 'bigint':
-      return `3:${target}n`;
+      return `0:${target}n`;
     case 'string':
-      return `4:${encodeURIComponent(target)}`;
+      return `1:${encodeURIComponent(target)}`;
     case 'symbol':
-      return `5:${encodeURIComponent(target.toString())}`;
+      return `2:${encodeURIComponent(target.toString())}`;
     case 'Function':
-      return `8:${target}`;
+      return `7:${target}`;
     case 'Array':
-      return `9:${stringifyArray(target)}`;
+      return `8:${stringifyArray(target)}`;
     case 'Object':
-      return `9:${stringifyObject(target)}`;
+      return `8:${stringifyObject(target)}`;
     default:
-      return `9:${type(target)}-${identify(target)}`;
+      return `9:${type(target)}(${identify(target)})`;
   }
 }
 
