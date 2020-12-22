@@ -1,4 +1,3 @@
-import { encodeURIComponent } from '../global';
 import { IterableCollection } from '../collection';
 import { type } from '../type';
 import { memoize } from '../memoize';
@@ -50,35 +49,41 @@ function stringify(target: any): string {
     case 'bigint':
       return `0:${target}n`;
     case 'string':
-      return `1:${encodeURIComponent(target)}`;
+      return `1:${escape(target)}`;
     case 'symbol':
-      return `2:${encodeURIComponent(target.toString())}`;
+      return `2:${escape(target.toString())}`;
     case 'Function':
-      return `7:${target}`;
+      return `7:${escape(target)}`;
     case 'Array':
       return `8:${stringifyArray(target)}`;
     case 'Object':
       return `8:${stringifyObject(target)}`;
     default:
-      return `9:${type(target)}(${identify(target)})`;
+      return `9:${escape(type(target))}(${identify(target)})`;
   }
+}
+
+function escape(str: string): string {
+  return str.indexOf('\n') > -1
+    ? str.replace(/\n/g, '%0A')
+    : str;
 }
 
 function stringifyArray(arr: unknown[]): string {
   assert(Array.isArray(arr));
   let acc = '';
   for (const k of arr) {
-    acc += `${stringify(k)},`;
+    acc += `${stringify(k)},\n`;
   }
-  return `[${acc}]`;
+  return `[\n${acc}]`;
 }
 
 function stringifyObject(obj: object): string {
   let acc = '';
   for (const k in obj) {
-    acc += `${stringify(k)}:${stringify(obj[k])},`;
+    acc += `${stringify(k)}: ${stringify(obj[k])},\n`;
   }
-  return `{${acc}}`;
+  return `{\n${acc}}`;
 }
 
-const identify = memoize(_ => sqid(), new WeakMap());
+const identify = memoize<object, number>(_ => +sqid(), new WeakMap());
