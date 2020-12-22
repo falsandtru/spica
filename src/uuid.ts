@@ -33,15 +33,15 @@ function rnd16(): number {
     crypto.getRandomValues(buffer);
     index = 0;
   }
-  if (denom === 16) {
-    denom = scale;
-    return buffer[index++] % 16;
-  }
-  else {
+  if (denom > 16) {
     denom = denom / 16;
     const rnd = buffer[index];
     buffer[index] = rnd % denom;
     return rnd / denom | 0;
+  }
+  else {
+    denom = scale;
+    return buffer[index++] % 16;
   }
 }
 
