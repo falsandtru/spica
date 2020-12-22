@@ -16,7 +16,7 @@ function calc(c: string): string {
     const r = rnd16();
     assert(r <= 16);
     const v = c === 'x' ? r : r & 0x03 | 0x08;
-    return v.toString(16);
+    return hex[v];
   }
   else {
     return c;
@@ -44,3 +44,5 @@ function rnd16(): number {
     return rnd / denom | 0;
   }
 }
+
+const hex = [...Array(16)].map((_, i) => i.toString(16));
