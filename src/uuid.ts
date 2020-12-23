@@ -14,8 +14,10 @@ export function uuid(): string {
 function calc(c: string): string {
   if (c === 'x' || c === 'y') {
     const r = rnd16();
-    assert(r <= 16);
+    assert(r === (r | 0));
+    assert(0 <= r && r < 16);
     const v = c === 'x' ? r : r & 0x03 | 0x08;
+    assert(v < hex.length);
     return hex[v];
   }
   else {
@@ -34,10 +36,12 @@ function rnd16(): number {
     index = 0;
   }
   if (denom > 16) {
+    assert(denom % 16 === 0);
     denom = denom / 16;
     const rnd = buffer[index];
-    buffer[index] = rnd % denom;
-    return rnd / denom | 0;
+    const mod = buffer[index] = rnd % denom;
+    assert((rnd - mod) % denom === 0);
+    return (rnd - mod) / denom;
   }
   else {
     denom = scale;
