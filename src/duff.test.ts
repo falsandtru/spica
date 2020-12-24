@@ -4,26 +4,14 @@ describe('Unit: lib/duff', () => {
   describe('duff', () => {
     it('', () => {
       var count = 100;
-      duff(count, function () {
-        count--;
-      });
-      assert(count === 0);
-
-      var count = 1000;
-      duff(count, function () {
-        count--;
+      duff(count, i => {
+        assert(i + count-- === 100);
       });
       assert(count === 0);
 
       var count = 100;
-      duff(-count, function () {
-        count--;
-      });
-      assert(count === 0);
-
-      var count = 1000;
-      duff(-count, function () {
-        count--;
+      duff(-count, i => {
+        assert(i + - --count === 0);
       });
       assert(count === 0);
     });
@@ -32,41 +20,23 @@ describe('Unit: lib/duff', () => {
 
   describe('duffbk', () => {
     it('', () => {
-    var count = 100;
-    duffbk(count, function () {
-      count--;
-      if (count === 50) {
-        return false;
-      }
-    });
-    assert(count === 50);
+      var count = 100;
+      duffbk(count, i => {
+        assert(i + count-- === 100);
+        if (count === 50) {
+          return false;
+        }
+      });
+      assert(count === 50);
 
-    var count = 1000;
-    duffbk(count, function () {
-      count--;
-      if (count === 500) {
-        return false;
-      }
-    });
-    assert(count === 500);
-
-    var count = 100;
-    duffbk(-count, function () {
-      count--;
-      if (count === 50) {
-        return false;
-      }
-    });
-    assert(count === 50);
-
-    var count = 1000;
-    duffbk(-count, function () {
-      count--;
-      if (count === 500) {
-        return false;
-      }
-    });
-    assert(count === 500);
+      var count = 100;
+      duffbk(-count, i => {
+        assert(i + - --count === 0);
+        if (count === 50) {
+          return false;
+        }
+      });
+      assert(count === 50);
 
     });
 
