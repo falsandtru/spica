@@ -1,3 +1,4 @@
+import { Array } from './global';
 import { noop } from './noop';
 
 export function mapParameters<as extends unknown[], bs extends readonly unknown[], c>(f: (...b: bs) => c, g: (...as: as) => bs): (...as: as) => c {
@@ -8,7 +9,7 @@ export function mapReturn<as extends unknown[], b, c>(f: (...as: as) => b, g: (b
   return (...as) => g(f(...as));
 }
 
-export function clear<as extends unknown[], b>(f: (...as: as) => b): (...as: as) => undefined {
+export function clear<as extends unknown[]>(f: (...as: as) => void): (...as: as) => undefined {
   return (...as) => void f(...as);
 }
 
@@ -22,22 +23,22 @@ export function once<f extends (..._: unknown[]) => undefined>(f: f): f {
 }
 
 export function run(fs: readonly (() => () => void)[]): () => undefined {
-  const gs: (() => void)[] = [];
+  const gs = Array<() => void>(fs.length);
   try {
     for (let i = 0; i < fs.length; ++i) {
-      gs.push(fs[i]());
+      gs[i] = fs[i]();
     }
   }
   catch (reason) {
-    for (let i = 0; i < gs.length; ++i) {
+    for (let i = 0; gs[i]; ++i) {
       gs[i]();
     }
     throw reason;
   }
   // @ts-ignore
-  return () => {
-    for (let i = 0; i < gs.length; ++i) {
+  return once(() => {
+    for (let i = 0; gs[i]; ++i) {
       gs[i]();
     }
-  };
+  });
 }
