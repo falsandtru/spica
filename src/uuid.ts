@@ -4,12 +4,15 @@ const FORMAT_V4 = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
 
 export function uuid(): string {
   // version 4
-  let acc = '';
-  for (let i = 0; i < FORMAT_V4.length; ++i) {
-    acc += calc(FORMAT_V4[i]);
-  }
-  return acc;
+  return body(calc);
 }
+
+const body = Function('calc', [
+  '"use strict";',
+  'let acc = "";',
+  FORMAT_V4.replace(/./g, c => `acc += calc('${c}');`),
+  'return acc;',
+].join(''));
 
 function calc(c: string): string {
   if (c === 'x' || c === 'y') {
