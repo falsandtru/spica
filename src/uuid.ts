@@ -37,15 +37,18 @@ function rnd16(): number {
   }
   if (denom > 16) {
     assert(denom % 16 === 0);
-    denom = denom / 16;
+    assert((denom >> 4) === denom / 16);
+    denom >>= 4;
     const rnd = buffer[index];
-    const mod = buffer[index] = rnd % denom;
+    const mod = buffer[index] = rnd & (denom - 1);
     assert((rnd - mod) % denom === 0);
     return (rnd - mod) / denom;
   }
   else {
+    assert(denom === 16);
+    assert(buffer[index] < 16);
     denom = scale;
-    return buffer[index++] % 16;
+    return buffer[index++];
   }
 }
 
