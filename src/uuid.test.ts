@@ -21,6 +21,14 @@ describe('Unit: lib/uuid', () => {
       assert(uuid() !== uuid());
     });
 
+    it('distribution', () => {
+      const rs = [...Array(99)].map(() => uuid().replace(/^(\w+)-(\w+)-.(\w+)-.(\w+)-(\w+)$/, '$1$2$3$4$5')).join('').split('')
+      const dist = rs.reduce((d, c) => (++d[parseInt(c, 16)], d), Array<0>(16).fill(0));
+      console.debug('lib/uuid distribution', dist);
+      assert(dist[0] > dist[dist.length / 2 | 0] / 2);
+      assert(dist[dist.length - 1] > dist[dist.length / 2 | 0] / 2);
+    });
+
   });
 
 });
