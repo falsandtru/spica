@@ -1,4 +1,4 @@
-import { crypto } from './global';
+import { Object, crypto } from './global';
 import { ObjectCreate } from './alias';
 
 const bases = [0, 2, 4, 8, 16, 32, 64] as const;
@@ -17,14 +17,15 @@ export const rnd0f = conv(rnd16);
 export const rnd0z = conv(rnd36);
 export const rnd0Z = conv(rnd62);
 
-export function unique(rnd: (len: number) => string, len: number): () => string {
-  const mem = ObjectCreate(null);
+export function unique(rnd: (len: number) => string, len: number, mem: object = ObjectCreate(null)): () => string {
+  if (mem instanceof Object) throw new Error('Spica: unique: Memory object must inherit null.');
   let limit = 5;
   return () => {
     while (true) {
       for (let i = 0; i < limit; ++i) {
         const r = rnd(len);
         if (r in mem) continue;
+        // @ts-ignore
         mem[r] = 1;
         return r;
       }
