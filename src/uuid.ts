@@ -4,27 +4,23 @@ const FORMAT_V4 = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
 
 export function uuid(): string {
   // version 4
-  return body(calc);
+  return body(rnd16, hex);
 }
 
-const body = Function('calc', [
+const body = Function('rnd16', 'hex', [
   '"use strict";',
   'return ""',
-  FORMAT_V4.replace(/./g, c =>
-    ['x', 'y'].includes(c)
-      ? `+ calc('${c}')`
-      : `+ '${c}'`),
+  FORMAT_V4.replace(/./g, c => {
+    switch (c) {
+      case 'x':
+        return `+ hex[rnd16()]`;
+      case 'y':
+        return `+ hex[rnd16() & 0x03 | 0x08]`;
+      default:
+        return `+ '${c}'`;
+    }
+  }),
 ].join(''));
-
-function calc(c: string): string {
-  assert(['x', 'y'].includes(c));
-  const r = rnd16();
-  assert(r === (r | 0));
-  assert(0 <= r && r < 16);
-  const v = c === 'x' ? r : r & 0x03 | 0x08;
-  assert(v < hex.length);
-  return hex[v];
-}
 
 const buffer = new Uint16Array(256);
 const scale = 1 << 16;
@@ -36,7 +32,8 @@ function rnd16(): number {
     crypto.getRandomValues(buffer);
     index = 0;
   }
-  if (denom > 16) {
+  if (denom ^ 16) {
+    assert(denom > 16);
     assert(denom % 16 === 0);
     assert((denom >> 4) === denom / 16);
     denom >>= 4;
