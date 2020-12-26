@@ -22,7 +22,7 @@ const body = Function('rnd16', 'hex', [
   }),
 ].join(''));
 
-const buffer = new Uint16Array(256);
+const buffer = new Uint16Array(512);
 const scale = 1 << 16;
 let index = buffer.length;
 let denom = scale;
