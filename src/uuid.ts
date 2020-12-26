@@ -9,23 +9,21 @@ export function uuid(): string {
 
 const body = Function('calc', [
   '"use strict";',
-  'let acc = "";',
-  FORMAT_V4.replace(/./g, c => `acc += calc('${c}');`),
-  'return acc;',
+  'return ""',
+  FORMAT_V4.replace(/./g, c =>
+    ['x', 'y'].includes(c)
+      ? `+ calc('${c}')`
+      : `+ '${c}'`),
 ].join(''));
 
 function calc(c: string): string {
-  if (c === 'x' || c === 'y') {
-    const r = rnd16();
-    assert(r === (r | 0));
-    assert(0 <= r && r < 16);
-    const v = c === 'x' ? r : r & 0x03 | 0x08;
-    assert(v < hex.length);
-    return hex[v];
-  }
-  else {
-    return c;
-  }
+  assert(['x', 'y'].includes(c));
+  const r = rnd16();
+  assert(r === (r | 0));
+  assert(0 <= r && r < 16);
+  const v = c === 'x' ? r : r & 0x03 | 0x08;
+  assert(v < hex.length);
+  return hex[v];
 }
 
 const buffer = new Uint16Array(256);
