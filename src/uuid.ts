@@ -23,30 +23,28 @@ const body = Function('rnd16', 'hex', [
 ].join(''));
 
 const buffer = new Uint16Array(512);
-const scale = 1 << 16;
+const digit = 16;
+const mask = 0b1111;
 let index = buffer.length;
-let denom = scale;
+let offset = digit;
 
 function rnd16(): number {
   if (index === buffer.length) {
     crypto.getRandomValues(buffer);
     index = 0;
   }
-  if (denom ^ 16) {
-    assert(denom > 16);
-    assert(denom % 16 === 0);
-    assert((denom >> 4) === denom / 16);
-    denom >>= 4;
-    const rnd = buffer[index];
-    const mod = buffer[index] = rnd & (denom - 1);
-    assert((rnd - mod) % denom === 0);
-    return (rnd - mod) / denom;
+  if (offset > 4) {
+    offset -= 4;
+    assert((buffer[index] >> offset & mask) >= 0);
+    assert((buffer[index] >> offset & mask) < 16);
+    return buffer[index] >> offset & mask;
   }
   else {
-    assert(denom === 16);
-    assert(buffer[index] < 16);
-    denom = scale;
-    return buffer[index++];
+    assert(offset === 4);
+    offset = digit;
+    assert((buffer[index] & mask) >= 0);
+    assert((buffer[index] & mask) < 16);
+    return buffer[index++] & mask;
   }
 }
 
