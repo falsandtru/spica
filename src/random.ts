@@ -19,13 +19,13 @@ export const rnd0Z = conv(rnd62);
 
 export function unique(rnd: (len: number) => string, len: number, mem: object = ObjectCreate(null)): () => string {
   if (mem instanceof Object) throw new Error('Spica: unique: Memory object must inherit null.');
+  assert(mem = mem as object);
   let limit = 5;
   return () => {
     while (true) {
       for (let i = 0; i < limit; ++i) {
         const r = rnd(len);
         if (r in mem) continue;
-        // @ts-ignore
         mem[r] = 1;
         return r;
       }
