@@ -1,5 +1,5 @@
 import { benchmark } from './benchmark';
-import { rnd16, rnd62, rnd0f, rnd0z, rnd0Z } from '../';
+import { rnd16, rnd62, rnd0f, rnd0z, rnd0Z, unique } from '../';
 
 describe('Benchmark:', function () {
   this.timeout(10 * 1e3);
@@ -49,6 +49,14 @@ describe('Benchmark:', function () {
   describe('rnd0Z 4', function () {
     it('', function (done) {
       benchmark('random rnd0Z 4', () => rnd0Z(4), done);
+    });
+
+  });
+
+  describe('unique', function () {
+    it('', function (done) {
+      const rnd = unique(rnd0Z, 1);
+      benchmark('random unique', () => rnd(), done);
     });
 
   });
