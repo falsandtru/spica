@@ -1,5 +1,4 @@
-import { Object, crypto } from './global';
-import { ObjectCreate } from './alias';
+import { Set, crypto } from './global';
 
 const bases = [0, 2, 4, 8, 16, 32, 64] as const;
 const dict = [
@@ -17,16 +16,14 @@ export const rnd0f = conv(rnd16);
 export const rnd0z = conv(rnd36);
 export const rnd0Z = conv(rnd62);
 
-export function unique(rnd: (len: number) => string, len: number, mem: object = ObjectCreate(null)): () => string {
-  if (mem instanceof Object) throw new Error('Spica: unique: Memory object must inherit null.');
-  assert(mem = mem as object);
+export function unique(rnd: (len: number) => string, len: number, mem: Set<string> = new Set()): () => string {
   let limit = 5;
   return () => {
     while (true) {
       for (let i = 0; i < limit; ++i) {
         const r = rnd(len);
-        if (r in mem) continue;
-        mem[r] = 1;
+        if (mem.has(r)) continue;
+        mem.add(r);
         return r;
       }
       ++len;
