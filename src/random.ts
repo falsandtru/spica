@@ -1,6 +1,7 @@
 import { Set, crypto } from './global';
 
-const bases = [0, 2, 4, 8, 16, 32, 64] as const;
+const bases = [...Array(7)].map((_, i) => 1 << i);
+assert.deepStrictEqual(bases, [1, 2, 4, 8, 16, 32, 64]);
 const dict = [
   ...[...Array(36)].map((_, i) => i.toString(36)),
   ...[...Array(26)].map((_, i) => (i + 10).toString(36).toUpperCase()),
