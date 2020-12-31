@@ -271,7 +271,7 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Reverse<[0]>, [0]>);
       assert((): true => true as TEq<Reverse<[0, 1]>, [1, 0]>);
       assert((): true => true as TEq<Reverse<[0, 1, 2]>, [2, 1, 0]>);
-      assert((): true => true as TEq<Reverse<0[]>, 0[]>);
+      assert((): true => true as TEq<Reverse<number[]>, number[]>);
     });
 
   });
