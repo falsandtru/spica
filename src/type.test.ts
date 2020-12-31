@@ -204,8 +204,8 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Head<[]>, never>);
       assert((): true => true as TEq<Head<[0]>, 0>);
       assert((): true => true as TEq<Head<[0, 1]>, 0>);
-      assert((): true => true as TEq<Head<number[]>, number>);
-      assert((): true => true as TEq<Head<[0, 1, ...number[]]>, 0>);
+      assert((): true => true as TEq<Head<number[]>, never>);
+      assert((): true => true as TEq<Head<[0, 1, ...number[]]>, never>);
     });
 
   });
@@ -215,8 +215,8 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Tail<[]>, never>);
       assert((): true => true as TEq<Tail<[0]>, []>);
       assert((): true => true as TEq<Tail<[0, 1]>, [1]>);
-      assert((): true => true as TEq<Tail<number[]>, number[]>);
-      assert((): true => true as TEq<Tail<[0, 1, ...number[]]>, [1, ...number[]]>);
+      assert((): true => true as TEq<Tail<number[]>, never>);
+      assert((): true => true as TEq<Tail<[0, 1, ...number[]]>, never>);
     });
 
   });
@@ -226,8 +226,8 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Init<[]>, never>);
       assert((): true => true as TEq<Init<[0]>, []>);
       assert((): true => true as TEq<Init<[0, 1]>, [0]>);
-      assert((): true => true as TEq<Init<number[]>, number[]>);
-      assert((): true => true as TEq<Init<[0, 1, ...number[]]>, [0, 1, ...number[]]>);
+      assert((): true => true as TEq<Init<number[]>, never>);
+      assert((): true => true as TEq<Init<[0, 1, ...number[]]>, never>);
     });
 
   });
@@ -237,8 +237,8 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Last<[]>, never>);
       assert((): true => true as TEq<Last<[0]>, 0>);
       assert((): true => true as TEq<Last<[0, 1]>, 1>);
-      assert((): true => true as TEq<Last<number[]>, number>);
-      assert((): true => true as TEq<Last<[0, 1, ...number[]]>, number>);
+      assert((): true => true as TEq<Last<number[]>, never>);
+      assert((): true => true as TEq<Last<[0, 1, ...number[]]>, never>);
     });
 
   });

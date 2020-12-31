@@ -44,19 +44,22 @@ export type Split<T extends readonly unknown[]> =
   never :
   never;
 export type Head<T extends readonly unknown[]> =
+  number extends T['length'] ? never :
   T extends readonly [] ? never :
   T extends [infer U, ...unknown[]] ? U :
   T[number];
 export type Tail<T extends readonly unknown[]> =
+  number extends T['length'] ? never :
   T extends readonly [] ? never :
   T extends [unknown, ...infer U] ? U :
   T;
 export type Init<T extends readonly unknown[]> =
-  number extends T['length'] ? T :
+  number extends T['length'] ? never :
   T extends readonly [] ? never :
   T extends [...infer U, unknown] ? U :
-  never;
+  T;
 export type Last<T extends readonly unknown[]> =
+  number extends T['length'] ? never :
   T extends readonly [] ? never :
   T extends [...infer _, infer U] ? U :
   T[number];
