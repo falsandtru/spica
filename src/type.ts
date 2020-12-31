@@ -63,7 +63,7 @@ export type Last<T extends readonly unknown[]> =
 export type Inits<as extends readonly unknown[]> =
   number extends as['length'] ? never :
   as extends readonly [] ? never :
-  [] | [Head<as>, ...Inits<Tail<as>> | []];
+  as | Inits<Init<as>> | [];
 export type Tails<as extends readonly unknown[]> =
   number extends as['length'] ? never :
   as extends readonly [] ? never :
