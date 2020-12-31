@@ -67,7 +67,6 @@ export type Tails<as extends readonly unknown[]> =
   as | Tails<Tail<as>>;
 export type Reverse<T extends readonly unknown[]> =
   T extends readonly [infer T, ...infer U, infer V] ? [V, ...Reverse<U>, T] :
-  T extends readonly [infer T, infer U] ? [U, T] :
   T;
 export type Member<T, U extends readonly unknown[]> = Index<T, U> extends -1 ? false : true;
 export type Index<T, U extends readonly unknown[]> = Idx<T, U, []>;
