@@ -36,6 +36,7 @@ export const ObjectDefineProperties: <T extends object>(o: T, properties: Proper
 export const ObjectDefineProperty: <T extends object>(o: T, p: string | number | symbol, attributes: PropertyDescriptor & ThisType<any>) => T = Object.defineProperty;
 export const ObjectEntries = Object.entries;
 export const ObjectFreeze = Object.freeze;
+// @ts-ignore
 export const ObjectFromEntries = Object.fromEntries;
 export const ObjectGetOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
 export const ObjectGetOwnPropertyDescriptors = Object.getOwnPropertyDescriptors;
