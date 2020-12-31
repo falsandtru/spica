@@ -44,18 +44,18 @@ export type Split<T extends readonly unknown[]> =
   never :
   never;
 export type Head<T extends readonly unknown[]> =
-  T extends [infer U, ...infer V] ? If<TEq<T, V>, never, U> :
+  T extends readonly [infer V, ...infer U] ? If<TEq<Readonly<T>, Readonly<U>>, never, V> :
   never;
 export type Tail<T extends readonly unknown[]> =
-  T extends [unknown, ...infer U] ? If<TEq<T, U>, never, U> :
+  T extends readonly [unknown, ...infer U] ? If<TEq<Readonly<T>, Readonly<U>>, never, U> :
   never;
 export type Init<T extends readonly unknown[]> =
   T extends readonly [] ? never :
-  T extends [...infer U, unknown] ? If<TEq<T, U>, never, U> :
+  T extends readonly [...infer U, unknown] ? If<TEq<Readonly<T>, Readonly<U>>, never, U> :
   never;
 export type Last<T extends readonly unknown[]> =
   T extends readonly [] ? never :
-  T extends [...infer U, infer V] ? If<TEq<T, U>, never, V> :
+  T extends readonly [...infer U, infer V] ? If<TEq<Readonly<T>, Readonly<U>>, never, V> :
   never;
 export type Inits<as extends readonly unknown[]> =
   number extends as['length'] ? never :
@@ -71,7 +71,7 @@ export type Reverse<T extends readonly unknown[]> =
 export type Member<T, U extends readonly unknown[]> = Index<T, U> extends -1 ? false : true;
 export type Index<T, U extends readonly unknown[]> = Idx<T, U, []>;
 type Idx<T, U extends readonly unknown[], V extends readonly void[]> =
-  TEq<U, Tail<U> | U> extends true ? -1 :
+  TEq<Readonly<U>, Readonly<Tail<U> | U>> extends true ? -1 :
   If<TEq<U[0], T>, V['length'], Idx<T, Tail<U>, [void, ...V]>>;
 export type AtLeast<N extends number, T> = AtLeastRec<N, T, T[], []>;
 type AtLeastRec<L, Elm, T extends readonly unknown[], C extends readonly unknown[]> = {
