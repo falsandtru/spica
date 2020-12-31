@@ -1,10 +1,10 @@
+import type { DeepImmutable, DeepRequired } from './type';
 import { Infinity, Object, Set, Map, WeakSet, setTimeout, Error } from './global';
 import { isFinite, ObjectFreeze } from './alias';
 import { Coroutine, CoroutineInterface, isCoroutine } from './coroutine';
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future';
 import { Observation, Observer, Publisher } from './observation';
-import type { DeepImmutable, DeepRequired } from './type';
 import { splice } from './array';
 import { extend } from './assign';
 import { tick } from './clock';

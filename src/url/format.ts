@@ -1,5 +1,5 @@
+import type { Mutable } from '../type';
 import { global, undefined, encodeURI, encodeURIComponent, URLSearchParams } from '../global';
-import { Mutable } from '../type';
 import { memoize } from '../memoize';
 import { Cache } from '../cache';
 import { flip } from '../flip';

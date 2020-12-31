@@ -1,8 +1,8 @@
+import type { DeepImmutable, DeepRequired } from './type';
 import { undefined, Map } from './global';
 import { IterableCollection } from './collection';
 import { extend } from './assign';
 import { indexOf, push, splice } from './array';
-import type { DeepImmutable, DeepRequired } from './type';
 
 export interface CacheOptions<K, V = undefined> {
   ignore?: {

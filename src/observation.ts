@@ -1,5 +1,5 @@
-import { undefined, Number, Map, WeakMap, Error } from './global';
 import type { PartialTuple, DeepImmutable, DeepRequired } from './type';
+import { undefined, Number, Map, WeakMap, Error } from './global';
 import { extend } from './assign';
 import { push, splice } from './array';
 import { causeAsyncException } from './exception';
