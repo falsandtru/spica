@@ -205,7 +205,7 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Head<[0]>, 0>);
       assert((): true => true as TEq<Head<[0, 1]>, 0>);
       assert((): true => true as TEq<Head<number[]>, never>);
-      assert((): true => true as TEq<Head<[0, 1, ...number[]]>, never>);
+      assert((): true => true as TEq<Head<[0, 1, ...number[]]>, 0>);
     });
 
   });
@@ -216,7 +216,7 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Tail<[0]>, []>);
       assert((): true => true as TEq<Tail<[0, 1]>, [1]>);
       assert((): true => true as TEq<Tail<number[]>, never>);
-      assert((): true => true as TEq<Tail<[0, 1, ...number[]]>, never>);
+      assert((): true => true as TEq<Tail<[0, 1, ...number[]]>, [1, ...number[]]>);
     });
 
   });
@@ -283,7 +283,7 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Member<0, [0, 1]>, true>);
       assert((): true => true as TEq<Member<1, [0, 1]>, true>);
       assert((): true => true as TEq<Member<2, [0, 1]>, false>);
-      assert((): true => true as TEq<Member<0, 0[]>, true>);
+      assert((): true => true as TEq<Member<0, 0[]>, false>);
       assert((): true => true as TEq<Member<0, 1[]>, false>);
     });
 
@@ -296,8 +296,9 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Index<0, [0, 1]>, 0>);
       assert((): true => true as TEq<Index<1, [0, 1]>, 1>);
       assert((): true => true as TEq<Index<2, [0, 1]>, -1>);
-      assert((): true => true as TEq<Index<0, 0[]>, number>);
+      assert((): true => true as TEq<Index<0, 0[]>, -1>);
       assert((): true => true as TEq<Index<0, 1[]>, -1>);
+      assert((): true => true as TEq<Index<0, [0, ...0[]]>, 0>);
     });
 
   });

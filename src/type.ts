@@ -44,25 +44,19 @@ export type Split<T extends readonly unknown[]> =
   never :
   never;
 export type Head<T extends readonly unknown[]> =
-  number extends T['length'] ? never :
-  T extends readonly [] ? never :
-  T extends [infer U, ...unknown[]] ? U :
-  T[number];
+  T extends [infer U, ...infer V] ? If<TEq<T, V>, never, U> :
+  never;
 export type Tail<T extends readonly unknown[]> =
-  number extends T['length'] ? never :
-  T extends readonly [] ? never :
-  T extends [unknown, ...infer U] ? U :
-  T;
+  T extends [unknown, ...infer U] ? If<TEq<T, U>, never, U> :
+  never;
 export type Init<T extends readonly unknown[]> =
-  number extends T['length'] ? never :
   T extends readonly [] ? never :
-  T extends [...infer U, unknown] ? U :
-  T;
+  T extends [...infer U, unknown] ? If<TEq<T, U>, never, U> :
+  never;
 export type Last<T extends readonly unknown[]> =
-  number extends T['length'] ? never :
   T extends readonly [] ? never :
-  T extends [...infer _, infer U] ? U :
-  T[number];
+  T extends [...infer U, infer V] ? If<TEq<T, U>, never, V> :
+  never;
 export type Inits<as extends readonly unknown[]> =
   number extends as['length'] ? never :
   as extends readonly [] ? [] :
@@ -76,12 +70,10 @@ export type Reverse<T extends readonly unknown[]> =
   T extends readonly [infer T, infer U] ? [U, T] :
   T;
 export type Member<T, U extends readonly unknown[]> = Index<T, U> extends -1 ? false : true;
-export type Index<T, U extends readonly unknown[]> =
-  number extends U['length'] ? If<TEq<U[0], T>, number, -1> :
-  Idx<T, U, []>;
+export type Index<T, U extends readonly unknown[]> = Idx<T, U, []>;
 type Idx<T, U extends readonly unknown[], V extends readonly void[]> =
-  U extends readonly [] ? -1 :
-  { 0: V['length']; 1: Idx<T, Tail<U>, [void, ...V]>; }[If<TEq<U[0], T>, 0, 1>];
+  TEq<U, Tail<U> | U> extends true ? -1 :
+  If<TEq<U[0], T>, V['length'], Idx<T, Tail<U>, [void, ...V]>>;
 export type AtLeast<N extends number, T> = AtLeastRec<N, T, T[], []>;
 type AtLeastRec<L, Elm, T extends readonly unknown[], C extends readonly unknown[]> = {
   0: T;
