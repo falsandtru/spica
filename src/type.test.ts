@@ -245,7 +245,7 @@ describe('Unit: lib/type', () => {
 
   describe('Inits', () => {
     it('', () => {
-      assert((): true => true as TEq<Inits<[]>, never>);
+      assert((): true => true as TEq<Inits<[]>, []>);
       assert((): true => true as TEq<Inits<[0]>, [0] | []>);
       assert((): true => true as TEq<Inits<[0, 1]>, [0, 1] | [0] | []>);
       assert((): true => true as TEq<Inits<number[]>, never>);
@@ -256,7 +256,7 @@ describe('Unit: lib/type', () => {
 
   describe('Tails', () => {
     it('', () => {
-      assert((): true => true as TEq<Tails<[]>, never>);
+      assert((): true => true as TEq<Tails<[]>, []>);
       assert((): true => true as TEq<Tails<[0]>, [0] | []>);
       assert((): true => true as TEq<Tails<[0, 1]>, [0, 1] | [1] | []>);
       assert((): true => true as TEq<Tails<number[]>, never>);

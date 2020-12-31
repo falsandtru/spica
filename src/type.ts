@@ -62,12 +62,12 @@ export type Last<T extends readonly unknown[]> =
   T[number];
 export type Inits<as extends readonly unknown[]> =
   number extends as['length'] ? never :
-  as extends readonly [] ? never :
-  as | Inits<Init<as>> | [];
+  as extends readonly [] ? [] :
+  as | Inits<Init<as>>;
 export type Tails<as extends readonly unknown[]> =
   number extends as['length'] ? never :
-  as extends readonly [] ? never :
-  as | Tails<Tail<as>> | [];
+  as extends readonly [] ? [] :
+  as | Tails<Tail<as>>;
 export type Reverse<T extends readonly unknown[]> =
   T extends readonly [infer T, ...infer U, infer V] ? [V, ...Reverse<U>, T] :
   T extends readonly [infer T, infer U] ? [U, T] :
