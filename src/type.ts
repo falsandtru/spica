@@ -37,71 +37,52 @@ interface NondeterminateTypeMap {
   boolean: boolean;
 }
 
-export type Prepend<T, U extends readonly unknown[]> =
-  U extends unknown ?
-  ((a: T, ...as: U) => void) extends ((...as: infer S) => void) ? S :
-  never :
-  never;
-export type Append<T, U extends readonly unknown[]> =
-  U extends unknown ?
-  Concat<U, [T]> :
-  never;
 export type Split<T extends readonly unknown[]> =
   T extends unknown ?
   T extends readonly [] ? never :
   ((...as: T) => void) extends ((a: infer T1, ...as: infer T2) => void) ? [T1, T2] :
   never :
   never;
-export type Head<T extends unknown[]> =
-  T extends [] ? never :
-  Split<T>[0];
+export type Head<T extends readonly unknown[]> =
+  T extends readonly [] ? never :
+  T extends [infer U, ...unknown[]] ? U :
+  T[number];
 export type Tail<T extends readonly unknown[]> =
   T extends readonly [] ? never :
-  Split<T>[1];
+  T extends [unknown, ...infer U] ? U :
+  T;
 export type Init<T extends readonly unknown[]> =
   number extends T['length'] ? T :
   T extends readonly [] ? never :
-  init<T, []>;
-type init<T extends readonly unknown[], U extends readonly unknown[]> =
-  { 0: U; 1: Prepend<T[0], Init<Tail<T>>>; }[T extends readonly [unknown] ? 0 : 1];
+  T extends [...infer U, unknown] ? U :
+  never;
 export type Last<T extends readonly unknown[]> =
   T extends readonly [] ? never :
-  Tail<T> extends T ? T[0] :
-  { 0: T[0]; 1: Last<Tail<T>>; }[T extends readonly [unknown] ? 0 : 1]
+  T extends [...infer _, infer U] ? U :
+  T[number];
 export type Inits<as extends readonly unknown[]> =
   number extends as['length'] ? never :
   as extends readonly [] ? never :
-  [] | inits<as>;
-type inits<as extends readonly unknown[]> = {
-  0: never;
-  1: [Split<as>[0]] | Prepend<Split<as>[0], inits<Split<as>[1]>>;
-}[as extends readonly [unknown, ...readonly unknown[]] ? 1 : 0];
+  [] | [Head<as>, ...Inits<Tail<as>> | []];
 export type Tails<as extends readonly unknown[]> =
   number extends as['length'] ? never :
   as extends readonly [] ? never :
-  tails<as> | [];
-type tails<as extends readonly unknown[]> = {
-  0: never;
-  1: as | tails<Split<as>[1]>;
-}[as extends readonly [unknown, ...readonly unknown[]] ? 1 : 0];
-export type Concat<T extends readonly unknown[], U extends readonly unknown[]> =
-  { 0: U; 1: Concat<Init<T>, Prepend<Last<T>, U>>; }[T extends readonly [] ? 0 : 1];
+  as | Tails<Tail<as>> | [];
 export type Reverse<T extends readonly unknown[]> =
-  number extends T['length'] ? T :
-  Rev<T, []>;
-type Rev<T extends readonly unknown[], U extends readonly unknown[]> =
-  { 0: U; 1: Rev<Tail<T>, Prepend<T[0], U>>; }[T extends readonly [] ? 0 : 1];
+  T extends readonly [infer T, ...infer U, infer V] ? [V, ...Reverse<U>, T] :
+  T extends readonly [infer T, infer U] ? [U, T] :
+  T;
 export type Member<T, U extends readonly unknown[]> = Index<T, U> extends -1 ? false : true;
 export type Index<T, U extends readonly unknown[]> =
   number extends U['length'] ? If<TEq<U[0], T>, number, -1> :
   Idx<T, U, []>;
 type Idx<T, U extends readonly unknown[], V extends readonly void[]> =
   U extends readonly [] ? -1 :
-  { 0: V['length']; 1: Idx<T, Tail<U>, Prepend<void, V>>; }[If<TEq<U[0], T>, 0, 1>];
+  { 0: V['length']; 1: Idx<T, Tail<U>, [void, ...V]>; }[If<TEq<U[0], T>, 0, 1>];
 export type AtLeast<N extends number, T> = AtLeastRec<N, T, T[], []>;
 type AtLeastRec<L, Elm, T extends readonly unknown[], C extends readonly unknown[]> = {
   0: T;
-  1: AtLeastRec<L, Elm, Prepend<Elm, T>, Prepend<unknown, C>>;
+  1: AtLeastRec<L, Elm, [Elm, ...T], [unknown, ...C]>;
 }[C['length'] extends L ? 0 : 1];
 
 export type Rewrite<T, R extends [unknown, unknown]> =

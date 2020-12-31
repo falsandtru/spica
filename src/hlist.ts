@@ -1,4 +1,4 @@
-import type { Prepend, Split, AtLeast, Reverse } from './type';
+import type { Split, Reverse, AtLeast } from './type';
 import { unshift } from './array';
 
 export type HList<as extends unknown[]> =
@@ -36,16 +36,16 @@ class HCons<as extends unknown[]> {
   ) {
     this.TYPE;
   }
-  public add<a>(a: a): HCons<Prepend<a, as>> {
+  public add<a>(a: a): HCons<[a, ...as]> {
     return new HCons(a, this as any);
   }
-  public modify<a>(f: (a: as[0]) => a): HCons<Prepend<a, Split<as>[1]>> {
+  public modify<a>(f: (a: as[0]) => a): HCons<[a, ...Split<as>[1]]> {
     return (this.tail.add as any)(f(this.head));
   }
-  public fold<a>(this: HCons<as extends AtLeast<2, unknown> ? as : never>, f: (l: as[0], r: as[1]) => a): HCons<Prepend<a, Split<Split<as>[1]>[1]>> {
+  public fold<a>(this: HCons<as extends AtLeast<2, unknown> ? as : never>, f: (l: as[0], r: as[1]) => a): HCons<[a, ...Split<Split<as>[1]>[1]]> {
     return (this.tail as HCons<Split<as>[1]>).modify(r => f(this.head, r)) as any;
   }
-  public unfold<a>(f: (a: as[0]) => a): HCons<Prepend<a, as>> {
+  public unfold<a>(f: (a: as[0]) => a): HCons<[a, ...as]> {
     return this.add(f(this.head));
   }
   public reverse(): Reverse<as> {

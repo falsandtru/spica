@@ -2,7 +2,7 @@ import {
   Not, And, Or,
   IsNever, IsVoid, IsAny, IsUnknown,
   Eq, TEq, DEq, If, Case,
-  Prepend, Append, Split, Head, Tail, Init, Last, Inits, Tails, Concat, Reverse, Member, Index, AtLeast,
+  Split, Head, Tail, Init, Last, Inits, Tails, Reverse, Member, Index, AtLeast,
   Rewrite, ExactRewrite, ExactExtract, ExactExclude,
   valueof, indexof,
   Type, StrictType,
@@ -187,26 +187,6 @@ describe('Unit: lib/type', () => {
 
   });
 
-  describe('Prepend', () => {
-    it('', () => {
-      assert((): true => true as TEq<Prepend<0, []>, [0]>);
-      assert((): true => true as TEq<Prepend<0, [1]>, [0, 1]>);
-      assert((): true => true as TEq<Prepend<0, [1, 2]>, [0, 1, 2]>);
-      assert((): true => true as TEq<Prepend<0, number[]>, [0, ...number[]]>);
-      assert((): true => true as TEq<Prepend<0, [1, ...number[]]>, [0, 1, ...number[]]>);
-    });
-
-  });
-
-  describe('Append', () => {
-    it('', () => {
-      assert((): true => true as TEq<Append<9, []>, [9]>);
-      assert((): true => true as TEq<Append<9, [1]>, [1, 9]>);
-      assert((): true => true as TEq<Append<9, [1, 2]>, [1, 2, 9]>);
-    });
-
-  });
-
   describe('Split', () => {
     it('', () => {
       assert((): true => true as TEq<Split<[]>, never>);
@@ -281,19 +261,6 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Tails<[0, 1]>, [0, 1] | [1] | []>);
       assert((): true => true as TEq<Tails<number[]>, never>);
       assert((): true => true as TEq<Tails<[0, 1, ...number[]]>, never>);
-    });
-
-  });
-
-  describe('Concat', () => {
-    it('', () => {
-      assert((): true => true as TEq<Concat<[], []>, []>);
-      assert((): true => true as TEq<Concat<[], [0]>, [0]>);
-      assert((): true => true as TEq<Concat<[0], []>, [0]>);
-      assert((): true => true as TEq<Concat<[0], [1]>, [0, 1]>);
-      assert((): true => true as TEq<Concat<[0, 1], [2, 3]>, [0, 1, 2, 3]>);
-      assert((): true => true as TEq<Concat<[0, 1], number[]>, [0, 1, ...number[]]>);
-      assert((): true => true as TEq<Concat<[0, 1], [2, ...number[]]>, [0, 1, 2, ...number[]]>);
     });
 
   });
