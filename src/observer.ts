@@ -1,26 +1,26 @@
-import type { PartialTuple, DeepImmutable, DeepRequired } from './type';
+import type { Inits, DeepImmutable, DeepRequired } from './type';
 import { undefined, Number, Map, WeakMap, Error } from './global';
 import { extend } from './assign';
 import { push, splice } from './array';
 import { causeAsyncException } from './exception';
 
 export interface Observer<N extends readonly unknown[], D, R> {
-  monitor(namespace: PartialTuple<N>, listener: Monitor<N, D>, options?: ObserverOptions): () => void;
-  on(namespace: N, listener: Subscriber<N, D, R>, options?: ObserverOptions): () => void;
-  off(namespace: N, listener?: Subscriber<N, D, R>): void;
-  once(namespace: N, listener: Subscriber<N, D, R>): () => void;
+  monitor(namespace: Readonly<N | Inits<N>>, listener: Monitor<N, D>, options?: ObserverOptions): () => void;
+  on(namespace: Readonly<N>, listener: Subscriber<N, D, R>, options?: ObserverOptions): () => void;
+  off(namespace: Readonly<N>, listener?: Subscriber<N, D, R>): void;
+  once(namespace: Readonly<N>, listener: Subscriber<N, D, R>): () => void;
 }
 export interface ObserverOptions {
   once?: boolean;
 }
 export interface Publisher<N extends readonly unknown[], D, R> {
-  emit(this: Publisher<N, undefined, R>, namespace: N, data?: D, tracker?: (data: D, results: R[]) => void): void;
-  emit(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void;
-  reflect(this: Publisher<N, undefined, R>, namespace: N, data?: D): R[];
-  reflect(namespace: N, data: D): R[];
+  emit(this: Publisher<N, undefined, R>, namespace: Readonly<N>, data?: D, tracker?: (data: D, results: R[]) => void): void;
+  emit(namespace: Readonly<N>, data: D, tracker?: (data: D, results: R[]) => void): void;
+  reflect(this: Publisher<N, undefined, R>, namespace: Readonly<N>, data?: D): R[];
+  reflect(namespace: Readonly<N>, data: D): R[];
 }
-export type Monitor<N extends readonly unknown[], D> = (data: D, namespace: N) => void;
-export type Subscriber<N extends readonly unknown[], D, R> = (data: D, namespace: N) => R;
+export type Monitor<N extends readonly unknown[], D> = (data: D, namespace: Readonly<N>) => void;
+export type Subscriber<N extends readonly unknown[], D, R> = (data: D, namespace: Readonly<N>) => R;
 
 class ListenerNode<N extends readonly unknown[], D, R> {
   constructor(
@@ -39,14 +39,14 @@ export type ListenerItem<N extends readonly unknown[], D, R> =
 interface MonitorItem<N extends readonly unknown[], D> {
   readonly id: number;
   readonly type: ListenerType.Monitor;
-  readonly namespace: PartialTuple<N>;
+  readonly namespace: Readonly<N | Inits<N>>;
   readonly listener: Monitor<N, D>;
   readonly options: ObserverOptions;
  }
 interface SubscriberItem<N extends readonly unknown[], D, R> {
   readonly id: number;
   readonly type: ListenerType.Subscriber;
-  readonly namespace: N;
+  readonly namespace: Readonly<N>;
   readonly listener: Subscriber<N, D, R>;
   readonly options: ObserverOptions;
 }
@@ -76,7 +76,7 @@ export class Observation<N extends readonly unknown[], D, R>
     limit: 10,
     cleanup: false,
   };
-  public monitor(namespace: PartialTuple<N>, monitor: Monitor<N, D>, { once = false }: ObserverOptions = {}): () => void {
+  public monitor(namespace: Readonly<N | Inits<N>>, monitor: Monitor<N, D>, { once = false }: ObserverOptions = {}): () => void {
     if (typeof monitor !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${monitor}`);
     const { monitors } = this.seekNode(namespace, SeekMode.Extensible);
     if (monitors.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
@@ -93,7 +93,7 @@ export class Observation<N extends readonly unknown[], D, R>
     monitors.push(item);
     return () => void this.off(namespace, item);
   }
-  public on(namespace: N, subscriber: Subscriber<N, D, R>, { once = false }: ObserverOptions = {}): () => void {
+  public on(namespace: Readonly<N>, subscriber: Subscriber<N, D, R>, { once = false }: ObserverOptions = {}): () => void {
     if (typeof subscriber !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${subscriber}`);
     const { subscribers } = this.seekNode(namespace, SeekMode.Extensible);
     if (subscribers.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
@@ -110,12 +110,12 @@ export class Observation<N extends readonly unknown[], D, R>
     subscribers.push(item);
     return () => void this.off(namespace, item);
   }
-  public once(namespace: N, subscriber: Subscriber<N, D, R>): () => void {
+  public once(namespace: Readonly<N>, subscriber: Subscriber<N, D, R>): () => void {
     return this.on(namespace, subscriber, { once: true });
   }
-  public off(namespace: N, subscriber?: Subscriber<N, D, R>): void;
-  public off(namespace: PartialTuple<N>, item?: ListenerItem<N, D, R>): void;
-  public off(namespace: PartialTuple<N>, subscriber?: Subscriber<N, D, R> | ListenerItem<N, D, R>): void {
+  public off(namespace: Readonly<N>, subscriber?: Subscriber<N, D, R>): void;
+  public off(namespace: Readonly<N | Inits<N>>, item?: ListenerItem<N, D, R>): void;
+  public off(namespace: Readonly<N | Inits<N>>, subscriber?: Subscriber<N, D, R> | ListenerItem<N, D, R>): void {
     const node = this.seekNode(namespace, SeekMode.Breakable);
     if (!node) return;
     switch (typeof subscriber) {
@@ -134,14 +134,14 @@ export class Observation<N extends readonly unknown[], D, R>
         return void clear(node);
     }
   }
-  public emit(this: Observation<N, void, R>, type: N, data?: D, tracker?: (data: D, results: R[]) => void): void
-  public emit(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void
-  public emit(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void {
+  public emit(this: Observation<N, void, R>, namespace: Readonly<N>, data?: D, tracker?: (data: D, results: R[]) => void): void
+  public emit(namespace: Readonly<N>, data: D, tracker?: (data: D, results: R[]) => void): void
+  public emit(namespace: Readonly<N>, data: D, tracker?: (data: D, results: R[]) => void): void {
     this.drain(namespace, data, tracker);
   }
-  public reflect(this: Observation<N, void, R>, type: N, data?: D): R[]
-  public reflect(namespace: N, data: D): R[]
-  public reflect(namespace: N, data: D): R[] {
+  public reflect(this: Observation<N, void, R>, namespace: Readonly<N>, data?: D): R[]
+  public reflect(namespace: Readonly<N>, data: D): R[]
+  public reflect(namespace: Readonly<N>, data: D): R[] {
     let results!: R[];
     this.emit(namespace, data, (_, r) => results = r);
     assert(results);
@@ -150,7 +150,7 @@ export class Observation<N extends readonly unknown[], D, R>
   private unrelaies = new WeakMap<Observer<N, D, unknown>, () => void>();
   public relay(source: Observer<N, D, unknown>): () => void {
     if (this.unrelaies.has(source)) return this.unrelaies.get(source)!;
-    const unbind = source.monitor([] as PartialTuple<N>, (data, namespace) =>
+    const unbind = source.monitor([] as N | Inits<N>, (data, namespace) =>
       void this.emit(namespace, data));
     const unrelay = () => (
       void this.unrelaies.delete(source),
@@ -158,7 +158,7 @@ export class Observation<N extends readonly unknown[], D, R>
     this.unrelaies.set(source, unrelay);
     return unrelay;
   }
-  public refs(namespace: PartialTuple<N>): ListenerItem<N, D, R>[] {
+  public refs(namespace: Readonly<N | Inits<N>>): ListenerItem<N, D, R>[] {
     const node = this.seekNode(namespace, SeekMode.Breakable);
     if (!node) return [];
     return push<ListenerItem<N, D, R>[]>(
@@ -166,7 +166,7 @@ export class Observation<N extends readonly unknown[], D, R>
       this.refsBelow(node, ListenerType.Subscriber))
       .reduce((acc, rs) => push(acc, rs), []);
   }
-  private drain(namespace: N, data: D, tracker?: (data: D, results: R[]) => void): void {
+  private drain(namespace: Readonly<N>, data: D, tracker?: (data: D, results: R[]) => void): void {
     const node = this.seekNode(namespace, SeekMode.Breakable);
     const results: R[] = [];
     const sss = node ? this.refsBelow(node, ListenerType.Subscriber) : [];
@@ -253,9 +253,9 @@ export class Observation<N extends readonly unknown[], D, R>
     }
     return [acc, monitors.length + subscribers.length + count];
   }
-  private seekNode(namespace: PartialTuple<N>, mode: SeekMode.Extensible | SeekMode.Closest): ListenerNode<N, D, R>;
-  private seekNode(namespace: PartialTuple<N>, mode: SeekMode): ListenerNode<N, D, R> | undefined;
-  private seekNode(namespace: PartialTuple<N>, mode: SeekMode): ListenerNode<N, D, R> | undefined {
+  private seekNode(namespace: Readonly<N | Inits<N>>, mode: SeekMode.Extensible | SeekMode.Closest): ListenerNode<N, D, R>;
+  private seekNode(namespace: Readonly<N | Inits<N>>, mode: SeekMode): ListenerNode<N, D, R> | undefined;
+  private seekNode(namespace: Readonly<N | Inits<N>>, mode: SeekMode): ListenerNode<N, D, R> | undefined {
     let node = this.node;
     for (let i = 0; i < namespace.length; ++i) {
       const index = namespace[i];

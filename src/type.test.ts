@@ -2,7 +2,7 @@ import {
   Not, And, Or,
   IsNever, IsVoid, IsAny, IsUnknown,
   Eq, TEq, DEq, If, Case,
-  Prepend, Append, Split, Head, Tail, Init, Last, Inits, Tails, Concat, Reverse, Member, Index, AtLeast, PartialTuple,
+  Prepend, Append, Split, Head, Tail, Init, Last, Inits, Tails, Concat, Reverse, Member, Index, AtLeast,
   Rewrite, ExactRewrite, ExactExtract, ExactExclude,
   valueof, indexof,
   Type, StrictType,
@@ -341,20 +341,6 @@ describe('Unit: lib/type', () => {
       assert((): AtLeast<0, number> => [0]);
       assert((): AtLeast<1, number> => [0]);
       assert((): AtLeast<1, number> => [0, 0]);
-    });
-
-  });
-
-  describe('PartialTuple', () => {
-    it('', () => {
-      assert((): true => true as TEq<PartialTuple<0[]>, readonly 0[]>);
-      assert((): true => true as TEq<PartialTuple<readonly 0[]>, readonly 0[]>);
-      assert((): true => true as TEq<PartialTuple<[]>, readonly []>);
-      assert((): true => true as TEq<PartialTuple<readonly []>, readonly []>);
-      assert((): true => true as TEq<PartialTuple<[0]>, readonly [] | [0]>);
-      assert((): true => true as TEq<PartialTuple<readonly [0]>, readonly [] | readonly [0]>);
-      assert((): true => true as TEq<PartialTuple<[0, 1]>, readonly [] | [0] | [0, 1]>);
-      assert((): true => true as TEq<PartialTuple<readonly [0, 1]>, readonly [] | [0] | readonly [0, 1]>);
     });
 
   });

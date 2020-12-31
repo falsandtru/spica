@@ -1,6 +1,6 @@
 import './src/global';
 export { Supervisor } from './src/supervisor';
-export { Observation } from './src/observation';
+export { Observation } from './src/observer';
 export { Cancellation } from './src/cancellation';
 export { Sequence } from './src/sequence';
 export { Maybe, Just, Nothing } from './src/maybe';

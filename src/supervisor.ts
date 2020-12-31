@@ -4,7 +4,7 @@ import { isFinite, ObjectFreeze } from './alias';
 import { Coroutine, CoroutineInterface, isCoroutine } from './coroutine';
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future';
-import { Observation, Observer, Publisher } from './observation';
+import { Observation, Observer, Publisher } from './observer';
 import { splice } from './array';
 import { extend } from './assign';
 import { tick } from './clock';

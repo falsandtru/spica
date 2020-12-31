@@ -1,4 +1,4 @@
-import { Observation, ListenerItem } from './observation';
+import { Observation, ListenerItem } from './observer';
 import { tick } from './clock';
 
 describe('Unit: lib/observation', function () {
@@ -322,9 +322,11 @@ describe('Unit: lib/observation', function () {
       const sym = Symbol();
       const ob = new Observation<[number, symbol], number, void>();
       ob.on([NaN, sym], data => assert(cnt === 0 && data === 1 && ++cnt));
-      ob.emit([NaN, Symbol().toString() as any], 0);
-      ob.emit(['NaN' as any, sym], 0);
+      // @ts-expect-error
+      ob.emit([NaN, NaN], 0);
       ob.emit([NaN, Symbol()], 0);
+      // @ts-expect-error
+      ob.emit(['NaN', sym], 0);
       ob.emit([NaN, sym], 1);
       ob.off([NaN, sym]);
       ob.monitor([NaN, sym], data => void assert(cnt === 1 && data === 2 && ++cnt));
