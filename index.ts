@@ -1,5 +1,6 @@
 import './src/global';
 export { type, isPrimitive } from './src/type';
+export { hasOwnProperty, ObjectGetPrototypeOf } from './src/alias';
 export { Supervisor } from './src/supervisor';
 export { Observation } from './src/observer';
 export { Cancellation } from './src/cancellation';
