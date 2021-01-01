@@ -13,7 +13,7 @@ export const clone = template((prop, target, source) => {
     case 'Object':
       switch (type(target[prop])) {
         case 'Object':
-          return target[prop] = clone(empty_(source[prop]), source[prop]);
+          return target[prop] = clone(empty(source[prop]), source[prop]);
         default:
           return target[prop] = source[prop];
       }
@@ -31,7 +31,7 @@ export const extend = template((prop, target, source) => {
         case 'Object':
           return target[prop] = extend(target[prop], source[prop]);
         default:
-          return target[prop] = extend(empty_(source[prop]), source[prop]);
+          return target[prop] = extend(empty(source[prop]), source[prop]);
       }
     default:
       return target[prop] = source[prop];
@@ -52,7 +52,7 @@ export const merge = template((prop, target, source) => {
         case 'Object':
           return target[prop] = merge(target[prop], source[prop]);
         default:
-          return target[prop] = merge(empty_(source[prop]), source[prop]);
+          return target[prop] = merge(empty(source[prop]), source[prop]);
       }
     default:
       return target[prop] = source[prop];
@@ -78,9 +78,7 @@ export const inherit = template((prop, target, source) => {
   }
 });
 
-export function template(
-  strategy: (prop: string, target: object, source: object) => void,
-  empty = empty_) {
+export function template(strategy: (prop: string, target: object, source: object) => void) {
   return walk;
 
   function walk<T extends U, U extends object>(target: Partial<U>, source1: T, source2: Partial<U>, ...sources: Partial<U>[]): T;
@@ -88,34 +86,24 @@ export function template(
   function walk<T extends object>(target: Partial<T>, source1: T, source2: Partial<T>, ...sources: Partial<T>[]): T;
   function walk<T extends object>(target: T, ...sources: Partial<T>[]): T;
   function walk<T extends object>(target: T, ...sources: T[]): T {
-    let isPrimitiveTarget = isPrimitive(target);
-    for (const source of sources) {
-      const isPrimitiveSource = isPrimitive(source);
-      if (isPrimitiveSource) {
-        target = source;
-        isPrimitiveTarget = isPrimitiveSource;
-      }
-      else {
-        if (isPrimitiveTarget) {
-          assert(!isPrimitiveSource);
-          target = empty(source) as T;
-          assert(!isPrimitive(target));
-          isPrimitiveTarget = isPrimitiveSource;
-        }
-        assert(!isPrimitiveTarget && !isPrimitiveSource);
-        assert(!isPrimitive(target) && !isPrimitive(source));
-        const keys = ObjectKeys(source);
-        for (let i = 0; i < keys.length; ++i) {
-          if (keys[i] in {}) continue;
-          void strategy(keys[i], target, source);
-        }
+    assert(!isPrimitive(target));
+    if (isPrimitive(target)) return target;
+    for (let i = 0; i < sources.length; ++i) {
+      const source = sources[i];
+      if (source === target) continue;
+      assert(!isPrimitive(source));
+      if (isPrimitive(source)) continue;
+      assert(!isPrimitive(target) && !isPrimitive(source));
+      const keys = ObjectKeys(source);
+      for (let i = 0; i < keys.length; ++i) {
+        strategy(keys[i], target, source);
       }
     }
     return target;
   }
 }
 
-function empty_(source: object): object {
+function empty(source: object): object {
   switch (type(source)) {
     case 'Array':
       return [];
