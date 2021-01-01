@@ -209,14 +209,12 @@ export function type(value: unknown): string {
     case undefined:
     case null:
       return `${value}`;
-    case 'boolean':
-    case 'number':
-    case 'bigint':
-    case 'string':
-    case 'symbol':
-      return t;
-    default:
+    case 'function':
+    case 'object':
       return toString(value).slice(8, -1);
+    default:
+      assert(typeof t === 'string');
+      return t as string;
   }
 }
 
@@ -236,23 +234,16 @@ export function isType(value: unknown, name: string): boolean {
     case 'function':
       return typeof value === 'function';
     case 'object':
-      return value !== null
-          && typeof value === 'object';
+      return value !== null && typeof value === 'object';
     default:
       return type(value) === name;
   }
 }
 
 export function isPrimitive(value: unknown): value is undefined | null | boolean | number | bigint | string | symbol {
-  switch (typeof value) {
-    case 'undefined':
-    case 'boolean':
-    case 'number':
-    case 'bigint':
-    case 'string':
-    case 'symbol':
-      return true;
-    default:
-      return value === null;
-  }
+  const type = typeof value;
+  return type === 'function'
+      || type === 'object'
+    ? value === null
+    : true;
 }
