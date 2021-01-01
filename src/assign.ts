@@ -1,6 +1,6 @@
 import { type, isPrimitive } from './type';
 import { Object } from './global';
-import { hasOwnProperty, ObjectCreate, ObjectKeys } from './alias';
+import { hasOwnProperty, ObjectCreate, ObjectGetPrototypeOf, ObjectKeys } from './alias';
 import { push } from './array';
 
 export const assign = template((prop, target, source) =>
@@ -66,8 +66,8 @@ export const inherit = template((prop, target, source) => {
     case 'Object':
       switch (type(target[prop])) {
         case 'Object':
-          assert([Object.prototype, null].includes(Object.getPrototypeOf(source[prop])));
-          return target[prop] = isOwnProperty(target, prop)
+          const proto = ObjectGetPrototypeOf(target);
+          return target[prop] = !proto || !(prop in proto) || hasOwnProperty(target, prop)
             ? inherit(target[prop], source[prop])
             : inherit(ObjectCreate(target[prop]), source[prop]);
         default:
@@ -77,10 +77,6 @@ export const inherit = template((prop, target, source) => {
       return target[prop] = source[prop];
   }
 });
-
-const isOwnProperty: (o: object, p: string) => boolean = '__proto__' in {}
-  ? (o, p) => !('__proto__' in o) || o[p] !== o['__proto__'][p]
-  : hasOwnProperty;
 
 export function template(
   strategy: (prop: string, target: object, source: object) => void,
