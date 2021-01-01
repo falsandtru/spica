@@ -1,6 +1,6 @@
 import { type, isPrimitive } from './type';
 import { Object } from './global';
-import { hasOwnProperty, ObjectCreate, ObjectGetPrototypeOf, ObjectKeys } from './alias';
+import { hasOwnProperty, ObjectCreate, ObjectKeys } from './alias';
 import { push } from './array';
 
 export const assign = template((prop, target, source) =>
@@ -66,8 +66,7 @@ export const inherit = template((prop, target, source) => {
     case 'Object':
       switch (type(target[prop])) {
         case 'Object':
-          const proto = ObjectGetPrototypeOf(target);
-          return target[prop] = !proto || !(prop in proto) || hasOwnProperty(target, prop)
+          return target[prop] = hasOwnProperty(target, prop)
             ? inherit(target[prop], source[prop])
             : inherit(ObjectCreate(target[prop]), source[prop]);
         default:

@@ -23,15 +23,7 @@ export const SymbolKeyFor = Symbol.keyFor;
 //export const SymbolToStringTag: typeof Symbol.toStringTag = Symbol.toStringTag;
 //export const SymbolUnscopables: typeof Symbol.unscopables = Symbol.unscopables;
 
-export const hasOwnProperty = (target: unknown, prop: string | number | symbol): boolean => {
-  const type = typeof target;
-  if (type !== 'function' && type !== 'object') return false;
-  const proto = ObjectGetPrototypeOf(target);
-  return proto !== null && prop in proto
-    ? hasOwnProperty_(target, prop)
-    : prop in (target as object);
-};
-const hasOwnProperty_ = Object.prototype.hasOwnProperty.call.bind(Object.prototype.hasOwnProperty) as (target: unknown, prop: string | number | symbol) => boolean;
+export const hasOwnProperty = Object.prototype.hasOwnProperty.call.bind(Object.prototype.hasOwnProperty) as (target: unknown, prop: string | number | symbol) => boolean;
 export const isPrototypeOf = Object.prototype.isPrototypeOf.call.bind(Object.prototype.isPrototypeOf) as (target: unknown, base: unknown) => boolean;
 export const isEnumerable = Object.prototype.propertyIsEnumerable.call.bind(Object.prototype.propertyIsEnumerable) as (target: unknown, prop: string | number | symbol) => boolean;
 export const toString = Object.prototype.toString.call.bind(Object.prototype.toString) as (target: unknown) => string;
