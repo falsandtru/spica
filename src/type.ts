@@ -1,3 +1,6 @@
+import { undefined, Array, Object } from './global';
+import { ObjectGetPrototypeOf } from './alias';
+
 type Falsy = undefined | false | 0 | '' | null | void;
 type Unique = typeof Unique;
 declare const Unique: unique symbol;
@@ -204,18 +207,17 @@ export type DeepMutable<T, E = never> =
 const toString = Object.prototype.toString.call.bind(Object.prototype.toString) as (target: unknown) => string;
 
 export function type(value: unknown): string {
-  const t = value == null ? value : typeof value;
-  switch (t) {
-    case undefined:
-    case null:
-      return `${value}`;
-    case 'function':
-    case 'object':
-      return toString(value).slice(8, -1);
-    default:
-      assert(typeof t === 'string');
-      return t as string;
+  if (value === undefined) return 'undefined';
+  if (value === null) return 'null';
+  const type = typeof value;
+  if (type === 'object') {
+    const proto = ObjectGetPrototypeOf(value);
+    if (proto === Object.prototype || proto === null) return 'Object';
+    if (proto === Array.prototype) return 'Array';
+    return toString(value).slice(8, -1);
   }
+  if (type === 'function') return 'Function';
+  return type;
 }
 
 export function isType(value: unknown, type: 'undefined'): value is undefined;
@@ -230,20 +232,15 @@ export function isType(value: unknown, type: 'object'): value is object;
 export function isType(value: unknown[], type: 'Array'): value is unknown[];
 export function isType(value: unknown, type: 'Array'): value is readonly unknown[];
 export function isType(value: unknown, name: string): boolean {
-  switch (name) {
-    case 'function':
-      return typeof value === 'function';
-    case 'object':
-      return value !== null && typeof value === 'object';
-    default:
-      return type(value) === name;
-  }
+  if (name === 'object') return value !== null && typeof value === name;
+  if (name === 'function') return typeof value === name;
+  return type(value) === name;
 }
 
 export function isPrimitive(value: unknown): value is undefined | null | boolean | number | bigint | string | symbol {
   const type = typeof value;
-  return type === 'function'
-      || type === 'object'
+  return type === 'object'
+      || type === 'function'
     ? value === null
     : true;
 }

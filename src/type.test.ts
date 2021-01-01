@@ -618,6 +618,7 @@ describe('Unit: lib/type', () => {
       assert(type([]) === 'Array');
       assert(type({}) === 'Object');
       assert(type(Object.create(null)) === 'Object');
+      assert(type(Object.create({})) === 'Object');
       assert(type(() => 0) === 'Function');
       assert(type(new Boolean()) === 'Boolean');
       assert(type(new WeakMap()) === 'WeakMap');
