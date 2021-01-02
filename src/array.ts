@@ -40,7 +40,7 @@ export function pop<a>(as: a[], count?: number): [a[], a | undefined | a[]] {
 }
 export function push<a>(as: a[], bs: Iterable<a> | ArrayLike<a>): a[] {
   if ('length' in bs || isArray(bs)) {
-    for (let i = 0; i < bs.length; ++i) {
+    for (let i = 0, len = bs.length; i < len; ++i) {
       as.push(bs[i]);
     }
   }
