@@ -1,5 +1,5 @@
 import { benchmark } from './benchmark';
-import { Channel } from '../src/channel';
+import { Channel } from '../';
 
 describe('Benchmark:', function () {
   this.timeout(10 * 1e3);

@@ -1,5 +1,5 @@
 import { benchmark } from './benchmark';
-import { memoize } from '../src/memoize';
+import { memoize } from '../';
 
 describe('Benchmark:', function () {
   this.timeout(10 * 1e3);

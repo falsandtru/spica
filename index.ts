@@ -34,3 +34,4 @@ export { sqid } from './src/sqid';
 export { assign, clone, extend } from './src/assign';
 export { concat } from './src/concat';
 export { sort } from './src/sort';
+export { memoize } from './src/memoize';

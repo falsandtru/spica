@@ -1,5 +1,5 @@
 import { benchmark } from './benchmark';
-import { ReadonlyURL, URL } from '..';
+import { ReadonlyURL, URL } from '../';
 
 describe('Benchmark:', function () {
   this.timeout(10 * 1e3);
