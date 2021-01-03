@@ -1,7 +1,6 @@
 # Spica
 
-[![Build Status](https://travis-ci.org/falsandtru/spica.svg?branch=master)](https://travis-ci.org/falsandtru/spica)
-[![Coverage Status](https://coveralls.io/repos/falsandtru/spica/badge.svg?branch=master&service=github)](https://coveralls.io/github/falsandtru/spica?branch=master)
+![CI](https://github.com/falsandtru/spica/workflows/CI/badge.svg)
 
 Supervisor, Coroutine, Channel, select, AtomicPromise, Cancellation, Sequence, Maybe, Either, and some utils.
 
