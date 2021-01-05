@@ -18,7 +18,7 @@ $ npm i spica
 - select
 - AtomicPromise
 - Cancellation
-- Observation
+- Observer
 - Sequence
 - Maybe, Just, Nothing
 - Either, Left, Right

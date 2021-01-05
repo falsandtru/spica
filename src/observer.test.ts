@@ -1,7 +1,7 @@
 import { Observation, ListenerItem } from './observer';
 import { tick } from './clock';
 
-describe('Unit: lib/observation', function () {
+describe('Unit: lib/observer', function () {
   describe('Observation', function () {
     const enum ListenerType {
       Monitor,
