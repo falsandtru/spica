@@ -1,8 +1,48 @@
 import { benchmark } from './benchmark';
 import { rnd16, rnd62, rnd0f, rnd0z, rnd0Z, unique } from '../';
+import { crypto } from '../src/global';
 
 describe('Benchmark:', function () {
   this.timeout(10 * 1e3);
+
+  describe('Uint8Array', function () {
+    it('256', function (done) {
+      const buf = new Uint8Array(256);
+      benchmark('random Uint8Array 256', () => crypto.getRandomValues(buf), done);
+    });
+
+    it('512', function (done) {
+      const buf = new Uint8Array(512);
+      benchmark('random Uint8Array 512', () => crypto.getRandomValues(buf), done);
+    });
+
+  });
+
+  describe('Uint16Array', function () {
+    it('256', function (done) {
+      const buf = new Uint16Array(256);
+      benchmark('random Uint16Array 256', () => crypto.getRandomValues(buf), done);
+    });
+
+    it('512', function (done) {
+      const buf = new Uint16Array(512);
+      benchmark('random Uint16Array 512', () => crypto.getRandomValues(buf), done);
+    });
+
+  });
+
+  describe('Uint32Array', function () {
+    it('256', function (done) {
+      const buf = new Uint32Array(256);
+      benchmark('random Uint32Array 256', () => crypto.getRandomValues(buf), done);
+    });
+
+    it('512', function (done) {
+      const buf = new Uint32Array(512);
+      benchmark('random Uint32Array 512', () => crypto.getRandomValues(buf), done);
+    });
+
+  });
 
   describe('rnd16', function () {
     it('', function (done) {
