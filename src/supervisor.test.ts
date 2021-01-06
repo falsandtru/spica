@@ -557,22 +557,22 @@ describe('Unit: lib/supervisor', function () {
         sv.register('', () => [0, 0], 0);
         throw 0;
       }
-      catch (err) {
-        assert(err instanceof Error);
+      catch (reason) {
+        assert(reason instanceof Error);
       }
       try {
         sv.cast('', 0);
         throw 0;
       }
-      catch (err) {
-        assert(err instanceof Error);
+      catch (reason) {
+        assert(reason instanceof Error);
       }
       try {
         sv.call('', 0, () => 0);
         throw 0;
       }
-      catch (err) {
-        assert(err instanceof Error);
+      catch (reason) {
+        assert(reason instanceof Error);
       }
       assert(TestSupervisor.count === 0);
       assert(TestSupervisor.procs === 0);
