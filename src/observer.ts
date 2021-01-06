@@ -134,12 +134,12 @@ export class Observation<N extends readonly unknown[], D, R>
         return void clear(node);
     }
   }
-  public emit(this: Observation<N, void, R>, namespace: Readonly<N>, data?: D, tracker?: (data: D, results: R[]) => void): void
+  public emit(this: Publisher<N, void, R>, namespace: Readonly<N>, data?: D, tracker?: (data: D, results: R[]) => void): void
   public emit(namespace: Readonly<N>, data: D, tracker?: (data: D, results: R[]) => void): void
   public emit(namespace: Readonly<N>, data: D, tracker?: (data: D, results: R[]) => void): void {
     this.drain(namespace, data, tracker);
   }
-  public reflect(this: Observation<N, void, R>, namespace: Readonly<N>, data?: D): R[]
+  public reflect(this: Publisher<N, void, R>, namespace: Readonly<N>, data?: D): R[]
   public reflect(namespace: Readonly<N>, data: D): R[]
   public reflect(namespace: Readonly<N>, data: D): R[] {
     let results!: R[];
