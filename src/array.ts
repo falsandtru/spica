@@ -76,10 +76,7 @@ export function splice<a>(as: a[], index: number, count?: number, ...inserts: a[
       break;
     case -1:
     case as.length - 1:
-    case Infinity:
       switch (count) {
-        case 0:
-          return [[], push(as, inserts)][0];
         case 1:
           return as.length === 0
             ? [[], push(as, inserts)][0]
@@ -91,6 +88,9 @@ export function splice<a>(as: a[], index: number, count?: number, ...inserts: a[
             : splice(as, index, 1);
       }
       break;
+    case as.length:
+    case Infinity:
+      return [[], push(as, inserts)][0];
   }
   return arguments.length > 2
     ? as.splice(index, count!, ...inserts)
