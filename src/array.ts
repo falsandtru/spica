@@ -1,5 +1,4 @@
 import { undefined, Infinity } from './global';
-import { isArray } from './alias';
 
 export function indexOf<a>(as: readonly a[], a: a): number {
   return a === a
@@ -18,7 +17,7 @@ export function shift<a>(as: a[], count?: number): [a | undefined | a[], a[]] {
     : [splice(as, 0, count), as];
 }
 export function unshift<a>(as: Iterable<a> | ArrayLike<a>, bs: a[]): a[] {
-  if ('length' in as || isArray(as)) {
+  if ('length' in as) {
     for (let i = as.length - 1; i >= 0; --i) {
       bs.unshift(as[i]);
     }
@@ -39,7 +38,7 @@ export function pop<a>(as: a[], count?: number): [a[], a | undefined | a[]] {
     : [as, splice(as, as.length - count, count)];
 }
 export function push<a>(as: a[], bs: Iterable<a> | ArrayLike<a>): a[] {
-  if ('length' in bs || isArray(bs)) {
+  if ('length' in bs) {
     for (let i = 0, len = bs.length; i < len; ++i) {
       as.push(bs[i]);
     }
