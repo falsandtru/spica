@@ -130,9 +130,9 @@ gulp.task('karma:test', done =>
   void new Server({
     configFile: __dirname + '/karma.conf.js',
     browsers: config.browsers,
-    reporters: ['dots', 'coverage-istanbul'],
+    reporters: ['dots'],
     preprocessors: {
-      'dist/*.js': ['espower', 'karma-coverage-istanbul-instrumenter']
+      'dist/*.js': ['espower']
     },
     concurrency: 1,
   }, done).start());

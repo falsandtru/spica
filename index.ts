@@ -1,4 +1,5 @@
-import './src/global';
+import * as global from './src/global';
+export { global };
 export { type, isPrimitive } from './src/type';
 export { hasOwnProperty, ObjectGetPrototypeOf } from './src/alias';
 export { Supervisor } from './src/supervisor';

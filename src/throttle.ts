@@ -15,7 +15,8 @@ export function throttle<T>(interval: number, callback: (last: T, buffer: MList<
       buffer = MList();
       assert(buf.tail);
       void callback(buf.head, buf);
-    }, interval);
+    // Bug: Karma and TypeScript
+    }, interval) as any;
   };
 }
 
@@ -37,6 +38,7 @@ export function debounce<T>(delay: number, callback: (last: T, buffer: MList<T>)
         assert(buf.tail);
         void callback(buf.head, buf);
       }, buffer.length > 1 ? delay : 0);
-    }, delay);
+    // Bug: Karma and TypeScript
+    }, delay) as any;
   };
 }
