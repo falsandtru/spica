@@ -35,7 +35,8 @@ export function unique(rnd: (len: number) => string, len: number, mem: Set<strin
 }
 
 function cons(radix: number): () => number {
-  const base = bases.find(base => base >= radix) ?? bases[bases.length - 1];
+  const base = bases.find(base => base >= radix)!;
+  assert(base);
   const len = bases.indexOf(base) as 1;
   return () => {
     while (true) {
