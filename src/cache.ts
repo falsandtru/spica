@@ -39,10 +39,16 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       LRU,
       LFU,
     };
-    this.store = new Map(entries);
+    this.store = new Map();
+    for (const [key, value] of entries) {
+      value === undefined
+        ? this.nullish ??= true
+        : undefined;
+      this.store.set(key, value);
+    }
     if (!opts.data) return;
-    for (const k of push(stats[1].slice(LFU.length), stats[0].slice(LRU.length))) {
-      this.store.delete(k);
+    for (const key of push(stats[1].slice(LFU.length), stats[0].slice(LRU.length))) {
+      this.store.delete(key);
     }
     if (this.store.size !== LFU.length + LRU.length) throw new Error(`Spica: Cache: Size of stats and entries is not matched.`);
     if (![...LFU, ...LRU].every(k => this.store.has(k))) throw new Error(`Spica: Cache: Keys of stats and entries is not matched.`);
@@ -61,8 +67,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public put(this: Cache<K, undefined>, key: K, value?: V): boolean;
   public put(key: K, value: V): boolean;
   public put(key: K, value: V): boolean {
-    !this.nullish && value === undefined
-      ? this.nullish = true
+    value === undefined
+      ? this.nullish ??= true
       : undefined;
     const hit = this.store.has(key);
     if (hit && this.access(key)) return this.store.set(key, value), true;
