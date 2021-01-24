@@ -39,7 +39,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       LRU,
       LFU,
     };
-    this.store = new Map();
     for (const [key, value] of entries) {
       value === undefined
         ? this.nullish ??= true
@@ -154,7 +153,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { LRU, LFU } = this.stats;
     return [LRU.slice(), LFU.slice()];
   }
-  private store: Map<K, V>;
+  private store = new Map<K, V>();
   private stats: {
     LRU: K[];
     LFU: K[];
