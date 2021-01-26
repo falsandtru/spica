@@ -20,11 +20,6 @@ describe('Benchmark:', function () {
       benchmark('array indexOf 1000', () => r.indexOf('-'), done);
     });
 
-    it('10000', function (done) {
-      const r = `${rnd0Z(9999)}-`.split('');
-      benchmark('array indexOf 10000', () => r.indexOf('-'), done);
-    });
-
   });
 
   describe('for-of', function () {
