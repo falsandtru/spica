@@ -1,4 +1,5 @@
-import { undefined, Math } from './global';
+import { undefined } from './global';
+import { floor } from './alias';
 import { causeAsyncException } from './exception';
 
 type Callback = () => void;
@@ -30,5 +31,5 @@ function run(): void {
     }
   }
   // Gradually reduce the unused buffer space.
-  jobs.length > 1000 && count < jobs.length * 0.5 && jobs.splice(Math.floor(jobs.length * 0.9), jobs.length);
+  jobs.length > 1000 && count < jobs.length * 0.5 && jobs.splice(floor(jobs.length * 0.9), jobs.length);
 }

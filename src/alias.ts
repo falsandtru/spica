@@ -8,6 +8,17 @@ export const {
   parseInt,
 } = Number;
 
+export const {
+  abs,
+  ceil,
+  floor,
+  max,
+  min,
+  random,
+  round,
+  sign,
+} = Math;
+
 //export const SymbolAsyncIterator: typeof Symbol.asyncIterator = Symbol.asyncIterator;
 export const SymbolFor = Symbol.for;
 //export const SymbolHasInstance: typeof Symbol.hasInstance = Symbol.hasInstance;
