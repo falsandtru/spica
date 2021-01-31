@@ -6,9 +6,8 @@ export function indexOf<a>(as: readonly a[], a: a): number {
     : as.findIndex(a => a !== a);
 }
 
-export function shift<a>(as: [a, ...a[]]): [a, a[]];
+export function shift<a, b>(as: [a, ...b[]]): [a, b[]];
 export function shift<a>(as: a[]): [a | undefined, a[]];
-export function shift<a>(as: [a, ...a[]], count: number): [a[], a[]];
 export function shift<a>(as: a[], count: number): [a[], a[]];
 export function shift<a>(as: a[], count?: number): [a | undefined | a[], a[]] {
   if (count! < 0) throw new Error('Unexpected negative number');
@@ -16,6 +15,8 @@ export function shift<a>(as: a[], count?: number): [a | undefined | a[], a[]] {
     ? [as.shift(), as]
     : [splice(as, 0, count), as];
 }
+export function unshift<as extends readonly unknown[], b>(as: as, bs: b[]): [...as, ...b[]];
+export function unshift<a>(as: Iterable<a> | ArrayLike<a>, bs: a[]): a[];
 export function unshift<a>(as: Iterable<a> | ArrayLike<a>, bs: a[]): a[] {
   if ('length' in as) {
     for (let i = as.length - 1; i >= 0; --i) {
@@ -27,9 +28,8 @@ export function unshift<a>(as: Iterable<a> | ArrayLike<a>, bs: a[]): a[] {
   }
   return bs;
 }
-export function pop<a>(as: [a, ...a[]]): [a[], a];
+export function pop<a, b>(as: [...a[], b]): [a[], b];
 export function pop<a>(as: a[]): [a[], a | undefined];
-export function pop<a>(as: [a, ...a[]], count: number): [a[], a[]];
 export function pop<a>(as: a[], count: number): [a[], a[]];
 export function pop<a>(as: a[], count?: number): [a[], a | undefined | a[]] {
   if (count! < 0) throw new Error('Unexpected negative number');
@@ -37,6 +37,8 @@ export function pop<a>(as: a[], count?: number): [a[], a | undefined | a[]] {
     ? [as, as.pop()]
     : [as, splice(as, as.length - count, count)];
 }
+export function push<a, bs extends readonly unknown[]>(as: a[], bs: bs): [...a[], ...bs];
+export function push<a>(as: a[], bs: Iterable<a> | ArrayLike<a>): a[];
 export function push<a>(as: a[], bs: Iterable<a> | ArrayLike<a>): a[] {
   if ('length' in bs) {
     for (let i = 0, len = bs.length; i < len; ++i) {
