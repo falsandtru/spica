@@ -16,7 +16,7 @@ export function memoize<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (..
     let z = memory.get(b);
     if (z !== undefined || nullish && memory.has(b)) return z!;
     z = f(...as);
-    nullish = nullish || z === undefined;
+    nullish ||= z === undefined;
     memory.set(b, z);
     return z;
   };

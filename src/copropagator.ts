@@ -48,7 +48,7 @@ function all<T>(sources: Iterable<PromiseLike<T>>, memory?: Map<PromiseLike<T>, 
       : [...sources];
     const same = after.length === before.length && after.every((_, i) => after[i] === before[i]);
     if (!memory && same) return values;
-    memory = memory || new Map();
+    memory ??= new Map();
     for (let i = 0; i < values.length; ++i) {
       void memory.set(before[i], values[i]);
     }

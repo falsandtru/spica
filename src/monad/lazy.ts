@@ -5,9 +5,7 @@ export abstract class Lazy<a> {
   }
   private memory_?: this = undefined;
   protected evaluate(): this {
-    return this.memory_
-      ? this.memory_
-      : this.memory_ = this.thunk() as this;
+    return this.memory_ ??= this.thunk() as this;
   }
   public abstract extract(): unknown;
 }
