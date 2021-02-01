@@ -42,7 +42,7 @@ export class URL<T extends string> implements Readonly<global.URL> {
   }
   private readonly [internal]: {
     url: ReadonlyURL;
-    searchParams?: URLSearchParams;
+    searchParams: URLSearchParams | undefined;
   };
   public get href(): URL.Href<T> {
     return this[internal].searchParams?.toString().replace(/^(?=.)/, `${this[internal].url.href.slice(0, -this[internal].url.query.length - this[internal].url.fragment.length || this[internal].url.href.length)}?`).concat(this.fragment)
@@ -98,9 +98,8 @@ export class URL<T extends string> implements Readonly<global.URL> {
     return this[internal].url.fragment as any;
   }
   public get searchParams(): URLSearchParams {
-    return this[internal].searchParams === undefined
-      ? this[internal].searchParams = new URLSearchParams(this.search)
-      : this[internal].searchParams!;
+    return this[internal].searchParams
+       ??= new URLSearchParams(this.search);
   }
   public toString(): string {
     return this.href;

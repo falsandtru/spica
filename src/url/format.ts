@@ -119,87 +119,71 @@ export class ReadonlyURL implements Readonly<global.URL> {
   }
   private readonly [internal]: {
     share: SharedURL;
-    searchParams?: URLSearchParams;
+    searchParams: URLSearchParams | undefined;
   };
   public get href(): string {
-    return this[internal].share.href === undefined
-      ? this[internal].share.href = this[internal].share.url.href
-      : this[internal].share.href!;
+    return this[internal].share.href
+       ??= this[internal].share.url.href;
   }
   public get resource(): string {
-    return this[internal].share.resource === undefined
-      ? this[internal].share.resource = this.href.slice(0, -this.fragment.length - this.query.length || this.href.length) + this.search
-      : this[internal].share.resource!;
+    return this[internal].share.resource
+       ??= this.href.slice(0, -this.fragment.length - this.query.length || this.href.length) + this.search;
   }
   public get origin(): string {
-    return this[internal].share.origin === undefined
-      ? this[internal].share.origin = this[internal].share.url.origin
-      : this[internal].share.origin!;
+    return this[internal].share.origin
+       ??= this[internal].share.url.origin;
   }
   public get protocol(): string {
-    return this[internal].share.protocol === undefined
-      ? this[internal].share.protocol = this[internal].share.url.protocol
-      : this[internal].share.protocol!;
+    return this[internal].share.protocol
+       ??= this[internal].share.url.protocol;
   }
   public get username(): string {
-    return this[internal].share.username === undefined
-      ? this[internal].share.username = this[internal].share.url.username
-      : this[internal].share.username!;
+    return this[internal].share.username
+       ??= this[internal].share.url.username;
   }
   public get password(): string {
-    return this[internal].share.password === undefined
-      ? this[internal].share.password = this[internal].share.url.password
-      : this[internal].share.password!;
+    return this[internal].share.password
+       ??= this[internal].share.url.password;
   }
   public get host(): string {
-    return this[internal].share.host === undefined
-      ? this[internal].share.host = this[internal].share.url.host
-      : this[internal].share.host!;
+    return this[internal].share.host
+       ??= this[internal].share.url.host;
   }
   public get hostname(): string {
-    return this[internal].share.hostname === undefined
-      ? this[internal].share.hostname = this[internal].share.url.hostname
-      : this[internal].share.hostname!;
+    return this[internal].share.hostname
+       ??= this[internal].share.url.hostname;
   }
   public get port(): string {
-    return this[internal].share.port === undefined
-      ? this[internal].share.port = this[internal].share.url.port
-      : this[internal].share.port!;
+    return this[internal].share.port
+       ??= this[internal].share.url.port;
   }
   public get path(): string {
-    return this[internal].share.path === undefined
-      ? this[internal].share.path = `${this.pathname}${this.search}`
-      : this[internal].share.path!;
+    return this[internal].share.path
+       ??= `${this.pathname}${this.search}`;
   }
   public get pathname(): string {
-    return this[internal].share.pathname === undefined
-      ? this[internal].share.pathname = this[internal].share.url.pathname
-      : this[internal].share.pathname!;
+    return this[internal].share.pathname
+       ??= this[internal].share.url.pathname;
   }
   public get search(): string {
-    return this[internal].share.search === undefined
-      ? this[internal].share.search = this[internal].share.url.search
-      : this[internal].share.search!;
+    return this[internal].share.search
+       ??= this[internal].share.url.search;
   }
   public get query(): string {
-    return this[internal].share.query === undefined
-      ? this[internal].share.query = this.search || this.href[this.href.length - this.fragment.length - 1] === '?' && '?' || '' as any
-      : this[internal].share.query;
+    return this[internal].share.query
+       ??= this.search || this.href[this.href.length - this.fragment.length - 1] === '?' && '?' || '' as any;
   }
   public get hash(): string {
-    return this[internal].share.hash === undefined
-      ? this[internal].share.hash = this[internal].share.url.hash
-      : this[internal].share.hash!;
+    return this[internal].share.hash
+       ??= this[internal].share.url.hash;
   }
   public get fragment(): string {
-    return this[internal].share.fragment === undefined
-      ? this[internal].share.fragment = this.hash || this.href[this.href.length - 1] === '#' && '#' || ''
-      : this[internal].share.fragment!;
+    return this[internal].share.fragment
+       ??= this.hash || this.href[this.href.length - 1] === '#' && '#' || '';
   }
   public get searchParams(): URLSearchParams {
-    return this[internal].searchParams === undefined
-      ? this[internal].searchParams = new URLSearchParams(this.search)
-      : this[internal].searchParams!;
+    return this[internal].searchParams
+       ??= new URLSearchParams(this.search);
   }
   public toString(): string {
     return this.href;
