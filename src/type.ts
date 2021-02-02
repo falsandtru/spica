@@ -104,7 +104,7 @@ export type ExactExclude<T, U> = T extends ExactExtract<T, U> ? never : T;
 export type indexof<T, V extends valueof<T>> =
   T extends readonly unknown[] ? Index<V, T> :
   { [P in keyof T]: If<TEq<T[P], V>, P, never>; }[keyof T];
-export type valueof<T, K extends string | number | symbol = T extends { [n: number]: unknown; length: number; } ? number : string | number> = T[Extract<keyof T, K>];
+export type valueof<T, K extends string | number | symbol = T extends { [n: number]: unknown; length: number; } ? number : keyof T> = T[Extract<keyof T, K>];
 
 export type Type<T> =
   T extends void ? null extends void ? 'object' | 'undefined' : 'undefined' :
