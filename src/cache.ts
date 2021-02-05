@@ -63,14 +63,20 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     },
   };
   private nullish = false;
+  private hit = false;
   public put(this: Cache<K, undefined>, key: K, value?: V): boolean;
   public put(key: K, value: V): boolean;
   public put(key: K, value: V): boolean {
     value === undefined
       ? this.nullish ??= true
       : undefined;
-    const hit = this.store.has(key);
-    if (hit && this.access(key)) return this.store.set(key, value), true;
+    const val = this.get(key)!;
+    if (this.hit) {
+      if (value !== val || value !== value && val !== val) {
+        this.store.set(key, value)
+      }
+      return true;
+    }
 
     const { LRU, LFU } = this.stats;
     if (LRU.length + LFU.length === this.capacity && LFU.length > LRU.length) {
@@ -103,7 +109,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   }
   public get(key: K): V | undefined {
     const val = this.store.get(key);
-    const hit = val !== undefined || this.nullish && this.store.has(key);
+    const hit = this.hit = val !== undefined || this.nullish && this.store.has(key);
     return hit && this.access(key)
       ? val
       : undefined;
@@ -138,7 +144,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     }
   }
   public get size(): number {
-    return this.store.size;
+    assert(this.stats.LRU.length + this.stats.LFU.length === this.store.size);
+    return this.stats.LRU.length + this.stats.LFU.length;
   }
   public [Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
     return this.store[Symbol.iterator]();
