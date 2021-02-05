@@ -303,8 +303,8 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       this.scheduled = false;
       void this.deliver();
     });
-    void tick(() =>
-      void this.settings.scheduler.call(void 0, p.bind));
+    void this.settings.scheduler.call(void 0, p.bind);
+    this.settings.scheduler === global.requestAnimationFrame && void setTimeout(p.bind, 1000);
     this.scheduled = true;
   }
   private readonly messages: [N | NamePool<N>, P, Supervisor.Callback<R>, number][] = [];
