@@ -165,11 +165,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   }
   private accessLRU(key: K): boolean {
     assert(this.store.has(key));
-    const { LRU } = this.stats;
+    const LRU = this.stats.LRU;
     const index = indexOf(LRU, key);
     assert(index > -1 === this.has(key));
     if (index === -1) return false;
-    const { LFU } = this.stats;
+    const LFU = this.stats.LFU;
     index === 0
       ? LFU.unshift(LRU.shift()!)
       : [LRU[index - 1], LRU[index]] = [LRU[index], LRU[index - 1]];
@@ -177,7 +177,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   }
   private accessLFU(key: K): boolean {
     assert(this.store.has(key));
-    const { LFU } = this.stats;
+    const LFU = this.stats.LFU;
     const index = indexOf(LFU, key);
     if (index === -1) return false;
     if (index === 0) return true;
