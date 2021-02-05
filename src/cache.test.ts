@@ -184,23 +184,18 @@ describe('Unit: lib/cache', () => {
       this.timeout(10 * 1e3);
       this.retries(3);
 
-      const capacity = 10;
+      const capacity = 100;
       const cache = new Cache<number, number>(capacity);
 
       const range = capacity * 10;
-      const repeat = capacity * 10000;
+      const repeat = 100000;
       let lrf = 0;
       let lru = 0;
       const LRU: number[] = [];
       for (let i = 0; i < repeat; ++i) {
         let key = Math.random() * range | 0;
-        switch (true) {
-          case key < range * 0.2:
-            key = key / 4 | 0;
-            break;
-          case key < range * 0.8:
-            key = key / 2 | 0;
-            break;
+        if (key < capacity * 8) {
+          key = key / 8 | 0;
         }
         lrf += +cache.put(key, i);
         const idx = LRU.indexOf(key);
