@@ -73,7 +73,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (hit && this.access(key)) return this.store.set(key, value), true;
 
     const { LRU, LFU } = this.stats;
-    if (LRU.length + LFU.length === this.capacity && LRU.length < LFU.length) {
+    if (LRU.length + LFU.length === this.capacity && LFU.length > LRU.length) {
       assert(LFU.length > 0);
       const key = LFU.pop()!;
       assert(this.store.has(key));
