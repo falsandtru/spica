@@ -187,25 +187,30 @@ describe('Unit: lib/cache', () => {
       const capacity = 10;
       const cache = new Cache<number, number>(capacity);
 
+      const range = capacity * 10;
       const repeat = capacity * 10000;
       let lrf = 0;
       let lru = 0;
       const LRU: number[] = [];
       for (let i = 0; i < repeat; ++i) {
-        let key = Math.random() * capacity * 10 | 0;
-        key = key < capacity * 8 ? key % (capacity * 4) | 0 : key;
-        lrf += +cache.put(key, i);
-        {
-          const idx = LRU.indexOf(key);
-          lru += +(idx > -1);
-          LRU.unshift(idx === -1 ? key : LRU.splice(idx, 1)[0]);
-          LRU.length = capacity;
+        let key = Math.random() * range | 0;
+        switch (true) {
+          case key < range * 0.2:
+            key = key / 4 | 0;
+            break;
+          case key < range * 0.8:
+            key = key / 2 | 0;
+            break;
         }
+        lrf += +cache.put(key, i);
+        const idx = LRU.indexOf(key);
+        lru += +(idx > -1);
+        LRU.unshift(idx === -1 ? key : LRU.splice(idx, 1)[0]);
+        LRU.length = capacity;
       }
-      console.debug('LRF cache hit rate', lrf / repeat * 100);
-      console.debug('LRU cache hit rate', lru / repeat * 100);
-      assert(lrf / repeat * 100 > lru / repeat * 100);
-      assert(lrf / repeat * 100 > 18 - 0.1);
+      console.debug('LRF cache hit rate', lrf * 100 / repeat);
+      console.debug('LRU cache hit rate', lru * 100 / repeat);
+      assert(lrf * 100 / repeat > lru * 100 / repeat);
     });
 
   });
