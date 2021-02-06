@@ -160,7 +160,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     return [LRU.slice(), LFU.slice()];
   }
   private store = new Map<K, V>();
-  private ratio = 50;
   private stats: {
     LRU: [[number, number], [number, number]],
     LFU: [[number, number], [number, number]],
@@ -168,9 +167,12 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     LRU: [[0, 0], [0, 0]],
     LFU: [[0, 0], [0, 0]],
   };
+  private ratio = 50;
   private optimize(): void {
     if (this.stats.LRU[0][1] % 10) return;
     const { LRU, LFU } = this.stats;
+    // 割当上限まで実割当が減るまで割当上限を再度減らさない
+    // 割当上限増減のために境界値を踏まなければならないため上昇幅は下降幅の倍数でなければならない
     if (LFU.length > this.capacity * this.ratio) return;
     assert(LRU[0][1] === LFU[0][1]);
     const window = this.capacity * 3;
