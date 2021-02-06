@@ -2,7 +2,7 @@ import type { DeepImmutable, DeepRequired } from './type';
 import { undefined, Map } from './global';
 import { IterableCollection } from './collection';
 import { extend } from './assign';
-import { indexOf, push, splice } from './array';
+import { indexOf, splice } from './array';
 
 export interface CacheOptions<K, V = undefined> {
   ignore?: {
@@ -46,11 +46,14 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       this.store.set(key, value);
     }
     if (!opts.data) return;
-    for (const key of push(indexes[1].slice(LFU.length), indexes[0].slice(LRU.length))) {
-      this.store.delete(key);
+    for (let i = LFU.length; i < indexes[1].length; ++i) {
+      this.store.delete(LFU[i]);
     }
-    if (this.store.size !== LFU.length + LRU.length) throw new Error(`Spica: Cache: Size of indexes and entries is not matched.`);
-    if (![...LFU, ...LRU].every(k => this.store.has(k))) throw new Error(`Spica: Cache: Keys of indexes and entries is not matched.`);
+    for (let i = LRU.length; i < indexes[0].length; ++i) {
+      this.store.delete(LRU[i]);
+    }
+    assert(this.store.size === LFU.length + LRU.length);
+    assert([...LFU, ...LRU].every(k => this.store.has(k)));
   }
   private readonly settings: DeepImmutable<DeepRequired<CacheOptions<K, V>>, unknown[]> = {
     ignore: {
