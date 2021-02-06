@@ -10,7 +10,7 @@ export interface CacheOptions<K, V = undefined> {
     clear?: boolean;
   };
   data?: {
-    stats: [K[], K[]];
+    indexes: [K[], K[]];
     entries: [K, V][];
   };
 }
@@ -25,17 +25,17 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         clear?: boolean;
       };
       data?: {
-        stats: [K[], K[]];
+        indexes: [K[], K[]];
         entries: [K, V][];
       };
     } = {},
   ) {
     if (capacity > 0 === false) throw new Error(`Spica: Cache: Cache capacity must be greater than 0.`);
     extend(this.settings, opts);
-    const { stats, entries } = this.settings.data;
-    const LFU = stats[1].slice(0, capacity);
-    const LRU = stats[0].slice(0, capacity - LFU.length);
-    this.stats = {
+    const { indexes, entries } = this.settings.data;
+    const LFU = indexes[1].slice(0, capacity);
+    const LRU = indexes[0].slice(0, capacity - LFU.length);
+    this.indexes = {
       LRU,
       LFU,
     };
@@ -46,11 +46,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       this.store.set(key, value);
     }
     if (!opts.data) return;
-    for (const key of push(stats[1].slice(LFU.length), stats[0].slice(LRU.length))) {
+    for (const key of push(indexes[1].slice(LFU.length), indexes[0].slice(LRU.length))) {
       this.store.delete(key);
     }
-    if (this.store.size !== LFU.length + LRU.length) throw new Error(`Spica: Cache: Size of stats and entries is not matched.`);
-    if (![...LFU, ...LRU].every(k => this.store.has(k))) throw new Error(`Spica: Cache: Keys of stats and entries is not matched.`);
+    if (this.store.size !== LFU.length + LRU.length) throw new Error(`Spica: Cache: Size of indexes and entries is not matched.`);
+    if (![...LFU, ...LRU].every(k => this.store.has(k))) throw new Error(`Spica: Cache: Keys of indexes and entries is not matched.`);
   }
   private readonly settings: DeepImmutable<DeepRequired<CacheOptions<K, V>>, unknown[]> = {
     ignore: {
@@ -58,7 +58,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       clear: false,
     },
     data: {
-      stats: [[], []],
+      indexes: [[], []],
       entries: [],
     },
   };
@@ -78,7 +78,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       return true;
     }
 
-    const { LRU, LFU } = this.stats;
+    const { LRU, LFU } = this.indexes;
     if (this.size === this.capacity && LFU.length > LRU.length) {
       assert(LFU.length > 0);
       const key = LFU.pop()!;
@@ -119,7 +119,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   }
   public delete(key: K): boolean {
     if (!this.store.has(key)) return false;
-    const { LRU, LFU } = this.stats;
+    const { LRU, LFU } = this.indexes;
     for (const stat of [LFU, LRU]) {
       const index = indexOf(stat, key);
       if (index === -1) continue;
@@ -134,7 +134,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public clear(): void {
     const store = this.store;
     this.store = new Map();
-    this.stats = {
+    this.indexes = {
       LRU: [],
       LFU: [],
     };
@@ -144,24 +144,24 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     }
   }
   public get size(): number {
-    assert(this.stats.LRU.length + this.stats.LFU.length === this.store.size);
-    return this.stats.LRU.length + this.stats.LFU.length;
+    assert(this.indexes.LRU.length + this.indexes.LFU.length === this.store.size);
+    return this.indexes.LRU.length + this.indexes.LFU.length;
   }
   public [Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
     return this.store[Symbol.iterator]();
   }
   public export(): NonNullable<CacheOptions<K, V>['data']> {
     return {
-      stats: [this.stats.LRU.slice(), this.stats.LFU.slice()],
+      indexes: [this.indexes.LRU.slice(), this.indexes.LFU.slice()],
       entries: [...this],
     };
   }
   public inspect(): [K[], K[]] {
-    const { LRU, LFU } = this.stats;
+    const { LRU, LFU } = this.indexes;
     return [LRU.slice(), LFU.slice()];
   }
   private store = new Map<K, V>();
-  private stats: {
+  private indexes: {
     LRU: K[];
     LFU: K[];
   };
@@ -172,11 +172,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   }
   private accessLRU(key: K): boolean {
     assert(this.store.has(key));
-    const LRU = this.stats.LRU;
+    const LRU = this.indexes.LRU;
     const index = indexOf(LRU, key);
     assert(index > -1 === this.has(key));
     if (index === -1) return false;
-    const LFU = this.stats.LFU;
+    const LFU = this.indexes.LFU;
     index === 0
       ? LFU.unshift(LRU.shift()!)
       : [LRU[index - 1], LRU[index]] = [LRU[index], LRU[index - 1]];
@@ -184,7 +184,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   }
   private accessLFU(key: K): boolean {
     assert(this.store.has(key));
-    const LFU = this.stats.LFU;
+    const LFU = this.indexes.LFU;
     const index = indexOf(LFU, key);
     if (index === -1) return false;
     if (index === 0) return true;

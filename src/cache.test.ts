@@ -108,20 +108,20 @@ describe('Unit: lib/cache', () => {
       assert(key === 0 && val === 0 && cnt === 1);
       assert(cache.put(1, 1) === true);
       assert.deepStrictEqual(cache.export(), {
-        stats: [[], [1]],
+        indexes: [[], [1]],
         entries: [[1, 1]],
       });
       assert(cache.put(0, 0) === false);
       assert(key === 1 && val === 1 && cnt === 2);
       assert.deepStrictEqual(cache.export(), {
-        stats: [[0], []],
+        indexes: [[0], []],
         entries: [[0, 0]],
       });
       assert(cache.put(2, 2) === false);
       assert(key === 0 && val === 0 && cnt === 3);
       assert(cache.put(2, 2) === true);
       assert.deepStrictEqual(cache.export(), {
-        stats: [[], [2]],
+        indexes: [[], [2]],
         entries: [[2, 2]],
       });
     });
@@ -149,7 +149,7 @@ describe('Unit: lib/cache', () => {
       assert(cache.put(3, 3) === false);
       assert(key === 0 && val === 0 && cnt === 3);
       assert.deepStrictEqual(cache.export(), {
-        stats: [[3], [2]],
+        indexes: [[3], [2]],
         entries: [[2, 2], [3, 3]],
       });
 
