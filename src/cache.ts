@@ -1,17 +1,17 @@
-import type { DeepImmutable, DeepRequired } from './type';
+import type { DeepRequired } from './type';
 import { undefined, Map } from './global';
 import { IterableCollection } from './collection';
 import { extend } from './assign';
 import { indexOf, splice } from './array';
 
 export interface CacheOptions<K, V = undefined> {
-  ignore?: {
-    delete?: boolean;
-    clear?: boolean;
+  readonly ignore?: {
+    readonly delete?: boolean;
+    readonly clear?: boolean;
   };
-  data?: {
-    indexes: [K[], K[]];
-    entries: [K, V][];
+  readonly data?: {
+    readonly indexes: readonly [readonly K[], readonly K[]];
+    readonly entries: readonly (readonly [K, V])[];
   };
 }
 
@@ -19,16 +19,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   constructor(
     private readonly capacity: number,
     private readonly callback: (key: K, value: V) => void = () => undefined,
-    opts: {
-      ignore?: {
-        delete?: boolean;
-        clear?: boolean;
-      };
-      data?: {
-        indexes: [K[], K[]];
-        entries: [K, V][];
-      };
-    } = {},
+    opts: CacheOptions<K, V> = {},
   ) {
     if (capacity > 0 === false) throw new Error(`Spica: Cache: Cache capacity must be greater than 0.`);
     extend(this.settings, opts);
@@ -55,7 +46,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     assert(this.store.size === LFU.length + LRU.length);
     assert([...LFU, ...LRU].every(k => this.store.has(k)));
   }
-  private readonly settings: DeepImmutable<DeepRequired<CacheOptions<K, V>>, unknown[]> = {
+  private readonly settings: DeepRequired<CacheOptions<K, V>> = {
     ignore: {
       delete: false,
       clear: false,
