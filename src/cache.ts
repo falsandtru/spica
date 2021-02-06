@@ -73,8 +73,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     }
 
     const { LRU, LFU } = this.indexes;
-    if (LFU.length === this.capacity ||
-        this.size === this.capacity && LFU.length > this.capacity * this.ratio / 100) {
+    if (this.size === this.capacity && LFU.length > this.capacity * this.ratio / 100 ||
+        LFU.length === this.capacity) {
       assert(LFU.length > 0);
       const key = LFU.pop()!;
       assert(this.store.has(key));
@@ -181,10 +181,15 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const rateF = rate(window, LFU[0], LFU[1]);
     const ratio = this.ratio;
     // LFUに収束させる
-    if (rateF > rateR && ratio < 100) {
+    // 小さすぎるLRUのために非効率にならないようにする
+    // 小さい容量では依然として最小LRUが小さくなりすぎ非効率
+    // なぜかLFUとLRUを広く往復させないとヒットレートが上がらない
+    if (rateF > rateR && ratio < 90) {
       this.ratio += 5;
     }
     // LRUに収束させない
+    // LFUと半々で均等分布においてLRUのみと同等効率
+    // これ以下に下げても(LRUを50%超にしても)均等分布ですら効率が悪化する
     else if (rateF < rateR && ratio > 50) {
       //console.log(this.ratio);
       this.ratio -= 5;

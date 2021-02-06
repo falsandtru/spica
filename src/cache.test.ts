@@ -208,7 +208,7 @@ describe('Unit: lib/cache', () => {
       console.debug('LRU cache hit rate even', lru * 100 / repeat);
       console.debug('LRU cache ratio even', cache['ratio']);
       assert(cache['ratio'] > 0);
-      assert(lrf * 100 / repeat - lru * 100 / repeat > -1);
+      assert(lrf * 100 / repeat - lru * 100 / repeat > -0.5);
     });
 
     it('rate uneven', function () {
@@ -241,6 +241,7 @@ describe('Unit: lib/cache', () => {
       console.debug('LRU cache hit rate uneven', lru * 100 / repeat);
       console.debug('LRU cache ratio uneven', cache['ratio']);
       assert(cache['ratio'] > 0);
+      //assert(lrf * 100 / repeat - lru * 100 / repeat > 3.5);
       assert(lrf * 100 / repeat - lru * 100 / repeat > 3);
     });
 
