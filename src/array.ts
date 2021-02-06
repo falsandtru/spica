@@ -1,6 +1,7 @@
 import { undefined, Infinity } from './global';
 
 export function indexOf<a>(as: readonly a[], a: a): number {
+  if (as.length === 0) return -1;
   return a === a
     ? as.indexOf(a)
     : as.findIndex(a => a !== a);
