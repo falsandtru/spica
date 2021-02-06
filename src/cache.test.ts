@@ -180,32 +180,68 @@ describe('Unit: lib/cache', () => {
           .length === capacity);
     });
 
-    it('rate', function () {
-      this.timeout(10 * 1e3);
+    it('rate even', function () {
+      this.timeout(5 * 1e3);
       this.retries(3);
 
       const capacity = 100;
       const cache = new Cache<number, number>(capacity);
 
-      const range = capacity * 10;
       const repeat = 100000;
+      const warmup = capacity * 100;
       let lrf = 0;
       let lru = 0;
       const LRU: number[] = [];
-      for (let i = 0; i < repeat; ++i) {
-        let key = Math.floor(Math.random() * range + i / 100);
-        if (key < capacity * 8) {
-          key = Math.floor(key / 8);
-        }
+      for (let i = 0; i < repeat + warmup; ++i) {
+        const key = Math.random() * capacity * 9 | 0;
         lrf += +cache.put(key, i);
         const idx = LRU.indexOf(key);
         lru += +(idx > -1);
         LRU.unshift(idx === -1 ? key : LRU.splice(idx, 1)[0]);
         LRU.length = capacity;
+        if (i + 1 === warmup) {
+          lrf = 0;
+          lru = 0;
+        }
       }
-      console.debug('LRF cache hit rate', lrf * 100 / repeat);
-      console.debug('LRU cache hit rate', lru * 100 / repeat);
-      assert(lrf * 100 / repeat > lru * 100 / repeat);
+      console.debug('LRF cache hit rate even', lrf * 100 / repeat);
+      console.debug('LRU cache hit rate even', lru * 100 / repeat);
+      console.debug('LRU cache ratio even', cache['ratio']);
+      assert(cache['ratio'] > 0);
+      assert(lrf * 100 / repeat - lru * 100 / repeat > -1);
+    });
+
+    it('rate uneven', function () {
+      this.timeout(5 * 1e3);
+      this.retries(3);
+
+      const capacity = 100;
+      const cache = new Cache<number, number>(capacity);
+
+      const repeat = 100000;
+      const warmup = capacity * 100;
+      let lrf = 0;
+      let lru = 0;
+      const LRU: number[] = [];
+      for (let i = 0; i < repeat + warmup; ++i) {
+        const key = Math.random() < 0.2
+          ? Math.random() * capacity * 1 | 0
+          : Math.random() * capacity * 9 | 0;
+        lrf += +cache.put(key, i);
+        const idx = LRU.indexOf(key);
+        lru += +(idx > -1);
+        LRU.unshift(idx === -1 ? key : LRU.splice(idx, 1)[0]);
+        LRU.length = capacity;
+        if (i + 1 === warmup) {
+          lrf = 0;
+          lru = 0;
+        }
+      }
+      console.debug('LRF cache hit rate uneven', lrf * 100 / repeat);
+      console.debug('LRU cache hit rate uneven', lru * 100 / repeat);
+      console.debug('LRU cache ratio uneven', cache['ratio']);
+      assert(cache['ratio'] > 0);
+      assert(lrf * 100 / repeat - lru * 100 / repeat > 3);
     });
 
   });
