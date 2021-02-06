@@ -193,9 +193,9 @@ describe('Unit: lib/cache', () => {
       let lru = 0;
       const LRU: number[] = [];
       for (let i = 0; i < repeat; ++i) {
-        let key = Math.random() * range | 0;
+        let key = Math.floor(Math.random() * range + i / 100);
         if (key < capacity * 8) {
-          key = key / 8 | 0;
+          key = Math.floor(key / 8);
         }
         lrf += +cache.put(key, i);
         const idx = LRU.indexOf(key);
