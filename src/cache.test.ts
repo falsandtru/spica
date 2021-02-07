@@ -199,7 +199,7 @@ describe('Unit: lib/cache', () => {
     }
 
     it('rate even', function () {
-      this.timeout(5 * 1e3);
+      this.timeout(10 * 1e3);
       this.retries(3);
 
       const capacity = 100;
@@ -207,7 +207,7 @@ describe('Unit: lib/cache', () => {
       const lru = new LRUCache<number, number>(capacity);
 
       const repeat = capacity * 1000;
-      const warmup = capacity * 100;
+      const warmup = capacity * 1000;
       let hitdwc = 0;
       let hitlru = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
@@ -221,12 +221,12 @@ describe('Unit: lib/cache', () => {
       }
       console.debug('DWC hit rate even', hitdwc * 100 / repeat);
       console.debug('LRU hit rate even', hitlru * 100 / repeat);
-      console.debug('Cache ratio even', dwc['ratio']);
-      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > -0.5);
+      console.debug('LRU ratio even', dwc['ratio']);
+      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > -0.1);
     });
 
     it('rate uneven', function () {
-      this.timeout(5 * 1e3);
+      this.timeout(10 * 1e3);
       this.retries(3);
 
       const capacity = 100;
@@ -234,7 +234,7 @@ describe('Unit: lib/cache', () => {
       const lru = new LRUCache<number, number>(capacity);
 
       const repeat = capacity * 1000;
-      const warmup = capacity * 100;
+      const warmup = capacity * 1000;
       let hitdwc = 0;
       let hitlru = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
@@ -250,9 +250,8 @@ describe('Unit: lib/cache', () => {
       }
       console.debug('DWC hit rate uneven', hitdwc * 100 / repeat);
       console.debug('LRU hit rate uneven', hitlru * 100 / repeat);
-      console.debug('Cache ratio uneven', dwc['ratio']);
-      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 3);
-      //assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 3.5);
+      console.debug('LRU ratio uneven', dwc['ratio']);
+      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 6);
     });
 
   });

@@ -180,18 +180,26 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   };
   private mode: Exclude<NonNullable<CacheOptions<K, V>['mode']>, 'auto'>;
   private ratio = 50;
+  private window(): number {
+    const total = this.stats.LRU[0][1] + this.stats.LRU[1][1];
+    assert(total === this.stats.LFU[0][1] + this.stats.LFU[1][1]);
+    const capacity = this.capacity;
+    return total < capacity
+      ? total
+      : capacity;
+  }
   private slide(): void {
     assert(this.mode === 'DW');
-    assert(this.size === this.capacity);
     const step = 1;
     // 速度への影響を確認できなかったため毎回再計算
     //if (this.stats.LRU[0][1] % step) return;
     const { LRU, LFU } = this.stats;
     assert(LRU[0][1] === LFU[0][1]);
-    const window = this.capacity * 3;
+    const window = this.window();
     if (LRU[1][1] === 0 && LRU[0][1] < window) return;
+    const capacity = this.capacity;
     // 割当上限まで実割当が減るまで割当上限を再度減らさない
-    if (LFU.length > this.capacity * this.ratio) return;
+    if (LFU.length > capacity * this.ratio) return;
     const rateR = rate(window, LRU[0], LRU[1]);
     const rateF = rate(window, LFU[0], LFU[1]);
     const ratio = this.ratio;
@@ -210,9 +218,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       this.ratio -= step;
     }
     if (LRU[0][1] === window) {
+      const flush = LRU[0][1] % capacity === 0;
       this.stats = {
-        LRU: [[0, 0], LRU[0]],
-        LFU: [[0, 0], LFU[0]],
+        LRU: [[0, 0], flush ? LRU[0] : [LRU[0][0] + LRU[1][0], LRU[0][1] + LRU[1][1]]],
+        LFU: [[0, 0], flush ? LFU[0] : [LFU[0][0] + LFU[1][0], LFU[0][1] + LFU[1][1]]],
       };
     }
   }
@@ -222,7 +231,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   };
   private access(key: K): boolean {
     assert(this.store.has(key));
-    const stats = this.mode === 'DW' && this.size === this.capacity
+    const stats = this.mode === 'DW'
       ? this.stats
       : undefined;
     this.hit = this.accessLFU(key, stats)
