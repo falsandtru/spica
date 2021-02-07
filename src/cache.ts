@@ -182,7 +182,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private ratio = 50;
   private slide(): void {
     if (this.mode !== 'DW') return;
-    const step = 5;
+    const step = 1;
     if (this.stats.LRU[0][1] % step) return;
     const { LRU, LFU } = this.stats;
     // 割当上限まで実割当が減るまで割当上限を再度減らさない
