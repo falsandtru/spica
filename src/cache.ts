@@ -182,10 +182,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private ratio = 50;
   private slide(): void {
     if (this.mode !== 'DW') return;
-    if (this.stats.LRU[0][1] % 5) return;
+    const step = 5;
+    if (this.stats.LRU[0][1] % step) return;
     const { LRU, LFU } = this.stats;
     // 割当上限まで実割当が減るまで割当上限を再度減らさない
-    // 割当上限増減のために境界値を踏まなければならないため上昇幅は下降幅の倍数でなければならない
     if (LFU.length > this.capacity * this.ratio) return;
     assert(LRU[0][1] === LFU[0][1]);
     const window = this.capacity * 3;
@@ -198,14 +198,14 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     // 小さい容量では依然として最小LRUが小さくなりすぎ非効率
     // なぜかLFUとLRUを広く往復させないとヒットレートが上がらない
     if (rateF > rateR && ratio < 90) {
-      this.ratio += 5;
+      this.ratio += step;
     }
     // LRUに収束させない
     // LFUと半々で均等分布においてLRUのみと同等効率
     // これ以下に下げても(LRUを50%超にしても)均等分布ですら効率が悪化する
     else if (rateF < rateR && ratio > 50) {
       //console.log(this.ratio);
-      this.ratio -= 5;
+      this.ratio -= step;
     }
     if (LRU[0][1] === window) {
       this.stats = {
