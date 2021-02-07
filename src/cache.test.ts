@@ -126,7 +126,7 @@ describe('Unit: lib/cache', () => {
       });
     });
 
-    it('DWC - Dual Window Cache', () => {
+    it('DWC', () => {
       let key: number | undefined;
       let val: number | undefined;
       let cnt = 0;

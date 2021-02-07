@@ -5,6 +5,8 @@ import { extend } from './assign';
 import { indexOf, splice } from './array';
 import { noop } from './noop';
 
+// Dual Window Cache
+
 export interface CacheOptions<K, V = undefined> {
   readonly mode?: 'auto' | 'DW' | 'LRU';
   readonly disposer?: (key: K, value: V) => void;
