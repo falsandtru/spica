@@ -178,7 +178,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   };
   private mode: Exclude<NonNullable<CacheOptions<K, V>['mode']>, 'auto'>;
   private ratio = 50;
-  private optimize(): void {
+  private slide(): void {
     if (this.mode !== 'DW') return;
     if (this.stats.LRU[0][1] % 10) return;
     const { LRU, LFU } = this.stats;
@@ -223,7 +223,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       : undefined;
     this.hit = this.accessLFU(key, stats)
     this.hit = this.accessLRU(key, stats) || this.hit;
-    this.optimize();
+    this.slide();
     assert(this.hit);
     return this.hit;
   }
