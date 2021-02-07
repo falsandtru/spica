@@ -251,8 +251,8 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC hit rate uneven', hitdwc * 100 / repeat);
       console.debug('LRU hit rate uneven', hitlru * 100 / repeat);
       console.debug('LRU ratio uneven', dwc['ratio']);
-      //assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 3.5);
       assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 3);
+      //assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 3.5);
     });
 
   });
