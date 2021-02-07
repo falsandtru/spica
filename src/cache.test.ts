@@ -211,7 +211,7 @@ describe('Unit: lib/cache', () => {
       let hitdwc = 0;
       let hitlru = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
-        const key = Math.random() * capacity * 9 | 0;
+        const key = Math.random() * capacity * 10 | 0;
         hitdwc += +dwc.put(key, i);
         hitlru += +lru.put(key, i);
         if (i + 1 === warmup) {
@@ -221,8 +221,8 @@ describe('Unit: lib/cache', () => {
       }
       console.debug('DWC hit rate even', hitdwc * 100 / repeat);
       console.debug('LRU hit rate even', hitlru * 100 / repeat);
-      console.debug('LRU ratio even', dwc['ratio']);
-      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > -0.1);
+      console.debug('LRU cache ratio even', dwc['ratio']);
+      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > -0.2);
     });
 
     it('rate uneven', function () {
@@ -238,9 +238,9 @@ describe('Unit: lib/cache', () => {
       let hitdwc = 0;
       let hitlru = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
-        const key = Math.random() < 0.2
+        const key = Math.random() < 0.4
           ? Math.random() * capacity * 1 | 0
-          : Math.random() * capacity * 9 | 0;
+          : Math.random() * capacity * 9 + capacity | 0;
         hitdwc += +dwc.put(key, i);
         hitlru += +lru.put(key, i);
         if (i + 1 === warmup) {
@@ -250,8 +250,8 @@ describe('Unit: lib/cache', () => {
       }
       console.debug('DWC hit rate uneven', hitdwc * 100 / repeat);
       console.debug('LRU hit rate uneven', hitlru * 100 / repeat);
-      console.debug('LRU ratio uneven', dwc['ratio']);
-      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 6);
+      console.debug('LRU cache ratio uneven', dwc['ratio']);
+      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 13);
     });
 
   });
