@@ -242,9 +242,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     stats && ++stats.LRU[0][1];
     if (index === -1) return false;
     stats && ++stats.LRU[0][0];
-    index === 0
-      ? this.mode !== 'LRU' && LFU.unshift(LRU.shift()!)
-      : [LRU[index - 1], LRU[index]] = [LRU[index], LRU[index - 1]];
+    if (index === 0) return this.mode !== 'LRU' && LFU.unshift(LRU.shift()!), true;
+    [LRU[index - 1], LRU[index]] = [LRU[index], LRU[index - 1]];
     return true;
   }
   private accessLFU(key: K, stats?: Cache<K, V>['stats']): boolean {
