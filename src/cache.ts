@@ -73,27 +73,28 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     }
 
     const { LRU, LFU } = this.indexes;
-    if (this.size === this.capacity && LFU.length > this.capacity * this.ratio / 100 ||
-        LFU.length === this.capacity) {
-      assert(LFU.length > 0);
-      const key = LFU.pop()!;
-      assert(this.store.has(key));
-      const val = this.store.get(key)!;
-      this.store.delete(key);
-      this.callback(key, val);
+
+    if (this.size === this.capacity) {
+      if (LFU.length > this.capacity * this.ratio / 100 || LFU.length === this.capacity) {
+        assert(LFU.length > 0);
+        const key = LFU.pop()!;
+        assert(this.store.has(key));
+        const val = this.store.get(key)!;
+        this.store.delete(key);
+        this.callback(key, val);
+      }
+      else {
+        assert(LRU.length > 0);
+        const key = LRU.pop()!;
+        assert(this.store.has(key));
+        const val = this.store.get(key)!;
+        this.store.delete(key);
+        this.callback(key, val);
+      }
     }
 
     LRU.unshift(key);
     this.store.set(key, value);
-
-    if (this.size > this.capacity) {
-      assert(LRU.length > 0);
-      const key = LRU.pop()!;
-      assert(this.store.has(key));
-      const val = this.store.get(key)!;
-      this.store.delete(key);
-      this.callback(key, val);
-    }
     return false;
   }
   public set<W extends V>(this: Cache<K, undefined>, key: K, value?: W): this;
