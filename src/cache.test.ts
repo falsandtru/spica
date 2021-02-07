@@ -221,7 +221,7 @@ describe('Unit: lib/cache', () => {
       }
       console.debug('DWC hit rate even', hitdwc * 100 / repeat);
       console.debug('LRU hit rate even', hitlru * 100 / repeat);
-      console.debug('LRU ratio even', dwc['ratio']);
+      console.debug('Cache ratio even', dwc['ratio']);
       assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > -0.5);
     });
 
@@ -250,7 +250,7 @@ describe('Unit: lib/cache', () => {
       }
       console.debug('DWC hit rate uneven', hitdwc * 100 / repeat);
       console.debug('LRU hit rate uneven', hitlru * 100 / repeat);
-      console.debug('LRU ratio uneven', dwc['ratio']);
+      console.debug('Cache ratio uneven', dwc['ratio']);
       assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 3);
       //assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 3.5);
     });
