@@ -6,6 +6,8 @@ import { indexOf, splice } from './array';
 import { noop } from './noop';
 
 export interface CacheOptions<K, V = undefined> {
+  readonly mode?: 'auto' | 'DW' | 'LRU';
+  readonly disposer?: (key: K, value: V) => void;
   readonly ignore?: {
     readonly delete?: boolean;
     readonly clear?: boolean;
@@ -14,8 +16,6 @@ export interface CacheOptions<K, V = undefined> {
     readonly indexes: readonly [readonly K[], readonly K[]];
     readonly entries: readonly (readonly [K, V])[];
   };
-  readonly callback?: (key: K, value: V) => void;
-  readonly mode?: 'auto' | 'DW' | 'LRU';
 }
 
 export class Cache<K, V = undefined> implements IterableCollection<K, V> {
@@ -60,7 +60,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       indexes: [[], []],
       entries: [],
     },
-    callback: noop,
+    disposer: noop,
     mode: 'auto',
   };
   private nullish = false;
@@ -89,7 +89,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         assert(this.store.has(key));
         const val = this.store.get(key)!;
         this.store.delete(key);
-        this.settings.callback(key, val);
+        this.settings.disposer(key, val);
       }
       else {
         assert(LRU.length > 0);
@@ -97,7 +97,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         assert(this.store.has(key));
         const val = this.store.get(key)!;
         this.store.delete(key);
-        this.settings.callback(key, val);
+        this.settings.disposer(key, val);
       }
     }
 
@@ -130,7 +130,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       const val = this.store.get(key)!;
       this.store.delete(splice(stat, index, 1)[0]);
       if (this.settings.ignore.delete) return true;
-      this.settings.callback(key, val);
+      this.settings.disposer(key, val);
       return true;
     }
     return false;
@@ -148,7 +148,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     };
     if (this.settings.ignore.clear) return;
     for (const kv of store) {
-      this.settings.callback(kv[0], kv[1]);
+      this.settings.disposer(kv[0], kv[1]);
     }
   }
   public get size(): number {

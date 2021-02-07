@@ -57,7 +57,7 @@ describe('Unit: lib/cache', () => {
       let key: number | undefined;
       let val: number | undefined;
       let cnt = 0;
-      const cache = new Cache<number, number>(1, { mode: 'DW', callback: (k, v) => (key = k, val = v, ++cnt) });
+      const cache = new Cache<number, number>(1, { mode: 'DW', disposer: (k, v) => (key = k, val = v, ++cnt) });
 
       assert.deepStrictEqual(cache.inspect(), [
         [], []
@@ -95,7 +95,7 @@ describe('Unit: lib/cache', () => {
       let key: number | undefined;
       let val: number | undefined;
       let cnt = 0;
-      const cache = new Cache<number, number>(1, { mode: 'DW', callback: (k, v) => (key = k, val = v, ++cnt) });
+      const cache = new Cache<number, number>(1, { mode: 'DW', disposer: (k, v) => (key = k, val = v, ++cnt) });
 
       assert.deepStrictEqual(cache.inspect(), [
         [], []
@@ -130,7 +130,7 @@ describe('Unit: lib/cache', () => {
       let key: number | undefined;
       let val: number | undefined;
       let cnt = 0;
-      const cache = new Cache<number, number>(2, { mode: 'DW', callback: (k, v) => (key = k, val = v, ++cnt) });
+      const cache = new Cache<number, number>(2, { mode: 'DW', disposer: (k, v) => (key = k, val = v, ++cnt) });
 
       assert.deepStrictEqual(cache.inspect(), [
         [], []
