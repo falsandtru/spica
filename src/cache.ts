@@ -3,6 +3,7 @@ import { undefined, Map } from './global';
 import { IterableCollection } from './collection';
 import { extend } from './assign';
 import { indexOf, splice } from './array';
+import { noop } from './noop';
 
 export interface CacheOptions<K, V = undefined> {
   readonly ignore?: {
@@ -13,16 +14,20 @@ export interface CacheOptions<K, V = undefined> {
     readonly indexes: readonly [readonly K[], readonly K[]];
     readonly entries: readonly (readonly [K, V])[];
   };
+  readonly callback?: (key: K, value: V) => void;
+  readonly mode?: 'auto' | 'DW' | 'LRU';
 }
 
 export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   constructor(
     private readonly capacity: number,
-    private readonly callback: (key: K, value: V) => void = () => undefined,
     opts: CacheOptions<K, V> = {},
   ) {
     if (capacity > 0 === false) throw new Error(`Spica: Cache: Cache capacity must be greater than 0.`);
     extend(this.settings, opts);
+    this.mode = this.settings.mode === 'auto'
+      ? capacity < 100 ? 'LRU' : 'DW'
+      : this.settings.mode;
     const { indexes, entries } = this.settings.data;
     const LFU = indexes[1].slice(0, capacity);
     const LRU = indexes[0].slice(0, capacity - LFU.length);
@@ -55,6 +60,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       indexes: [[], []],
       entries: [],
     },
+    callback: noop,
+    mode: 'auto',
   };
   private nullish = false;
   private hit = false;
@@ -76,12 +83,13 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
 
     if (this.size === this.capacity) {
       if (LFU.length > this.capacity * this.ratio / 100 || LFU.length === this.capacity) {
+        assert(this.mode !== 'LRU');
         assert(LFU.length > 0);
         const key = LFU.pop()!;
         assert(this.store.has(key));
         const val = this.store.get(key)!;
         this.store.delete(key);
-        this.callback(key, val);
+        this.settings.callback(key, val);
       }
       else {
         assert(LRU.length > 0);
@@ -89,7 +97,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         assert(this.store.has(key));
         const val = this.store.get(key)!;
         this.store.delete(key);
-        this.callback(key, val);
+        this.settings.callback(key, val);
       }
     }
 
@@ -122,7 +130,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       const val = this.store.get(key)!;
       this.store.delete(splice(stat, index, 1)[0]);
       if (this.settings.ignore.delete) return true;
-      this.callback(key, val);
+      this.settings.callback(key, val);
       return true;
     }
     return false;
@@ -140,7 +148,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     };
     if (this.settings.ignore.clear) return;
     for (const kv of store) {
-      this.callback(kv[0], kv[1]);
+      this.settings.callback(kv[0], kv[1]);
     }
   }
   public get size(): number {
@@ -168,8 +176,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     LRU: [[0, 0], [0, 0]],
     LFU: [[0, 0], [0, 0]],
   };
+  private mode: Exclude<NonNullable<CacheOptions<K, V>['mode']>, 'auto'>;
   private ratio = 50;
   private optimize(): void {
+    if (this.mode !== 'DW') return;
     if (this.stats.LRU[0][1] % 10) return;
     const { LRU, LFU } = this.stats;
     // 割当上限まで実割当が減るまで割当上限を再度減らさない
@@ -208,7 +218,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   };
   private access(key: K): boolean {
     assert(this.store.has(key));
-    const stats = this.size === this.capacity
+    const stats = this.mode === 'DW' && this.size === this.capacity
       ? this.stats
       : undefined;
     this.hit = this.accessLFU(key, stats)
@@ -232,7 +242,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     stats && ++stats.LRU[0][0];
     const LFU = this.indexes.LFU;
     index === 0
-      ? LFU.unshift(LRU.shift()!)
+      ? this.mode !== 'LRU' && LFU.unshift(LRU.shift()!)
       : [LRU[index - 1], LRU[index]] = [LRU[index], LRU[index - 1]];
     return true;
   }
@@ -242,6 +252,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const index = indexOf(LFU, key);
     stats && ++stats.LFU[0][1];
     if (index === -1) return false;
+    assert(this.mode !== 'LRU');
     stats && ++stats.LFU[0][0];
     if (index === 0) return true;
     [LFU[index - 1], LFU[index]] = [LFU[index], LFU[index - 1]];
