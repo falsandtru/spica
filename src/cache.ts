@@ -243,6 +243,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (index === -1) return false;
     stats && ++stats.LRU[0][0];
     if (index === 0) return this.mode !== 'LRU' && LFU.unshift(LRU.shift()!), true;
+    // spliceが遅いので代用
+    // ヒットレートの変化は確認できず
     [LRU[index - 1], LRU[index]] = [LRU[index], LRU[index - 1]];
     return true;
   }
