@@ -113,7 +113,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   }
   public get(key: K): V | undefined {
     const val = this.store.get(key);
-    const hit = this.hit = val !== undefined || this.nullish && this.store.has(key);
+    const hit = this.hit = val !== undefined || this.nullish && this.has(key);
     return hit && this.access(key)
       ? val
       : undefined;
@@ -122,7 +122,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     return this.store.has(key);
   }
   public delete(key: K): boolean {
-    if (!this.store.has(key)) return false;
+    if (!this.has(key)) return false;
     const { LRU, LFU } = this.indexes;
     for (const stat of [LFU, LRU]) {
       const index = indexOf(stat, key);
@@ -236,7 +236,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     }
     const { LRU, LFU } = this.indexes;
     const index = indexOf(LRU, key);
-    assert(index > -1 === this.has(key));
+    assert(index > -1 === this.store.has(key));
     stats && ++stats.LRU[0][1];
     if (index === -1) return false;
     stats && ++stats.LRU[0][0];
