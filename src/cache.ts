@@ -230,7 +230,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private accessLRU(key: K, stats?: Cache<K, V>['stats']): boolean {
     assert(this.store.has(key));
     if (this.hit) {
-      assert(this.indexes.LRU.indexOf(key) === -1);
+      assert(indexOf(this.indexes.LRU, key) === -1);
       stats && ++stats.LRU[0][1];
       return false;
     }
