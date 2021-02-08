@@ -166,10 +166,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       entries: [...this],
     };
   }
-  public inspect(): [K[], K[]] {
-    const { LRU, LFU } = this.indexes;
-    return [LRU.slice(), LFU.slice()];
-  }
   private store = new Map<K, V>();
   private stats: {
     LRU: [[number, number], [number, number]],

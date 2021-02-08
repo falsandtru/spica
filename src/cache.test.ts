@@ -3,12 +3,17 @@ import { Sequence } from './monad/sequence';
 
 describe('Unit: lib/cache', () => {
   describe('Cache', () => {
+    function inspect<K>(cache: Cache<K, any>): [K[], K[]] {
+      const { LRU, LFU } = cache['indexes'];
+      return [LRU.slice(), LFU.slice()];
+    }
+
     it('put/has/delete', () => {
       const cache = new Cache<number, number>(1, { mode: 'DW' });
 
       assert.deepStrictEqual([...cache], [
       ]);
-      assert.deepStrictEqual(cache.inspect(), [
+      assert.deepStrictEqual(inspect(cache), [
         [], []
       ]);
 
@@ -17,7 +22,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual([...cache], [
         [0, 0]
       ]);
-      assert.deepStrictEqual(cache.inspect(), [
+      assert.deepStrictEqual(inspect(cache), [
         [0], []
       ]);
 
@@ -26,7 +31,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual([...cache], [
         [0, 0]
       ]);
-      assert.deepStrictEqual(cache.inspect(), [
+      assert.deepStrictEqual(inspect(cache), [
         [], [0]
       ]);
 
@@ -35,7 +40,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual([...cache], [
         [0, 0]
       ]);
-      assert.deepStrictEqual(cache.inspect(), [
+      assert.deepStrictEqual(inspect(cache), [
         [], [0]
       ]);
 
@@ -44,7 +49,7 @@ describe('Unit: lib/cache', () => {
       assert(cache.delete(0) === false);
       assert.deepStrictEqual([...cache], [
       ]);
-      assert.deepStrictEqual(cache.inspect(), [
+      assert.deepStrictEqual(inspect(cache), [
         [], []
       ]);
     });
@@ -59,7 +64,7 @@ describe('Unit: lib/cache', () => {
       let cnt = 0;
       const cache = new Cache<number, number>(1, { mode: 'DW', disposer: (k, v) => (key = k, val = v, ++cnt) });
 
-      assert.deepStrictEqual(cache.inspect(), [
+      assert.deepStrictEqual(inspect(cache), [
         [], []
       ]);
 
@@ -70,7 +75,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual([...cache], [
         [1, 1]
       ]);
-      assert.deepStrictEqual(cache.inspect(), [
+      assert.deepStrictEqual(inspect(cache), [
         [1], []
       ]);
       assert(cache.put(0, 0) === false);
@@ -78,7 +83,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual([...cache], [
         [0, 0]
       ]);
-      assert.deepStrictEqual(cache.inspect(), [
+      assert.deepStrictEqual(inspect(cache), [
         [0], []
       ]);
       assert(cache.put(2, 2) === false);
@@ -86,7 +91,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual([...cache], [
         [2, 2]
       ]);
-      assert.deepStrictEqual(cache.inspect(), [
+      assert.deepStrictEqual(inspect(cache), [
         [2], []
       ]);
     });
@@ -97,7 +102,7 @@ describe('Unit: lib/cache', () => {
       let cnt = 0;
       const cache = new Cache<number, number>(1, { mode: 'DW', disposer: (k, v) => (key = k, val = v, ++cnt) });
 
-      assert.deepStrictEqual(cache.inspect(), [
+      assert.deepStrictEqual(inspect(cache), [
         [], []
       ]);
 
@@ -132,7 +137,7 @@ describe('Unit: lib/cache', () => {
       let cnt = 0;
       const cache = new Cache<number, number>(2, { mode: 'DW', disposer: (k, v) => (key = k, val = v, ++cnt) });
 
-      assert.deepStrictEqual(cache.inspect(), [
+      assert.deepStrictEqual(inspect(cache), [
         [], []
       ]);
 
@@ -157,7 +162,7 @@ describe('Unit: lib/cache', () => {
       assert(key === 3 && val === 3 && cnt === 5);
       assert.deepStrictEqual([...cache], [
       ]);
-      assert.deepStrictEqual(cache.inspect(), [
+      assert.deepStrictEqual(inspect(cache), [
         [], []
       ]);
     });
@@ -169,7 +174,7 @@ describe('Unit: lib/cache', () => {
       for (let i = 0; i < 10000; ++i) {
         cache.put((Math.random() * capacity * 4 | 0) + i, i);
       }
-      const [LRU, LFU] = cache.inspect();
+      const [LRU, LFU] = inspect(cache);
       assert(LRU.every(k => cache.has(k)));
       assert(LFU.every(k => cache.has(k)));
       assert(LRU.length + LFU.length === capacity);
