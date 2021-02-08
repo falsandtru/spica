@@ -1,16 +1,14 @@
-import type { DeepRequired } from './type';
 import { undefined, Map } from './global';
 import { IterableCollection } from './collection';
 import { extend } from './assign';
 import { indexOf, splice } from './array';
-import { noop } from './noop';
 
 // Dual Window Cache
 
 export interface CacheOptions<K, V = undefined> {
   readonly mode?: 'auto' | 'DW' | 'LRU';
   readonly disposer?: (key: K, value: V) => void;
-  readonly ignore?: {
+  readonly dispose?: {
     readonly delete?: boolean;
     readonly clear?: boolean;
   };
@@ -27,23 +25,23 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   ) {
     if (capacity > 0 === false) throw new Error(`Spica: Cache: Cache capacity must be greater than 0.`);
     extend(this.settings, opts);
-    this.mode = this.settings.mode === 'auto'
+    this.mode = (opts.mode ?? 'auto') === 'auto'
       ? capacity < 100 ? 'LRU' : 'DW'
-      : this.settings.mode;
-    const { indexes, entries } = this.settings.data;
-    const LFU = indexes[1].slice(0, capacity);
-    const LRU = indexes[0].slice(0, capacity - LFU.length);
+      : opts.mode as 'DW';
+    const LFU = opts.data?.indexes[1].slice(0, capacity) ?? [];
+    const LRU = opts.data?.indexes[0].slice(0, capacity - LFU.length) ?? [];
     this.indexes = {
       LRU,
       LFU,
     };
+    if (!opts.data) return;
+    const { indexes, entries } = opts.data;
     for (const [key, value] of entries) {
       value === undefined
         ? this.nullish ??= true
         : undefined;
       this.store.set(key, value);
     }
-    if (!opts.data) return;
     for (let i = LFU.length; i < indexes[1].length; ++i) {
       this.store.delete(LFU[i]);
     }
@@ -53,17 +51,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     assert(this.store.size === LFU.length + LRU.length);
     assert([...LFU, ...LRU].every(k => this.store.has(k)));
   }
-  private readonly settings: DeepRequired<CacheOptions<K, V>> = {
-    ignore: {
-      delete: false,
-      clear: false,
+  private readonly settings: CacheOptions<K, V> = {
+    dispose: {
+      delete: true,
+      clear: true,
     },
-    data: {
-      indexes: [[], []],
-      entries: [],
-    },
-    disposer: noop,
-    mode: 'auto',
   };
   private nullish = false;
   private hit = false;
@@ -89,17 +81,27 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         assert(LFU.length > 0);
         const key = LFU.pop()!;
         assert(this.store.has(key));
-        const val = this.store.get(key)!;
-        this.store.delete(key);
-        this.settings.disposer(key, val);
+        if (this.settings.disposer) {
+          const val = this.store.get(key)!;
+          this.store.delete(key);
+          this.settings.disposer(key, val);
+        }
+        else {
+          this.store.delete(key);
+        }
       }
       else {
         assert(LRU.length > 0);
         const key = LRU.pop()!;
         assert(this.store.has(key));
-        const val = this.store.get(key)!;
-        this.store.delete(key);
-        this.settings.disposer(key, val);
+        if (this.settings.disposer) {
+          const val = this.store.get(key)!;
+          this.store.delete(key);
+          this.settings.disposer(key, val);
+        }
+        else {
+          this.store.delete(key);
+        }
       }
     }
 
@@ -129,10 +131,14 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     for (const stat of [LFU, LRU]) {
       const index = indexOf(stat, key);
       if (index === -1) continue;
-      const val = this.store.get(key)!;
-      this.store.delete(splice(stat, index, 1)[0]);
-      if (this.settings.ignore.delete) return true;
-      this.settings.disposer(key, val);
+      if (!this.settings.disposer || !this.settings.dispose!.delete) {
+        this.store.delete(splice(stat, index, 1)[0]);
+      }
+      else {
+        const val = this.store.get(key)!;
+        this.store.delete(splice(stat, index, 1)[0]);
+        this.settings.disposer(key, val);
+      }
       return true;
     }
     return false;
@@ -148,7 +154,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       LRU: [[0, 0], [0, 0]],
       LFU: [[0, 0], [0, 0]],
     };
-    if (this.settings.ignore.clear) return;
+    if (!this.settings.disposer || !this.settings.dispose?.clear) return;
     for (const kv of store) {
       this.settings.disposer(kv[0], kv[1]);
     }
