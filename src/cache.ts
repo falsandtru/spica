@@ -173,6 +173,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     };
   }
   private store = new Map<K, V>();
+  private indexes: {
+    LRU: K[];
+    LFU: K[];
+  };
   private stats: {
     LRU: [number, number],
     LFU: [number, number],
@@ -228,10 +232,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       };
     }
   }
-  private indexes: {
-    LRU: K[];
-    LFU: K[];
-  };
   private access(key: K): boolean {
     assert(this.store.has(key));
     const stats = this.mode === 'DW'
