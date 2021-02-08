@@ -151,8 +151,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       LFU: [],
     };
     this.stats = {
-      LRU: [[0, 0], [0, 0]],
-      LFU: [[0, 0], [0, 0]],
+      LRU: [0, 0],
+      LFU: [0, 0],
     };
     if (!this.settings.disposer || !this.settings.dispose?.clear) return;
     for (const kv of store) {
@@ -174,17 +174,18 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   }
   private store = new Map<K, V>();
   private stats: {
-    LRU: [[number, number], [number, number]],
-    LFU: [[number, number], [number, number]],
+    LRU: [number, number],
+    LFU: [number, number],
   } = {
-    LRU: [[0, 0], [0, 0]],
-    LFU: [[0, 0], [0, 0]],
+    LRU: [0, 0],
+    LFU: [0, 0],
   };
   private mode: Exclude<NonNullable<CacheOptions<K, V>['mode']>, 'auto'>;
   private ratio = 50;
   private window(): number {
-    const total = this.stats.LRU[0][1] + this.stats.LRU[1][1];
-    assert(total === this.stats.LFU[0][1] + this.stats.LFU[1][1]);
+    const hitR = this.stats.LRU[0] + this.stats.LRU[1];
+    const hitF = this.stats.LFU[0] + this.stats.LFU[1];
+    const total = hitR + hitF;
     const capacity = this.capacity;
     return total < capacity
       ? total
@@ -193,17 +194,17 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private slide(): void {
     assert(this.mode === 'DW');
     const step = 1;
-    // 速度への影響を確認できなかったため毎回再計算
-    //if (this.stats.LRU[0][1] % step) return;
     const { LRU, LFU } = this.stats;
-    assert(LRU[0][1] === LFU[0][1]);
+    // 速度への影響を確認できなかったため毎回再計算
+    //if ((LRU[0] + LFU[0]) % step) return;
     const window = this.window();
-    if (LRU[1][1] === 0 && LRU[0][1] < window) return;
+    assert(window > 0);
+    if (window === 0) return;
     const capacity = this.capacity;
     // 割当上限まで実割当が減るまで割当上限を再度減らさない
     if (LFU.length > capacity * this.ratio) return;
-    const rateR = rate(window, LRU[0], LRU[1]);
-    const rateF = rate(window, LFU[0], LFU[1]);
+    const rateR = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1]);
+    const rateF = rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1]);
     const ratio = this.ratio;
     // LFUに収束させる
     // 小さすぎるLRUのために非効率にならないようにする
@@ -219,11 +220,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       //console.log(this.ratio);
       this.ratio -= step;
     }
-    if (LRU[0][1] === window) {
-      const flush = LRU[0][1] % capacity === 0;
+    if (LRU[0] + LFU[0] === window) {
+      const flush = (LRU[1] + LFU[1]) % capacity === 0;
       this.stats = {
-        LRU: [[0, 0], flush ? LRU[0] : [LRU[0][0] + LRU[1][0], LRU[0][1] + LRU[1][1]]],
-        LFU: [[0, 0], flush ? LFU[0] : [LFU[0][0] + LFU[1][0], LFU[0][1] + LFU[1][1]]],
+        LRU: [0, flush ? LRU[0] : LRU[0] + LRU[1]],
+        LFU: [0, flush ? LFU[0] : LFU[0] + LFU[1]],
       };
     }
   }
@@ -244,17 +245,12 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   }
   private accessLRU(key: K, stats?: Cache<K, V>['stats']): boolean {
     assert(this.store.has(key));
-    if (this.hit) {
-      assert(indexOf(this.indexes.LRU, key) === -1);
-      stats && ++stats.LRU[0][1];
-      return false;
-    }
+    if (this.hit) return false;
     const { LRU, LFU } = this.indexes;
     const index = indexOf(LRU, key);
     assert(index > -1 === this.store.has(key));
-    stats && ++stats.LRU[0][1];
     if (index === -1) return false;
-    stats && ++stats.LRU[0][0];
+    stats && ++stats.LRU[0];
     if (index === 0) return this.mode !== 'LRU' && LFU.unshift(LRU.shift()!), true;
     // spliceが遅いので代用
     // ヒットレートの変化は確認できず
@@ -265,20 +261,19 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     assert(this.store.has(key));
     const { LFU } = this.indexes;
     const index = indexOf(LFU, key);
-    stats && ++stats.LFU[0][1];
     if (index === -1) return false;
     assert(this.mode !== 'LRU');
-    stats && ++stats.LFU[0][0];
+    stats && ++stats.LFU[0];
     if (index === 0) return true;
     [LFU[index - 1], LFU[index]] = [LFU[index], LFU[index - 1]];
     return true;
   }
 }
 
-function rate(window: number, curr: [number, number], prev: [number, number]): number {
-  const currRate = curr[0] * 100 / curr[1] | 0;
-  const currRatio = curr[1] / window;
-  const prevRate = prev[0] * 100 / prev[1] | 0;
+function rate(window: number, currHits: number, currTotal: number, prevHits: number, prevTotal: number): number {
+  const currRate = currHits * 100 / currTotal | 0;
+  const currRatio = currTotal / window;
+  const prevRate = prevHits * 100 / prevTotal | 0;
   const prevRatio = 1 - currRatio;
   return currRate * currRatio + prevRate * prevRatio | 0;
 }
