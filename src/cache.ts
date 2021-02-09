@@ -11,10 +11,6 @@ export interface CacheOptions<K, V = undefined> {
     readonly delete?: boolean;
     readonly clear?: boolean;
   };
-  readonly data?: {
-    readonly indexes: readonly [readonly K[], readonly K[]];
-    readonly entries: readonly (readonly [K, V])[];
-  };
 }
 
 export class Cache<K, V = undefined> implements IterableCollection<K, V> {
@@ -24,28 +20,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   ) {
     if (capacity > 0 === false) throw new Error(`Spica: Cache: Cache capacity must be greater than 0.`);
     extend(this.settings, opts);
-    const LFU = opts.data?.indexes[1].slice(0, capacity) ?? [];
-    const LRU = opts.data?.indexes[0].slice(0, capacity - LFU.length) ?? [];
-    this.indexes = {
-      LRU,
-      LFU,
-    };
-    if (!opts.data) return;
-    const { indexes, entries } = opts.data;
-    for (const [key, value] of entries) {
-      value === undefined
-        ? this.nullish ??= true
-        : undefined;
-      this.store.set(key, value);
-    }
-    for (let i = LFU.length; i < indexes[1].length; ++i) {
-      this.store.delete(LFU[i]);
-    }
-    for (let i = LRU.length; i < indexes[0].length; ++i) {
-      this.store.delete(LRU[i]);
-    }
-    assert(this.store.size === LFU.length + LRU.length);
-    assert([...LFU, ...LRU].every(k => this.store.has(k)));
   }
   private readonly settings: CacheOptions<K, V> = {
     dispose: {
@@ -149,16 +123,13 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public [Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
     return this.store[Symbol.iterator]();
   }
-  public export(): NonNullable<CacheOptions<K, V>['data']> {
-    return {
-      indexes: [this.indexes.LRU.slice(), this.indexes.LFU.slice()],
-      entries: [...this],
-    };
-  }
   private store = new Map<K, V>();
   private indexes: {
     LRU: K[];
     LFU: K[];
+  } = {
+    LRU: [],
+    LFU: [],
   };
   private stats: {
     LRU: [number, number],

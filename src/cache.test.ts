@@ -1,188 +1,177 @@
 import { Cache } from './cache';
-import { Sequence } from './monad/sequence';
 
 describe('Unit: lib/cache', () => {
   describe('Cache', () => {
-    function inspect<K>(cache: Cache<K, any>): [K[], K[]] {
-      const { LRU, LFU } = cache['indexes'];
-      return [LRU.slice(), LFU.slice()];
+    function inspect<K, V>(cache: Cache<K, V>) {
+      return {
+        LRU: cache['indexes'].LRU,
+        LFU: cache['indexes'].LFU,
+        store: [...cache['store']],
+      };
     }
 
-    it('put/has/delete', () => {
+    it('put/has/delete 1', () => {
       const cache = new Cache<number, number>(1);
 
-      assert.deepStrictEqual([...cache], [
-      ]);
-      assert.deepStrictEqual(inspect(cache), [
-        [], []
-      ]);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [],
+        LFU: [],
+        store: [],
+      });
+
+      assert(cache.has(0) === false);
+      assert(cache.get(0) === undefined);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [],
+        LFU: [],
+        store: [],
+      });
 
       assert(cache.has(0) === false);
       assert(cache.put(0, 0) === false);
-      assert.deepStrictEqual([...cache], [
-        [0, 0]
-      ]);
-      assert.deepStrictEqual(inspect(cache), [
-        [0], []
-      ]);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [0],
+        LFU: [],
+        store: [[0, 0]],
+      });
+
+      assert(cache.has(0) === true);
+      assert(cache.put(0, 1) === true);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [0],
+        LFU: [],
+        store: [[0, 1]],
+      });
+
+      assert(cache.get(0) === 1);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [],
+        LFU: [0],
+        store: [[0, 1]],
+      });
 
       assert(cache.has(0) === true);
       assert(cache.put(0, 0) === true);
-      assert.deepStrictEqual([...cache], [
-        [0, 0]
-      ]);
-      assert.deepStrictEqual(inspect(cache), [
-        [], [0]
-      ]);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [],
+        LFU: [0],
+        store: [[0, 0]],
+      });
 
-      assert(cache.has(0) === true);
-      assert(cache.put(0, 0) === true);
-      assert.deepStrictEqual([...cache], [
-        [0, 0]
-      ]);
-      assert.deepStrictEqual(inspect(cache), [
-        [], [0]
-      ]);
+      assert(cache.get(0) === 0);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [],
+        LFU: [0],
+        store: [[0, 0]],
+      });
 
       assert(cache.has(0) === true);
       assert(cache.delete(0) === true);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [],
+        LFU: [],
+        store: [],
+      });
+
       assert(cache.delete(0) === false);
-      assert.deepStrictEqual([...cache], [
-      ]);
-      assert.deepStrictEqual(inspect(cache), [
-        [], []
-      ]);
-    });
-
-    it('set', () => {
-      assert(new Cache<number, number>(1).set(0, 1) instanceof Cache);
-    });
-
-    it('LRU', () => {
-      let key: number | undefined;
-      let val: number | undefined;
-      let cnt = 0;
-      const cache = new Cache<number, number>(1, { disposer: (k, v) => (key = k, val = v, ++cnt) });
-
-      assert.deepStrictEqual(inspect(cache), [
-        [], []
-      ]);
-
-      assert(cache.put(0, 0) === false);
-      assert(key === undefined && val === undefined && cnt === 0);
-      assert(cache.put(1, 1) === false);
-      assert(key === 0 && val === 0 && cnt === 1);
-      assert.deepStrictEqual([...cache], [
-        [1, 1]
-      ]);
-      assert.deepStrictEqual(inspect(cache), [
-        [1], []
-      ]);
-      assert(cache.put(0, 0) === false);
-      assert(key === 1 && val === 1 && cnt === 2);
-      assert.deepStrictEqual([...cache], [
-        [0, 0]
-      ]);
-      assert.deepStrictEqual(inspect(cache), [
-        [0], []
-      ]);
-      assert(cache.put(2, 2) === false);
-      assert(key === 0 && val === 0 && cnt === 3);
-      assert.deepStrictEqual([...cache], [
-        [2, 2]
-      ]);
-      assert.deepStrictEqual(inspect(cache), [
-        [2], []
-      ]);
-    });
-
-    it('LFU', () => {
-      let key: number | undefined;
-      let val: number | undefined;
-      let cnt = 0;
-      const cache = new Cache<number, number>(1, { disposer: (k, v) => (key = k, val = v, ++cnt) });
-
-      assert.deepStrictEqual(inspect(cache), [
-        [], []
-      ]);
-
-      assert(cache.put(0, 0) === false);
-      assert(key === undefined && val === undefined && cnt === 0);
-      assert(cache.put(0, 0) === true);
-      assert(cache.put(1, 1) === false);
-      assert(key === 0 && val === 0 && cnt === 1);
-      assert(cache.put(1, 1) === true);
-      assert.deepStrictEqual(cache.export(), {
-        indexes: [[], [1]],
-        entries: [[1, 1]],
-      });
-      assert(cache.put(0, 0) === false);
-      assert(key === 1 && val === 1 && cnt === 2);
-      assert.deepStrictEqual(cache.export(), {
-        indexes: [[0], []],
-        entries: [[0, 0]],
-      });
-      assert(cache.put(2, 2) === false);
-      assert(key === 0 && val === 0 && cnt === 3);
-      assert(cache.put(2, 2) === true);
-      assert.deepStrictEqual(cache.export(), {
-        indexes: [[], [2]],
-        entries: [[2, 2]],
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [],
+        LFU: [],
+        store: [],
       });
     });
 
-    it('DWC', () => {
+    it('put/has/delete 2', () => {
       let key: number | undefined;
       let val: number | undefined;
       let cnt = 0;
       const cache = new Cache<number, number>(2, { disposer: (k, v) => (key = k, val = v, ++cnt) });
 
-      assert.deepStrictEqual(inspect(cache), [
-        [], []
-      ]);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [],
+        LFU: [],
+        store: [],
+      });
 
       assert(cache.put(0, 0) === false);
       assert(key === undefined && val === undefined && cnt === 0);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [0],
+        LFU: [],
+        store: [[0, 0]],
+      });
+
       assert(cache.put(1, 1) === false);
       assert(key === undefined && val === undefined && cnt === 0);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [1, 0],
+        LFU: [],
+        store: [[0, 0], [1, 1]],
+      });
+
       assert(cache.put(1, 1) === true);
+      assert(key === undefined && val === undefined && cnt === 0);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [1, 0],
+        LFU: [],
+        store: [[0, 0], [1, 1]],
+      });
+
+      assert(cache.get(1) === 1);
+      assert(key === undefined && val === undefined && cnt === 0);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [0],
+        LFU: [1],
+        store: [[0, 0], [1, 1]],
+      });
+
       assert(cache.put(2, 2) === false);
       assert(key === 0 && val === 0 && cnt === 1);
-      assert(cache.put(2, 2) === true);
-      assert(cache.put(0, 0) === false);
-      assert(key === 1 && val === 1 && cnt === 2);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [2],
+        LFU: [1],
+        store: [[1, 1], [2, 2]],
+      });
+
+      assert(cache.get(2) === 2);
+      assert(key === 0 && val === 0 && cnt === 1);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [],
+        LFU: [2, 1],
+        store: [[1, 1], [2, 2]],
+      });
+
+      assert(cache.get(2) === 2);
+      assert(key === 0 && val === 0 && cnt === 1);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [],
+        LFU: [2, 1],
+        store: [[1, 1], [2, 2]],
+      });
+
+      assert(cache.get(1) === 1);
+      assert(key === 0 && val === 0 && cnt === 1);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [],
+        LFU: [1, 2],
+        store: [[1, 1], [2, 2]],
+      });
+
       assert(cache.put(3, 3) === false);
-      assert(key === 0 && val === 0 && cnt === 3);
-      assert.deepStrictEqual(cache.export(), {
-        indexes: [[3], [2]],
-        entries: [[2, 2], [3, 3]],
+      assert(key === 2 && val === 2 && cnt === 2);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [3],
+        LFU: [1],
+        store: [[1, 1], [3, 3]],
       });
 
       assert(cache.clear() === undefined);
-      assert(key === 3 && val === 3 && cnt === 5);
-      assert.deepStrictEqual([...cache], [
-      ]);
-      assert.deepStrictEqual(inspect(cache), [
-        [], []
-      ]);
-    });
-
-    it('condition', () => {
-      const capacity = 10;
-      const cache = new Cache<number, number>(capacity);
-
-      for (let i = 0; i < 10000; ++i) {
-        cache.put((Math.random() * capacity * 4 | 0) + i, i);
-      }
-      const [LRU, LFU] = inspect(cache);
-      assert(LRU.every(k => cache.has(k)));
-      assert(LFU.every(k => cache.has(k)));
-      assert(LRU.length + LFU.length === capacity);
-      assert([...cache].length === capacity);
-      assert(
-        Sequence.union(Sequence.from(LRU).sort(), Sequence.from(LFU).sort(), (a, b) => a - b)
-          .extract()
-          .length === capacity);
+      assert(key === 3 && val === 3 && cnt === 4);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [],
+        LFU: [],
+        store: [],
+      });
     });
 
     class LRUCache<K, V> {
