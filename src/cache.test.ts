@@ -239,24 +239,24 @@ describe('Unit: lib/cache', () => {
       this.retries(3);
 
       const capacity = 100;
-      const dwc = new Cache<number, number>(capacity, { mode: 'DW' });
       const lru = new LRUCache<number, number>(capacity);
       const lfu = new LFUCache<number, number>(capacity);
+      const dwc = new Cache<number, number>(capacity);
 
       const repeat = capacity * 1000;
       const warmup = capacity * 1000;
-      let hitdwc = 0;
       let hitlru = 0;
       let hitlfu = 0;
+      let hitdwc = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() * capacity * 10 | 0;
-        hitdwc += +dwc.put(key, i);
         hitlru += +lru.put(key, i);
         hitlfu += +lfu.put(key, i);
+        hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
-          hitdwc = 0;
           hitlru = 0;
           hitlfu = 0;
+          hitdwc = 0;
         }
       }
       console.debug('LRU hit rate even', hitlru * 100 / repeat);
@@ -271,26 +271,26 @@ describe('Unit: lib/cache', () => {
       this.retries(3);
 
       const capacity = 100;
-      const dwc = new Cache<number, number>(capacity, { mode: 'DW' });
       const lru = new LRUCache<number, number>(capacity);
       const lfu = new LFUCache<number, number>(capacity);
+      const dwc = new Cache<number, number>(capacity);
 
       const repeat = capacity * 1000;
       const warmup = capacity * 1000;
-      let hitdwc = 0;
       let hitlru = 0;
       let hitlfu = 0;
+      let hitdwc = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() < 0.4
           ? Math.random() * capacity * 1 | 0
           : Math.random() * capacity * 9 + capacity | 0;
-        hitdwc += +dwc.put(key, i);
         hitlru += +lru.put(key, i);
         hitlfu += +lfu.put(key, i);
+        hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
-          hitdwc = 0;
           hitlru = 0;
           hitlfu = 0;
+          hitdwc = 0;
         }
       }
       console.debug('LRU hit rate uneven', hitlru * 100 / repeat);
