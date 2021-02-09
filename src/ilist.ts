@@ -1,9 +1,6 @@
 import { undefined } from './global';
-import { indexOf } from './array';
 
 // Indexed circular linked list
-
-const empty = Symbol('empty') as unknown;
 
 export class IList<K, V = undefined> {
   constructor(
@@ -12,7 +9,6 @@ export class IList<K, V = undefined> {
     assert(capacity > 0);
   }
   private items: (Item<K, V> | undefined)[] = [];
-  private index: K[] = [];
   private indexes: number[] = [];
   private head = 0;
   private cursor = 0;
@@ -30,7 +26,6 @@ export class IList<K, V = undefined> {
         : this.length;
       assert(!items[index]);
       this.length++;
-      this.index[index] = key;
       items[index] =
         new Item(index, key, value, head!, head!);
       assert(this.items[index] === this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
@@ -44,7 +39,6 @@ export class IList<K, V = undefined> {
         : this.length;
       assert(!items[index]);
       this.length++;
-      this.index[index] = key;
       items[index] = head.prev = head.prev.next =
         new Item(index, key, value, head, head.prev);
       assert(this.length !== 1 || this.items[index] === this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
@@ -59,7 +53,6 @@ export class IList<K, V = undefined> {
       const index = this.head = this.cursor = head.prev.index;
       assert(items[index]);
       const garbage = items[index]!;
-      this.index[index] = key;
       items[index] = head.prev = head.prev.prev.next =
         new Item(index, key, value, head, head.prev.prev);
       assert(this.length !== 1 || this.items[index] === this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
@@ -107,7 +100,6 @@ export class IList<K, V = undefined> {
     const { prev, next } = item;
     prev.next = next;
     next.prev = prev;
-    this.index[item.index] = empty as K;
     this.items[item.index] = undefined;
     if (this.head === item.index) {
       this.head = next.index;
@@ -151,10 +143,9 @@ export class IList<K, V = undefined> {
     if (!item) return;
     const isNaN = key !== key;
     if (isNaN ? item.key !== item.key : item.key === key) return this.cursor = cursor, item;
-    const i = indexOf(this.index, key);
-    if (i === -1) return;
-    this.cursor = i;
-    return this.items[i];
+    for (let i = 1; i < this.length && (item = item.next); ++i) {
+      if (isNaN ? item.key !== item.key : item.key === key) return this.cursor = item.index, item;
+    }
   }
   private insert(item: Item<K, V>, before: number): void {
     if (item.index === before) return;
