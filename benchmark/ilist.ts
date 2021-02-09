@@ -34,21 +34,21 @@ describe('Benchmark:', function () {
       const cap = 10;
       const list = new IList(cap);
       let i = 0;
-      benchmark('IList put 10', () => list.put(++i % cap, undefined, i % cap), done);
+      benchmark('IList put 10', () => list.put(++i % cap), done);
     });
 
     it('put 100', function (done) {
       const cap = 100;
       const list = new IList(cap);
       let i = 0;
-      benchmark('IList put 100', () => list.put(++i % cap, undefined, i % cap), done);
+      benchmark('IList put 100', () => list.put(++i % cap), done);
     });
 
     it('put 1000', function (done) {
       const cap = 1000;
       const list = new IList(cap);
       let i = 0;
-      benchmark('IList put 1000', () => list.put(++i % cap, undefined, i % cap), done);
+      benchmark('IList put 1000', () => list.put(++i % cap), done);
     });
 
   });
