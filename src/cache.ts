@@ -26,7 +26,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (capacity > 0 === false) throw new Error(`Spica: Cache: Cache capacity must be greater than 0.`);
     extend(this.settings, opts);
     this.mode = (opts.mode ?? 'auto') === 'auto'
-      ? capacity < 100 ? 'LRU' : 'DW'
+      ? 'DW'
       : opts.mode as 'DW';
     const LFU = opts.data?.indexes[1].slice(0, capacity) ?? [];
     const LRU = opts.data?.indexes[0].slice(0, capacity - LFU.length) ?? [];
@@ -76,32 +76,24 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { LRU, LFU } = this.indexes;
 
     if (this.size === this.capacity) {
+      let key: K;
       if (LFU.length > this.capacity * this.ratio / 100 || LFU.length === this.capacity) {
         assert(this.mode !== 'LRU');
         assert(LFU.length > 0);
-        const key = LFU.pop()!;
-        assert(this.store.has(key));
-        if (this.settings.disposer) {
-          const val = this.store.get(key)!;
-          this.store.delete(key);
-          this.settings.disposer(key, val);
-        }
-        else {
-          this.store.delete(key);
-        }
+        key = LFU.pop()!;
       }
       else {
         assert(LRU.length > 0);
-        const key = LRU.pop()!;
-        assert(this.store.has(key));
-        if (this.settings.disposer) {
-          const val = this.store.get(key)!;
-          this.store.delete(key);
-          this.settings.disposer(key, val);
-        }
-        else {
-          this.store.delete(key);
-        }
+        key = LRU.pop()!;
+      }
+      assert(this.store.has(key));
+      if (this.settings.disposer) {
+        const val = this.store.get(key)!;
+        this.store.delete(key);
+        this.settings.disposer(key, val);
+      }
+      else {
+        this.store.delete(key);
       }
     }
 
@@ -118,25 +110,28 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public get(key: K): V | undefined {
     const val = this.store.get(key);
     const hit = this.hit = val !== undefined || this.nullish && this.has(key);
+    assert(hit === this.store.has(key));
     return hit && this.access(key)
       ? val
       : undefined;
   }
   public has(key: K): boolean {
+    assert(this.store.has(key) === (this.indexes.LFU.includes(key) || this.indexes.LRU.includes(key)));
+    assert(this.store.size === this.indexes.LFU.length + this.indexes.LRU.length);
     return this.store.has(key);
   }
   public delete(key: K): boolean {
     if (!this.has(key)) return false;
     const { LRU, LFU } = this.indexes;
-    for (const stat of [LFU, LRU]) {
-      const index = indexOf(stat, key);
-      if (index === -1) continue;
+    for (const index of [LFU, LRU]) {
+      const i = indexOf(index, key);
+      if (i === -1) continue;
       if (!this.settings.disposer || !this.settings.dispose!.delete) {
-        this.store.delete(splice(stat, index, 1)[0]);
+        this.store.delete(splice(index, i, 1)[0]);
       }
       else {
         const val = this.store.get(key)!;
-        this.store.delete(splice(stat, index, 1)[0]);
+        this.store.delete(splice(index, i, 1)[0]);
         this.settings.disposer(key, val);
       }
       return true;
@@ -201,7 +196,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const ratio = this.ratio;
     // LFUに収束させる
     // 小さすぎるLRUのために非効率にならないようにする
-    // 小さい容量では依然として最小LRUが小さくなりすぎ非効率
     // なぜかLFUとLRUを広く往復させないとヒットレートが上がらない
     if (rateF > rateR && ratio < 90) {
       this.ratio += step;
@@ -227,15 +221,14 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const stats = this.mode === 'DW'
       ? this.stats
       : undefined;
-    this.hit = this.accessLFU(key, stats)
-    this.hit = this.accessLRU(key, stats) || this.hit;
-    stats && this.slide();
-    assert(this.hit);
-    return this.hit;
+    const hit = false
+      || this.accessLFU(key, stats)
+      || this.accessLRU(key, stats);
+    hit && stats && this.slide();
+    return hit;
   }
   private accessLRU(key: K, stats?: Cache<K, V>['stats']): boolean {
     assert(this.store.has(key));
-    if (this.hit) return false;
     const { LRU, LFU } = this.indexes;
     const index = indexOf(LRU, key);
     assert(index > -1 === this.store.has(key));
