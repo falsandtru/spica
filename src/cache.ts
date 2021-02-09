@@ -143,8 +143,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       LFU: [0, 0],
     };
     if (!this.settings.disposer || !this.settings.dispose?.clear) return;
-    for (const kv of store) {
-      this.settings.disposer(kv[0], kv[1]);
+    for (const [key, value] of store) {
+      this.settings.disposer(key, value);
     }
   }
   public get size(): number {
