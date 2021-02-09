@@ -234,7 +234,73 @@ describe('Unit: lib/cache', () => {
       }
     }
 
-    it('rate even', function () {
+    it('rate even 10', function () {
+      this.timeout(10 * 1e3);
+      this.retries(3);
+
+      const capacity = 10;
+      const lru = new LRUCache<number, number>(capacity);
+      const lfu = new LFUCache<number, number>(capacity);
+      const dwc = new Cache<number, number>(capacity);
+
+      const repeat = capacity * 1000;
+      const warmup = capacity * 1000;
+      let hitlru = 0;
+      let hitlfu = 0;
+      let hitdwc = 0;
+      for (let i = 0; i < repeat + warmup; ++i) {
+        const key = Math.random() * capacity * 10 | 0;
+        hitlru += +lru.put(key, i);
+        hitlfu += +lfu.put(key, i);
+        hitdwc += +dwc.put(key, i);
+        if (i + 1 === warmup) {
+          hitlru = 0;
+          hitlfu = 0;
+          hitdwc = 0;
+        }
+      }
+      console.debug('LRU hit rate even 10', hitlru * 100 / repeat);
+      console.debug('LFU hit rate even 10', hitlfu * 100 / repeat);
+      console.debug('DWC hit rate even 10', hitdwc * 100 / repeat);
+      console.debug('LRU cache ratio even 10', dwc['ratio']);
+      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > -0.2);
+    });
+
+    it('rate uneven 10', function () {
+      this.timeout(10 * 1e3);
+      this.retries(3);
+
+      const capacity = 10;
+      const lru = new LRUCache<number, number>(capacity);
+      const lfu = new LFUCache<number, number>(capacity);
+      const dwc = new Cache<number, number>(capacity);
+
+      const repeat = capacity * 1000;
+      const warmup = capacity * 1000;
+      let hitlru = 0;
+      let hitlfu = 0;
+      let hitdwc = 0;
+      for (let i = 0; i < repeat + warmup; ++i) {
+        const key = Math.random() < 0.4
+          ? Math.random() * capacity * 1 | 0
+          : Math.random() * capacity * 9 + capacity | 0;
+        hitlru += +lru.put(key, i);
+        hitlfu += +lfu.put(key, i);
+        hitdwc += +dwc.put(key, i);
+        if (i + 1 === warmup) {
+          hitlru = 0;
+          hitlfu = 0;
+          hitdwc = 0;
+        }
+      }
+      console.debug('LRU hit rate uneven 10', hitlru * 100 / repeat);
+      console.debug('LFU hit rate uneven 10', hitlfu * 100 / repeat);
+      console.debug('DWC hit rate uneven 10', hitdwc * 100 / repeat);
+      console.debug('LRU cache ratio uneven 10', dwc['ratio']);
+      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 13);
+    });
+
+    it('rate even 100', function () {
       this.timeout(10 * 1e3);
       this.retries(3);
 
@@ -259,14 +325,14 @@ describe('Unit: lib/cache', () => {
           hitdwc = 0;
         }
       }
-      console.debug('LRU hit rate even', hitlru * 100 / repeat);
-      console.debug('LFU hit rate even', hitlfu * 100 / repeat);
-      console.debug('DWC hit rate even', hitdwc * 100 / repeat);
-      console.debug('LRU cache ratio even', dwc['ratio']);
+      console.debug('LRU hit rate even 100', hitlru * 100 / repeat);
+      console.debug('LFU hit rate even 100', hitlfu * 100 / repeat);
+      console.debug('DWC hit rate even 100', hitdwc * 100 / repeat);
+      console.debug('LRU cache ratio even 100', dwc['ratio']);
       assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > -0.2);
     });
 
-    it('rate uneven', function () {
+    it('rate uneven 100', function () {
       this.timeout(10 * 1e3);
       this.retries(3);
 
@@ -293,10 +359,10 @@ describe('Unit: lib/cache', () => {
           hitdwc = 0;
         }
       }
-      console.debug('LRU hit rate uneven', hitlru * 100 / repeat);
-      console.debug('LFU hit rate uneven', hitlfu * 100 / repeat);
-      console.debug('DWC hit rate uneven', hitdwc * 100 / repeat);
-      console.debug('LRU cache ratio uneven', dwc['ratio']);
+      console.debug('LRU hit rate uneven 100', hitlru * 100 / repeat);
+      console.debug('LFU hit rate uneven 100', hitlfu * 100 / repeat);
+      console.debug('DWC hit rate uneven 100', hitdwc * 100 / repeat);
+      console.debug('LRU cache ratio uneven 100', dwc['ratio']);
       assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 13);
     });
 
