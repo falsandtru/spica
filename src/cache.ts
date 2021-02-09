@@ -58,20 +58,13 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     },
   };
   private nullish = false;
-  private hit = false;
   public put(this: Cache<K, undefined>, key: K, value?: V): boolean;
   public put(key: K, value: V): boolean;
   public put(key: K, value: V): boolean {
     value === undefined
       ? this.nullish ??= true
       : undefined;
-    const val = this.get(key)!;
-    if (this.hit) {
-      if (value !== val || value !== value && val !== val) {
-        this.store.set(key, value)
-      }
-      return true;
-    }
+    if (this.access(key)) return this.store.set(key, value), true;
 
     const { LRU, LFU } = this.indexes;
 
@@ -109,7 +102,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   }
   public get(key: K): V | undefined {
     const val = this.store.get(key);
-    const hit = this.hit = val !== undefined || this.nullish && this.has(key);
+    const hit = val !== undefined || this.nullish && this.has(key);
     assert(hit === this.store.has(key));
     return hit && this.access(key)
       ? val
@@ -217,18 +210,17 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     }
   }
   private access(key: K): boolean {
-    assert(this.store.has(key));
     const stats = this.mode === 'DW'
       ? this.stats
       : undefined;
     const hit = false
       || this.accessLFU(key, stats)
       || this.accessLRU(key, stats);
+    assert(hit === this.store.has(key));
     hit && stats && this.slide();
     return hit;
   }
   private accessLRU(key: K, stats?: Cache<K, V>['stats']): boolean {
-    assert(this.store.has(key));
     const { LRU, LFU } = this.indexes;
     const index = indexOf(LRU, key);
     assert(index > -1 === this.store.has(key));
@@ -241,7 +233,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     return true;
   }
   private accessLFU(key: K, stats?: Cache<K, V>['stats']): boolean {
-    assert(this.store.has(key));
     const { LFU } = this.indexes;
     const index = indexOf(LFU, key);
     if (index === -1) return false;
