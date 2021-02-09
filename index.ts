@@ -13,6 +13,7 @@ export { flip } from './src/flip';
 export { tuple } from './src/tuple';
 export { List, MList } from './src/list';
 export { HList } from './src/hlist';
+export { IList } from './src/ilist';
 export { AtomicPromise } from './src/promise';
 export { Future, AtomicFuture } from './src/future';
 export { Coroutine } from './src/coroutine';
