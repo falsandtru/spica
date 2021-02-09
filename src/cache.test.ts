@@ -253,7 +253,7 @@ describe('Unit: lib/cache', () => {
       console.debug('LRU hit rate even 10', hitlru * 100 / repeat);
       console.debug('LFU hit rate even 10', hitlfu * 100 / repeat);
       console.debug('DWC hit rate even 10', hitdwc * 100 / repeat);
-      console.debug('LRU cache ratio even 10', dwc['ratio']);
+      console.debug('DWC vs LRU even 10', hitdwc * 100 / repeat - hitlru * 100 / repeat | 0);
       assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > -0.2);
     });
 
@@ -289,7 +289,7 @@ describe('Unit: lib/cache', () => {
       console.debug('LRU hit rate uneven 10', hitlru * 100 / repeat);
       console.debug('LFU hit rate uneven 10', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 10', hitdwc * 100 / repeat);
-      console.debug('LRU cache ratio uneven 10', dwc['ratio']);
+      console.debug('DWC vs LRU uneven 10', hitdwc * 100 / repeat - hitlru * 100 / repeat | 0);
       assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 12);
     });
 
@@ -323,7 +323,7 @@ describe('Unit: lib/cache', () => {
       console.debug('LRU hit rate even 100', hitlru * 100 / repeat);
       console.debug('LFU hit rate even 100', hitlfu * 100 / repeat);
       console.debug('DWC hit rate even 100', hitdwc * 100 / repeat);
-      console.debug('LRU cache ratio even 100', dwc['ratio']);
+      console.debug('DWC vs LRU even 100', hitdwc * 100 / repeat - hitlru * 100 / repeat | 0);
       assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > -0.2);
     });
 
@@ -359,7 +359,7 @@ describe('Unit: lib/cache', () => {
       console.debug('LRU hit rate uneven 100', hitlru * 100 / repeat);
       console.debug('LFU hit rate uneven 100', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 100', hitdwc * 100 / repeat);
-      console.debug('LRU cache ratio uneven 100', dwc['ratio']);
+      console.debug('DWC vs LRU uneven 100', hitdwc * 100 / repeat - hitlru * 100 / repeat | 0);
       assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 13);
     });
 
