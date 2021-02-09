@@ -64,7 +64,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     value === undefined
       ? this.nullish ??= true
       : undefined;
-    if (this.access(key)) return this.store.set(key, value), true;
+    if (this.has(key)) return this.store.set(key, value), true;
 
     const { LRU, LFU } = this.indexes;
 

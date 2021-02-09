@@ -252,7 +252,9 @@ describe('Unit: lib/cache', () => {
         const key = Math.random() * capacity * 10 | 0;
         hitlru += +lru.put(key, i);
         hitlfu += +lfu.put(key, i);
-        hitdwc += +dwc.put(key, i);
+        const hit = dwc.put(key, i);
+        hitdwc += +hit;
+        hit && dwc.get(key);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitlfu = 0;
@@ -286,7 +288,9 @@ describe('Unit: lib/cache', () => {
           : Math.random() * capacity * 9 + capacity | 0;
         hitlru += +lru.put(key, i);
         hitlfu += +lfu.put(key, i);
-        hitdwc += +dwc.put(key, i);
+        const hit = dwc.put(key, i);
+        hitdwc += +hit;
+        hit && dwc.get(key);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitlfu = 0;
@@ -318,7 +322,9 @@ describe('Unit: lib/cache', () => {
         const key = Math.random() * capacity * 10 | 0;
         hitlru += +lru.put(key, i);
         hitlfu += +lfu.put(key, i);
-        hitdwc += +dwc.put(key, i);
+        const hit = dwc.put(key, i);
+        hitdwc += +hit;
+        hit && dwc.get(key);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitlfu = 0;
@@ -352,7 +358,9 @@ describe('Unit: lib/cache', () => {
           : Math.random() * capacity * 9 + capacity | 0;
         hitlru += +lru.put(key, i);
         hitlfu += +lfu.put(key, i);
-        hitdwc += +dwc.put(key, i);
+        const hit = dwc.put(key, i);
+        hitdwc += +hit;
+        hit && dwc.get(key);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitlfu = 0;
