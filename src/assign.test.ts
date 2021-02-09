@@ -308,7 +308,7 @@ describe('Unit: lib/assign', () => {
         extend<object>({
           a: 1,
           b: undefined,
-          c: 0
+          c: 3
         }, {
           b: 2,
           c: undefined,
@@ -319,7 +319,7 @@ describe('Unit: lib/assign', () => {
         }), {
           a: 1,
           b: 2,
-          c: undefined,
+          c: 3,
           d: 4,
           e: 5
         });
@@ -450,7 +450,7 @@ describe('Unit: lib/assign', () => {
         merge<object>({
           a: 1,
           b: undefined,
-          c: 0
+          c: 3
         }, {
           b: 2,
           c: undefined,
@@ -461,7 +461,7 @@ describe('Unit: lib/assign', () => {
         }), {
           a: 1,
           b: 2,
-          c: undefined,
+          c: 3,
           d: 4,
           e: 5
         });
@@ -592,7 +592,7 @@ describe('Unit: lib/assign', () => {
         inherit<object>({
           a: 1,
           b: undefined,
-          c: 0
+          c: 3
         }, {
           b: 2,
           c: undefined,
@@ -603,7 +603,7 @@ describe('Unit: lib/assign', () => {
         }), {
           a: 1,
           b: 2,
-          c: undefined,
+          c: 3,
           d: 4,
           e: 5
         });

@@ -24,8 +24,10 @@ export const clone = template((prop, target, source) => {
 
 export const extend = template((prop, target, source) => {
   switch (type(source[prop])) {
+    case 'undefined':
+      return;
     case 'Array':
-      return target[prop] = source[prop].slice();
+      return target[prop] = source[prop];
     case 'Object':
       switch (type(target[prop])) {
         case 'Object':
@@ -40,6 +42,8 @@ export const extend = template((prop, target, source) => {
 
 export const merge = template((prop, target, source) => {
   switch (type(source[prop])) {
+    case 'undefined':
+      return;
     case 'Array':
       switch (type(target[prop])) {
         case 'Array':
@@ -61,6 +65,8 @@ export const merge = template((prop, target, source) => {
 
 export const inherit = template((prop, target, source) => {
   switch (type(source[prop])) {
+    case 'undefined':
+      return;
     case 'Array':
       return target[prop] = source[prop].slice();
     case 'Object':
