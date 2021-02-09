@@ -9,7 +9,7 @@ describe('Unit: lib/cache', () => {
     }
 
     it('put/has/delete', () => {
-      const cache = new Cache<number, number>(1, { mode: 'DW' });
+      const cache = new Cache<number, number>(1);
 
       assert.deepStrictEqual([...cache], [
       ]);
@@ -62,7 +62,7 @@ describe('Unit: lib/cache', () => {
       let key: number | undefined;
       let val: number | undefined;
       let cnt = 0;
-      const cache = new Cache<number, number>(1, { mode: 'DW', disposer: (k, v) => (key = k, val = v, ++cnt) });
+      const cache = new Cache<number, number>(1, { disposer: (k, v) => (key = k, val = v, ++cnt) });
 
       assert.deepStrictEqual(inspect(cache), [
         [], []
@@ -100,7 +100,7 @@ describe('Unit: lib/cache', () => {
       let key: number | undefined;
       let val: number | undefined;
       let cnt = 0;
-      const cache = new Cache<number, number>(1, { mode: 'DW', disposer: (k, v) => (key = k, val = v, ++cnt) });
+      const cache = new Cache<number, number>(1, { disposer: (k, v) => (key = k, val = v, ++cnt) });
 
       assert.deepStrictEqual(inspect(cache), [
         [], []
@@ -135,7 +135,7 @@ describe('Unit: lib/cache', () => {
       let key: number | undefined;
       let val: number | undefined;
       let cnt = 0;
-      const cache = new Cache<number, number>(2, { mode: 'DW', disposer: (k, v) => (key = k, val = v, ++cnt) });
+      const cache = new Cache<number, number>(2, { disposer: (k, v) => (key = k, val = v, ++cnt) });
 
       assert.deepStrictEqual(inspect(cache), [
         [], []
@@ -169,7 +169,7 @@ describe('Unit: lib/cache', () => {
 
     it('condition', () => {
       const capacity = 10;
-      const cache = new Cache<number, number>(capacity, { mode: 'DW' });
+      const cache = new Cache<number, number>(capacity);
 
       for (let i = 0; i < 10000; ++i) {
         cache.put((Math.random() * capacity * 4 | 0) + i, i);

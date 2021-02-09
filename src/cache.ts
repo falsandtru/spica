@@ -6,7 +6,6 @@ import { indexOf, splice } from './array';
 // Dual Window Cache
 
 export interface CacheOptions<K, V = undefined> {
-  readonly mode?: 'auto' | 'DW' | 'LRU';
   readonly disposer?: (key: K, value: V) => void;
   readonly dispose?: {
     readonly delete?: boolean;
@@ -25,9 +24,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   ) {
     if (capacity > 0 === false) throw new Error(`Spica: Cache: Cache capacity must be greater than 0.`);
     extend(this.settings, opts);
-    this.mode = (opts.mode ?? 'auto') === 'auto'
-      ? 'DW'
-      : opts.mode as 'DW';
     const LFU = opts.data?.indexes[1].slice(0, capacity) ?? [];
     const LRU = opts.data?.indexes[0].slice(0, capacity - LFU.length) ?? [];
     this.indexes = {
@@ -71,7 +67,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (this.size === this.capacity) {
       let key: K;
       if (LFU.length > this.capacity * this.ratio / 100 || LFU.length === this.capacity) {
-        assert(this.mode !== 'LRU');
         assert(LFU.length > 0);
         key = LFU.pop()!;
       }
@@ -172,10 +167,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     LRU: [0, 0],
     LFU: [0, 0],
   };
-  private mode: Exclude<NonNullable<CacheOptions<K, V>['mode']>, 'auto'>;
   private ratio = 50;
   private slide(): void {
-    assert(this.mode === 'DW');
     const step = 1;
     const { LRU, LFU } = this.stats;
     // 速度への影響を確認できなかったため毎回再計算
@@ -210,9 +203,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     }
   }
   private access(key: K): boolean {
-    const stats = this.mode === 'DW'
-      ? this.stats
-      : undefined;
+    const stats = this.stats;
     const hit = false
       || this.accessLFU(key, stats)
       || this.accessLRU(key, stats);
@@ -226,7 +217,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     assert(index > -1 === this.store.has(key));
     if (index === -1) return false;
     stats && ++stats.LRU[0];
-    if (index === 0) return this.mode !== 'LRU' && LFU.unshift(LRU.shift()!), true;
+    if (index === 0) return LFU.unshift(LRU.shift()!), true;
     // spliceが遅いので代用
     // ヒットレートの変化は確認できず
     [LRU[index - 1], LRU[index]] = [LRU[index], LRU[index - 1]];
@@ -236,7 +227,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { LFU } = this.indexes;
     const index = indexOf(LFU, key);
     if (index === -1) return false;
-    assert(this.mode !== 'LRU');
     stats && ++stats.LFU[0];
     if (index === 0) return true;
     [LFU[index - 1], LFU[index]] = [LFU[index], LFU[index - 1]];
