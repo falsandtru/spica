@@ -1,5 +1,5 @@
+import { undefined } from './global';
 import { indexOf } from './array';
-import { undefined, Array } from './global';
 
 // Indexed circular linked list
 
@@ -11,9 +11,9 @@ export class IList<K, V = undefined> {
   ) {
     assert(capacity > 0);
   }
-  private items = Array<Item<K, V> | undefined>(this.capacity);
-  private index = Array<K>(this.capacity);
-  private indexes = Array<number>();
+  private items: (Item<K, V> | undefined)[] = [];
+  private index: K[] = [];
+  private indexes: number[] = [];
   private head = 0;
   private cursor = 0;
   public length = 0;
@@ -58,12 +58,15 @@ export class IList<K, V = undefined> {
       assert(this.indexes.length === 0);
       const index = this.head = this.cursor = head.prev.index;
       assert(items[index]);
+      const garbage = items[index]!;
       items[index] = head.prev = head.prev.prev.next =
         new Item(index, key, value, head, head.prev.prev);
       this.index[index] = key;
       assert(this.length !== 1 || this.items[index] === this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
       assert(this.length !== 2 || this.items[index] !== this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
       assert(this.length < 3 || this.items[index] !== this.items[index]!.prev && this.items[index]!.prev !== this.items[index]!.next);
+      // @ts-expect-error
+      garbage.prev = garbage.next = undefined;
       //assert(this.length > 10 || [...this].length === this.length);
       return false;
     }
@@ -202,13 +205,13 @@ class Item<K, V> {
     public prev: Item<K, V>,
   ) {
     this.next ??= this;
-    if (next && next.index === index) {
+    if (next?.index === index) {
       this.next = next.next === next
         ? this
         : next.next;
     }
     this.prev ??= this;
-    if (prev && prev.index === index) {
+    if (prev?.index === index) {
       this.prev = prev.prev === prev
         ? this
         : prev.prev;
