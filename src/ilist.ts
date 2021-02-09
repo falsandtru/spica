@@ -30,9 +30,9 @@ export class IList<K, V = undefined> {
         : this.length;
       assert(!items[index]);
       this.length++;
+      this.index[index] = key;
       items[index] =
         new Item(index, key, value, head!, head!);
-      this.index[index] = key;
       assert(this.items[index] === this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
       //assert(this.length > 10 || [...this].length === this.length);
       return false;
@@ -44,9 +44,9 @@ export class IList<K, V = undefined> {
         : this.length;
       assert(!items[index]);
       this.length++;
+      this.index[index] = key;
       items[index] = head.prev = head.prev.next =
         new Item(index, key, value, head, head.prev);
-      this.index[index] = key;
       assert(this.length !== 1 || this.items[index] === this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
       assert(this.length !== 2 || this.items[index] !== this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
       assert(this.length < 3 || this.items[index] !== this.items[index]!.prev && this.items[index]!.prev !== this.items[index]!.next);
@@ -59,9 +59,9 @@ export class IList<K, V = undefined> {
       const index = this.head = this.cursor = head.prev.index;
       assert(items[index]);
       const garbage = items[index]!;
+      this.index[index] = key;
       items[index] = head.prev = head.prev.prev.next =
         new Item(index, key, value, head, head.prev.prev);
-      this.index[index] = key;
       assert(this.length !== 1 || this.items[index] === this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
       assert(this.length !== 2 || this.items[index] !== this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
       assert(this.length < 3 || this.items[index] !== this.items[index]!.prev && this.items[index]!.prev !== this.items[index]!.next);
@@ -107,8 +107,8 @@ export class IList<K, V = undefined> {
     const { prev, next } = item;
     prev.next = next;
     next.prev = prev;
-    this.items[item.index] = undefined;
     this.index[item.index] = empty as K;
+    this.items[item.index] = undefined;
     if (this.head === item.index) {
       this.head = next.index;
     }
