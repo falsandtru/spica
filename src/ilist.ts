@@ -74,6 +74,18 @@ export class IList<K, V = undefined> {
     item.value = value;
     return true;
   }
+  public shift(): { index: number; key: K; value: V; } | undefined {
+    assert(this.length === 0 ? !this.items[this.head] : this.items[this.head]);
+    const item = this.items[this.head];
+    assert(this.length === 0 ? !item : item);
+    if (!item) return;
+    this.delete(item.key, item.index);
+    return {
+      index: item.index,
+      key: item.key,
+      value: item.value,
+    };
+  }
   public pop(): { index: number; key: K; value: V; } | undefined {
     assert(this.length === 0 ? !this.items[this.head] : this.items[this.head]);
     const item = this.items[this.head]?.prev;
@@ -112,16 +124,23 @@ export class IList<K, V = undefined> {
     //assert(this.length > 10 || [...this].length === this.length);
     return item.value;
   }
+  public peek(): { index: number; key: K; value: V; } | undefined {
+    const item = this.items[this.head];
+    return item && {
+      index: item.index,
+      key: item.key,
+      value: item.value,
+    };
+  }
   public item(index: number | undefined): { index: number; key: K; value: V; } | undefined {
-    const items = this.items;
-    return index !== undefined
-        && items[index]
-      ? {
-          index: this.cursor = index,
-          key: items[index]!.key,
-          value: items[index]!.value,
-        }
+    const item = index !== undefined
+      ? this.items[index]
       : undefined;
+    return item && {
+      index: this.cursor = item.index,
+      key: item.key,
+      value: item.value,
+    };
   }
   public find(key: K, index?: number): V | undefined {
     return this.seek(key, index)?.value;
@@ -171,7 +190,7 @@ export class IList<K, V = undefined> {
     assert(b2.prev === b0);
     //assert(this.length > 10 || [...this].length === this.length);
   }
-  public moveToTop(index: number): void {
+  public raiseToTop(index: number): void {
     if (this.length <= 1) return;
     if (index === this.head) return;
     const item = this.items[index];
@@ -179,11 +198,14 @@ export class IList<K, V = undefined> {
     this.insert(item, this.head);
     this.head = index;
   }
-  public moveToPrev(index: number): void {
+  public raiseToPrev(index: number): void {
     if (this.length <= 1) return;
     const item = this.items[index];
     if (!item) return;
     this.insert(item, item.prev.index);
+    if (item.next.index === this.head) {
+      this.head = item.index;
+    }
   }
 }
 
