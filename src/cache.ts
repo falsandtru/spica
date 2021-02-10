@@ -5,6 +5,8 @@ import { indexOf, splice } from './array';
 
 // Dual Window Cache
 
+// TODO: アルゴリズムをアクセスパターンをもとにDWC/LRU/RR/MRUなどから動的に選択
+
 export interface CacheOptions<K, V = undefined> {
   readonly disposer?: (key: K, value: V) => void;
   readonly dispose?: {
@@ -32,7 +34,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public put(key: K, value: V): boolean;
   public put(key: K, value: V): boolean {
     value === undefined
-      ? this.nullish ??= true
+      ? this.nullish ||= true
       : undefined;
     if (this.has(key)) return this.store.set(key, value), true;
 
@@ -71,11 +73,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   }
   public get(key: K): V | undefined {
     const val = this.store.get(key);
-    const hit = val !== undefined || this.nullish && this.has(key);
-    assert(hit === this.store.has(key));
-    return hit && this.access(key)
-      ? val
-      : undefined;
+    if (val !== undefined || this.nullish && this.has(key)) {
+      assert(this.store.has(key));
+      this.access(key);
+    }
+    return val;
   }
   public has(key: K): boolean {
     assert(this.store.has(key) === (this.indexes.LFU.includes(key) || this.indexes.LRU.includes(key)));
@@ -101,8 +103,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     return false;
   }
   public clear(): void {
-    const store = this.store;
-    this.store = new Map();
+    this.nullish = false;
+    this.ratio = 50;
     this.indexes = {
       LRU: [],
       LFU: [],
@@ -111,6 +113,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       LRU: [0, 0],
       LFU: [0, 0],
     };
+    const store = this.store;
+    this.store = new Map();
     if (!this.settings.disposer || !this.settings.dispose?.clear) return;
     for (const [key, value] of store) {
       this.settings.disposer(key, value);
@@ -177,7 +181,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       || this.accessLFU(key, stats)
       || this.accessLRU(key, stats);
     assert(hit === this.store.has(key));
-    hit && stats && this.slide();
+    this.slide();
     return hit;
   }
   private accessLRU(key: K, stats?: Cache<K, V>['stats']): boolean {
@@ -188,7 +192,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     stats && ++stats.LRU[0];
     if (index === 0) return LFU.unshift(LRU.shift()!), true;
     // spliceが遅いので代用
-    // ヒットレートの変化は確認できず
+    // ヒットレートの低下はごくわずか
+    //LRU.unshift(splice(LRU, index, 1)[0]);
     [LRU[index - 1], LRU[index]] = [LRU[index], LRU[index - 1]];
     return true;
   }

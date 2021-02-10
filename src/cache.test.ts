@@ -424,8 +424,12 @@ describe('Unit: lib/cache', () => {
         const key = Math.random() < 0.4
           // transitive bias
           // DWCは推移的な偏りに弱い
-          // おそらく偏りの抽出が逆効果になるからだろう
-          ? Math.random() * capacity * 1 + i | 0
+          // 偏りの抽出が分布全体の推移により無効化され逆効果になるからであろう
+          // 偏りの抽出によりLRUより精度を上げようとするキャッシュアルゴリズム全般のトレードオフと思われる
+          // 単純に大きな分布なら問題ないが大きな分布の中で局所性の変化による疑似的な推移が生じる可能性はある
+          // しかし推移により常に抽出を無効化し続ける状況は通常のアクセスパターンからは考えにくく
+          // そのような状況が生じるならキャッシュサイズが小さすぎることに問題があることのほうが多いだろう
+          ? Math.random() * capacity * 1 - i / 10 | 0
           : Math.random() * capacity * 9 + capacity + i | 0;
         hitlru += +lru.put(key, i);
         hitlfu += +lfu.put(key, i);
@@ -442,7 +446,7 @@ describe('Unit: lib/cache', () => {
       console.debug('LFU hit rate uneven 100 transitive bias', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 100 transitive bias', hitdwc * 100 / repeat);
       console.debug('DWC vs LRU uneven 100 transitive bias', hitdwc * 100 / repeat - hitlru * 100 / repeat | 0);
-      //assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 13);
+      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > -9);
     });
 
   });
