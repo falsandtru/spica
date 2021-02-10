@@ -294,6 +294,7 @@ describe('Unit: lib/cache', () => {
     });
 
     it('rate even 100', function () {
+      if (!navigator.userAgent.includes('Chrome')) return;
       this.timeout(10 * 1e3);
       this.retries(3);
 
@@ -328,6 +329,7 @@ describe('Unit: lib/cache', () => {
     });
 
     it('rate uneven 100', function () {
+      if (!navigator.userAgent.includes('Chrome')) return;
       this.timeout(10 * 1e3);
       this.retries(3);
 
@@ -342,6 +344,7 @@ describe('Unit: lib/cache', () => {
       let hitlfu = 0;
       let hitdwc = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
+        // DWCは静的な偏りの抽出能力が高いだけのようだが偏りがない場合でもLRUより悪くはならない
         const key = Math.random() < 0.4
           ? Math.random() * capacity * 1 | 0
           : Math.random() * capacity * 9 + capacity | 0;
@@ -361,6 +364,85 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC hit rate uneven 100', hitdwc * 100 / repeat);
       console.debug('DWC vs LRU uneven 100', hitdwc * 100 / repeat - hitlru * 100 / repeat | 0);
       assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 13);
+    });
+
+    it('rate uneven 100 transitive distribution', function () {
+      if (!navigator.userAgent.includes('Chrome')) return;
+      this.timeout(10 * 1e3);
+      this.retries(3);
+
+      const capacity = 100;
+      const lru = new LRUCache<number, number>(capacity);
+      const lfu = new LFUCache<number, number>(capacity);
+      const dwc = new Cache<number, number>(capacity);
+
+      const repeat = capacity * 1000;
+      const warmup = capacity * 1000;
+      let hitlru = 0;
+      let hitlfu = 0;
+      let hitdwc = 0;
+      for (let i = 0; i < repeat + warmup; ++i) {
+        const key = Math.random() < 0.4
+          ? Math.random() * capacity * 1 | 0
+          // transitive distribution
+          // DWCは推移的な分散には影響されない
+          : Math.random() * capacity * 9 + capacity + i | 0;
+        hitlru += +lru.put(key, i);
+        hitlfu += +lfu.put(key, i);
+        const hit = dwc.put(key, i);
+        hitdwc += +hit;
+        hit && dwc.get(key);
+        if (i + 1 === warmup) {
+          hitlru = 0;
+          hitlfu = 0;
+          hitdwc = 0;
+        }
+      }
+      console.debug('LRU hit rate uneven 100 transitive distribution', hitlru * 100 / repeat);
+      console.debug('LFU hit rate uneven 100 transitive distribution', hitlfu * 100 / repeat);
+      console.debug('DWC hit rate uneven 100 transitive distribution', hitdwc * 100 / repeat);
+      console.debug('DWC vs LRU uneven 100 transitive distribution', hitdwc * 100 / repeat - hitlru * 100 / repeat | 0);
+      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 13);
+    });
+
+    it('rate uneven 100 transitive bias', function () {
+      if (!navigator.userAgent.includes('Chrome')) return;
+      this.timeout(10 * 1e3);
+      this.retries(3);
+
+      const capacity = 100;
+      const lru = new LRUCache<number, number>(capacity);
+      const lfu = new LFUCache<number, number>(capacity);
+      const dwc = new Cache<number, number>(capacity);
+
+      const repeat = capacity * 1000;
+      const warmup = capacity * 1000;
+      let hitlru = 0;
+      let hitlfu = 0;
+      let hitdwc = 0;
+      for (let i = 0; i < repeat + warmup; ++i) {
+        const key = Math.random() < 0.4
+          // transitive bias
+          // DWCは推移的な偏りに弱い
+          // おそらく偏りの抽出が逆効果になるからだろう
+          ? Math.random() * capacity * 1 + i | 0
+          : Math.random() * capacity * 9 + capacity + i | 0;
+        hitlru += +lru.put(key, i);
+        hitlfu += +lfu.put(key, i);
+        const hit = dwc.put(key, i);
+        hitdwc += +hit;
+        hit && dwc.get(key);
+        if (i + 1 === warmup) {
+          hitlru = 0;
+          hitlfu = 0;
+          hitdwc = 0;
+        }
+      }
+      console.debug('LRU hit rate uneven 100 transitive bias', hitlru * 100 / repeat);
+      console.debug('LFU hit rate uneven 100 transitive bias', hitlfu * 100 / repeat);
+      console.debug('DWC hit rate uneven 100 transitive bias', hitdwc * 100 / repeat);
+      console.debug('DWC vs LRU uneven 100 transitive bias', hitdwc * 100 / repeat - hitlru * 100 / repeat | 0);
+      //assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 13);
     });
 
   });
