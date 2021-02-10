@@ -112,7 +112,8 @@ export class IList<K, V = undefined> {
     const { prev, next } = item;
     prev.next = next;
     next.prev = prev;
-    this.items[item.index] = undefined;
+    // @ts-expect-error
+    this.items[item.index] = item.prev = item.next = undefined;
     if (this.head === item.index) {
       this.head = next.index;
     }
