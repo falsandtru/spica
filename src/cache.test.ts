@@ -254,7 +254,7 @@ describe('Unit: lib/cache', () => {
       console.debug('LFU hit rate even 10', hitlfu * 100 / repeat);
       console.debug('DWC hit rate even 10', hitdwc * 100 / repeat);
       console.debug('DWC vs LRU even 10', hitdwc * 100 / repeat - hitlru * 100 / repeat | 0);
-      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > -0.2);
+      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > -0.4);
     });
 
     it('rate uneven 10', function () {
