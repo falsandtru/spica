@@ -146,8 +146,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     //if ((LRU[0] + LFU[0]) % step) return;
     const capacity = this.capacity;
     const window = capacity;
-    // 割当上限まで実割当が減るまで割当上限を再度減らさない
-    if (LFU.length > capacity * this.ratio) return;
     const rateR = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1]);
     const rateF = 100 - rateR;
     const ratio = this.ratio;
