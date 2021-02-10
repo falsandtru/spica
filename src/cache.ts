@@ -5,8 +5,6 @@ import { indexOf, splice } from './array';
 
 // Dual Window Cache
 
-// TODO: アルゴリズムをアクセスパターンをもとにDWC/LRU/RR/MRUなどから動的に選択
-
 export interface CacheOptions<K, V = undefined> {
   readonly disposer?: (key: K, value: V) => void;
   readonly dispose?: {
@@ -77,6 +75,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       assert(this.store.has(key));
       this.access(key);
     }
+    else {
+      assert(!this.store.has(key));
+      ++this.stats.miss;
+      this.slide();
+    }
     return val;
   }
   public has(key: K): boolean {
@@ -112,6 +115,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.stats = {
       LRU: [0, 0],
       LFU: [0, 0],
+      miss: 0,
     };
     const store = this.store;
     this.store = new Map();
@@ -136,16 +140,17 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     LFU: [],
   };
   private stats: {
-    LRU: [number, number],
-    LFU: [number, number],
+    LRU: [number, number];
+    LFU: [number, number];
+    miss: number;
   } = {
     LRU: [0, 0],
     LFU: [0, 0],
+    miss: 0,
   };
   private ratio = 50;
   private slide(): void {
-    const step = 1;
-    const { LRU, LFU } = this.stats;
+    const { LRU, LFU, miss } = this.stats;
     // 速度への影響を確認できなかったため毎回再計算
     //if ((LRU[0] + LFU[0]) % step) return;
     const capacity = this.capacity;
@@ -153,18 +158,33 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const rateR = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1]);
     const rateF = 100 - rateR;
     const ratio = this.ratio;
+    const step = 1;
     // LFUに収束させる
     // 小さすぎるLRUのために非効率にならないようにする
     // なぜかLFUとLRUを広く往復させないとヒットレートが上がらない
-    if (rateF > rateR && ratio < 90) {
+    if (rateF > rateR * 1.2 && ratio < 90) {
       this.ratio += step;
     }
     // LRUに収束させない
     // LFUと半々で均等分布においてLRUのみと同等効率
     // これ以下に下げても(LRUを50%超にしても)均等分布ですら効率が悪化する
-    else if (rateF < rateR && ratio > 50) {
+    else
+    if (rateR > rateF * 1.2 && ratio > 50) {
       //console.log(this.ratio);
       this.ratio -= step;
+    }
+    // シーケンシャルおよび推移的アクセスパターンへの対処
+    // 削除しても他のパターンの性能低下なし
+    else
+    if (rateR > rateF * 1.5 && this.indexes.LRU.length > capacity / 100 * (100 - ratio) - 1) {
+      // 小さいキャッシュサイズで誤差が大きく不安定になりやすい
+      if (ratio > 10 && miss > 5 && this.indexes.LRU.length < miss * 5) {
+        this.ratio -= step;
+      }
+      else
+      if (ratio < 50) {
+        this.ratio += step;
+      }
     }
     assert(LRU[0] + LFU[0] <= window);
     assert(LRU[1] + LFU[1] <= window);
@@ -172,6 +192,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       this.stats = {
         LRU: [0, LRU[0]],
         LFU: [0, LFU[0]],
+        miss,
       };
     }
   }
@@ -181,6 +202,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       || this.accessLFU(key, stats)
       || this.accessLRU(key, stats);
     assert(hit === this.store.has(key));
+    assert(hit);
+    stats.miss = 0;
     this.slide();
     return hit;
   }
@@ -192,7 +215,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     stats && ++stats.LRU[0];
     if (index === 0) return LFU.unshift(LRU.shift()!), true;
     // spliceが遅いので代用
-    // ヒットレートの低下はごくわずか
+    // 速度の倍化に対してヒットレートの低下はごくわずか
     //LRU.unshift(splice(LRU, index, 1)[0]);
     [LRU[index - 1], LRU[index]] = [LRU[index], LRU[index - 1]];
     return true;

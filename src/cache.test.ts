@@ -241,9 +241,8 @@ describe('Unit: lib/cache', () => {
         const key = Math.random() * capacity * 10 | 0;
         hitlru += +lru.put(key, i);
         hitlfu += +lfu.put(key, i);
-        const hit = dwc.put(key, i);
-        hitdwc += +hit;
-        hit && dwc.get(key);
+        dwc.get(key);
+        hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitlfu = 0;
@@ -254,7 +253,7 @@ describe('Unit: lib/cache', () => {
       console.debug('LFU hit rate even 10', hitlfu * 100 / repeat);
       console.debug('DWC hit rate even 10', hitdwc * 100 / repeat);
       console.debug('DWC vs LRU even 10', hitdwc * 100 / repeat - hitlru * 100 / repeat | 0);
-      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > -0.4);
+      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > -0.2);
     });
 
     it('rate uneven 10', function () {
@@ -277,9 +276,8 @@ describe('Unit: lib/cache', () => {
           : Math.random() * capacity * 9 + capacity | 0;
         hitlru += +lru.put(key, i);
         hitlfu += +lfu.put(key, i);
-        const hit = dwc.put(key, i);
-        hitdwc += +hit;
-        hit && dwc.get(key);
+        dwc.get(key);
+        hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitlfu = 0;
@@ -312,9 +310,8 @@ describe('Unit: lib/cache', () => {
         const key = Math.random() * capacity * 10 | 0;
         hitlru += +lru.put(key, i);
         hitlfu += +lfu.put(key, i);
-        const hit = dwc.put(key, i);
-        hitdwc += +hit;
-        hit && dwc.get(key);
+        dwc.get(key);
+        hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitlfu = 0;
@@ -350,9 +347,8 @@ describe('Unit: lib/cache', () => {
           : Math.random() * capacity * 9 + capacity | 0;
         hitlru += +lru.put(key, i);
         hitlfu += +lfu.put(key, i);
-        const hit = dwc.put(key, i);
-        hitdwc += +hit;
-        hit && dwc.get(key);
+        dwc.get(key);
+        hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitlfu = 0;
@@ -363,7 +359,7 @@ describe('Unit: lib/cache', () => {
       console.debug('LFU hit rate uneven 100', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 100', hitdwc * 100 / repeat);
       console.debug('DWC vs LRU uneven 100', hitdwc * 100 / repeat - hitlru * 100 / repeat | 0);
-      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 13);
+      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 12);
     });
 
     it('rate uneven 100 transitive distribution', function () {
@@ -389,9 +385,8 @@ describe('Unit: lib/cache', () => {
           : Math.random() * capacity * 9 + capacity + i | 0;
         hitlru += +lru.put(key, i);
         hitlfu += +lfu.put(key, i);
-        const hit = dwc.put(key, i);
-        hitdwc += +hit;
-        hit && dwc.get(key);
+        dwc.get(key);
+        hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitlfu = 0;
@@ -433,9 +428,8 @@ describe('Unit: lib/cache', () => {
           : Math.random() * capacity * 9 + capacity + i | 0;
         hitlru += +lru.put(key, i);
         hitlfu += +lfu.put(key, i);
-        const hit = dwc.put(key, i);
-        hitdwc += +hit;
-        hit && dwc.get(key);
+        dwc.get(key);
+        hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitlfu = 0;
@@ -446,7 +440,7 @@ describe('Unit: lib/cache', () => {
       console.debug('LFU hit rate uneven 100 transitive bias', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 100 transitive bias', hitdwc * 100 / repeat);
       console.debug('DWC vs LRU uneven 100 transitive bias', hitdwc * 100 / repeat - hitlru * 100 / repeat | 0);
-      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > -9);
+      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > -4);
     });
 
   });
