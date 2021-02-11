@@ -162,25 +162,32 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     // LFUに収束させる
     // 小さすぎるLRUのために非効率にならないようにする
     // なぜかLFUとLRUを広く往復させないとヒットレートが上がらない
-    if (rateF > rateR * 1.2 && ratio < 90) {
+    if (ratio < 90 && rateF > rateR * 1.2) {
       this.ratio += step;
     }
     // LRUに収束させない
     // LFUと半々で均等分布においてLRUのみと同等効率
     // これ以下に下げても(LRUを50%超にしても)均等分布ですら効率が悪化する
     else
-    if (rateR > rateF * 1.2 && ratio > 50) {
+    if (ratio > 50 && rateR > rateF * 1.2) {
       //console.log(this.ratio);
       this.ratio -= step;
     }
     // シーケンシャルおよび推移的アクセスパターンへの対処
-    // 削除しても他のパターンの性能低下なし
+    // 削除しても他のパターンに悪影響なし
     else
-    if (rateR > rateF * 1.5 && this.indexes.LRU.length > capacity / 100 * (100 - ratio) - 1) {
+    if (ratio <= 50 && rateR > rateF * 1.5 && this.indexes.LRU.length > capacity / 100 * (100 - ratio) - 1) {
+      // シーケンシャルアクセスからLFUを保護
+      if (ratio > 10 && miss > capacity / 2) {
+        this.ratio = 50;
+      }
+      // 推移的アクセスでLRUを拡大
       // 小さいキャッシュサイズで誤差が大きく不安定になりやすい
+      else
       if (ratio > 10 && miss > 5 && this.indexes.LRU.length < miss * 5) {
         this.ratio -= step;
       }
+      // 自力でLFUを回復できないので補助
       else
       if (ratio < 50) {
         this.ratio += step;

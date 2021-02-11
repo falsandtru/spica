@@ -225,7 +225,7 @@ describe('Unit: lib/cache', () => {
 
     it('rate even 10', function () {
       this.timeout(10 * 1e3);
-      this.retries(3);
+      this.retries(5);
 
       const capacity = 10;
       const lru = new LRUCache<number, number>(capacity);
@@ -258,7 +258,7 @@ describe('Unit: lib/cache', () => {
 
     it('rate uneven 10', function () {
       this.timeout(10 * 1e3);
-      this.retries(3);
+      this.retries(5);
 
       const capacity = 10;
       const lru = new LRUCache<number, number>(capacity);
@@ -341,7 +341,7 @@ describe('Unit: lib/cache', () => {
       let hitlfu = 0;
       let hitdwc = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
-        // DWCは静的な偏りの抽出能力が高いだけのようだが偏りがない場合でもLRUより悪くはならない
+        // DWCは静的な偏りの抽出能力が高いだけのようだが偏りがない場合でもLRUとほぼ遜色ない
         const key = Math.random() < 0.4
           ? Math.random() * capacity * 1 | 0
           : Math.random() * capacity * 9 + capacity | 0;
@@ -359,7 +359,7 @@ describe('Unit: lib/cache', () => {
       console.debug('LFU hit rate uneven 100', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 100', hitdwc * 100 / repeat);
       console.debug('DWC vs LRU uneven 100', hitdwc * 100 / repeat - hitlru * 100 / repeat | 0);
-      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 12);
+      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 13);
     });
 
     it('rate uneven 100 transitive distribution', function () {
@@ -380,7 +380,7 @@ describe('Unit: lib/cache', () => {
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() < 0.4
           ? Math.random() * capacity * 1 | 0
-          // transitive distribution
+          // Transitive distribution
           // DWCは推移的な分散には影響されない
           : Math.random() * capacity * 9 + capacity + i | 0;
         hitlru += +lru.put(key, i);
@@ -417,7 +417,7 @@ describe('Unit: lib/cache', () => {
       let hitdwc = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() < 0.4
-          // transitive bias
+          // Transitive bias
           // DWCは推移的な偏りに弱い
           // 偏りの抽出が分布全体の推移により無効化され逆効果になるからであろう
           // 偏りの抽出によりLRUより精度を上げようとするキャッシュアルゴリズム全般のトレードオフと思われる
