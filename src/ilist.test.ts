@@ -1,6 +1,6 @@
 import { IList } from './ilist';
 
-describe('Unit: lib/rlist', () => {
+describe('Unit: lib/ilist', () => {
   describe('IList', () => {
     function inspect<K, V>(list: IList<K, V>) {
       return {
