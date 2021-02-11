@@ -177,23 +177,23 @@ describe('Unit: lib/cache', () => {
     class LRUCache<K, V> {
       constructor(public capacity: number) {
       }
-      public indexes: K[] = [];
+      public index: K[] = [];
       public entries = new Map<K, V>();
       public put(key: K, val: V): boolean {
-        const { indexes, entries } = this;
-        const i = indexes.indexOf(key);
-        if (indexes.length === this.capacity) {
+        const { index, entries } = this;
+        const i = index.indexOf(key);
+        if (index.length === this.capacity) {
           i === -1
-            ? entries.delete(indexes.pop()!)
-            : indexes.splice(i, 1);
+            ? entries.delete(index.pop()!)
+            : index.splice(i, 1);
         }
         else {
-          i > -1 && indexes.splice(i, 1);
+          i > -1 && index.splice(i, 1);
         }
-        indexes.unshift(key);
+        index.unshift(key);
         entries.set(key, val);
-        assert(indexes.length <= this.capacity);
-        assert(indexes.length === entries.size);
+        assert(index.length <= this.capacity);
+        assert(index.length === entries.size);
         return i > -1;
       }
     }
@@ -201,24 +201,24 @@ describe('Unit: lib/cache', () => {
     class LFUCache<K, V> {
       constructor(public capacity: number) {
       }
-      public indexes: K[] = [];
+      public index: K[] = [];
       public entries = new Map<K, V>();
       public put(key: K, val: V): boolean {
-        const { indexes, entries } = this;
-        const i = indexes.indexOf(key);
+        const { index, entries } = this;
+        const i = index.indexOf(key);
         switch (i) {
           case -1:
-            indexes.length === this.capacity && entries.delete(indexes.pop()!);
-            indexes.unshift(key);
+            index.length === this.capacity && entries.delete(index.pop()!);
+            index.unshift(key);
             break;
           case 0:
             break;
           default:
-            [indexes[i - 1], indexes[i]] = [indexes[i], indexes[i - 1]];
+            [index[i - 1], index[i]] = [index[i], index[i - 1]];
         }
         entries.set(key, val);
-        assert(indexes.length <= this.capacity);
-        assert(indexes.length === entries.size);
+        assert(index.length <= this.capacity);
+        assert(index.length === entries.size);
         return i > -1;
       }
     }
