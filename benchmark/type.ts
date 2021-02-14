@@ -6,8 +6,7 @@ describe('Benchmark:', function () {
 
   describe('type', function () {
     it('undefined', function (done) {
-      const { undefined } = global;
-      benchmark('type undefined', () => type(undefined), done);
+      benchmark('type undefined', () => type(void 0), done);
     });
 
     it('number', function (done) {

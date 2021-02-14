@@ -1,4 +1,4 @@
-import { undefined, Map } from './global';
+import { Map } from './global';
 import { IterableCollection } from './collection';
 import { extend } from './assign';
 import { indexOf, splice } from './array';
@@ -31,9 +31,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public put(this: Cache<K, undefined>, key: K, value?: V): boolean;
   public put(key: K, value: V): boolean;
   public put(key: K, value: V): boolean {
-    value === undefined
+    value === void 0
       ? this.nullish ||= true
-      : undefined;
+      : void 0;
     if (this.has(key)) return this.store.set(key, value), true;
 
     const { LRU, LFU } = this.indexes;
@@ -71,7 +71,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   }
   public get(key: K): V | undefined {
     const val = this.store.get(key);
-    if (val !== undefined || this.nullish && this.has(key)) {
+    if (val !== void 0 || this.nullish && this.has(key)) {
       assert(this.store.has(key));
       this.access(key);
     }

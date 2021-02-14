@@ -1,4 +1,4 @@
-import { undefined, Promise as ESPromise } from './global';
+import { Promise as ESPromise } from './global';
 import { AtomicPromise, Internal } from './promise';
 
 const internal = Symbol.for('spica/promise::internal');
@@ -28,7 +28,7 @@ export class Future<T = undefined> implements Promise<T> {
       this[internal].then(onfulfilled, onrejected, resolve, reject));
   }
   public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): Promise<T | TResult> {
-    return this.then(undefined, onrejected);
+    return this.then(void 0, onrejected);
   }
   public finally(onfinally?: (() => void) | undefined | null): Promise<T> {
     return this.then(onfinally, onfinally).then(() => this);
@@ -59,7 +59,7 @@ export class AtomicFuture<T = undefined> implements Future<T> {
       this[internal].then(onfulfilled, onrejected, resolve, reject));
   }
   public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult> {
-    return this.then(undefined, onrejected);
+    return this.then(void 0, onrejected);
   }
   public finally(onfinally?: (() => void) | undefined | null): AtomicPromise<T> {
     return this.then(onfinally, onfinally).then(() => this);

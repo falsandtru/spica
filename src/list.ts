@@ -1,5 +1,3 @@
-import { undefined } from './global';
-
 export type List<T> = Cons<T>;
 export function List<T>(...values: T[]): List<T> {
   let node = Nil<T>();
@@ -11,7 +9,7 @@ export function List<T>(...values: T[]): List<T> {
 }
 
 function Nil<T>(): List<T> {
-  return new Cons<never>(undefined as never, undefined as never);
+  return new Cons<never>(void 0 as never, void 0 as never);
 }
 // Don't extend any class for performance.
 class Cons<T> {
@@ -76,7 +74,7 @@ export function MList<T>(...values: T[]): MList<T> {
 }
 
 function MNil<T>(): MList<T> {
-  return new MCons<never>(undefined as never, undefined as never);
+  return new MCons<never>(void 0 as never, void 0 as never);
 }
 // Don't extend any class for performance.
 class MCons<T> {
@@ -128,7 +126,7 @@ class MCons<T> {
     return this;
   }
   public clear(): MList<T> {
-    return this.replaceWith(undefined as never, undefined as never);
+    return this.replaceWith(void 0 as never, void 0 as never);
   }
   public freeze(): List<T> {
     const first = List<T>();

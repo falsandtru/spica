@@ -1,5 +1,5 @@
 import type { Structural, DeepImmutable, DeepRequired } from './type';
-import { undefined, Array, Promise as ESPromise, Error } from './global';
+import { Array, Promise as ESPromise, Error } from './global';
 import { ObjectDefineProperty, ObjectGetOwnPropertyDescriptor } from './alias';
 import { AtomicPromise, isPromiseLike } from './promise';
 import { Future, AtomicFuture } from './future';
@@ -65,19 +65,19 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
         while (core.alive) {
           const [[msg, rpy]] = ++count === 1
             // Don't block.
-            ? [[undefined, noop]]
+            ? [[void 0, noop]]
             // Block.
             : await ESPromise.all([
                 // Don't block.
                 core.settings.size < 0
-                  ? [undefined, noop] as const
+                  ? [void 0, noop] as const
                   : core.sendBuffer!.take() as unknown as [S, Reply<R, T>],
                 // Don't block.
                 ESPromise.all([
                   core.settings.resume(),
                   core.settings.interval > 0
                     ? wait(core.settings.interval)
-                    : undefined,
+                    : void 0,
                 ]),
               ]);
           reply = rpy;
@@ -113,10 +113,10 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
       }
     };
     const core = this[internal];
-    assert(core.settings.size < 0 ? core.sendBuffer === undefined : core.sendBuffer instanceof Channel);
+    assert(core.settings.size < 0 ? core.sendBuffer === void 0 : core.sendBuffer instanceof Channel);
     assert(core.settings.size < 0 ? core.recvBuffer instanceof BroadcastChannel : core.recvBuffer instanceof Channel);
     res(core.result.then(({ value }) => value));
-    if (core.settings.trigger !== undefined) {
+    if (core.settings.trigger !== void 0) {
       for (const prop of Array<string | symbol>().concat(core.settings.trigger)) {
         if (prop in this && this.hasOwnProperty(prop)) continue;
         if (prop in this) {
@@ -176,7 +176,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
           if (!core.alive) return;
           core.alive = false;
           // Don't block.
-          core.recvBuffer.put({ value: undefined, done: true });
+          core.recvBuffer.put({ value: void 0, done: true });
           core.result.bind({ value: result });
         },
         reason => {
@@ -184,7 +184,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
           if (!core.alive) return;
           core.alive = false;
           // Don't block.
-          core.recvBuffer.put({ value: undefined, done: true });
+          core.recvBuffer.put({ value: void 0, done: true });
           core.result.bind(AtomicPromise.reject(reason));
         });
   }
@@ -229,15 +229,15 @@ class Internal<T, R, S> {
     delay: true,
     size: -1,
     interval: 0,
-    resume: () => undefined,
-    trigger: undefined as any,
+    resume: () => void 0,
+    trigger: void 0 as any,
   }, this.opts);
   public alive = true;
   public reception = 0;
   public readonly sendBuffer?: Channel<[S, Reply<R, T>]> =
     this.settings.size >= 0
       ? new Channel(this.settings.size)
-      : undefined;
+      : void 0;
   public readonly recvBuffer: Channel<IteratorResult<R, T | undefined>> | BroadcastChannel<IteratorResult<R, T | undefined>> =
     this.settings.size >= 0
       // Block the iteration until an yielded value is consumed.

@@ -1,4 +1,3 @@
-import { undefined } from './global';
 import { floor } from './alias';
 import { causeAsyncException } from './exception';
 
@@ -24,7 +23,7 @@ function run(): void {
     try {
       jobs[i]!();
       // Release the reference.
-      jobs[i] = undefined;
+      jobs[i] = void 0;
     }
     catch (reason) {
       causeAsyncException(reason);

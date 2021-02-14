@@ -1,4 +1,4 @@
-import { undefined, URLSearchParams } from './global';
+import { URLSearchParams } from './global';
 import { AbsoluteURL, ReadonlyURL } from './url/format';
 
 export { StandardURL, standardize } from './url/format';
@@ -29,7 +29,7 @@ export class URL<T extends string> implements Readonly<global.URL> {
   ) {
     this[internal] = {
       url: new ReadonlyURL(url, base),
-      searchParams: undefined,
+      searchParams: void 0,
     };
     assert(this[internal].url.href.endsWith(`${this.port}${this.pathname}${this.query}${this.fragment}`));
     assert(this.href === this[internal].url.href);

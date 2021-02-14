@@ -1,5 +1,5 @@
 import type { Mutable } from '../type';
-import { global, undefined, encodeURI, encodeURIComponent, URLSearchParams } from '../global';
+import { global, encodeURI, encodeURIComponent, URLSearchParams } from '../global';
 import { memoize } from '../memoize';
 import { Cache } from '../cache';
 import { flip } from '../flip';
@@ -83,21 +83,21 @@ export class ReadonlyURL implements Readonly<global.URL> {
     = flip(uncurry(memoize((base: string | undefined) => memoize((url: string) =>
       ({
         url: new global.URL(url, base),
-        href: undefined,
-        resource: undefined,
-        origin: undefined,
-        protocol: undefined,
-        username: undefined,
-        password: undefined,
-        host: undefined,
-        hostname: undefined,
-        port: undefined,
-        path: undefined,
-        pathname: undefined,
-        search: undefined,
-        query: undefined,
-        hash: undefined,
-        fragment: undefined,
+        href: void 0,
+        resource: void 0,
+        origin: void 0,
+        protocol: void 0,
+        username: void 0,
+        password: void 0,
+        host: void 0,
+        hostname: void 0,
+        port: void 0,
+        path: void 0,
+        pathname: void 0,
+        search: void 0,
+        query: void 0,
+        hash: void 0,
+        fragment: void 0,
       })
       , new Cache(100)), new Cache(100))));
   constructor(
@@ -114,7 +114,7 @@ export class ReadonlyURL implements Readonly<global.URL> {
     }
     this[internal] = {
       share: ReadonlyURL.get(src, base),
-      searchParams: undefined,
+      searchParams: void 0,
     };
   }
   private readonly [internal]: {

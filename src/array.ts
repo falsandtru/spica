@@ -1,4 +1,4 @@
-import { undefined, Infinity } from './global';
+import { Infinity } from './global';
 
 export function indexOf<a>(as: readonly a[], a: a): number {
   if (as.length === 0) return -1;
@@ -26,7 +26,7 @@ export function shift<a>(as: a[]): [a | undefined, a[]];
 export function shift<a>(as: a[], count: number): [a[], a[]];
 export function shift<a>(as: a[], count?: number): [a | undefined | a[], a[]] {
   if (count! < 0) throw new Error('Unexpected negative number');
-  return count === undefined
+  return count === void 0
     ? [as.shift(), as]
     : [splice(as, 0, count), as];
 }
@@ -52,7 +52,7 @@ export function pop<a>(as: a[]): [a[], a | undefined];
 export function pop<a>(as: a[], count: number): [a[], a[]];
 export function pop<a>(as: a[], count?: number): [a[], a | undefined | a[]] {
   if (count! < 0) throw new Error('Unexpected negative number');
-  return count === undefined
+  return count === void 0
     ? [as, as.pop()]
     : [as, splice(as, as.length - count, count)];
 }
@@ -73,7 +73,7 @@ export function splice<a>(as: a[], index: number, count?: number, ...inserts: a[
           return as.length === 0
             ? [[], unshift(inserts, as)][0]
             : [[as.shift()!], unshift(inserts, as)][0];
-        case undefined:
+        case void 0:
           if (as.length > 1 || arguments.length > 2) break;
           return as.length === 0
             ? []
@@ -87,7 +87,7 @@ export function splice<a>(as: a[], index: number, count?: number, ...inserts: a[
           return as.length === 0
             ? [[], push(as, inserts)][0]
             : [[as.pop()!], push(as, inserts)][0];
-        case undefined:
+        case void 0:
           if (as.length > 1 || arguments.length > 2) break;
           return as.length === 0
             ? []

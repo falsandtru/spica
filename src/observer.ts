@@ -1,5 +1,5 @@
 import type { Inits, DeepImmutable, DeepRequired } from './type';
-import { undefined, Number, Map, WeakMap, Error } from './global';
+import { Number, Map, WeakMap, Error } from './global';
 import { extend } from './assign';
 import { push, splice } from './array';
 import { causeAsyncException } from './exception';
@@ -71,7 +71,7 @@ export class Observation<N extends readonly unknown[], D, R>
     extend(this.settings, opts);
   }
   private id: number = 0;
-  private readonly node: ListenerNode<N, D, R> = new ListenerNode(undefined, undefined);
+  private readonly node: ListenerNode<N, D, R> = new ListenerNode(void 0, void 0);
   private readonly settings: DeepImmutable<DeepRequired<ObservationOptions>> = {
     limit: 10,
     cleanup: false,

@@ -1,4 +1,4 @@
-import { undefined, Array, Object } from './global';
+import { Array, Object } from './global';
 import { ObjectGetPrototypeOf } from './alias';
 
 type Falsy = undefined | false | 0 | '' | null | void;
@@ -207,7 +207,7 @@ export type DeepMutable<T, E = never> =
 const toString = Object.prototype.toString.call.bind(Object.prototype.toString) as (target: unknown) => string;
 
 export function type(value: unknown): string {
-  if (value === undefined) return 'undefined';
+  if (value === void 0) return 'undefined';
   if (value === null) return 'null';
   const type = typeof value;
   if (type === 'object') {

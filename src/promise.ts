@@ -1,4 +1,4 @@
-import { undefined, Array } from './global';
+import { Array } from './global';
 import { isArray } from './alias';
 import { splice } from './array';
 
@@ -214,7 +214,7 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
       this[internal].then(onfulfilled, onrejected, resolve, reject));
   }
   public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult> {
-    return this.then(undefined, onrejected);
+    return this.then(void 0, onrejected);
   }
   public finally(onfinally?: (() => void) | undefined | null): AtomicPromise<T> {
     return this.then(onfinally, onfinally).then(() => this);

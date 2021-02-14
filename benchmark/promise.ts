@@ -1,6 +1,6 @@
 import { benchmark } from './benchmark';
 import { AtomicPromise } from '../';
-import { undefined, Promise } from '../src/global';
+import { Promise } from '../src/global';
 import Bluebird from 'bluebird';
 import { clock } from '../src/clock';
 import { noop } from '../src/noop';
@@ -21,7 +21,7 @@ describe('Benchmark:', function () {
     });
 
     it('new', function (done) {
-      benchmark('AtomicPromise new', () => void new AtomicPromise(resolve => resolve(undefined)), done);
+      benchmark('AtomicPromise new', () => void new AtomicPromise(resolve => resolve(void 0)), done);
     });
 
     it('run', function (done) {
@@ -85,7 +85,7 @@ describe('Benchmark:', function () {
     });
 
     it('new', function (done) {
-      benchmark('Promise new', () => void new Promise(resolve => resolve(undefined)), done);
+      benchmark('Promise new', () => void new Promise(resolve => resolve(void 0)), done);
     });
 
     it('run', function (done) {

@@ -1,5 +1,3 @@
-import { undefined } from './global';
-
 export type Cont<T> = (() => Result<T>) | undefined;
 type Result<T> = [T, Cont<T>];
 export function Cont<T>(value: T, cont: Cont<T>): NonNullable<Cont<T>> {
@@ -12,7 +10,7 @@ function Result<T>(value: T, cont: Cont<T>): Result<T> {
 export function append<T>(cont: NonNullable<Cont<T>>, value: T): NonNullable<Cont<T>> {
   const r = cont();
   assert(!r[1]);
-  return r[1] = Cont(value, undefined);
+  return r[1] = Cont(value, void 0);
 }
 
 export type CList<T> = CCons<T>;
@@ -54,12 +52,12 @@ class CCons<T> {
     return acc;
   }
   public map<U>(f: (value: T) => U): CList<U> {
-    const cont = Cont<U>(undefined as never, undefined);
+    const cont = Cont<U>(void 0 as never, void 0);
     this.foldl((acc, value) => append(acc, f(value)), cont);
     return new CCons(cont()[1]);
   }
   public reverse(): CList<T> {
-    this.cont = this.foldl<Cont<T>>((acc, value) => Cont(value, acc), undefined);
+    this.cont = this.foldl<Cont<T>>((acc, value) => Cont(value, acc), void 0);
     return this;
   }
   public get length(): number {

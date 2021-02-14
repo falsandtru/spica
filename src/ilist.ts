@@ -1,5 +1,3 @@
-import { undefined } from './global';
-
 // Indexed circular linked list
 
 export class IList<K, V = undefined> {
@@ -59,7 +57,7 @@ export class IList<K, V = undefined> {
       assert(this.length !== 2 || this.items[index] !== this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
       assert(this.length < 3 || this.items[index] !== this.items[index]!.prev && this.items[index]!.prev !== this.items[index]!.next);
       // @ts-expect-error
-      garbage.prev = garbage.next = undefined;
+      garbage.prev = garbage.next = void 0;
       //assert(this.length > 10 || [...this].length === this.length);
       return false;
     }
@@ -113,7 +111,7 @@ export class IList<K, V = undefined> {
     prev.next = next;
     next.prev = prev;
     // @ts-expect-error
-    this.items[item.index] = item.prev = item.next = undefined;
+    this.items[item.index] = item.prev = item.next = void 0;
     if (this.head === item.index) {
       this.head = next.index;
     }
@@ -134,9 +132,9 @@ export class IList<K, V = undefined> {
     };
   }
   public item(index: number | undefined): { index: number; key: K; value: V; } | undefined {
-    const item = index !== undefined
+    const item = index !== void 0
       ? this.items[index]
-      : undefined;
+      : void 0;
     return item && {
       index: this.cursor = item.index,
       key: item.key,
