@@ -22,6 +22,22 @@ export const clone = template((prop, target, source) => {
   }
 });
 
+export const overwrite = template((prop, target, source) => {
+  switch (type(source[prop])) {
+    case 'Array':
+      return target[prop] = source[prop];
+    case 'Object':
+      switch (type(target[prop])) {
+        case 'Object':
+          return target[prop] = overwrite(target[prop], source[prop]);
+        default:
+          return target[prop] = overwrite(empty(source[prop]), source[prop]);
+      }
+    default:
+      return target[prop] = source[prop];
+  }
+});
+
 export const extend = template((prop, target, source) => {
   switch (type(source[prop])) {
     case 'undefined':
