@@ -7,7 +7,7 @@ import { indexOf, splice } from './array';
 
 export interface CacheOptions<K, V = undefined> {
   readonly disposer?: (key: K, value: V) => void;
-  readonly dispose?: {
+  readonly capture?: {
     readonly delete?: boolean;
     readonly clear?: boolean;
   };
@@ -22,7 +22,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     extend(this.settings, opts);
   }
   private readonly settings: CacheOptions<K, V> = {
-    dispose: {
+    capture: {
       delete: true,
       clear: true,
     },
@@ -93,7 +93,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     for (const index of [LFU, LRU]) {
       const i = indexOf(index, key);
       if (i === -1) continue;
-      if (!this.settings.disposer || !this.settings.dispose!.delete) {
+      if (!this.settings.disposer || !this.settings.capture!.delete) {
         this.store.delete(splice(index, i, 1)[0]);
       }
       else {
@@ -119,7 +119,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     };
     const store = this.store;
     this.store = new Map();
-    if (!this.settings.disposer || !this.settings.dispose?.clear) return;
+    if (!this.settings.disposer || !this.settings.capture?.clear) return;
     for (const [key, value] of store) {
       this.settings.disposer(key, value);
     }
