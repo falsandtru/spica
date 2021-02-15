@@ -36,23 +36,23 @@ describe('Unit: lib/cancellation', () => {
       cancellation.register(() =>
         done(false));
       assert(cancellation.alive === true);
-      assert(cancellation.canceled === false);
+      assert(cancellation.cancelled === false);
       cancellation.close();
       assert(cancellation.alive === false);
-      assert(cancellation.canceled === false);
+      assert(cancellation.cancelled === false);
       cancellation.close();
       assert(cancellation.alive === false);
-      assert(cancellation.canceled === false);
+      assert(cancellation.cancelled === false);
       cancellation.cancel();
       assert(cancellation.alive === false);
-      assert(cancellation.canceled === false);
+      assert(cancellation.cancelled === false);
       cancellation.register(() =>
         done(false));
       assert(cancellation.alive === false);
-      assert(cancellation.canceled === false);
+      assert(cancellation.cancelled === false);
       cancellation.close();
       assert(cancellation.alive === false);
-      assert(cancellation.canceled === false);
+      assert(cancellation.cancelled === false);
       cancellation.catch(done);
     });
 
@@ -66,11 +66,11 @@ describe('Unit: lib/cancellation', () => {
       c.register(() => assert(cnt === 0 && ++cnt));
       b.cancel();
       assert(a.alive === true);
-      assert(a.canceled === false);
+      assert(a.cancelled === false);
       assert(b.alive === false);
-      assert(b.canceled === true);
+      assert(b.cancelled === true);
       assert(c.alive === false);
-      assert(c.canceled === true);
+      assert(c.cancelled === true);
       assert(cnt === 2);
       done();
     });

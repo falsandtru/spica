@@ -15,7 +15,7 @@ export interface Canceller<L = undefined> {
 }
 export interface Cancellee<L = undefined> {
   readonly alive: boolean;
-  readonly canceled: boolean;
+  readonly cancelled: boolean;
   readonly register: (listener: Listener<L>) => () => void;
   readonly promise: <T>(val: T) => AtomicPromise<T>;
   readonly maybe: <T>(val: T) => Maybe<T>;
@@ -38,8 +38,8 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
   public get alive(): boolean {
     return this[internal].alive;
   }
-  public get canceled(): boolean {
-    return this[internal].canceled;
+  public get cancelled(): boolean {
+    return this[internal].cancelled;
   }
   public get register(): (listener: Listener<L>) => () => void {
     return (listener: Listener<L>) =>
@@ -75,13 +75,13 @@ class Internal<L> implements Canceller<L>, Cancellee<L> {
   public alive: boolean = true;
   public available: boolean = true;
   public reason?: L;
-  public get canceled(): boolean {
+  public get cancelled(): boolean {
     return 'reason' in this;
   }
   public readonly listeners: Set<Listener<L>> = new Set();
   public register(listener: Listener<L>): () => void {
     if (!this.alive) {
-      this.canceled && handler(this.reason!);
+      this.cancelled && handler(this.reason!);
       return noop;
     }
     this.listeners.add(handler);
@@ -113,21 +113,21 @@ class Internal<L> implements Canceller<L>, Cancellee<L> {
     this.alive = false;
   }
   public promise<T>(val: T): AtomicPromise<T> {
-    return this.canceled
+    return this.cancelled
       ? AtomicPromise.reject(this.reason)
       : AtomicPromise.resolve(val);
   }
   public maybe<T>(val: T): Maybe<T> {
     return Just(val)
       .bind(val =>
-        this.canceled
+        this.cancelled
           ? Nothing
           : Just(val));
   }
   public either<R>(val: R): Either<L, R> {
     return Right<L, R>(val)
       .bind(val =>
-        this.canceled
+        this.cancelled
           ? Left(this.reason!)
           : Right(val));
   }
