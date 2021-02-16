@@ -1,4 +1,5 @@
 import { Map } from './global';
+import { min } from './alias';
 import { IterableCollection } from './collection';
 import { extend } from './assign';
 import { indexOf, splice } from './array';
@@ -239,6 +240,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
 }
 
 function rate(window: number, currHits: number, currTotal: number, prevHits: number, prevTotal: number): number {
+  window = min(currTotal + prevTotal, window);
   const currRate = currHits * 100 / currTotal | 0;
   const currRatio = currTotal / window;
   const prevRate = prevHits * 100 / prevTotal | 0;
