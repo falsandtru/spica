@@ -241,9 +241,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
 
 function rate(window: number, currHits: number, currTotal: number, prevHits: number, prevTotal: number): number {
   window = min(currTotal + prevTotal, window);
-  const currRate = currHits * 100 / currTotal | 0;
+  const currRate = currHits * 100 / currTotal;
   const currRatio = currTotal / window;
-  const prevRate = prevHits * 100 / prevTotal | 0;
+  const prevRate = prevHits * 100 / prevTotal;
   const prevRatio = 1 - currRatio;
   return currRate * currRatio + prevRate * prevRatio | 0;
 }
