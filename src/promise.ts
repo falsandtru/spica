@@ -131,9 +131,9 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
     });
   }
   public static allSettled<T extends readonly unknown[] | readonly [unknown]>(values: T):
-    Promise<{ -readonly [P in keyof T]: PromiseSettledResult<T[P] extends PromiseLike<infer U> ? U : T[P]> }>;
-  public static allSettled<T>(values: Iterable<T>): Promise<PromiseSettledResult<T extends PromiseLike<infer U> ? U : T>[]>;
-  public static allSettled<T>(vs: Iterable<T>): Promise<unknown> {
+    AtomicPromise<{ -readonly [P in keyof T]: PromiseSettledResult<T[P] extends PromiseLike<infer U> ? U : T[P]> }>;
+  public static allSettled<T>(values: Iterable<T>): AtomicPromise<PromiseSettledResult<T extends PromiseLike<infer U> ? U : T>[]>;
+  public static allSettled<T>(vs: Iterable<T>): AtomicPromise<unknown> {
     return new AtomicPromise<PromiseSettledResult<T extends PromiseLike<infer U> ? U : T>[]>(resolve => {
       const values = isArray(vs) ? vs : [...vs];
       const results: PromiseSettledResult<T extends PromiseLike<infer U> ? U : T>[] = Array(values.length);
