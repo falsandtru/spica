@@ -40,9 +40,9 @@ interface MonitorItem<N extends readonly unknown[], D> {
   readonly id: number;
   readonly type: ListenerType.Monitor;
   readonly namespace: Readonly<N | Inits<N>>;
-  readonly listener: Monitor<N, D>;
+  readonly listener: Monitor<N | Inits<N>, D>;
   readonly options: ObserverOptions;
- }
+}
 interface SubscriberItem<N extends readonly unknown[], D, R> {
   readonly id: number;
   readonly type: ListenerType.Subscriber;
@@ -179,7 +179,7 @@ export class Observation<N extends readonly unknown[], D, R>
           this.off(item.namespace, item);
         }
         try {
-          const result = item.listener(data, namespace);
+          const result = item.listener(data, item.namespace);
           tracker && results.push(result);
         }
         catch (reason) {
@@ -199,7 +199,7 @@ export class Observation<N extends readonly unknown[], D, R>
           this.off(item.namespace, item);
         }
         try {
-          item.listener(data, namespace);
+          item.listener(data, item.namespace);
         }
         catch (reason) {
           causeAsyncException(reason);
