@@ -179,7 +179,7 @@ export class Observation<N extends readonly unknown[], D, R>
           this.off(item.namespace, item);
         }
         try {
-          const result = item.listener(data, item.namespace);
+          const result = item.listener(data, namespace);
           tracker && results.push(result);
         }
         catch (reason) {
@@ -199,7 +199,7 @@ export class Observation<N extends readonly unknown[], D, R>
           this.off(item.namespace, item);
         }
         try {
-          item.listener(data, item.namespace);
+          item.listener(data, namespace);
         }
         catch (reason) {
           causeAsyncException(reason);
