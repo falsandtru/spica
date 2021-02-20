@@ -17,7 +17,7 @@ export class Colistener<T, U = undefined> extends Coroutine<U, T> {
           notifiable = false;
         }
         void queue.push(value);
-        while (queue.length > (opts.size || 1)) {
+        while (queue.length > (opts.capacity || 1)) {
           void queue.shift()!;
         }
         assert(queue.length > 0);
@@ -30,7 +30,7 @@ export class Colistener<T, U = undefined> extends Coroutine<U, T> {
           yield queue.shift()!;
         }
       }
-    }, { ...opts, size: -1, run: false });
+    }, { ...opts, capacity: -1, run: false });
     void this[Coroutine.init]();
   }
   public close(this: Colistener<T, undefined>, value?: U): void;

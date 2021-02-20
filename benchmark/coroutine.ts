@@ -18,19 +18,19 @@ describe('Benchmark:', function () {
 
   describe('Coroutine', function () {
     it('new', function (done) {
-      benchmark('Coroutine new', () => void new Coroutine(async function* () { }, { size: 0, run: false }), done);
+      benchmark('Coroutine new', () => void new Coroutine(async function* () { }, { capacity: 0, run: false }), done);
     });
 
     it('run', function (done) {
       this.timeout(90 * 1e3);
-      benchmark('Coroutine run', done => void new Coroutine(async function* () { }, { size: 0, delay: false }).then(done), done, { defer: true, async: true });
+      benchmark('Coroutine run', done => void new Coroutine(async function* () { }, { capacity: 0, delay: false }).then(done), done, { defer: true, async: true });
     });
 
     it('ask', function (done) {
       this.timeout(90 * 1e3);
       const port = new Coroutine(async function* () {
         while (true) yield;
-      }, { size: 0, delay: false })[Coroutine.port];
+      }, { capacity: 0, delay: false })[Coroutine.port];
       benchmark('Coroutine ask', done => void port.ask(0).then(done), done, { defer: true, async: true });
     });
 
