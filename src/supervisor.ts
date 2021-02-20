@@ -190,7 +190,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       () =>
         this.workers.get(name) === worker &&
         void this.workers.delete(name));
-    void this.workers.set(name, worker)
+    void this.workers.set(name, worker);
     return worker.terminate;
 
     function isAsyncGeneratorFunction(process: Supervisor.Process<P, R, S>): process is Supervisor.Process.AsyncGeneratorFunction<P, R, S> {
