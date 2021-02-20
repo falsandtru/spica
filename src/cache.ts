@@ -2,7 +2,7 @@ import { Map } from './global';
 import { min } from './alias';
 import { IterableCollection } from './collection';
 import { extend } from './assign';
-import { indexOf, splice } from './array';
+import { IList } from './ilist';
 import { tuple } from './tuple';
 
 // Dual Window Cache
@@ -42,8 +42,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
 
     if (this.size === this.capacity) {
       const key = LFU.length === this.capacity || LFU.length > this.capacity * this.ratio / 100
-        ? LFU.pop()!
-        : LRU.pop()!;
+        ? LFU.pop()!.key
+        : LRU.pop()!.key;
       assert(this.store.has(key));
       if (this.settings.disposer) {
         const val = this.store.get(key)!;
@@ -55,7 +55,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       }
     }
 
-    LRU.unshift(key);
+    LRU.add(key);
     this.store.set(key, value);
     return false;
   }
@@ -80,22 +80,23 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     return val;
   }
   public has(key: K): boolean {
-    assert(this.store.has(key) === (this.indexes.LFU.includes(key) || this.indexes.LRU.includes(key)));
-    assert(this.store.size === this.indexes.LFU.length + this.indexes.LRU.length);
+    //assert(this.store.has(key) === (this.indexes.LFU.has(key) || this.indexes.LRU.has(key)));
+    //assert(this.store.size === this.indexes.LFU.length + this.indexes.LRU.length);
     return this.store.has(key);
   }
   public delete(key: K): boolean {
     if (!this.has(key)) return false;
     const { LRU, LFU } = this.indexes;
     for (const index of [LFU, LRU]) {
-      const i = indexOf(index, key);
+      const i = index.findIndex(key) ?? -1;
       if (i === -1) continue;
+      index.delete(key);
       if (!this.settings.disposer || !this.settings.capture!.delete) {
-        this.store.delete(splice(index, i, 1)[0]);
+        this.store.delete(key);
       }
       else {
         const val = this.store.get(key)!;
-        this.store.delete(splice(index, i, 1)[0]);
+        this.store.delete(key);
         this.settings.disposer(key, val);
       }
       return true;
@@ -106,8 +107,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.nullish = false;
     this.ratio = 50;
     this.indexes = {
-      LRU: [],
-      LFU: [],
+      LRU: new IList(this.capacity),
+      LFU: new IList(this.capacity),
     };
     this.stats = {
       LRU: [0, 0],
@@ -122,7 +123,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     }
   }
   public get size(): number {
-    assert(this.indexes.LRU.length + this.indexes.LFU.length === this.store.size);
+    //assert(this.indexes.LRU.length + this.indexes.LFU.length === this.store.size);
     return this.indexes.LRU.length + this.indexes.LFU.length;
   }
   public [Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
@@ -130,8 +131,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   }
   private store = new Map<K, V>();
   private indexes = {
-    LRU: [] as K[],
-    LFU: [] as K[],
+    LRU: new IList<K>(this.capacity),
+    LFU: new IList<K>(this.capacity),
   } as const;
   private stats = {
     LRU: tuple(0, 0),
@@ -205,24 +206,21 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   }
   private accessLRU(key: K, stats?: Cache<K, V>['stats']): boolean {
     const { LRU, LFU } = this.indexes;
-    const index = indexOf(LRU, key);
+    const index = LRU.findIndex(key) ?? -1;
     assert(index > -1 === this.store.has(key));
     if (index === -1) return false;
     stats && ++stats.LRU[0];
-    if (index === 0) return LFU.unshift(LRU.shift()!), true;
-    // spliceが遅いので代用
-    // 速度の倍化に対してヒットレートの低下はごくわずか
-    //LRU.unshift(splice(LRU, index, 1)[0]);
-    [LRU[index - 1], LRU[index]] = [LRU[index], LRU[index - 1]];
+    if (index === LRU.peek()!.index) return LFU.add(LRU.shift()!.key), true;
+    LRU.raiseToTop(index);
     return true;
   }
   private accessLFU(key: K, stats?: Cache<K, V>['stats']): boolean {
     const { LFU } = this.indexes;
-    const index = indexOf(LFU, key);
+    const index = LFU.findIndex(key) ?? -1;
     if (index === -1) return false;
     stats && ++stats.LFU[0];
-    if (index === 0) return true;
-    [LFU[index - 1], LFU[index]] = [LFU[index], LFU[index - 1]];
+    if (index === LFU.peek()!.index) return true;
+    LFU.raiseToTop(index);
     return true;
   }
 }

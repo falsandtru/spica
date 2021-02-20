@@ -25,12 +25,12 @@ export class IList<K, V = undefined> {
       const index = this.head = this.cursor = this.indexes.length > 0
         ? this.indexes.shift()!
         : this.length;
-      assert(!items[index]);
+      //assert(!items[index]);
       this.length++;
       this.index.set(key, index);
       items[index] =
         new Item(index, key, value, head!, head!);
-      assert(this.items[index] === this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
+      //assert(this.items[index] === this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
       //assert(this.length > 10 || [...this].length === this.length);
       return false;
     }
@@ -39,14 +39,14 @@ export class IList<K, V = undefined> {
       const index = this.head = this.cursor = this.indexes.length > 0
         ? this.indexes.shift()!
         : this.length;
-      assert(!items[index]);
+      //assert(!items[index]);
       this.length++;
       this.index.set(key, index);
       items[index] = head.prev = head.prev.next =
         new Item(index, key, value, head, head.prev);
-      assert(this.length !== 1 || this.items[index] === this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
-      assert(this.length !== 2 || this.items[index] !== this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
-      assert(this.length < 3 || this.items[index] !== this.items[index]!.prev && this.items[index]!.prev !== this.items[index]!.next);
+      //assert(this.length !== 1 || this.items[index] === this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
+      //assert(this.length !== 2 || this.items[index] !== this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
+      //assert(this.length < 3 || this.items[index] !== this.items[index]!.prev && this.items[index]!.prev !== this.items[index]!.next);
       //assert(this.length > 10 || [...this].length === this.length);
       return false;
     }
@@ -54,16 +54,16 @@ export class IList<K, V = undefined> {
       assert(this.length === this.capacity);
       assert(this.indexes.length === 0);
       const index = this.head = this.cursor = head.prev.index;
-      assert(items[index]);
+      //assert(items[index]);
       const garbage = items[index]!;
       assert(garbage.index === this.index.get(garbage.key));
       this.index.take(garbage.key);
       this.index.set(key, index);
       items[index] = head.prev = head.prev.prev.next =
         new Item(index, key, value, head, head.prev.prev);
-      assert(this.length !== 1 || this.items[index] === this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
-      assert(this.length !== 2 || this.items[index] !== this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
-      assert(this.length < 3 || this.items[index] !== this.items[index]!.prev && this.items[index]!.prev !== this.items[index]!.next);
+      //assert(this.length !== 1 || this.items[index] === this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
+      //assert(this.length !== 2 || this.items[index] !== this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
+      //assert(this.length < 3 || this.items[index] !== this.items[index]!.prev && this.items[index]!.prev !== this.items[index]!.next);
       // @ts-expect-error
       garbage.prev = garbage.next = void 0;
       //assert(this.length > 10 || [...this].length === this.length);
@@ -81,7 +81,7 @@ export class IList<K, V = undefined> {
     return true;
   }
   public shift(): { index: number; key: K; value: V; } | undefined {
-    assert(this.length === 0 ? !this.items[this.head] : this.items[this.head]);
+    //assert(this.length === 0 ? !this.items[this.head] : this.items[this.head]);
     const item = this.items[this.head];
     assert(this.length === 0 ? !item : item);
     if (!item) return;
@@ -93,7 +93,7 @@ export class IList<K, V = undefined> {
     };
   }
   public pop(): { index: number; key: K; value: V; } | undefined {
-    assert(this.length === 0 ? !this.items[this.head] : this.items[this.head]);
+    //assert(this.length === 0 ? !this.items[this.head] : this.items[this.head]);
     const item = this.items[this.head]?.prev;
     assert(this.length === 0 ? !item : item);
     if (!item) return;
@@ -110,9 +110,9 @@ export class IList<K, V = undefined> {
     if (!item) return;
     this.cursor = cursor;
     assert(this.length > 0);
-    assert(this.length !== 1 || item === item.prev && item.prev === item.next);
-    assert(this.length !== 2 || item !== item.prev && item.prev === item.next);
-    assert(this.length < 3 || item !== item.prev && item.prev !== item.next);
+    //assert(this.length !== 1 || item === item.prev && item.prev === item.next);
+    //assert(this.length !== 2 || item !== item.prev && item.prev === item.next);
+    //assert(this.length < 3 || item !== item.prev && item.prev !== item.next);
     --this.length;
     this.indexes.push(item.index);
     assert(item.index === this.index.get(item.key));
@@ -128,8 +128,8 @@ export class IList<K, V = undefined> {
     if (this.cursor === item.index) {
       this.cursor = next.index;
     }
-    assert(this.length === 0 ? !this.items[this.head] : this.items[this.head]);
-    assert(this.length === 0 ? !this.items[this.cursor] : this.items[this.cursor]);
+    //assert(this.length === 0 ? !this.items[this.head] : this.items[this.head]);
+    //assert(this.length === 0 ? !this.items[this.cursor] : this.items[this.cursor]);
     //assert(this.length > 10 || [...this].length === this.length);
     return item.value;
   }
@@ -192,12 +192,12 @@ export class IList<K, V = undefined> {
     b1.prev = a0;
     b0.next = b2;
     b2.prev = b0;
-    assert(a0.next === b1);
-    assert(b1.next === a1);
-    assert(a1.prev === b1);
-    assert(b1.prev === a0);
-    assert(b0.next === b2);
-    assert(b2.prev === b0);
+    //assert(a0.next === b1);
+    //assert(b1.next === a1);
+    //assert(a1.prev === b1);
+    //assert(b1.prev === a0);
+    //assert(b0.next === b2);
+    //assert(b2.prev === b0);
     //assert(this.length > 10 || [...this].length === this.length);
   }
   public raiseToTop(index: number): void {
