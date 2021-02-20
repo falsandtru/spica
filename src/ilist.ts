@@ -1,3 +1,5 @@
+import { MultiMap } from './collection/multimap';
+
 // Indexed circular linked list
 
 export class IList<K, V = undefined> {
@@ -7,6 +9,7 @@ export class IList<K, V = undefined> {
     assert(capacity > 0);
   }
   private items: (Item<K, V> | undefined)[] = [];
+  private index = new MultiMap<K, number>();
   private indexes: number[] = [];
   private head = 0;
   private cursor = 0;
@@ -24,6 +27,7 @@ export class IList<K, V = undefined> {
         : this.length;
       assert(!items[index]);
       this.length++;
+      this.index.set(key, index);
       items[index] =
         new Item(index, key, value, head!, head!);
       assert(this.items[index] === this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
@@ -37,6 +41,7 @@ export class IList<K, V = undefined> {
         : this.length;
       assert(!items[index]);
       this.length++;
+      this.index.set(key, index);
       items[index] = head.prev = head.prev.next =
         new Item(index, key, value, head, head.prev);
       assert(this.length !== 1 || this.items[index] === this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
@@ -51,6 +56,8 @@ export class IList<K, V = undefined> {
       const index = this.head = this.cursor = head.prev.index;
       assert(items[index]);
       const garbage = items[index]!;
+      this.index.take(garbage.key);
+      this.index.set(key, index);
       items[index] = head.prev = head.prev.prev.next =
         new Item(index, key, value, head, head.prev.prev);
       assert(this.length !== 1 || this.items[index] === this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
@@ -107,6 +114,7 @@ export class IList<K, V = undefined> {
     assert(this.length < 3 || item !== item.prev && item.prev !== item.next);
     --this.length;
     this.indexes.push(item.index);
+    this.index.take(item.key);
     const { prev, next } = item;
     prev.next = next;
     next.prev = prev;
@@ -157,13 +165,14 @@ export class IList<K, V = undefined> {
     return;
   }
   private seek(key: K, cursor = this.cursor): Item<K, V> | undefined {
-    let item = this.items[cursor === -1 ? this.head : cursor];
-    if (!item) return;
     const isNaN = key !== key;
+    let item: Item<K, V> | undefined;
+    item = this.items[cursor = cursor < 0 ? this.head : cursor];
+    if (!item) return;
     if (isNaN ? item.key !== item.key : item.key === key) return this.cursor = cursor, item;
-    for (let i = 1; i < this.length && (item = item.next); ++i) {
-      if (isNaN ? item.key !== item.key : item.key === key) return this.cursor = item.index, item;
-    }
+    item = this.items[cursor = this.index.get(key) ?? this.capacity];
+    if (!item) return;
+    if (isNaN ? item.key !== item.key : item.key === key) return this.cursor = cursor, item;
   }
   private insert(item: Item<K, V>, before: number): void {
     if (item.index === before) return;
