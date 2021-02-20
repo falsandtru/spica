@@ -8,10 +8,10 @@ const internal = Symbol.for('spica/channel::internal');
 
 export class Channel<T = undefined> implements AsyncIterable<T> {
   constructor(
-    size: number = 0,
+    capacity: number = 0,
   ) {
-    assert(size >= 0);
-    this[internal] = new Internal(size);
+    assert(capacity >= 0);
+    this[internal] = new Internal(capacity);
   }
   public readonly [internal]: Internal<T>;
   public get alive(): boolean {
@@ -42,19 +42,19 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
   public put(msg: T): AtomicPromise<undefined>;
   public put(msg: T): AtomicPromise<undefined> {
     if (!this.alive) return fail();
-    const { size, buffer, producers, consumers } = this[internal];
+    const { capacity, buffer, producers, consumers } = this[internal];
     switch (true) {
-      case buffer.length < size:
+      case buffer.length < capacity:
       case consumers.length > 0:
-        assert(buffer.length + 1 < size ? producers.length === 0 : true);
-        assert(size === 0 ? buffer.length === 0 : true);
+        assert(buffer.length + 1 < capacity ? producers.length === 0 : true);
+        assert(capacity === 0 ? buffer.length === 0 : true);
         buffer.push(msg);
         consumers.length > 0 && consumers.shift()!.bind(buffer.shift()!)
-        assert(buffer.length <= size);
+        assert(buffer.length <= capacity);
         assert(buffer.length > 0 ? consumers.length === 0 : true);
         return success;
       default:
-        assert(buffer.length === size);
+        assert(buffer.length === capacity);
         assert(consumers.length === 0);
         return producers[producers.push(new AtomicFuture()) - 1]
           .then(() => this.put(msg));
@@ -81,6 +81,9 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
           .then();
     }
   }
+  public get size(): number {
+    return this[internal].buffer.length;
+  }
   public async *[Symbol.asyncIterator](): AsyncGenerator<T, undefined, undefined> {
     try {
       while (this.alive) {
@@ -96,7 +99,7 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
 
 class Internal<T> {
   constructor(
-    public readonly size: number = 0,
+    public readonly capacity: number = 0,
   ) {
   }
   public alive: boolean = true;
