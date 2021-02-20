@@ -72,7 +72,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       const name = typeof names === 'string'
         ? names
         : names[Symbol.iterator]().next().value!;
-      void this.events_.loss.emit([name], [name, param]);
+      void this.events_?.loss.emit([name], [name, param]);
     }
     assert(this.messages.length === 0);
     assert(!Object.isFrozen(this.messages));
@@ -95,16 +95,22 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     scheduler: tick,
     resource: 10,
   };
-  private readonly events_ = {
-    init: new Observation<[N], Supervisor.Event.Data.Init<N, P, R, S>, unknown>(),
-    loss: new Observation<[N], Supervisor.Event.Data.Loss<N, P>, unknown>(),
-    exit: new Observation<[N], Supervisor.Event.Data.Exit<N, P, R, S>, unknown>(),
+  private events_?: {
+    readonly init: Observation<[N], Supervisor.Event.Data.Init<N, P, R, S>, unknown>;
+    readonly loss: Observation<[N], Supervisor.Event.Data.Loss<N, P>, unknown>;
+    readonly exit: Observation<[N], Supervisor.Event.Data.Exit<N, P, R, S>, unknown>;
   };
-  public readonly events: {
+  public get events(): {
     readonly init: Observer<[N], Supervisor.Event.Data.Init<N, P, R, S>, unknown>;
     readonly loss: Observer<[N], Supervisor.Event.Data.Loss<N, P>, unknown>;
     readonly exit: Observer<[N], Supervisor.Event.Data.Exit<N, P, R, S>, unknown>;
-  } = this.events_;
+  } {
+    return this.events_ ??= {
+      init: new Observation<[N], Supervisor.Event.Data.Init<N, P, R, S>, unknown>(),
+      loss: new Observation<[N], Supervisor.Event.Data.Loss<N, P>, unknown>(),
+      exit: new Observation<[N], Supervisor.Event.Data.Exit<N, P, R, S>, unknown>(),
+    };
+  }
   private readonly workers = new Map<N, Worker<N, P, R, S>>();
   private alive = true;
   private available = true;
@@ -219,7 +225,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       const name = typeof names === 'string'
         ? names
         : names[Symbol.iterator]().next().value!;
-      void this.events_.loss.emit([name], [name, param]);
+      void this.events_?.loss.emit([name], [name, param]);
       try {
         void callback(void 0 as any, new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A message overflowed.`));
       }
@@ -244,7 +250,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     name = name as N;
     assert(name !== void 0);
     if (result) return true;
-    void this.events_.loss.emit([name], [name, param]);
+    void this.events_?.loss.emit([name], [name, param]);
     return false;
   }
   public refs(name?: N): [N, Supervisor.Process.Regular<P, R, S>, S, (reason?: unknown) => boolean][] {
@@ -327,7 +333,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       void --len;
 
       if (result === void 0) {
-        void this.events_.loss.emit([name], [name, param]);
+        void this.events_?.loss.emit([name], [name, param]);
         try {
           void callback(void 0 as any, new Error(`Spica: Supervisor: A process has failed.`));
         }
@@ -406,7 +412,7 @@ class Worker<N extends string, P, R, S> {
     private readonly events: {
       readonly init: Publisher<[N], Supervisor.Event.Data.Init<N, P, R, S>, unknown>;
       readonly exit: Publisher<[N], Supervisor.Event.Data.Exit<N, P, R, S>, unknown>;
-    },
+    } | undefined,
     private readonly destructor_: () => void,
   ) {
     initiated && void this.init();
@@ -434,7 +440,7 @@ class Worker<N extends string, P, R, S> {
   private init(): void {
     assert(!this.initiated);
     this.initiated = true;
-    void this.events.init
+    void this.events?.init
       .emit([this.name], [this.name, this.process, this.state]);
     this.state = this.process.init(this.state, this.terminate);
   }
@@ -442,11 +448,11 @@ class Worker<N extends string, P, R, S> {
     assert(this.initiated);
     try {
       void this.process.exit(reason, this.state);
-      void this.events.exit
+      void this.events?.exit
         .emit([this.name], [this.name, this.process, this.state, reason]);
     }
     catch (reason_) {
-      void this.events.exit
+      void this.events?.exit
         .emit([this.name], [this.name, this.process, this.state, reason]);
       void this.sv.terminate(reason_);
     }
