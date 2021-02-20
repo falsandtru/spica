@@ -1,5 +1,5 @@
 import type { DeepImmutable, DeepRequired } from './type';
-import { Infinity, Object, Set, Map, WeakSet, setTimeout, Error } from './global';
+import { Infinity, Object, Set, Map, WeakSet, setTimeout, clearTimeout, Error } from './global';
 import { isFinite, ObjectFreeze } from './alias';
 import { Coroutine, CoroutineInterface, isCoroutine } from './coroutine';
 import { AtomicPromise } from './promise';
@@ -68,10 +68,11 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     assert(this.workers.size === 0);
     void ObjectFreeze(this.workers);
     while (this.messages.length > 0) {
-      const [names, param] = this.messages.shift()!;
+      const [names, param, , , timer] = this.messages.shift()!;
       const name = typeof names === 'string'
         ? names
         : names[Symbol.iterator]().next().value!;
+      timer && void clearTimeout(timer);
       void this.events_?.loss.emit([name], [name, param]);
     }
     assert(this.messages.length === 0);
@@ -212,6 +213,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
   public call(name: N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), param: P, callback: Supervisor.Callback<R> | number = this.settings.timeout, timeout = this.settings.timeout): AtomicPromise<R> | void {
     if (typeof callback !== 'function') return new AtomicPromise<R>((resolve, reject) =>
       void this.call(name, param, (result, err) => err ? reject(err) : resolve(result), callback));
+    void this.throwErrorIfNotAvailable();
     void this.messages.push([
       typeof name === 'string'
         ? name
@@ -219,9 +221,11 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       param,
       callback,
       Date.now() + timeout,
+      0,
     ]);
     while (this.messages.length > (this.available ? this.settings.size : 0)) {
-      const [names, param, callback] = this.messages.shift()!;
+      const [names, param, callback, , timer] = this.messages.shift()!;
+      timer && void clearTimeout(timer);
       const name = typeof names === 'string'
         ? names
         : names[Symbol.iterator]().next().value!;
@@ -233,12 +237,14 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
         void causeAsyncException(reason);
       }
     }
+    if (this.messages.length === 0) return;
     void this.throwErrorIfNotAvailable();
     void this.schedule();
     if (timeout > 0 && timeout !== Infinity) {
-      void setTimeout(() =>
+      assert(this.messages[this.messages.length - 1][4] === 0);
+      this.messages[this.messages.length - 1][4] = setTimeout(() =>
         void this.schedule()
-      , timeout + 3);
+      , timeout + 3) as any;
     }
   }
   public cast(name: N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), param: P, timeout = this.settings.timeout): boolean {
@@ -304,6 +310,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
   private scheduled = false;
   private schedule(): void {
     if (!this.available || this.scheduled || this.messages.length === 0) return;
+    this.scheduled = true;
     const p = new AtomicFuture(false);
     void p.finally(() => {
       this.scheduled = false;
@@ -311,16 +318,15 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     });
     void this.settings.scheduler.call(void 0, p.bind);
     this.settings.scheduler === global.requestAnimationFrame && void setTimeout(p.bind, 1000);
-    this.scheduled = true;
   }
-  private readonly messages: [N | NamePool<N>, P, Supervisor.Callback<R>, number][] = [];
+  private readonly messages: [N | NamePool<N>, P, Supervisor.Callback<R>, number, number][] = [];
   private deliver(): void {
     if (!this.available) return;
     assert(!this.scheduled);
     const since = Date.now();
     for (let i = 0, len = this.messages.length; this.available && i < len; ++i) {
       if (this.settings.resource - (Date.now() - since) <= 0) return void this.schedule();
-      const [names, param, callback, expiry] = this.messages[i];
+      const [names, param, callback, expiry, timer] = this.messages[i];
       let result: AtomicPromise<R> | undefined;
       let name!: N;
       for (name of typeof names === 'string' ? [names] : names) {
@@ -331,6 +337,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       void splice(this.messages, i, 1);
       void --i;
       void --len;
+      timer && void clearTimeout(timer);
 
       if (result === void 0) {
         void this.events_?.loss.emit([name], [name, param]);
