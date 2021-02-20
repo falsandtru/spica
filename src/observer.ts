@@ -19,8 +19,8 @@ export interface Publisher<N extends readonly unknown[], D, R> {
   reflect(this: Publisher<N, undefined, R>, namespace: Readonly<N | Inits<N>>, data?: D): R[];
   reflect(namespace: Readonly<N | Inits<N>>, data: D): R[];
 }
-export type Monitor<N extends readonly unknown[], D> = (data: D, namespace: Readonly<N>) => void;
-export type Subscriber<N extends readonly unknown[], D, R> = (data: D, namespace: Readonly<N>) => R;
+export type Monitor<N extends readonly unknown[], D> = (data: D, namespace: Readonly<N | Inits<N>>) => void;
+export type Subscriber<N extends readonly unknown[], D, R> = (data: D, namespace: Readonly<N | Inits<N>>) => R;
 
 class ListenerNode<N extends readonly unknown[], D, R> {
   constructor(
@@ -150,8 +150,8 @@ export class Observation<N extends readonly unknown[], D, R>
   private unrelaies = new WeakMap<Observer<N, D, unknown>, () => void>();
   public relay(source: Observer<N, D, unknown>): () => void {
     if (this.unrelaies.has(source)) return this.unrelaies.get(source)!;
-    const unbind = source.monitor([] as N | Inits<N>, (data, namespace) =>
-      void this.emit(namespace, data));
+    const unbind = source.monitor([] as Inits<N>, (data, namespace) =>
+      void this.emit(namespace as N, data));
     const unrelay = () => (
       void this.unrelaies.delete(source),
       void unbind());
