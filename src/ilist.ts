@@ -56,6 +56,7 @@ export class IList<K, V = undefined> {
       const index = this.head = this.cursor = head.prev.index;
       assert(items[index]);
       const garbage = items[index]!;
+      assert(garbage.index === this.index.get(garbage.key));
       this.index.take(garbage.key);
       this.index.set(key, index);
       items[index] = head.prev = head.prev.prev.next =
@@ -114,6 +115,7 @@ export class IList<K, V = undefined> {
     assert(this.length < 3 || item !== item.prev && item.prev !== item.next);
     --this.length;
     this.indexes.push(item.index);
+    assert(item.index === this.index.get(item.key));
     this.index.take(item.key);
     const { prev, next } = item;
     prev.next = next;
