@@ -34,18 +34,19 @@ function rnd16(): number {
     index = 0;
     assert(offset === digit);
   }
-  if (offset > 4) {
-    offset -= 4;
-    assert((buffer[index] >> offset & mask) >= 0);
-    assert((buffer[index] >> offset & mask) < 16);
-    return buffer[index] >> offset & mask;
-  }
-  else {
+  if (offset === 4) {
     assert(offset === 4);
     offset = digit;
     assert((buffer[index] & mask) >= 0);
     assert((buffer[index] & mask) < 16);
     return buffer[index++] & mask;
+  }
+  else {
+    assert(offset > 4);
+    offset -= 4;
+    assert((buffer[index] >> offset & mask) >= 0);
+    assert((buffer[index] >> offset & mask) < 16);
+    return buffer[index] >> offset & mask;
   }
 }
 

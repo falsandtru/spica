@@ -70,17 +70,20 @@ function random(len: 1 | 2 | 3 | 4 | 5 | 6): number {
     index = 0;
     assert(offset === digit);
   }
-  if (offset < len) {
+  if (offset === len) {
+    assert(offset === len);
     offset = digit;
-    ++index;
-    return random(len);
+    return buffer[index++] & masks[len];
   }
-  if (offset > len) {
+  else if (offset > len) {
+    assert(offset > len);
     offset -= len;
     return buffer[index] >> offset & masks[len];
   }
   else {
+    assert(offset < len);
     offset = digit;
-    return buffer[index++] & masks[len];
+    ++index;
+    return random(len);
   }
 }
