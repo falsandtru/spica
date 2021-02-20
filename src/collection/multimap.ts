@@ -14,17 +14,22 @@ export class MultiMap<K, V> implements IterableCollection<K, V> {
     return this.store.get(key)?.[0];
   }
   public set(key: K, val: V): this {
-    this.store.get(key)?.push(val) || this.store.set(key, [val]);
+    this.store.get(key)?.push(val) ?? this.store.set(key, [val]);
     return this;
   }
   public has(key: K): boolean {
-    return this.store.has(key);
+    return this.store.get(key)?.length! > 0;
   }
   public delete(key: K): boolean {
     return this.store.delete(key);
   }
-  public take(key: K, count: number): V[] {
-    return splice(this.store.get(key) || [], 0, count);
+  public take(key: K): V | undefined;
+  public take(key: K, count: number): V[];
+  public take(key: K, count?: number): V | undefined | V[] {
+    const vs = this.store.get(key) ?? [];
+    return count === void 0
+      ? splice(vs, 0, 1)[0]
+      : splice(vs, 0, count);
   }
   public ref(key: K): V[] {
     let vs = this.store.get(key);
