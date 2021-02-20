@@ -40,15 +40,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { LRU, LFU } = this.indexes;
 
     if (this.size === this.capacity) {
-      let key: K;
-      if (LFU.length > this.capacity * this.ratio / 100 || LFU.length === this.capacity) {
-        assert(LFU.length > 0);
-        key = LFU.pop()!;
-      }
-      else {
-        assert(LRU.length > 0);
-        key = LRU.pop()!;
-      }
+      const key = LFU.length === this.capacity || LFU.length > this.capacity * this.ratio / 100
+        ? LFU.pop()!
+        : LRU.pop()!;
       assert(this.store.has(key));
       if (this.settings.disposer) {
         const val = this.store.get(key)!;
