@@ -1,5 +1,5 @@
 import type { Inits, DeepImmutable, DeepRequired } from './type';
-import { Number, Map, WeakMap, Error } from './global';
+import { Number, Map, WeakSet, Error } from './global';
 import { extend } from './assign';
 import { push, splice } from './array';
 import { causeAsyncException } from './exception';
@@ -147,16 +147,13 @@ export class Observation<N extends readonly unknown[], D, R>
     assert(results);
     return results;
   }
-  private unrelaies = new WeakMap<Observer<N, D, unknown>, () => void>();
+  private relaies = new WeakSet<Observer<N, D, unknown>>();
   public relay(source: Observer<N, D, unknown>): () => void {
-    if (this.unrelaies.has(source)) return this.unrelaies.get(source)!;
-    const unbind = source.monitor([] as Inits<N>, (data, namespace) =>
+    assert(!this.relaies.has(source));
+    if (this.relaies.has(source)) throw new Error(`Spica: Observation: Relay source is already registered.`);
+    this.relaies.add(source);
+    return source.monitor([] as Inits<N>, (data, namespace) =>
       void this.emit(namespace as N, data));
-    const unrelay = () => (
-      void this.unrelaies.delete(source),
-      void unbind());
-    this.unrelaies.set(source, unrelay);
-    return unrelay;
   }
   public refs(namespace: Readonly<N | Inits<N>>): ListenerItem<N, D, R>[] {
     const node = this.seekNode(namespace, SeekMode.Breakable);
