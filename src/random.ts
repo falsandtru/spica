@@ -68,6 +68,7 @@ function random(len: 1 | 2 | 3 | 4 | 5 | 6): number {
   if (index === buffer.length) {
     crypto.getRandomValues(buffer);
     index = 0;
+    assert(offset === digit);
   }
   if (offset < len) {
     offset = digit;

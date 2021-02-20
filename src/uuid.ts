@@ -32,6 +32,7 @@ function rnd16(): number {
   if (index === buffer.length) {
     crypto.getRandomValues(buffer);
     index = 0;
+    assert(offset === digit);
   }
   if (offset > 4) {
     offset -= 4;
