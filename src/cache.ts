@@ -3,6 +3,7 @@ import { min } from './alias';
 import { IterableCollection } from './collection';
 import { extend } from './assign';
 import { indexOf, splice } from './array';
+import { tuple } from './tuple';
 
 // Dual Window Cache
 
@@ -127,20 +128,13 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     return this.store[Symbol.iterator]();
   }
   private store = new Map<K, V>();
-  private indexes: {
-    LRU: K[];
-    LFU: K[];
-  } = {
-    LRU: [],
-    LFU: [],
-  };
-  private stats: {
-    LRU: [number, number];
-    LFU: [number, number];
-    miss: number;
-  } = {
-    LRU: [0, 0],
-    LFU: [0, 0],
+  private indexes = {
+    LRU: [] as K[],
+    LFU: [] as K[],
+  } as const;
+  private stats = {
+    LRU: tuple(0, 0),
+    LFU: tuple(0, 0),
     miss: 0,
   };
   private ratio = 50;
