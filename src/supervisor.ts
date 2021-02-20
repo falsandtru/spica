@@ -26,7 +26,7 @@ export interface Supervisor<N extends string = string, P = undefined, R = P, S =
 }
 export abstract class Supervisor<N extends string, P = undefined, R = P, S = undefined> extends Coroutine<undefined, undefined, undefined> {
   private static instances_: Set<Supervisor<string, unknown, unknown, unknown>>;
-  private static get instances(): typeof Supervisor.instances_ {
+  private static get instances() {
     return this.hasOwnProperty('instances_')
       ? this.instances_
       : this.instances_ = new Set();
