@@ -1,5 +1,6 @@
 import { Monad } from './monad';
 import { AtomicPromise } from '../promise';
+import { noop } from '../noop';
 
 export class Either<a, b> extends Monad<b> {
   private readonly EITHER!: Left<a> | Right<b>;
@@ -54,7 +55,7 @@ export class Either<a, b> extends Monad<b> {
       const { value: m, done } = iter.next(val!);
       if (done) return m;
       const r = m.extract(
-        () => void 0,
+        noop,
         a => [a]);
       if (!r) return m;
       val = r[0];

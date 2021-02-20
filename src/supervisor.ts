@@ -10,6 +10,7 @@ import { extend } from './assign';
 import { tick } from './clock';
 import { sqid } from './sqid';
 import { causeAsyncException } from './exception';
+import { noop } from './noop';
 
 export interface SupervisorOptions {
   readonly name?: string;
@@ -102,7 +103,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     name: '',
     size: Infinity,
     timeout: Infinity,
-    destructor: (_: unknown) => void 0,
+    destructor: noop,
     scheduler: tick,
     resource: 10,
   };
@@ -165,7 +166,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
             AtomicPromise.resolve(iter.next(param))
               .then(({ value: reply, done }) =>
                 done && void kill() || [reply, state]),
-          exit: () => void 0
+          exit: noop,
         },
         state);
     }
@@ -181,7 +182,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
               done && kill();
               return [reply, state];
             },
-            exit: () => void 0
+            exit: noop,
           },
           state);
       }
@@ -190,7 +191,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
         {
           init: state => state,
           main: process,
-          exit: () => void 0
+          exit: noop,
         },
         state);
     }

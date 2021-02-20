@@ -1,5 +1,7 @@
 import { setTimeout } from './global';
 import { AtomicPromise } from './promise';
+import { noop } from './noop';
+
 export { tick } from './clock.tick';
 
 export const clock: Promise<undefined> = Promise.resolve(undefined);
@@ -16,7 +18,7 @@ export const never: AtomicPromise<never> = new class Never extends AtomicPromise
     return Never;
   }
   constructor() {
-    super(() => void 0);
+    super(noop);
   }
   public then() {
     return this;

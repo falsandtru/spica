@@ -5,6 +5,7 @@ import { Colistener } from './colistener';
 import { Cancellation } from './cancellation';
 import { Collection } from './collection';
 import { ReadonlyURL } from './url';
+import { noop } from './noop';
 
 export interface CofetchOptions {
   method?: string;
@@ -55,7 +56,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
         void this[internal].register(() =>
           xhr.readyState < 4 &&
           void xhr.abort());
-        return () => void 0;
+        return noop;
       });
       for await (const ev of listener) {
         assert(ev instanceof ProgressEvent);

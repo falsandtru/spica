@@ -1,5 +1,6 @@
 import { MonadPlus } from './monadplus';
 import { AtomicPromise } from '../promise';
+import { noop } from '../noop';
 
 export class Maybe<a> extends MonadPlus<a> {
   private readonly MAYBE!: Just<a> | Nothing;
@@ -57,7 +58,7 @@ export class Maybe<a> extends MonadPlus<a> {
       const { value: m, done } = iter.next(val!);
       if (done) return m;
       const r = m.extract(
-        () => void 0,
+        noop,
         a => [a]);
       if (!r) return m;
       val = r[0];

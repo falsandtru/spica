@@ -229,7 +229,7 @@ class Internal<T, R, S> {
     delay: true,
     size: -1,
     interval: 0,
-    resume: () => void 0,
+    resume: noop,
     trigger: void 0 as any,
   }, this.opts);
   public alive = true;

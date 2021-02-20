@@ -1,8 +1,9 @@
 import * as Monad from './either.impl';
+import { noop } from '../noop';
 
 export class Either<a, b> extends Monad.Either<a, b> {
   private constructor() {
-    super(() => void 0 as never);
+    super(noop as never);
   }
 }
 
