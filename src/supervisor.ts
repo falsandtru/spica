@@ -14,7 +14,7 @@ import { noop } from './noop';
 
 export interface SupervisorOptions {
   readonly name?: string;
-  readonly size?: number;
+  readonly capacity?: number;
   readonly timeout?: number;
   readonly destructor?: (reason: unknown) => void;
   readonly scheduler?: (cb: () => void) => void;
@@ -101,7 +101,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
   public readonly name: string;
   private readonly settings: DeepImmutable<DeepRequired<SupervisorOptions>> = {
     name: '',
-    size: Infinity,
+    capacity: Infinity,
     timeout: Infinity,
     destructor: noop,
     scheduler: tick,
@@ -234,7 +234,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       Date.now() + timeout,
       0,
     ]);
-    while (this.messages.length > (this.available ? this.settings.size : 0)) {
+    while (this.messages.length > (this.available ? this.settings.capacity : 0)) {
       const [names, param, callback, , timer] = this.messages.shift()!;
       timer && void clearTimeout(timer);
       const name = typeof names === 'string'

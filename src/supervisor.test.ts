@@ -386,7 +386,7 @@ describe('Unit: lib/supervisor', function () {
     it('overflow', function (done) {
       let cnt = 0;
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
-        size: 1
+        capacity: 1
       });
       sv.events.loss.once([''], ([n, p]) => {
         assert(n === '');
