@@ -6,39 +6,39 @@ import { Sequence } from './sequence';
 describe('Unit: lib/supervisor', function () {
   describe('Supervisor', function () {
     before(() => {
-      assert(Supervisor.count === 0);
-      assert(Supervisor.procs === 0);
+      assert(Supervisor.status.instances === 0);
+      assert(Supervisor.status.processes === 0);
     });
 
     afterEach(() => {
-      assert(Supervisor.count === 0);
-      assert(Supervisor.procs === 0);
+      assert(Supervisor.status.instances === 0);
+      assert(Supervisor.status.processes === 0);
     });
 
     it('extend', function (done) {
       class TestSupervisor extends Supervisor<string, number, number, number> {
       }
 
-      assert(Supervisor.count === 0);
-      assert(Supervisor.procs === 0);
-      assert(TestSupervisor.count === 0);
-      assert(TestSupervisor.procs === 0);
+      assert(Supervisor.status.instances === 0);
+      assert(Supervisor.status.processes === 0);
+      assert(TestSupervisor.status.instances === 0);
+      assert(TestSupervisor.status.processes === 0);
 
       const sv1 = new TestSupervisor();
-      assert(Supervisor.count === 0);
-      assert(Supervisor.procs === 0);
-      assert(TestSupervisor.count === 1);
-      assert(TestSupervisor.procs === 0);
+      assert(Supervisor.status.instances === 0);
+      assert(Supervisor.status.processes === 0);
+      assert(TestSupervisor.status.instances === 1);
+      assert(TestSupervisor.status.processes === 0);
 
       const sv2 = new class TestSupervisor extends Supervisor<string, number, number, number> {
       }();
-      assert(Supervisor.count === 0);
-      assert(Supervisor.procs === 0);
-      assert(TestSupervisor.count === 1);
-      assert(TestSupervisor.procs === 0);
+      assert(Supervisor.status.instances === 0);
+      assert(Supervisor.status.processes === 0);
+      assert(TestSupervisor.status.instances === 1);
+      assert(TestSupervisor.status.processes === 0);
 
-      assert(class extends TestSupervisor { }.count === 0);
-      assert(class extends TestSupervisor { }.procs === 0);
+      assert(class extends TestSupervisor { }.status.instances === 0);
+      assert(class extends TestSupervisor { }.status.processes === 0);
 
       const process: Supervisor.Process<number, number, number> = {
         init: (state) => state,
@@ -49,36 +49,36 @@ describe('Unit: lib/supervisor', function () {
       assert.deepStrictEqual(sv1.refs(), [
         ['', process, 0, kill]
       ]);
-      assert(Supervisor.count === 0);
-      assert(Supervisor.procs === 0);
-      assert(TestSupervisor.count === 1);
-      assert(TestSupervisor.procs === 1);
+      assert(Supervisor.status.instances === 0);
+      assert(Supervisor.status.processes === 0);
+      assert(TestSupervisor.status.instances === 1);
+      assert(TestSupervisor.status.processes === 1);
       sv1.kill('');
-      assert(Supervisor.count === 0);
-      assert(Supervisor.procs === 0);
-      assert(TestSupervisor.count === 1);
-      assert(TestSupervisor.procs === 0);
+      assert(Supervisor.status.instances === 0);
+      assert(Supervisor.status.processes === 0);
+      assert(TestSupervisor.status.instances === 1);
+      assert(TestSupervisor.status.processes === 0);
       sv1.terminate();
-      assert(Supervisor.count === 0);
-      assert(Supervisor.procs === 0);
-      assert(TestSupervisor.count === 0);
-      assert(TestSupervisor.procs === 0);
+      assert(Supervisor.status.instances === 0);
+      assert(Supervisor.status.processes === 0);
+      assert(TestSupervisor.status.instances === 0);
+      assert(TestSupervisor.status.processes === 0);
       sv2.terminate();
-      assert(Supervisor.count === 0);
-      assert(Supervisor.procs === 0);
-      assert(TestSupervisor.count === 0);
-      assert(TestSupervisor.procs === 0);
+      assert(Supervisor.status.instances === 0);
+      assert(Supervisor.status.processes === 0);
+      assert(TestSupervisor.status.instances === 0);
+      assert(TestSupervisor.status.processes === 0);
       done();
     });
 
     it('refs', function (done) {
       class TestSupervisor extends Supervisor<string, number, number, number> {
       }
-      assert(TestSupervisor.count === 0);
-      assert(TestSupervisor.procs === 0);
+      assert(TestSupervisor.status.instances === 0);
+      assert(TestSupervisor.status.processes === 0);
       const sv = new TestSupervisor();
-      assert(TestSupervisor.count === 1);
-      assert(TestSupervisor.procs === 0);
+      assert(TestSupervisor.status.instances === 1);
+      assert(TestSupervisor.status.processes === 0);
       const process: Supervisor.Process<number, number, number> = {
         init: (state) => state,
         main: (n, s) => [n, ++s],
@@ -88,14 +88,14 @@ describe('Unit: lib/supervisor', function () {
       assert.deepStrictEqual(sv.refs(), [
         ['', process, 0, kill]
       ]);
-      assert(TestSupervisor.count === 1);
-      assert(TestSupervisor.procs === 1);
+      assert(TestSupervisor.status.instances === 1);
+      assert(TestSupervisor.status.processes === 1);
       sv.kill('');
-      assert(TestSupervisor.count === 1);
-      assert(TestSupervisor.procs === 0);
+      assert(TestSupervisor.status.instances === 1);
+      assert(TestSupervisor.status.processes === 0);
       sv.terminate();
-      assert(TestSupervisor.count === 0);
-      assert(TestSupervisor.procs === 0);
+      assert(TestSupervisor.status.instances === 0);
+      assert(TestSupervisor.status.processes === 0);
       done();
     });
 
@@ -103,8 +103,8 @@ describe('Unit: lib/supervisor', function () {
       let cnt = 0;
       class TestSupervisor extends Supervisor<string, number, number, number> {
       }
-      assert(TestSupervisor.count === 0);
-      assert(TestSupervisor.procs === 0);
+      assert(TestSupervisor.status.instances === 0);
+      assert(TestSupervisor.status.processes === 0);
       const sv = new TestSupervisor({
         name: '',
         destructor: reason => {
@@ -114,8 +114,8 @@ describe('Unit: lib/supervisor', function () {
           assert.throws(() => sv.cast('', 0));
           assert.throws(() => sv.call('', 0, () => undefined));
           assert(sv.terminate() === false);
-          assert(TestSupervisor.count === 0);
-          assert(TestSupervisor.procs === 0);
+          assert(TestSupervisor.status.instances === 0);
+          assert(TestSupervisor.status.processes === 0);
           done();
         }
       });
@@ -123,7 +123,7 @@ describe('Unit: lib/supervisor', function () {
       assert(sv.name === '');
       sv.events.init
         .monitor([], ([name, process, state]) => {
-          assert(TestSupervisor.procs === 1);
+          assert(TestSupervisor.status.processes === 1);
           assert(cnt === 1 && ++cnt);
           assert(name === '');
           assert(process.init instanceof Function);
@@ -133,7 +133,7 @@ describe('Unit: lib/supervisor', function () {
         });
       sv.events.loss
         .monitor([], ([name, param]) => {
-          assert(TestSupervisor.procs === 0);
+          assert(TestSupervisor.status.processes === 0);
           assert(name === '');
           switch (cnt) {
             case 11:
@@ -148,7 +148,7 @@ describe('Unit: lib/supervisor', function () {
         });
       sv.events.exit
         .monitor([], ([name, process, state, reason]) => {
-          assert(TestSupervisor.procs === 0);
+          assert(TestSupervisor.status.processes === 0);
           assert(cnt === 9 && ++cnt);
           assert(name === '');
           assert(process.init instanceof Function);
@@ -159,13 +159,13 @@ describe('Unit: lib/supervisor', function () {
         });
       sv.register('', {
         init(state) {
-          assert(TestSupervisor.procs === 1);
+          assert(TestSupervisor.status.processes === 1);
           assert(cnt === 2 && ++cnt);
           assert(state === 0);
           return state;
         },
         main(n: number, state: number): [number, number] {
-          assert(TestSupervisor.procs === 1);
+          assert(TestSupervisor.status.processes === 1);
           switch (cnt) {
             case 3:
               assert(n === 2 && ++cnt);
@@ -182,14 +182,14 @@ describe('Unit: lib/supervisor', function () {
           return [-n, ++state];
         },
         exit(reason, state) {
-          assert(TestSupervisor.procs === 0);
+          assert(TestSupervisor.status.processes === 0);
           assert(cnt === 8 && ++cnt);
           assert(reason instanceof Error);
           assert(state === 2);
         }
       }, 0);
       assert(cnt === 0 && ++cnt);
-      sv.call('', 1, r => void assert(TestSupervisor.procs === 1) || void assert(r === -1) || assert(cnt === 6 && ++cnt));
+      sv.call('', 1, r => void assert(TestSupervisor.status.processes === 1) || void assert(r === -1) || assert(cnt === 6 && ++cnt));
       assert(sv.cast('', 2) === true);
       sv.call('', 3, (r, e) => void assert(r === undefined) || void assert(e instanceof Error) || assert(cnt === 10 && ++cnt));
       sv.call('', 4, (r, e) => void assert(r === undefined) || void assert(e instanceof Error) || void assert(cnt === 12 && ++cnt) || sv.terminate(), 100);
@@ -481,52 +481,52 @@ describe('Unit: lib/supervisor', function () {
     it('kill', function (done) {
       class TestSupervisor extends Supervisor<string, number, number, number> {
       }
-      assert(TestSupervisor.count === 0);
-      assert(TestSupervisor.procs === 0);
+      assert(TestSupervisor.status.instances === 0);
+      assert(TestSupervisor.status.processes === 0);
       const sv = new TestSupervisor({});
-      assert(TestSupervisor.count === 1);
-      assert(TestSupervisor.procs === 0);
+      assert(TestSupervisor.status.instances === 1);
+      assert(TestSupervisor.status.processes === 0);
       void sv.register(' ', () => [0, 0], 0);
-      assert(TestSupervisor.count === 1);
-      assert(TestSupervisor.procs === 1);
+      assert(TestSupervisor.status.instances === 1);
+      assert(TestSupervisor.status.processes === 1);
       assert(sv.kill('') === false);
-      assert(TestSupervisor.count === 1);
-      assert(TestSupervisor.procs === 1);
+      assert(TestSupervisor.status.instances === 1);
+      assert(TestSupervisor.status.processes === 1);
       assert(sv.kill(' ') === true);
-      assert(TestSupervisor.count === 1);
-      assert(TestSupervisor.procs === 0);
+      assert(TestSupervisor.status.instances === 1);
+      assert(TestSupervisor.status.processes === 0);
       assert(sv.terminate() === true);
-      assert(TestSupervisor.count === 0);
-      assert(TestSupervisor.procs === 0);
+      assert(TestSupervisor.status.instances === 0);
+      assert(TestSupervisor.status.processes === 0);
       done();
     });
 
     it('clear', function (done) {
       class TestSupervisor extends Supervisor<string, number, number, number> {
       }
-      assert(TestSupervisor.count === 0);
-      assert(TestSupervisor.procs === 0);
+      assert(TestSupervisor.status.instances === 0);
+      assert(TestSupervisor.status.processes === 0);
       const sv = new TestSupervisor({});
-      assert(TestSupervisor.count === 1);
-      assert(TestSupervisor.procs === 0);
+      assert(TestSupervisor.status.instances === 1);
+      assert(TestSupervisor.status.processes === 0);
       void sv.register('1', () => [0, 0], 0);
       void sv.register('2', () => [0, 0], 0);
-      assert(TestSupervisor.count === 1);
-      assert(TestSupervisor.procs === 2);
+      assert(TestSupervisor.status.instances === 1);
+      assert(TestSupervisor.status.processes === 2);
       sv.clear();
-      assert(TestSupervisor.count === 1);
-      assert(TestSupervisor.procs === 0);
+      assert(TestSupervisor.status.instances === 1);
+      assert(TestSupervisor.status.processes === 0);
       assert(sv.terminate() === true);
       sv.clear();
-      assert(TestSupervisor.count === 0);
-      assert(TestSupervisor.procs === 0);
+      assert(TestSupervisor.status.instances === 0);
+      assert(TestSupervisor.status.processes === 0);
       new TestSupervisor({});
       new TestSupervisor({});
-      assert(TestSupervisor.count === 2);
-      assert(TestSupervisor.procs === 0);
+      assert(TestSupervisor.status.instances === 2);
+      assert(TestSupervisor.status.processes === 0);
       TestSupervisor.clear();
-      assert(TestSupervisor.count === 0);
-      assert(TestSupervisor.procs === 0);
+      assert(TestSupervisor.status.instances === 0);
+      assert(TestSupervisor.status.processes === 0);
       done();
     });
 
@@ -534,8 +534,8 @@ describe('Unit: lib/supervisor', function () {
       let cnt = 0;
       class TestSupervisor extends Supervisor<string, number, number, number> {
       }
-      assert(TestSupervisor.count === 0);
-      assert(TestSupervisor.procs === 0);
+      assert(TestSupervisor.status.instances === 0);
+      assert(TestSupervisor.status.processes === 0);
       const sv = new TestSupervisor({
         destructor: reason => {
           assert(reason === undefined);
@@ -543,8 +543,8 @@ describe('Unit: lib/supervisor', function () {
           assert.throws(() => sv.cast('', 0));
           assert.throws(() => sv.call('', 0, () => undefined));
           assert(sv.terminate() === false);
-          assert(TestSupervisor.count === 0);
-          assert(TestSupervisor.procs === 0);
+          assert(TestSupervisor.status.instances === 0);
+          assert(TestSupervisor.status.processes === 0);
           ++cnt;
         }
       });
@@ -574,8 +574,8 @@ describe('Unit: lib/supervisor', function () {
       catch (reason) {
         assert(reason instanceof Error);
       }
-      assert(TestSupervisor.count === 0);
-      assert(TestSupervisor.procs === 0);
+      assert(TestSupervisor.status.instances === 0);
+      assert(TestSupervisor.status.processes === 0);
       done();
     });
 

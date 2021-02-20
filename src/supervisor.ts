@@ -31,14 +31,24 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       ? this.instances_
       : this.instances_ = new Set();
   }
-  public static get count(): number {
-    return this.instances.size;
-  }
-  public static get procs(): number {
-    return [...this.instances]
-      .reduce((acc, sv) =>
-        acc + sv.workers.size
-      , 0);
+  private static status_: {
+    readonly instances: number;
+    readonly processes: number;
+  };
+  public static get status() {
+    if (this.hasOwnProperty('status_')) return this.status_;
+    const { instances } = this;
+    return this.status_ = {
+      get instances(): number {
+        return instances.size;
+      },
+      get processes(): number {
+        return [...instances]
+          .reduce((acc, sv) =>
+            acc + sv.workers.size
+          , 0);
+      },
+    } as const;
   }
   public static clear(reason?: unknown): void {
     while (this.instances.size > 0) {
