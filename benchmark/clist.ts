@@ -1,5 +1,5 @@
 import { benchmark } from './benchmark';
-import { CList } from '../src/cont';
+import { CList } from '../src/list/cont';
 import { Array } from '../src/global';
 
 describe('Benchmark:', function () {
