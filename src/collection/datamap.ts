@@ -1,7 +1,6 @@
 import { IterableCollection } from '../collection';
 import { type } from '../type';
 import { memoize } from '../memoize';
-import { sqid } from '../sqid';
 
 export class DataMap<K, V> implements IterableCollection<K, V> {
   constructor(
@@ -87,4 +86,4 @@ function stringifyObject(obj: object): string {
   return `{\n${acc}}`;
 }
 
-const identify = memoize<object, number>(_ => +sqid(), new WeakMap());
+const identify = (counter => memoize<object, number>(() => ++counter, new WeakMap()))(0);
