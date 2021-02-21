@@ -1,4 +1,5 @@
 import { MultiMap } from './collection/multimap';
+import { indexOf, splice } from './array';
 
 // Indexed circular linked list
 
@@ -115,8 +116,18 @@ export class IList<K, V = undefined> {
     //assert(this.length < 3 || item !== item.prev && item.prev !== item.next);
     --this.length;
     this.empties.push(item.index);
-    assert(item.index === this.index.get(item.key));
-    this.index.take(item.key);
+    const indexes = this.index.ref(item.key);
+    assert(indexes.length > 0);
+    switch (item.index) {
+      case indexes[0]:
+        indexes.shift();
+        break;
+      case indexes[indexes.length - 1]:
+        indexes.pop();
+        break;
+      default:
+        splice(indexes, indexOf(indexes, item.index), 1);
+    }
     const { prev, next } = item;
     prev.next = next;
     next.prev = prev;
