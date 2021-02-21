@@ -200,7 +200,7 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
   ) {
     try {
       executor(
-        value => this[internal].resolve(value!),
+        value => this[internal].resolve(value),
         reason => this[internal].reject(reason));
     }
     catch (reason) {
@@ -210,7 +210,7 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
   public readonly [internal]: Internal<T> = new Internal();
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
     return new AtomicPromise((resolve, reject) =>
-      this[internal].then(onfulfilled, onrejected, resolve, reject));
+      this[internal].then(resolve, reject, onfulfilled, onrejected));
   }
   public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult> {
     return this.then(void 0, onrejected);
@@ -234,6 +234,19 @@ export class Internal<T> {
       };
       return this.resume();
     }
+    if (isAtomicPromiseLike(value)) {
+      const core: Internal<T> = value[internal];
+      switch (core.status.state) {
+        case State.fulfilled:
+        case State.rejected:
+          this.status = core.status;
+          return this.resume();
+        default:
+          return void core.then(
+            () => (this.status = core.status, this.resume()),
+            () => (this.status = core.status, this.resume()));
+      }
+    }
     this.status = {
       state: State.resolved,
       promise: value,
@@ -243,7 +256,7 @@ export class Internal<T> {
         assert(this.status.state === State.resolved);
         this.status = {
           state: State.fulfilled,
-          value: value,
+          value,
         };
         this.resume();
       },
@@ -251,7 +264,7 @@ export class Internal<T> {
         assert(this.status.state === State.resolved);
         this.status = {
           state: State.rejected,
-          reason: reason,
+          reason,
         };
         this.resume();
       });
@@ -260,17 +273,17 @@ export class Internal<T> {
     if (this.status.state !== State.pending) return;
     this.status = {
       state: State.rejected,
-      reason: reason,
+      reason,
     };
     return this.resume();
   }
   public fulfillReactions: [(value: unknown) => void, (value: unknown) => void, (reason: unknown) => void, ((param: unknown) => unknown) | undefined | null][] = [];
   public rejectReactions: [(value: unknown) => void, (reason: unknown) => void, (reason: unknown) => void, ((param: unknown) => unknown) | undefined | null][] = [];
   public then<TResult1, TResult2>(
-    onfulfilled: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null,
-    onrejected: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null,
     resolve: (value: TResult1 | TResult2 | PromiseLike<TResult1 | TResult2>) => void,
     reject: (reason: unknown) => void,
+    onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null,
+    onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null,
   ): void {
     const { status, fulfillReactions, rejectReactions } = this;
     switch (status.state) {

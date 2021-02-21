@@ -14,7 +14,6 @@ export class Future<T = undefined> implements Promise<T> {
       if (!core.isPending && !strict) return this;
       if (!core.isPending) throw new Error(`Spica: Future: Cannot rebind a value.`);
       core.resolve(value);
-      core.resume();
       return this;
     };
   }
@@ -25,7 +24,7 @@ export class Future<T = undefined> implements Promise<T> {
   };
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): Promise<TResult1 | TResult2> {
     return new ESPromise((resolve, reject) =>
-      this[internal].then(onfulfilled, onrejected, resolve, reject));
+      this[internal].then(resolve, reject, onfulfilled, onrejected));
   }
   public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): Promise<T | TResult> {
     return this.then(void 0, onrejected);
@@ -42,10 +41,10 @@ export class AtomicFuture<T = undefined> implements Future<T> {
   public readonly [Symbol.toStringTag] = 'Promise';
   constructor(strict: boolean = true) {
     this.bind = (value: T) => {
-      if (!this[internal].isPending && !strict) return this;
-      if (!this[internal].isPending) throw new Error(`Spica: AtomicFuture: Cannot rebind a value.`);
-      this[internal].resolve(value);
-      this[internal].resume();
+      const core = this[internal];
+      if (!core.isPending && !strict) return this;
+      if (!core.isPending) throw new Error(`Spica: AtomicFuture: Cannot rebind a value.`);
+      core.resolve(value);
       return this;
     };
   }
@@ -56,7 +55,7 @@ export class AtomicFuture<T = undefined> implements Future<T> {
   };
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
     return new AtomicPromise((resolve, reject) =>
-      this[internal].then(onfulfilled, onrejected, resolve, reject));
+      this[internal].then(resolve, reject, onfulfilled, onrejected));
   }
   public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult> {
     return this.then(void 0, onrejected);
