@@ -225,7 +225,6 @@ export class Internal<T> {
   public get isPending(): boolean {
     return this.status.state === State.pending;
   }
-  public reactable: boolean = true;
   public fulfillReactions: ((value: T) => void)[] = [];
   public rejectReactions: ((reason: unknown) => void)[] = [];
   public resolve(value: T | PromiseLike<T>): void {
@@ -319,7 +318,6 @@ export class Internal<T> {
     return this.resume();
   }
   public resume(): void {
-    if (!this.reactable) return;
     const { status, fulfillReactions, rejectReactions } = this;
     switch (status.state) {
       case State.pending:
@@ -344,12 +342,9 @@ export class Internal<T> {
     }
   }
   public react<T>(reactions: ((param: T) => void)[], param: T): void {
-    assert(this.reactable);
-    this.reactable = false;
     for (let i = 0; i < reactions.length; ++i) {
       reactions[i](param);
     }
-    this.reactable = true;
   }
 }
 
