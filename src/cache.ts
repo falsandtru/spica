@@ -2,7 +2,7 @@ import { Map } from './global';
 import { min } from './alias';
 import { IterableCollection } from './collection';
 import { extend } from './assign';
-import { IList } from './ilist';
+import { OList } from './olist';
 import { tuple } from './tuple';
 
 // Dual Window Cache
@@ -107,8 +107,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.nullish = false;
     this.ratio = 50;
     this.indexes = {
-      LRU: new IList(this.capacity),
-      LFU: new IList(this.capacity),
+      LRU: new OList(this.capacity),
+      LFU: new OList(this.capacity),
     };
     this.stats = {
       LRU: [0, 0],
@@ -131,8 +131,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   }
   private store = new Map<K, V>();
   private indexes = {
-    LRU: new IList<K>(this.capacity),
-    LFU: new IList<K>(this.capacity),
+    LRU: new OList<K>(this.capacity),
+    LFU: new OList<K>(this.capacity),
   } as const;
   private stats = {
     LRU: tuple(0, 0),

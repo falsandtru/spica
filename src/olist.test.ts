@@ -1,8 +1,8 @@
-import { IList } from './ilist';
+import { OList } from './olist';
 
-describe('Unit: lib/ilist', () => {
-  describe('IList', () => {
-    function inspect<K, V>(list: IList<K, V>) {
+describe('Unit: lib/olist', () => {
+  describe('OList', () => {
+    function inspect<K, V>(list: OList<K, V>) {
       return {
         items: [...list],
         array: list['items'].map(item => item && [item.key, item.value, item.index]),
@@ -13,7 +13,7 @@ describe('Unit: lib/ilist', () => {
     }
 
     it('put/delete 1', () => {
-      const list = new IList<number, undefined>(1);
+      const list = new OList<number, undefined>(1);
 
       assert.deepStrictEqual(inspect(list), {
         items: [],
@@ -99,7 +99,7 @@ describe('Unit: lib/ilist', () => {
     });
 
     it('put/delete 2', () => {
-      const list = new IList<number, undefined>(2);
+      const list = new OList<number, undefined>(2);
 
       assert(list.put(0) === false);
       assert.deepStrictEqual(inspect(list), {
@@ -184,7 +184,7 @@ describe('Unit: lib/ilist', () => {
     });
 
     it('put/delete 3', () => {
-      const list = new IList<number, undefined>(3);
+      const list = new OList<number, undefined>(3);
 
       assert(list.put(0) === false);
       assert.deepStrictEqual(inspect(list), {
@@ -299,7 +299,7 @@ describe('Unit: lib/ilist', () => {
     });
 
     it('update', () => {
-      const list = new IList<number, number>(3);
+      const list = new OList<number, number>(3);
 
       assert(list.put(0, ~0) === false);
       assert(list.put(1, ~1) === false);

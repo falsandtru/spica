@@ -2,9 +2,9 @@ import { MultiMap } from './collection/multimap';
 import { indexOf, splice } from './array';
 import { equal } from './compare';
 
-// Indexed circular linked list
+// Optimal indexed circular linked list
 
-export class IList<K, V = undefined> {
+export class OList<K, V = undefined> {
   constructor(
     private readonly capacity: number,
   ) {
@@ -16,7 +16,7 @@ export class IList<K, V = undefined> {
   private head = 0;
   private cursor = 0;
   public length = 0;
-  public add(this: IList<K, undefined>, key: K, value?: V): boolean;
+  public add(this: OList<K, undefined>, key: K, value?: V): boolean;
   public add(key: K, value: V): boolean;
   public add(key: K, value: V): boolean {
     const items = this.items;
@@ -72,7 +72,7 @@ export class IList<K, V = undefined> {
       return false;
     }
   }
-  public put(this: IList<K, undefined>, key: K, value?: V, index?: number): boolean;
+  public put(this: OList<K, undefined>, key: K, value?: V, index?: number): boolean;
   public put(key: K, value: V, index?: number): boolean;
   public put(key: K, value: V, index?: number): boolean {
     const item = this.seek(key, index);
@@ -227,6 +227,23 @@ export class IList<K, V = undefined> {
     this.insert(item, item.prev.index);
     if (item.next.index === this.head) {
       this.head = item.index;
+    }
+  }
+  public swap(index1: number, index2: number): void {
+    if (this.length <= 1) return;
+    const item1 = this.items[index1];
+    const item2 = this.items[index2];
+    if (!item1 || !item2) return;
+    const item3 = item2.next;
+    this.insert(item2, item1.index);
+    this.insert(item1, item3.index);
+    switch (this.head) {
+      case item1.index:
+        this.head = item2.index;
+        break;
+      case item2.index:
+        this.head = item1.index;
+        break;
     }
   }
 }
