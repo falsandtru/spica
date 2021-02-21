@@ -26,8 +26,6 @@ $ npm i spica
 - uncurry
 - flip
 - tuple
-- List
-- MList
 - HList
 - IList
 - OList

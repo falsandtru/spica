@@ -1,5 +1,5 @@
 import { benchmark } from './benchmark';
-import { MList } from '../';
+import { MList } from '../src/list/list';
 import { Array } from '../src/global';
 
 describe('Benchmark:', function () {

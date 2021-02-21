@@ -1,4 +1,4 @@
-import { MList } from './list';
+import { MList } from './list/list';
 import { setTimeout } from './global';
 
 export function throttle<T>(interval: number, callback: (last: T, buffer: MList<T>) => void): (arg: T) => void {

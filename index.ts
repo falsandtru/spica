@@ -11,7 +11,6 @@ export { Either, Left, Right } from './src/either';
 export { curry } from './src/curry';
 export { flip } from './src/flip';
 export { tuple } from './src/tuple';
-export { List, MList } from './src/list';
 export { HList } from './src/hlist';
 export { IList } from './src/ilist';
 export { OList } from './src/olist';

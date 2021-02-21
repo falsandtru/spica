@@ -1,5 +1,4 @@
 import { List, MList } from './list';
-import { Infinity } from './global';
 
 describe('Unit: lib/list', () => {
   describe('List', () => {
