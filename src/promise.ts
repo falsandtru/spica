@@ -225,8 +225,6 @@ export class Internal<T> {
   public get isPending(): boolean {
     return this.status.state === State.pending;
   }
-  public fulfillReactions: ((value: T) => void)[] = [];
-  public rejectReactions: ((reason: unknown) => void)[] = [];
   public resolve(value: T | PromiseLike<T>): void {
     if (this.status.state !== State.pending) return;
     if (!isPromiseLike(value)) {
@@ -266,6 +264,8 @@ export class Internal<T> {
     };
     return this.resume();
   }
+  public fulfillReactions: [(value: unknown) => void, (value: unknown) => void, (reason: unknown) => void, ((param: unknown) => unknown) | undefined | null][] = [];
+  public rejectReactions: [(value: unknown) => void, (reason: unknown) => void, (reason: unknown) => void, ((param: unknown) => unknown) | undefined | null][] = [];
   public then<TResult1, TResult2>(
     onfulfilled: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null,
     onrejected: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null,
@@ -295,27 +295,18 @@ export class Internal<T> {
           return reject(reason);
         }
     }
-    fulfillReactions.push(value => {
-      try {
-        onfulfilled
-          ? resolve(onfulfilled(value))
-          : resolve(value as any);
-      }
-      catch (reason) {
-        reject(reason);
-      }
-    });
-    rejectReactions.push(reason => {
-      try {
-        onrejected
-          ? resolve(onrejected(reason))
-          : reject(reason);
-      }
-      catch (reason) {
-        reject(reason);
-      }
-    });
-    return this.resume();
+    fulfillReactions.push([
+      resolve,
+      resolve,
+      reject,
+      onfulfilled,
+    ]);
+    rejectReactions.push([
+      resolve,
+      reject,
+      reject,
+      onrejected,
+    ]);
   }
   public resume(): void {
     const { status, fulfillReactions, rejectReactions } = this;
@@ -341,9 +332,17 @@ export class Internal<T> {
         return;
     }
   }
-  public react<T>(reactions: ((param: T) => void)[], param: T): void {
+  public react<T>(reactions: this['fulfillReactions'], param: T): void {
     for (let i = 0; i < reactions.length; ++i) {
-      reactions[i](param);
+      const reaction = reactions[i];
+      try {
+        reaction[3]
+          ? reaction[0](reaction[3](param))
+          : reaction[1](param);
+      }
+      catch (reason) {
+        reaction[2](reason);
+      }
     }
   }
 }
