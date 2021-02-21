@@ -249,6 +249,8 @@ describe('Unit: lib/cache', () => {
           hitdwc = 0;
         }
       }
+      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['store'].size);
+      assert(dwc['store'].size <= capacity);
       console.debug('LRU hit rate even 10', hitlru * 100 / repeat);
       console.debug('LFU hit rate even 10', hitlfu * 100 / repeat);
       console.debug('DWC hit rate even 10', hitdwc * 100 / repeat);
@@ -284,6 +286,8 @@ describe('Unit: lib/cache', () => {
           hitdwc = 0;
         }
       }
+      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['store'].size);
+      assert(dwc['store'].size <= capacity);
       console.debug('LRU hit rate uneven 10', hitlru * 100 / repeat);
       console.debug('LFU hit rate uneven 10', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 10', hitdwc * 100 / repeat);
@@ -318,6 +322,8 @@ describe('Unit: lib/cache', () => {
           hitdwc = 0;
         }
       }
+      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['store'].size);
+      assert(dwc['store'].size <= capacity);
       console.debug('LRU hit rate even 100', hitlru * 100 / repeat);
       console.debug('LFU hit rate even 100', hitlfu * 100 / repeat);
       console.debug('DWC hit rate even 100', hitdwc * 100 / repeat);
@@ -355,6 +361,8 @@ describe('Unit: lib/cache', () => {
           hitdwc = 0;
         }
       }
+      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['store'].size);
+      assert(dwc['store'].size <= capacity);
       console.debug('LRU hit rate uneven 100', hitlru * 100 / repeat);
       console.debug('LFU hit rate uneven 100', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 100', hitdwc * 100 / repeat);
@@ -393,6 +401,8 @@ describe('Unit: lib/cache', () => {
           hitdwc = 0;
         }
       }
+      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['store'].size);
+      assert(dwc['store'].size <= capacity);
       console.debug('LRU hit rate uneven 100 transitive distribution', hitlru * 100 / repeat);
       console.debug('LFU hit rate uneven 100 transitive distribution', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 100 transitive distribution', hitdwc * 100 / repeat);
@@ -436,6 +446,8 @@ describe('Unit: lib/cache', () => {
           hitdwc = 0;
         }
       }
+      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['store'].size);
+      assert(dwc['store'].size <= capacity);
       console.debug('LRU hit rate uneven 100 transitive bias', hitlru * 100 / repeat);
       console.debug('LFU hit rate uneven 100 transitive bias', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 100 transitive bias', hitdwc * 100 / repeat);
