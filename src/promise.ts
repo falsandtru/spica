@@ -1,6 +1,5 @@
 import { Array } from './global';
 import { isArray } from './alias';
-import { splice } from './array';
 
 const enum State {
   pending,
@@ -227,9 +226,8 @@ export class Internal<T> {
     return this.status.state === State.pending;
   }
   public reactable: boolean = true;
-  public readonly fulfillReactions: ((value: T) => void)[] = [];
-  public readonly rejectReactions: ((reason: unknown) => void)[] = [];
-  public isHandled: boolean = false;
+  public fulfillReactions: ((value: T) => void)[] = [];
+  public rejectReactions: ((reason: unknown) => void)[] = [];
   public resolve(value: T | PromiseLike<T>): void {
     if (this.status.state !== State.pending) return;
     if (!isPromiseLike(value)) {
@@ -328,36 +326,28 @@ export class Internal<T> {
       case State.resolved:
         return;
       case State.fulfilled:
-        if (this.isHandled && rejectReactions.length > 0) {
-          splice(rejectReactions, 0);
+        if (rejectReactions.length > 0) {
+          this.rejectReactions = [];
         }
         if (fulfillReactions.length === 0) return;
-        this.isHandled = true;
         this.react(fulfillReactions, status.value);
+        this.fulfillReactions = [];
         return;
       case State.rejected:
-        if (this.isHandled && fulfillReactions.length > 0) {
-          splice(fulfillReactions, 0);
+        if (fulfillReactions.length > 0) {
+          this.fulfillReactions = [];
         }
         if (rejectReactions.length === 0) return;
-        this.isHandled = true;
         this.react(rejectReactions, status.reason);
+        this.rejectReactions = [];
         return;
     }
   }
   public react<T>(reactions: ((param: T) => void)[], param: T): void {
     assert(this.reactable);
     this.reactable = false;
-    if (reactions.length < 5) {
-      while (reactions.length > 0) {
-        reactions.shift()!(param);
-      }
-    }
-    else {
-      for (let i = 0; i < reactions.length; ++i) {
-        reactions[i](param);
-      }
-      splice(reactions, 0);
+    for (let i = 0; i < reactions.length; ++i) {
+      reactions[i](param);
     }
     this.reactable = true;
   }
