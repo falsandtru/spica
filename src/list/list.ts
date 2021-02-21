@@ -9,21 +9,18 @@ export function List<T>(...values: T[]): List<T> {
 }
 
 function Nil<T>(): List<T> {
-  return new Cons<never>(void 0 as never, void 0 as never);
+  return new Cons<never>(void 0 as never, void 0 as never, 0);
 }
 // Don't extend any class for performance.
 class Cons<T> {
-  private append(value: T): List<T> {
-    assert(!this.tail);
-    return this.replaceWith(value, List()).tail;
-  }
   constructor(
     public readonly head: T,
     public readonly tail: List<T>,
+    public readonly length: number,
   ) {
   }
   public add(value: T): List<T> {
-    return new Cons(value, this);
+    return new Cons(value, this, this.length + 1);
   }
   public foldl<U>(f: (acc: U, value: T) => U, acc: U): U {
     for (let node: List<T> = this; node.tail; node = node.tail) {
@@ -37,24 +34,8 @@ class Cons<T> {
     }
     return acc;
   }
-  public map<U>(f: (value: T) => U): List<U> {
-    const node = List<U>();
-    this.foldl((acc, value) => acc.append(f(value)), node);
-    return node;
-  }
-  private replaceWith(head: T, tail: List<T>): List<T> {
-    assert(tail !== this);
-    // @ts-ignore
-    this.head = head;
-    // @ts-ignore
-    this.tail = tail;
-    return this;
-  }
   public reverse(): List<T> {
     return this.foldl((acc, value) => acc.add(value), List());
-  }
-  public get length(): number {
-    return this.foldl(acc => acc + 1, 0);
   }
   public *[Symbol.iterator](): IterableIterator<T> {
     for (let node: List<T> = this; node.tail; node = node.tail) {
@@ -127,13 +108,6 @@ class MCons<T> {
   }
   public clear(): MList<T> {
     return this.replaceWith(void 0 as never, void 0 as never);
-  }
-  public freeze(): List<T> {
-    const first = List<T>();
-    for (let last = first, tail: MList<T> = this; tail.tail; tail = tail.tail) {
-      last = last['append'](tail.head);
-    }
-    return first;
   }
   constructor(
     public readonly head: T,

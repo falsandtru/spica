@@ -22,12 +22,6 @@ describe('Unit: lib/list', () => {
       assert(List(0, 1).tail.head === 1);
     });
 
-    it('map', () => {
-      assert.deepStrictEqual([...List().map(v => v)], []);
-      assert.deepStrictEqual([...List(0).map(v => ++v)], [1]);
-      assert.deepStrictEqual([...List(0, 1).map(v => ++v)], [1, 2]);
-    });
-
     it('reverse', () => {
       assert.deepStrictEqual([...List().reverse()], []);
       assert.deepStrictEqual([...List(0).reverse()], [0]);
@@ -162,12 +156,6 @@ describe('Unit: lib/list', () => {
       assert.deepStrictEqual([...list.convert(v => ++v)], [1, 2]);
       assert.deepStrictEqual([...list], [1, 2]);
       assert(list === list.convert(v => v));
-    });
-
-    it('freeze', () => {
-      assert.deepStrictEqual([...MList().freeze()], []);
-      assert.deepStrictEqual([...MList(0).freeze()], [0]);
-      assert.deepStrictEqual([...MList(0, 1).freeze()], [0, 1]);
     });
 
   });
