@@ -200,8 +200,8 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
   ) {
     try {
       executor(
-        value => this[internal].resolve(value),
-        reason => this[internal].reject(reason));
+        value => void this[internal].resolve(value),
+        reason => void this[internal].reject(reason));
     }
     catch (reason) {
       this[internal].reject(reason);
@@ -242,7 +242,7 @@ export class Internal<T> {
           this.status = core.status;
           return this.resume();
         default:
-          return void core.then(
+          return core.then(
             () => (this.status = core.status, this.resume()),
             () => (this.status = core.status, this.resume()));
       }
