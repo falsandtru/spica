@@ -297,29 +297,28 @@ export class Internal<T> {
         catch (reason) {
           return reject(reason);
         }
-      default:
-        fulfillReactions.push(value => {
-          try {
-            onfulfilled
-              ? resolve(onfulfilled(value))
-              : resolve(value as any);
-          }
-          catch (reason) {
-            reject(reason);
-          }
-        });
-        rejectReactions.push(reason => {
-          try {
-            onrejected
-              ? resolve(onrejected(reason))
-              : reject(reason);
-          }
-          catch (reason) {
-            reject(reason);
-          }
-        });
-        return this.resume();
     }
+    fulfillReactions.push(value => {
+      try {
+        onfulfilled
+          ? resolve(onfulfilled(value))
+          : resolve(value as any);
+      }
+      catch (reason) {
+        reject(reason);
+      }
+    });
+    rejectReactions.push(reason => {
+      try {
+        onrejected
+          ? resolve(onrejected(reason))
+          : reject(reason);
+      }
+      catch (reason) {
+        reject(reason);
+      }
+    });
+    return this.resume();
   }
   public resume(): void {
     if (!this.reactable) return;
@@ -366,7 +365,7 @@ export class Internal<T> {
 
 export function isPromiseLike(value: any): value is PromiseLike<any> {
   return value !== null && typeof value === 'object'
-      && 'then' in value && typeof value.then === 'function';
+      && typeof value.then === 'function';
 }
 
 function isAtomicPromiseLike(value: any): value is AtomicPromiseLike<any> {
