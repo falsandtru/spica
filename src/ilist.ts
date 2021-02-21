@@ -1,5 +1,6 @@
 import { MultiMap } from './collection/multimap';
 import { indexOf, splice } from './array';
+import { equal } from './compare';
 
 // Indexed circular linked list
 
@@ -179,14 +180,13 @@ export class IList<K, V = undefined> {
     return;
   }
   private seek(key: K, cursor = this.cursor): Item<K, V> | undefined {
-    const isNaN = key !== key;
     let item: Item<K, V> | undefined;
     item = this.items[cursor = cursor < 0 ? this.head : cursor];
     if (!item) return;
-    if (isNaN ? item.key !== item.key : item.key === key) return this.cursor = cursor, item;
+    if (equal(item.key, key)) return this.cursor = cursor, item;
     item = this.items[cursor = this.index.get(key) ?? this.capacity];
     if (!item) return;
-    if (isNaN ? item.key !== item.key : item.key === key) return this.cursor = cursor, item;
+    if (equal(item.key, key)) return this.cursor = cursor, item;
   }
   private insert(item: Item<K, V>, before: number): void {
     if (item.index === before) return;
