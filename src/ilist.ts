@@ -9,8 +9,8 @@ export class IList<K, V = undefined> {
     assert(capacity > 0);
   }
   private items: (Item<K, V> | undefined)[] = [];
+  private empties: number[] = [];
   private index = new MultiMap<K, number>();
-  private indexes: number[] = [];
   private head = 0;
   private cursor = 0;
   public length = 0;
@@ -22,8 +22,8 @@ export class IList<K, V = undefined> {
     assert(this.length === 0 ? !head : head);
     if (!head) {
       assert(this.length === 0);
-      const index = this.head = this.cursor = this.indexes.length > 0
-        ? this.indexes.shift()!
+      const index = this.head = this.cursor = this.empties.length > 0
+        ? this.empties.shift()!
         : this.length;
       //assert(!items[index]);
       this.length++;
@@ -36,8 +36,8 @@ export class IList<K, V = undefined> {
     }
     assert(head);
     if (this.length < this.capacity) {
-      const index = this.head = this.cursor = this.indexes.length > 0
-        ? this.indexes.shift()!
+      const index = this.head = this.cursor = this.empties.length > 0
+        ? this.empties.shift()!
         : this.length;
       //assert(!items[index]);
       this.length++;
@@ -52,7 +52,7 @@ export class IList<K, V = undefined> {
     }
     else {
       assert(this.length === this.capacity);
-      assert(this.indexes.length === 0);
+      assert(this.empties.length === 0);
       const index = this.head = this.cursor = head.prev.index;
       //assert(items[index]);
       const garbage = items[index]!;
@@ -114,7 +114,7 @@ export class IList<K, V = undefined> {
     //assert(this.length !== 2 || item !== item.prev && item.prev === item.next);
     //assert(this.length < 3 || item !== item.prev && item.prev !== item.next);
     --this.length;
-    this.indexes.push(item.index);
+    this.empties.push(item.index);
     assert(item.index === this.index.get(item.key));
     this.index.take(item.key);
     const { prev, next } = item;
