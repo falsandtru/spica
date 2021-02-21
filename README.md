@@ -12,20 +12,15 @@ $ npm i spica
 
 ## APIs
 
+- global
 - Supervisor
 - Coroutine, Coaggregator, Copropagator, Colistener, cofetch
 - Channel
 - select
+- Observer
 - AtomicPromise
 - Cancellation
-- Observer
-- Sequence
-- Maybe, Just, Nothing
-- Either, Left, Right
-- curry
-- uncurry
-- flip
-- tuple
+- Cache
 - HList
 - IList
 - OList
@@ -33,7 +28,13 @@ $ npm i spica
 - DataMap
 - MultiMap
 - AttrMap
-- Cache
+- Maybe, Just, Nothing
+- Either, Left, Right
+- Sequence
+- curry
+- uncurry
+- flip
+- tuple
 - tick
 - throttle, debounce
 - uuid
@@ -43,7 +44,6 @@ $ npm i spica
 - extend
 - concat
 - sort
-- global
 
 ## Browsers
 
