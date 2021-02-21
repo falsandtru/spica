@@ -356,8 +356,6 @@ export class Internal<T> {
       catch (reason) {
         reaction[2](reason);
       }
-      // @ts-expect-error
-      reactions[i] = void 0;
     }
   }
 }
