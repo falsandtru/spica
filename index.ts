@@ -14,6 +14,7 @@ export { tuple } from './src/tuple';
 export { HList } from './src/hlist';
 export { IList } from './src/ilist';
 export { OList } from './src/olist';
+export { Heap } from './src/heap';
 export { AtomicPromise } from './src/promise';
 export { Future, AtomicFuture } from './src/future';
 export { Coroutine } from './src/coroutine';

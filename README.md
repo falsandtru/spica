@@ -29,6 +29,7 @@ $ npm i spica
 - HList
 - IList
 - OList
+- Heap
 - DataMap
 - MultiMap
 - AttrMap
