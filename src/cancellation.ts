@@ -3,8 +3,8 @@ import { once } from './function';
 import { noop } from './noop';
 import { AtomicPromise } from './promise';
 import { causeAsyncException } from './exception';
-import { Maybe, Just, Nothing } from './monad/maybe';
-import { Either, Left, Right } from './monad/either';
+import { Maybe, Just, Nothing } from './maybe';
+import { Either, Left, Right } from './either';
 
 export interface Canceller<L = undefined> {
   readonly cancel: {
