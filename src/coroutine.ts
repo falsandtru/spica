@@ -349,7 +349,7 @@ class BroadcastChannel<T> {
     while (consumers.length > 0) {
       consumers.shift()!.bind(msg);
     }
-    return BroadcastChannel.success;
+    return AtomicPromise.resolve();
   }
   public take(): AtomicPromise<T> {
     if (!this.alive) return BroadcastChannel.fail();
@@ -359,7 +359,6 @@ class BroadcastChannel<T> {
   }
 }
 namespace BroadcastChannel {
-  export const success = AtomicPromise.resolve();
   export const fail = () => AtomicPromise.reject(new Error('Spica: Channel: Closed.'));
   export class Internal<T> {
     public alive: boolean = true;

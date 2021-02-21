@@ -1,7 +1,6 @@
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future';
 
-const success = AtomicPromise.resolve();
 const fail = () => AtomicPromise.reject(new Error('Spica: Channel: Closed.'));
 
 const internal = Symbol.for('spica/channel::internal');
@@ -52,7 +51,7 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
         consumers.length > 0 && consumers.shift()!.bind(buffer.shift()!)
         assert(buffer.length <= capacity);
         assert(buffer.length > 0 ? consumers.length === 0 : true);
-        return success;
+        return AtomicPromise.resolve();
       default:
         assert(buffer.length === capacity);
         assert(consumers.length === 0);
