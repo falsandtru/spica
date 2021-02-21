@@ -118,6 +118,7 @@ export class IList<K, V = undefined> {
     this.empties.push(item.index);
     const indexes = this.index.ref(item.key);
     assert(indexes.length > 0);
+    assert(indexes.includes(item.index));
     switch (item.index) {
       case indexes[0]:
         indexes.shift();
