@@ -151,9 +151,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const ratio = this.ratio;
     const step = 1;
     // LFUに収束させる
-    // 小さすぎるLRUのために非効率にならないようにする
     // なぜかLFUとLRUを広く往復させないとヒットレートが上がらない
-    if (ratio < 90 && rateF > rateR * 1.2) {
+    if (ratio < 100 && rateF > rateR * 1.2) {
       this.ratio += step;
     }
     // LRUに収束させない
