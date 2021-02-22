@@ -152,14 +152,14 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const step = 1;
     // LFUに収束させる
     // なぜかLFUとLRUを広く往復させないとヒットレートが上がらない
-    if (ratio < 100 && rateF > rateR * 1.2) {
+    if (ratio < 100 && rateF > rateR * 1.1) {
       this.ratio += step;
     }
     // LRUに収束させない
     // LFUと半々で均等分布においてLRUのみと同等効率
     // これ以下に下げても(LRUを50%超にしても)均等分布ですら効率が悪化する
     else
-    if (ratio > 50 && rateR > rateF * 1.2) {
+    if (ratio > 50 && rateR > rateF * 1.1) {
       //console.log(this.ratio);
       this.ratio -= step;
     }
