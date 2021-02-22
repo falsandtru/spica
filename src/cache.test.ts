@@ -452,7 +452,7 @@ describe('Unit: lib/cache', () => {
       console.debug('LFU hit rate uneven 100 transitive bias', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 100 transitive bias', hitdwc * 100 / repeat);
       console.debug('DWC / LRU hit rate ratio uneven 100 transitive bias', `${hitdwc / hitlru * 100 | 0}%`);
-      assert(hitdwc / hitlru * 100 > 80);
+      assert(hitdwc / hitlru * 100 > 90);
     });
 
   });

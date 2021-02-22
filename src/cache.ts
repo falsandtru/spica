@@ -172,9 +172,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         this.ratio = 50;
       }
       // 推移的アクセスでLRUを拡大
-      // 小さいキャッシュサイズで誤差が大きく不安定になりやすい
       else
-      if (ratio > 10 && miss > 5 && this.indexes.LRU.length < miss * 5) {
+      if (ratio > 10 && miss * 20 > this.indexes.LRU.length) {
         this.ratio -= step;
       }
       // 自力でLFUを回復できないので補助
