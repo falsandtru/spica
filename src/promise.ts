@@ -277,7 +277,7 @@ export class Internal<T> {
     };
     return this.resume();
   }
-  public fulfillReactions: [(value: unknown) => void, (value: unknown) => void, (reason: unknown) => void, ((param: unknown) => unknown) | undefined | null][] = [];
+  public fulfillReactions: [(value: unknown) => void, (reason: unknown) => void, (value: unknown) => void, ((param: unknown) => unknown) | undefined | null][] = [];
   public rejectReactions: [(value: unknown) => void, (reason: unknown) => void, (reason: unknown) => void, ((param: unknown) => unknown) | undefined | null][] = [];
   public then<TResult1, TResult2>(
     resolve: (value: TResult1 | TResult2 | PromiseLike<TResult1 | TResult2>) => void,
@@ -289,29 +289,15 @@ export class Internal<T> {
     switch (status.state) {
       case State.fulfilled:
         if (fulfillReactions.length > 0) break;
-        try {
-          return onfulfilled
-            ? resolve(onfulfilled(status.value))
-            : resolve(status.value as any);
-        }
-        catch (reason) {
-          return reject(reason);
-        }
+        return this.call(resolve, reject, resolve, onfulfilled, status.value);
       case State.rejected:
         if (rejectReactions.length > 0) break;
-        try {
-          return onrejected
-            ? resolve(onrejected(status.reason))
-            : reject(status.reason);
-        }
-        catch (reason) {
-          return reject(reason);
-        }
+        return this.call(resolve, reject, reject, onrejected, status.reason);
     }
     fulfillReactions.push([
       resolve,
-      resolve,
       reject,
+      resolve,
       onfulfilled,
     ]);
     rejectReactions.push([
@@ -348,14 +334,28 @@ export class Internal<T> {
   public react(reactions: this['fulfillReactions'], param: unknown): void {
     for (let i = 0; i < reactions.length; ++i) {
       const reaction = reactions[i];
-      try {
-        reaction[3]
-          ? reaction[0]((void 0, reaction[3])(param))
-          : reaction[1](param);
-      }
-      catch (reason) {
-        reaction[2](reason);
-      }
+      this.call(
+        reaction[0],
+        reaction[1],
+        reaction[2],
+        reaction[3],
+        param);
+    }
+  }
+  public call(
+    resolve: (value: unknown) => void,
+    reject: (reason: unknown) => void,
+    cont: (value: unknown) => void,
+    callback: ((param: unknown) => unknown) | undefined | null,
+    param: unknown,
+  ): void {
+    assert([resolve, reject].includes(cont));
+    if (!callback) return cont(param);
+    try {
+      resolve(callback(param));
+    }
+    catch (reason) {
+      reject(reason);
     }
   }
 }
