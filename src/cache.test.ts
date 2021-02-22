@@ -254,8 +254,8 @@ describe('Unit: lib/cache', () => {
       console.debug('LRU hit rate even 10', hitlru * 100 / repeat);
       console.debug('LFU hit rate even 10', hitlfu * 100 / repeat);
       console.debug('DWC hit rate even 10', hitdwc * 100 / repeat);
-      console.debug('DWC vs LRU even 10', hitdwc * 100 / repeat - hitlru * 100 / repeat | 0);
-      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > -0.2);
+      console.debug('DWC / LRU hit rate ratio even 10', `${hitdwc / hitlru * 100 | 0}%`);
+      assert(hitdwc / hitlru * 100 > 95);
     });
 
     it('rate uneven 10', function () {
@@ -291,8 +291,8 @@ describe('Unit: lib/cache', () => {
       console.debug('LRU hit rate uneven 10', hitlru * 100 / repeat);
       console.debug('LFU hit rate uneven 10', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 10', hitdwc * 100 / repeat);
-      console.debug('DWC vs LRU uneven 10', hitdwc * 100 / repeat - hitlru * 100 / repeat | 0);
-      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 13);
+      console.debug('DWC / LRU hit rate ratio uneven 10', `${hitdwc / hitlru * 100 | 0}%`);
+      assert(hitdwc / hitlru * 100 > 170);
     });
 
     it('rate even 100', function () {
@@ -327,8 +327,8 @@ describe('Unit: lib/cache', () => {
       console.debug('LRU hit rate even 100', hitlru * 100 / repeat);
       console.debug('LFU hit rate even 100', hitlfu * 100 / repeat);
       console.debug('DWC hit rate even 100', hitdwc * 100 / repeat);
-      console.debug('DWC vs LRU even 100', hitdwc * 100 / repeat - hitlru * 100 / repeat | 0);
-      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > -0.2);
+      console.debug('DWC / LRU hit rate ratio even 100', `${hitdwc / hitlru * 100 | 0}%`);
+      assert(hitdwc / hitlru * 100 > 100);
     });
 
     it('rate uneven 100', function () {
@@ -366,8 +366,8 @@ describe('Unit: lib/cache', () => {
       console.debug('LRU hit rate uneven 100', hitlru * 100 / repeat);
       console.debug('LFU hit rate uneven 100', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 100', hitdwc * 100 / repeat);
-      console.debug('DWC vs LRU uneven 100', hitdwc * 100 / repeat - hitlru * 100 / repeat | 0);
-      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 18);
+      console.debug('DWC / LRU hit rate ratio uneven 100', `${hitdwc / hitlru * 100 | 0}%`);
+      assert(hitdwc / hitlru * 100 > 200);
     });
 
     it('rate uneven 100 transitive distribution', function () {
@@ -406,8 +406,8 @@ describe('Unit: lib/cache', () => {
       console.debug('LRU hit rate uneven 100 transitive distribution', hitlru * 100 / repeat);
       console.debug('LFU hit rate uneven 100 transitive distribution', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 100 transitive distribution', hitdwc * 100 / repeat);
-      console.debug('DWC vs LRU uneven 100 transitive distribution', hitdwc * 100 / repeat - hitlru * 100 / repeat | 0);
-      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > 18);
+      console.debug('DWC / LRU hit rate ratio uneven 100 transitive distribution', `${hitdwc / hitlru * 100 | 0}%`);
+      assert(hitdwc / hitlru * 100 > 200);
     });
 
     it('rate uneven 100 transitive bias', function () {
@@ -451,8 +451,8 @@ describe('Unit: lib/cache', () => {
       console.debug('LRU hit rate uneven 100 transitive bias', hitlru * 100 / repeat);
       console.debug('LFU hit rate uneven 100 transitive bias', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 100 transitive bias', hitdwc * 100 / repeat);
-      console.debug('DWC vs LRU uneven 100 transitive bias', hitdwc * 100 / repeat - hitlru * 100 / repeat | 0);
-      assert(hitdwc * 100 / repeat - hitlru * 100 / repeat > -4);
+      console.debug('DWC / LRU hit rate ratio uneven 100 transitive bias', `${hitdwc / hitlru * 100 | 0}%`);
+      assert(hitdwc / hitlru * 100 > 80);
     });
 
   });
