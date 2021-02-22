@@ -191,28 +191,33 @@ export class IList<K, V = undefined> {
     assert(b2.prev === b0);
     assert(this.length > 10 || [...this].length === this.length);
   }
-  public raiseToTop(index: number): void {
-    if (this.length <= 1) return;
-    if (index === this.head) return;
+  public raiseToTop(index: number): boolean {
+    if (this.length <= 1) return false;
+    if (index === this.head) return false;
     const item = this.items[index];
-    if (!item) return;
+    if (!item) return false;
     this.insert(item, this.head);
     this.head = index;
+    return true;
   }
-  public raiseToPrev(index: number): void {
-    if (this.length <= 1) return;
+  public raiseToPrev(index: number): boolean {
+    if (this.length <= 1) return false;
     const item = this.items[index];
-    if (!item) return;
+    if (!item) return false;
     this.insert(item, item.prev.index);
     if (item.next.index === this.head) {
       this.head = item.index;
     }
+    return true;
   }
-  public swap(index1: number, index2: number): void {
-    if (this.length <= 1) return;
+  public swap(index1: number, index2: number): boolean {
+    if (this.length <= 1) return false;
+    if (index1 === index2) return false;
     const item1 = this.items[index1];
     const item2 = this.items[index2];
-    if (!item1 || !item2) return;
+    if (!item1 || !item2) return false;
+    if (item1.next === item2) return this.raiseToPrev(index2)
+    if (item2.next === item1) return this.raiseToPrev(index1)
     const item3 = item2.next;
     this.insert(item2, item1.index);
     this.insert(item1, item3.index);
@@ -224,6 +229,7 @@ export class IList<K, V = undefined> {
         this.head = item1.index;
         break;
     }
+    return true;
   }
 }
 
