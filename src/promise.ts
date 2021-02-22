@@ -350,7 +350,7 @@ export class Internal<T> {
       const reaction = reactions[i];
       try {
         reaction[3]
-          ? reaction[0](reaction[3](param))
+          ? reaction[0]((void 0, reaction[3])(param))
           : reaction[1](param);
       }
       catch (reason) {
