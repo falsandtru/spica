@@ -230,7 +230,7 @@ export class Internal<T> {
     if (!isPromiseLike(value)) {
       this.status = {
         state: State.fulfilled,
-        value: value!,
+        value: value,
       };
       return this.resume();
     }
@@ -345,7 +345,7 @@ export class Internal<T> {
         return;
     }
   }
-  public react<T>(reactions: this['fulfillReactions'], param: T): void {
+  public react(reactions: this['fulfillReactions'], param: unknown): void {
     for (let i = 0; i < reactions.length; ++i) {
       const reaction = reactions[i];
       try {
