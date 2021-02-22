@@ -235,17 +235,13 @@ class Item<K, V> {
     public next: Item<K, V>,
     public prev: Item<K, V>,
   ) {
-    this.next ??= this;
-    if (next?.index === index) {
-      this.next = next.next === next
-        ? this
-        : next.next;
+    if (!next || next.index === index) {
+      assert(!next || next.next === next);
+      this.next = this;
     }
-    this.prev ??= this;
-    if (prev?.index === index) {
-      this.prev = prev.prev === prev
-        ? this
-        : prev.prev;
+    if (!prev || prev.index === index) {
+      assert(!prev || prev.prev === prev);
+      this.prev = this;
     }
   }
 }
