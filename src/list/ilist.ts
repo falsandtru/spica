@@ -25,7 +25,7 @@ export class IList<K, V = undefined> {
         ? this.empties.shift()!
         : this.length;
       assert(!items[index]);
-      this.length++;
+      ++this.length;
       items[index] =
         new Item(index, key, value, head!, head!);
       assert(this.items[index] === this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
@@ -38,7 +38,7 @@ export class IList<K, V = undefined> {
         ? this.empties.shift()!
         : this.length;
       assert(!items[index]);
-      this.length++;
+      ++this.length;
       items[index] = head.prev = head.prev.next =
         new Item(index, key, value, head, head.prev);
       assert(this.length !== 1 || this.items[index] === this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);

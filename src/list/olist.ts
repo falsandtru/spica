@@ -28,7 +28,7 @@ export class OList<K, V = undefined> {
         ? this.empties.shift()!
         : this.length;
       //assert(!items[index]);
-      this.length++;
+      ++this.length;
       this.index.set(key, index);
       items[index] =
         new Item(index, key, value, head!, head!);
@@ -42,7 +42,7 @@ export class OList<K, V = undefined> {
         ? this.empties.shift()!
         : this.length;
       //assert(!items[index]);
-      this.length++;
+      ++this.length;
       this.index.set(key, index);
       items[index] = head.prev = head.prev.next =
         new Item(index, key, value, head, head.prev);
