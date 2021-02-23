@@ -209,6 +209,7 @@ export class IList<K, V = undefined> {
   }
   public raiseToPrev(index: number): boolean {
     if (this.length <= 1) return false;
+    if (index === this.head) return false;
     const item = this.items[index];
     if (!item) return false;
     this.insert(item, item.prev.index);
