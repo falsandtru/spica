@@ -1,4 +1,3 @@
-import { Array, Object } from './global';
 import { ObjectGetPrototypeOf } from './alias';
 
 type Falsy = undefined | false | 0 | '' | null | void;
@@ -205,15 +204,16 @@ export type DeepMutable<T, E = never> =
   { -readonly [P in keyof T]: DeepMutable<T[P], E>; };
 
 const toString = Object.prototype.toString.call.bind(Object.prototype.toString) as (target: unknown) => string;
-
+const ObjectPrototype = Object.prototype;
+const ArrayPrototype = Array.prototype;
 export function type(value: unknown): string {
   if (value === void 0) return 'undefined';
   if (value === null) return 'null';
   const type = typeof value;
   if (type === 'object') {
     const proto = ObjectGetPrototypeOf(value);
-    if (proto === Object.prototype || proto === null) return 'Object';
-    if (proto === Array.prototype) return 'Array';
+    if (proto === ObjectPrototype || proto === null) return 'Object';
+    if (proto === ArrayPrototype) return 'Array';
     return toString(value).slice(8, -1);
   }
   if (type === 'function') return 'Function';
