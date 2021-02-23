@@ -145,6 +145,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     // 速度への影響を確認できなかったため毎回再計算
     //if ((LRU[0] + LFU[0]) % step) return;
     const capacity = this.capacity;
+    // シーケンシャルアクセス等の早期検出のため半分にしてみる
     const window = (capacity + 1) / 2 | 0;
     const rateR = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1]);
     const rateF = 100 - rateR;
@@ -167,9 +168,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     // 削除しても他のパターンに悪影響なし
     else
     if (ratio <= 50 && rateR > rateF * 10 && this.indexes.LRU.length >= capacity * (100 - ratio) / 100) {
-      // シーケンシャルアクセスからLFUを保護
+      // シーケンシャルアクセスでLRUを縮小しLFUを保護
       // TODO: 異なるアクセスパターンの混在によりキャッシュミスの連続性からシーケンシャルアクセスを検出できない場合の対処
-      // 保護したいLFU容量の残余となるLRU容量分の区間のヒット率が低すぎる場合LRU容量を制限してもこれによるヒット率の低下は
+      // 保護したいLFU容量の残余となるLRU容量分の区間のLRUのヒット率が低すぎる場合LRU容量を制限してもこれによるヒット率の低下は
       // 実数の小ささから無視できると思われる
       if (ratio > 10 && miss * 3 > capacity) {
         this.ratio = 50;
