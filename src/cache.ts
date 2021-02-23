@@ -151,7 +151,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const ratio = this.ratio;
     const step = 1;
     // LFUに収束させる
-    // なぜかLFUとLRUを広く往復させないとヒットレートが上がらない
+    // なぜかLFUとLRUを広く往復させないとヒット率が上がらない
     if (ratio < 100 && rateF > rateR * 1.1) {
       this.ratio += step;
     }
@@ -168,6 +168,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     else
     if (ratio <= 50 && rateR > rateF * 1.5 && this.indexes.LRU.length >= capacity * (100 - ratio) / 100) {
       // シーケンシャルアクセスからLFUを保護
+      // TODO: 異なるアクセスパターンの混在によりキャッシュミスの連続性からシーケンシャルアクセスを検出できない場合の対処
+      // 保護したいLFU容量の残余となるLRU容量分の区間のヒット率が低すぎる場合LRU容量を制限してもこれによるヒット率の低下は
+      // 実数の小ささから無視できると思われる
       if (ratio > 10 && miss * 3 > capacity) {
         this.ratio = 50;
       }
