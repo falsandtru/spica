@@ -59,9 +59,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.store.set(key, value);
     return false;
   }
-  public set<W extends V>(this: Cache<K, undefined>, key: K, value?: W): this;
-  public set<W extends V>(key: K, value: W): this;
-  public set<W extends V>(key: K, value: W): this {
+  public set(this: Cache<K, undefined>, key: K, value?: V): this;
+  public set(key: K, value: V): this;
+  public set(key: K, value: V): this {
     this.put(key, value);
     return this;
   }
