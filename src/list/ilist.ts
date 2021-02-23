@@ -13,6 +13,13 @@ export class IList<K, V = undefined> {
   private head = 0;
   private cursor = 0;
   public length = 0;
+  public clear(): void {
+    this.items = [];
+    this.empties = [];
+    this.head = 0;
+    this.cursor = 0;
+    this.length = 0;
+  }
   public add(this: IList<K, undefined>, key: K, value?: V): boolean;
   public add(key: K, value: V): boolean;
   public add(key: K, value: V): boolean {
