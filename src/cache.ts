@@ -166,9 +166,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     // シーケンシャルおよび推移的アクセスパターンへの対処
     // 削除しても他のパターンに悪影響なし
     else
-    if (ratio <= 50 && rateR > rateF * 1.5 && this.indexes.LRU.length > capacity / 100 * (100 - ratio) - 1) {
+    if (ratio <= 50 && rateR > rateF * 1.5 && this.indexes.LRU.length >= capacity * (100 - ratio) / 100) {
       // シーケンシャルアクセスからLFUを保護
-      if (ratio > 10 && miss > capacity / 2) {
+      if (ratio > 10 && miss * 3 > capacity) {
         this.ratio = 50;
       }
       // 推移的アクセスでLRUを拡大
