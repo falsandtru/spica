@@ -166,7 +166,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     // シーケンシャルおよび推移的アクセスパターンへの対処
     // 削除しても他のパターンに悪影響なし
     else
-    if (ratio <= 50 && rateR > rateF * 1.5 && this.indexes.LRU.length >= capacity * (100 - ratio) / 100) {
+    if (ratio <= 50 && rateR > rateF * 10 && this.indexes.LRU.length >= capacity * (100 - ratio) / 100) {
       // シーケンシャルアクセスからLFUを保護
       // TODO: 異なるアクセスパターンの混在によりキャッシュミスの連続性からシーケンシャルアクセスを検出できない場合の対処
       // 保護したいLFU容量の残余となるLRU容量分の区間のヒット率が低すぎる場合LRU容量を制限してもこれによるヒット率の低下は
