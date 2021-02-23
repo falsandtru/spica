@@ -205,21 +205,21 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     stats.miss = 0;
     return hit;
   }
-  private accessLRU(key: K, stats?: Cache<K, V>['stats']): boolean {
+  private accessLRU(key: K, stats: Cache<K, V>['stats']): boolean {
     const { LRU, LFU } = this.indexes;
     const index = LRU.findIndex(key) ?? -1;
     assert(index > -1 === this.store.has(key));
     if (index === -1) return false;
-    stats && ++stats.LRU[0];
+    ++stats.LRU[0];
     if (index === LRU.peek()!.index) return LFU.add(LRU.shift()!.key), true;
     LRU.raiseToTop(index);
     return true;
   }
-  private accessLFU(key: K, stats?: Cache<K, V>['stats']): boolean {
+  private accessLFU(key: K, stats: Cache<K, V>['stats']): boolean {
     const { LFU } = this.indexes;
     const index = LFU.findIndex(key) ?? -1;
     if (index === -1) return false;
-    stats && ++stats.LFU[0];
+    ++stats.LFU[0];
     if (index === LFU.peek()!.index) return true;
     LFU.raiseToTop(index);
     return true;
