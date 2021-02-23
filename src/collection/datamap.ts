@@ -1,3 +1,4 @@
+import { Map } from '../global';
 import { IterableCollection } from '../collection';
 import { type } from '../type';
 import { memoize } from '../memoize';

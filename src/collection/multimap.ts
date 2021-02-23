@@ -1,10 +1,11 @@
+import { Map } from '../global';
 import { IterableCollection } from '../collection';
 import { splice } from '../array';
 
 export class MultiMap<K, V> implements IterableCollection<K, V> {
   constructor(
     entries: Iterable<[K, V]> = [],
-    private readonly store: IterableCollection<K, V[]> = new Map(),
+    private store: IterableCollection<K, V[]> | Map<K, V[]> = new Map(),
   ) {
     for (const [k, v] of entries) {
       this.set(k, v);
@@ -22,6 +23,11 @@ export class MultiMap<K, V> implements IterableCollection<K, V> {
   }
   public delete(key: K): boolean {
     return this.store.delete(key);
+  }
+  public clear(): void {
+    'clear' in this.store
+      ? this.store.clear()
+      : this.store = new Map();
   }
   public take(key: K): V | undefined;
   public take(key: K, count: number): V[];

@@ -1,3 +1,4 @@
+import { Map, WeakMap } from '../global';
 import { Collection } from '../collection';
 
 export class AttrMap<C, K, V> {
