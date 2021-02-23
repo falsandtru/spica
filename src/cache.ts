@@ -172,7 +172,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       // TODO: 異なるアクセスパターンの混在によりキャッシュミスの連続性からシーケンシャルアクセスを検出できない場合の対処
       // 保護したいLFU容量の残余となるLRU容量分の区間のLRUのヒット率が低すぎる場合LRU容量を制限してもこれによるヒット率の低下は
       // 実数の小ささから無視できると思われる
-      if (ratio > 10 && miss * 3 > capacity) {
+      if (miss * 3 > capacity) {
         this.ratio = 50;
       }
       // 推移的アクセスでLRUを拡大
