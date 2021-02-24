@@ -207,12 +207,12 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     return hit;
   }
   private accessLRU(key: K, stats: Cache<K, V>['stats']): boolean {
-    const { LRU, LFU } = this.indexes;
+    const { LRU } = this.indexes;
     const index = LRU.findIndex(key) ?? -1;
     assert(index > -1 === this.store.has(key));
     if (index === -1) return false;
     ++stats.LRU[0];
-    if (index === LRU.peek()!.index) return LFU.add(LRU.shift()!.key), true;
+    if (index === LRU.peek()!.index) return !this.indexes.LFU.add(LRU.shift()!.key);
     LRU.raiseToTop(index);
     return true;
   }
