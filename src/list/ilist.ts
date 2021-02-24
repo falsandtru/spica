@@ -57,9 +57,9 @@ export class IList<K, V = undefined> {
     else {
       assert(this.length === this.capacity);
       assert(this.empties.length === 0);
-      const index = this.head = this.cursor = head.prev.index;
+      const garbage = items[head.prev.index]!;
+      const index = this.head = this.cursor = garbage.index;
       assert(items[index]);
-      const garbage = items[index]!;
       items[index] = head.prev = head.prev.prev.next =
         new Item(index, key, value, head, head.prev.prev);
       // @ts-expect-error
