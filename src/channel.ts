@@ -16,7 +16,7 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
   public get alive(): boolean {
     return this[internal].alive;
   }
-  public close(finalizer?: (msg: T[]) => void): void {
+  public close(finalizer?: (msgs: T[]) => void): void {
     if (!this.alive) return;
     const core = this[internal];
     const { buffer, producers, consumers } = core;
@@ -27,14 +27,13 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
     }
     consumers.splice(0, consumers.length);
     if (finalizer) {
-      AtomicPromise.all([
-        ...buffer.splice(0, buffer.length),
-        ...producers.splice(0, producers.length),
-      ]).then(finalizer);
+      producers.splice(0, producers.length);
+      AtomicPromise.all(buffer.splice(0, buffer.length))
+        .then(finalizer);
     }
     else {
-      buffer.splice(0, buffer.length);
       producers.splice(0, producers.length);
+      buffer.splice(0, buffer.length);
     }
   }
   public put(this: Channel<undefined>, msg?: T): AtomicPromise<undefined>;
