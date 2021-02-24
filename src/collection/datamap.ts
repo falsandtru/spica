@@ -12,28 +12,28 @@ export class DataMap<K, V> implements IterableCollection<K, V> {
       this.set(k, v);
     }
   }
-  private readonly store = new Map<unknown, [K, V]>();
+  private readonly memory = new Map<unknown, [K, V]>();
   public get(key: K): V | undefined {
-    return this.store.get(this.indentify(key))?.[1];
+    return this.memory.get(this.indentify(key))?.[1];
   }
   public set(key: K, val: V): this {
-    this.store.set(this.indentify(key), [key, val]);
+    this.memory.set(this.indentify(key), [key, val]);
     return this;
   }
   public has(key: K): boolean {
-    return this.store.has(this.indentify(key));
+    return this.memory.has(this.indentify(key));
   }
   public delete(key: K): boolean {
-    return this.store.delete(this.indentify(key));
+    return this.memory.delete(this.indentify(key));
   }
   public clear(): void {
-    return this.store.clear();
+    return this.memory.clear();
   }
   public get size(): number {
-    return this.store.size;
+    return this.memory.size;
   }
   public [Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
-    return this.store.values();
+    return this.memory.values();
   }
 }
 
