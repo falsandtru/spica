@@ -6,7 +6,7 @@ describe('Unit: lib/cache', () => {
       return {
         LRU: [...cache['indexes'].LRU].map(([k]) => k),
         LFU: [...cache['indexes'].LFU].map(([k]) => k),
-        store: [...cache['store']],
+        memory: [...cache['memory']],
       };
     }
 
@@ -16,7 +16,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [],
-        store: [],
+        memory: [],
       });
 
       assert(cache.has(0) === false);
@@ -24,7 +24,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [],
-        store: [],
+        memory: [],
       });
 
       assert(cache.has(0) === false);
@@ -32,7 +32,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [0],
         LFU: [],
-        store: [[0, 0]],
+        memory: [[0, 0]],
       });
 
       assert(cache.has(0) === true);
@@ -40,14 +40,14 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [0],
         LFU: [],
-        store: [[0, 1]],
+        memory: [[0, 1]],
       });
 
       assert(cache.get(0) === 1);
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [0],
-        store: [[0, 1]],
+        memory: [[0, 1]],
       });
 
       assert(cache.has(0) === true);
@@ -55,14 +55,14 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [0],
-        store: [[0, 0]],
+        memory: [[0, 0]],
       });
 
       assert(cache.get(0) === 0);
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [0],
-        store: [[0, 0]],
+        memory: [[0, 0]],
       });
 
       assert(cache.has(0) === true);
@@ -70,14 +70,14 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [],
-        store: [],
+        memory: [],
       });
 
       assert(cache.delete(0) === false);
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [],
-        store: [],
+        memory: [],
       });
     });
 
@@ -90,7 +90,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [],
-        store: [],
+        memory: [],
       });
 
       assert(cache.put(0, 0) === false);
@@ -98,7 +98,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [0],
         LFU: [],
-        store: [[0, 0]],
+        memory: [[0, 0]],
       });
 
       assert(cache.put(1, 1) === false);
@@ -106,7 +106,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [1, 0],
         LFU: [],
-        store: [[0, 0], [1, 1]],
+        memory: [[0, 0], [1, 1]],
       });
 
       assert(cache.put(1, 1) === true);
@@ -114,7 +114,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [1, 0],
         LFU: [],
-        store: [[0, 0], [1, 1]],
+        memory: [[0, 0], [1, 1]],
       });
 
       assert(cache.get(1) === 1);
@@ -122,7 +122,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [0],
         LFU: [1],
-        store: [[0, 0], [1, 1]],
+        memory: [[0, 0], [1, 1]],
       });
 
       assert(cache.put(2, 2) === false);
@@ -130,7 +130,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [2],
         LFU: [1],
-        store: [[1, 1], [2, 2]],
+        memory: [[1, 1], [2, 2]],
       });
 
       assert(cache.get(2) === 2);
@@ -138,7 +138,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [2, 1],
-        store: [[1, 1], [2, 2]],
+        memory: [[1, 1], [2, 2]],
       });
 
       assert(cache.get(2) === 2);
@@ -146,7 +146,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [2, 1],
-        store: [[1, 1], [2, 2]],
+        memory: [[1, 1], [2, 2]],
       });
 
       assert(cache.get(1) === 1);
@@ -154,7 +154,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [1, 2],
-        store: [[1, 1], [2, 2]],
+        memory: [[1, 1], [2, 2]],
       });
 
       assert(cache.put(3, 3) === false);
@@ -162,7 +162,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [3],
         LFU: [1],
-        store: [[1, 1], [3, 3]],
+        memory: [[1, 1], [3, 3]],
       });
 
       assert(cache.clear() === undefined);
@@ -170,7 +170,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [],
-        store: [],
+        memory: [],
       });
     });
 
@@ -249,8 +249,8 @@ describe('Unit: lib/cache', () => {
           hitdwc = 0;
         }
       }
-      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['store'].size);
-      assert(dwc['store'].size <= capacity);
+      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
+      assert(dwc['memory'].size <= capacity);
       console.debug('LRU hit rate even 10', hitlru * 100 / repeat);
       console.debug('LFU hit rate even 10', hitlfu * 100 / repeat);
       console.debug('DWC hit rate even 10', hitdwc * 100 / repeat);
@@ -286,8 +286,8 @@ describe('Unit: lib/cache', () => {
           hitdwc = 0;
         }
       }
-      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['store'].size);
-      assert(dwc['store'].size <= capacity);
+      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
+      assert(dwc['memory'].size <= capacity);
       console.debug('LRU hit rate uneven 10', hitlru * 100 / repeat);
       console.debug('LFU hit rate uneven 10', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 10', hitdwc * 100 / repeat);
@@ -322,8 +322,8 @@ describe('Unit: lib/cache', () => {
           hitdwc = 0;
         }
       }
-      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['store'].size);
-      assert(dwc['store'].size <= capacity);
+      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
+      assert(dwc['memory'].size <= capacity);
       console.debug('LRU hit rate even 100', hitlru * 100 / repeat);
       console.debug('LFU hit rate even 100', hitlfu * 100 / repeat);
       console.debug('DWC hit rate even 100', hitdwc * 100 / repeat);
@@ -361,8 +361,8 @@ describe('Unit: lib/cache', () => {
           hitdwc = 0;
         }
       }
-      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['store'].size);
-      assert(dwc['store'].size <= capacity);
+      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
+      assert(dwc['memory'].size <= capacity);
       console.debug('LRU hit rate uneven 100', hitlru * 100 / repeat);
       console.debug('LFU hit rate uneven 100', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 100', hitdwc * 100 / repeat);
@@ -401,8 +401,8 @@ describe('Unit: lib/cache', () => {
           hitdwc = 0;
         }
       }
-      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['store'].size);
-      assert(dwc['store'].size <= capacity);
+      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
+      assert(dwc['memory'].size <= capacity);
       console.debug('LRU hit rate uneven 100 transitive distribution', hitlru * 100 / repeat);
       console.debug('LFU hit rate uneven 100 transitive distribution', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 100 transitive distribution', hitdwc * 100 / repeat);
@@ -446,8 +446,8 @@ describe('Unit: lib/cache', () => {
           hitdwc = 0;
         }
       }
-      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['store'].size);
-      assert(dwc['store'].size <= capacity);
+      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
+      assert(dwc['memory'].size <= capacity);
       console.debug('LRU hit rate uneven 100 transitive bias', hitlru * 100 / repeat);
       console.debug('LFU hit rate uneven 100 transitive bias', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 100 transitive bias', hitdwc * 100 / repeat);

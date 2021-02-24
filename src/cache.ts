@@ -1,8 +1,8 @@
 import { Map } from './global';
 import { min } from './alias';
 import { IterableCollection } from './collection';
+import { OList } from './olist';
 import { extend } from './assign';
-import { WList } from './wlist';
 import { tuple } from './tuple';
 
 // Dual Window Cache
@@ -36,7 +36,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     value === void 0
       ? this.nullish ||= true
       : void 0;
-    if (this.has(key)) return this.store.set(key, value), true;
+    if (this.has(key)) return this.memory.set(key, value), true;
 
     const { LRU, LFU } = this.indexes;
 
@@ -44,19 +44,19 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       const key = LFU.length === this.capacity || LFU.length > this.capacity * this.ratio / 100
         ? LFU.pop()!.key
         : LRU.pop()!.key;
-      assert(this.store.has(key));
+      assert(this.memory.has(key));
       if (this.settings.disposer) {
-        const val = this.store.get(key)!;
-        this.store.delete(key);
+        const val = this.memory.get(key)!;
+        this.memory.delete(key);
         this.settings.disposer(key, val);
       }
       else {
-        this.store.delete(key);
+        this.memory.delete(key);
       }
     }
 
     LRU.add(key);
-    this.store.set(key, value);
+    this.memory.set(key, value);
     return false;
   }
   public set(this: Cache<K, undefined>, key: K, value?: V): this;
@@ -66,23 +66,23 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     return this;
   }
   public get(key: K): V | undefined {
-    const val = this.store.get(key);
+    const val = this.memory.get(key);
     if (val !== void 0 || this.nullish && this.has(key)) {
-      assert(this.store.has(key));
+      assert(this.memory.has(key));
       this.access(key);
       this.slide();
     }
     else {
-      assert(!this.store.has(key));
+      assert(!this.memory.has(key));
       ++this.stats.miss;
       this.slide();
     }
     return val;
   }
   public has(key: K): boolean {
-    //assert(this.store.has(key) === (this.indexes.LFU.has(key) || this.indexes.LRU.has(key)));
-    //assert(this.store.size === this.indexes.LFU.length + this.indexes.LRU.length);
-    return this.store.has(key);
+    //assert(this.memory.has(key) === (this.indexes.LFU.has(key) || this.indexes.LRU.has(key)));
+    //assert(this.memory.size === this.indexes.LFU.length + this.indexes.LRU.length);
+    return this.memory.has(key);
   }
   public delete(key: K): boolean {
     if (!this.has(key)) return false;
@@ -92,11 +92,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       if (i === -1) continue;
       index.delete(key);
       if (!this.settings.disposer || !this.settings.capture!.delete) {
-        this.store.delete(key);
+        this.memory.delete(key);
       }
       else {
-        const val = this.store.get(key)!;
-        this.store.delete(key);
+        const val = this.memory.get(key)!;
+        this.memory.delete(key);
         this.settings.disposer(key, val);
       }
       return true;
@@ -107,32 +107,32 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.nullish = false;
     this.ratio = 50;
     this.indexes = {
-      LRU: new WList(this.capacity),
-      LFU: new WList(this.capacity),
+      LRU: new OList(this.capacity),
+      LFU: new OList(this.capacity),
     };
     this.stats = {
       LRU: [0, 0],
       LFU: [0, 0],
       miss: 0,
     };
-    const store = this.store;
-    this.store = new Map();
+    const memory = this.memory;
+    this.memory = new Map();
     if (!this.settings.disposer || !this.settings.capture?.clear) return;
-    for (const [key, value] of store) {
+    for (const [key, value] of memory) {
       this.settings.disposer(key, value);
     }
   }
   public get size(): number {
-    //assert(this.indexes.LRU.length + this.indexes.LFU.length === this.store.size);
+    //assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     return this.indexes.LRU.length + this.indexes.LFU.length;
   }
   public [Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
-    return this.store[Symbol.iterator]();
+    return this.memory[Symbol.iterator]();
   }
-  private store = new Map<K, V>();
+  private memory = new Map<K, V>();
   private indexes = {
-    LRU: new WList<K>(this.capacity),
-    LFU: new WList<K>(this.capacity),
+    LRU: new OList<K>(this.capacity),
+    LFU: new OList<K>(this.capacity),
   } as const;
   private stats = {
     LRU: tuple(0, 0),
@@ -201,7 +201,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const hit = false
       || this.accessLFU(key, stats)
       || this.accessLRU(key, stats);
-    assert(hit === this.store.has(key));
+    assert(hit === this.memory.has(key));
     assert(hit);
     stats.miss = 0;
     return hit;
@@ -209,7 +209,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private accessLRU(key: K, stats: Cache<K, V>['stats']): boolean {
     const { LRU } = this.indexes;
     const index = LRU.findIndex(key) ?? -1;
-    assert(index > -1 === this.store.has(key));
+    assert(index > -1 === this.memory.has(key));
     if (index === -1) return false;
     ++stats.LRU[0];
     if (index === LRU.peek()!.index) return !this.indexes.LFU.add(LRU.shift()!.key);
