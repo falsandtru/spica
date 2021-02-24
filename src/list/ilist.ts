@@ -62,11 +62,11 @@ export class IList<K, V = undefined> {
       const garbage = items[index]!;
       items[index] = head.prev = head.prev.prev.next =
         new Item(index, key, value, head, head.prev.prev);
+      // @ts-expect-error
+      garbage.prev = garbage.next = void 0;
       assert(this.length !== 1 || this.items[index] === this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
       assert(this.length !== 2 || this.items[index] !== this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
       assert(this.length < 3 || this.items[index] !== this.items[index]!.prev && this.items[index]!.prev !== this.items[index]!.next);
-      // @ts-expect-error
-      garbage.prev = garbage.next = void 0;
       assert(this.length > 10 || [...this].length === this.length);
       return false;
     }
