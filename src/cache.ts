@@ -70,6 +70,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (val !== void 0 || this.nullish && this.has(key)) {
       assert(this.memory.has(key));
       this.access(key);
+      this.stats.miss = 0;
       this.slide();
     }
     else {
@@ -207,7 +208,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       || this.accessLRU(key, stats);
     assert(hit === this.memory.has(key));
     assert(hit);
-    stats.miss = 0;
     return hit;
   }
   private accessLRU(key: K, stats: Cache<K, V>['stats']): boolean {
