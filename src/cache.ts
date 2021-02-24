@@ -146,8 +146,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     // 速度への影響を確認できなかったため毎回再計算
     //if ((LRU[0] + LFU[0]) % step) return;
     const capacity = this.capacity;
-    // シーケンシャルアクセス等の早期検出のため半分にしてみる
-    const window = (capacity + 1) / 2 | 0;
+    const window = capacity;
     const rateR = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1]);
     const rateF = 100 - rateR;
     const ratio = this.ratio;
