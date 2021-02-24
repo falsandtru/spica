@@ -70,12 +70,12 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (val !== void 0 || this.nullish && this.has(key)) {
       assert(this.memory.has(key));
       this.access(key);
-      this.stats.miss = 0;
+      ++this.stats.total[0];
       this.slide();
     }
     else {
       assert(!this.memory.has(key));
-      ++this.stats.miss;
+      ++this.stats.total[0];
       this.slide();
     }
     return val;
@@ -114,7 +114,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.stats = {
       LRU: [0, 0],
       LFU: [0, 0],
-      miss: 0,
+      total: tuple(0, 0),
     };
     const memory = this.memory;
     this.memory = new Map();
@@ -138,29 +138,29 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private stats = {
     LRU: tuple(0, 0),
     LFU: tuple(0, 0),
-    miss: 0,
+    total: tuple(0, 0),
   };
   private ratio = 50;
   private slide(): void {
-    const { LRU, LFU, miss } = this.stats;
+    const { LRU, LFU, total } = this.stats;
     // 速度への影響を確認できなかったため毎回再計算
     //if ((LRU[0] + LFU[0]) % step) return;
     const capacity = this.capacity;
     const window = capacity;
     const rateR = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1]);
-    const rateF = 100 - rateR;
+    const rateF = 10000 - rateR;
     const ratio = this.ratio;
     const step = 1;
     // LFUに収束させる
     // なぜかLFUとLRUを広く往復させないとヒット率が上がらない
-    if (ratio < 100 && rateF > rateR * 1.1) {
+    if (ratio < 100 && rateF > rateR * 1.01) {
       this.ratio += step;
     }
     // LRUに収束させない
     // LFUと半々で均等分布においてLRUのみと同等効率
     // これ以下に下げても(LRUを50%超にしても)均等分布ですら効率が悪化する
     else
-    if (ratio > 50 && rateR > rateF * 1.1) {
+    if (ratio > 50 && rateR > rateF * 1.01) {
       //console.log(this.ratio);
       this.ratio -= step;
     }
@@ -171,23 +171,16 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     // シーケンシャル以外すべてのパターンで最低限動作するLRUと一定水準未満の偏りでほとんど動作しなくなる可能性のある
     // アドミッションポリシーのLFUの選択は難しい
     else
-    if (ratio <= 50 && rateR > rateF * 10 && this.indexes.LRU.length >= capacity * (100 - ratio) / 100) {
-      // シーケンシャルアクセスでLRUを縮小しLFUを保護
-      // TODO: 異なるアクセスパターンの混在によりキャッシュミスの連続性からシーケンシャルアクセスを検出できない場合の対処
-      // 保護したいLFU容量の残余となるLRU容量分の区間のLRUのヒット率が低すぎる場合LRU容量を制限してもこれによるヒット率の低下は
-      // 実数の小ささから無視できると思われる
-      if (miss * 3 > capacity) {
+    if (ratio <= 50 && this.indexes.LRU.length >= capacity * (100 - ratio) / 100) {
+      // シーケンシャルアクセスでLRUの拡大を制限しLFUを保護
+      if (rateR > rateF * 5 && rate(window / 2 | 0, LRU[0], total[0], LRU[1], total[1]) < 1) {
+        //console.log(this.ratio);
         this.ratio = 50;
       }
       // 推移的アクセスでLRUを拡大
       else
-      if (ratio > 10 && miss * 20 > this.indexes.LRU.length) {
+      if (ratio > 10 && rateR > rateF * 20 && rate(window / 2 | 0, LFU[0], total[0], LFU[1], total[1]) * 1.01 < rate(window, LFU[0], total[0], LFU[1], total[1])) {
         this.ratio -= step;
-      }
-      // 自力でLFUを回復できないので補助
-      else
-      if (ratio < 50) {
-        this.ratio += step;
       }
     }
     assert(LRU[0] + LFU[0] <= window);
@@ -196,7 +189,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       this.stats = {
         LRU: [0, LRU[0]],
         LFU: [0, LFU[0]],
-        miss,
+        total: [0, total[0]],
       };
     }
   }
@@ -233,8 +226,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
 function rate(window: number, currHits: number, currTotal: number, prevHits: number, prevTotal: number): number {
   window = min(currTotal + prevTotal, window);
   const currRate = currHits * 100 / currTotal;
-  const currRatio = currTotal / window;
+  const currRatio = min(currTotal * 100 / window, 100);
   const prevRate = prevHits * 100 / prevTotal;
-  const prevRatio = 1 - currRatio;
+  const prevRatio = 100 - currRatio;
   return currRate * currRatio + prevRate * prevRatio | 0;
 }
