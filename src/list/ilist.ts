@@ -57,7 +57,7 @@ export class IList<K, V = undefined> {
     else {
       assert(this.length === this.capacity);
       assert(this.empties.length === 0);
-      const garbage = nodes[head.prev.index]!;
+      const garbage = head.prev;
       const index = this.head = this.cursor = garbage.index;
       assert(nodes[index]);
       nodes[index] = head.prev = head.prev.prev.next =

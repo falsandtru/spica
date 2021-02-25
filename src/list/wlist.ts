@@ -71,7 +71,7 @@ export class WList<K, V = undefined> {
     else {
       assert(this.length === this.capacity);
       assert(this.empties.length === 0);
-      const garbage = nodes[head.prev.index]!;
+      const garbage = head.prev;
       assert(garbage.index === this.index.get(garbage.key));
       if (this.secure(size - garbage.size)) return this.add(key, value, size);
       const index = this.head = this.cursor = garbage.index;

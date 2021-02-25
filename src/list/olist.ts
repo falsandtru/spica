@@ -63,7 +63,7 @@ export class OList<K, V = undefined> {
     else {
       assert(this.length === this.capacity);
       assert(this.empties.length === 0);
-      const garbage = nodes[head.prev.index]!;
+      const garbage = head.prev;
       assert(garbage.index === this.index.get(garbage.key));
       this.index.take(garbage.key);
       const index = this.head = this.cursor = garbage.index;
