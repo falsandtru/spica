@@ -10,7 +10,7 @@ export class FList<K, V = undefined> {
       ? this.capacity * this.interval | 0
       : this.interval;
   }
-  private items: (Item<K, V> | undefined)[] = [];
+  private nodes: (Item<K, V> | undefined)[] = [];
   private indexes: number[] = [];
   private head = 0;
   private cursor = 0;
@@ -18,19 +18,19 @@ export class FList<K, V = undefined> {
   public add(this: FList<K, undefined>, key: K, value?: V): boolean;
   public add(key: K, value: V): boolean;
   public add(key: K, value: V): boolean {
-    const items = this.items;
-    const head = items[this.head];
+    const nodes = this.nodes;
+    const head = nodes[this.head];
     assert(this.length === 0 ? !head : head);
     if (!head) {
       assert(this.length === 0);
       const index = this.head = this.cursor = this.indexes.length > 0
         ? this.indexes.shift()!
         : this.length;
-      assert(!items[index]);
+      assert(!nodes[index]);
       this.length++;
-      items[index] =
+      nodes[index] =
         new Item(index, key, value, head!, head!);
-      assert(this.items[index] === this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
+      assert(this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
       //assert(this.length > 10 || [...this].length === this.length);
       return false;
     }
@@ -39,27 +39,27 @@ export class FList<K, V = undefined> {
       const index = this.head = this.cursor = this.indexes.length > 0
         ? this.indexes.shift()!
         : this.length;
-      assert(!items[index]);
+      assert(!nodes[index]);
       this.length++;
-      items[index] = head.prev = head.prev.next =
+      nodes[index] = head.prev = head.prev.next =
         new Item(index, key, value, head, head.prev);
-      assert(this.length !== 1 || this.items[index] === this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
-      assert(this.length !== 2 || this.items[index] !== this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
-      assert(this.length < 3 || this.items[index] !== this.items[index]!.prev && this.items[index]!.prev !== this.items[index]!.next);
+      assert(this.length !== 1 || this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
+      assert(this.length !== 2 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
+      assert(this.length < 3 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
       //assert(this.length > 10 || [...this].length === this.length);
       return false;
     }
     else {
       assert(this.length === this.capacity);
       assert(this.indexes.length === 0);
-      const index = this.head = this.cursor = items[this.head]!.prev.index;
-      assert(items[index]);
-      const garbage = items[index]!;
-      items[index] = head.prev = head.prev.prev.next =
+      const index = this.head = this.cursor = nodes[this.head]!.prev.index;
+      assert(nodes[index]);
+      const garbage = nodes[index]!;
+      nodes[index] = head.prev = head.prev.prev.next =
         new Item(index, key, value, head, head.prev.prev);
-      assert(this.length !== 1 || this.items[index] === this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
-      assert(this.length !== 2 || this.items[index] !== this.items[index]!.prev && this.items[index]!.prev === this.items[index]!.next);
-      assert(this.length < 3 || this.items[index] !== this.items[index]!.prev && this.items[index]!.prev !== this.items[index]!.next);
+      assert(this.length !== 1 || this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
+      assert(this.length !== 2 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
+      assert(this.length < 3 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
       // @ts-expect-error
       garbage.prev = garbage.next = void 0;
       assert(this.head === index);
@@ -70,79 +70,79 @@ export class FList<K, V = undefined> {
   public put(this: FList<K, undefined>, key: K, value?: V, index?: number): boolean;
   public put(key: K, value: V, index?: number): boolean;
   public put(key: K, value: V, index?: number): boolean {
-    const item = this.seek(key, index);
-    if (!item) return this.add(key, value);
-    assert(this.cursor === item.index);
-    this.head = item.index;
-    item.value = value;
+    const node = this.seek(key, index);
+    if (!node) return this.add(key, value);
+    assert(this.cursor === node.index);
+    this.head = node.index;
+    node.value = value;
     return true;
   }
   public shift(): { index: number; key: K; value: V; } | undefined {
-    assert(this.length === 0 ? !this.items[this.head] : this.items[this.head]);
-    const item = this.items[this.head];
-    assert(this.length === 0 ? !item : item);
-    if (!item) return;
-    this.delete(item.key, item.index);
+    assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
+    const node = this.nodes[this.head];
+    assert(this.length === 0 ? !node : node);
+    if (!node) return;
+    this.delete(node.key, node.index);
     return {
-      index: item.index,
-      key: item.key,
-      value: item.value,
+      index: node.index,
+      key: node.key,
+      value: node.value,
     };
   }
   public pop(): { index: number; key: K; value: V; } | undefined {
-    assert(this.length === 0 ? !this.items[this.head]?.prev : this.items[this.head]?.prev);
-    const item = this.items[this.head]?.prev;
-    assert(this.length === 0 ? !item : item);
-    if (!item) return;
-    this.delete(item.key, item.index);
+    assert(this.length === 0 ? !this.nodes[this.head]?.prev : this.nodes[this.head]?.prev);
+    const node = this.nodes[this.head]?.prev;
+    assert(this.length === 0 ? !node : node);
+    if (!node) return;
+    this.delete(node.key, node.index);
     return {
-      index: item.index,
-      key: item.key,
-      value: item.value,
+      index: node.index,
+      key: node.key,
+      value: node.value,
     };
   }
   public delete(key: K, index?: number): V | undefined {
     const cursor = this.cursor;
-    const item = this.seek(key, index, false);
-    if (!item) return;
+    const node = this.seek(key, index, false);
+    if (!node) return;
     this.cursor = cursor;
     assert(this.length > 0);
-    assert(this.length !== 1 || item === item.prev && item.prev === item.next);
-    assert(this.length !== 2 || item !== item.prev && item.prev === item.next);
-    assert(this.length < 3 || item !== item.prev && item.prev !== item.next);
+    assert(this.length !== 1 || node === node.prev && node.prev === node.next);
+    assert(this.length !== 2 || node !== node.prev && node.prev === node.next);
+    assert(this.length < 3 || node !== node.prev && node.prev !== node.next);
     --this.length;
-    this.indexes.push(item.index);
-    const { prev, next } = item;
+    this.indexes.push(node.index);
+    const { prev, next } = node;
     prev.next = next;
     next.prev = prev;
     // @ts-expect-error
-    this.items[item.index] = item.prev = item.next = void 0;
-    if (this.head === item.index) {
+    this.nodes[node.index] = node.prev = node.next = void 0;
+    if (this.head === node.index) {
       this.head = next.index;
     }
-    if (this.cursor === item.index) {
+    if (this.cursor === node.index) {
       this.cursor = next.index;
     }
-    assert(this.length === 0 ? !this.items[this.cursor] : this.items[this.cursor]);
+    assert(this.length === 0 ? !this.nodes[this.cursor] : this.nodes[this.cursor]);
     //assert(this.length > 10 || [...this].length === this.length);
-    return item.value;
+    return node.value;
   }
   public peek(): { index: number; key: K; value: V; } | undefined {
-    const item = this.items[this.head];
-    return item && {
-      index: item.index,
-      key: item.key,
-      value: item.value,
+    const node = this.nodes[this.head];
+    return node && {
+      index: node.index,
+      key: node.key,
+      value: node.value,
     };
   }
-  public item(index: number | undefined): { index: number; key: K; value: V; } | undefined {
-    const item = index !== void 0
-      ? this.items[index]
+  public node(index: number | undefined): { index: number; key: K; value: V; } | undefined {
+    const node = index !== void 0
+      ? this.nodes[index]
       : void 0;
-    return item && {
-      index: this.cursor = item.index,
-      key: item.key,
-      value: item.value,
+    return node && {
+      index: this.cursor = node.index,
+      key: node.key,
+      value: node.value,
     };
   }
   public find(key: K, index?: number): V | undefined {
@@ -155,37 +155,37 @@ export class FList<K, V = undefined> {
     return !!this.seek(key, index, false);
   }
   public *[Symbol.iterator](): Iterator<[K, V, number], undefined, undefined> {
-    for (let item = this.items[this.head], i = 0; item && i < this.length; (item = item.next) && ++i) {
-      yield [item.key, item.value, item.index];
+    for (let node = this.nodes[this.head], i = 0; node && i < this.length; (node = node.next) && ++i) {
+      yield [node.key, node.value, node.index];
     }
     return;
   }
   private seek(key: K, cursor: number = this.cursor, aging = true): Item<K, V> | undefined {
-    let item = this.items[cursor];
-    if (!item) return;
-    assert(this.items[this.head]);
-    const newest = this.items[this.head]!;
+    let node = this.nodes[cursor];
+    if (!node) return;
+    assert(this.nodes[this.head]);
+    const newest = this.nodes[this.head]!;
     const isNaN = key !== key;
-    if (isNaN ? item.key !== item.key : item.key === key) return this.cursor = cursor, item;
-    aging && age(item, false);
-    let newer = item;
+    if (isNaN ? node.key !== node.key : node.key === key) return this.cursor = cursor, node;
+    aging && age(node, false);
+    let newer = node;
     const interval = this.interval < this.length
       ? this.interval
       : this.length;
-    for (let i = 1; (item = item.next) && i < interval; ++i) {
-      if (isNaN ? item.key !== item.key : item.key === key) {
-        aging && age(item);
-        newer = item.age > newer.age ? item : newer;
+    for (let i = 1; (node = node.next) && i < interval; ++i) {
+      if (isNaN ? node.key !== node.key : node.key === key) {
+        aging && age(node);
+        newer = node.age > newer.age ? node : newer;
         this.head = newer.age > newest.age ? newer.index : newest.index;
-        return this.cursor = item.index, item;
+        return this.cursor = node.index, node;
       }
       else {
-        aging && age(item, false);
-        newer = item.age > newer.age ? item : newer;
+        aging && age(node, false);
+        newer = node.age > newer.age ? node : newer;
       }
     }
     this.head = newer.age > newest.age ? newer.index : newest.index;
-    this.cursor = item.index;
+    this.cursor = node.index;
   }
 }
 
@@ -213,13 +213,13 @@ class Item<K, V> {
   public age = 0 >>> 0;
 }
 
-function age<K, V>(item: Item<K, V>, hit?: boolean): Item<K, V>;
-function age<K, V>(item: Item<K, V> | undefined, hit?: boolean): Item<K, V> | undefined;
-function age<K, V>(item: Item<K, V> | undefined, hit = true): Item<K, V> | undefined {
-  if (!item) return;
-  item.age >>>= 1;
-  item.age |= +hit && 0x80000000;
-  item.age >>>= 0;
-  assert(item.age === item.age >>> 0);
-  return item;
+function age<K, V>(node: Item<K, V>, hit?: boolean): Item<K, V>;
+function age<K, V>(node: Item<K, V> | undefined, hit?: boolean): Item<K, V> | undefined;
+function age<K, V>(node: Item<K, V> | undefined, hit = true): Item<K, V> | undefined {
+  if (!node) return;
+  node.age >>>= 1;
+  node.age |= +hit && 0x80000000;
+  node.age >>>= 0;
+  assert(node.age === node.age >>> 0);
+  return node;
 }
