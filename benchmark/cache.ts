@@ -84,21 +84,6 @@ describe('Benchmark:', function () {
       benchmark('Cache get 50 0%', () => cache.get(-1), done);
     });
 
-    it('get 99 100%', function (done) {
-      const capacity = 99;
-      const cache = new Cache<number, number>(capacity);
-      for (let i = 0; i < capacity; ++i) cache.put(i, i);
-      let i = 0;
-      benchmark('Cache get 99 100%', () => cache.get(++i % capacity), done);
-    });
-
-    it('get 99 0%', function (done) {
-      const capacity = 99;
-      const cache = new Cache<number, number>(capacity);
-      for (let i = 0; i < capacity; ++i) cache.put(i, i);
-      benchmark('Cache get 99 0%', () => cache.get(-1), done);
-    });
-
     it('get 100 100%', function (done) {
       const capacity = 100;
       const cache = new Cache<number, number>(capacity);
