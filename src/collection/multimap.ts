@@ -2,10 +2,14 @@ import { Map } from '../global';
 import { IterableCollection } from '../collection';
 import { splice } from '../array';
 
+interface Collection<K, V> extends IterableCollection<K, V> {
+  clear(): void;
+}
+
 export class MultiMap<K, V> implements IterableCollection<K, V> {
   constructor(
     entries: Iterable<[K, V]> = [],
-    private memory: IterableCollection<K, V[]> | Map<K, V[]> = new Map(),
+    private memory: Collection<K, V[]> = new Map(),
   ) {
     for (const [k, v] of entries) {
       this.set(k, v);
@@ -25,9 +29,7 @@ export class MultiMap<K, V> implements IterableCollection<K, V> {
     return this.memory.delete(key);
   }
   public clear(): void {
-    'clear' in this.memory
-      ? this.memory.clear()
-      : this.memory = new Map();
+    this.memory.clear();
   }
   public take(key: K): V | undefined;
   public take(key: K, count: number): V[];

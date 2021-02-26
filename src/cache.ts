@@ -126,10 +126,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public clear(): void {
     this.nullish = false;
     this.ratio = 50;
-    this.indexes = {
-      LRU: new OList(this.capacity),
-      LFU: new OList(this.capacity),
-    };
+    this.indexes.LRU.clear();
+    this.indexes.LFU.clear();
     this.stats = {
       LRU: [0, 0],
       LFU: [0, 0],
