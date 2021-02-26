@@ -89,12 +89,12 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (val !== void 0 || this.nullish && this.has(key)) {
       assert(this.memory.has(key));
       this.access(key);
-      ++this.stats.total[0];
+      ++this.stats.Total[0];
       this.slide();
     }
     else {
       assert(!this.memory.has(key));
-      ++this.stats.total[0];
+      ++this.stats.Total[0];
       this.slide();
     }
     return val;
@@ -133,7 +133,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.stats = {
       LRU: [0, 0],
       LFU: [0, 0],
-      total: tuple(0, 0),
+      Total: tuple(0, 0),
     };
     const memory = this.memory;
     this.memory = new Map();
@@ -157,11 +157,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private stats = {
     LRU: tuple(0, 0),
     LFU: tuple(0, 0),
-    total: tuple(0, 0),
+    Total: tuple(0, 0),
   };
   private ratio = 50;
   private slide(): void {
-    const { LRU, LFU, total } = this.stats;
+    const { LRU, LFU, Total } = this.stats;
     // 速度への影響を確認できなかったため毎回再計算
     //if ((LRU[0] + LFU[0]) % step) return;
     const capacity = this.capacity;
@@ -188,14 +188,14 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     else
     if (ratio <= 50 && this.indexes.LRU.length >= capacity * (100 - ratio) / 100) {
       // シーケンシャルアクセスでLRUの拡大を制限しLFUを保護
-      if (rateR <= rateF && rate(window / 2 | 0, LRU[0], total[0], LRU[1], total[1]) < 100) {
-        //console.log(this.ratio, LRU, total, rate(window / 2 | 0, LRU[0], total[0], LRU[1], total[1]));
+      if (rateR <= rateF && rate(window / 2 | 0, LRU[0], Total[0], LRU[1], Total[1]) < 100) {
+        //console.log(this.ratio, LRU, Total, rate(window / 2 | 0, LRU[0], Total[0], LRU[1], Total[1]));
         this.ratio = 50;
       }
       // 推移的アクセスでLRUを拡大
       else
-      if (ratio > 10 && rate(window / 2 | 0, LFU[0], total[0], LFU[1], total[1]) * 2 <= rate(window, LFU[0], total[0], LFU[1], total[1])) {
-        //console.log(this.ratio, rateR, rateF, rate(window / 2 | 0, LFU[0], total[0], LFU[1], total[1]), rate(window, LFU[0], total[0], LFU[1], total[1]));
+      if (ratio > 10 && rate(window / 2 | 0, LFU[0], Total[0], LFU[1], Total[1]) * 2 <= rate(window, LFU[0], Total[0], LFU[1], Total[1])) {
+        //console.log(this.ratio, rateR, rateF, rate(window / 2 | 0, LFU[0], Total[0], LFU[1], Total[1]), rate(window, LFU[0], Total[0], LFU[1], Total[1]));
         this.ratio -= step;
       }
     }
@@ -205,7 +205,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       this.stats = {
         LRU: [0, LRU[0]],
         LFU: [0, LFU[0]],
-        total: [0, total[0]],
+        Total: [0, Total[0]],
       };
     }
   }
