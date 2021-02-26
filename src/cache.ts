@@ -188,13 +188,14 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     else
     if (ratio <= 50 && this.indexes.LRU.length >= capacity * (100 - ratio) / 100) {
       // シーケンシャルアクセスでLRUの拡大を制限しLFUを保護
-      if (rateR > rateF * 5 && rate(window / 2 | 0, LRU[0], total[0], LRU[1], total[1]) < 1) {
-        //console.log(this.ratio);
+      if (rateR <= rateF && rate(window / 2 | 0, LRU[0], total[0], LRU[1], total[1]) < 100) {
+        //console.log(this.ratio, LRU, total, rate(window / 2 | 0, LRU[0], total[0], LRU[1], total[1]));
         this.ratio = 50;
       }
       // 推移的アクセスでLRUを拡大
       else
-      if (ratio > 10 && rateR > rateF * 20 && rate(window / 2 | 0, LFU[0], total[0], LFU[1], total[1]) * 1.01 < rate(window, LFU[0], total[0], LFU[1], total[1])) {
+      if (ratio > 10 && rate(window / 2 | 0, LFU[0], total[0], LFU[1], total[1]) * 2 <= rate(window, LFU[0], total[0], LFU[1], total[1])) {
+        //console.log(this.ratio, rateR, rateF, rate(window / 2 | 0, LFU[0], total[0], LFU[1], total[1]), rate(window, LFU[0], total[0], LFU[1], total[1]));
         this.ratio -= step;
       }
     }
