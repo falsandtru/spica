@@ -6,12 +6,12 @@ describe('Benchmark:', function () {
   this.timeout(30 * 1e3);
   afterEach(() => new AtomicPromise(requestAnimationFrame));
 
-  describe('Async generator', function () {
+  describe('Asyncgenerator', function () {
     it('iterate ', function (done) {
       const iter = async function* () {
         while (true) yield;
       }()[Symbol.asyncIterator]();
-      benchmark('Async generator', done => void iter.next().then(done), done, { defer: true, async: true });
+      benchmark('Asyncgenerator iterate', done => void iter.next().then(done), done, { defer: true, async: true });
     });
 
   });
