@@ -162,39 +162,41 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { LRU, LFU, Total } = this.stats;
     // 速度への影響を確認できなかったため毎回再計算
     //if ((LRU[0] + LFU[0]) % step) return;
-    const capacity = this.capacity;
+    const { capacity, indexes } = this;
     const window = capacity;
     const rateR = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1]);
-    const rateF = 10000 - rateR;
+    const rateF = rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1]);
     const ratio = this.ratio;
+    const isCalculable = Total[1] > 0;
+    const isLRUFilled = indexes.LRU.length >= capacity * (100 - ratio) / 100;
+    const isLFUFilled = indexes.LFU.length >= capacity * ratio / 100;
     const step = 1;
-    // LFUに収束させる
-    // なぜかLFUとLRUを広く往復させないとヒット率が上がらない
-    if (ratio < 100 && rateF > rateR * 1.01) {
+    // LFUとLRUを広く往復させないとヒット率が上がらない
+    if (isCalculable && ratio < 100 && isLFUFilled && rateF > rateR) {
+      //ratio % 10 || console.debug('+', this.ratio, LRU, LFU, Total);
       this.ratio += step;
     }
     // LRUに収束させない
     // LFUと半々で均等分布においてLRUのみと同等効率
     // これ以下に下げても(LRUを50%超にしても)均等分布ですら効率が悪化する
     else
-    if (ratio > 50 && rateR > rateF * 1.01) {
-      //console.log(this.ratio);
+    if (isCalculable && ratio > 50 && isLRUFilled && rateR > rateF) {
+      //ratio % 10 || console.debug('-', this.ratio, LRU, LFU, Total);
       this.ratio -= step;
     }
     // シーケンシャルおよび推移的アクセスパターンへの対処
     // 削除しても他のパターンに悪影響なし
     else
-    if (ratio <= 50 && this.indexes.LRU.length >= capacity * (100 - ratio) / 100) {
+    if (isCalculable && ratio <= 50 && isLFUFilled && isLRUFilled) {
       // シーケンシャルアクセスでLRUの拡大を制限しLFUを保護
-      if (rateR <= rateF && rate(window / 2 | 0, LRU[0], Total[0], LRU[1], Total[1]) < 100) {
-        //console.log(this.ratio, LRU, Total, rate(window / 2 | 0, LRU[0], Total[0], LRU[1], Total[1]));
+      if (ratio < 50 && rateR <= rateF && rate(window / 2 | 0, LRU[0], Total[0], LRU[1], Total[1]) < 100) {
+        //ratio % 10 || console.debug('<', this.ratio, LRU, LFU, Total, rate(window / 2 | 0, LRU[0], Total[0], LRU[1], Total[1]));
         this.ratio = 50;
       }
       // 推移的アクセスでLRUを拡大
-      // 低倍率では他のパターンが不安定
       else
-      if (ratio > 10 && rate(window / 2 | 0, LFU[0], Total[0], LFU[1], Total[1]) * 10 <= rate(window, LFU[0], Total[0], LFU[1], Total[1])) {
-        //console.log(this.ratio, rateR, rateF, rate(window / 2 | 0, LFU[0], Total[0], LFU[1], Total[1]), rate(window, LFU[0], Total[0], LFU[1], Total[1]));
+      if (ratio > 10 && rate(window / 2 | 0, LFU[0], Total[0], LFU[1], Total[1]) * 1.01 <= rate(window, LFU[0], Total[0], LFU[1], Total[1])) {
+        //ratio % 10 || console.debug('>', this.ratio, LRU, LFU, Total, rate(window / 2 | 0, LFU[0], Total[0], LFU[1], Total[1]), rate(window, LFU[0], Total[0], LFU[1], Total[1]));
         this.ratio -= step;
       }
     }
@@ -240,9 +242,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
 
 function rate(window: number, currHits: number, currTotal: number, prevHits: number, prevTotal: number): number {
   window = min(currTotal + prevTotal, window);
-  const currRate = currHits * 100 / currTotal;
+  const currRate = currHits * 100 / currTotal | 0;
   const currRatio = min(currTotal * 100 / window, 100);
-  const prevRate = prevHits * 100 / prevTotal;
+  const prevRate = prevHits * 100 / prevTotal | 0;
   const prevRatio = 100 - currRatio;
   return currRate * currRatio + prevRate * prevRatio | 0;
 }
+assert(rate(10, 5, 10, 0, 0) === 5000);
+assert(rate(10, 0, 0, 5, 10) === 5000);
