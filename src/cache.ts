@@ -191,8 +191,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         this.ratio = 50;
       }
       // 推移的アクセスでLRUを拡大
+      // 低倍率では他のパターンが不安定
       else
-      if (ratio > 10 && rate(window / 2 | 0, LFU[0], Total[0], LFU[1], Total[1]) * 2 <= rate(window, LFU[0], Total[0], LFU[1], Total[1])) {
+      if (ratio > 10 && rate(window / 2 | 0, LFU[0], Total[0], LFU[1], Total[1]) * 10 <= rate(window, LFU[0], Total[0], LFU[1], Total[1])) {
         //console.log(this.ratio, rateR, rateF, rate(window / 2 | 0, LFU[0], Total[0], LFU[1], Total[1]), rate(window, LFU[0], Total[0], LFU[1], Total[1]));
         this.ratio -= step;
       }
