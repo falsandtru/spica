@@ -132,6 +132,7 @@ export class OList<K, V = undefined> {
       default:
         splice(indexes, indexOf(indexes, node.index), 1);
     }
+    indexes.length === 0 && this.index.delete(node.key);
     const { prev, next, value } = node;
     prev.next = next;
     next.prev = prev;
