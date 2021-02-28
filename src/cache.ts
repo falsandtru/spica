@@ -211,29 +211,28 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     }
   }
   private access(key: K): boolean {
-    const stats = this.stats;
     const hit = false
-      || this.accessLFU(key, stats)
-      || this.accessLRU(key, stats);
+      || this.accessLFU(key)
+      || this.accessLRU(key);
     assert(hit === this.memory.has(key));
     assert(hit);
     return hit;
   }
-  private accessLRU(key: K, stats: Cache<K, V>['stats']): boolean {
+  private accessLRU(key: K): boolean {
     const { LRU } = this.indexes;
     const index = LRU.findIndex(key) ?? -1;
     assert(index > -1 === this.memory.has(key));
     if (index === -1) return false;
-    ++stats.LRU[0];
+    ++this.stats.LRU[0];
     if (index === LRU.peek()!.index) return !this.indexes.LFU.add(LRU.shift()!.key);
     LRU.raiseToTop(index);
     return true;
   }
-  private accessLFU(key: K, stats: Cache<K, V>['stats']): boolean {
+  private accessLFU(key: K): boolean {
     const { LFU } = this.indexes;
     const index = LFU.findIndex(key) ?? -1;
     if (index === -1) return false;
-    ++stats.LFU[0];
+    ++this.stats.LFU[0];
     if (index === LFU.peek()!.index) return true;
     LFU.raiseToTop(index);
     return true;
