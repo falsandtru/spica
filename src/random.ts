@@ -28,6 +28,7 @@ export function unique(rnd: (len: number) => string, len: number, mem: Set<strin
         mem.add(r);
         return r;
       }
+      mem.clear();
       ++len;
       limit = len < 3 ? limit : 3;
     }
