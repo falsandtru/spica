@@ -1,6 +1,7 @@
 import type { Inits, DeepImmutable, DeepRequired } from './type';
 import { Number, Map, WeakSet, Error } from './global';
 import { extend } from './assign';
+import { once } from './function';
 import { push, splice } from './array';
 import { causeAsyncException } from './exception';
 
@@ -76,7 +77,7 @@ export class Observation<N extends readonly unknown[], D, R>
     limit: 10,
     cleanup: false,
   };
-  public monitor(namespace: Readonly<N | Inits<N>>, monitor: Monitor<N, D>, { once = false }: ObserverOptions = {}): () => void {
+  public monitor(namespace: Readonly<N | Inits<N>>, monitor: Monitor<N, D>, options: ObserverOptions = {}): () => void {
     if (typeof monitor !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${monitor}`);
     const { monitors } = this.seekNode(namespace, SeekMode.Extensible);
     if (monitors.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
@@ -86,14 +87,12 @@ export class Observation<N extends readonly unknown[], D, R>
       type: ListenerType.Monitor,
       namespace,
       listener: monitor,
-      options: {
-        once,
-      },
+      options,
     };
     monitors.push(item);
-    return () => void this.off(namespace, item);
+    return once(() => void this.off(namespace, item));
   }
-  public on(namespace: Readonly<N>, subscriber: Subscriber<N, D, R>, { once = false }: ObserverOptions = {}): () => void {
+  public on(namespace: Readonly<N>, subscriber: Subscriber<N, D, R>, options: ObserverOptions = {}): () => void {
     if (typeof subscriber !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${subscriber}`);
     const { subscribers } = this.seekNode(namespace, SeekMode.Extensible);
     if (subscribers.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
@@ -103,12 +102,10 @@ export class Observation<N extends readonly unknown[], D, R>
       type: ListenerType.Subscriber,
       namespace,
       listener: subscriber,
-      options: {
-        once,
-      },
+      options,
     };
     subscribers.push(item);
-    return () => void this.off(namespace, item);
+    return once(() => void this.off(namespace, item));
   }
   public once(namespace: Readonly<N>, subscriber: Subscriber<N, D, R>): () => void {
     return this.on(namespace, subscriber, { once: true });
