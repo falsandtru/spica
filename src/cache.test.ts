@@ -198,61 +198,31 @@ describe('Unit: lib/cache', () => {
       }
     }
 
-    class LFUCache<K, V> {
-      constructor(public capacity: number) {
-      }
-      public index: K[] = [];
-      public entries = new Map<K, V>();
-      public put(key: K, val: V): boolean {
-        const { index, entries } = this;
-        const i = index.indexOf(key);
-        switch (i) {
-          case -1:
-            index.length === this.capacity && entries.delete(index.pop()!);
-            index.unshift(key);
-            break;
-          case 0:
-            break;
-          default:
-            [index[i - 1], index[i]] = [index[i], index[i - 1]];
-        }
-        entries.set(key, val);
-        assert(index.length <= this.capacity);
-        assert(index.length === entries.size);
-        return i > -1;
-      }
-    }
-
     it('rate even 10', function () {
       this.timeout(10 * 1e3);
       this.retries(5);
 
       const capacity = 10;
       const lru = new LRUCache<number, number>(capacity);
-      const lfu = new LFUCache<number, number>(capacity);
       const dwc = new Cache<number, number>(capacity);
 
       const repeat = capacity * 1000;
       const warmup = capacity * 1000;
       let hitlru = 0;
-      let hitlfu = 0;
       let hitdwc = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() * capacity * 10 | 0;
         hitlru += +lru.put(key, i);
-        hitlfu += +lfu.put(key, i);
         dwc.get(key);
         hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
           hitlru = 0;
-          hitlfu = 0;
           hitdwc = 0;
         }
       }
       assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
       assert(dwc['memory'].size <= capacity);
       console.debug('LRU hit rate even 10', hitlru * 100 / repeat);
-      console.debug('LFU hit rate even 10', hitlfu * 100 / repeat);
       console.debug('DWC hit rate even 10', hitdwc * 100 / repeat);
       console.debug('DWC / LRU hit rate ratio even 10', `${hitdwc / hitlru * 100 | 0}%`);
       assert(hitdwc / hitlru * 100 > 95);
@@ -264,32 +234,27 @@ describe('Unit: lib/cache', () => {
 
       const capacity = 10;
       const lru = new LRUCache<number, number>(capacity);
-      const lfu = new LFUCache<number, number>(capacity);
       const dwc = new Cache<number, number>(capacity);
 
       const repeat = capacity * 1000;
       const warmup = capacity * 1000;
       let hitlru = 0;
-      let hitlfu = 0;
       let hitdwc = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() < 0.4
           ? Math.random() * capacity * 1 | 0
           : Math.random() * capacity * 9 + capacity | 0;
         hitlru += +lru.put(key, i);
-        hitlfu += +lfu.put(key, i);
         dwc.get(key);
         hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
           hitlru = 0;
-          hitlfu = 0;
           hitdwc = 0;
         }
       }
       assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
       assert(dwc['memory'].size <= capacity);
       console.debug('LRU hit rate uneven 10', hitlru * 100 / repeat);
-      console.debug('LFU hit rate uneven 10', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 10', hitdwc * 100 / repeat);
       console.debug('DWC / LRU hit rate ratio uneven 10', `${hitdwc / hitlru * 100 | 0}%`);
       assert(hitdwc / hitlru * 100 > 170);
@@ -302,30 +267,25 @@ describe('Unit: lib/cache', () => {
 
       const capacity = 100;
       const lru = new LRUCache<number, number>(capacity);
-      const lfu = new LFUCache<number, number>(capacity);
       const dwc = new Cache<number, number>(capacity);
 
       const repeat = capacity * 1000;
       const warmup = capacity * 1000;
       let hitlru = 0;
-      let hitlfu = 0;
       let hitdwc = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() * capacity * 10 | 0;
         hitlru += +lru.put(key, i);
-        hitlfu += +lfu.put(key, i);
         dwc.get(key);
         hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
           hitlru = 0;
-          hitlfu = 0;
           hitdwc = 0;
         }
       }
       assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
       assert(dwc['memory'].size <= capacity);
       console.debug('LRU hit rate even 100', hitlru * 100 / repeat);
-      console.debug('LFU hit rate even 100', hitlfu * 100 / repeat);
       console.debug('DWC hit rate even 100', hitdwc * 100 / repeat);
       console.debug('DWC / LRU hit rate ratio even 100', `${hitdwc / hitlru * 100 | 0}%`);
       assert(hitdwc / hitlru * 100 > 99);
@@ -338,13 +298,11 @@ describe('Unit: lib/cache', () => {
 
       const capacity = 100;
       const lru = new LRUCache<number, number>(capacity);
-      const lfu = new LFUCache<number, number>(capacity);
       const dwc = new Cache<number, number>(capacity);
 
       const repeat = capacity * 1000;
       const warmup = capacity * 1000;
       let hitlru = 0;
-      let hitlfu = 0;
       let hitdwc = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
         // DWCは静的な偏りの抽出能力が高いだけのようだが偏りがない場合でもLRUとほぼ遜色ない
@@ -352,19 +310,16 @@ describe('Unit: lib/cache', () => {
           ? Math.random() * capacity * 1 | 0
           : Math.random() * capacity * 9 + capacity | 0;
         hitlru += +lru.put(key, i);
-        hitlfu += +lfu.put(key, i);
         dwc.get(key);
         hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
           hitlru = 0;
-          hitlfu = 0;
           hitdwc = 0;
         }
       }
       assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
       assert(dwc['memory'].size <= capacity);
       console.debug('LRU hit rate uneven 100', hitlru * 100 / repeat);
-      console.debug('LFU hit rate uneven 100', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 100', hitdwc * 100 / repeat);
       console.debug('DWC / LRU hit rate ratio uneven 100', `${hitdwc / hitlru * 100 | 0}%`);
       assert(hitdwc / hitlru * 100 > 200);
@@ -377,13 +332,11 @@ describe('Unit: lib/cache', () => {
 
       const capacity = 100;
       const lru = new LRUCache<number, number>(capacity);
-      const lfu = new LFUCache<number, number>(capacity);
       const dwc = new Cache<number, number>(capacity);
 
       const repeat = capacity * 1000;
       const warmup = capacity * 1000;
       let hitlru = 0;
-      let hitlfu = 0;
       let hitdwc = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() < 0.4
@@ -392,19 +345,16 @@ describe('Unit: lib/cache', () => {
           // DWCは推移的な分散には影響されない
           : Math.random() * capacity * 9 + capacity + i | 0;
         hitlru += +lru.put(key, i);
-        hitlfu += +lfu.put(key, i);
         dwc.get(key);
         hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
           hitlru = 0;
-          hitlfu = 0;
           hitdwc = 0;
         }
       }
       assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
       assert(dwc['memory'].size <= capacity);
       console.debug('LRU hit rate uneven 100 transitive distribution', hitlru * 100 / repeat);
-      console.debug('LFU hit rate uneven 100 transitive distribution', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 100 transitive distribution', hitdwc * 100 / repeat);
       console.debug('DWC / LRU hit rate ratio uneven 100 transitive distribution', `${hitdwc / hitlru * 100 | 0}%`);
       assert(hitdwc / hitlru * 100 > 200);
@@ -417,13 +367,11 @@ describe('Unit: lib/cache', () => {
 
       const capacity = 100;
       const lru = new LRUCache<number, number>(capacity);
-      const lfu = new LFUCache<number, number>(capacity);
       const dwc = new Cache<number, number>(capacity);
 
       const repeat = capacity * 1000;
       const warmup = capacity * 1000;
       let hitlru = 0;
-      let hitlfu = 0;
       let hitdwc = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() < 0.4
@@ -437,19 +385,16 @@ describe('Unit: lib/cache', () => {
           ? Math.random() * capacity * 1 - i / 10 | 0
           : Math.random() * capacity * 9 + capacity + i | 0;
         hitlru += +lru.put(key, i);
-        hitlfu += +lfu.put(key, i);
         dwc.get(key);
         hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
           hitlru = 0;
-          hitlfu = 0;
           hitdwc = 0;
         }
       }
       assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
       assert(dwc['memory'].size <= capacity);
       console.debug('LRU hit rate uneven 100 transitive bias', hitlru * 100 / repeat);
-      console.debug('LFU hit rate uneven 100 transitive bias', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 100 transitive bias', hitdwc * 100 / repeat);
       console.debug('DWC / LRU hit rate ratio uneven 100 transitive bias', `${hitdwc / hitlru * 100 | 0}%`);
       assert(hitdwc / hitlru * 100 > 90);
@@ -462,32 +407,27 @@ describe('Unit: lib/cache', () => {
 
       const capacity = 100;
       const lru = new LRUCache<number, number>(capacity);
-      const lfu = new LFUCache<number, number>(capacity);
       const dwc = new Cache<number, number>(capacity);
 
       const repeat = capacity * 1000;
       const warmup = capacity * 1000;
       let hitlru = 0;
-      let hitlfu = 0;
       let hitdwc = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() < 0.4
           ? Math.random() * capacity * 1 | 0
           : capacity + i % (capacity * 10);
         hitlru += +lru.put(key, i);
-        hitlfu += +lfu.put(key, i);
         dwc.get(key);
         hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
           hitlru = 0;
-          hitlfu = 0;
           hitdwc = 0;
         }
       }
       assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
       assert(dwc['memory'].size <= capacity);
       console.debug('LRU hit rate uneven 100 sequential', hitlru * 100 / repeat);
-      console.debug('LFU hit rate uneven 100 sequential', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 100 sequential', hitdwc * 100 / repeat);
       console.debug('DWC / LRU hit rate ratio uneven 100 sequential', `${hitdwc / hitlru * 100 | 0}%`);
       assert(hitdwc / hitlru * 100 > 270);
@@ -500,32 +440,27 @@ describe('Unit: lib/cache', () => {
 
       const capacity = 100;
       const lru = new LRUCache<number, number>(capacity);
-      const lfu = new LFUCache<number, number>(capacity);
       const dwc = new Cache<number, number>(capacity);
 
       const repeat = capacity * 1000;
       const warmup = capacity * 1000;
       let hitlru = 0;
-      let hitlfu = 0;
       let hitdwc = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() < 0.1
           ? Math.random() * capacity * 1 | 0
           : capacity + i >> 1 << 1;
         hitlru += +lru.put(key, i);
-        hitlfu += +lfu.put(key, i);
         dwc.get(key);
         hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
           hitlru = 0;
-          hitlfu = 0;
           hitdwc = 0;
         }
       }
       assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
       assert(dwc['memory'].size <= capacity);
       console.debug('LRU hit rate uneven 100 adversarial', hitlru * 100 / repeat);
-      console.debug('LFU hit rate uneven 100 adversarial', hitlfu * 100 / repeat);
       console.debug('DWC hit rate uneven 100 adversarial', hitdwc * 100 / repeat);
       console.debug('DWC / LRU hit rate ratio uneven 100 adversarial', `${hitdwc / hitlru * 100 | 0}%`);
       assert(hitdwc / hitlru * 100 > 100);
