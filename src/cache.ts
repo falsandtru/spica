@@ -162,11 +162,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { LRU, LFU, Total } = this.stats;
     // 速度への影響を確認できなかったため毎回再計算
     //if ((LRU[0] + LFU[0]) % step) return;
-    const { capacity, indexes } = this;
+    const { capacity, ratio, indexes } = this;
     const window = capacity;
     const rateR = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1]);
     const rateF = rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1]);
-    const ratio = this.ratio;
     const isCalculable = Total[1] > 0;
     const isLRUFilled = indexes.LRU.length >= capacity * (100 - ratio) / 100;
     const isLFUFilled = indexes.LFU.length >= capacity * ratio / 100;
