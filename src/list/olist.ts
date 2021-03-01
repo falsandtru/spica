@@ -86,7 +86,6 @@ export class OList<K, V = undefined> {
     const node = this.seek(key, index);
     if (!node) return this.add(key, value);
     assert(this.cursor === node.index);
-    this.head = node.index;
     node.value = value;
     return true;
   }

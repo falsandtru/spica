@@ -307,16 +307,16 @@ describe('Unit: lib/olist', () => {
       assert(list.put(1, 0) === true);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
+          [2, ~2, 2],
           [1, 0, 1],
           [0, ~0, 0],
-          [2, ~2, 2],
         ],
         array: [
           [0, ~0, 0],
           [1, 0, 1],
           [2, ~2, 2],
         ],
-        head: 1,
+        head: 2,
         cursor: 1,
         length: 3,
       });

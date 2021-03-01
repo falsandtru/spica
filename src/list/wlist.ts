@@ -98,7 +98,6 @@ export class WList<K, V = undefined> {
     if (this.secure(size - node.size) && !node.next) return this.put(key, value, size);
     assert(this.cursor === node.index);
     this.size += size - node.size;
-    this.head = node.index;
     node.value = value;
     node.size = size;
     return true;
