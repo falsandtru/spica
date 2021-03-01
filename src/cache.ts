@@ -182,7 +182,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     }
     // LRUに収束させない
     else
-    if (isCalculable && ratio > 50 && isLRUFilled && rateR > rateF) {
+    if (isCalculable && ratio > 10 && isLRUFilled && rateR > rateF) {
       //ratio % 10 || console.debug('-', this.ratio, LRU, LFU, Total);
       this.ratio -= step;
     }
@@ -194,12 +194,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       if (ratio < 50 && rateR <= rateF && rate(window / 2 | 0, LRU[0], Total[0], LRU[1], Total[1]) < 100) {
         //ratio % 10 || console.debug('!', this.ratio, LRU, LFU, Total, rate(window / 2 | 0, LRU[0], Total[0], LRU[1], Total[1]));
         this.ratio = 50;
-      }
-      // 推移的アクセスでLRUを拡大
-      else
-      if (ratio > 10 && rate(window / 2 | 0, LFU[0], Total[0], LFU[1], Total[1]) * 1.01 <= rate(window, LFU[0], Total[0], LFU[1], Total[1])) {
-        //ratio % 10 || console.debug('>', this.ratio, LRU, LFU, Total, rate(window / 2 | 0, LFU[0], Total[0], LFU[1], Total[1]), rate(window, LFU[0], Total[0], LFU[1], Total[1]));
-        this.ratio -= step;
       }
     }
     assert(LRU[0] + LFU[0] <= window);
