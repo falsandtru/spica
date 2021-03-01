@@ -60,7 +60,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { LRU, LFU } = this.indexes;
 
     if (this.size === this.capacity) {
-      const key = LFU.length === this.capacity || LFU.length > this.capacity * this.ratio / 100
+      const key = false
+        || LFU.length === this.capacity
+        || LFU.length > this.capacity * this.ratio / 100
+        || LFU.length > this.capacity / 2 && LFU.pop(false)?.value! < this.clock - this.capacity * 16
         ? LFU.pop()!.key
         : LRU.pop()!.key;
       assert(this.memory.has(key));
@@ -147,10 +150,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public [Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
     return this.memory[Symbol.iterator]();
   }
+  private clock = 0;
   private memory = new Map<K, V>();
   private indexes = {
     LRU: new OList<K>(this.capacity),
-    LFU: new OList<K>(this.capacity),
+    LFU: new OList<K, number>(this.capacity),
   } as const;
   private stats = {
     LRU: tuple(0, 0),
@@ -165,19 +169,18 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { capacity, ratio, indexes } = this;
     const window = capacity;
     const rateR = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1]);
-    const rateF = rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1]);
+    const rateF = rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1]) * indexes.LRU.length / indexes.LFU.length | 0;
     const isCalculable = Total[1] > 0;
     const isLRUFilled = indexes.LRU.length >= capacity * (100 - ratio) / 100;
     const isLFUFilled = indexes.LFU.length >= capacity * ratio / 100;
     const step = 1;
     // LFUとLRUを広く往復させないとヒット率が上がらない
+    // TODO: エージングによるLFU固定化回避の最適化
     if (isCalculable && ratio < 100 && isLFUFilled && rateF > rateR) {
       //ratio % 10 || console.debug('+', this.ratio, LRU, LFU, Total);
       this.ratio += step;
     }
     // LRUに収束させない
-    // LFUと半々で均等分布においてLRUのみと同等効率
-    // これ以下に下げても(LRUを50%超にしても)均等分布ですら効率が悪化する
     else
     if (isCalculable && ratio > 50 && isLRUFilled && rateR > rateF) {
       //ratio % 10 || console.debug('-', this.ratio, LRU, LFU, Total);
@@ -189,7 +192,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (isCalculable && ratio <= 50 && isLFUFilled && isLRUFilled) {
       // シーケンシャルアクセスでLRUの拡大を制限しLFUを保護
       if (ratio < 50 && rateR <= rateF && rate(window / 2 | 0, LRU[0], Total[0], LRU[1], Total[1]) < 100) {
-        //ratio % 10 || console.debug('<', this.ratio, LRU, LFU, Total, rate(window / 2 | 0, LRU[0], Total[0], LRU[1], Total[1]));
+        //ratio % 10 || console.debug('!', this.ratio, LRU, LFU, Total, rate(window / 2 | 0, LRU[0], Total[0], LRU[1], Total[1]));
         this.ratio = 50;
       }
       // 推移的アクセスでLRUを拡大
@@ -223,7 +226,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     assert(index > -1 === this.memory.has(key));
     if (index === -1) return false;
     ++this.stats.LRU[0];
-    if (index === LRU.peek()!.index) return !this.indexes.LFU.add(LRU.shift()!.key);
+    ++this.clock;
+    if (index === LRU.peek()!.index) return !this.indexes.LFU.add(LRU.shift()!.key, this.clock);
     LRU.raiseToTop(index);
     return true;
   }
@@ -232,8 +236,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const index = LFU.findIndex(key) ?? -1;
     if (index === -1) return false;
     ++this.stats.LFU[0];
+    ++this.clock;
     if (index === LFU.peek()!.index) return true;
     LFU.raiseToTop(index);
+    LFU.put(key, this.clock);
     return true;
   }
 }

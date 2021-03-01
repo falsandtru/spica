@@ -224,6 +224,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['memory'].size <= capacity);
       console.debug('LRU hit rate even 10', hitlru * 100 / repeat);
       console.debug('DWC hit rate even 10', hitdwc * 100 / repeat);
+      console.debug('LFU ratio even 10', dwc['ratio'], dwc['indexes'].LFU.length * 100 / dwc.size | 0);
       console.debug('DWC / LRU hit rate ratio even 10', `${hitdwc / hitlru * 100 | 0}%`);
       assert(hitdwc / hitlru * 100 > 95);
     });
@@ -256,8 +257,9 @@ describe('Unit: lib/cache', () => {
       assert(dwc['memory'].size <= capacity);
       console.debug('LRU hit rate uneven 10', hitlru * 100 / repeat);
       console.debug('DWC hit rate uneven 10', hitdwc * 100 / repeat);
+      console.debug('LFU ratio uneven 10', dwc['ratio'], dwc['indexes'].LFU.length * 100 / dwc.size | 0);
       console.debug('DWC / LRU hit rate ratio uneven 10', `${hitdwc / hitlru * 100 | 0}%`);
-      assert(hitdwc / hitlru * 100 > 170);
+      assert(hitdwc / hitlru * 100 > 110);
     });
 
     it('rate even 100', function () {
@@ -287,6 +289,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['memory'].size <= capacity);
       console.debug('LRU hit rate even 100', hitlru * 100 / repeat);
       console.debug('DWC hit rate even 100', hitdwc * 100 / repeat);
+      console.debug('LFU ratio even 100', dwc['ratio'], dwc['indexes'].LFU.length * 100 / dwc.size | 0);
       console.debug('DWC / LRU hit rate ratio even 100', `${hitdwc / hitlru * 100 | 0}%`);
       assert(hitdwc / hitlru * 100 > 99);
     });
@@ -321,6 +324,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['memory'].size <= capacity);
       console.debug('LRU hit rate uneven 100', hitlru * 100 / repeat);
       console.debug('DWC hit rate uneven 100', hitdwc * 100 / repeat);
+      console.debug('LFU ratio uneven 100', dwc['ratio'], dwc['indexes'].LFU.length * 100 / dwc.size | 0);
       console.debug('DWC / LRU hit rate ratio uneven 100', `${hitdwc / hitlru * 100 | 0}%`);
       assert(hitdwc / hitlru * 100 > 200);
     });
@@ -356,6 +360,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['memory'].size <= capacity);
       console.debug('LRU hit rate uneven 100 transitive distribution', hitlru * 100 / repeat);
       console.debug('DWC hit rate uneven 100 transitive distribution', hitdwc * 100 / repeat);
+      console.debug('LFU ratio uneven 100 transitive distribution', dwc['ratio'], dwc['indexes'].LFU.length * 100 / dwc.size | 0);
       console.debug('DWC / LRU hit rate ratio uneven 100 transitive distribution', `${hitdwc / hitlru * 100 | 0}%`);
       assert(hitdwc / hitlru * 100 > 200);
     });
@@ -396,6 +401,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['memory'].size <= capacity);
       console.debug('LRU hit rate uneven 100 transitive bias', hitlru * 100 / repeat);
       console.debug('DWC hit rate uneven 100 transitive bias', hitdwc * 100 / repeat);
+      console.debug('LFU ratio uneven 100 transitive bias', dwc['ratio'], dwc['indexes'].LFU.length * 100 / dwc.size | 0);
       console.debug('DWC / LRU hit rate ratio uneven 100 transitive bias', `${hitdwc / hitlru * 100 | 0}%`);
       assert(hitdwc / hitlru * 100 > 90);
     });
@@ -429,6 +435,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['memory'].size <= capacity);
       console.debug('LRU hit rate uneven 100 sequential', hitlru * 100 / repeat);
       console.debug('DWC hit rate uneven 100 sequential', hitdwc * 100 / repeat);
+      console.debug('LFU ratio uneven 100 sequential', dwc['ratio'], dwc['indexes'].LFU.length * 100 / dwc.size | 0);
       console.debug('DWC / LRU hit rate ratio uneven 100 sequential', `${hitdwc / hitlru * 100 | 0}%`);
       assert(hitdwc / hitlru * 100 > 270);
     });
@@ -462,6 +469,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['memory'].size <= capacity);
       console.debug('LRU hit rate uneven 100 adversarial', hitlru * 100 / repeat);
       console.debug('DWC hit rate uneven 100 adversarial', hitdwc * 100 / repeat);
+      console.debug('LFU ratio uneven 100 adversarial', dwc['ratio'], dwc['indexes'].LFU.length * 100 / dwc.size | 0);
       console.debug('DWC / LRU hit rate ratio uneven 100 adversarial', `${hitdwc / hitlru * 100 | 0}%`);
       assert(hitdwc / hitlru * 100 > 100);
     });

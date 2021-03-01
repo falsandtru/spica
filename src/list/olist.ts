@@ -90,22 +90,22 @@ export class OList<K, V = undefined> {
     node.value = value;
     return true;
   }
-  public shift(): { index: number; key: K; value: V; } | undefined {
+  public shift(deletion = true): { index: number; key: K; value: V; } | undefined {
     //assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
     const node = this.nodes[this.head];
     assert(this.length === 0 ? !node : node);
     if (!node) return;
     const { index, key, value } = node;
-    this.delete(key, index);
+    deletion && this.delete(key, index);
     return { index, key, value };
   }
-  public pop(): { index: number; key: K; value: V; } | undefined {
+  public pop(deletion = true): { index: number; key: K; value: V; } | undefined {
     //assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
     const node = this.nodes[this.head]?.prev;
     assert(this.length === 0 ? !node : node);
     if (!node) return;
     const { index, key, value } = node;
-    this.delete(key, index);
+    deletion && this.delete(key, index);
     return { index, key, value };
   }
   public delete(key: K, index?: number): V | undefined {
