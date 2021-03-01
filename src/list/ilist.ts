@@ -138,7 +138,7 @@ export class IList<K, V = undefined> {
       ? this.nodes[index]
       : void 0;
     return node && {
-      index: this.cursor = node.index,
+      index: node.index,
       key: node.key,
       value: node.value,
     };
