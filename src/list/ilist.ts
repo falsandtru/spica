@@ -80,25 +80,19 @@ export class IList<K, V = undefined> {
     node.value = value;
     return true;
   }
-  public shift(): { index: number; key: K; value: V; } | undefined {
+  public shift(): { key: K; value: V; } | undefined {
     assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
     const node = this.nodes[this.head];
     assert(this.length === 0 ? !node : node);
-    if (!node) return;
-    const { index, key, value } = node;
-    this.delete(key, index);
-    return { index, key, value };
+    return node && this.delete(node.key, node.index);
   }
-  public pop(): { index: number; key: K; value: V; } | undefined {
+  public pop(): { key: K; value: V; } | undefined {
     assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
     const node = this.nodes[this.head]?.prev;
     assert(this.length === 0 ? !node : node);
-    if (!node) return;
-    const { index, key, value } = node;
-    this.delete(key, index);
-    return { index, key, value };
+    return node && this.delete(node.key, node.index);
   }
-  public delete(key: K, index?: number): V | undefined {
+  public delete(key: K, index?: number): { key: K; value: V; } | undefined {
     const cursor = this.cursor;
     const node = this.seek(key, index);
     if (!node) return;
@@ -123,7 +117,7 @@ export class IList<K, V = undefined> {
     assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
     assert(this.length === 0 ? !this.nodes[this.cursor] : this.nodes[this.cursor]);
     assert(this.length > 10 || [...this].length === this.length);
-    return value;
+    return { key, value };
   }
   public peek(at?: -1 | 0): { index: number; key: K; value: V; } | undefined {
     const node = at ? this.nodes[this.head]?.prev : this.nodes[this.head];

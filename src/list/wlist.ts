@@ -110,25 +110,19 @@ export class WList<K, V = undefined> {
     }
     return change;
   }
-  public shift(): { index: number; key: K; value: V; size: number; } | undefined {
+  public shift(): { key: K; value: V; size: number; } | undefined {
     //assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
     const node = this.nodes[this.head];
     assert(this.length === 0 ? !node : node);
-    if (!node) return;
-    const { index, key, value, size } = node;
-    this.delete(key, index);
-    return { index, key, value, size };
+    return node && this.delete(node.key, node.index);
   }
-  public pop(): { index: number; key: K; value: V; size: number; } | undefined {
+  public pop(): { key: K; value: V; size: number; } | undefined {
     //assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
     const node = this.nodes[this.head]?.prev;
     assert(this.length === 0 ? !node : node);
-    if (!node) return;
-    const { index, key, value, size } = node;
-    this.delete(key, index);
-    return { index, key, value, size };
+    return node && this.delete(node.key, node.index);
   }
-  public delete(key: K, index?: number): V | undefined {
+  public delete(key: K, index?: number): { key: K; value: V; size: number; } | undefined {
     const cursor = this.cursor;
     const node = this.seek(key, index);
     if (!node) return;
@@ -153,7 +147,7 @@ export class WList<K, V = undefined> {
       default:
         splice(indexes, indexOf(indexes, node.index), 1);
     }
-    const { prev, next, value } = node;
+    const { prev, next, value, size } = node;
     prev.next = next;
     next.prev = prev;
     if (this.head === node.index) {
@@ -167,7 +161,7 @@ export class WList<K, V = undefined> {
     //assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
     //assert(this.length === 0 ? !this.nodes[this.cursor] : this.nodes[this.cursor]);
     //assert(this.length > 10 || [...this].length === this.length);
-    return value;
+    return { key, value, size };
   }
   public peek(at?: -1 | 0): { index: number; key: K; value: V; size: number; } | undefined {
     const node = at ? this.nodes[this.head]?.prev : this.nodes[this.head];
