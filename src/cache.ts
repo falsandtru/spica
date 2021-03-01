@@ -213,8 +213,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     ++this.clock;
     ++this.clockR;
     if (LRU.node(index)!.value + LRU.length / 3 > this.clockR) {
-      LRU.raiseToTop(index);
       LRU.put(key, this.clockR);
+      LRU.raiseToTop(index);
       return true;
     }
     LRU.delete(key);
@@ -228,8 +228,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     ++this.stats.LFU[0];
     ++this.clock;
     if (index === LFU.peek()!.index) return true;
-    LFU.raiseToTop(index);
     LFU.put(key, this.clock);
+    LFU.raiseToTop(index);
     return true;
   }
 }
