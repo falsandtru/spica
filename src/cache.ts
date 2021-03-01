@@ -77,7 +77,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       }
     }
 
-    LRU.add(key);
+    LRU.add(key, ++this.clockR);
     this.memory.set(key, value);
     return false;
   }
@@ -151,9 +151,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     return this.memory[Symbol.iterator]();
   }
   private clock = 0;
+  private clockR = 0;
   private memory = new Map<K, V>();
   private indexes = {
-    LRU: new OList<K>(this.capacity),
+    LRU: new OList<K, number>(this.capacity),
     LFU: new OList<K, number>(this.capacity),
   } as const;
   private stats = {
@@ -210,6 +211,12 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (index === -1) return false;
     ++this.stats.LRU[0];
     ++this.clock;
+    ++this.clockR;
+    if (LRU.node(index)!.value + LRU.length / 3 > this.clockR) {
+      LRU.raiseToTop(index);
+      LRU.put(key, this.clockR);
+      return true;
+    }
     LRU.delete(key);
     LFU.add(key, this.clock);
     return true;
