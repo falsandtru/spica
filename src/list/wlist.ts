@@ -178,11 +178,10 @@ export class WList<K, V = undefined> {
       size: node.size,
     };
   }
-  public node(index: number | undefined): { index: number; key: K; value: V; size: number; } | undefined {
-    const node = index !== void 0
-      ? this.nodes[index]
-      : void 0;
-    return node && {
+  public node(index: number): { index: number; key: K; value: V; size: number; } {
+    const node = this.nodes[index];
+    if (!node) throw new Error(`Spica: WList: Invalid index.`);
+    return {
       index: node.index,
       key: node.key,
       value: node.value,

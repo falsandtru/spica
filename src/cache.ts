@@ -209,7 +209,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     ++this.stats.LRU[0];
     ++this.clock;
     ++this.clockR;
-    if (LRU.node(index)!.value + LRU.length / 3 > this.clockR) {
+    if (LRU.node(index).value + LRU.length / 3 > this.clockR) {
       LRU.put(key, this.clockR);
       LRU.raiseToTop(index);
       return true;
