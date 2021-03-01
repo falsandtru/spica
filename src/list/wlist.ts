@@ -169,8 +169,8 @@ export class WList<K, V = undefined> {
     //assert(this.length > 10 || [...this].length === this.length);
     return value;
   }
-  public peek(): { index: number; key: K; value: V; size: number; } | undefined {
-    const node = this.nodes[this.head];
+  public peek(at?: -1 | 0): { index: number; key: K; value: V; size: number; } | undefined {
+    const node = at ? this.nodes[this.head]?.prev : this.nodes[this.head];
     return node && {
       index: node.index,
       key: node.key,
@@ -187,6 +187,12 @@ export class WList<K, V = undefined> {
       value: node.value,
       size: node.size,
     };
+  }
+  public next(index: number): { index: number; key: K; value: V; size: number; } {
+    return this.node(this.nodes[index]?.next.index ?? this.capacity);
+  }
+  public prev(index: number): { index: number; key: K; value: V; size: number; } {
+    return this.node(this.nodes[index]?.prev.index ?? this.capacity);
   }
   public find(key: K, index?: number): V | undefined {
     return this.seek(key, index)?.value;
@@ -212,13 +218,14 @@ export class WList<K, V = undefined> {
     if (!node) return;
     if (equal(node.key, key)) return this.cursor = cursor, node;
   }
-  private insert(node: Node<K, V>, before: number): void {
-    if (node.index === before) return;
+  public insert(index: number, before: number): boolean {
+    if (index === before) return false;
     const a1 = this.nodes[before];
-    if (!a1) return;
-    const b1 = node;
-    if (a1 === b1) return;
-    if (b1.next === a1) return;
+    if (!a1) return false;
+    const b1 = this.nodes[index];
+    if (!b1) return false;
+    assert(a1 !== b1);
+    if (b1.next === a1) return false;
     const a0 = a1.prev;
     const b0 = b1.prev;
     const b2 = b1.next;
@@ -235,13 +242,14 @@ export class WList<K, V = undefined> {
     //assert(b0.next === b2);
     //assert(b2.prev === b0);
     //assert(this.length > 10 || [...this].length === this.length);
+    return true;
   }
   public raiseToTop(index: number): boolean {
     if (this.length <= 1) return false;
     if (index === this.head) return false;
     const node = this.nodes[index];
     if (!node) return false;
-    this.insert(node, this.head);
+    this.insert(index, this.head);
     this.head = index;
     return true;
   }
@@ -250,7 +258,7 @@ export class WList<K, V = undefined> {
     if (index === this.head) return false;
     const node = this.nodes[index];
     if (!node) return false;
-    this.insert(node, node.prev.index);
+    this.insert(node.index, node.prev.index);
     if (node.next.index === this.head) {
       this.head = node.index;
     }
@@ -265,8 +273,8 @@ export class WList<K, V = undefined> {
     if (node1.next === node2) return this.raiseToPrev(index2);
     if (node2.next === node1) return this.raiseToPrev(index1);
     const node3 = node2.next;
-    this.insert(node2, node1.index);
-    this.insert(node1, node3.index);
+    this.insert(node2.index, node1.index);
+    this.insert(node1.index, node3.index);
     switch (this.head) {
       case node1.index:
         this.head = node2.index;

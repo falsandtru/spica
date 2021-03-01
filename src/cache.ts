@@ -61,7 +61,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       const key = false
         || LFU.length === this.capacity
         || LFU.length > this.capacity * this.ratio / 100
-        || LFU.length > this.capacity / 2 && LFU.pop(false)?.value! < this.clock - this.capacity * 8
+        || LFU.length > this.capacity / 2 && LFU.peek(-1)?.value! < this.clock - this.capacity * 8
         ? LFU.pop()!.key
         : LRU.pop()!.key;
       assert(this.memory.has(key));
