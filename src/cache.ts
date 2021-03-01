@@ -7,8 +7,6 @@ import { tuple } from './tuple';
 
 // Dual Window Cache
 
-// いくつかのキャッシュ破壊防止能力が欠けているがLRUの上位互換としてLRUを置換できることを優先する
-
 /*
 比較検討
 
@@ -175,7 +173,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const isLRUFilled = indexes.LRU.length >= capacity * (100 - ratio) / 100;
     const isLFUFilled = indexes.LFU.length >= capacity * ratio / 100;
     const step = 1;
-    // LFUとLRUを広く往復させないとヒット率が上がらない
     if (isCalculable && ratio < 100 && isLFUFilled && rateF > rateR) {
       //ratio % 10 || console.debug('+', this.ratio, LRU, LFU, Total);
       this.ratio += step;
