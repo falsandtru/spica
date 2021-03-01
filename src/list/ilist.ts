@@ -160,7 +160,7 @@ export class IList<K, V = undefined> {
   }
   private seek(key: K, cursor = this.cursor): Node<K, V> | undefined {
     let node: Node<K, V> | undefined;
-    node = this.nodes[cursor = cursor < 0 ? this.head : cursor];
+    node = this.nodes[cursor];
     if (!node) return;
     if (equal(node.key, key)) return this.cursor = cursor, node;
     for (let i = 1; i < this.length && (node = node.next); ++i) {
