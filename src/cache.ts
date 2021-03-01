@@ -186,16 +186,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       //ratio % 10 || console.debug('-', this.ratio, LRU, LFU, Total);
       this.ratio -= step;
     }
-    // シーケンシャルおよび推移的アクセスパターンへの対処
-    // 削除しても他のパターンに悪影響なし
-    else
-    if (isCalculable && ratio <= 50 && isLFUFilled && isLRUFilled) {
-      // シーケンシャルアクセスでLRUの拡大を制限しLFUを保護
-      if (ratio < 50 && rateR <= rateF && rate(window / 2 | 0, LRU[0], Total[0], LRU[1], Total[1]) < 100) {
-        //ratio % 10 || console.debug('!', this.ratio, LRU, LFU, Total, rate(window / 2 | 0, LRU[0], Total[0], LRU[1], Total[1]));
-        this.ratio = 50;
-      }
-    }
     assert(LRU[0] + LFU[0] <= window);
     assert(LRU[1] + LFU[1] <= window);
     if (LRU[0] + LFU[0] === window) {
