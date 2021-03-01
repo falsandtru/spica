@@ -259,7 +259,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC hit rate uneven 10', hitdwc * 100 / repeat);
       console.debug('LFU ratio uneven 10', dwc['ratio'], dwc['indexes'].LFU.length * 100 / dwc.size | 0);
       console.debug('DWC / LRU hit rate ratio uneven 10', `${hitdwc / hitlru * 100 | 0}%`);
-      assert(hitdwc / hitlru * 100 > 110);
+      assert(hitdwc / hitlru * 100 > 100);
     });
 
     it('rate even 100', function () {
