@@ -37,7 +37,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     private readonly capacity: number,
     opts: CacheOptions<K, V> = {},
   ) {
-    if (capacity > 0 === false) throw new Error(`Spica: Cache: Cache capacity must be greater than 0.`);
+    if (capacity < 1) throw new Error(`Spica: Cache: Cache capacity must be 1 or more.`);
     extend(this.settings, opts);
   }
   private readonly settings: CacheOptions<K, V> = {
