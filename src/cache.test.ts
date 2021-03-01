@@ -474,6 +474,40 @@ describe('Unit: lib/cache', () => {
       assert(hitdwc / hitlru * 100 > 100);
     });
 
+    it('rate uneven 200', function () {
+      if (!navigator.userAgent.includes('Chrome')) return;
+      this.timeout(30 * 1e3);
+      this.retries(3);
+
+      const capacity = 200;
+      const lru = new LRUCache<number, number>(capacity);
+      const dwc = new Cache<number, number>(capacity);
+
+      const repeat = capacity * 1000;
+      const warmup = capacity * 1000;
+      let hitlru = 0;
+      let hitdwc = 0;
+      for (let i = 0; i < repeat + warmup; ++i) {
+        const key = Math.random() < 0.4
+          ? Math.random() * capacity * 1 | 0
+          : Math.random() * capacity * 9 + capacity | 0;
+        hitlru += +lru.put(key, i);
+        dwc.get(key);
+        hitdwc += +dwc.put(key, i);
+        if (i + 1 === warmup) {
+          hitlru = 0;
+          hitdwc = 0;
+        }
+      }
+      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
+      assert(dwc['memory'].size <= capacity);
+      console.debug('LRU hit rate uneven 200', hitlru * 100 / repeat);
+      console.debug('DWC hit rate uneven 200', hitdwc * 100 / repeat);
+      console.debug('LFU ratio uneven 200', dwc['ratio'], dwc['indexes'].LFU.length * 100 / dwc.size | 0);
+      console.debug('DWC / LRU hit rate ratio uneven 200', `${hitdwc / hitlru * 100 | 0}%`);
+      assert(hitdwc / hitlru * 100 > 200);
+    });
+
   });
 
 });
