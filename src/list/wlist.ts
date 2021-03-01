@@ -262,8 +262,8 @@ export class WList<K, V = undefined> {
     const node1 = this.nodes[index1];
     const node2 = this.nodes[index2];
     if (!node1 || !node2) return false;
-    if (node1.next === node2) return this.raiseToPrev(index2)
-    if (node2.next === node1) return this.raiseToPrev(index1)
+    if (node1.next === node2) return this.raiseToPrev(index2);
+    if (node2.next === node1) return this.raiseToPrev(index1);
     const node3 = node2.next;
     this.insert(node2, node1.index);
     this.insert(node1, node3.index);
