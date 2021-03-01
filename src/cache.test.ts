@@ -176,20 +176,16 @@ describe('Unit: lib/cache', () => {
 
     class LRUCache<K, V> {
       constructor(public capacity: number) {
+        assert(capacity > 0);
       }
       public index: K[] = [];
       public entries = new Map<K, V>();
       public put(key: K, val: V): boolean {
         const { index, entries } = this;
         const i = index.indexOf(key);
-        if (index.length === this.capacity) {
-          i === -1
-            ? entries.delete(index.pop()!)
-            : index.splice(i, 1);
-        }
-        else {
-          i > -1 && index.splice(i, 1);
-        }
+        i > -1
+          ? index.splice(i, 1)
+          : index.length === this.capacity && entries.delete(index.pop()!);
         index.unshift(key);
         entries.set(key, val);
         assert(index.length <= this.capacity);
