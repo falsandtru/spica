@@ -63,7 +63,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       const key = false
         || LFU.length === this.capacity
         || LFU.length > this.capacity * this.ratio / 100
-        || LFU.length > this.capacity / 2 && LFU.pop(false)?.value! < this.clock - this.capacity * 16
+        || LFU.length > this.capacity / 2 && LFU.pop(false)?.value! < this.clock - this.capacity * 8
         ? LFU.pop()!.key
         : LRU.pop()!.key;
       assert(this.memory.has(key));
@@ -175,7 +175,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const isLFUFilled = indexes.LFU.length >= capacity * ratio / 100;
     const step = 1;
     // LFUとLRUを広く往復させないとヒット率が上がらない
-    // TODO: エージングによるLFU固定化回避の最適化
     if (isCalculable && ratio < 100 && isLFUFilled && rateF > rateR) {
       //ratio % 10 || console.debug('+', this.ratio, LRU, LFU, Total);
       this.ratio += step;
@@ -205,14 +204,14 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     return hit;
   }
   private accessLRU(key: K): boolean {
-    const { LRU } = this.indexes;
+    const { LRU, LFU } = this.indexes;
     const index = LRU.findIndex(key) ?? -1;
     assert(index > -1 === this.memory.has(key));
     if (index === -1) return false;
     ++this.stats.LRU[0];
     ++this.clock;
-    if (index === LRU.peek()!.index) return !this.indexes.LFU.add(LRU.shift()!.key, this.clock);
-    LRU.raiseToTop(index);
+    LRU.delete(key);
+    LFU.add(key, this.clock);
     return true;
   }
   private accessLFU(key: K): boolean {
