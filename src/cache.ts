@@ -46,6 +46,17 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       clear: true,
     },
   };
+  private clock = 0;
+  private clockR = 0;
+  private memory = new Map<K, V>();
+  private readonly indexes = {
+    LRU: new OList<K, number>(this.capacity),
+    LFU: new OList<K, number>(this.capacity),
+  } as const;
+  public get length(): number {
+    //assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
+    return this.indexes.LRU.length + this.indexes.LFU.length;
+  }
   private nullish = false;
   public put(this: Cache<K, undefined>, key: K, value?: V): boolean;
   public put(key: K, value: V): boolean;
@@ -57,7 +68,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
 
     const { LRU, LFU } = this.indexes;
 
-    if (this.size === this.capacity) {
+    if (this.length === this.capacity) {
       const key = false
         || LFU.length === this.capacity
         || LFU.length > this.capacity * this.ratio / 100
@@ -141,20 +152,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       this.settings.disposer(key, value);
     }
   }
-  public get size(): number {
-    //assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
-    return this.indexes.LRU.length + this.indexes.LFU.length;
-  }
   public [Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
     return this.memory[Symbol.iterator]();
   }
-  private clock = 0;
-  private clockR = 0;
-  private memory = new Map<K, V>();
-  private readonly indexes = {
-    LRU: new OList<K, number>(this.capacity),
-    LFU: new OList<K, number>(this.capacity),
-  } as const;
   private stats = {
     LRU: tuple(0, 0),
     LFU: tuple(0, 0),
