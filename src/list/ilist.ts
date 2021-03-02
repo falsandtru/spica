@@ -192,7 +192,7 @@ export class IList<K, V = undefined> {
     assert(this.length > 10 || [...this].length === this.length);
     return true;
   }
-  public moveToTop(index: number): boolean {
+  public moveToHead(index: number): boolean {
     if (this.length <= 1) return false;
     if (index === this.head) return false;
     const node = this.nodes[index];
