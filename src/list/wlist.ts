@@ -40,14 +40,14 @@ export class WList<K, V = undefined> {
       const index = this.head = this.cursor = this.empties.length > 0
         ? this.empties.shift()!
         : this.length;
-      //assert(!nodes[index]);
+      assert(!nodes[index]);
       ++this.length;
       this.size += size;
       this.index.set(key, index);
       nodes[index] =
         new Node(index, key, value, size, head!, head!);
-      //assert(this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
-      //assert(this.length > 10 || [...this].length === this.length);
+      assert(this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
+      assert(this.length > 10 || [...this].length === this.length);
       return index;
     }
     assert(head);
@@ -56,16 +56,16 @@ export class WList<K, V = undefined> {
       const index = this.head = this.cursor = this.empties.length > 0
         ? this.empties.shift()!
         : this.length;
-      //assert(!nodes[index]);
+      assert(!nodes[index]);
       ++this.length;
       this.size += size;
       this.index.set(key, index);
       nodes[index] = head.prev = head.prev.next =
         new Node(index, key, value, size, head, head.prev);
-      //assert(this.length !== 1 || this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
-      //assert(this.length !== 2 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
-      //assert(this.length < 3 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
-      //assert(this.length > 10 || [...this].length === this.length);
+      assert(this.length !== 1 || this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
+      assert(this.length !== 2 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
+      assert(this.length < 3 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
+      assert(this.length > 10 || [...this].length === this.length);
       return index;
     }
     else {
@@ -75,7 +75,7 @@ export class WList<K, V = undefined> {
       assert(garbage.index === this.index.get(garbage.key));
       if (this.secure(size - garbage.size)) return this.add(key, value, size);
       const index = this.head = this.cursor = garbage.index;
-      //assert(nodes[index]);
+      assert(nodes[index]);
       this.index.take(garbage.key);
       this.index.set(key, index);
       this.size += size - garbage.size;
@@ -83,10 +83,10 @@ export class WList<K, V = undefined> {
         new Node(index, key, value, size, head, head.prev.prev);
       // @ts-expect-error
       garbage.key = garbage.value = garbage.prev = garbage.next = void 0;
-      //assert(this.length !== 1 || this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
-      //assert(this.length !== 2 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
-      //assert(this.length < 3 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
-      //assert(this.length > 10 || [...this].length === this.length);
+      assert(this.length !== 1 || this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
+      assert(this.length !== 2 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
+      assert(this.length < 3 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
+      assert(this.length > 10 || [...this].length === this.length);
       return index;
     }
   }
@@ -111,15 +111,15 @@ export class WList<K, V = undefined> {
     return change;
   }
   public shift(): { key: K; value: V; size: number; } | undefined {
-    //assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
+    assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
     const node = this.nodes[this.head];
-    //assert(this.length === 0 ? !node : node);
+    assert(this.length === 0 ? !node : node);
     return node && this.delete(node.key, node.index);
   }
   public pop(): { key: K; value: V; size: number; } | undefined {
-    //assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
+    assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
     const node = this.nodes[this.head]?.prev;
-    //assert(this.length === 0 ? !node : node);
+    assert(this.length === 0 ? !node : node);
     return node && this.delete(node.key, node.index);
   }
   public delete(key: K, index?: number): { key: K; value: V; size: number; } | undefined {
@@ -128,9 +128,9 @@ export class WList<K, V = undefined> {
     if (!node) return;
     this.cursor = cursor;
     assert(this.length > 0);
-    //assert(this.length !== 1 || node === node.prev && node.prev === node.next);
-    //assert(this.length !== 2 || node !== node.prev && node.prev === node.next);
-    //assert(this.length < 3 || node !== node.prev && node.prev !== node.next);
+    assert(this.length !== 1 || node === node.prev && node.prev === node.next);
+    assert(this.length !== 2 || node !== node.prev && node.prev === node.next);
+    assert(this.length < 3 || node !== node.prev && node.prev !== node.next);
     --this.length;
     this.size -= node.size;
     this.empties.push(node.index);
@@ -158,9 +158,9 @@ export class WList<K, V = undefined> {
     }
     // @ts-expect-error
     this.nodes[node.index] = node.key = node.value = node.prev = node.next = void 0;
-    //assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
-    //assert(this.length === 0 ? !this.nodes[this.cursor] : this.nodes[this.cursor]);
-    //assert(this.length > 10 || [...this].length === this.length);
+    assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
+    assert(this.length === 0 ? !this.nodes[this.cursor] : this.nodes[this.cursor]);
+    assert(this.length > 10 || [...this].length === this.length);
     return { key, value, size };
   }
   public peek(at?: -1 | 0): { index: number; key: K; value: V; size: number; } | undefined {
@@ -229,13 +229,13 @@ export class WList<K, V = undefined> {
     b1.prev = a0;
     b0.next = b2;
     b2.prev = b0;
-    //assert(a0.next === b1);
-    //assert(b1.next === a1);
-    //assert(a1.prev === b1);
-    //assert(b1.prev === a0);
-    //assert(b0.next === b2);
-    //assert(b2.prev === b0);
-    //assert(this.length > 10 || [...this].length === this.length);
+    assert(a0.next === b1);
+    assert(b1.next === a1);
+    assert(a1.prev === b1);
+    assert(b1.prev === a0);
+    assert(b0.next === b2);
+    assert(b2.prev === b0);
+    assert(this.length > 10 || [...this].length === this.length);
     return true;
   }
   public moveToHead(index: number): boolean {

@@ -1,7 +1,7 @@
 import { Map } from './global';
 import { min } from './alias';
 import { IterableCollection } from './collection';
-import { OList } from './olist';
+import { IList } from './ilist';
 import { extend } from './assign';
 import { tuple } from './tuple';
 import { equal } from './compare';
@@ -24,6 +24,13 @@ TinyLFU:
 JavaScriptにおける需要を満たさない懸念がある。
 
 */
+
+type Record<V> = {
+  target: 'LRU' | 'LFU';
+  index: number;
+  value: V;
+  size: number;
+};
 
 export interface CacheOptions<K, V = undefined> {
   readonly space?: number;
@@ -53,10 +60,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private readonly space: number;
   private clock = 0;
   private clockR = 0;
-  private memory = new Map<K, { value: V; size: number; }>();
+  private memory = new Map<K, Record<V>>();
   private readonly indexes = {
-    LRU: new OList<K, number>(this.capacity),
-    LFU: new OList<K, number>(this.capacity),
+    LRU: new IList<K, number>(this.capacity, true),
+    LFU: new IList<K, number>(this.capacity, true),
   } as const;
   public get length(): number {
     //assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
@@ -107,9 +114,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     assert(!this.memory.has(key));
     this.secure(size);
 
-    this.indexes.LRU.add(key, ++this.clockR);
+    const { LRU } = this.indexes;
     this.space && (this.size += size);
-    this.memory.set(key, { value, size });
+    this.memory.set(key, { target: 'LRU', index: LRU.add(key, ++this.clockR), value, size });
     return false;
   }
   public set(this: Cache<K, undefined>, key: K, value?: V, size?: number): this;
@@ -120,17 +127,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   }
   public get(key: K): V | undefined {
     const record = this.memory.get(key);
-    if (record) {
-      assert(this.memory.has(key));
-      this.access(key);
-      ++this.stats.Total[0];
-      this.slide();
-    }
-    else {
-      assert(!this.memory.has(key));
-      ++this.stats.Total[0];
-      this.slide();
-    }
+    record && this.access(key, record);
+    ++this.stats.Total[0];
+    this.slide();
     return record?.value;
   }
   public has(key: K): boolean {
@@ -139,21 +138,16 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     return this.memory.has(key);
   }
   public delete(key: K): boolean {
-    if (!this.has(key)) return false;
-    const { LRU, LFU } = this.indexes;
-    for (const index of [LFU, LRU]) {
-      const i = index.findIndex(key) ?? -1;
-      if (i === -1) continue;
-      index.delete(key);
-      const { value, size } = this.memory.get(key)!;
-      this.space && (this.size -= size);
-      this.memory.delete(key);
-      if (this.settings.disposer && this.settings.capture!.delete) {
-        this.settings.disposer(key, value);
-      }
-      return true;
+    const record = this.memory.get(key);
+    if (!record) return false;
+    const { target, index, value, size } = record;
+    this.indexes[target].delete(key, index);
+    this.space && (this.size -= size);
+    this.memory.delete(key);
+    if (this.settings.disposer && this.settings.capture!.delete) {
+      this.settings.disposer(key, value);
     }
-    return false;
+    return true;
   }
   public clear(): void {
     this.size = 0;
@@ -217,38 +211,40 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       };
     }
   }
-  private access(key: K): boolean {
+  private access(key: K, record: Record<V>): boolean {
     const hit = false
-      || this.accessLFU(key)
-      || this.accessLRU(key);
+      || this.accessLFU(key, record)
+      || this.accessLRU(key, record);
     assert(hit === this.memory.has(key));
     assert(hit);
     return hit;
   }
-  private accessLRU(key: K): boolean {
+  private accessLRU(key: K, record: Record<V>): boolean {
+    if (record.target !== 'LRU') return false;
     const { LRU, LFU } = this.indexes;
-    const index = LRU.findIndex(key) ?? -1;
-    assert(index > -1 === this.memory.has(key));
-    if (index === -1) return false;
+    const { index } = record;
+    assert(LRU.node(index).key === key);
     ++this.stats.LRU[0];
     ++this.clock;
     ++this.clockR;
     if (LRU.node(index).value + LRU.length / 3 > this.clockR) {
-      LRU.put(key, this.clockR);
+      LRU.put(key, this.clockR, index);
       LRU.moveToHead(index);
       return true;
     }
-    LRU.delete(key);
-    LFU.add(key, this.clock);
+    LRU.delete(key, index);
+    record.target = 'LFU';
+    record.index = LFU.add(key, this.clock);
     return true;
   }
-  private accessLFU(key: K): boolean {
+  private accessLFU(key: K, record: Record<V>): boolean {
+    if (record.target !== 'LFU') return false;
     const { LFU } = this.indexes;
-    const index = LFU.findIndex(key) ?? -1;
-    if (index === -1) return false;
+    const { index } = record;
+    assert(LFU.node(index).key === key);
     ++this.stats.LFU[0];
     ++this.clock;
-    LFU.put(key, this.clock);
+    LFU.put(key, this.clock, index);
     LFU.moveToHead(index);
     return true;
   }

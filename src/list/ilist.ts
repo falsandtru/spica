@@ -26,33 +26,33 @@ export class IList<K, V = undefined> {
   public add(key: K, value: V): number {
     const nodes = this.nodes;
     const head = nodes[this.head];
-    assert(this.length === 0 ? !head : head);
+    //assert(this.length === 0 ? !head : head);
     if (!head) {
       assert(this.length === 0);
       const index = this.head = this.cursor = this.empties.length > 0
         ? this.empties.shift()!
         : this.length;
-      assert(!nodes[index]);
+      //assert(!nodes[index]);
       ++this.length;
       nodes[index] =
         new Node(index, key, value, head!, head!);
-      assert(this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
-      assert(this.length > 10 || [...this].length === this.length);
+      //assert(this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
+      //assert(this.length > 10 || [...this].length === this.length);
       return index;
     }
-    assert(head);
+    //assert(head);
     if (this.length < this.capacity) {
       const index = this.head = this.cursor = this.empties.length > 0
         ? this.empties.shift()!
         : this.length;
-      assert(!nodes[index]);
+      //assert(!nodes[index]);
       ++this.length;
       nodes[index] = head.prev = head.prev.next =
         new Node(index, key, value, head, head.prev);
-      assert(this.length !== 1 || this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
-      assert(this.length !== 2 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
-      assert(this.length < 3 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
-      assert(this.length > 10 || [...this].length === this.length);
+      //assert(this.length !== 1 || this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
+      //assert(this.length !== 2 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
+      //assert(this.length < 3 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
+      //assert(this.length > 10 || [...this].length === this.length);
       return index;
     }
     else {
@@ -60,15 +60,15 @@ export class IList<K, V = undefined> {
       assert(this.empties.length === 0);
       const garbage = head.prev;
       const index = this.head = this.cursor = garbage.index;
-      assert(nodes[index]);
+      //assert(nodes[index]);
       nodes[index] = head.prev = head.prev.prev.next =
         new Node(index, key, value, head, head.prev.prev);
       // @ts-expect-error
       garbage.key = garbage.value = garbage.prev = garbage.next = void 0;
-      assert(this.length !== 1 || this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
-      assert(this.length !== 2 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
-      assert(this.length < 3 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
-      assert(this.length > 10 || [...this].length === this.length);
+      //assert(this.length !== 1 || this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
+      //assert(this.length !== 2 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
+      //assert(this.length < 3 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
+      //assert(this.length > 10 || [...this].length === this.length);
       return index;
     }
   }
@@ -82,15 +82,15 @@ export class IList<K, V = undefined> {
     return node.index;
   }
   public shift(): { key: K; value: V; } | undefined {
-    assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
+    //assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
     const node = this.nodes[this.head];
-    assert(this.length === 0 ? !node : node);
+    //assert(this.length === 0 ? !node : node);
     return node && this.delete(node.key, node.index);
   }
   public pop(): { key: K; value: V; } | undefined {
-    assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
+    //assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
     const node = this.nodes[this.head]?.prev;
-    assert(this.length === 0 ? !node : node);
+    //assert(this.length === 0 ? !node : node);
     return node && this.delete(node.key, node.index);
   }
   public delete(key: K, index?: number): { key: K; value: V; } | undefined {
@@ -99,9 +99,9 @@ export class IList<K, V = undefined> {
     if (!node) return;
     this.cursor = cursor;
     assert(this.length > 0);
-    assert(this.length !== 1 || node === node.prev && node.prev === node.next);
-    assert(this.length !== 2 || node !== node.prev && node.prev === node.next);
-    assert(this.length < 3 || node !== node.prev && node.prev !== node.next);
+    //assert(this.length !== 1 || node === node.prev && node.prev === node.next);
+    //assert(this.length !== 2 || node !== node.prev && node.prev === node.next);
+    //assert(this.length < 3 || node !== node.prev && node.prev !== node.next);
     --this.length;
     this.empties.push(node.index);
     const { prev, next, value } = node;
@@ -115,9 +115,9 @@ export class IList<K, V = undefined> {
     }
     // @ts-expect-error
     this.nodes[node.index] = node.key = node.value = node.prev = node.next = void 0;
-    assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
-    assert(this.length === 0 ? !this.nodes[this.cursor] : this.nodes[this.cursor]);
-    assert(this.length > 10 || [...this].length === this.length);
+    //assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
+    //assert(this.length === 0 ? !this.nodes[this.cursor] : this.nodes[this.cursor]);
+    //assert(this.length > 10 || [...this].length === this.length);
     return { key, value };
   }
   public peek(at?: -1 | 0): { index: number; key: K; value: V; } | undefined {
