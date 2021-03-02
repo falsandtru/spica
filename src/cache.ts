@@ -70,7 +70,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
 
     if (this.length === this.capacity) {
       const key = false
-        || LFU.length === this.capacity
+        || LRU.length === 0
         || LFU.length > this.capacity * this.ratio / 100
         || LFU.length > this.capacity / 2 && LFU.peek(-1)!.value < this.clock - this.capacity * 8
         ? LFU.pop()!.key
