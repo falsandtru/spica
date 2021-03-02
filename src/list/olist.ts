@@ -215,14 +215,14 @@ export class OList<K, V = undefined> {
     //assert(this.length > 10 || [...this].length === this.length);
     return true;
   }
-  public raiseToTop(index: number): boolean {
+  public moveToHead(index: number): boolean {
     if (this.length <= 1) return false;
     if (index === this.head) return false;
     this.insert(index, this.head);
     this.head = index;
     return true;
   }
-  public raiseToPrev(index: number): boolean {
+  public moveToPrev(index: number): boolean {
     if (this.length <= 1) return false;
     if (index === this.head) return false;
     const node = this.nodes[index];
@@ -239,8 +239,8 @@ export class OList<K, V = undefined> {
     const node1 = this.nodes[index1];
     const node2 = this.nodes[index2];
     if (!node1 || !node2) return false;
-    if (node1.next === node2) return this.raiseToPrev(index2);
-    if (node2.next === node1) return this.raiseToPrev(index1);
+    if (node1.next === node2) return this.moveToPrev(index2);
+    if (node2.next === node1) return this.moveToPrev(index1);
     const node3 = node2.next;
     this.insert(node2.index, node1.index);
     this.insert(node1.index, node3.index);
