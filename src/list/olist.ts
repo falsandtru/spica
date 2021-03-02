@@ -24,9 +24,9 @@ export class OList<K, V = undefined> {
     this.cursor = 0;
     this.length = 0;
   }
-  public add(this: OList<K, undefined>, key: K, value?: V): boolean;
-  public add(key: K, value: V): boolean;
-  public add(key: K, value: V): boolean {
+  public add(this: OList<K, undefined>, key: K, value?: V): number;
+  public add(key: K, value: V): number;
+  public add(key: K, value: V): number {
     const nodes = this.nodes;
     const head = nodes[this.head];
     assert(this.length === 0 ? !head : head);
@@ -42,7 +42,7 @@ export class OList<K, V = undefined> {
         new Node(index, key, value, head!, head!);
       //assert(this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
       //assert(this.length > 10 || [...this].length === this.length);
-      return false;
+      return index;
     }
     assert(head);
     if (this.length < this.capacity) {
@@ -58,7 +58,7 @@ export class OList<K, V = undefined> {
       //assert(this.length !== 2 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
       //assert(this.length < 3 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
       //assert(this.length > 10 || [...this].length === this.length);
-      return false;
+      return index;
     }
     else {
       assert(this.length === this.capacity);
@@ -77,17 +77,17 @@ export class OList<K, V = undefined> {
       //assert(this.length !== 2 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
       //assert(this.length < 3 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
       //assert(this.length > 10 || [...this].length === this.length);
-      return false;
+      return index;
     }
   }
-  public put(this: OList<K, undefined>, key: K, value?: V, index?: number): boolean;
-  public put(key: K, value: V, index?: number): boolean;
-  public put(key: K, value: V, index?: number): boolean {
+  public put(this: OList<K, undefined>, key: K, value?: V, index?: number): number;
+  public put(key: K, value: V, index?: number): number;
+  public put(key: K, value: V, index?: number): number {
     const node = this.seek(key, index);
     if (!node) return this.add(key, value);
     assert(this.cursor === node.index);
     node.value = value;
-    return true;
+    return node.index;
   }
   public shift(): { key: K; value: V; } | undefined {
     //assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);

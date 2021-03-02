@@ -28,9 +28,9 @@ export class WList<K, V = undefined> {
     this.length = 0;
     this.size = 0;
   }
-  public add(this: WList<K, undefined>, key: K, value?: V, size?: number): boolean;
-  public add(key: K, value: V, size?: number): boolean;
-  public add(key: K, value: V, size: number = 1): boolean {
+  public add(this: WList<K, undefined>, key: K, value?: V, size?: number): number;
+  public add(key: K, value: V, size?: number): number;
+  public add(key: K, value: V, size: number = 1): number {
     assert(size > 0);
     const nodes = this.nodes;
     const head = nodes[this.head];
@@ -48,7 +48,7 @@ export class WList<K, V = undefined> {
         new Node(index, key, value, size, head!, head!);
       //assert(this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
       //assert(this.length > 10 || [...this].length === this.length);
-      return false;
+      return index;
     }
     assert(head);
     if (this.length < this.capacity) {
@@ -66,7 +66,7 @@ export class WList<K, V = undefined> {
       //assert(this.length !== 2 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
       //assert(this.length < 3 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
       //assert(this.length > 10 || [...this].length === this.length);
-      return false;
+      return index;
     }
     else {
       assert(this.length === this.capacity);
@@ -87,12 +87,12 @@ export class WList<K, V = undefined> {
       //assert(this.length !== 2 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
       //assert(this.length < 3 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
       //assert(this.length > 10 || [...this].length === this.length);
-      return false;
+      return index;
     }
   }
-  public put(this: WList<K, undefined>, key: K, value?: V, size?: number, index?: number): boolean;
-  public put(key: K, value: V, size?: number, index?: number): boolean;
-  public put(key: K, value: V, size: number = 1, index?: number): boolean {
+  public put(this: WList<K, undefined>, key: K, value?: V, size?: number, index?: number): number;
+  public put(key: K, value: V, size?: number, index?: number): number;
+  public put(key: K, value: V, size: number = 1, index?: number): number {
     const node = this.seek(key, index);
     if (!node) return this.add(key, value, size);
     if (this.secure(size - node.size) && !node.next) return this.put(key, value, size);
@@ -100,7 +100,7 @@ export class WList<K, V = undefined> {
     this.size += size - node.size;
     node.value = value;
     node.size = size;
-    return true;
+    return node.index;
   }
   private secure(margin: number): boolean {
     let change = false;

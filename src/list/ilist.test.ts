@@ -23,7 +23,7 @@ describe('Unit: lib/ilist', () => {
         length: 0,
       });
 
-      assert(list.put(0) === false);
+      assert(list.put(0) === 0);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
           [0, undefined, 0],
@@ -36,7 +36,7 @@ describe('Unit: lib/ilist', () => {
         length: 1,
       });
 
-      assert(list.put(1) === false);
+      assert(list.put(1) === 0);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
           [1, undefined, 0],
@@ -49,7 +49,7 @@ describe('Unit: lib/ilist', () => {
         length: 1,
       });
 
-      assert(list.put(1) === true);
+      assert(list.put(1) === 0);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
           [1, undefined, 0],
@@ -101,7 +101,7 @@ describe('Unit: lib/ilist', () => {
     it('put/delete 2', () => {
       const list = new IList<number, undefined>(2);
 
-      assert(list.put(0) === false);
+      assert(list.put(0) === 0);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
           [0, undefined, 0],
@@ -114,7 +114,7 @@ describe('Unit: lib/ilist', () => {
         length: 1,
       });
 
-      assert(list.put(1) === false);
+      assert(list.put(1) === 1);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
           [1, undefined, 1],
@@ -129,7 +129,7 @@ describe('Unit: lib/ilist', () => {
         length: 2,
       });
 
-      assert(list.put(1) === true);
+      assert(list.put(1) === 1);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
           [1, undefined, 1],
@@ -186,7 +186,7 @@ describe('Unit: lib/ilist', () => {
     it('put/delete 3', () => {
       const list = new IList<number, undefined>(3);
 
-      assert(list.put(0) === false);
+      assert(list.put(0) === 0);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
           [0, undefined, 0],
@@ -199,7 +199,7 @@ describe('Unit: lib/ilist', () => {
         length: 1,
       });
 
-      assert(list.put(1) === false);
+      assert(list.put(1) === 1);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
           [1, undefined, 1],
@@ -214,7 +214,7 @@ describe('Unit: lib/ilist', () => {
         length: 2,
       });
 
-      assert(list.put(2) === false);
+      assert(list.put(2) === 2);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
           [2, undefined, 2],
@@ -231,7 +231,7 @@ describe('Unit: lib/ilist', () => {
         length: 3,
       });
 
-      assert(list.put(3) === false);
+      assert(list.put(3) === 0);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
           [3, undefined, 0],
@@ -301,10 +301,10 @@ describe('Unit: lib/ilist', () => {
     it('update', () => {
       const list = new IList<number, number>(3);
 
-      assert(list.put(0, ~0) === false);
-      assert(list.put(1, ~1) === false);
-      assert(list.put(2, ~2) === false);
-      assert(list.put(1, 0) === true);
+      assert(list.put(0, ~0) === 0);
+      assert(list.put(1, ~1) === 1);
+      assert(list.put(2, ~2) === 2);
+      assert(list.put(1, 0) === 1);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
           [2, ~2, 2],

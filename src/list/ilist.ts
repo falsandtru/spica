@@ -5,6 +5,7 @@ import { equal } from '../compare';
 export class IList<K, V = undefined> {
   constructor(
     private readonly capacity: number,
+    private readonly strict: boolean = false,
   ) {
     assert(capacity > 0);
   }
@@ -20,9 +21,9 @@ export class IList<K, V = undefined> {
     this.cursor = 0;
     this.length = 0;
   }
-  public add(this: IList<K, undefined>, key: K, value?: V): boolean;
-  public add(key: K, value: V): boolean;
-  public add(key: K, value: V): boolean {
+  public add(this: IList<K, undefined>, key: K, value?: V): number;
+  public add(key: K, value: V): number;
+  public add(key: K, value: V): number {
     const nodes = this.nodes;
     const head = nodes[this.head];
     assert(this.length === 0 ? !head : head);
@@ -37,7 +38,7 @@ export class IList<K, V = undefined> {
         new Node(index, key, value, head!, head!);
       assert(this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
       assert(this.length > 10 || [...this].length === this.length);
-      return false;
+      return index;
     }
     assert(head);
     if (this.length < this.capacity) {
@@ -52,7 +53,7 @@ export class IList<K, V = undefined> {
       assert(this.length !== 2 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
       assert(this.length < 3 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
       assert(this.length > 10 || [...this].length === this.length);
-      return false;
+      return index;
     }
     else {
       assert(this.length === this.capacity);
@@ -68,17 +69,17 @@ export class IList<K, V = undefined> {
       assert(this.length !== 2 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
       assert(this.length < 3 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
       assert(this.length > 10 || [...this].length === this.length);
-      return false;
+      return index;
     }
   }
-  public put(this: IList<K, undefined>, key: K, value?: V, index?: number): boolean;
-  public put(key: K, value: V, index?: number): boolean;
-  public put(key: K, value: V, index?: number): boolean {
+  public put(this: IList<K, undefined>, key: K, value?: V, index?: number): number;
+  public put(key: K, value: V, index?: number): number;
+  public put(key: K, value: V, index?: number): number {
     const node = this.seek(key, index);
     if (!node) return this.add(key, value);
     assert(this.cursor === node.index);
     node.value = value;
-    return true;
+    return node.index;
   }
   public shift(): { key: K; value: V; } | undefined {
     assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
@@ -143,12 +144,15 @@ export class IList<K, V = undefined> {
     return this.node(this.nodes[index]?.prev.index ?? this.capacity);
   }
   public find(key: K, index?: number): V | undefined {
+    if (this.strict) throw new Error(`Spica: IList: Invalid cursor.`);
     return this.seek(key, index)?.value;
   }
   public findIndex(key: K, index?: number): number | undefined {
+    if (this.strict) throw new Error(`Spica: IList: Invalid cursor.`);
     return this.seek(key, index)?.index;
   }
   public has(key: K, index?: number): boolean {
+    if (this.strict) throw new Error(`Spica: IList: Invalid cursor.`);
     return !!this.seek(key, index);
   }
   public *[Symbol.iterator](): Iterator<[K, V, number], undefined, undefined> {
@@ -162,6 +166,7 @@ export class IList<K, V = undefined> {
     node = this.nodes[cursor];
     if (!node) return;
     if (equal(node.key, key)) return this.cursor = cursor, node;
+    if (this.strict) throw new Error(`Spica: IList: Invalid cursor.`);
     for (let i = 1; i < this.length && (node = node.next); ++i) {
       if (equal(node.key, key)) return this.cursor = node.index, node;
     }
