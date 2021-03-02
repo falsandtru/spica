@@ -1,6 +1,6 @@
 import { tick } from './clock';
 
-describe('Unit: lib/clock.tick', function () {
+describe('Unit: lib/clock', function () {
   describe('tick', function () {
     it('async', function (done) {
       let async = false;
