@@ -1,5 +1,5 @@
 import { Map } from './global';
-import { min } from './alias';
+import { max, min } from './alias';
 import { IterableCollection } from './collection';
 import { IList } from './ilist';
 import { extend } from './assign';
@@ -127,10 +127,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   }
   public get(key: K): V | undefined {
     const record = this.memory.get(key);
-    record && this.access(key, record);
-    ++this.stats.Total[0];
+    if (!record) return;
+    this.access(key, record);
     this.slide();
-    return record?.value;
+    return record.value;
   }
   public has(key: K): boolean {
     //assert(this.memory.has(key) === (this.indexes.LFU.has(key) || this.indexes.LRU.has(key)));
@@ -157,7 +157,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.stats = {
       LRU: [0, 0],
       LFU: [0, 0],
-      Total: tuple(0, 0),
     };
     const memory = this.memory;
     this.memory = new Map();
@@ -176,18 +175,16 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private stats = {
     LRU: tuple(0, 0),
     LFU: tuple(0, 0),
-    Total: tuple(0, 0),
   };
   private ratio = 50;
   private slide(): void {
-    const { LRU, LFU, Total } = this.stats;
-    // 速度への影響を確認できなかったため毎回再計算
-    //if ((LRU[0] + LFU[0]) % step) return;
+    const { LRU, LFU } = this.stats;
     const { capacity, ratio, indexes } = this;
+    if ((LRU[0] + LFU[0]) % max(capacity / 100 | 0, 1)) return;
     const window = capacity;
+    const isCalculable = LRU[1] + LFU[1] > 0;
     const rateR = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1]);
     const rateF = rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1]) * indexes.LRU.length / indexes.LFU.length | 0;
-    const isCalculable = Total[1] > 0;
     const isLRUFilled = indexes.LRU.length >= capacity * (100 - ratio) / 100;
     const isLFUFilled = indexes.LFU.length >= capacity * ratio / 100;
     const step = 1;
@@ -203,11 +200,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     }
     assert(LRU[0] + LFU[0] <= window);
     assert(LRU[1] + LFU[1] <= window);
-    if (LRU[0] + LFU[0] === window) {
+    if (LRU[0] + LFU[0] >= window) {
       this.stats = {
         LRU: [0, LRU[0]],
         LFU: [0, LFU[0]],
-        Total: [0, Total[0]],
       };
     }
   }
@@ -253,7 +249,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
 function rate(window: number, currHits: number, currTotal: number, prevHits: number, prevTotal: number): number {
   window = min(currTotal + prevTotal, window);
   const currRate = currHits * 100 / currTotal | 0;
-  const currRatio = min(currTotal * 100 / window, 100);
+  const currRatio = min(currTotal * 100 / window | 0, 100);
   const prevRate = prevHits * 100 / prevTotal | 0;
   const prevRatio = 100 - currRatio;
   return currRate * currRatio + prevRate * prevRatio | 0;
