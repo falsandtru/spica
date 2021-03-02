@@ -61,7 +61,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       const key = false
         || LFU.length === this.capacity
         || LFU.length > this.capacity * this.ratio / 100
-        || LFU.length > this.capacity / 2 && LFU.peek(-1)?.value! < this.clock - this.capacity * 8
+        || LFU.length > this.capacity / 2 && LFU.peek(-1)!.value < this.clock - this.capacity * 8
         ? LFU.pop()!.key
         : LRU.pop()!.key;
       assert(this.memory.has(key));
@@ -151,7 +151,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private clock = 0;
   private clockR = 0;
   private memory = new Map<K, V>();
-  private indexes = {
+  private readonly indexes = {
     LRU: new OList<K, number>(this.capacity),
     LFU: new OList<K, number>(this.capacity),
   } as const;
