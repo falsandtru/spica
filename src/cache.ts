@@ -119,8 +119,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     return this;
   }
   public get(key: K): V | undefined {
-    const result = this.memory.get(key);
-    if (result) {
+    const record = this.memory.get(key);
+    if (record) {
       assert(this.memory.has(key));
       this.access(key);
       ++this.stats.Total[0];
@@ -131,7 +131,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       ++this.stats.Total[0];
       this.slide();
     }
-    return result?.value;
+    return record?.value;
   }
   public has(key: K): boolean {
     //assert(this.memory.has(key) === (this.indexes.LFU.has(key) || this.indexes.LRU.has(key)));
