@@ -7,7 +7,7 @@ describe('Unit: lib/cache', () => {
       return {
         LRU: [...cache['indexes'].LRU].map(([k]) => k),
         LFU: [...cache['indexes'].LFU].map(([k]) => k),
-        memory: [...cache['memory']],
+        memory: [...cache['memory']].map(([key, { value }]) => [key, value]),
       };
     }
 
@@ -172,6 +172,48 @@ describe('Unit: lib/cache', () => {
         LRU: [],
         LFU: [],
         memory: [],
+      });
+    });
+
+    it('space', () => {
+      const cache = new Cache<number, number>(3, { space: 3 });
+
+      cache.put(0, 0);
+      cache.put(1, 1);
+      cache.put(2, 2, 2);
+      assert(cache.length === 2);
+      assert(cache.size === 3);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [2, 1],
+        LFU: [],
+        memory: [[1, 1], [2, 2]],
+      });
+
+      cache.put(1, 1, 2);
+      assert(cache.length === 1);
+      assert(cache.size === 2);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [1],
+        LFU: [],
+        memory: [[1, 1]],
+      });
+
+      cache.put(2, 2, 2);
+      assert(cache.length === 1);
+      assert(cache.size === 2);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [2],
+        LFU: [],
+        memory: [[2, 2]],
+      });
+
+      cache.put(3, 3);
+      assert(cache.length === 2);
+      assert(cache.size === 3);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [3, 2],
+        LFU: [],
+        memory: [[2, 2], [3, 3]],
       });
     });
 

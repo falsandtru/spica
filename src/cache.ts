@@ -4,6 +4,7 @@ import { IterableCollection } from './collection';
 import { OList } from './olist';
 import { extend } from './assign';
 import { tuple } from './tuple';
+import { equal } from './compare';
 
 // Dual Window Cache
 
@@ -25,6 +26,7 @@ JavaScriptにおける需要を満たさない懸念がある。
 */
 
 export interface CacheOptions<K, V = undefined> {
+  readonly space?: number;
   readonly disposer?: (key: K, value: V) => void;
   readonly capture?: {
     readonly delete?: boolean;
@@ -39,16 +41,19 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   ) {
     if (capacity < 1) throw new Error(`Spica: Cache: Cache capacity must be 1 or more.`);
     extend(this.settings, opts);
+    this.space = this.settings.space!;
   }
   private readonly settings: CacheOptions<K, V> = {
+    space: 0,
     capture: {
       delete: true,
       clear: true,
     },
   };
+  private readonly space: number;
   private clock = 0;
   private clockR = 0;
-  private memory = new Map<K, V>();
+  private memory = new Map<K, { value: V; size: number; }>();
   private readonly indexes = {
     LRU: new OList<K, number>(this.capacity),
     LFU: new OList<K, number>(this.capacity),
@@ -57,18 +62,14 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     //assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     return this.indexes.LRU.length + this.indexes.LFU.length;
   }
-  private nullish = false;
-  public put(this: Cache<K, undefined>, key: K, value?: V): boolean;
-  public put(key: K, value: V): boolean;
-  public put(key: K, value: V): boolean {
-    value === void 0
-      ? this.nullish ||= true
-      : void 0;
-    if (this.has(key)) return this.memory.set(key, value), true;
-
+  public size = 0;
+  private secure(margin: number, target?: K): boolean {
+    if (margin <= 0) return true;
     const { LRU, LFU } = this.indexes;
-
-    if (this.length === this.capacity) {
+    let keep = arguments.length === 1
+      ? false
+      : void 0;
+    while (this.length === this.capacity || this.space && this.size + margin > this.space) {
       const key = false
         || LRU.length === 0
         || LFU.length > this.capacity * this.ratio / 100
@@ -76,29 +77,50 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         ? LFU.pop()!.key
         : LRU.pop()!.key;
       assert(this.memory.has(key));
+      keep ??= !equal(key, target) && keep;
+      const { value, size } = this.memory.get(key)!;
+      this.space && (this.size -= size);
+      this.memory.delete(key);
       if (this.settings.disposer) {
-        const value = this.memory.get(key)!;
-        this.memory.delete(key);
         this.settings.disposer(key, value);
       }
-      else {
-        this.memory.delete(key);
-      }
+    }
+    return keep ?? true;
+  }
+  public put(this: Cache<K, undefined>, key: K, value?: V, size?: number): boolean;
+  public put(key: K, value: V, size?: number): boolean;
+  public put(key: K, value: V, size: number = 1): boolean {
+    if (this.space && size > this.space / this.capacity * 10) {
+      this.settings.disposer?.(key, value);
+      return false;
     }
 
-    LRU.add(key, ++this.clockR);
-    this.memory.set(key, value);
+    const record = this.memory.get(key);
+    if (record && this.secure(size - record.size, key)) {
+      assert(this.memory.has(key));
+      this.space && (this.size += size - record.size);
+      assert(this.size >= 0);
+      record.value = value;
+      record.size = size;
+      return true;
+    }
+    assert(!this.memory.has(key));
+    this.secure(size);
+
+    this.indexes.LRU.add(key, ++this.clockR);
+    this.space && (this.size += size);
+    this.memory.set(key, { value, size });
     return false;
   }
-  public set(this: Cache<K, undefined>, key: K, value?: V): this;
-  public set(key: K, value: V): this;
-  public set(key: K, value: V): this {
-    this.put(key, value);
+  public set(this: Cache<K, undefined>, key: K, value?: V, size?: number): this;
+  public set(key: K, value: V, size?: number): this;
+  public set(key: K, value: V, size?: number): this {
+    this.put(key, value, size);
     return this;
   }
   public get(key: K): V | undefined {
-    const value = this.memory.get(key);
-    if (value !== void 0 || this.nullish && this.has(key)) {
+    const result = this.memory.get(key);
+    if (result) {
       assert(this.memory.has(key));
       this.access(key);
       ++this.stats.Total[0];
@@ -109,7 +131,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       ++this.stats.Total[0];
       this.slide();
     }
-    return value;
+    return result?.value;
   }
   public has(key: K): boolean {
     //assert(this.memory.has(key) === (this.indexes.LFU.has(key) || this.indexes.LRU.has(key)));
@@ -123,12 +145,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       const i = index.findIndex(key) ?? -1;
       if (i === -1) continue;
       index.delete(key);
-      if (!this.settings.disposer || !this.settings.capture!.delete) {
-        this.memory.delete(key);
-      }
-      else {
-        const value = this.memory.get(key)!;
-        this.memory.delete(key);
+      const { value, size } = this.memory.get(key)!;
+      this.space && (this.size -= size);
+      this.memory.delete(key);
+      if (this.settings.disposer && this.settings.capture!.delete) {
         this.settings.disposer(key, value);
       }
       return true;
@@ -136,7 +156,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     return false;
   }
   public clear(): void {
-    this.nullish = false;
+    this.size = 0;
     this.ratio = 50;
     this.indexes.LRU.clear();
     this.indexes.LFU.clear();
@@ -147,13 +167,17 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     };
     const memory = this.memory;
     this.memory = new Map();
-    if (!this.settings.disposer || !this.settings.capture!.clear) return;
-    for (const [key, value] of memory) {
-      this.settings.disposer(key, value);
+    if (this.settings.disposer && this.settings.capture!.clear) {
+      for (const [key, { value }] of memory) {
+        this.settings.disposer(key, value);
+      }
     }
   }
-  public [Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
-    return this.memory[Symbol.iterator]();
+  public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
+    for (const [key, { value }] of this.memory) {
+      yield [key, value];
+    }
+    return;
   }
   private stats = {
     LRU: tuple(0, 0),
