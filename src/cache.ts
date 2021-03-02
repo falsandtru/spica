@@ -66,9 +66,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         : LRU.pop()!.key;
       assert(this.memory.has(key));
       if (this.settings.disposer) {
-        const val = this.memory.get(key)!;
+        const value = this.memory.get(key)!;
         this.memory.delete(key);
-        this.settings.disposer(key, val);
+        this.settings.disposer(key, value);
       }
       else {
         this.memory.delete(key);
@@ -86,8 +86,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     return this;
   }
   public get(key: K): V | undefined {
-    const val = this.memory.get(key);
-    if (val !== void 0 || this.nullish && this.has(key)) {
+    const value = this.memory.get(key);
+    if (value !== void 0 || this.nullish && this.has(key)) {
       assert(this.memory.has(key));
       this.access(key);
       ++this.stats.Total[0];
@@ -98,7 +98,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       ++this.stats.Total[0];
       this.slide();
     }
-    return val;
+    return value;
   }
   public has(key: K): boolean {
     //assert(this.memory.has(key) === (this.indexes.LFU.has(key) || this.indexes.LRU.has(key)));
@@ -116,9 +116,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         this.memory.delete(key);
       }
       else {
-        const val = this.memory.get(key)!;
+        const value = this.memory.get(key)!;
         this.memory.delete(key);
-        this.settings.disposer(key, val);
+        this.settings.disposer(key, value);
       }
       return true;
     }
