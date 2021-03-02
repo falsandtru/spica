@@ -1,4 +1,5 @@
 import { Cache } from './cache';
+import LRUCache from 'lru-cache';
 
 describe('Unit: lib/cache', () => {
   describe('Cache', () => {
@@ -174,26 +175,6 @@ describe('Unit: lib/cache', () => {
       });
     });
 
-    class LRUCache<K, V> {
-      constructor(public capacity: number) {
-        assert(capacity > 0);
-      }
-      public index: K[] = [];
-      public entries = new Map<K, V>();
-      public put(key: K, val: V): boolean {
-        const { index, entries } = this;
-        const i = index.indexOf(key);
-        i > -1
-          ? index.splice(i, 1)
-          : index.length === this.capacity && entries.delete(index.pop()!);
-        index.unshift(key);
-        entries.set(key, val);
-        assert(index.length <= this.capacity);
-        assert(index.length === entries.size);
-        return i > -1;
-      }
-    }
-
     it('rate even 10', function () {
       this.timeout(10 * 1e3);
       this.retries(5);
@@ -208,7 +189,7 @@ describe('Unit: lib/cache', () => {
       let hitdwc = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() * capacity * 10 | 0;
-        hitlru += +lru.put(key, i);
+        hitlru += +[lru.has(key), lru.set(key, i)][0];
         dwc.get(key);
         hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
@@ -241,7 +222,7 @@ describe('Unit: lib/cache', () => {
         const key = Math.random() < 0.4
           ? Math.random() * capacity * 1 | 0
           : Math.random() * capacity * 9 + capacity | 0;
-        hitlru += +lru.put(key, i);
+        hitlru += +[lru.has(key), lru.set(key, i)][0];
         dwc.get(key);
         hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
@@ -273,7 +254,7 @@ describe('Unit: lib/cache', () => {
       let hitdwc = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() * capacity * 10 | 0;
-        hitlru += +lru.put(key, i);
+        hitlru += +[lru.has(key), lru.set(key, i)][0];
         dwc.get(key);
         hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
@@ -308,7 +289,7 @@ describe('Unit: lib/cache', () => {
         const key = Math.random() < 0.4
           ? Math.random() * capacity * 1 | 0
           : Math.random() * capacity * 9 + capacity | 0;
-        hitlru += +lru.put(key, i);
+        hitlru += +[lru.has(key), lru.set(key, i)][0];
         dwc.get(key);
         hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
@@ -344,7 +325,7 @@ describe('Unit: lib/cache', () => {
           // Transitive distribution
           // DWCは推移的な分散には影響されない
           : Math.random() * capacity * 9 + capacity + i | 0;
-        hitlru += +lru.put(key, i);
+        hitlru += +[lru.has(key), lru.set(key, i)][0];
         dwc.get(key);
         hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
@@ -385,7 +366,7 @@ describe('Unit: lib/cache', () => {
           // そのような状況が生じるならキャッシュサイズが小さすぎることに問題があることのほうが多いだろう
           ? Math.random() * capacity * 1 - i / 10 | 0
           : Math.random() * capacity * 9 + capacity + i | 0;
-        hitlru += +lru.put(key, i);
+        hitlru += +[lru.has(key), lru.set(key, i)][0];
         dwc.get(key);
         hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
@@ -419,7 +400,7 @@ describe('Unit: lib/cache', () => {
         const key = Math.random() < 0.4
           ? Math.random() * capacity * 1 | 0
           : capacity + i % (capacity * 10);
-        hitlru += +lru.put(key, i);
+        hitlru += +[lru.has(key), lru.set(key, i)][0];
         dwc.get(key);
         hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
@@ -453,7 +434,7 @@ describe('Unit: lib/cache', () => {
         const key = Math.random() < 0.1
           ? Math.random() * capacity * 1 | 0
           : capacity + i >> 1 << 1;
-        hitlru += +lru.put(key, i);
+        hitlru += +[lru.has(key), lru.set(key, i)][0];
         dwc.get(key);
         hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {
@@ -487,7 +468,7 @@ describe('Unit: lib/cache', () => {
         const key = Math.random() < 0.4
           ? Math.random() * capacity * 1 | 0
           : Math.random() * capacity * 9 + capacity | 0;
-        hitlru += +lru.put(key, i);
+        hitlru += +[lru.has(key), lru.set(key, i)][0];
         dwc.get(key);
         hitdwc += +dwc.put(key, i);
         if (i + 1 === warmup) {

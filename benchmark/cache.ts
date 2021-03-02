@@ -1,5 +1,6 @@
 import { benchmark } from './benchmark';
 import { Cache } from '../';
+import LRUCache from 'lru-cache';
 
 describe('Benchmark:', function () {
   this.timeout(10 * 1e3);
@@ -7,6 +8,14 @@ describe('Benchmark:', function () {
   describe('Cache', function () {
     it('new', function (done) {
       benchmark('Cache new', () => new Cache(1000), done);
+    });
+
+    it('put 10 100% LRU', function (done) {
+      const capacity = 10;
+      const cache = new LRUCache<number, number>(capacity);
+      for (let i = 0; i < capacity; ++i) cache.set(i, i);
+      let i = 0;
+      benchmark('LRUCache put 10 100%', () => cache.set(++i % capacity, 0), done);
     });
 
     it('put 10 100%', function (done) {
@@ -24,6 +33,14 @@ describe('Benchmark:', function () {
       benchmark('Cache put 10 0%', () => cache.put(-1, 0), done);
     });
 
+    it('put 100 100% LRU', function (done) {
+      const capacity = 100;
+      const cache = new LRUCache<number, number>(capacity);
+      for (let i = 0; i < capacity; ++i) cache.set(i, i);
+      let i = 0;
+      benchmark('LRUCache put 100 100%', () => cache.set(++i % capacity, 0), done);
+    });
+
     it('put 100 100%', function (done) {
       const capacity = 100;
       const cache = new Cache<number, number>(capacity);
@@ -37,6 +54,14 @@ describe('Benchmark:', function () {
       const cache = new Cache<number, number>(capacity);
       for (let i = 0; i < capacity; ++i) cache.put(i, i);
       benchmark('Cache put 100 0%', () => cache.put(-1, 0), done);
+    });
+
+    it('put 1,000 100% LRU', function (done) {
+      const capacity = 1000;
+      const cache = new LRUCache<number, number>(capacity);
+      for (let i = 0; i < capacity; ++i) cache.set(i, i);
+      let i = 0;
+      benchmark('LRUCache put 1,000 100%', () => cache.set(++i % capacity, 0), done);
     });
 
     it('put 1,000 100%', function (done) {
@@ -54,6 +79,14 @@ describe('Benchmark:', function () {
       benchmark('Cache put 1,000 0%', () => cache.put(-1, 0), done);
     });
 
+    it('put 10,000 100% LRU', function (done) {
+      const capacity = 10000;
+      const cache = new LRUCache<number, number>(capacity);
+      for (let i = 0; i < capacity; ++i) cache.set(i, i);
+      let i = 0;
+      benchmark('LRUCache put 10,000 100%', () => cache.set(++i % capacity, 0), done);
+    });
+
     it('put 10,000 100%', function (done) {
       const capacity = 10000;
       const cache = new Cache<number, number>(capacity);
@@ -67,6 +100,14 @@ describe('Benchmark:', function () {
       const cache = new Cache<number, number>(capacity);
       for (let i = 0; i < capacity; ++i) cache.put(i, i);
       benchmark('Cache put 10,000 0%', () => cache.put(-1, 0), done);
+    });
+
+    it('get 10 100% LRU', function (done) {
+      const capacity = 10;
+      const cache = new LRUCache<number, number>(capacity);
+      for (let i = 0; i < capacity; ++i) cache.set(i, i);
+      let i = 0;
+      benchmark('LRUCache get 10 100%', () => cache.get(++i % capacity), done);
     });
 
     it('get 10 100%', function (done) {
@@ -84,6 +125,14 @@ describe('Benchmark:', function () {
       benchmark('Cache get 10 0%', () => cache.get(-1), done);
     });
 
+    it('get 100 100% LRU', function (done) {
+      const capacity = 100;
+      const cache = new LRUCache<number, number>(capacity);
+      for (let i = 0; i < capacity; ++i) cache.set(i, i);
+      let i = 0;
+      benchmark('LRUCache get 100 100%', () => cache.get(++i % capacity), done);
+    });
+
     it('get 100 100%', function (done) {
       const capacity = 100;
       const cache = new Cache<number, number>(capacity);
@@ -99,6 +148,14 @@ describe('Benchmark:', function () {
       benchmark('Cache get 100 0%', () => cache.get(-1), done);
     });
 
+    it('get 1,000 100% LRU', function (done) {
+      const capacity = 1000;
+      const cache = new LRUCache<number, number>(capacity);
+      for (let i = 0; i < capacity; ++i) cache.set(i, i);
+      let i = 0;
+      benchmark('LRUCache get 1,000 100%', () => cache.get(++i % capacity), done);
+    });
+
     it('get 1,000 100%', function (done) {
       const capacity = 1000;
       const cache = new Cache<number, number>(capacity);
@@ -112,6 +169,14 @@ describe('Benchmark:', function () {
       const cache = new Cache<number, number>(capacity);
       for (let i = 0; i < capacity; ++i) cache.put(i, i);
       benchmark('Cache get 1,000 0%', () => cache.get(-1), done);
+    });
+
+    it('get 10,000 100% LRU', function (done) {
+      const capacity = 10000;
+      const cache = new LRUCache<number, number>(capacity);
+      for (let i = 0; i < capacity; ++i) cache.set(i, i);
+      let i = 0;
+      benchmark('LRUCache get 10,000 100%', () => cache.get(++i % capacity), done);
     });
 
     it('get 10,000 100%', function (done) {

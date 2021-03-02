@@ -48,6 +48,7 @@
   "devDependencies": {
     "@types/benchmark": "^2.1.0",
     "@types/bluebird": "^3.5.33",
+    "@types/lru-cache": "^5.1.0",
     "@types/mocha": "^8.2.1",
     "@types/power-assert": "1.5.3",
     "benchmark": "^2.1.4",
@@ -70,6 +71,7 @@
     "karma-espower-preprocessor": "^1.2.0",
     "karma-firefox-launcher": "^2.1.0",
     "karma-mocha": "^2.0.1",
+    "lru-cache": "^6.0.0",
     "mocha": "^8.3.0",
     "npm-check-updates": "^11.1.9",
     "power-assert": "^1.6.1",
