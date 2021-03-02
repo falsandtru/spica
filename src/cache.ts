@@ -136,7 +136,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     };
     const memory = this.memory;
     this.memory = new Map();
-    if (!this.settings.disposer || !this.settings.capture?.clear) return;
+    if (!this.settings.disposer || !this.settings.capture!.clear) return;
     for (const [key, value] of memory) {
       this.settings.disposer(key, value);
     }
