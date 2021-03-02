@@ -248,7 +248,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (index === -1) return false;
     ++this.stats.LFU[0];
     ++this.clock;
-    if (index === LFU.peek()!.index) return true;
     LFU.put(key, this.clock);
     LFU.moveToHead(index);
     return true;
