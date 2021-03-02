@@ -113,13 +113,13 @@ export class WList<K, V = undefined> {
   public shift(): { key: K; value: V; size: number; } | undefined {
     //assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
     const node = this.nodes[this.head];
-    assert(this.length === 0 ? !node : node);
+    //assert(this.length === 0 ? !node : node);
     return node && this.delete(node.key, node.index);
   }
   public pop(): { key: K; value: V; size: number; } | undefined {
     //assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
     const node = this.nodes[this.head]?.prev;
-    assert(this.length === 0 ? !node : node);
+    //assert(this.length === 0 ? !node : node);
     return node && this.delete(node.key, node.index);
   }
   public delete(key: K, index?: number): { key: K; value: V; size: number; } | undefined {
