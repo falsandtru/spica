@@ -1,5 +1,6 @@
 import { Cache } from './cache';
 import LRUCache from 'lru-cache';
+import { wait } from './clock';
 
 describe('Unit: lib/cache', () => {
   describe('Cache', () => {
@@ -215,6 +216,24 @@ describe('Unit: lib/cache', () => {
         LFU: [],
         memory: [[2, 2], [3, 3]],
       });
+    });
+
+    it('age', async () => {
+      const cache = new Cache<number, number>(1);
+
+      cache.put(0, 0, 1, 10);
+      assert(cache.has(0));
+      assert(cache.get(0) === 0);
+      await wait(20);
+      assert(cache.has(0) === false);
+      assert(cache.get(0) === undefined);
+
+      cache.put(0, 0, 1, 10);
+      assert(cache.get(0) === 0);
+      assert(cache.has(0));
+      await wait(20);
+      assert(cache.get(0) === undefined);
+      assert(cache.has(0) === false);
     });
 
     it('rate even 10', function () {

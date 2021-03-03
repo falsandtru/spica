@@ -1,4 +1,4 @@
-import { Map } from './global';
+import { Infinity, Date, Map } from './global';
 import { max, min } from './alias';
 import { IterableCollection } from './collection';
 import { IList } from './ilist';
@@ -30,10 +30,12 @@ type Record<V> = {
   index: number;
   value: V;
   size: number;
+  expiry: number;
 };
 
 export interface CacheOptions<K, V = undefined> {
   readonly space?: number;
+  readonly age?: number;
   readonly disposer?: (key: K, value: V) => void;
   readonly capture?: {
     readonly delete?: boolean;
@@ -46,12 +48,13 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     private readonly capacity: number,
     opts: CacheOptions<K, V> = {},
   ) {
-    if (capacity < 1) throw new Error(`Spica: Cache: Cache capacity must be 1 or more.`);
+    if (capacity < 1) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     extend(this.settings, opts);
     this.space = this.settings.space!;
   }
   private readonly settings: CacheOptions<K, V> = {
     space: 0,
+    age: Infinity,
     capture: {
       delete: true,
       clear: true,
@@ -81,27 +84,33 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         || LRU.length === 0
         || LFU.length > this.capacity * this.ratio / 100
         || LFU.length > this.capacity / 2 && LFU.peek(-1)!.value < this.clock - this.capacity * 8
-        ? LFU.pop()!
-        : LRU.pop()!;
+        ? LFU.peek(-1)!
+        : LRU.peek(-1)!;
       assert(this.memory.has(key));
       keep ??= !equal(key, target) && keep;
-      const { value, size } = this.memory.get(key)!;
-      this.memory.delete(key);
-      this.space && (this.size -= size);
-      if (this.settings.disposer) {
-        this.settings.disposer(key, value);
-      }
+      this.dispose(key, this.memory.get(key)!, this.settings.disposer);
     }
     return keep ?? true;
   }
-  public put(this: Cache<K, undefined>, key: K, value?: V, size?: number): boolean;
-  public put(key: K, value: V, size?: number): boolean;
-  public put(key: K, value: V, size: number = 1): boolean {
-    if (this.space && size > this.space / this.capacity * 10) {
+  private dispose(key: K, { target, index, size, value }: Record<V>, disposer: CacheOptions<K, V>['disposer']): void {
+    this.indexes[target].delete(key, index);
+    this.memory.delete(key);
+    this.space && (this.size -= size);
+    disposer?.(key, value);
+  }
+  public put(this: Cache<K, undefined>, key: K, value?: V, size?: number, age?: number): boolean;
+  public put(key: K, value: V, size?: number, age?: number): boolean;
+  public put(key: K, value: V, size: number = 1, age: number = this.settings.age!): boolean {
+    if (size < 1) throw new Error(`Spica: Cache: Size must be 1 or more.`);
+    if (age < 1) throw new Error(`Spica: Cache: Age must be 1 or more.`);
+    if (this.space && size > this.space / this.capacity * 10 || age <= 0) {
       this.settings.disposer?.(key, value);
       return false;
     }
 
+    const expiry = age === Infinity
+      ? Infinity
+      : Date.now() + age;
     const record = this.memory.get(key);
     if (record && this.secure(size - record.size, key)) {
       assert(this.memory.has(key));
@@ -109,6 +118,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       assert(this.size >= 0);
       record.value = value;
       record.size = size;
+      record.expiry = expiry;
       return true;
     }
     assert(!this.memory.has(key));
@@ -116,18 +126,28 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
 
     const { LRU } = this.indexes;
     this.space && (this.size += size);
-    this.memory.set(key, { target: 'LRU', index: LRU.add(key, ++this.clockR), value, size });
+    this.memory.set(key, {
+      target: 'LRU',
+      index: LRU.add(key, ++this.clockR),
+      value,
+      size,
+      expiry,
+    });
     return false;
   }
-  public set(this: Cache<K, undefined>, key: K, value?: V, size?: number): this;
-  public set(key: K, value: V, size?: number): this;
-  public set(key: K, value: V, size?: number): this {
-    this.put(key, value, size);
+  public set(this: Cache<K, undefined>, key: K, value?: V, size?: number, age?: number): this;
+  public set(key: K, value: V, size?: number, age?: number): this;
+  public set(key: K, value: V, size?: number, age?: number): this {
+    this.put(key, value, size, age);
     return this;
   }
   public get(key: K): V | undefined {
     const record = this.memory.get(key);
     if (!record) return;
+    if (record.expiry < Infinity && record.expiry < Date.now()) {
+      this.dispose(key, record, this.settings.disposer);
+      return;
+    }
     this.access(key, record);
     this.slide();
     return record.value;
@@ -135,18 +155,18 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public has(key: K): boolean {
     //assert(this.memory.has(key) === (this.indexes.LFU.has(key) || this.indexes.LRU.has(key)));
     //assert(this.memory.size === this.indexes.LFU.length + this.indexes.LRU.length);
-    return this.memory.has(key);
+    const record = this.memory.get(key);
+    if (!record) return false;
+    if (record.expiry < Infinity && record.expiry < Date.now()) {
+      this.dispose(key, record, this.settings.disposer);
+      return false;
+    }
+    return true;
   }
   public delete(key: K): boolean {
     const record = this.memory.get(key);
     if (!record) return false;
-    const { target, index, value, size } = record;
-    this.indexes[target].delete(key, index);
-    this.memory.delete(key);
-    this.space && (this.size -= size);
-    if (this.settings.disposer && this.settings.capture!.delete) {
-      this.settings.disposer(key, value);
-    }
+    this.dispose(key, record, this.settings.capture!.delete ? this.settings.disposer : void 0);
     return true;
   }
   public clear(): void {
