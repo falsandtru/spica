@@ -86,8 +86,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       assert(this.memory.has(key));
       keep ??= !equal(key, target) && keep;
       const { value, size } = this.memory.get(key)!;
-      this.space && (this.size -= size);
       this.memory.delete(key);
+      this.space && (this.size -= size);
       if (this.settings.disposer) {
         this.settings.disposer(key, value);
       }
@@ -142,8 +142,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (!record) return false;
     const { target, index, value, size } = record;
     this.indexes[target].delete(key, index);
-    this.space && (this.size -= size);
     this.memory.delete(key);
+    this.space && (this.size -= size);
     if (this.settings.disposer && this.settings.capture!.delete) {
       this.settings.disposer(key, value);
     }
