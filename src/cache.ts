@@ -25,7 +25,7 @@ JavaScriptにおける需要を満たさない懸念がある。
 
 */
 
-type Record<V> = {
+interface Record<V> {
   target: 'LRU' | 'LFU';
   index: number;
   value: V;
