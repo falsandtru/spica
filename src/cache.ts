@@ -77,12 +77,12 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       ? false
       : void 0;
     while (this.length === this.capacity || this.space && this.size + margin > this.space) {
-      const key = false
+      const { key } = false
         || LRU.length === 0
         || LFU.length > this.capacity * this.ratio / 100
         || LFU.length > this.capacity / 2 && LFU.peek(-1)!.value < this.clock - this.capacity * 8
-        ? LFU.pop()!.key
-        : LRU.pop()!.key;
+        ? LFU.pop()!
+        : LRU.pop()!;
       assert(this.memory.has(key));
       keep ??= !equal(key, target) && keep;
       const { value, size } = this.memory.get(key)!;
