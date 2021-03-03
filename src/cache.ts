@@ -25,6 +25,8 @@ JavaScriptにおける需要を満たさない懸念がある。
 
 */
 
+const SIZE = Symbol('size');
+
 interface Record<V> {
   target: 'LRU' | 'LFU';
   index: number;
@@ -61,6 +63,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     },
   };
   private readonly space: number;
+  private [SIZE] = 0;
   private clock = 0;
   private clockR = 0;
   private memory = new Map<K, Record<V>>();
@@ -72,7 +75,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     //assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     return this.indexes.LRU.length + this.indexes.LFU.length;
   }
-  public size = 0;
+  public get size(): number {
+    return this[SIZE];
+  }
   private secure(margin: number, target?: K): boolean {
     if (margin <= 0) return true;
     const { LRU, LFU } = this.indexes;
@@ -95,7 +100,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private dispose(key: K, { target, index, size, value }: Record<V>, disposer: CacheOptions<K, V>['disposer']): void {
     this.indexes[target].delete(key, index);
     this.memory.delete(key);
-    this.space && (this.size -= size);
+    this.space && (this[SIZE] -= size);
     disposer?.(key, value);
   }
   public put(this: Cache<K, undefined>, key: K, value?: V, size?: number, age?: number): boolean;
@@ -114,8 +119,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const record = this.memory.get(key);
     if (record && this.secure(size - record.size, key)) {
       assert(this.memory.has(key));
-      this.space && (this.size += size - record.size);
-      assert(this.size >= 0);
+      this.space && (this[SIZE] += size - record.size);
+      assert(this[SIZE] >= 0);
       record.value = value;
       record.size = size;
       record.expiry = expiry;
@@ -125,7 +130,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.secure(size);
 
     const { LRU } = this.indexes;
-    this.space && (this.size += size);
+    this.space && (this[SIZE] += size);
     this.memory.set(key, {
       target: 'LRU',
       index: LRU.add(key, ++this.clockR),
@@ -170,7 +175,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     return true;
   }
   public clear(): void {
-    this.size = 0;
+    this[SIZE] = 0;
     this.ratio = 50;
     this.indexes.LRU.clear();
     this.indexes.LFU.clear();

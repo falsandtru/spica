@@ -5,6 +5,9 @@ import { equal } from '../compare';
 
 // Weighted optimal indexed circular linked list
 
+const LENGTH = Symbol('length');
+const SIZE = Symbol('size');
+
 export class WList<K, V = undefined> {
   constructor(
     private readonly space: number,
@@ -17,16 +20,22 @@ export class WList<K, V = undefined> {
   private index = new MultiMap<K, number>();
   private head = 0;
   private cursor = 0;
-  public length = 0;
-  public size = 0;
+  private [LENGTH] = 0;
+  private [SIZE] = 0;
+  public get length() {
+    return this[LENGTH];
+  }
+  public get size() {
+    return this[SIZE];
+  }
   public clear(): void {
     this.nodes = [];
     this.empties = [];
     this.index.clear();
     this.head = 0;
     this.cursor = 0;
-    this.length = 0;
-    this.size = 0;
+    this[LENGTH] = 0;
+    this[SIZE] = 0;
   }
   public add(this: WList<K, undefined>, key: K, value?: V, size?: number): number;
   public add(key: K, value: V, size?: number): number;
@@ -41,8 +50,8 @@ export class WList<K, V = undefined> {
         ? this.empties.shift()!
         : this.length;
       assert(!nodes[index]);
-      ++this.length;
-      this.size += size;
+      ++this[LENGTH];
+      this[SIZE] += size;
       this.index.set(key, index);
       nodes[index] =
         new Node(index, key, value, size, head!, head!);
@@ -57,8 +66,8 @@ export class WList<K, V = undefined> {
         ? this.empties.shift()!
         : this.length;
       assert(!nodes[index]);
-      ++this.length;
-      this.size += size;
+      ++this[LENGTH];
+      this[SIZE] += size;
       this.index.set(key, index);
       nodes[index] = head.prev = head.prev.next =
         new Node(index, key, value, size, head, head.prev);
@@ -78,7 +87,7 @@ export class WList<K, V = undefined> {
       assert(nodes[index]);
       this.index.take(garbage.key);
       this.index.set(key, index);
-      this.size += size - garbage.size;
+      this[SIZE] += size - garbage.size;
       nodes[index] = head.prev = head.prev.prev.next =
         new Node(index, key, value, size, head, head.prev.prev);
       // @ts-expect-error
@@ -97,7 +106,7 @@ export class WList<K, V = undefined> {
     if (!node) return this.add(key, value, size);
     if (this.secure(size - node.size) && !node.next) return this.put(key, value, size);
     assert(this.cursor === node.index);
-    this.size += size - node.size;
+    this[SIZE] += size - node.size;
     node.value = value;
     node.size = size;
     return node.index;
@@ -131,8 +140,8 @@ export class WList<K, V = undefined> {
     assert(this.length !== 1 || node === node.prev && node.prev === node.next);
     assert(this.length !== 2 || node !== node.prev && node.prev === node.next);
     assert(this.length < 3 || node !== node.prev && node.prev !== node.next);
-    --this.length;
-    this.size -= node.size;
+    --this[LENGTH];
+    this[SIZE] -= node.size;
     this.empties.push(node.index);
     const indexes = this.index.ref(node.key);
     assert(indexes.length > 0);

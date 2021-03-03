@@ -2,6 +2,8 @@ import { equal } from '../compare';
 
 // Indexed circular linked list
 
+const LENGTH = Symbol('length');
+
 export class IList<K, V = undefined> {
   constructor(
     private readonly capacity: number,
@@ -13,13 +15,16 @@ export class IList<K, V = undefined> {
   private empties: number[] = [];
   private head = 0;
   private cursor = 0;
-  public length = 0;
+  private [LENGTH] = 0;
+  public get length() {
+    return this[LENGTH];
+  }
   public clear(): void {
     this.nodes = [];
     this.empties = [];
     this.head = 0;
     this.cursor = 0;
-    this.length = 0;
+    this[LENGTH] = 0;
   }
   public add(this: IList<K, undefined>, key: K, value?: V): number;
   public add(key: K, value: V): number;
@@ -33,7 +38,7 @@ export class IList<K, V = undefined> {
         ? this.empties.shift()!
         : this.length;
       //assert(!nodes[index]);
-      ++this.length;
+      ++this[LENGTH];
       nodes[index] =
         new Node(index, key, value, head!, head!);
       //assert(this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
@@ -46,7 +51,7 @@ export class IList<K, V = undefined> {
         ? this.empties.shift()!
         : this.length;
       //assert(!nodes[index]);
-      ++this.length;
+      ++this[LENGTH];
       nodes[index] = head.prev = head.prev.next =
         new Node(index, key, value, head, head.prev);
       //assert(this.length !== 1 || this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
@@ -102,7 +107,7 @@ export class IList<K, V = undefined> {
     //assert(this.length !== 1 || node === node.prev && node.prev === node.next);
     //assert(this.length !== 2 || node !== node.prev && node.prev === node.next);
     //assert(this.length < 3 || node !== node.prev && node.prev !== node.next);
-    --this.length;
+    --this[LENGTH];
     this.empties.push(node.index);
     const { prev, next, value } = node;
     prev.next = next;

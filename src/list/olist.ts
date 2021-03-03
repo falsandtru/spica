@@ -4,6 +4,8 @@ import { equal } from '../compare';
 
 // Optimal indexed circular linked list
 
+const LENGTH = Symbol('length');
+
 export class OList<K, V = undefined> {
   constructor(
     private readonly capacity: number,
@@ -15,14 +17,17 @@ export class OList<K, V = undefined> {
   private index = new MultiMap<K, number>();
   private head = 0;
   private cursor = 0;
-  public length = 0;
+  private [LENGTH] = 0;
+  public get length() {
+    return this[LENGTH];
+  }
   public clear(): void {
     this.nodes = [];
     this.empties = [];
     this.index.clear();
     this.head = 0;
     this.cursor = 0;
-    this.length = 0;
+    this[LENGTH] = 0;
   }
   public add(this: OList<K, undefined>, key: K, value?: V): number;
   public add(key: K, value: V): number;
@@ -36,7 +41,7 @@ export class OList<K, V = undefined> {
         ? this.empties.shift()!
         : this.length;
       assert(!nodes[index]);
-      ++this.length;
+      ++this[LENGTH];
       this.index.set(key, index);
       nodes[index] =
         new Node(index, key, value, head!, head!);
@@ -50,7 +55,7 @@ export class OList<K, V = undefined> {
         ? this.empties.shift()!
         : this.length;
       assert(!nodes[index]);
-      ++this.length;
+      ++this[LENGTH];
       this.index.set(key, index);
       nodes[index] = head.prev = head.prev.next =
         new Node(index, key, value, head, head.prev);
@@ -110,7 +115,7 @@ export class OList<K, V = undefined> {
     assert(this.length !== 1 || node === node.prev && node.prev === node.next);
     assert(this.length !== 2 || node !== node.prev && node.prev === node.next);
     assert(this.length < 3 || node !== node.prev && node.prev !== node.next);
-    --this.length;
+    --this[LENGTH];
     this.empties.push(node.index);
     const indexes = this.index.ref(node.key);
     assert(indexes.length > 0);
