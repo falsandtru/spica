@@ -228,12 +228,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     }
   }
   private access(key: K, record: Record<V>): boolean {
-    const hit = false
-      || this.accessLFU(key, record)
-      || this.accessLRU(key, record);
-    assert(hit === this.memory.has(key));
-    assert(hit);
-    return hit;
+    return this.accessLFU(key, record)
+        || this.accessLRU(key, record);
   }
   private accessLRU(key: K, record: Record<V>): boolean {
     if (record.target !== 'LRU') return false;
