@@ -1,6 +1,6 @@
-import { type, isPrimitive } from './type';
 import { Object } from './global';
 import { hasOwnProperty, ObjectCreate, ObjectKeys } from './alias';
+import { type, isPrimitive } from './type';
 import { push } from './array';
 
 export const assign = template((prop, target, source) =>
