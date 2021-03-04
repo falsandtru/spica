@@ -11,6 +11,11 @@ import { equal } from './compare';
 // Note: The logical clocks of a cache will overflow after 1041 days in 100,000,000 ops/sec.
 
 /*
+この実装はオーバーヘッド削減を優先して論理クロックのリセットを実装していないが他の高速な言語で
+これが問題になる場合はクロックの世代管理を行うだけでよいと思われる。
+*/
+
+/*
 比較検討
 
 ARC:
