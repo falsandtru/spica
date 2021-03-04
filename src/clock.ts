@@ -1,8 +1,15 @@
-import { setTimeout } from './global';
+import { Date, setTimeout } from './global';
 import { floor } from './alias';
 import { AtomicPromise } from './promise';
 import { causeAsyncException } from './exception';
 import { noop } from './noop';
+
+let now_: number | undefined;
+export function now(): number {
+  if (now_ !== void 0) return now_;
+  tick(() => now_ = void 0);
+  return now_ = Date.now();
+}
 
 export const clock: Promise<undefined> = Promise.resolve(undefined);
 

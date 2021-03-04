@@ -1,5 +1,6 @@
-import { Infinity, Date, Map } from './global';
+import { Infinity, Map } from './global';
 import { max, min } from './alias';
+import { now } from './clock';
 import { IterableCollection } from './collection';
 import { IList } from './ilist';
 import { extend } from './assign';
@@ -123,7 +124,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
 
     const expiry = age === Infinity
       ? Infinity
-      : Date.now() + age;
+      : now() + age;
     const record = this.memory.get(key);
     if (record && this.secure(size - record.size, key)) {
       assert(this.memory.has(key));
@@ -157,7 +158,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public get(key: K): V | undefined {
     const record = this.memory.get(key);
     if (!record) return;
-    if (record.expiry !== Infinity && record.expiry <= Date.now()) {
+    if (record.expiry !== Infinity && record.expiry <= now()) {
       this.dispose(key, record, this.settings.disposer);
       return;
     }
@@ -170,7 +171,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     //assert(this.memory.size === this.indexes.LFU.length + this.indexes.LRU.length);
     const record = this.memory.get(key);
     if (!record) return false;
-    if (record.expiry !== Infinity && record.expiry <= Date.now()) {
+    if (record.expiry !== Infinity && record.expiry <= now()) {
       this.dispose(key, record, this.settings.disposer);
       return false;
     }
