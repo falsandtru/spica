@@ -8,6 +8,8 @@ import { equal } from './compare';
 
 // Dual Window Cache
 
+// Note: The logical clocks of a cache will overflow after 1041 days in 100,000,000 ops/sec.
+
 /*
 比較検討
 
@@ -64,6 +66,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   };
   private readonly space: number;
   private [SIZE] = 0;
+  // 1041 days < 2 ** 53 / 100,000,000 / 3600 / 24.
   private clock = 0;
   private clockR = 0;
   private memory = new Map<K, Record<V>>();
