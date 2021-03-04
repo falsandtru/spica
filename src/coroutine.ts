@@ -1,11 +1,11 @@
 import type { Structural, DeepImmutable, DeepRequired } from './type';
 import { Array, Promise as ESPromise, Error } from './global';
 import { ObjectDefineProperty, ObjectGetOwnPropertyDescriptor } from './alias';
+import { tick, wait } from './clock';
 import { AtomicPromise, isPromiseLike } from './promise';
 import { Future, AtomicFuture } from './future';
 import { Channel } from './channel';
 import { extend } from './assign';
-import { wait, tick } from './clock';
 import { causeAsyncException } from './exception';
 import { noop } from './noop';
 

@@ -1,13 +1,13 @@
 import type { DeepImmutable, DeepRequired } from './type';
 import { Infinity, Object, Set, Map, WeakSet, setTimeout, clearTimeout, Error } from './global';
 import { isFinite, ObjectFreeze } from './alias';
+import { tick } from './clock';
 import { Coroutine, CoroutineInterface, isCoroutine } from './coroutine';
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future';
 import { Observation, Observer, Publisher } from './observer';
 import { splice } from './array';
 import { extend } from './assign';
-import { tick } from './clock';
 import { sqid } from './sqid';
 import { causeAsyncException } from './exception';
 import { noop } from './noop';
