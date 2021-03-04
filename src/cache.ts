@@ -149,7 +149,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public get(key: K): V | undefined {
     const record = this.memory.get(key);
     if (!record) return;
-    if (record.expiry < Infinity && record.expiry < Date.now()) {
+    if (record.expiry !== Infinity && record.expiry <= Date.now()) {
       this.dispose(key, record, this.settings.disposer);
       return;
     }
@@ -162,7 +162,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     //assert(this.memory.size === this.indexes.LFU.length + this.indexes.LRU.length);
     const record = this.memory.get(key);
     if (!record) return false;
-    if (record.expiry < Infinity && record.expiry < Date.now()) {
+    if (record.expiry !== Infinity && record.expiry <= Date.now()) {
       this.dispose(key, record, this.settings.disposer);
       return false;
     }
