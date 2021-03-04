@@ -71,8 +71,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private clockR = 0;
   private memory = new Map<K, Record<V>>();
   private readonly indexes = {
-    LRU: new IList<K, number>(this.capacity, true),
-    LFU: new IList<K, number>(this.capacity, true),
+    LRU: new IList<K, number>(this.capacity),
+    LFU: new IList<K, number>(this.capacity),
   } as const;
   public get length(): number {
     //assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);

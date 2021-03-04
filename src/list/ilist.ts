@@ -7,7 +7,7 @@ const LENGTH = Symbol('length');
 export class IList<K, V = undefined> {
   constructor(
     private readonly capacity: number,
-    private readonly strict: boolean = false,
+    private readonly strict: boolean = true,
   ) {
     assert(capacity > 0);
   }
