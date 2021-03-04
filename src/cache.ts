@@ -192,12 +192,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       LRU: [0, 0],
       LFU: [0, 0],
     };
+    if (!this.settings.disposer || !this.settings.capture!.clear) return void this.memory.clear();
     const memory = this.memory;
     this.memory = new Map();
-    if (this.settings.disposer && this.settings.capture!.clear) {
-      for (const [key, { value }] of memory) {
-        this.settings.disposer(key, value);
-      }
+    for (const [key, { value }] of memory) {
+      this.settings.disposer(key, value);
     }
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
