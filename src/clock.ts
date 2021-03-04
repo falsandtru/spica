@@ -13,7 +13,7 @@ export function wait(ms: number): AtomicPromise<undefined> {
     : new AtomicPromise(resolve => void setTimeout(resolve, ms));
 }
 
-export const never: AtomicPromise<never> = new class Never extends AtomicPromise<never> {
+export const never: Promise<never> = new class Never extends Promise<never> {
   public static get [Symbol.species]() {
     return Never;
   }
