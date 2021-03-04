@@ -223,8 +223,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       //ratio % 10 || console.debug('-', this.ratio, LRU, LFU, Total);
       this.ratio -= step;
     }
-    assert(LRU[0] + LFU[0] <= window);
-    assert(LRU[1] + LFU[1] <= window);
     if (LRU[0] + LFU[0] >= window) {
       this.stats = {
         LRU: [0, LRU[0]],
