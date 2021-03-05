@@ -118,18 +118,6 @@ export class WList<K, V = undefined> {
     }
     return change;
   }
-  public shift(): { key: K; value: V; size: number; } | undefined {
-    assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
-    const node = this.nodes[this.head];
-    assert(this.length === 0 ? !node : node);
-    return node && this.delete(node.key, node.index);
-  }
-  public pop(): { key: K; value: V; size: number; } | undefined {
-    assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
-    const node = this.nodes[this.head]?.prev;
-    assert(this.length === 0 ? !node : node);
-    return node && this.delete(node.key, node.index);
-  }
   public delete(key: K, index?: number): { key: K; value: V; size: number; } | undefined {
     const cursor = this.cursor;
     const node = this.search(key, index);
@@ -158,6 +146,18 @@ export class WList<K, V = undefined> {
     assert(this.length === 0 ? !this.nodes[this.cursor] : this.nodes[this.cursor]);
     assert(this.length > 10 || [...this].length === this.length);
     return { key, value, size };
+  }
+  public shift(): { key: K; value: V; size: number; } | undefined {
+    assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
+    const node = this.nodes[this.head];
+    assert(this.length === 0 ? !node : node);
+    return node && this.delete(node.key, node.index);
+  }
+  public pop(): { key: K; value: V; size: number; } | undefined {
+    assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
+    const node = this.nodes[this.head]?.prev;
+    assert(this.length === 0 ? !node : node);
+    return node && this.delete(node.key, node.index);
   }
   public node(index: number): { index: number; key: K; value: V; size: number; } {
     const node = this.nodes[index];

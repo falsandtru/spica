@@ -116,18 +116,6 @@ export class IxList<K, V = undefined> {
     node.value = value;
     return node.index;
   }
-  public shift(): { key: K; value: V; } | undefined {
-    //assert(this.length === 0 ? !this.nodes[this[HEAD]] : this.nodes[this[HEAD]]);
-    const node = this.nodes[this[HEAD]];
-    //assert(this.length === 0 ? !node : node);
-    return node && this.delete(node.key, node.index);
-  }
-  public pop(): { key: K; value: V; } | undefined {
-    //assert(this.length === 0 ? !this.nodes[this[HEAD]] : this.nodes[this[HEAD]]);
-    const node = this.nodes[this[HEAD]]?.prev;
-    //assert(this.length === 0 ? !node : node);
-    return node && this.delete(node.key, node.index);
-  }
   public delete(key: K, index?: number): { key: K; value: V; } | undefined {
     const cursor = this.cursor;
     const node = this.search(key, index);
@@ -155,6 +143,31 @@ export class IxList<K, V = undefined> {
     //assert(this.length === 0 ? !this.nodes[this.cursor] : this.nodes[this.cursor]);
     //assert(this.length > 10 || [...this].length === this.length);
     return { key, value };
+  }
+  public unshift(this: IxList<K, undefined>, key: K, value?: V): number;
+  public unshift(key: K, value: V): number;
+  public unshift(key: K, value: V): number {
+    return this.add(key, value);
+  }
+  public shift(): { key: K; value: V; } | undefined {
+    //assert(this.length === 0 ? !this.nodes[this[HEAD]] : this.nodes[this[HEAD]]);
+    const node = this.nodes[this[HEAD]];
+    //assert(this.length === 0 ? !node : node);
+    return node && this.delete(node.key, node.index);
+  }
+  public push(this: IxList<K, undefined>, key: K, value?: V): number;
+  public push(key: K, value: V): number;
+  public push(key: K, value: V): number {
+    const h = this[HEAD];
+    const i = this.add(key, value);
+    this[HEAD] = h;
+    return i;
+  }
+  public pop(): { key: K; value: V; } | undefined {
+    //assert(this.length === 0 ? !this.nodes[this[HEAD]] : this.nodes[this[HEAD]]);
+    const node = this.nodes[this[HEAD]]?.prev;
+    //assert(this.length === 0 ? !node : node);
+    return node && this.delete(node.key, node.index);
   }
   public node(index: number): { index: number; key: K; value: V; } {
     const node = this.nodes[index];
