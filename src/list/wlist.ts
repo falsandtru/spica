@@ -159,15 +159,6 @@ export class WList<K, V = undefined> {
     assert(this.length > 10 || [...this].length === this.length);
     return { key, value, size };
   }
-  public peek(at?: -1 | 0): { index: number; key: K; value: V; size: number; } | undefined {
-    const node = at ? this.nodes[this.head]?.prev : this.nodes[this.head];
-    return node && {
-      index: node.index,
-      key: node.key,
-      value: node.value,
-      size: node.size,
-    };
-  }
   public node(index: number): { index: number; key: K; value: V; size: number; } {
     const node = this.nodes[index];
     if (!node) throw new Error(`Spica: WList: Invalid index.`);
