@@ -23,7 +23,6 @@ $ npm i spica
 - Cache
 - HList
 - IList
-- OList
 - Heap
 - DataMap
 - MultiMap

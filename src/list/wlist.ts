@@ -2,7 +2,7 @@ import { Infinity } from '../global';
 import { MultiMap } from '../multimap';
 import { equal } from '../compare';
 
-// Weighted optimal indexed circular linked list
+// Weighted indexed circular linked list
 
 const LENGTH = Symbol('length');
 const SIZE = Symbol('size');

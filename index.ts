@@ -17,7 +17,6 @@ export { Cancellation } from './src/cancellation';
 export { Cache } from './src/cache';
 export { HList } from './src/hlist';
 export { IList } from './src/ilist';
-export { OList } from './src/olist';
 export { WList } from './src/wlist';
 export { Heap } from './src/heap';
 export { DataMap } from './src/datamap';
