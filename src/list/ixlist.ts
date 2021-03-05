@@ -22,7 +22,7 @@ export class IxList<K, V = undefined> {
   private empties: number[] = [];
   private [HEAD] = 0;
   private cursor = 0;
-  public get head(): { index: number; key: K; value: V; } | undefined {
+  public get head(): { readonly index: number; readonly key: K; readonly value: V; } | undefined {
     const node = this.nodes[this[HEAD]];
     return node && {
       index: node.index,
@@ -30,7 +30,7 @@ export class IxList<K, V = undefined> {
       value: node.value,
     };
   }
-  public get last(): { index: number; key: K; value: V; } | undefined {
+  public get last(): { readonly index: number; readonly key: K; readonly value: V; } | undefined {
     const node = this.nodes[this[HEAD]]?.prev;
     return node && {
       index: node.index,
@@ -116,7 +116,7 @@ export class IxList<K, V = undefined> {
     node.value = value;
     return node.index;
   }
-  public delete(key: K, index?: number): { key: K; value: V; } | undefined {
+  public delete(key: K, index?: number): { readonly key: K; readonly value: V; } | undefined {
     const cursor = this.cursor;
     const node = this.search(key, index);
     if (!node) return;
@@ -149,7 +149,7 @@ export class IxList<K, V = undefined> {
   public unshift(key: K, value: V): number {
     return this.add(key, value);
   }
-  public shift(): { key: K; value: V; } | undefined {
+  public shift(): { readonly key: K; readonly value: V; } | undefined {
     //assert(this.length === 0 ? !this.nodes[this[HEAD]] : this.nodes[this[HEAD]]);
     const node = this.nodes[this[HEAD]];
     //assert(this.length === 0 ? !node : node);
@@ -163,13 +163,13 @@ export class IxList<K, V = undefined> {
     this[HEAD] = h;
     return i;
   }
-  public pop(): { key: K; value: V; } | undefined {
+  public pop(): { readonly key: K; readonly value: V; } | undefined {
     //assert(this.length === 0 ? !this.nodes[this[HEAD]] : this.nodes[this[HEAD]]);
     const node = this.nodes[this[HEAD]]?.prev;
     //assert(this.length === 0 ? !node : node);
     return node && this.delete(node.key, node.index);
   }
-  public node(index: number): { index: number; key: K; value: V; } {
+  public node(index: number): { readonly index: number; readonly key: K; readonly value: V; } {
     const node = this.nodes[index];
     if (!node) throw new Error(`Spica: IxList: Invalid index.`);
     return {
@@ -178,10 +178,10 @@ export class IxList<K, V = undefined> {
       value: node.value,
     };
   }
-  public next(index: number): { index: number; key: K; value: V; } {
+  public next(index: number): { readonly index: number; readonly key: K; readonly value: V; } {
     return this.node(this.nodes[index]?.next.index ?? this.capacity);
   }
-  public prev(index: number): { index: number; key: K; value: V; } {
+  public prev(index: number): { readonly index: number; readonly key: K; readonly value: V; } {
     return this.node(this.nodes[index]?.prev.index ?? this.capacity);
   }
   private search(key: K, cursor = this.cursor): Node<K, V> | undefined {
