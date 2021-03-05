@@ -193,9 +193,9 @@ export class WList<K, V = undefined> {
   public has(key: K, index?: number): boolean {
     return this.search(key, index) !== void 0;
   }
-  public *[Symbol.iterator](): Iterator<[K, V, number], undefined, undefined> {
+  public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
     for (let node = this.nodes[this.head], i = 0; node && i < this.length; (node = node.next) && ++i) {
-      yield [node.key, node.value, node.index];
+      yield [node.key, node.value];
     }
     return;
   }

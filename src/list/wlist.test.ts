@@ -26,7 +26,7 @@ describe('Unit: lib/wlist', () => {
       assert(list.put(0) === 0);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
-          [0, undefined, 0],
+          [0, undefined],
         ],
         array: [
           [0, undefined, 0],
@@ -39,7 +39,7 @@ describe('Unit: lib/wlist', () => {
       assert(list.put(1) === 0);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
-          [1, undefined, 0],
+          [1, undefined],
         ],
         array: [
           [1, undefined, 0],
@@ -52,7 +52,7 @@ describe('Unit: lib/wlist', () => {
       assert(list.put(1) === 0);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
-          [1, undefined, 0],
+          [1, undefined],
         ],
         array: [
           [1, undefined, 0],
@@ -65,7 +65,7 @@ describe('Unit: lib/wlist', () => {
       assert.deepStrictEqual(list.delete(0), undefined);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
-          [1, undefined, 0],
+          [1, undefined],
         ],
         array: [
           [1, undefined, 0],
@@ -104,7 +104,7 @@ describe('Unit: lib/wlist', () => {
       assert(list.put(0) === 0);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
-          [0, undefined, 0],
+          [0, undefined],
         ],
         array: [
           [0, undefined, 0],
@@ -117,8 +117,8 @@ describe('Unit: lib/wlist', () => {
       assert(list.put(1) === 1);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
-          [1, undefined, 1],
-          [0, undefined, 0],
+          [1, undefined],
+          [0, undefined],
         ],
         array: [
           [0, undefined, 0],
@@ -132,8 +132,8 @@ describe('Unit: lib/wlist', () => {
       assert(list.put(1) === 1);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
-          [1, undefined, 1],
-          [0, undefined, 0],
+          [1, undefined],
+          [0, undefined],
         ],
         array: [
           [0, undefined, 0],
@@ -147,7 +147,7 @@ describe('Unit: lib/wlist', () => {
       assert.deepStrictEqual(list.delete(0), { key: 0, value: undefined, size: 1 });
       assert.deepStrictEqual(inspect(list), {
         nodes: [
-          [1, undefined, 1],
+          [1, undefined],
         ],
         array: [
           undefined,
@@ -189,7 +189,7 @@ describe('Unit: lib/wlist', () => {
       assert(list.put(0) === 0);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
-          [0, undefined, 0],
+          [0, undefined],
         ],
         array: [
           [0, undefined, 0],
@@ -202,8 +202,8 @@ describe('Unit: lib/wlist', () => {
       assert(list.put(1) === 1);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
-          [1, undefined, 1],
-          [0, undefined, 0],
+          [1, undefined],
+          [0, undefined],
         ],
         array: [
           [0, undefined, 0],
@@ -217,9 +217,9 @@ describe('Unit: lib/wlist', () => {
       assert(list.put(2) === 2);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
-          [2, undefined, 2],
-          [1, undefined, 1],
-          [0, undefined, 0],
+          [2, undefined],
+          [1, undefined],
+          [0, undefined],
         ],
         array: [
           [0, undefined, 0],
@@ -234,9 +234,9 @@ describe('Unit: lib/wlist', () => {
       assert(list.put(3) === 0);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
-          [3, undefined, 0],
-          [2, undefined, 2],
-          [1, undefined, 1],
+          [3, undefined],
+          [2, undefined],
+          [1, undefined],
         ],
         array: [
           [3, undefined, 0],
@@ -251,9 +251,9 @@ describe('Unit: lib/wlist', () => {
       assert.deepStrictEqual(list.delete(0), undefined);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
-          [3, undefined, 0],
-          [2, undefined, 2],
-          [1, undefined, 1],
+          [3, undefined],
+          [2, undefined],
+          [1, undefined],
         ],
         array: [
           [3, undefined, 0],
@@ -268,8 +268,8 @@ describe('Unit: lib/wlist', () => {
       assert.deepStrictEqual(list.delete(1), { key: 1, value: undefined, size: 1 });
       assert.deepStrictEqual(inspect(list), {
         nodes: [
-          [3, undefined, 0],
-          [2, undefined, 2],
+          [3, undefined],
+          [2, undefined],
         ],
         array: [
           [3, undefined, 0],
@@ -284,8 +284,8 @@ describe('Unit: lib/wlist', () => {
       assert.deepStrictEqual(list.delete(1), undefined);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
-          [3, undefined, 0],
-          [2, undefined, 2],
+          [3, undefined],
+          [2, undefined],
         ],
         array: [
           [3, undefined, 0],
@@ -307,9 +307,9 @@ describe('Unit: lib/wlist', () => {
       assert(list.put(1, 0) === 1);
       assert.deepStrictEqual(inspect(list), {
         nodes: [
-          [2, ~2, 2],
-          [1, 0, 1],
-          [0, ~0, 0],
+          [2, ~2],
+          [1, 0],
+          [0, ~0],
         ],
         array: [
           [0, ~0, 0],
