@@ -1,5 +1,6 @@
 import { Coroutine } from './coroutine';
-import { wait, never } from './clock';
+import { wait } from './clock';
+import { never } from './promise';
 
 describe('Unit: lib/coroutine', () => {
   describe('Coroutine', () => {

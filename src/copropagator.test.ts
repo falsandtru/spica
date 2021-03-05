@@ -1,6 +1,6 @@
 import { Copropagator } from './copropagator';
 import { Coroutine } from './coroutine';
-import { never } from './clock';
+import { never } from './promise';
 
 describe('Unit: lib/copropagator', () => {
   describe('Copropagator', () => {

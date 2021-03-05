@@ -1,5 +1,6 @@
 import { Array } from './global';
 import { isArray } from './alias';
+import { noop } from './noop';
 
 const enum State {
   pending,
@@ -369,3 +370,21 @@ function isAtomicPromiseLike(value: any): value is AtomicPromiseLike<any> {
   assert(isPromiseLike(value));
   return internal in value;
 }
+
+export const never: Promise<never> = new class Never extends Promise<never> {
+  public static get [Symbol.species]() {
+    return Never;
+  }
+  constructor() {
+    super(noop);
+  }
+  public then() {
+    return this;
+  }
+  public catch() {
+    return this;
+  }
+  public finally() {
+    return this;
+  }
+}();

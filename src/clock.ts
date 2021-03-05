@@ -2,7 +2,6 @@ import { Date, setTimeout } from './global';
 import { floor } from './alias';
 import { AtomicPromise } from './promise';
 import { causeAsyncException } from './exception';
-import { noop } from './noop';
 
 let now_: number | undefined;
 export function now(): number {
@@ -19,24 +18,6 @@ export function wait(ms: number): AtomicPromise<undefined> {
     ? AtomicPromise.resolve(clock)
     : new AtomicPromise(resolve => void setTimeout(resolve, ms));
 }
-
-export const never: Promise<never> = new class Never extends Promise<never> {
-  public static get [Symbol.species]() {
-    return Never;
-  }
-  constructor() {
-    super(noop);
-  }
-  public then() {
-    return this;
-  }
-  public catch() {
-    return this;
-  }
-  public finally() {
-    return this;
-  }
-}();
 
 type Callback = () => void;
 

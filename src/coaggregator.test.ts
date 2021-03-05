@@ -1,6 +1,6 @@
 import { Coaggregator } from './coaggregator';
 import { Coroutine } from './coroutine';
-import { never } from './clock';
+import { never } from './promise';
 
 describe('Unit: lib/coaggregator', () => {
   describe('Coaggregator', () => {
