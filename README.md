@@ -22,7 +22,7 @@ $ npm i spica
 - Cancellation
 - Cache
 - HList
-- IList
+- IxList
 - Heap
 - DataMap
 - MultiMap

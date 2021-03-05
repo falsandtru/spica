@@ -24,6 +24,7 @@
     "monad",
     "list",
     "hlist",
+    "ixlist",
     "heap",
     "cache"
   ],

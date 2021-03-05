@@ -2,7 +2,7 @@ import { Infinity, Map } from './global';
 import { max, min } from './alias';
 import { now } from './clock';
 import { IterableCollection } from './collection';
-import { IList } from './ilist';
+import { IxList } from './ixlist';
 import { extend } from './assign';
 import { tuple } from './tuple';
 import { equal } from './compare';
@@ -77,8 +77,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private clockR = 0;
   private memory = new Map<K, Record<V>>();
   private readonly indexes = {
-    LRU: new IList<K, number>(this.capacity),
-    LFU: new IList<K, number>(this.capacity),
+    LRU: new IxList<K, number>(this.capacity),
+    LFU: new IxList<K, number>(this.capacity),
   } as const;
   public get length(): number {
     //assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);

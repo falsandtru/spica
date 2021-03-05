@@ -11,7 +11,7 @@ interface Collection<K, V> extends IterableCollection<K, V> {
   clear(): void;
 }
 
-export class IList<K, V = undefined> {
+export class IxList<K, V = undefined> {
   constructor(
     private readonly capacity: number,
     private readonly index?: Collection<K, number>,
@@ -50,7 +50,7 @@ export class IList<K, V = undefined> {
     this.cursor = 0;
     this[LENGTH] = 0;
   }
-  public add(this: IList<K, undefined>, key: K, value?: V): number;
+  public add(this: IxList<K, undefined>, key: K, value?: V): number;
   public add(key: K, value: V): number;
   public add(key: K, value: V): number {
     const nodes = this.nodes;
@@ -107,7 +107,7 @@ export class IList<K, V = undefined> {
       return index;
     }
   }
-  public put(this: IList<K, undefined>, key: K, value?: V, index?: number): number;
+  public put(this: IxList<K, undefined>, key: K, value?: V, index?: number): number;
   public put(key: K, value: V, index?: number): number;
   public put(key: K, value: V, index?: number): number {
     const node = this.search(key, index);
@@ -158,7 +158,7 @@ export class IList<K, V = undefined> {
   }
   public node(index: number): { index: number; key: K; value: V; } {
     const node = this.nodes[index];
-    if (!node) throw new Error(`Spica: IList: Invalid index.`);
+    if (!node) throw new Error(`Spica: IxList: Invalid index.`);
     return {
       index: node.index,
       key: node.key,
@@ -172,15 +172,15 @@ export class IList<K, V = undefined> {
     return this.node(this.nodes[index]?.prev.index ?? this.capacity);
   }
   public find(key: K, index?: number): V | undefined {
-    if (!this.index) throw new Error(`Spica: IList: Invalid cursor.`);
+    if (!this.index) throw new Error(`Spica: IxList: Invalid cursor.`);
     return this.search(key, index)?.value;
   }
   public findIndex(key: K, index?: number): number | undefined {
-    if (!this.index) throw new Error(`Spica: IList: Invalid cursor.`);
+    if (!this.index) throw new Error(`Spica: IxList: Invalid cursor.`);
     return this.search(key, index)?.index;
   }
   public has(key: K, index?: number): boolean {
-    if (!this.index) throw new Error(`Spica: IList: Invalid cursor.`);
+    if (!this.index) throw new Error(`Spica: IxList: Invalid cursor.`);
     return !!this.search(key, index);
   }
   private search(key: K, cursor = this.cursor): Node<K, V> | undefined {
@@ -188,7 +188,7 @@ export class IList<K, V = undefined> {
     node = this.nodes[cursor];
     if (!node) return;
     if (equal(node.key, key)) return this.cursor = cursor, node;
-    if (!this.index) throw new Error(`Spica: IList: Invalid cursor.`);
+    if (!this.index) throw new Error(`Spica: IxList: Invalid cursor.`);
     node = this.nodes[cursor = this.index.get(key) ?? this.capacity];
     if (!node) return;
     if (equal(node.key, key)) return this.cursor = cursor, node;
