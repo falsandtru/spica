@@ -175,15 +175,6 @@ export class WList<K, V = undefined> {
   public prev(index: number): { index: number; key: K; value: V; size: number; } {
     return this.node(this.nodes[index]?.prev.index ?? this.capacity);
   }
-  public find(key: K, index?: number): V | undefined {
-    return this.search(key, index)?.value;
-  }
-  public findIndex(key: K, index?: number): number | undefined {
-    return this.search(key, index)?.index;
-  }
-  public has(key: K, index?: number): boolean {
-    return !!this.search(key, index);
-  }
   private search(key: K, cursor = this.cursor): Node<K, V> | undefined {
     let node: Node<K, V> | undefined;
     node = this.nodes[cursor];
@@ -192,6 +183,15 @@ export class WList<K, V = undefined> {
     node = this.nodes[cursor = this.index.get(key) ?? this.capacity];
     if (!node) return;
     if (equal(node.key, key)) return this.cursor = cursor, node;
+  }
+  public find(key: K, index?: number): V | undefined {
+    return this.search(key, index)?.value;
+  }
+  public findIndex(key: K, index?: number): number | undefined {
+    return this.search(key, index)?.index;
+  }
+  public has(key: K, index?: number): boolean {
+    return !!this.search(key, index);
   }
   public *[Symbol.iterator](): Iterator<[K, V, number], undefined, undefined> {
     for (let node = this.nodes[this.head], i = 0; node && i < this.length; (node = node.next) && ++i) {

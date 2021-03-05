@@ -171,6 +171,16 @@ export class IxList<K, V = undefined> {
   public prev(index: number): { index: number; key: K; value: V; } {
     return this.node(this.nodes[index]?.prev.index ?? this.capacity);
   }
+  private search(key: K, cursor = this.cursor): Node<K, V> | undefined {
+    let node: Node<K, V> | undefined;
+    node = this.nodes[cursor];
+    if (!node) return;
+    if (equal(node.key, key)) return this.cursor = cursor, node;
+    if (!this.index) throw new Error(`Spica: IxList: Invalid cursor.`);
+    node = this.nodes[cursor = this.index.get(key) ?? this.capacity];
+    if (!node) return;
+    if (equal(node.key, key)) return this.cursor = cursor, node;
+  }
   public find(key: K, index?: number): V | undefined {
     if (!this.index) throw new Error(`Spica: IxList: Invalid cursor.`);
     return this.search(key, index)?.value;
@@ -182,16 +192,6 @@ export class IxList<K, V = undefined> {
   public has(key: K, index?: number): boolean {
     if (!this.index) throw new Error(`Spica: IxList: Invalid cursor.`);
     return !!this.search(key, index);
-  }
-  private search(key: K, cursor = this.cursor): Node<K, V> | undefined {
-    let node: Node<K, V> | undefined;
-    node = this.nodes[cursor];
-    if (!node) return;
-    if (equal(node.key, key)) return this.cursor = cursor, node;
-    if (!this.index) throw new Error(`Spica: IxList: Invalid cursor.`);
-    node = this.nodes[cursor = this.index.get(key) ?? this.capacity];
-    if (!node) return;
-    if (equal(node.key, key)) return this.cursor = cursor, node;
   }
   public *[Symbol.iterator](): Iterator<[K, V, number], undefined, undefined> {
     for (let node = this.nodes[this[HEAD]], i = 0; node && i < this.length; (node = node.next) && ++i) {
