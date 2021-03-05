@@ -187,12 +187,10 @@ export class IxList<K, V = undefined> {
   private search(key: K, cursor = this.cursor): Node<K, V> | undefined {
     let node: Node<K, V> | undefined;
     node = this.nodes[cursor];
-    if (!node) return;
-    if (equal(node.key, key)) return this.cursor = cursor, node;
+    if (node && equal(node.key, key)) return this.cursor = cursor, node;
     if (!this.index) throw new Error(`Spica: IxList: Invalid index.`);
     node = this.nodes[cursor = this.index.get(key) ?? this.capacity];
-    if (!node) return;
-    if (equal(node.key, key)) return this.cursor = cursor, node;
+    if (node && equal(node.key, key)) return this.cursor = cursor, node;
   }
   public find(key: K, index?: number): V | undefined {
     if (!this.index) throw new Error(`Spica: IxList: No index.`);
