@@ -19,7 +19,7 @@ export class IxList<K, V = undefined> {
     assert(capacity > 0);
   }
   private nodes: (Node<K, V> | undefined)[] = [];
-  private empties: number[] = [];
+  private buffers: number[] = [];
   private [HEAD] = 0;
   private cursor = 0;
   private [LENGTH] = 0;
@@ -59,7 +59,7 @@ export class IxList<K, V = undefined> {
   }
   public clear(): void {
     this.nodes = [];
-    this.empties = [];
+    this.buffers = [];
     this.index?.clear();
     this[HEAD] = 0;
     this.cursor = 0;
@@ -73,8 +73,8 @@ export class IxList<K, V = undefined> {
     //assert(this.length === 0 ? !head : head);
     if (!head) {
       assert(this.length === 0);
-      const index = this[HEAD] = this.cursor = this.empties.length > 0
-        ? this.empties.shift()!
+      const index = this[HEAD] = this.cursor = this.buffers.length > 0
+        ? this.buffers.shift()!
         : this.length;
       //assert(!nodes[index]);
       ++this[LENGTH];
@@ -87,8 +87,8 @@ export class IxList<K, V = undefined> {
     }
     //assert(head);
     if (this.length < this.capacity) {
-      const index = this[HEAD] = this.cursor = this.empties.length > 0
-        ? this.empties.shift()!
+      const index = this[HEAD] = this.cursor = this.buffers.length > 0
+        ? this.buffers.shift()!
         : this.length;
       //assert(!nodes[index]);
       ++this[LENGTH];
@@ -103,7 +103,7 @@ export class IxList<K, V = undefined> {
     }
     else {
       assert(this.length === this.capacity);
-      assert(this.empties.length === 0);
+      assert(this.buffers.length === 0);
       const garbage = head.prev;
       const index = this[HEAD] = this.cursor = garbage.index;
       //assert(nodes[index]);
@@ -141,7 +141,7 @@ export class IxList<K, V = undefined> {
     //assert(this.length !== 2 || node !== node.prev && node.prev === node.next);
     //assert(this.length < 3 || node !== node.prev && node.prev !== node.next);
     --this[LENGTH];
-    this.empties.push(node.index);
+    this.buffers.push(node.index);
     this.index?.delete(node.key, node.index);
     const { prev, next, value } = node;
     prev.next = next;
