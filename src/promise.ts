@@ -289,10 +289,10 @@ export class Internal<T> {
     const { status, fulfillReactions, rejectReactions } = this;
     switch (status.state) {
       case State.fulfilled:
-        if (fulfillReactions.length > 0) break;
+        if (fulfillReactions.length !== 0) break;
         return this.call(resolve, reject, resolve, onfulfilled, status.value);
       case State.rejected:
-        if (rejectReactions.length > 0) break;
+        if (rejectReactions.length !== 0) break;
         return this.call(resolve, reject, reject, onrejected, status.reason);
     }
     fulfillReactions.push([
