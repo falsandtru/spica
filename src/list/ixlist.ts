@@ -22,6 +22,10 @@ export class IxList<K, V = undefined> {
   private empties: number[] = [];
   private [HEAD] = 0;
   private cursor = 0;
+  private [LENGTH] = 0;
+  public get length() {
+    return this[LENGTH];
+  }
   public get head(): { readonly index: number; readonly key: K; readonly value: V; } | undefined {
     const node = this.nodes[this[HEAD]];
     return node && {
@@ -38,9 +42,20 @@ export class IxList<K, V = undefined> {
       value: node.value,
     };
   }
-  private [LENGTH] = 0;
-  public get length() {
-    return this[LENGTH];
+  public node(index: number): { readonly index: number; readonly key: K; readonly value: V; } {
+    const node = this.nodes[index];
+    if (!node) throw new Error(`Spica: IxList: Invalid index.`);
+    return {
+      index: node.index,
+      key: node.key,
+      value: node.value,
+    };
+  }
+  public next(index: number): { readonly index: number; readonly key: K; readonly value: V; } {
+    return this.node(this.nodes[index]?.next.index ?? this.capacity);
+  }
+  public prev(index: number): { readonly index: number; readonly key: K; readonly value: V; } {
+    return this.node(this.nodes[index]?.prev.index ?? this.capacity);
   }
   public clear(): void {
     this.nodes = [];
@@ -168,21 +183,6 @@ export class IxList<K, V = undefined> {
     const node = this.nodes[this[HEAD]]?.prev;
     //assert(this.length === 0 ? !node : node);
     return node && this.delete(node.key, node.index);
-  }
-  public node(index: number): { readonly index: number; readonly key: K; readonly value: V; } {
-    const node = this.nodes[index];
-    if (!node) throw new Error(`Spica: IxList: Invalid index.`);
-    return {
-      index: node.index,
-      key: node.key,
-      value: node.value,
-    };
-  }
-  public next(index: number): { readonly index: number; readonly key: K; readonly value: V; } {
-    return this.node(this.nodes[index]?.next.index ?? this.capacity);
-  }
-  public prev(index: number): { readonly index: number; readonly key: K; readonly value: V; } {
-    return this.node(this.nodes[index]?.prev.index ?? this.capacity);
   }
   private search(key: K, cursor = this.cursor): Node<K, V> | undefined {
     let node: Node<K, V> | undefined;

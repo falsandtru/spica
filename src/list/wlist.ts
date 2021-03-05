@@ -27,6 +27,22 @@ export class WList<K, V = undefined> {
   public get size() {
     return this[SIZE];
   }
+  public node(index: number): { index: number; key: K; value: V; size: number; } {
+    const node = this.nodes[index];
+    if (!node) throw new Error(`Spica: WList: Invalid index.`);
+    return {
+      index: node.index,
+      key: node.key,
+      value: node.value,
+      size: node.size,
+    };
+  }
+  public next(index: number): { index: number; key: K; value: V; size: number; } {
+    return this.node(this.nodes[index]?.next.index ?? this.capacity);
+  }
+  public prev(index: number): { index: number; key: K; value: V; size: number; } {
+    return this.node(this.nodes[index]?.prev.index ?? this.capacity);
+  }
   public clear(): void {
     this.nodes = [];
     this.empties = [];
@@ -158,22 +174,6 @@ export class WList<K, V = undefined> {
     const node = this.nodes[this.head]?.prev;
     assert(this.length === 0 ? !node : node);
     return node && this.delete(node.key, node.index);
-  }
-  public node(index: number): { index: number; key: K; value: V; size: number; } {
-    const node = this.nodes[index];
-    if (!node) throw new Error(`Spica: WList: Invalid index.`);
-    return {
-      index: node.index,
-      key: node.key,
-      value: node.value,
-      size: node.size,
-    };
-  }
-  public next(index: number): { index: number; key: K; value: V; size: number; } {
-    return this.node(this.nodes[index]?.next.index ?? this.capacity);
-  }
-  public prev(index: number): { index: number; key: K; value: V; size: number; } {
-    return this.node(this.nodes[index]?.prev.index ?? this.capacity);
   }
   private search(key: K, cursor = this.cursor): Node<K, V> | undefined {
     let node: Node<K, V> | undefined;
