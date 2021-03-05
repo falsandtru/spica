@@ -201,27 +201,27 @@ export class IxList<K, V = undefined> {
   }
   public insert(index: number, before: number): boolean {
     if (index === before) return false;
-    const a1 = this.nodes[before];
+    const a1 = this.nodes[index];
     if (!a1) return false;
-    const b1 = this.nodes[index];
+    const b1 = this.nodes[before];
     if (!b1) return false;
     assert(a1 !== b1);
-    if (b1.next === a1) return false;
-    const a0 = a1.prev;
+    if (a1.next === b1) return false;
     const b0 = b1.prev;
-    const b2 = b1.next;
-    a0.next = b1;
-    b1.next = a1;
-    a1.prev = b1;
-    b1.prev = a0;
-    b0.next = b2;
-    b2.prev = b0;
-    assert(a0.next === b1);
-    assert(b1.next === a1);
-    assert(a1.prev === b1);
-    assert(b1.prev === a0);
-    assert(b0.next === b2);
-    assert(b2.prev === b0);
+    const a0 = a1.prev;
+    const a2 = a1.next;
+    b0.next = a1;
+    a1.next = b1;
+    b1.prev = a1;
+    a1.prev = b0;
+    a0.next = a2;
+    a2.prev = a0;
+    assert(b0.next === a1);
+    assert(a1.next === b1);
+    assert(b1.prev === a1);
+    assert(a1.prev === b0);
+    assert(a0.next === a2);
+    assert(a2.prev === a0);
     assert(this.length > 10 || [...this].length === this.length);
     return true;
   }
