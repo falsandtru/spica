@@ -105,17 +105,15 @@ export class IxList<K, V = undefined> {
     else {
       assert(this.length === this.capacity);
       assert(this.buffers.length === 0);
-      const garbage = head.prev;
-      const index = this[HEAD] = this[CURSOR] = garbage.index;
+      const node = head.prev;
+      const index = this[HEAD] = this[CURSOR] = node.index;
       //assert(nodes[index]);
-      if (this.index && !equal(key, garbage.key)) {
-        this.index.delete(garbage.key, garbage.index);
+      if (this.index && !equal(key, node.key)) {
+        this.index.delete(node.key, node.index);
         this.index.set(key, index);
       }
-      nodes[index] = head.prev = head.prev.prev.next =
-        new Node(index, key, value, head, head.prev.prev);
-      // @ts-expect-error
-      garbage.key = garbage.value = garbage.prev = garbage.next = void 0;
+      node.key = key;
+      node.value = value;
       //assert(this.length !== 1 || this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
       //assert(this.length !== 2 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
       //assert(this.length < 3 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
@@ -288,7 +286,7 @@ assert(Object.defineProperty(IxList.prototype, 'cursor', {
 class Node<K, V> {
   constructor(
     public readonly index: number,
-    public readonly key: K,
+    public key: K,
     public value: V,
     public next: Node<K, V>,
     public prev: Node<K, V>,
