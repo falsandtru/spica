@@ -191,7 +191,7 @@ export class WList<K, V = undefined> {
     return this.search(key, index)?.index;
   }
   public has(key: K, index?: number): boolean {
-    return !!this.search(key, index);
+    return this.search(key, index) !== void 0;
   }
   public *[Symbol.iterator](): Iterator<[K, V, number], undefined, undefined> {
     for (let node = this.nodes[this.head], i = 0; node && i < this.length; (node = node.next) && ++i) {

@@ -204,7 +204,7 @@ export class IxList<K, V = undefined> {
   }
   public has(key: K, index?: number): boolean {
     if (!this.index) throw new Error(`Spica: IxList: Invalid cursor.`);
-    return !!this.search(key, index);
+    return this.search(key, index) !== void 0;
   }
   public *[Symbol.iterator](): Iterator<[K, V, number], undefined, undefined> {
     for (let node = this.nodes[this[HEAD]], i = 0; node && i < this.length; (node = node.next) && ++i) {
