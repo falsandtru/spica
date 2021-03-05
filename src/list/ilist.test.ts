@@ -13,7 +13,7 @@ describe('Unit: lib/ilist', () => {
     }
 
     it('put/delete 1', () => {
-      const list = new IList<number, undefined>(1, false);
+      const list = new IList<number, undefined>(1, new Map());
 
       assert.deepStrictEqual(inspect(list), {
         nodes: [],
@@ -99,7 +99,7 @@ describe('Unit: lib/ilist', () => {
     });
 
     it('put/delete 2', () => {
-      const list = new IList<number, undefined>(2, false);
+      const list = new IList<number, undefined>(2, new Map());
 
       assert(list.put(0) === 0);
       assert.deepStrictEqual(inspect(list), {
@@ -184,7 +184,7 @@ describe('Unit: lib/ilist', () => {
     });
 
     it('put/delete 3', () => {
-      const list = new IList<number, undefined>(3, false);
+      const list = new IList<number, undefined>(3, new Map());
 
       assert(list.put(0) === 0);
       assert.deepStrictEqual(inspect(list), {
@@ -299,7 +299,7 @@ describe('Unit: lib/ilist', () => {
     });
 
     it('update', () => {
-      const list = new IList<number, number>(3, false);
+      const list = new IList<number, number>(3, new Map());
 
       assert(list.put(0, ~0) === 0);
       assert(list.put(1, ~1) === 1);

@@ -1,5 +1,4 @@
 import { MultiMap } from '../multimap';
-import { indexOf, splice } from '../array';
 import { equal } from '../compare';
 
 // Optimal indexed circular linked list
@@ -14,7 +13,7 @@ export class OList<K, V = undefined> {
   }
   private nodes: (Node<K, V> | undefined)[] = [];
   private empties: number[] = [];
-  private index = new MultiMap<K, number>();
+  private readonly index = new MultiMap<K, number>();
   private head = 0;
   private cursor = 0;
   private [LENGTH] = 0;
@@ -88,7 +87,7 @@ export class OList<K, V = undefined> {
   public put(this: OList<K, undefined>, key: K, value?: V, index?: number): number;
   public put(key: K, value: V, index?: number): number;
   public put(key: K, value: V, index?: number): number {
-    const node = this.seek(key, index);
+    const node = this.search(key, index);
     if (!node) return this.add(key, value);
     assert(this.cursor === node.index);
     node.value = value;
@@ -108,7 +107,7 @@ export class OList<K, V = undefined> {
   }
   public delete(key: K, index?: number): { key: K; value: V; } | undefined {
     const cursor = this.cursor;
-    const node = this.seek(key, index);
+    const node = this.search(key, index);
     if (!node) return;
     this.cursor = cursor;
     assert(this.length > 0);
@@ -117,20 +116,7 @@ export class OList<K, V = undefined> {
     assert(this.length < 3 || node !== node.prev && node.prev !== node.next);
     --this[LENGTH];
     this.empties.push(node.index);
-    const indexes = this.index.ref(node.key);
-    assert(indexes.length > 0);
-    assert(indexes.includes(node.index));
-    switch (node.index) {
-      case indexes[0]:
-        indexes.shift();
-        break;
-      case indexes[indexes.length - 1]:
-        indexes.pop();
-        break;
-      default:
-        splice(indexes, indexOf(indexes, node.index), 1);
-    }
-    indexes.length === 0 && this.index.delete(node.key);
+    this.index.delete(node.key, node.index);
     const { prev, next, value } = node;
     prev.next = next;
     next.prev = prev;
@@ -171,21 +157,15 @@ export class OList<K, V = undefined> {
     return this.node(this.nodes[index]?.prev.index ?? this.capacity);
   }
   public find(key: K, index?: number): V | undefined {
-    return this.seek(key, index)?.value;
+    return this.search(key, index)?.value;
   }
   public findIndex(key: K, index?: number): number | undefined {
-    return this.seek(key, index)?.index;
+    return this.search(key, index)?.index;
   }
   public has(key: K, index?: number): boolean {
-    return !!this.seek(key, index);
+    return !!this.search(key, index);
   }
-  public *[Symbol.iterator](): Iterator<[K, V, number], undefined, undefined> {
-    for (let node = this.nodes[this.head], i = 0; node && i < this.length; (node = node.next) && ++i) {
-      yield [node.key, node.value, node.index];
-    }
-    return;
-  }
-  private seek(key: K, cursor = this.cursor): Node<K, V> | undefined {
+  private search(key: K, cursor = this.cursor): Node<K, V> | undefined {
     let node: Node<K, V> | undefined;
     node = this.nodes[cursor];
     if (!node) return;
@@ -193,6 +173,12 @@ export class OList<K, V = undefined> {
     node = this.nodes[cursor = this.index.get(key) ?? this.capacity];
     if (!node) return;
     if (equal(node.key, key)) return this.cursor = cursor, node;
+  }
+  public *[Symbol.iterator](): Iterator<[K, V, number], undefined, undefined> {
+    for (let node = this.nodes[this.head], i = 0; node && i < this.length; (node = node.next) && ++i) {
+      yield [node.key, node.value, node.index];
+    }
+    return;
   }
   public insert(index: number, before: number): boolean {
     if (index === before) return false;

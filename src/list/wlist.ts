@@ -1,6 +1,5 @@
 import { Infinity } from '../global';
 import { MultiMap } from '../multimap';
-import { indexOf, splice } from '../array';
 import { equal } from '../compare';
 
 // Weighted optimal indexed circular linked list
@@ -17,7 +16,7 @@ export class WList<K, V = undefined> {
   }
   private nodes: (Node<K, V> | undefined)[] = [];
   private empties: number[] = [];
-  private index = new MultiMap<K, number>();
+  private readonly index = new MultiMap<K, number>();
   private head = 0;
   private cursor = 0;
   private [LENGTH] = 0;
@@ -102,7 +101,7 @@ export class WList<K, V = undefined> {
   public put(this: WList<K, undefined>, key: K, value?: V, size?: number, index?: number): number;
   public put(key: K, value: V, size?: number, index?: number): number;
   public put(key: K, value: V, size: number = 1, index?: number): number {
-    const node = this.seek(key, index);
+    const node = this.search(key, index);
     if (!node) return this.add(key, value, size);
     if (this.secure(size - node.size) && !node.next) return this.put(key, value, size);
     assert(this.cursor === node.index);
@@ -113,7 +112,7 @@ export class WList<K, V = undefined> {
   }
   private secure(margin: number): boolean {
     let change = false;
-    while (this.size > this.space - margin) {
+    while (this.size + margin > this.space) {
       change = true;
       this.pop();
     }
@@ -133,7 +132,7 @@ export class WList<K, V = undefined> {
   }
   public delete(key: K, index?: number): { key: K; value: V; size: number; } | undefined {
     const cursor = this.cursor;
-    const node = this.seek(key, index);
+    const node = this.search(key, index);
     if (!node) return;
     this.cursor = cursor;
     assert(this.length > 0);
@@ -143,19 +142,7 @@ export class WList<K, V = undefined> {
     --this[LENGTH];
     this[SIZE] -= node.size;
     this.empties.push(node.index);
-    const indexes = this.index.ref(node.key);
-    assert(indexes.length > 0);
-    assert(indexes.includes(node.index));
-    switch (node.index) {
-      case indexes[0]:
-        indexes.shift();
-        break;
-      case indexes[indexes.length - 1]:
-        indexes.pop();
-        break;
-      default:
-        splice(indexes, indexOf(indexes, node.index), 1);
-    }
+    this.index.delete(node.key, node.index);
     const { prev, next, value, size } = node;
     prev.next = next;
     next.prev = prev;
@@ -198,21 +185,15 @@ export class WList<K, V = undefined> {
     return this.node(this.nodes[index]?.prev.index ?? this.capacity);
   }
   public find(key: K, index?: number): V | undefined {
-    return this.seek(key, index)?.value;
+    return this.search(key, index)?.value;
   }
   public findIndex(key: K, index?: number): number | undefined {
-    return this.seek(key, index)?.index;
+    return this.search(key, index)?.index;
   }
   public has(key: K, index?: number): boolean {
-    return !!this.seek(key, index);
+    return !!this.search(key, index);
   }
-  public *[Symbol.iterator](): Iterator<[K, V, number], undefined, undefined> {
-    for (let node = this.nodes[this.head], i = 0; node && i < this.length; (node = node.next) && ++i) {
-      yield [node.key, node.value, node.index];
-    }
-    return;
-  }
-  private seek(key: K, cursor = this.cursor): Node<K, V> | undefined {
+  private search(key: K, cursor = this.cursor): Node<K, V> | undefined {
     let node: Node<K, V> | undefined;
     node = this.nodes[cursor];
     if (!node) return;
@@ -220,6 +201,12 @@ export class WList<K, V = undefined> {
     node = this.nodes[cursor = this.index.get(key) ?? this.capacity];
     if (!node) return;
     if (equal(node.key, key)) return this.cursor = cursor, node;
+  }
+  public *[Symbol.iterator](): Iterator<[K, V, number], undefined, undefined> {
+    for (let node = this.nodes[this.head], i = 0; node && i < this.length; (node = node.next) && ++i) {
+      yield [node.key, node.value, node.index];
+    }
+    return;
   }
   public insert(index: number, before: number): boolean {
     if (index === before) return false;

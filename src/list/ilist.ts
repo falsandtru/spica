@@ -1,13 +1,19 @@
+import { IterableCollection } from '../collection';
 import { equal } from '../compare';
 
 // Indexed circular linked list
 
 const LENGTH = Symbol('length');
 
+interface Collection<K, V> extends IterableCollection<K, V> {
+  delete(key: K, value?: V): boolean;
+  clear(): void;
+}
+
 export class IList<K, V = undefined> {
   constructor(
     private readonly capacity: number,
-    private readonly strict: boolean = true,
+    private readonly index?: Collection<K, number>,
   ) {
     assert(capacity > 0);
   }
@@ -22,6 +28,7 @@ export class IList<K, V = undefined> {
   public clear(): void {
     this.nodes = [];
     this.empties = [];
+    this.index?.clear();
     this.head = 0;
     this.cursor = 0;
     this[LENGTH] = 0;
@@ -39,6 +46,7 @@ export class IList<K, V = undefined> {
         : this.length;
       //assert(!nodes[index]);
       ++this[LENGTH];
+      this.index?.set(key, index);
       nodes[index] =
         new Node(index, key, value, head!, head!);
       //assert(this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
@@ -52,6 +60,7 @@ export class IList<K, V = undefined> {
         : this.length;
       //assert(!nodes[index]);
       ++this[LENGTH];
+      this.index?.set(key, index);
       nodes[index] = head.prev = head.prev.next =
         new Node(index, key, value, head, head.prev);
       //assert(this.length !== 1 || this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
@@ -66,6 +75,10 @@ export class IList<K, V = undefined> {
       const garbage = head.prev;
       const index = this.head = this.cursor = garbage.index;
       //assert(nodes[index]);
+      if (this.index && !equal(key, garbage.key)) {
+        this.index.delete(garbage.key, garbage.index);
+        this.index.set(key, index);
+      }
       nodes[index] = head.prev = head.prev.prev.next =
         new Node(index, key, value, head, head.prev.prev);
       // @ts-expect-error
@@ -80,7 +93,7 @@ export class IList<K, V = undefined> {
   public put(this: IList<K, undefined>, key: K, value?: V, index?: number): number;
   public put(key: K, value: V, index?: number): number;
   public put(key: K, value: V, index?: number): number {
-    const node = this.seek(key, index);
+    const node = this.search(key, index);
     if (!node) return this.add(key, value);
     assert(this.cursor === node.index);
     node.value = value;
@@ -100,7 +113,7 @@ export class IList<K, V = undefined> {
   }
   public delete(key: K, index?: number): { key: K; value: V; } | undefined {
     const cursor = this.cursor;
-    const node = this.seek(key, index);
+    const node = this.search(key, index);
     if (!node) return;
     this.cursor = cursor;
     assert(this.length > 0);
@@ -109,6 +122,7 @@ export class IList<K, V = undefined> {
     //assert(this.length < 3 || node !== node.prev && node.prev !== node.next);
     --this[LENGTH];
     this.empties.push(node.index);
+    this.index?.delete(node.key, node.index);
     const { prev, next, value } = node;
     prev.next = next;
     next.prev = prev;
@@ -149,32 +163,32 @@ export class IList<K, V = undefined> {
     return this.node(this.nodes[index]?.prev.index ?? this.capacity);
   }
   public find(key: K, index?: number): V | undefined {
-    if (this.strict) throw new Error(`Spica: IList: Invalid cursor.`);
-    return this.seek(key, index)?.value;
+    if (!this.index) throw new Error(`Spica: IList: Invalid cursor.`);
+    return this.search(key, index)?.value;
   }
   public findIndex(key: K, index?: number): number | undefined {
-    if (this.strict) throw new Error(`Spica: IList: Invalid cursor.`);
-    return this.seek(key, index)?.index;
+    if (!this.index) throw new Error(`Spica: IList: Invalid cursor.`);
+    return this.search(key, index)?.index;
   }
   public has(key: K, index?: number): boolean {
-    if (this.strict) throw new Error(`Spica: IList: Invalid cursor.`);
-    return !!this.seek(key, index);
+    if (!this.index) throw new Error(`Spica: IList: Invalid cursor.`);
+    return !!this.search(key, index);
+  }
+  private search(key: K, cursor = this.cursor): Node<K, V> | undefined {
+    let node: Node<K, V> | undefined;
+    node = this.nodes[cursor];
+    if (!node) return;
+    if (equal(node.key, key)) return this.cursor = cursor, node;
+    if (!this.index) throw new Error(`Spica: IList: Invalid cursor.`);
+    node = this.nodes[cursor = this.index.get(key) ?? this.capacity];
+    if (!node) return;
+    if (equal(node.key, key)) return this.cursor = cursor, node;
   }
   public *[Symbol.iterator](): Iterator<[K, V, number], undefined, undefined> {
     for (let node = this.nodes[this.head], i = 0; node && i < this.length; (node = node.next) && ++i) {
       yield [node.key, node.value, node.index];
     }
     return;
-  }
-  private seek(key: K, cursor = this.cursor): Node<K, V> | undefined {
-    let node: Node<K, V> | undefined;
-    node = this.nodes[cursor];
-    if (!node) return;
-    if (equal(node.key, key)) return this.cursor = cursor, node;
-    if (this.strict) throw new Error(`Spica: IList: Invalid cursor.`);
-    for (let i = 1; i < this.length && (node = node.next); ++i) {
-      if (equal(node.key, key)) return this.cursor = node.index, node;
-    }
   }
   public insert(index: number, before: number): boolean {
     if (index === before) return false;

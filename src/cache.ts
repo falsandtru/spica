@@ -90,7 +90,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private secure(margin: number, target?: K): boolean {
     if (margin <= 0) return true;
     const { LRU, LFU } = this.indexes;
-    let updatable = arguments.length === 1
+    let updatable = arguments.length < 2
       ? false
       : void 0;
     while (this.length === this.capacity || this.space && this.size + margin > this.space) {

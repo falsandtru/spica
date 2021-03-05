@@ -22,14 +22,14 @@ export class AttrMap<C, K, V> {
   public has(ctx: C): boolean
   public has(ctx: C, key: K): boolean
   public has(ctx: C, key?: K): boolean {
-    return arguments.length === 1
+    return arguments.length < 2
       ? this.memory.has(ctx)
       : this.memory.get(ctx)?.has(key!) ?? false;
   }
   public delete(ctx: C): boolean
   public delete(ctx: C, key: K): boolean
   public delete(ctx: C, key?: K): boolean {
-    return arguments.length === 1
+    return arguments.length < 2
       ? this.memory.delete(ctx)
       : this.memory.get(ctx)?.delete(key!) ?? false;
   }
