@@ -189,21 +189,21 @@ export class IxList<K, V = undefined> {
     node = this.nodes[cursor];
     if (!node) return;
     if (equal(node.key, key)) return this.cursor = cursor, node;
-    if (!this.index) throw new Error(`Spica: IxList: Invalid cursor.`);
+    if (!this.index) throw new Error(`Spica: IxList: Invalid index.`);
     node = this.nodes[cursor = this.index.get(key) ?? this.capacity];
     if (!node) return;
     if (equal(node.key, key)) return this.cursor = cursor, node;
   }
   public find(key: K, index?: number): V | undefined {
-    if (!this.index) throw new Error(`Spica: IxList: Invalid cursor.`);
+    if (!this.index) throw new Error(`Spica: IxList: No index.`);
     return this.search(key, index)?.value;
   }
   public findIndex(key: K, index?: number): number | undefined {
-    if (!this.index) throw new Error(`Spica: IxList: Invalid cursor.`);
+    if (!this.index) throw new Error(`Spica: IxList: No index.`);
     return this.search(key, index)?.index;
   }
   public has(key: K, index?: number): boolean {
-    if (!this.index) throw new Error(`Spica: IxList: Invalid cursor.`);
+    if (!this.index) throw new Error(`Spica: IxList: No index.`);
     return this.search(key, index) !== void 0;
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
