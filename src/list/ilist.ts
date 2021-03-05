@@ -3,6 +3,7 @@ import { equal } from '../compare';
 
 // Indexed circular linked list
 
+const HEAD = Symbol('head');
 const LENGTH = Symbol('length');
 
 interface Collection<K, V> extends IterableCollection<K, V> {
@@ -19,8 +20,24 @@ export class IList<K, V = undefined> {
   }
   private nodes: (Node<K, V> | undefined)[] = [];
   private empties: number[] = [];
-  private head = 0;
+  private [HEAD] = 0;
   private cursor = 0;
+  public get head(): { index: number; key: K; value: V; } | undefined {
+    const node = this.nodes[this[HEAD]];
+    return node && {
+      index: node.index,
+      key: node.key,
+      value: node.value,
+    };
+  }
+  public get last(): { index: number; key: K; value: V; } | undefined {
+    const node = this.nodes[this[HEAD]]?.prev;
+    return node && {
+      index: node.index,
+      key: node.key,
+      value: node.value,
+    };
+  }
   private [LENGTH] = 0;
   public get length() {
     return this[LENGTH];
@@ -29,7 +46,7 @@ export class IList<K, V = undefined> {
     this.nodes = [];
     this.empties = [];
     this.index?.clear();
-    this.head = 0;
+    this[HEAD] = 0;
     this.cursor = 0;
     this[LENGTH] = 0;
   }
@@ -37,11 +54,11 @@ export class IList<K, V = undefined> {
   public add(key: K, value: V): number;
   public add(key: K, value: V): number {
     const nodes = this.nodes;
-    const head = nodes[this.head];
+    const head = nodes[this[HEAD]];
     //assert(this.length === 0 ? !head : head);
     if (!head) {
       assert(this.length === 0);
-      const index = this.head = this.cursor = this.empties.length > 0
+      const index = this[HEAD] = this.cursor = this.empties.length > 0
         ? this.empties.shift()!
         : this.length;
       //assert(!nodes[index]);
@@ -55,7 +72,7 @@ export class IList<K, V = undefined> {
     }
     //assert(head);
     if (this.length < this.capacity) {
-      const index = this.head = this.cursor = this.empties.length > 0
+      const index = this[HEAD] = this.cursor = this.empties.length > 0
         ? this.empties.shift()!
         : this.length;
       //assert(!nodes[index]);
@@ -73,7 +90,7 @@ export class IList<K, V = undefined> {
       assert(this.length === this.capacity);
       assert(this.empties.length === 0);
       const garbage = head.prev;
-      const index = this.head = this.cursor = garbage.index;
+      const index = this[HEAD] = this.cursor = garbage.index;
       //assert(nodes[index]);
       if (this.index && !equal(key, garbage.key)) {
         this.index.delete(garbage.key, garbage.index);
@@ -100,14 +117,14 @@ export class IList<K, V = undefined> {
     return node.index;
   }
   public shift(): { key: K; value: V; } | undefined {
-    //assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
-    const node = this.nodes[this.head];
+    //assert(this.length === 0 ? !this.nodes[this[HEAD]] : this.nodes[this[HEAD]]);
+    const node = this.nodes[this[HEAD]];
     //assert(this.length === 0 ? !node : node);
     return node && this.delete(node.key, node.index);
   }
   public pop(): { key: K; value: V; } | undefined {
-    //assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
-    const node = this.nodes[this.head]?.prev;
+    //assert(this.length === 0 ? !this.nodes[this[HEAD]] : this.nodes[this[HEAD]]);
+    const node = this.nodes[this[HEAD]]?.prev;
     //assert(this.length === 0 ? !node : node);
     return node && this.delete(node.key, node.index);
   }
@@ -126,26 +143,18 @@ export class IList<K, V = undefined> {
     const { prev, next, value } = node;
     prev.next = next;
     next.prev = prev;
-    if (this.head === node.index) {
-      this.head = next.index;
+    if (this[HEAD] === node.index) {
+      this[HEAD] = next.index;
     }
     if (this.cursor === node.index) {
       this.cursor = next.index;
     }
     // @ts-expect-error
     this.nodes[node.index] = node.key = node.value = node.prev = node.next = void 0;
-    //assert(this.length === 0 ? !this.nodes[this.head] : this.nodes[this.head]);
+    //assert(this.length === 0 ? !this.nodes[this[HEAD]] : this.nodes[this[HEAD]]);
     //assert(this.length === 0 ? !this.nodes[this.cursor] : this.nodes[this.cursor]);
     //assert(this.length > 10 || [...this].length === this.length);
     return { key, value };
-  }
-  public peek(at?: -1 | 0): { index: number; key: K; value: V; } | undefined {
-    const node = at ? this.nodes[this.head]?.prev : this.nodes[this.head];
-    return node && {
-      index: node.index,
-      key: node.key,
-      value: node.value,
-    };
   }
   public node(index: number): { index: number; key: K; value: V; } {
     const node = this.nodes[index];
@@ -185,7 +194,7 @@ export class IList<K, V = undefined> {
     if (equal(node.key, key)) return this.cursor = cursor, node;
   }
   public *[Symbol.iterator](): Iterator<[K, V, number], undefined, undefined> {
-    for (let node = this.nodes[this.head], i = 0; node && i < this.length; (node = node.next) && ++i) {
+    for (let node = this.nodes[this[HEAD]], i = 0; node && i < this.length; (node = node.next) && ++i) {
       yield [node.key, node.value, node.index];
     }
     return;
@@ -218,21 +227,21 @@ export class IList<K, V = undefined> {
   }
   public moveToHead(index: number): boolean {
     if (this.length <= 1) return false;
-    if (index === this.head) return false;
+    if (index === this[HEAD]) return false;
     const node = this.nodes[index];
     if (!node) return false;
-    this.insert(index, this.head);
-    this.head = index;
+    this.insert(index, this[HEAD]);
+    this[HEAD] = index;
     return true;
   }
   public moveToPrev(index: number): boolean {
     if (this.length <= 1) return false;
-    if (index === this.head) return false;
+    if (index === this[HEAD]) return false;
     const node = this.nodes[index];
     if (!node) return false;
     this.insert(node.index, node.prev.index);
-    if (node.next.index === this.head) {
-      this.head = node.index;
+    if (node.next.index === this[HEAD]) {
+      this[HEAD] = node.index;
     }
     return true;
   }
@@ -247,12 +256,12 @@ export class IList<K, V = undefined> {
     const node3 = node2.next;
     this.insert(node2.index, node1.index);
     this.insert(node1.index, node3.index);
-    switch (this.head) {
+    switch (this[HEAD]) {
       case node1.index:
-        this.head = node2.index;
+        this[HEAD] = node2.index;
         break;
       case node2.index:
-        this.head = node1.index;
+        this[HEAD] = node1.index;
         break;
     }
     return true;

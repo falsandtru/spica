@@ -97,9 +97,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       const { key } = false
         || LRU.length === 0
         || LFU.length > this.capacity * this.ratio / 100
-        || LFU.length > this.capacity / 2 && LFU.peek(-1)!.value < this.clock - this.capacity * 8
-        ? LFU.peek(-1)!
-        : LRU.peek(-1)!;
+        || LFU.length > this.capacity / 2 && LFU.last!.value < this.clock - this.capacity * 8
+        ? LFU.last!
+        : LRU.last!;
       assert(this.memory.has(key));
       updatable ??= !equal(key, target) && updatable;
       this.dispose(key, this.memory.get(key)!, this.settings.disposer);
