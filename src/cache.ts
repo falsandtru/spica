@@ -87,44 +87,60 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public get size(): number {
     return this[SIZE];
   }
+  private queue: { key: K; value: V; }[] = [];
+  private resume(): void {
+    if (this.queue.length === 0) return;
+    const { queue, settings: { disposer } } = this;
+    assert(disposer);
+    for (let i = 0; i < queue.length; ++i) {
+      const { key, value } = queue[i];
+      disposer!(key, value);
+    }
+    this.queue = [];
+  }
   private dispose(key: K, { target, index, value, size }: Record<V>, disposer: CacheOptions<K, V>['disposer']): void {
     this.indexes[target].delete(key, index);
     this.memory.delete(key);
     this.space && (this[SIZE] -= size);
     disposer?.(key, value);
   }
-  private secure(margin: number, target?: { readonly key: K; readonly record: Record<V>; }): boolean {
-    if (margin <= 0) return true;
+  private secure(margin: number, key?: K): void {
+    assert(!this.space || margin <= this.space);
+    if (margin <= 0) return;
     const { LRU, LFU } = this.indexes;
-    let updatable = target
-      ? void 0
-      : false;
+    let miss: false | undefined = arguments.length < 2 ? false : void 0;
+    let restore: IxList<K, number> | undefined;
     while (this.length === this.capacity || this.space && this.size + margin > this.space) {
-      const { key } = false
+      const list = false
         || LRU.length === 0
         || LFU.length > this.capacity * this.ratio / 100
         || LFU.length > this.capacity / 2 && LFU.last!.value < this.clock - this.capacity * 8
-        ? LFU.last!
-        : LRU.last!;
-      assert(this.memory.has(key));
-      assert(!updatable);
-      if (updatable ?? equal(key, target!.key)) {
-        updatable = false;
-        margin += target!.record.size;
-        this.dispose(key, target!.record, this.settings.disposer);
+        ? LFU
+        : LRU;
+      if (list.length === 0) throw new Error(`Spica: Cache: Failed to secure the margin.`);
+      const index = list.last!;
+      assert(this.memory.has(index.key));
+      if (miss ?? equal(index.key, key)) {
+        miss = false;
+        assert(!restore);
+        restore = list;
+        list.HEAD = index.index;
+        continue;
       }
-      else {
-        this.dispose(key, this.memory.get(key)!, this.settings.disposer);
-      }
+      const record = this.memory.get(index.key)!;
+      this.dispose(index.key, record, void 0);
+      this.settings.disposer && this.queue.push({ key: index.key, value: record.value });
     }
-    return updatable ?? true;
+    if (restore && restore.length > 0) {
+      restore.HEAD = restore.next(restore.head!.index).index;
+    }
   }
   public put(this: Cache<K, undefined>, key: K, value?: V, size?: number, age?: number): boolean;
   public put(key: K, value: V, size?: number, age?: number): boolean;
   public put(key: K, value: V, size: number = 1, age: number = this.settings.age!): boolean {
     if (size < 1) throw new Error(`Spica: Cache: Size must be 1 or more.`);
     if (age < 1) throw new Error(`Spica: Cache: Age must be 1 or more.`);
-    if (this.space && size > this.space / this.capacity * 10 || age <= 0) {
+    if (this.space && size > this.space || age <= 0) {
       this.settings.disposer?.(key, value);
       return false;
     }
@@ -133,18 +149,19 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       ? Infinity
       : now() + age;
     const record = this.memory.get(key);
-    if (record && this.secure(size - record.size, { key, record })) {
+    if (record) {
       assert(this.memory.has(key));
+      this.settings.disposer && this.queue.push({ key, value: record.value });
+      this.secure(size - record.size, key);
       this.space && (this[SIZE] += size - record.size);
       assert(0 <= this.size && this.size <= this.space);
       record.value = value;
       record.size = size;
       record.expiry = expiry;
+      this.resume();
       return true;
     }
-    else if (!record) {
-      this.secure(size);
-    }
+    this.secure(size);
     assert(!this.memory.has(key));
 
     const { LRU } = this.indexes;
@@ -157,6 +174,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       size,
       expiry,
     });
+    this.resume();
     return false;
   }
   public set(this: Cache<K, undefined>, key: K, value?: V, size?: number, age?: number): this;

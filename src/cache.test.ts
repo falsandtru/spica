@@ -112,7 +112,7 @@ describe('Unit: lib/cache', () => {
       });
 
       assert(cache.put(1, 1) === true);
-      assert(key === undefined && val === undefined && cnt === 0);
+      assert(key === 1 && val === 1 && cnt === 1);
       assert.deepStrictEqual(inspect(cache), {
         LRU: [1, 0],
         LFU: [],
@@ -120,7 +120,7 @@ describe('Unit: lib/cache', () => {
       });
 
       assert(cache.get(1) === 1);
-      assert(key === undefined && val === undefined && cnt === 0);
+      assert(key === 1 && val === 1 && cnt === 1);
       assert.deepStrictEqual(inspect(cache), {
         LRU: [0],
         LFU: [1],
@@ -128,7 +128,7 @@ describe('Unit: lib/cache', () => {
       });
 
       assert(cache.put(2, 2) === false);
-      assert(key === 0 && val === 0 && cnt === 1);
+      assert(key === 0 && val === 0 && cnt === 2);
       assert.deepStrictEqual(inspect(cache), {
         LRU: [2],
         LFU: [1],
@@ -136,7 +136,7 @@ describe('Unit: lib/cache', () => {
       });
 
       assert(cache.get(2) === 2);
-      assert(key === 0 && val === 0 && cnt === 1);
+      assert(key === 0 && val === 0 && cnt === 2);
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [2, 1],
@@ -144,7 +144,7 @@ describe('Unit: lib/cache', () => {
       });
 
       assert(cache.get(2) === 2);
-      assert(key === 0 && val === 0 && cnt === 1);
+      assert(key === 0 && val === 0 && cnt === 2);
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [2, 1],
@@ -152,7 +152,7 @@ describe('Unit: lib/cache', () => {
       });
 
       assert(cache.get(1) === 1);
-      assert(key === 0 && val === 0 && cnt === 1);
+      assert(key === 0 && val === 0 && cnt === 2);
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [1, 2],
@@ -160,7 +160,7 @@ describe('Unit: lib/cache', () => {
       });
 
       assert(cache.put(3, 3) === false);
-      assert(key === 2 && val === 2 && cnt === 2);
+      assert(key === 2 && val === 2 && cnt === 3);
       assert.deepStrictEqual(inspect(cache), {
         LRU: [3],
         LFU: [1],
@@ -168,7 +168,7 @@ describe('Unit: lib/cache', () => {
       });
 
       assert(cache.clear() === undefined);
-      assert(key === 3 && val === 3 && cnt === 4);
+      assert(key === 3 && val === 3 && cnt === 5);
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [],

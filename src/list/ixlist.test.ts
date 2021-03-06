@@ -6,7 +6,7 @@ describe('Unit: lib/ixlist', () => {
       return {
         nodes: [...list],
         array: list['nodes'].map(node => node && [node.key, node.value, node.index]),
-        head: list.head?.index,
+        head: list.HEAD,
         cursor: list['cursor'],
         length: list.length,
       };
@@ -18,7 +18,7 @@ describe('Unit: lib/ixlist', () => {
       assert.deepStrictEqual(inspect(list), {
         nodes: [],
         array: [],
-        head: undefined,
+        head: 0,
         cursor: 0,
         length: 0,
       });
@@ -81,7 +81,7 @@ describe('Unit: lib/ixlist', () => {
         array: [
           undefined,
         ],
-        head: undefined,
+        head: 0,
         cursor: 0,
         length: 0,
       });
@@ -92,7 +92,7 @@ describe('Unit: lib/ixlist', () => {
         array: [
           undefined,
         ],
-        head: undefined,
+        head: 0,
         cursor: 0,
         length: 0,
       });
@@ -165,7 +165,7 @@ describe('Unit: lib/ixlist', () => {
           undefined,
           undefined,
         ],
-        head: undefined,
+        head: 1,
         cursor: 1,
         length: 0,
       });
@@ -177,7 +177,7 @@ describe('Unit: lib/ixlist', () => {
           undefined,
           undefined,
         ],
-        head: undefined,
+        head: 1,
         cursor: 1,
         length: 0,
       });

@@ -3,7 +3,6 @@ import { equal } from '../compare';
 
 // Indexed circular linked list
 
-const HEAD = Symbol('head');
 const CURSOR = Symbol('cursor');
 const LENGTH = Symbol('length');
 
@@ -21,14 +20,14 @@ export class IxList<K, V = undefined> {
   }
   private nodes: (Node<K, V> | undefined)[] = [];
   private buffers: number[] = [];
-  private [HEAD] = 0;
+  public HEAD = 0;
   private [CURSOR] = 0;
   private [LENGTH] = 0;
   public get length() {
     return this[LENGTH];
   }
   public get head(): { readonly index: number; readonly key: K; readonly value: V; } | undefined {
-    const node = this.nodes[this[HEAD]];
+    const node = this.nodes[this.HEAD];
     return node && {
       index: node.index,
       key: node.key,
@@ -36,7 +35,7 @@ export class IxList<K, V = undefined> {
     };
   }
   public get last(): { readonly index: number; readonly key: K; readonly value: V; } | undefined {
-    const node = this.nodes[this[HEAD]]?.prev;
+    const node = this.nodes[this.HEAD]?.prev;
     return node && {
       index: node.index,
       key: node.key,
@@ -62,7 +61,7 @@ export class IxList<K, V = undefined> {
     this.nodes = [];
     this.buffers = [];
     this.index?.clear();
-    this[HEAD] = 0;
+    this.HEAD = 0;
     this[CURSOR] = 0;
     this[LENGTH] = 0;
   }
@@ -70,11 +69,11 @@ export class IxList<K, V = undefined> {
   public add(key: K, value: V): number;
   public add(key: K, value: V): number {
     const nodes = this.nodes;
-    const head = nodes[this[HEAD]];
+    const head = nodes[this.HEAD];
     //assert(this.length === 0 ? !head : head);
     if (!head) {
       assert(this.length === 0);
-      const index = this[HEAD] = this[CURSOR] = this.buffers.length > 0
+      const index = this.HEAD = this[CURSOR] = this.buffers.length > 0
         ? this.buffers.shift()!
         : this.length;
       assert(!nodes[index]);
@@ -88,7 +87,7 @@ export class IxList<K, V = undefined> {
     }
     //assert(head);
     if (this.length < this.capacity) {
-      const index = this[HEAD] = this[CURSOR] = this.buffers.length > 0
+      const index = this.HEAD = this[CURSOR] = this.buffers.length > 0
         ? this.buffers.shift()!
         : this.length;
       assert(!nodes[index]);
@@ -106,7 +105,7 @@ export class IxList<K, V = undefined> {
       assert(this.length === this.capacity);
       assert(this.buffers.length === 0);
       const node = head.prev;
-      const index = this[HEAD] = this[CURSOR] = node.index;
+      const index = this.HEAD = this[CURSOR] = node.index;
       //assert(nodes[index]);
       if (this.index && !equal(key, node.key)) {
         this.index.delete(node.key, node.index);
@@ -145,15 +144,15 @@ export class IxList<K, V = undefined> {
     const { prev, next, value } = node;
     prev.next = next;
     next.prev = prev;
-    if (this[HEAD] === node.index) {
-      this[HEAD] = next.index;
+    if (this.HEAD === node.index) {
+      this.HEAD = next.index;
     }
     if (this[CURSOR] === node.index) {
       this[CURSOR] = next.index;
     }
     // @ts-expect-error
     this.nodes[node.index] = node.key = node.value = node.prev = node.next = void 0;
-    assert(this.length === 0 ? !this.nodes[this[HEAD]] : this.nodes[this[HEAD]]);
+    assert(this.length === 0 ? !this.nodes[this.HEAD] : this.nodes[this.HEAD]);
     assert(this.length === 0 ? !this.nodes[this[CURSOR]] : this.nodes[this[CURSOR]]);
     //assert(this.length > 10 || [...this].length === this.length);
     return { key, value };
@@ -164,22 +163,22 @@ export class IxList<K, V = undefined> {
     return this.add(key, value);
   }
   public shift(): { readonly key: K; readonly value: V; } | undefined {
-    assert(this.length === 0 ? !this.nodes[this[HEAD]] : this.nodes[this[HEAD]]);
-    const node = this.nodes[this[HEAD]];
+    assert(this.length === 0 ? !this.nodes[this.HEAD] : this.nodes[this.HEAD]);
+    const node = this.nodes[this.HEAD];
     assert(this.length === 0 ? !node : node);
     return node && this.delete(node.key, node.index);
   }
   public push(this: IxList<K, undefined>, key: K, value?: V): number;
   public push(key: K, value: V): number;
   public push(key: K, value: V): number {
-    const h = this[HEAD];
+    const h = this.HEAD;
     const i = this.add(key, value);
-    this[HEAD] = h;
+    this.HEAD = h;
     return i;
   }
   public pop(): { readonly key: K; readonly value: V; } | undefined {
-    assert(this.length === 0 ? !this.nodes[this[HEAD]] : this.nodes[this[HEAD]]);
-    const node = this.nodes[this[HEAD]]?.prev;
+    assert(this.length === 0 ? !this.nodes[this.HEAD] : this.nodes[this.HEAD]);
+    const node = this.nodes[this.HEAD]?.prev;
     assert(this.length === 0 ? !node : node);
     return node && this.delete(node.key, node.index);
   }
@@ -204,7 +203,7 @@ export class IxList<K, V = undefined> {
     return this.search(key, index) !== void 0;
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
-    for (let node = this.nodes[this[HEAD]], i = 0; node && i < this.length; (node = node.next) && ++i) {
+    for (let node = this.nodes[this.HEAD], i = 0; node && i < this.length; (node = node.next) && ++i) {
       yield [node.key, node.value];
     }
     return;
@@ -237,21 +236,21 @@ export class IxList<K, V = undefined> {
   }
   public moveToHead(index: number): boolean {
     if (this.length <= 1) return false;
-    if (index === this[HEAD]) return false;
+    if (index === this.HEAD) return false;
     const node = this.nodes[index];
     if (!node) return false;
-    this.insert(index, this[HEAD]);
-    this[HEAD] = index;
+    this.insert(index, this.HEAD);
+    this.HEAD = index;
     return true;
   }
   public moveToPrev(index: number): boolean {
     if (this.length <= 1) return false;
-    if (index === this[HEAD]) return false;
+    if (index === this.HEAD) return false;
     const node = this.nodes[index];
     if (!node) return false;
     this.insert(node.index, node.prev.index);
-    if (node.next.index === this[HEAD]) {
-      this[HEAD] = node.index;
+    if (node.next.index === this.HEAD) {
+      this.HEAD = node.index;
     }
     return true;
   }
@@ -266,12 +265,12 @@ export class IxList<K, V = undefined> {
     const node3 = node2.next;
     this.insert(node2.index, node1.index);
     this.insert(node1.index, node3.index);
-    switch (this[HEAD]) {
+    switch (this.HEAD) {
       case node1.index:
-        this[HEAD] = node2.index;
+        this.HEAD = node2.index;
         break;
       case node2.index:
-        this[HEAD] = node1.index;
+        this.HEAD = node1.index;
         break;
     }
     return true;
