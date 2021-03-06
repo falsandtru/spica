@@ -93,7 +93,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { queue, settings: { disposer } } = this;
     assert(disposer);
     for (let i = 0; i < queue.length; ++i) {
+      if (!queue[i]) continue;
       const { key, value } = queue[i];
+      // @ts-expect-error
+      queue[i] = void 0;
       disposer!(value, key);
     }
     this.queue = [];
