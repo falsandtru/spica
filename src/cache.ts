@@ -87,7 +87,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public get size(): number {
     return this[SIZE];
   }
-  private dispose(key: K, { target, index, size, value }: Record<V>, disposer: CacheOptions<K, V>['disposer']): void {
+  private dispose(key: K, { target, index, value, size }: Record<V>, disposer: CacheOptions<K, V>['disposer']): void {
     this.indexes[target].delete(key, index);
     this.memory.delete(key);
     this.space && (this[SIZE] -= size);
