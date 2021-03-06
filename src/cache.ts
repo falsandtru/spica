@@ -162,6 +162,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       record.size = size;
       record.expiry = expiry;
       this.resume();
+      assert(this.queue.length === 0);
       return true;
     }
     this.secure(size);
@@ -178,6 +179,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       expiry,
     });
     this.resume();
+    assert(this.queue.length === 0);
     return false;
   }
   public set(this: Cache<K, undefined>, key: K, value?: V, size?: number, age?: number): this;
