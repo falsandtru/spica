@@ -107,8 +107,13 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         ? LFU.last!
         : LRU.last!;
       assert(this.memory.has(key));
-      updatable ??= !equal(key, target) && updatable;
-      this.dispose(key, this.memory.get(key)!, this.settings.disposer);
+      const record = this.memory.get(key)!;
+      assert(!updatable);
+      if (updatable ?? equal(key, target)) {
+        updatable = false;
+        margin += record.size;
+      }
+      this.dispose(key, record, this.settings.disposer);
     }
     return updatable ?? true;
   }
@@ -129,17 +134,20 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (record && this.secure(size - record.size, key)) {
       assert(this.memory.has(key));
       this.space && (this[SIZE] += size - record.size);
-      assert(this[SIZE] >= 0);
+      assert(0 <= this.size && this.size <= this.space);
       record.value = value;
       record.size = size;
       record.expiry = expiry;
       return true;
     }
+    else if (!record) {
+      this.secure(size);
+    }
     assert(!this.memory.has(key));
-    this.secure(size);
 
     const { LRU } = this.indexes;
     this.space && (this[SIZE] += size);
+    assert(0 <= this.size && this.size <= this.space);
     this.memory.set(key, {
       target: 'LRU',
       index: LRU.add(key, ++this.clockR),
