@@ -87,7 +87,7 @@ describe('Unit: lib/cache', () => {
       let key: number | undefined;
       let val: number | undefined;
       let cnt = 0;
-      const cache = new Cache<number, number>(2, { disposer: (k, v) => (key = k, val = v, ++cnt) });
+      const cache = new Cache<number, number>(2, { disposer: (v, k) => (key = k, val = v, ++cnt) });
 
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],

@@ -46,7 +46,7 @@ interface Record<V> {
 export interface CacheOptions<K, V = undefined> {
   readonly space?: number;
   readonly age?: number;
-  readonly disposer?: (key: K, value: V) => void;
+  readonly disposer?: (value: V, key: K) => void;
   readonly capture?: {
     readonly delete?: boolean;
     readonly clear?: boolean;
@@ -94,7 +94,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     assert(disposer);
     for (let i = 0; i < queue.length; ++i) {
       const { key, value } = queue[i];
-      disposer!(key, value);
+      disposer!(value, key);
     }
     this.queue = [];
   }
@@ -102,7 +102,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.indexes[target].delete(key, index);
     this.memory.delete(key);
     this.space && (this[SIZE] -= size);
-    disposer?.(key, value);
+    disposer?.(value, key);
   }
   private secure(margin: number, key?: K): void {
     assert(!this.space || margin <= this.space);
@@ -141,7 +141,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (size < 1) throw new Error(`Spica: Cache: Size must be 1 or more.`);
     if (age < 1) throw new Error(`Spica: Cache: Age must be 1 or more.`);
     if (this.space && size > this.space || age <= 0) {
-      this.settings.disposer?.(key, value);
+      this.settings.disposer?.(value, key);
       return false;
     }
 
@@ -224,7 +224,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const memory = this.memory;
     this.memory = new Map();
     for (const [key, { value }] of memory) {
-      this.settings.disposer(key, value);
+      this.settings.disposer(value, key);
     }
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
