@@ -87,6 +87,12 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public get size(): number {
     return this[SIZE];
   }
+  private dispose(key: K, { target, index, size, value }: Record<V>, disposer: CacheOptions<K, V>['disposer']): void {
+    this.indexes[target].delete(key, index);
+    this.memory.delete(key);
+    this.space && (this[SIZE] -= size);
+    disposer?.(key, value);
+  }
   private secure(margin: number, target?: K): boolean {
     if (margin <= 0) return true;
     const { LRU, LFU } = this.indexes;
@@ -105,12 +111,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       this.dispose(key, this.memory.get(key)!, this.settings.disposer);
     }
     return updatable ?? true;
-  }
-  private dispose(key: K, { target, index, size, value }: Record<V>, disposer: CacheOptions<K, V>['disposer']): void {
-    this.indexes[target].delete(key, index);
-    this.memory.delete(key);
-    this.space && (this[SIZE] -= size);
-    disposer?.(key, value);
   }
   public put(this: Cache<K, undefined>, key: K, value?: V, size?: number, age?: number): boolean;
   public put(key: K, value: V, size?: number, age?: number): boolean;
