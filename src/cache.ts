@@ -94,7 +94,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     disposer?.(key, value);
   }
   private secure(margin: number, target?: { readonly key: K; readonly record: Record<V>; }): boolean {
-    margin -= target?.record.size ?? 0;
     if (margin <= 0) return true;
     const { LRU, LFU } = this.indexes;
     let updatable = target
@@ -134,7 +133,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       ? Infinity
       : now() + age;
     const record = this.memory.get(key);
-    if (record && this.secure(size, { key, record })) {
+    if (record && this.secure(size - record.size, { key, record })) {
       assert(this.memory.has(key));
       this.space && (this[SIZE] += size - record.size);
       assert(0 <= this.size && this.size <= this.space);
