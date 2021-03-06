@@ -93,12 +93,13 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.space && (this[SIZE] -= size);
     disposer?.(key, value);
   }
-  private secure(margin: number, target?: K): boolean {
+  private secure(margin: number, target?: { readonly key: K; readonly record: Record<V>; }): boolean {
+    margin -= target?.record.size ?? 0;
     if (margin <= 0) return true;
     const { LRU, LFU } = this.indexes;
-    let updatable = arguments.length < 2
-      ? false
-      : void 0;
+    let updatable = target
+      ? void 0
+      : false;
     while (this.length === this.capacity || this.space && this.size + margin > this.space) {
       const { key } = false
         || LRU.length === 0
@@ -107,13 +108,15 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         ? LFU.last!
         : LRU.last!;
       assert(this.memory.has(key));
-      const record = this.memory.get(key)!;
       assert(!updatable);
-      if (updatable ?? equal(key, target)) {
+      if (updatable ?? equal(key, target!.key)) {
         updatable = false;
-        margin += record.size;
+        margin += target!.record.size;
+        this.dispose(key, target!.record, this.settings.disposer);
       }
-      this.dispose(key, record, this.settings.disposer);
+      else {
+        this.dispose(key, this.memory.get(key)!, this.settings.disposer);
+      }
     }
     return updatable ?? true;
   }
@@ -131,7 +134,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       ? Infinity
       : now() + age;
     const record = this.memory.get(key);
-    if (record && this.secure(size - record.size, key)) {
+    if (record && this.secure(size, { key, record })) {
       assert(this.memory.has(key));
       this.space && (this[SIZE] += size - record.size);
       assert(0 <= this.size && this.size <= this.space);
