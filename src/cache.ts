@@ -135,7 +135,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       this.settings.disposer && this.queue.push({ key: index.key, value: record.value });
     }
     if (restore && restore.length > 0) {
-      restore.HEAD = restore.next(restore.head!.index).index;
+      restore.HEAD = restore.tail!.index;
     }
   }
   public put(this: Cache<K, undefined>, key: K, value?: V, size?: number, age?: number): boolean;

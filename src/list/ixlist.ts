@@ -34,6 +34,14 @@ export class IxList<K, V = undefined> {
       value: node.value,
     };
   }
+  public get tail(): { readonly index: number; readonly key: K; readonly value: V; } | undefined {
+    const node = this.nodes[this.HEAD]?.next;
+    return node && {
+      index: node.index,
+      key: node.key,
+      value: node.value,
+    };
+  }
   public get last(): { readonly index: number; readonly key: K; readonly value: V; } | undefined {
     const node = this.nodes[this.HEAD]?.prev;
     return node && {
