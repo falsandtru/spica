@@ -77,12 +77,12 @@ export class IxList<K, V = undefined> {
       const index = this[HEAD] = this[CURSOR] = this.buffers.length > 0
         ? this.buffers.shift()!
         : this.length;
-      //assert(!nodes[index]);
+      assert(!nodes[index]);
       ++this[LENGTH];
       this.index?.set(key, index);
       nodes[index] =
         new Node(index, key, value, head!, head!);
-      //assert(this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
+      assert(this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
       //assert(this.length > 10 || [...this].length === this.length);
       return index;
     }
@@ -91,14 +91,14 @@ export class IxList<K, V = undefined> {
       const index = this[HEAD] = this[CURSOR] = this.buffers.length > 0
         ? this.buffers.shift()!
         : this.length;
-      //assert(!nodes[index]);
+      assert(!nodes[index]);
       ++this[LENGTH];
       this.index?.set(key, index);
       nodes[index] = head.prev = head.prev.next =
         new Node(index, key, value, head, head.prev);
-      //assert(this.length !== 1 || this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
-      //assert(this.length !== 2 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
-      //assert(this.length < 3 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
+      assert(this.length !== 1 || this.nodes[index] === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
+      assert(this.length !== 2 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
+      assert(this.length < 3 || this.nodes[index] !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
       //assert(this.length > 10 || [...this].length === this.length);
       return index;
     }
@@ -153,8 +153,8 @@ export class IxList<K, V = undefined> {
     }
     // @ts-expect-error
     this.nodes[node.index] = node.key = node.value = node.prev = node.next = void 0;
-    //assert(this.length === 0 ? !this.nodes[this[HEAD]] : this.nodes[this[HEAD]]);
-    //assert(this.length === 0 ? !this.nodes[this[CURSOR]] : this.nodes[this[CURSOR]]);
+    assert(this.length === 0 ? !this.nodes[this[HEAD]] : this.nodes[this[HEAD]]);
+    assert(this.length === 0 ? !this.nodes[this[CURSOR]] : this.nodes[this[CURSOR]]);
     //assert(this.length > 10 || [...this].length === this.length);
     return { key, value };
   }
@@ -164,9 +164,9 @@ export class IxList<K, V = undefined> {
     return this.add(key, value);
   }
   public shift(): { readonly key: K; readonly value: V; } | undefined {
-    //assert(this.length === 0 ? !this.nodes[this[HEAD]] : this.nodes[this[HEAD]]);
+    assert(this.length === 0 ? !this.nodes[this[HEAD]] : this.nodes[this[HEAD]]);
     const node = this.nodes[this[HEAD]];
-    //assert(this.length === 0 ? !node : node);
+    assert(this.length === 0 ? !node : node);
     return node && this.delete(node.key, node.index);
   }
   public push(this: IxList<K, undefined>, key: K, value?: V): number;
@@ -178,9 +178,9 @@ export class IxList<K, V = undefined> {
     return i;
   }
   public pop(): { readonly key: K; readonly value: V; } | undefined {
-    //assert(this.length === 0 ? !this.nodes[this[HEAD]] : this.nodes[this[HEAD]]);
+    assert(this.length === 0 ? !this.nodes[this[HEAD]] : this.nodes[this[HEAD]]);
     const node = this.nodes[this[HEAD]]?.prev;
-    //assert(this.length === 0 ? !node : node);
+    assert(this.length === 0 ? !node : node);
     return node && this.delete(node.key, node.index);
   }
   private search(key: K, cursor = this[CURSOR]): Node<K, V> | undefined {
