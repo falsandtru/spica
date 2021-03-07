@@ -115,7 +115,7 @@ export class IxList<K, V = undefined> {
       const node = head.prev;
       const index = this.HEAD = this[CURSOR] = node.index;
       //assert(nodes[index]);
-      if (this.index && !equal(key, node.key)) {
+      if (this.index && !equal(node.key, key)) {
         this.index.delete(node.key, node.index);
         this.index.set(key, index);
       }
@@ -196,7 +196,8 @@ export class IxList<K, V = undefined> {
     if (node && equal(node.key, key)) return this[CURSOR] = cursor, node;
     if (!this.index) throw new Error(`Spica: IxList: Invalid index.`);
     node = this.nodes[cursor = this.index.get(key) ?? this.capacity];
-    if (node && equal(node.key, key)) return this[CURSOR] = cursor, node;
+    assert(!node || equal(node.key, key));
+    if (node) return this[CURSOR] = cursor, node;
   }
   public find(key: K, index?: number): V | undefined {
     if (!this.index) throw new Error(`Spica: IxList: No index.`);
