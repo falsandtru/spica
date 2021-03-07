@@ -11,6 +11,14 @@ interface Collection<K, V> extends IterableCollection<K, V> {
   clear(): void;
 }
 
+interface Node<K, V> {
+  readonly index: number;
+  key: K;
+  value: V;
+  next: number;
+  prev: number;
+}
+
 export class IxList<K, V = undefined> {
   constructor(
     private readonly capacity: number,
@@ -91,7 +99,13 @@ export class IxList<K, V = undefined> {
       assert(!nodes[index]);
       ++this[LENGTH];
       this.index?.set(key, index);
-      nodes[index] = Node(index, key, value, index, index);
+      nodes[index] = {
+        index,
+        key,
+        value,
+        next: index,
+        prev: index,
+      };
       assert(index === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
       //assert(this.length > 10 || [...this].length === this.length);
       return index;
@@ -104,7 +118,13 @@ export class IxList<K, V = undefined> {
       assert(!nodes[index]);
       ++this[LENGTH];
       this.index?.set(key, index);
-      nodes[index] = Node(index, key, value, head.index, head.prev);
+      nodes[index] = {
+        index,
+        key,
+        value,
+        next: head.index,
+        prev: head.prev,
+      };
       head.prev = nodes[head.prev]!.next = index;
       assert(this.length !== 1 || index === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
       assert(this.length !== 2 || index !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
@@ -299,26 +319,3 @@ assert(Object.defineProperty(IxList.prototype, 'cursor', {
     return this[CURSOR];
   },
 }));
-
-interface Node<K, V> {
-  readonly index: number;
-  key: K;
-  value: V;
-  next: number;
-  prev: number;
-}
-function Node<K, V>(
-  index: number,
-  key: K,
-  value: V,
-  next: number,
-  prev: number,
-): Node<K, V> {
-  return {
-    index,
-    key,
-    value,
-    next,
-    prev,
-  };
-}
