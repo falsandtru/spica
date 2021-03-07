@@ -6,6 +6,10 @@ describe('Benchmark:', function () {
   this.timeout(10 * 1e3);
 
   describe('Cache', function () {
+    this.beforeEach(done => {
+      setTimeout(done, 1000);
+    });
+
     it('new', function (done) {
       benchmark('Cache new', () => new Cache(1000), done);
     });
