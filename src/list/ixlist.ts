@@ -3,9 +3,6 @@ import { equal } from '../compare';
 
 // Indexed circular linked list
 
-const CURSOR = Symbol('cursor');
-const LENGTH = Symbol('length');
-
 interface Collection<K, V> extends IterableCollection<K, V> {
   delete(key: K, value?: V): boolean;
   clear(): void;
@@ -18,6 +15,9 @@ interface Node<K, V> {
   next: number;
   prev: number;
 }
+
+const CURSOR = Symbol('cursor');
+const LENGTH = Symbol('length');
 
 export class IxList<K, V = undefined> {
   constructor(

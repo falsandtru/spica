@@ -34,8 +34,6 @@ JavaScriptにおける需要を満たさない懸念がある。
 
 */
 
-const SIZE = Symbol('size');
-
 interface Record<V> {
   target: 'LRU' | 'LFU';
   index: number;
@@ -53,6 +51,8 @@ export interface CacheOptions<K, V = undefined> {
     readonly clear?: boolean;
   };
 }
+
+const SIZE = Symbol('size');
 
 export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   constructor(
