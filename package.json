@@ -25,6 +25,8 @@
     "list",
     "hlist",
     "ixlist",
+    "stack",
+    "queue",
     "heap",
     "cache"
   ],

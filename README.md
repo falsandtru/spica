@@ -21,8 +21,11 @@ $ npm i spica
 - AtomicPromise
 - Cancellation
 - Cache
+- List
 - HList
 - IxList
+- Stack
+- Queue
 - Heap
 - DataMap
 - MultiMap

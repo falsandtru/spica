@@ -3,6 +3,7 @@ import { max, min } from './alias';
 import { now } from './clock';
 import { IterableCollection } from './collection';
 import { IxList } from './ixlist';
+import { Stack } from './stack';
 import { extend } from './assign';
 import { tuple } from './tuple';
 import { equal } from './compare';
@@ -87,19 +88,14 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public get size(): number {
     return this[SIZE];
   }
-  private queue: { key: K; value: V; }[] = [];
+  private readonly stack = new Stack<{ key: K; value: V; }>();
   private resume(): void {
-    if (this.queue.length === 0) return;
-    const { queue, settings: { disposer } } = this;
+    if (this.stack.isEmpty()) return;
+    const { stack, settings: { disposer } } = this;
     assert(disposer);
-    for (let i = 0; i < queue.length; ++i) {
-      if (!queue[i]) continue;
-      const { key, value } = queue[i];
-      // @ts-expect-error
-      queue[i] = void 0;
-      disposer!(value, key);
+    for (let record: { key: K, value: V } | undefined; record = stack.pop();) {
+      disposer!(record.value, record.key);
     }
-    this.queue = [];
   }
   private dispose(key: K, { target, index, value, size }: Record<V>, disposer: CacheOptions<K, V>['disposer']): void {
     this.indexes[target].delete(key, index);
@@ -132,7 +128,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       }
       const record = this.memory.get(index.key)!;
       this.dispose(index.key, record, void 0);
-      this.settings.disposer && this.queue.push({ key: index.key, value: record.value });
+      this.settings.disposer && this.stack.push({ key: index.key, value: record.value });
     }
     if (restore && restore.length > 0) {
       restore.HEAD = restore.tail!.index;
@@ -154,7 +150,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const record = this.memory.get(key);
     if (record) {
       assert(this.memory.has(key));
-      this.settings.disposer && this.queue.push({ key, value: record.value });
+      this.settings.disposer && this.stack.push({ key, value: record.value });
       this.secure(size - record.size, key);
       this.space && (this[SIZE] += size - record.size);
       assert(0 <= this.size && this.size <= this.space);
@@ -162,7 +158,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       record.size = size;
       record.expiry = expiry;
       this.resume();
-      assert(this.queue.length === 0);
+      assert(this.stack.isEmpty());
       return true;
     }
     this.secure(size);
@@ -179,7 +175,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       expiry,
     });
     this.resume();
-    assert(this.queue.length === 0);
+    assert(this.stack.isEmpty());
     return false;
   }
   public set(this: Cache<K, undefined>, key: K, value?: V, size?: number, age?: number): this;

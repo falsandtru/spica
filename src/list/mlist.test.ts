@@ -1,44 +1,7 @@
-import { List, MList } from './list';
+import { MList } from './mlist';
 
-describe('Unit: lib/list', () => {
-  describe('List', () => {
-    it('List', () => {
-      (): List<number> => List(0);
-      (): List<number> => List(0).tail;
-      assert.deepStrictEqual([...List()], []);
-      assert.deepStrictEqual([...List(0)], [0]);
-      assert.deepStrictEqual([...List(0, 1)], [0, 1]);
-    });
-
-    it('head', () => {
-      assert(List().head === undefined);
-      assert(List(0).head === 0);
-      assert(List(0, 1).head === 0);
-    });
-
-    it('tail', () => {
-      assert(List().tail === undefined);
-      assert(List(0).tail);
-      assert(List(0, 1).tail.head === 1);
-    });
-
-    it('reverse', () => {
-      assert.deepStrictEqual([...List().reverse()], []);
-      assert.deepStrictEqual([...List(0).reverse()], [0]);
-      assert.deepStrictEqual([...List(0, 1).reverse()], [1, 0]);
-    });
-
-    it('length', () => {
-      assert(List().length === 0);
-      assert(List(0).length === 1);
-    });
-
-    it('iterator', () => {
-      assert.deepStrictEqual([...List(0).tail], []);
-      assert.deepStrictEqual([...List(0)], [0]);
-      assert.deepStrictEqual([...List(0, 1)], [0, 1]);
-    });
-
+describe('Unit: lib/mlist', () => {
+  describe('MList', () => {
     it('take', () => {
       assert.deepStrictEqual([...MList().take(0)], []);
       assert.deepStrictEqual([...MList().take(1)], []);
