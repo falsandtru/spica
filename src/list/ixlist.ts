@@ -209,10 +209,6 @@ export class IxList<K, V = undefined> {
     if (!this.index) throw new Error(`Spica: IxList: No index.`);
     return this.search(key, index);
   }
-  public findIndex(key: K, index?: number): number | undefined {
-    if (!this.index) throw new Error(`Spica: IxList: No index.`);
-    return this.search(key, index)?.index;
-  }
   public has(key: K, index?: number): boolean {
     if (!this.index) throw new Error(`Spica: IxList: No index.`);
     return this.search(key, index) !== void 0;
