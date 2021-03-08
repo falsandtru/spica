@@ -252,7 +252,7 @@ export class Observation<N extends readonly unknown[], D, R>
     for (let i = 0; i < namespace.length; ++i) {
       const name = namespace[i];
       const { children } = node;
-      let child = children.find(name)?.value;
+      let child = children.get(name);
       if (!child) {
         switch (mode) {
           case SeekMode.Breakable:

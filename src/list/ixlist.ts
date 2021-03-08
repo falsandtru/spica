@@ -140,6 +140,29 @@ export class IxList<K, V = undefined> {
     node.value = value;
     return node.index;
   }
+  private search(key: K, cursor = this[CURSOR]): Node<K, V> | undefined {
+    const nodes = this.nodes;
+    let node: Node<K, V> | undefined;
+    node = nodes[cursor];
+    if (node && equal(node.key, key)) return this[CURSOR] = cursor, node;
+    if (!this.index) throw new Error(`Spica: IxList: Invalid index.`);
+    if (this.length === 0 || node && this.length === 1) return;
+    node = nodes[cursor = this.index.get(key) ?? this.capacity];
+    assert(!node || equal(node.key, key));
+    if (node) return this[CURSOR] = cursor, node;
+  }
+  public find(key: K, index?: number): ReadonlyNode<K, V> | undefined {
+    if (!this.index) throw new Error(`Spica: IxList: No index.`);
+    return this.search(key, index);
+  }
+  public get(key: K, index?: number): V | undefined {
+    if (!this.index) throw new Error(`Spica: IxList: No index.`);
+    return this.search(key, index)?.value;
+  }
+  public has(key: K, index?: number): boolean {
+    if (!this.index) throw new Error(`Spica: IxList: No index.`);
+    return this.search(key, index) !== void 0;
+  }
   public delete(key: K, index?: number): ReadonlyNode<K, V> | undefined {
     const cursor = this[CURSOR];
     const node = this.search(key, index);
@@ -193,25 +216,6 @@ export class IxList<K, V = undefined> {
     const node = nodes[nodes[this.HEAD]!.prev];
     assert(this.length === 0 ? !node : node);
     return node && this.delete(node.key, node.index);
-  }
-  private search(key: K, cursor = this[CURSOR]): Node<K, V> | undefined {
-    const nodes = this.nodes;
-    let node: Node<K, V> | undefined;
-    node = nodes[cursor];
-    if (node && equal(node.key, key)) return this[CURSOR] = cursor, node;
-    if (!this.index) throw new Error(`Spica: IxList: Invalid index.`);
-    if (this.length === 0 || node && this.length === 1) return;
-    node = nodes[cursor = this.index.get(key) ?? this.capacity];
-    assert(!node || equal(node.key, key));
-    if (node) return this[CURSOR] = cursor, node;
-  }
-  public find(key: K, index?: number): ReadonlyNode<K, V> | undefined {
-    if (!this.index) throw new Error(`Spica: IxList: No index.`);
-    return this.search(key, index);
-  }
-  public has(key: K, index?: number): boolean {
-    if (!this.index) throw new Error(`Spica: IxList: No index.`);
-    return this.search(key, index) !== void 0;
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
     const nodes = this.nodes;
