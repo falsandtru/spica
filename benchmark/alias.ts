@@ -26,5 +26,3 @@ describe('Benchmark:', function () {
   });
 
 });
-
-
