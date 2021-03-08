@@ -1,6 +1,6 @@
 import { benchmark } from './benchmark';
-import { Stack } from '../';
-import { Queue } from '../';
+import { Stack } from '../src/stack';
+import { Queue } from '../src/queue';
 
 describe('Benchmark:', function () {
   this.timeout(10 * 1e3);
