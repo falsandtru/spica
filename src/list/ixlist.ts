@@ -34,7 +34,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     assert(capacity > 0);
   }
   private nodes: Record<number, Node<K, V> | undefined> = {};
-  private buffers: number[] = [];
+  private buffers: { [i: number]: number; length: number; } = { length: 0 };
   public HEAD = 0;
   private [CURSOR] = 0;
   private [LENGTH] = 0;
@@ -59,7 +59,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
   }
   public clear(): void {
     this.nodes = {};
-    this.buffers = [];
+    this.buffers = { length: 0 };
     this.index?.clear();
     this.HEAD = 0;
     this[CURSOR] = 0;
@@ -74,7 +74,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     if (!head) {
       assert(this.length === 0);
       const index = this.HEAD = this[CURSOR] = this.buffers.length > 0
-        ? this.buffers.shift()!
+        ? this.buffers[--this.buffers.length]
         : this.length;
       assert(!nodes[index]);
       ++this[LENGTH];
@@ -93,7 +93,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     //assert(head);
     if (this.length < this.capacity) {
       const index = this.HEAD = this[CURSOR] = this.buffers.length > 0
-        ? this.buffers.shift()!
+        ? this.buffers[--this.buffers.length]
         : this.length;
       assert(!nodes[index]);
       ++this[LENGTH];
@@ -177,7 +177,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     //assert(this.length !== 2 || node !== node.prev && node.prev === node.next);
     //assert(this.length < 3 || node !== node.prev && node.prev !== node.next);
     --this[LENGTH];
-    this.buffers.push(node.index);
+    this.buffers[this.buffers.length++] = node.index;
     this.index?.delete(node.key, node.index);
     const nodes = this.nodes;
     nodes[node.prev]!.next = node.next;
