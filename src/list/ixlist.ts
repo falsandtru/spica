@@ -33,7 +33,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
   ) {
     assert(capacity > 0);
   }
-  private nodes: (Node<K, V> | undefined)[] = [];
+  private nodes: Record<number, Node<K, V> | undefined> = {};
   private buffers: number[] = [];
   public HEAD = 0;
   private [CURSOR] = 0;
@@ -58,7 +58,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     return this.nodes[index];
   }
   public clear(): void {
-    this.nodes = [];
+    this.nodes = {};
     this.buffers = [];
     this.index?.clear();
     this.HEAD = 0;
