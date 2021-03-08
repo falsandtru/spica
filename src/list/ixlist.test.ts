@@ -1,4 +1,5 @@
 import { IxList } from './ixlist';
+import { MultiMap } from '../multimap';
 
 describe('Unit: lib/ixlist', () => {
   describe('IxList', () => {
@@ -319,6 +320,66 @@ describe('Unit: lib/ixlist', () => {
         head: 2,
         cursor: 1,
         length: 3,
+      });
+
+    });
+
+    it('duplicate', () => {
+      const list = new IxList<number, number>(3, new MultiMap());
+
+      list.add(0, 1);
+      list.add(0, 2);
+      list.add(0, 3);
+      list.add(0, 4);
+      assert.deepStrictEqual(inspect(list), {
+        nodes: [
+          [0, 4],
+          [0, 3],
+          [0, 2],
+        ],
+        array: [
+          [0, 4, 0],
+          [0, 2, 1],
+          [0, 3, 2],
+        ],
+        head: 0,
+        cursor: 0,
+        length: 3,
+      });
+
+      list.add(1, 0);
+      assert.deepStrictEqual(inspect(list), {
+        nodes: [
+          [1, 0],
+          [0, 4],
+          [0, 3],
+        ],
+        array: [
+          [0, 4, 0],
+          [1, 0, 1],
+          [0, 3, 2],
+        ],
+        head: 1,
+        cursor: 1,
+        length: 3,
+      });
+
+      assert(list.get(0) === 4);
+      assert(list.del(0)?.value === 4);
+      assert(list.del(0)?.value === 3);
+      assert(list.del(0)?.value === undefined);
+      assert.deepStrictEqual(inspect(list), {
+        nodes: [
+          [1, 0],
+        ],
+        array: [
+          undefined,
+          [1, 0, 1],
+          undefined,
+        ],
+        head: 1,
+        cursor: 1,
+        length: 1,
       });
 
     });
