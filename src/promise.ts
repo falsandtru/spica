@@ -221,6 +221,9 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
   }
 }
 
+type FulfillReaction = [(value: unknown) => void, (reason: unknown) => void, (value: unknown) => void, ((param: unknown) => unknown) | undefined | null];
+type RejectReaction = [(value: unknown) => void, (reason: unknown) => void, (reason: unknown) => void, ((param: unknown) => unknown) | undefined | null];
+
 export class Internal<T> {
   public status: Status<T> = { state: State.pending };
   public get isPending(): boolean {
@@ -278,8 +281,8 @@ export class Internal<T> {
     };
     return this.resume();
   }
-  public fulfillReactions: [(value: unknown) => void, (reason: unknown) => void, (value: unknown) => void, ((param: unknown) => unknown) | undefined | null][] = [];
-  public rejectReactions: [(value: unknown) => void, (reason: unknown) => void, (reason: unknown) => void, ((param: unknown) => unknown) | undefined | null][] = [];
+  public fulfillReactions: FulfillReaction[] = [];
+  public rejectReactions: RejectReaction[] = [];
   public then<TResult1, TResult2>(
     resolve: (value: TResult1 | TResult2 | PromiseLike<TResult1 | TResult2>) => void,
     reject: (reason: unknown) => void,
@@ -290,10 +293,10 @@ export class Internal<T> {
     switch (status.state) {
       case State.fulfilled:
         if (fulfillReactions.length !== 0) break;
-        return this.call(resolve, reject, resolve, onfulfilled, status.value);
+        return call(resolve, reject, resolve, onfulfilled, status.value);
       case State.rejected:
         if (rejectReactions.length !== 0) break;
-        return this.call(resolve, reject, reject, onrejected, status.reason);
+        return call(resolve, reject, reject, onrejected, status.reason);
     }
     fulfillReactions.push([
       resolve,
@@ -315,49 +318,52 @@ export class Internal<T> {
       case State.resolved:
         return;
       case State.fulfilled:
-        if (rejectReactions.length > 0) {
+        if (rejectReactions.length !== 0) {
           this.rejectReactions = [];
         }
         if (fulfillReactions.length === 0) return;
-        this.react(fulfillReactions, status.value);
+        react(fulfillReactions, status.value);
         this.fulfillReactions = [];
         return;
       case State.rejected:
-        if (fulfillReactions.length > 0) {
+        if (fulfillReactions.length !== 0) {
           this.fulfillReactions = [];
         }
         if (rejectReactions.length === 0) return;
-        this.react(rejectReactions, status.reason);
+        react(rejectReactions, status.reason);
         this.rejectReactions = [];
         return;
     }
   }
-  public react(reactions: this['fulfillReactions'], param: unknown): void {
-    for (let i = 0; i < reactions.length; ++i) {
-      const reaction = reactions[i];
-      this.call(
-        reaction[0],
-        reaction[1],
-        reaction[2],
-        reaction[3],
-        param);
-    }
+
+}
+
+function react(reactions: Array<FulfillReaction | RejectReaction>, param: unknown): void {
+  for (let i = 0; i < reactions.length; ++i) {
+    const reaction = reactions[i];
+    call(
+      reaction[0],
+      reaction[1],
+      reaction[2],
+      reaction[3],
+      param);
   }
-  public call(
-    resolve: (value: unknown) => void,
-    reject: (reason: unknown) => void,
-    cont: (value: unknown) => void,
-    callback: ((param: unknown) => unknown) | undefined | null,
-    param: unknown,
-  ): void {
-    assert([resolve, reject].includes(cont));
-    if (!callback) return cont(param);
-    try {
-      resolve(callback(param));
-    }
-    catch (reason) {
-      reject(reason);
-    }
+}
+
+function call(
+  resolve: (value: unknown) => void,
+  reject: (reason: unknown) => void,
+  cont: (value: unknown) => void,
+  callback: ((param: unknown) => unknown) | undefined | null,
+  param: unknown,
+): void {
+  assert([resolve, reject].includes(cont));
+  if (!callback) return cont(param);
+  try {
+    resolve(callback(param));
+  }
+  catch (reason) {
+    reject(reason);
   }
 }
 

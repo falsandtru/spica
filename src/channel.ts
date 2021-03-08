@@ -21,19 +21,13 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
     const core = this[internal];
     const { buffer, producers, consumers } = core;
     core.alive = false;
-    for (let i = 0; producers[i] || consumers[i]; ++i) {
-      producers[i]?.bind(fail());
-      consumers[i]?.bind(fail());
+    for (let i = 0; i < producers.length || i < consumers.length; ++i) {
+      i < producers.length && producers[i].bind(fail());
+      i < consumers.length && consumers[i].bind(fail());
     }
-    consumers.splice(0, consumers.length);
     if (finalizer) {
-      producers.splice(0, producers.length);
-      AtomicPromise.all(buffer.splice(0, buffer.length))
+      AtomicPromise.all(buffer)
         .then(finalizer);
-    }
-    else {
-      producers.splice(0, producers.length);
-      buffer.splice(0, buffer.length);
     }
   }
   public put(this: Channel<undefined>, msg?: T): AtomicPromise<undefined>;
@@ -47,7 +41,7 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
         assert(buffer.length + 1 < capacity ? producers.length === 0 : true);
         assert(capacity === 0 ? buffer.length === 0 : true);
         buffer.push(msg);
-        consumers.length > 0 && consumers.shift()!.bind(buffer.shift()!)
+        consumers.length > 0 && consumers.shift()!.bind(buffer.shift()!);
         assert(buffer.length <= capacity);
         assert(buffer.length > 0 ? consumers.length === 0 : true);
         return AtomicPromise.resolve();

@@ -3,7 +3,6 @@ import { max, min } from './alias';
 import { now } from './clock';
 import { IterableCollection } from './collection';
 import { IxList } from './ixlist';
-import { Stack } from './stack';
 import { extend } from './assign';
 import { tuple } from './tuple';
 import { equal } from './compare';
@@ -88,9 +87,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public get size(): number {
     return this[SIZE];
   }
-  private readonly stack = new Stack<{ key: K; value: V; }>();
+  private readonly stack: { key: K; value: V; }[] = [];
   private resume(): void {
-    if (this.stack.isEmpty()) return;
+    if (this.stack.length === 0) return;
     const { stack, settings: { disposer } } = this;
     assert(disposer);
     for (let record: { key: K, value: V } | undefined; record = stack.pop();) {
@@ -158,7 +157,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       record.size = size;
       record.expiry = expiry;
       this.resume();
-      assert(this.stack.isEmpty());
+      assert(this.stack.length === 0);
       return true;
     }
     this.secure(size);
@@ -175,7 +174,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       expiry,
     });
     this.resume();
-    assert(this.stack.isEmpty());
+    assert(this.stack.length === 0);
     return false;
   }
   public set(this: Cache<K, undefined>, key: K, value?: V, size?: number, age?: number): this;
@@ -275,11 +274,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (record.target !== 'LRU') return false;
     const { LRU, LFU } = this.indexes;
     const { index } = record;
-    assert(LRU.node(index).key === key);
+    assert(LRU.node(index)!.key === key);
     ++this.stats.LRU[0];
     ++this.clock;
     ++this.clockR;
-    if (LRU.node(index).value + LRU.length / 3 > this.clockR) {
+    if (LRU.node(index)!.value + LRU.length / 3 > this.clockR) {
       LRU.put(key, this.clockR, index);
       LRU.moveToHead(index);
       return true;
@@ -293,7 +292,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (record.target !== 'LFU') return false;
     const { LFU } = this.indexes;
     const { index } = record;
-    assert(LFU.node(index).key === key);
+    assert(LFU.node(index)!.key === key);
     ++this.stats.LFU[0];
     ++this.clock;
     LFU.put(key, this.clock, index);

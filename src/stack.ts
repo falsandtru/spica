@@ -15,10 +15,19 @@ export class Stack<T> {
     node[1] = undefined;
     return value;
   }
+  public clear(): void {
+    this.list = undefined;
+  }
   public isEmpty(): boolean {
     return this.list === undefined;
   }
   public peek(): T | undefined {
     return this.list?.[0];
+  }
+  public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
+    while (!this.isEmpty()) {
+      yield this.pop()!;
+    }
+    return;
   }
 }

@@ -1,5 +1,6 @@
 import type { Inits, DeepImmutable, DeepRequired } from './type';
-import { Number, Map, WeakSet, Error } from './global';
+import { Infinity, Number, Map, WeakSet, Error } from './global';
+import { IxList } from './ixlist';
 import { extend } from './assign';
 import { once } from './function';
 import { push, splice } from './array';
@@ -29,8 +30,7 @@ class ListenerNode<N extends readonly unknown[], D, R> {
     public readonly index: unknown,
   ) {
   }
-  public readonly children: Map<N[number], ListenerNode<N, D, R>> = new Map();
-  public readonly childrenIndexes: N[number][] = [];
+  public readonly children = new IxList<N[number], ListenerNode<N, D, R>>(Infinity, new Map());
   public readonly monitors: MonitorItem<N, D>[] = [];
   public readonly subscribers: SubscriberItem<N, D, R>[] = [];
 }
@@ -229,19 +229,17 @@ export class Observation<N extends readonly unknown[], D, R>
   private refsBelow(node: ListenerNode<N, D, R>, type: ListenerType): ListenerItem<N, D, R>[][] {
     return this.refsBelow_(node, type, [])[0];
   }
-  private refsBelow_({ monitors, subscribers, childrenIndexes, children }: ListenerNode<N, D, R>, type: ListenerType, acc: ListenerItem<N, D, R>[][]): readonly [ListenerItem<N, D, R>[][], number] {
+  private refsBelow_({ monitors, subscribers, children }: ListenerNode<N, D, R>, type: ListenerType, acc: ListenerItem<N, D, R>[][]): readonly [ListenerItem<N, D, R>[][], number] {
     type === ListenerType.Monitor
       ? (acc as typeof monitors[]).push(monitors)
       : (acc as typeof subscribers[]).push(subscribers);
     let count = 0;
-    for (let i = 0; i < childrenIndexes.length; ++i) {
-      const index = childrenIndexes[i];
-      assert(children.has(index));
-      const cnt = this.refsBelow_(children.get(index)!, type, acc)[1];
+    for (let node = children.last, i = 0; node && i < children.length; (node = children.node(node.prev)) && ++i) {
+      const cnt = this.refsBelow_(node.value, type, acc)[1];
       count += cnt;
       if (cnt === 0 && this.settings.cleanup) {
-        children.delete(index);
-        splice(childrenIndexes, i, 1);
+        node = children.node(children.delete(node.key, node.index)!.next);
+        if (!node) break;
         --i;
       }
     }
@@ -252,9 +250,9 @@ export class Observation<N extends readonly unknown[], D, R>
   private seekNode(namespace: Readonly<N | Inits<N>>, mode: SeekMode): ListenerNode<N, D, R> | undefined {
     let node = this.node;
     for (let i = 0; i < namespace.length; ++i) {
-      const index = namespace[i];
-      const { childrenIndexes, children } = node;
-      let child = children.get(index);
+      const name = namespace[i];
+      const { children } = node;
+      let child = children.find(name)?.value;
       if (!child) {
         switch (mode) {
           case SeekMode.Breakable:
@@ -262,9 +260,8 @@ export class Observation<N extends readonly unknown[], D, R>
           case SeekMode.Closest:
             return node;
         }
-        child = new ListenerNode(node, index);
-        childrenIndexes.push(index);
-        children.set(index, child);
+        child = new ListenerNode(node, name);
+        children.add(name, child);
       }
       node = child;
     }
@@ -272,11 +269,11 @@ export class Observation<N extends readonly unknown[], D, R>
   }
 }
 
-function clear<N extends readonly unknown[], D, R>({ monitors, subscribers, childrenIndexes, children }: ListenerNode<N, D, R>): boolean {
-  for (let i = 0; i < childrenIndexes.length; ++i) {
-    if (!clear(children.get(childrenIndexes[i])!)) continue;
-    children.delete(childrenIndexes[i]);
-    splice(childrenIndexes, i, 1);
+function clear<N extends readonly unknown[], D, R>({ monitors, subscribers, children }: ListenerNode<N, D, R>): boolean {
+  for (let node = children.last, i = 0; node && i < children.length; (node = children.node(node.prev)) && ++i) {
+    if (!clear(node.value)) continue;
+    node = children.node(children.delete(node.key, node.index)!.next);
+    if (!node) break;
     --i;
   }
   splice(subscribers, 0);

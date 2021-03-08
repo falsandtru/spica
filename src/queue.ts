@@ -9,7 +9,7 @@ export class Queue<T> {
     const node = [sentinel] as Node<T>;
     this.edges = [node, node];
   }
-  private edges: [Node<T>, Node<T>];
+  private readonly edges: [Node<T>, Node<T>];
   public enqueue(value: T): void {
     const edges = this.edges;
     const node = edges[1];
@@ -25,6 +25,9 @@ export class Queue<T> {
     node[1] = undefined;
     return value;
   }
+  public clear(): void {
+    this.edges[0] = this.edges[1];
+  }
   public isEmpty(): boolean {
     return this.edges[0][0] === sentinel;
   }
@@ -32,5 +35,11 @@ export class Queue<T> {
     const value = this.edges[0][0];
     if (value === sentinel) return;
     return value;
+  }
+  public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
+    while (!this.isEmpty()) {
+      yield this.dequeue()!;
+    }
+    return;
   }
 }
