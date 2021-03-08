@@ -21,9 +21,9 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
     const core = this[internal];
     const { buffer, producers, consumers } = core;
     core.alive = false;
-    for (let i = 0; i < producers.length || i < consumers.length; ++i) {
-      i < producers.length && producers[i].bind(fail());
-      i < consumers.length && consumers[i].bind(fail());
+    while (producers.length || consumers.length) {
+      producers.length && producers.shift()!.bind(fail());
+      consumers.length && consumers.shift()!.bind(fail());
     }
     if (finalizer) {
       AtomicPromise.all(buffer)
