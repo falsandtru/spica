@@ -1,9 +1,9 @@
-import { IterableCollection } from '../collection';
+import { Collection } from '../collection';
 import { equal } from '../compare';
 
 // Indexed circular linked list
 
-interface Collection<K, V> extends IterableCollection<K, V> {
+interface Index<K, V> extends Collection<K, V> {
   delete(key: K, value?: V): boolean;
   clear(): void;
 }
@@ -29,7 +29,7 @@ const LENGTH = Symbol('length');
 export class IxList<K, V = undefined> {
   constructor(
     private readonly capacity: number,
-    private readonly index?: Collection<K, number>,
+    private readonly index?: Index<K, number>,
   ) {
     assert(capacity > 0);
   }
