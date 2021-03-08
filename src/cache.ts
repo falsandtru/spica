@@ -87,13 +87,14 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public get size(): number {
     return this[SIZE];
   }
-  private readonly stack: { key: K; value: V; }[] = [];
+  private stack: { [i: number]: { key: K; value: V; }; length: number; } = { length: 0 };
   private resume(): void {
     if (this.stack.length === 0) return;
     const { stack, settings: { disposer } } = this;
     assert(disposer);
-    for (let record: { key: K, value: V } | undefined; record = stack.pop();) {
-      disposer!(record.value, record.key);
+    while (stack.length > 0) {
+      const { key, value } = stack[--stack.length];
+      disposer!(value, key);
     }
   }
   private dispose(key: K, { target, index, value, size }: Record<V>, disposer: CacheOptions<K, V>['disposer']): void {
@@ -127,7 +128,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       }
       const record = this.memory.get(index.key)!;
       this.dispose(index.key, record, void 0);
-      this.settings.disposer && this.stack.push({ key: index.key, value: record.value });
+      this.settings.disposer && (this.stack[this.stack.length++] = { key: index.key, value: record.value });
     }
     if (restore && restore.length > 0) {
       restore.HEAD = restore.tail!.index;
@@ -149,7 +150,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const record = this.memory.get(key);
     if (record) {
       assert(this.memory.has(key));
-      this.settings.disposer && this.stack.push({ key, value: record.value });
+      this.settings.disposer && (this.stack[this.stack.length++] = { key, value: record.value });
       this.secure(size - record.size, key);
       this.space && (this[SIZE] += size - record.size);
       assert(0 <= this.size && this.size <= this.space);
@@ -216,6 +217,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.ratio = 50;
     this.indexes.LRU.clear();
     this.indexes.LFU.clear();
+    this.stack = { length: 0 };
     this.stats = {
       LRU: [0, 0],
       LFU: [0, 0],
