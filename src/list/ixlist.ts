@@ -162,12 +162,10 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     return this.search(key, index);
   }
   public get(key: K, index?: number): V | undefined {
-    if (!this.index) throw new Error(`Spica: IxList: No index.`);
-    return this.search(key, index)?.value;
+    return this.find(key, index)?.value;
   }
   public has(key: K, index?: number): boolean {
-    if (!this.index) throw new Error(`Spica: IxList: No index.`);
-    return this.search(key, index) !== void 0;
+    return this.find(key, index) !== void 0;
   }
   public del(key: K, index?: number): ReadonlyNode<K, V> | undefined {
     const cursor = this[CURSOR];
