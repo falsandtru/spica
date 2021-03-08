@@ -16,54 +16,54 @@ describe('Benchmark:', function () {
     });
 
     for (const length of [10, 100, 1000, 10000, 100000]) {
-      it(`LRU put ${length.toLocaleString('en')} 0%`, function (done) {
+      it(`LRU set ${length.toLocaleString('en')} 0%`, function (done) {
         const capacity = length;
         const cache = new LRUCache<number, number>(capacity);
         for (let i = 0; i < capacity; ++i) cache.set(i, i);
         let i = 0;
-        benchmark(`LRUCache put ${length.toLocaleString('en')} 0%`, () => cache.set(--i, 0), done);
+        benchmark(`LRUCache set ${length.toLocaleString('en')} 0%`, () => cache.set(--i, 0), done);
       });
 
-      it(`DWC put ${length.toLocaleString('en')} 0%`, function (done) {
+      it(`DWC set ${length.toLocaleString('en')} 0%`, function (done) {
         const capacity = length;
         const cache = new Cache<number, number>(capacity);
         for (let i = 0; i < capacity; ++i) cache.set(i, i);
         let i = 0;
-        benchmark(`DW-Cache put ${length.toLocaleString('en')} 0%`, () => cache.set(--i, 0), done);
+        benchmark(`DW-Cache set ${length.toLocaleString('en')} 0%`, () => cache.set(--i, 0), done);
       });
     }
 
     for (const length of [10, 100, 1000, 10000, 100000]) {
-      it(`LRU put ${length.toLocaleString('en')} 100%`, function (done) {
+      it(`LRU set ${length.toLocaleString('en')} 100%`, function (done) {
         const capacity = length;
         const cache = new LRUCache<number, number>(capacity);
         for (let i = 0; i < capacity; ++i) cache.set(i, i);
         let i = 0;
-        benchmark(`LRUCache put ${length.toLocaleString('en')} 100%`, () => cache.set(++i % capacity, 0), done);
+        benchmark(`LRUCache set ${length.toLocaleString('en')} 100%`, () => cache.set(++i % capacity, 0), done);
       });
 
-      it(`DWC put ${length.toLocaleString('en')} 100%`, function (done) {
+      it(`DWC set ${length.toLocaleString('en')} 100%`, function (done) {
         const capacity = length;
         const cache = new Cache<number, number>(capacity);
         for (let i = 0; i < capacity; ++i) cache.set(i, i);
         let i = 0;
-        benchmark(`DW-Cache put ${length.toLocaleString('en')} 100%`, () => cache.set(++i % capacity, 0), done);
+        benchmark(`DW-Cache set ${length.toLocaleString('en')} 100%`, () => cache.set(++i % capacity, 0), done);
       });
     }
 
     for (const length of [10, 100, 1000, 10000, 100000]) {
-      it(`LRU put ${length.toLocaleString('en')} 100% random`, function (done) {
+      it(`LRU set ${length.toLocaleString('en')} 100% random`, function (done) {
         const capacity = length;
         const cache = new LRUCache<number, number>(capacity);
         for (let i = 0; i < capacity; ++i) cache.set(i, i);
-        benchmark(`LRUCache put ${length.toLocaleString('en')} 100% random`, () => cache.set(Math.random() * capacity | 0, 0), done);
+        benchmark(`LRUCache set ${length.toLocaleString('en')} 100% random`, () => cache.set(Math.random() * capacity | 0, 0), done);
       });
 
-      it(`DWC put ${length.toLocaleString('en')} 100% random`, function (done) {
+      it(`DWC set ${length.toLocaleString('en')} 100% random`, function (done) {
         const capacity = length;
         const cache = new Cache<number, number>(capacity);
         for (let i = 0; i < capacity; ++i) cache.set(i, i);
-        benchmark(`DW-Cache put ${length.toLocaleString('en')} 100% random`, () => cache.set(Math.random() * capacity | 0, 0), done);
+        benchmark(`DW-Cache set ${length.toLocaleString('en')} 100% random`, () => cache.set(Math.random() * capacity | 0, 0), done);
       });
     }
 
