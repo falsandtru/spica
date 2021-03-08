@@ -1,4 +1,4 @@
-import { Collection } from '../collection';
+import { Collection, IterableCollection } from '../collection';
 import { equal } from '../compare';
 
 // Indexed circular linked list
@@ -26,7 +26,7 @@ interface ReadonlyNode<K, V> {
 const CURSOR = Symbol('cursor');
 const LENGTH = Symbol('length');
 
-export class IxList<K, V = undefined> {
+export class IxList<K, V = undefined> implements IterableCollection<K, V> {
   constructor(
     private readonly capacity: number,
     private readonly index?: Index<K, number>,
@@ -140,6 +140,12 @@ export class IxList<K, V = undefined> {
     node.value = value;
     return node.index;
   }
+  public set(this: IxList<K, undefined>, key: K, value?: V, index?: number): this;
+  public set(key: K, value: V, index?: number): this;
+  public set(key: K, value: V, index?: number): this {
+    this.put(key, value, index);
+    return this;
+  }
   private search(key: K, cursor = this[CURSOR]): Node<K, V> | undefined {
     const nodes = this.nodes;
     let node: Node<K, V> | undefined;
@@ -163,7 +169,7 @@ export class IxList<K, V = undefined> {
     if (!this.index) throw new Error(`Spica: IxList: No index.`);
     return this.search(key, index) !== void 0;
   }
-  public delete(key: K, index?: number): ReadonlyNode<K, V> | undefined {
+  public del(key: K, index?: number): ReadonlyNode<K, V> | undefined {
     const cursor = this[CURSOR];
     const node = this.search(key, index);
     if (!node) return;
@@ -190,6 +196,9 @@ export class IxList<K, V = undefined> {
     //assert(this.length > 10 || [...this].length === this.length);
     return node;
   }
+  public delete(key: K, index?: number): boolean {
+    return this.del(key, index) !== void 0;
+  }
   public unshift(this: IxList<K, undefined>, key: K, value?: V): number;
   public unshift(key: K, value: V): number;
   public unshift(key: K, value: V): number {
@@ -199,7 +208,7 @@ export class IxList<K, V = undefined> {
     assert(this.length === 0 ? !this.nodes[this.HEAD] : this.nodes[this.HEAD]);
     const node = this.nodes[this.HEAD];
     assert(this.length === 0 ? !node : node);
-    return node && this.delete(node.key, node.index);
+    return node && this.del(node.key, node.index);
   }
   public push(this: IxList<K, undefined>, key: K, value?: V): number;
   public push(key: K, value: V): number;
@@ -215,7 +224,7 @@ export class IxList<K, V = undefined> {
     const nodes = this.nodes;
     const node = nodes[nodes[this.HEAD]!.prev];
     assert(this.length === 0 ? !node : node);
-    return node && this.delete(node.key, node.index);
+    return node && this.del(node.key, node.index);
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
     const nodes = this.nodes;

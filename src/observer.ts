@@ -238,7 +238,7 @@ export class Observation<N extends readonly unknown[], D, R>
       const cnt = this.refsBelow_(node.value, type, acc)[1];
       count += cnt;
       if (cnt === 0 && this.settings.cleanup) {
-        node = children.node(children.delete(node.key, node.index)!.next);
+        node = children.node(children.del(node.key, node.index)!.next);
         if (!node) break;
         --i;
       }
@@ -272,7 +272,7 @@ export class Observation<N extends readonly unknown[], D, R>
 function clear<N extends readonly unknown[], D, R>({ monitors, subscribers, children }: ListenerNode<N, D, R>): boolean {
   for (let node = children.last, i = 0; node && i < children.length; (node = children.node(node.prev)) && ++i) {
     if (!clear(node.value)) continue;
-    node = children.node(children.delete(node.key, node.index)!.next);
+    node = children.node(children.del(node.key, node.index)!.next);
     if (!node) break;
     --i;
   }

@@ -97,7 +97,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     }
   }
   private dispose(key: K, { target, index, value, size }: Record<V>, disposer: CacheOptions<K, V>['disposer']): void {
-    this.indexes[target].delete(key, index);
+    this.indexes[target].del(key, index);
     this.memory.delete(key);
     this.space && (this[SIZE] -= size);
     disposer?.(value, key);
@@ -283,7 +283,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       LRU.moveToHead(index);
       return true;
     }
-    LRU.delete(key, index);
+    LRU.del(key, index);
     record.target = 'LFU';
     record.index = LFU.add(key, this.clock);
     return true;
