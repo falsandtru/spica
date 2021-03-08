@@ -2,7 +2,7 @@
 
 const LENGTH = Symbol('length');
 
-export class Heap<T = undefined> {
+export class Heap<T> {
   private array: [number, T][] = [];
   private [LENGTH] = 0;
   public get length(): number {
