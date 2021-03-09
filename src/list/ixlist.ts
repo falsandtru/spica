@@ -1,4 +1,5 @@
 import { Collection, IterableCollection } from '../collection';
+import { Stack } from '../stack';
 import { equal } from '../compare';
 
 // Indexed circular linked list
@@ -33,7 +34,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     assert(capacity > 0);
   }
   private nodes: Record<number, Node<K, V> | undefined> = {};
-  private buffers: { [i: number]: number; length: number; } = { length: 0 };
+  private readonly buffers = new Stack<number>();
   public HEAD = 0;
   private CURSOR = 0;
   private LENGTH = 0;
@@ -56,7 +57,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
   }
   public clear(): void {
     this.nodes = {};
-    this.buffers = { length: 0 };
+    this.buffers.clear();
     this.index?.clear();
     this.HEAD = 0;
     this.CURSOR = 0;
@@ -71,7 +72,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     if (!head) {
       assert(this.length === 0);
       const index = this.HEAD = this.CURSOR = this.buffers.length > 0
-        ? this.buffers[--this.buffers.length]
+        ? this.buffers.pop()!
         : this.length;
       assert(!nodes[index]);
       ++this.LENGTH;
@@ -90,7 +91,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     //assert(head);
     if (this.length < this.capacity) {
       const index = this.HEAD = this.CURSOR = this.buffers.length > 0
-        ? this.buffers[--this.buffers.length]
+        ? this.buffers.pop()!
         : this.length;
       //assert(!nodes[index]);
       ++this.LENGTH;
@@ -174,7 +175,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     //assert(this.length !== 2 || node !== node.prev && node.prev === node.next);
     //assert(this.length < 3 || node !== node.prev && node.prev !== node.next);
     --this.LENGTH;
-    this.buffers[this.buffers.length++] = node.index;
+    this.buffers.push(node.index);
     this.index?.delete(node.key, node.index);
     const nodes = this.nodes;
     nodes[node.prev]!.next = node.next;

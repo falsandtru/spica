@@ -1,31 +1,36 @@
-import type { List } from './list/list';
-
 const undefined = void 0;
 
+interface Memory<T> {
+  [i: number]: T | undefined;
+  length: number;
+}
+
 export class Stack<T> {
-  private list: List<T> = undefined;
+  private memory: Memory<T> = { length: 0 };
   public push(value: T): void {
-    this.list = [value, this.list];
+    const mem = this.memory;
+    mem[mem.length++] = value;
   }
   public pop(): T | undefined {
-    const node = this.list;
-    if (node === undefined) return;
-    const value = node[0];
-    this.list = node[1];
-    node[1] = undefined;
+    const mem = this.memory;
+    if (mem.length === 0) return undefined;
+    const value = mem[--mem.length];
+    mem[mem.length] = undefined;
     return value;
   }
   public clear(): void {
-    this.list = undefined;
+    this.memory = { length: 0 };
   }
-  public isEmpty(): boolean {
-    return this.list === undefined;
+  public get length(): number {
+    return this.memory.length;
   }
   public peek(): T | undefined {
-    return this.list?.[0];
+    const mem = this.memory;
+    return mem[mem.length - 1];
   }
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
-    while (!this.isEmpty()) {
+    const mem = this.memory;
+    while (mem.length !== 0) {
       yield this.pop()!;
     }
     return;
