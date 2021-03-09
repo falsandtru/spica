@@ -189,8 +189,8 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
       this[CURSOR] = node.next;
     }
     nodes[node.index] = void 0;
-    assert(this.length === 0 ? !this.nodes[this.HEAD] : this.nodes[this.HEAD]);
-    assert(this.length === 0 ? !this.nodes[this[CURSOR]] : this.nodes[this[CURSOR]]);
+    //assert(this.length === 0 ? !this.nodes[this.HEAD] : this.nodes[this.HEAD]);
+    //assert(this.length === 0 ? !this.nodes[this[CURSOR]] : this.nodes[this[CURSOR]]);
     //assert(this.length > 10 || [...this].length === this.length);
     return node;
   }
