@@ -221,13 +221,6 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     assert(this.length === 0 ? !node : node);
     return node && this.del(node.key, node.index);
   }
-  public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
-    const nodes = this.nodes;
-    for (let node = nodes[this.HEAD], i = 0; node && i < this.length; (node = nodes[node.next]) && ++i) {
-      yield [node.key, node.value];
-    }
-    return;
-  }
   public insert(index: number, before: number): boolean {
     if (index === before) return false;
     const nodes = this.nodes;
@@ -295,6 +288,13 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
         break;
     }
     return true;
+  }
+  public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
+    const nodes = this.nodes;
+    for (let node = nodes[this.HEAD], i = 0; node && i < this.length; (node = nodes[node.next]) && ++i) {
+      yield [node.key, node.value];
+    }
+    return;
   }
 }
 assert(Object.defineProperty(IxList.prototype, 'cursor', {
