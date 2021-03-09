@@ -8,7 +8,7 @@ describe('Unit: lib/ixlist', () => {
         list: [...list],
         nodes: Object.values(list['nodes']).map(node => node && [node.key, node.value, node.index]),
         head: list.HEAD,
-        cursor: list['cursor'],
+        cursor: list['CURSOR'],
         length: list.length,
       };
     }

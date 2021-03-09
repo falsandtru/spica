@@ -25,9 +25,6 @@ interface ReadonlyNode<K, V> {
   readonly prev: number;
 }
 
-const CURSOR = Symbol('cursor');
-const LENGTH = Symbol('length');
-
 export class IxList<K, V = undefined> implements IterableCollection<K, V> {
   constructor(
     private readonly capacity: number,
@@ -38,10 +35,10 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
   private nodes: Record<number, Node<K, V> | undefined> = {};
   private buffers: { [i: number]: number; length: number; } = { length: 0 };
   public HEAD = 0;
-  private [CURSOR] = 0;
-  private [LENGTH] = 0;
+  private CURSOR = 0;
+  private LENGTH = 0;
   public get length() {
-    return this[LENGTH];
+    return this.LENGTH;
   }
   public get head(): ReadonlyNode<K, V> | undefined {
     return this.nodes[this.HEAD];
@@ -62,8 +59,8 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     this.buffers = { length: 0 };
     this.index?.clear();
     this.HEAD = 0;
-    this[CURSOR] = 0;
-    this[LENGTH] = 0;
+    this.CURSOR = 0;
+    this.LENGTH = 0;
   }
   public add(this: IxList<K, undefined>, key: K, value?: V): number;
   public add(key: K, value: V): number;
@@ -73,11 +70,11 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     //assert(this.length === 0 ? !head : head);
     if (!head) {
       assert(this.length === 0);
-      const index = this.HEAD = this[CURSOR] = this.buffers.length > 0
+      const index = this.HEAD = this.CURSOR = this.buffers.length > 0
         ? this.buffers[--this.buffers.length]
         : this.length;
       assert(!nodes[index]);
-      ++this[LENGTH];
+      ++this.LENGTH;
       this.index?.set(key, index);
       nodes[index] = {
         index,
@@ -92,11 +89,11 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     }
     //assert(head);
     if (this.length < this.capacity) {
-      const index = this.HEAD = this[CURSOR] = this.buffers.length > 0
+      const index = this.HEAD = this.CURSOR = this.buffers.length > 0
         ? this.buffers[--this.buffers.length]
         : this.length;
       assert(!nodes[index]);
-      ++this[LENGTH];
+      ++this.LENGTH;
       this.index?.set(key, index);
       nodes[index] = {
         index,
@@ -116,7 +113,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
       assert(this.length === this.capacity);
       assert(this.buffers.length === 0);
       const node = nodes[head.prev]!;
-      const index = this.HEAD = this[CURSOR] = node.index;
+      const index = this.HEAD = this.CURSOR = node.index;
       //assert(nodes[index]);
       if (this.index && !equal(node.key, key)) {
         this.index.delete(node.key, node.index);
@@ -136,7 +133,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
   public put(key: K, value: V, index?: number): number {
     const node = this.search(key, index);
     if (!node) return this.add(key, value);
-    assert(this[CURSOR] === node.index);
+    assert(this.CURSOR === node.index);
     node.value = value;
     return node.index;
   }
@@ -146,16 +143,16 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     this.put(key, value, index);
     return this;
   }
-  private search(key: K, cursor = this[CURSOR]): Node<K, V> | undefined {
+  private search(key: K, cursor = this.CURSOR): Node<K, V> | undefined {
     const nodes = this.nodes;
     let node: Node<K, V> | undefined;
     node = nodes[cursor];
-    if (node && equal(node.key, key)) return this[CURSOR] = cursor, node;
+    if (node && equal(node.key, key)) return this.CURSOR = cursor, node;
     if (!this.index) throw new Error(`Spica: IxList: Invalid index.`);
     if (this.length === 0 || node && this.length === 1) return;
     node = nodes[cursor = this.index.get(key) ?? this.capacity];
     assert(!node || equal(node.key, key));
-    if (node) return this[CURSOR] = cursor, node;
+    if (node) return this.CURSOR = cursor, node;
   }
   public find(key: K, index?: number): ReadonlyNode<K, V> | undefined {
     if (!this.index) throw new Error(`Spica: IxList: No index.`);
@@ -168,15 +165,15 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     return this.find(key, index) !== undefined;
   }
   public del(key: K, index?: number): ReadonlyNode<K, V> | undefined {
-    const cursor = this[CURSOR];
+    const cursor = this.CURSOR;
     const node = this.search(key, index);
     if (!node) return;
-    this[CURSOR] = cursor;
+    this.CURSOR = cursor;
     assert(this.length > 0);
     //assert(this.length !== 1 || node === node.prev && node.prev === node.next);
     //assert(this.length !== 2 || node !== node.prev && node.prev === node.next);
     //assert(this.length < 3 || node !== node.prev && node.prev !== node.next);
-    --this[LENGTH];
+    --this.LENGTH;
     this.buffers[this.buffers.length++] = node.index;
     this.index?.delete(node.key, node.index);
     const nodes = this.nodes;
@@ -185,12 +182,12 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     if (this.HEAD === node.index) {
       this.HEAD = node.next;
     }
-    if (this[CURSOR] === node.index) {
-      this[CURSOR] = node.next;
+    if (this.CURSOR === node.index) {
+      this.CURSOR = node.next;
     }
     nodes[node.index] = undefined;
     //assert(this.length === 0 ? !this.nodes[this.HEAD] : this.nodes[this.HEAD]);
-    //assert(this.length === 0 ? !this.nodes[this[CURSOR]] : this.nodes[this[CURSOR]]);
+    //assert(this.length === 0 ? !this.nodes[this.CURSOR] : this.nodes[this.CURSOR]);
     //assert(this.length > 10 || [...this].length === this.length);
     return node;
   }
@@ -298,8 +295,3 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     return;
   }
 }
-assert(Object.defineProperty(IxList.prototype, 'cursor', {
-  get() {
-    return this[CURSOR];
-  },
-}));
