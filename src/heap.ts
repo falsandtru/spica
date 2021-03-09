@@ -1,46 +1,50 @@
 // Max heap
 
-const LENGTH = Symbol('length');
+const undefined = void 0;
+
+interface Array<T> {
+  [i: number]: [number, T];
+  length: number;
+}
 
 export class Heap<T> {
-  private array: [number, T][] = [];
-  private [LENGTH] = 0;
+  private array: Array<T> = { length: 0 };
   public get length(): number {
-    return this[LENGTH];
+    return this.array.length;
   }
   public insert(priority: number, value: T): void {
     const array = this.array;
-    this.length < array.length
-      ? array[this[LENGTH]] = [priority, value]
-      : array.push([priority, value]);
-    upHeapify(array, priority, ++this[LENGTH]);
+    array[array.length++] = [priority, value];
+    upHeapify(array, priority);
   }
   public extract(): T | undefined {
-    if (this.length === 0) return;
     const array = this.array;
+    if (array.length === 0) return;
     const value = array[0][1];
-    array[0] = array[this.length - 1];
+    array[0] = array[--array.length];
     // @ts-expect-error
-    array[this.length - 1] = void 0;
-    downHeapify(array, --this[LENGTH]);
+    array[array.length] = undefined;
+    downHeapify(array);
     return value;
   }
   public replace(priority: number, value: T): T | undefined {
-    if (this.length === 0) return void this.insert(priority, value);
     const array = this.array;
+    if (array.length === 0) return void this.insert(priority, value);
     const result = array[0][1];
     array[0] = [priority, value];
-    downHeapify(array, this.length);
+    downHeapify(array);
     return result;
   }
   public peek(): T | undefined {
-    return this.length === 0
-      ? void 0
-      : this.array[0][1];
+    const array = this.array;
+    return array.length === 0
+      ? undefined
+      : array[0][1];
   }
 }
 
-function upHeapify<T>(array: [number, T][], priority: number, index: number): void {
+function upHeapify<T>(array: Array<T>, priority: number): void {
+  let index = array.length;
   while (index > 1) {
     const parent = index / 2 | 0;
     if (array[parent - 1][0] >= priority) break;
@@ -49,7 +53,8 @@ function upHeapify<T>(array: [number, T][], priority: number, index: number): vo
   }
 }
 
-function downHeapify<T>(array: [number, T][], length: number): void {
+function downHeapify<T>(array: Array<T>): void {
+  const length = array.length;
   for (let index = 1; index < length;) {
     const left = index * 2;
     const right = index * 2 + 1;

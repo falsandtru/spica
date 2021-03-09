@@ -3,7 +3,7 @@ import { Heap } from './heap';
 describe('Unit: lib/heap', () => {
   describe('Heap', () => {
     function inspect<T>(heap: Heap<T>) {
-      return heap['array'];
+      return Array.from(heap['array']);
     }
 
     it('insert/extract', () => {
