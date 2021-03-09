@@ -78,7 +78,7 @@
     "npm-check-updates": "^11.2.0",
     "power-assert": "^1.6.1",
     "tsify": "^5.0.2",
-    "typescript": "4.3.0-dev.20210308",
+    "typescript": "4.3.0-dev.20210309",
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0",
     "yallist": "^4.0.0"
