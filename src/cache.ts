@@ -247,20 +247,17 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if ((LRU[0] + LFU[0]) % this.frequency) return;
     const window = capacity;
     const isCalculable = LRU[1] + LFU[1] > 0;
-    const rateR = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1]);
-    const rateF = rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1]) * indexes.LRU.length / indexes.LFU.length | 0;
-    const isLRUFilled = indexes.LRU.length >= capacity * (100 - ratio) / 100;
-    const isLFUFilled = indexes.LFU.length >= capacity * ratio / 100;
-    const step = 1;
-    if (isCalculable && ratio < 100 && isLFUFilled && rateF > rateR) {
-      //ratio % 10 || console.debug('+', this.ratio, LRU, LFU, Total);
-      this.ratio += step;
+    const rateR = +isCalculable && rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1]);
+    const rateF = +isCalculable && rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1]) * indexes.LRU.length / indexes.LFU.length | 0;
+    if (isCalculable && ratio < 100 && rateF > rateR && indexes.LFU.length >= capacity * ratio / 100) {
+      //ratio % 10 || console.debug('+', this.ratio, LRU, LFU);
+      ++this.ratio;
     }
     // LRUに収束させない
     else
-    if (isCalculable && ratio > 10 && isLRUFilled && rateR > rateF) {
-      //ratio % 10 || console.debug('-', this.ratio, LRU, LFU, Total);
-      this.ratio -= step;
+    if (isCalculable && ratio > 10 && rateR > rateF && indexes.LRU.length >= capacity * (100 - ratio) / 100) {
+      //ratio % 10 || console.debug('-', this.ratio, LRU, LFU);
+      --this.ratio;
     }
     if (LRU[0] + LFU[0] >= window) {
       this.stats = {
