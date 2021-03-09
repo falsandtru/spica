@@ -197,6 +197,13 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
   public delete(key: K, index?: number): boolean {
     return this.del(key, index) !== void 0;
   }
+  public insert(key: K, value: V, before: number): number {
+    const head = this.HEAD;
+    this.HEAD = before;
+    const index = this.add(key, value);
+    this.HEAD = head;
+    return index;
+  }
   public unshift(this: IxList<K, undefined>, key: K, value?: V): number;
   public unshift(key: K, value: V): number;
   public unshift(key: K, value: V): number {
@@ -216,13 +223,6 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     const nodes = this.nodes;
     const node = nodes[nodes[this.HEAD]!.prev];
     return node && this.del(node.key, node.index);
-  }
-  public insert(key: K, value: V, before: number): number {
-    const head = this.HEAD;
-    this.HEAD = before;
-    const index = this.add(key, value);
-    this.HEAD = head;
-    return index;
   }
   public move(index: number, before: number): boolean {
     if (index === before) return false;
