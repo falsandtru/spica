@@ -240,10 +240,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     LFU: tuple(0, 0),
   };
   private ratio = 50;
+  private readonly frequency = max(this.capacity / 100 | 0, 1);
   private slide(): void {
     const { LRU, LFU } = this.stats;
     const { capacity, ratio, indexes } = this;
-    if ((LRU[0] + LFU[0]) % max(capacity / 100 | 0, 1)) return;
+    if ((LRU[0] + LFU[0]) % this.frequency) return;
     const window = capacity;
     const isCalculable = LRU[1] + LFU[1] > 0;
     const rateR = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1]);
