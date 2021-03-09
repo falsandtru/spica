@@ -211,7 +211,9 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
   public push(this: IxList<K, undefined>, key: K, value?: V): number;
   public push(key: K, value: V): number;
   public push(key: K, value: V): number {
-    return this.HEAD = this.nodes[this.add(key, value)]!.next;
+    const index = this.add(key, value);
+    this.HEAD = this.nodes[index]!.next;
+    return index;
   }
   public pop(): ReadonlyNode<K, V> | undefined {
     assert(this.length === 0 ? !this.nodes[this.HEAD] : this.nodes[this.HEAD]);
