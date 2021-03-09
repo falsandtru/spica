@@ -92,7 +92,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
       const index = this.HEAD = this.CURSOR = this.buffers.length > 0
         ? this.buffers[--this.buffers.length]
         : this.length;
-      assert(!nodes[index]);
+      //assert(!nodes[index]);
       ++this.LENGTH;
       this.index?.set(key, index);
       nodes[index] = {
@@ -103,9 +103,9 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
         prev: head.prev,
       };
       head.prev = nodes[head.prev]!.next = index;
-      assert(this.length !== 1 || index === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
-      assert(this.length !== 2 || index !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
-      assert(this.length < 3 || index !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
+      //assert(this.length !== 1 || index === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
+      //assert(this.length !== 2 || index !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
+      //assert(this.length < 3 || index !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
       //assert(this.length > 10 || [...this].length === this.length);
       return index;
     }
