@@ -203,9 +203,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     return this.add(key, value);
   }
   public shift(): ReadonlyNode<K, V> | undefined {
-    assert(this.length === 0 ? !this.nodes[this.HEAD] : this.nodes[this.HEAD]);
     const node = this.nodes[this.HEAD];
-    assert(this.length === 0 ? !node : node);
     return node && this.del(node.key, node.index);
   }
   public push(this: IxList<K, undefined>, key: K, value?: V): number;
@@ -214,11 +212,9 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     return this.insert(key, value, this.HEAD);
   }
   public pop(): ReadonlyNode<K, V> | undefined {
-    assert(this.length === 0 ? !this.nodes[this.HEAD] : this.nodes[this.HEAD]);
     if (this.length === 0) return;
     const nodes = this.nodes;
     const node = nodes[nodes[this.HEAD]!.prev];
-    assert(this.length === 0 ? !node : node);
     return node && this.del(node.key, node.index);
   }
   public insert(key: K, value: V, before: number): number {
