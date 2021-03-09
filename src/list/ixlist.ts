@@ -3,6 +3,8 @@ import { equal } from '../compare';
 
 // Indexed circular linked list
 
+const undefined = void 0;
+
 interface Index<K, V> extends Collection<K, V> {
   delete(key: K, value?: V): boolean;
   clear(): void;
@@ -165,7 +167,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     return this.find(key, index)?.value;
   }
   public has(key: K, index?: number): boolean {
-    return this.find(key, index) !== void 0;
+    return this.find(key, index) !== undefined;
   }
   public del(key: K, index?: number): ReadonlyNode<K, V> | undefined {
     const cursor = this[CURSOR];
@@ -188,14 +190,14 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     if (this[CURSOR] === node.index) {
       this[CURSOR] = node.next;
     }
-    nodes[node.index] = void 0;
+    nodes[node.index] = undefined;
     //assert(this.length === 0 ? !this.nodes[this.HEAD] : this.nodes[this.HEAD]);
     //assert(this.length === 0 ? !this.nodes[this[CURSOR]] : this.nodes[this[CURSOR]]);
     //assert(this.length > 10 || [...this].length === this.length);
     return node;
   }
   public delete(key: K, index?: number): boolean {
-    return this.del(key, index) !== void 0;
+    return this.del(key, index) !== undefined;
   }
   public insert(key: K, value: V, before: number): number {
     const head = this.HEAD;
