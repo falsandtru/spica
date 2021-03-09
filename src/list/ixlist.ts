@@ -47,14 +47,12 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     return this.nodes[this.HEAD];
   }
   public get tail(): ReadonlyNode<K, V> | undefined {
-    if (this.length === 0) return;
-    const nodes = this.nodes;
-    return nodes[nodes[this.HEAD]!.next];
+    const head = this.head;
+    return head && this.nodes[head.next];
   }
   public get last(): ReadonlyNode<K, V> | undefined {
-    if (this.length === 0) return;
-    const nodes = this.nodes;
-    return nodes[nodes[this.HEAD]!.prev];
+    const head = this.head;
+    return head && this.nodes[head.prev];
   }
   public node(index: number): ReadonlyNode<K, V> | undefined {
     return this.nodes[index];
@@ -212,7 +210,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     return this.add(key, value);
   }
   public shift(): ReadonlyNode<K, V> | undefined {
-    const node = this.nodes[this.HEAD];
+    const node = this.head;
     return node && this.del(node.key, node.index);
   }
   public push(this: IxList<K, undefined>, key: K, value?: V): number;
@@ -221,9 +219,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     return this.insert(key, value, this.HEAD);
   }
   public pop(): ReadonlyNode<K, V> | undefined {
-    if (this.length === 0) return;
-    const nodes = this.nodes;
-    const node = nodes[nodes[this.HEAD]!.prev];
+    const node = this.last;
     return node && this.del(node.key, node.index);
   }
   public move(index: number, before: number): boolean {
