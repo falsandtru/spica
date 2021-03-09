@@ -223,7 +223,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     assert(this.length === 0 ? !node : node);
     return node && this.del(node.key, node.index);
   }
-  public insert(index: number, before: number): boolean {
+  public move(index: number, before: number): boolean {
     if (index === before) return false;
     const nodes = this.nodes;
     const a1 = nodes[index];
@@ -255,7 +255,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     if (index === this.HEAD) return false;
     const node = this.nodes[index];
     if (!node) return false;
-    this.insert(index, this.HEAD);
+    this.move(index, this.HEAD);
     this.HEAD = index;
     return true;
   }
@@ -264,7 +264,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     if (index === this.HEAD) return false;
     const node = this.nodes[index];
     if (!node) return false;
-    this.insert(node.index, node.prev);
+    this.move(node.index, node.prev);
     if (node.next === this.HEAD) {
       this.HEAD = node.index;
     }
@@ -279,8 +279,8 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     if (!node1 || !node2) return false;
     if (node1.next === node2.index) return this.moveToPrev(index2);
     if (node2.next === node1.index) return this.moveToPrev(index1);
-    this.insert(node2.index, node1.index);
-    this.insert(node1.index, node2.next);
+    this.move(node2.index, node1.index);
+    this.move(node1.index, node2.next);
     switch (this.HEAD) {
       case node1.index:
         this.HEAD = node2.index;
