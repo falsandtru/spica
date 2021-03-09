@@ -216,6 +216,44 @@ describe('Unit: lib/cache', () => {
         LFU: [],
         memory: [[2, 2], [3, 3]],
       });
+
+      cache.get(3);
+      assert(cache.length === 2);
+      assert(cache.size === 3);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [2],
+        LFU: [3],
+        memory: [[2, 2], [3, 3]],
+      });
+
+      cache.put(1, 1, 3);
+      assert(cache.length === 1);
+      assert(cache.size === 3);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [1],
+        LFU: [],
+        memory: [[1, 1]],
+      });
+
+      cache.put(1, 1);
+      cache.put(2, 2, 2);
+      cache.get(2);
+      assert(cache.length === 2);
+      assert(cache.size === 3);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [1],
+        LFU: [2],
+        memory: [[1, 1], [2, 2]],
+      });
+
+      cache.put(1, 1, 3);
+      assert(cache.length === 1);
+      assert(cache.size === 3);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [1],
+        LFU: [],
+        memory: [[1, 1]],
+      });
     });
 
     it('age', async () => {

@@ -111,12 +111,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     let restore: IxList<K, number> | undefined;
     while (this.length === this.capacity || this.space && this.size + margin > this.space) {
       const list = false
-        || LRU.length === 0
+        || LRU.length === +(restore === LRU)
         || LFU.length > this.capacity * this.ratio / 100
         || LFU.length > this.capacity / 2 && LFU.last!.value < this.clock - this.capacity * 8
         ? LFU
         : LRU;
-      if (list.length === 0) throw new Error(`Spica: Cache: Failed to secure the margin.`);
       const index = list.last!;
       assert(this.memory.has(index.key));
       if (miss ?? equal(index.key, key)) {
