@@ -122,7 +122,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         miss = false;
         assert(!restore);
         restore = list;
-        list.HEAD = index.index;
+        assert(restore.last!.index === index.index);
+        restore.HEAD = index.index;
         continue;
       }
       const record = this.memory.get(index.key)!;
