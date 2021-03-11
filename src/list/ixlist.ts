@@ -90,6 +90,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     }
     //assert(head);
     if (this.length !== this.capacity) {
+      assert(this.length < this.capacity);
       const index = this.HEAD = this.CURSOR = this.buffers.length > 0
         ? this.buffers.pop()!
         : this.length;
