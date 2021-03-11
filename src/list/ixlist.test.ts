@@ -428,7 +428,80 @@ describe('Unit: lib/ixlist', () => {
         cursor: 1,
         length: 1,
       });
+    });
 
+    it('swap', () => {
+      const list = new IxList<number, number>(4);
+
+      list.add(0, ~0);
+      list.add(1, ~1);
+      assert.deepStrictEqual(inspect(list), {
+        list: [
+          [1, ~1],
+          [0, ~0],
+        ],
+        nodes: [
+          [0, ~0, 0],
+          [1, ~1, 1],
+        ],
+        head: 1,
+        cursor: 1,
+        length: 2,
+      });
+
+      list.swap(0, 1);
+      assert.deepStrictEqual(inspect(list), {
+        list: [
+          [0, ~0],
+          [1, ~1],
+        ],
+        nodes: [
+          [0, ~0, 0],
+          [1, ~1, 1],
+        ],
+        head: 0,
+        cursor: 1,
+        length: 2,
+      });
+
+      list.add(2, ~2);
+      list.add(3, ~3);
+      assert.deepStrictEqual(inspect(list), {
+        list: [
+          [3, ~3],
+          [2, ~2],
+          [0, ~0],
+          [1, ~1],
+        ],
+        nodes: [
+          [0, ~0, 0],
+          [1, ~1, 1],
+          [2, ~2, 2],
+          [3, ~3, 3],
+        ],
+        head: 3,
+        cursor: 3,
+        length: 4,
+      });
+
+      list.swap(0, 3);
+      assert.deepStrictEqual(inspect(list), {
+        list: [
+          [0, ~0],
+          [2, ~2],
+          [3, ~3],
+          [1, ~1],
+        ],
+        nodes: [
+          [0, ~0, 0],
+          [1, ~1, 1],
+          [2, ~2, 2],
+          [3, ~3, 3],
+        ],
+        head: 0,
+        cursor: 3,
+        length: 4,
+      });
     });
 
   });

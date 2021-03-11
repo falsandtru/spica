@@ -273,10 +273,9 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     const node1 = nodes[index1];
     const node2 = nodes[index2];
     if (!node1 || !node2) return false;
-    if (node1.next === node2.index) return this.moveToPrev(index2);
-    if (node2.next === node1.index) return this.moveToPrev(index1);
+    const node3 = nodes[node2.next]!;
     this.move(node2.index, node1.index);
-    this.move(node1.index, node2.next);
+    this.move(node1.index, node3.index);
     switch (this.HEAD) {
       case node1.index:
         this.HEAD = node2.index;
