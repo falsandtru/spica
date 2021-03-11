@@ -156,14 +156,13 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     if (node) return this.CURSOR = cursor, node;
   }
   public find(key: K, index?: number): ReadonlyNode<K, V> | undefined {
-    if (!this.index) throw new Error(`Spica: IxList: No index.`);
     return this.search(key, index);
   }
   public get(key: K, index?: number): V | undefined {
-    return this.find(key, index)?.value;
+    return this.search(key, index)?.value;
   }
   public has(key: K, index?: number): boolean {
-    return this.find(key, index) !== undefined;
+    return this.search(key, index) !== undefined;
   }
   public del(key: K, index?: number): ReadonlyNode<K, V> | undefined {
     const cursor = this.CURSOR;
