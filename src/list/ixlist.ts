@@ -3,7 +3,7 @@ import { Collection, IterableCollection } from '../collection';
 import { Stack } from '../stack';
 import { equal } from '../compare';
 
-// Indexed circular linked list
+// Circular indexed list
 
 const undefined = void 0;
 
