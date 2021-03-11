@@ -89,7 +89,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
       return index;
     }
     //assert(head);
-    if (this.length < this.capacity) {
+    if (this.length !== this.capacity) {
       const index = this.HEAD = this.CURSOR = this.buffers.length > 0
         ? this.buffers.pop()!
         : this.length;
@@ -248,7 +248,6 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     return true;
   }
   public moveToHead(index: number): boolean {
-    if (this.length <= 1) return false;
     if (index === this.HEAD) return false;
     const node = this.nodes[index];
     if (!node) return false;
@@ -257,7 +256,6 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     return true;
   }
   public moveToPrev(index: number): boolean {
-    if (this.length <= 1) return false;
     if (index === this.HEAD) return false;
     const node = this.nodes[index];
     if (!node) return false;
@@ -268,7 +266,6 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     return true;
   }
   public swap(index1: number, index2: number): boolean {
-    if (this.length <= 1) return false;
     if (index1 === index2) return false;
     const nodes = this.nodes;
     const node1 = nodes[index1];
