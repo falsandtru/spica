@@ -248,18 +248,12 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     assert(this.length > 10 || [...this].length === this.length);
     return true;
   }
-  public moveToHead(index: number): boolean {
-    if (index === this.HEAD) return false;
-    const node = this.nodes[index];
-    if (!node) return false;
+  public moveToHead(index: number): void {
     this.move(index, this.HEAD);
     this.HEAD = index;
-    return true;
   }
-  public moveToLast(index: number): boolean {
-    if (!this.moveToHead(index)) return false;
-    this.HEAD = this.nodes[index!]!.next;
-    return true;
+  public moveToLast(index: number): void {
+    this.move(index, this.HEAD);
   }
   public swap(index1: number, index2: number): boolean {
     if (index1 === index2) return false;
