@@ -199,7 +199,9 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     const head = this.HEAD;
     this.HEAD = before;
     const index = this.add(key, value);
-    this.HEAD = head;
+    if (this.length !== 1) {
+      this.HEAD = head;
+    }
     return index;
   }
   public unshift(this: IxList<K, undefined>, key: K, value?: V): number;

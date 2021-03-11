@@ -299,6 +299,53 @@ describe('Unit: lib/ixlist', () => {
       });
     });
 
+    it('insert', () => {
+      const list = new IxList<number, number>(2);
+
+      assert(list.insert(0, ~0, 0) === 0);
+      assert.deepStrictEqual(inspect(list), {
+        list: [
+          [0, ~0],
+        ],
+        nodes: [
+          [0, ~0, 0],
+        ],
+        head: 0,
+        cursor: 0,
+        length: 1,
+      });
+
+      assert(list.insert(1, ~1, 0) === 1);
+      assert.deepStrictEqual(inspect(list), {
+        list: [
+          [0, ~0],
+          [1, ~1],
+        ],
+        nodes: [
+          [0, ~0, 0],
+          [1, ~1, 1],
+        ],
+        head: 0,
+        cursor: 1,
+        length: 2,
+      });
+
+      assert(list.insert(2, ~2, 0) === 1);
+      assert.deepStrictEqual(inspect(list), {
+        list: [
+          [0, ~0],
+          [2, ~2],
+        ],
+        nodes: [
+          [0, ~0, 0],
+          [2, ~2, 1],
+        ],
+        head: 0,
+        cursor: 1,
+        length: 2,
+      });
+    });
+
     it('update', () => {
       const list = new IxList<number, number>(3, new Map());
 
