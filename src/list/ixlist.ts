@@ -150,7 +150,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     node = nodes[cursor];
     if (node && equal(node.key, key)) return this.CURSOR = cursor, node;
     if (!this.index) throw new Error(`Spica: IxList: Invalid index.`);
-    if (this.length === 0 || node && this.length === 1) return;
+    if (node ? this.length === 1 : this.length === 0) return;
     node = nodes[cursor = this.index.get(key) ?? this.capacity];
     assert(!node || equal(node.key, key));
     if (node) return this.CURSOR = cursor, node;
