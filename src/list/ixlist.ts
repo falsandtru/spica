@@ -29,7 +29,7 @@ interface ReadonlyNode<K, V> {
 
 export class IxList<K, V = undefined> implements IterableCollection<K, V> {
   constructor(
-    private readonly capacity: number = Number.MAX_SAFE_INTEGER,
+    public readonly capacity: number = Number.MAX_SAFE_INTEGER,
     private readonly index?: Index<K, number>,
   ) {
     assert(capacity > 0);
