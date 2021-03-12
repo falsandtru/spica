@@ -13,7 +13,7 @@ export class Stack<T> {
   }
   public pop(): T | undefined {
     const mem = this.memory;
-    if (mem.length === 0) return undefined;
+    if (mem.length === 0) return;
     const value = mem[--mem.length];
     mem[mem.length] = undefined;
     return value;
