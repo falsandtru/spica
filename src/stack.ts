@@ -1,24 +1,30 @@
 import type { List } from './list/list';
 
 // Note: Generally much slower than arrays.
-// Note: Slower than associative arrays a little...
 
 const undefined = void 0;
 
 export class Stack<T> {
-  private list: List<T> = undefined;
+  private list: List<T[]> = undefined;
   public length = 0;
   public push(value: T): void {
-    this.list = [value, this.list];
+    const node = this.list;
+    const values = node?.[0];
     ++this.length;
+    !values || values.length === 100
+      ? this.list = [[value], node]
+      : values.push(value);
   }
   public pop(): T | undefined {
     const node = this.list;
     if (node === undefined) return;
-    const value = node[0];
+    const values = node[0];
+    //assert(values.length > 0);
+    --this.length;
+    if (values.length !== 1) return values.pop();
+    const value = values[0];
     this.list = node[1];
     node[1] = undefined;
-    --this.length;
     return value;
   }
   public clear(): void {
@@ -28,7 +34,7 @@ export class Stack<T> {
     return this.list === undefined;
   }
   public peek(): T | undefined {
-    return this.list?.[0];
+    return this.list?.[0][0];
   }
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
     while (!this.isEmpty()) {

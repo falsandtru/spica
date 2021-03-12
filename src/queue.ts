@@ -4,42 +4,41 @@ import type { Node } from './list/list';
 
 const undefined = void 0;
 
-const sentinel = [] as unknown;
-
 export class Queue<T> {
   constructor() {
-    const node: Node<T> = [sentinel as T, undefined];
+    const node: Node<T[]> = [[], undefined];
     this.edges = [node, node];
   }
-  private readonly edges: [Node<T>, Node<T>];
+  private readonly edges: [Node<T[]>, Node<T[]>];
   public length = 0;
   public enqueue(value: T): void {
     const edges = this.edges;
     const node = edges[1];
-    node[0] = value;
-    edges[1] = node[1] = [sentinel as T, undefined];
     ++this.length;
+    node[0].push(value);
+    if (node[0].length === 100) {
+      edges[1] = node[1] = [[], undefined];
+    }
   }
   public dequeue(): T | undefined {
     const edges = this.edges;
     const node = edges[0];
-    const value = node[0];
-    if (value === sentinel) return;
-    edges[0] = node[1]!;
-    node[1] = undefined;
+    const values = node[0];
+    if (values.length === 0) return;
     --this.length;
-    return value;
+    if (!node[1] || values.length !== 1) return values.shift();
+    edges[0] = node[1];
+    node[1] = undefined;
+    return values[0];
   }
   public clear(): void {
-    this.edges[0] = this.edges[1];
+    this.edges[0] = this.edges[1] = [[], undefined];
   }
   public isEmpty(): boolean {
-    return this.edges[0][0] === sentinel;
+    return this.edges[0][0].length === 0;
   }
   public peek(): T | undefined {
-    const value = this.edges[0][0];
-    if (value === sentinel) return;
-    return value;
+    return this.edges[0][0][0];
   }
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
     while (!this.isEmpty()) {
