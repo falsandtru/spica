@@ -1,36 +1,37 @@
+import type { List } from './list/list';
+
+// Note: Generally much slower than arrays.
+// Note: Slower than associative arrays a little...
+
 const undefined = void 0;
 
-interface Memory<T> {
-  [i: number]: T | undefined;
-  length: number;
-}
-
 export class Stack<T> {
-  private memory: Memory<T> = { length: 0 };
+  private list: List<T> = undefined;
+  public length = 0;
   public push(value: T): void {
-    const mem = this.memory;
-    mem[mem.length++] = value;
+    this.list = [value, this.list];
+    ++this.length;
   }
   public pop(): T | undefined {
-    const mem = this.memory;
-    if (mem.length === 0) return;
-    const value = mem[--mem.length];
-    mem[mem.length] = undefined;
+    const node = this.list;
+    if (node === undefined) return;
+    const value = node[0];
+    this.list = node[1];
+    node[1] = undefined;
+    --this.length;
     return value;
   }
   public clear(): void {
-    this.memory = { length: 0 };
+    this.list = undefined;
   }
-  public get length(): number {
-    return this.memory.length;
+  public isEmpty(): boolean {
+    return this.list === undefined;
   }
   public peek(): T | undefined {
-    const mem = this.memory;
-    return mem[mem.length - 1];
+    return this.list?.[0];
   }
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
-    const mem = this.memory;
-    while (mem.length !== 0) {
+    while (!this.isEmpty()) {
       yield this.pop()!;
     }
     return;

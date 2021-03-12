@@ -1,12 +1,14 @@
 import type { Node } from './list/list';
 
+// Note: Generally much slower than arrays.
+
 const undefined = void 0;
 
 const sentinel = [] as unknown;
 
 export class Queue<T> {
   constructor() {
-    const node = [sentinel, undefined] as Node<T>;
+    const node: Node<T> = [sentinel as T, undefined];
     this.edges = [node, node];
   }
   private readonly edges: [Node<T>, Node<T>];
@@ -15,7 +17,7 @@ export class Queue<T> {
     const edges = this.edges;
     const node = edges[1];
     node[0] = value;
-    edges[1] = node[1] = [sentinel, undefined] as Node<T>;
+    edges[1] = node[1] = [sentinel as T, undefined];
     ++this.length;
   }
   public dequeue(): T | undefined {
