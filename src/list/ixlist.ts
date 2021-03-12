@@ -119,7 +119,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
       const index = this.HEAD = this.CURSOR = node.index;
       //assert(nodes[index]);
       if (this.index && !equal(node.key, key)) {
-        this.index.delete(node.key, node.index);
+        this.index.delete(node.key, index);
         this.index.set(key, index);
       }
       node.key = key;
