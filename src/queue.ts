@@ -10,11 +10,13 @@ export class Queue<T> {
     this.edges = [node, node];
   }
   private readonly edges: [Node<T>, Node<T>];
+  public length = 0;
   public enqueue(value: T): void {
     const edges = this.edges;
     const node = edges[1];
     node[0] = value;
     edges[1] = node[1] = [sentinel, undefined] as Node<T>;
+    ++this.length;
   }
   public dequeue(): T | undefined {
     const edges = this.edges;
@@ -23,6 +25,7 @@ export class Queue<T> {
     if (value === sentinel) return;
     edges[0] = node[1]!;
     node[1] = undefined;
+    --this.length;
     return value;
   }
   public clear(): void {
