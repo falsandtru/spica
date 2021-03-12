@@ -164,6 +164,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     assert(!this.memory.has(key));
 
     const { LRU } = this.indexes;
+    assert(LRU.length !== LRU.capacity);
     this.space && (this.SIZE += size);
     assert(0 <= this.size && this.size <= this.space);
     this.memory.set(key, {
@@ -283,6 +284,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       return true;
     }
     LRU.del(key, index);
+    assert(LFU.length !== LFU.capacity);
     record.target = 'LFU';
     record.index = LFU.add(key, this.clock);
     return true;
