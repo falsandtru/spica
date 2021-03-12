@@ -6,7 +6,7 @@ const sentinel = [] as unknown;
 
 export class Queue<T> {
   constructor() {
-    const node = [sentinel] as Node<T>;
+    const node = [sentinel, undefined] as Node<T>;
     this.edges = [node, node];
   }
   private readonly edges: [Node<T>, Node<T>];
@@ -14,7 +14,7 @@ export class Queue<T> {
     const edges = this.edges;
     const node = edges[1];
     node[0] = value;
-    edges[1] = node[1] = [sentinel] as Node<T>;
+    edges[1] = node[1] = [sentinel, undefined] as Node<T>;
   }
   public dequeue(): T | undefined {
     const edges = this.edges;
