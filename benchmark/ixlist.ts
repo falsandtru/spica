@@ -23,14 +23,54 @@ describe('Benchmark:', function () {
         const cap = length;
         const list = new Yallist();
         let i = 0;
-        benchmark(`Yalist add ${length.toLocaleString('en')}`, () => ++i > cap ? void list.pop() || list.unshift(i) : list.unshift(i), done);
+        benchmark(`Yalist add ${length.toLocaleString('en')}`, () => {
+          if (++i > cap) {
+            list.pop();
+            list.unshift(i);
+          }
+          else {
+            list.unshift(i);
+          }
+        }, done);
       });
 
-      it(`IxList add ${length.toLocaleString('en')}`, function (done) {
+      it(`IxList add ${length.toLocaleString('en')} by pop and unshift`, function (done) {
+        const cap = length;
+        const list = new IxList();
+        let i = 0;
+        benchmark(`IxList add ${length.toLocaleString('en')} by pop and unshift`, () => {
+          if (++i > cap) {
+            list.pop();
+            list.unshift(i);
+          }
+          else {
+            list.unshift(i);
+          }
+        }, done);
+      });
+
+      it(`IxList add ${length.toLocaleString('en')} by rotate and replace`, function (done) {
+        const cap = length;
+        const list = new IxList();
+        let i = 0;
+        benchmark(`IxList add ${length.toLocaleString('en')} by rotate and replace`, () => {
+          if (++i > cap) {
+            list.rotateToPrev();
+            list.replace(list.HEAD, i);
+          }
+          else {
+            list.unshift(i);
+          }
+        }, done);
+      });
+
+      it(`IxList add ${length.toLocaleString('en')} with constraint`, function (done) {
         const cap = length;
         const list = new IxList(cap);
         let i = 0;
-        benchmark(`IxList add ${length.toLocaleString('en')}`, () => list.add(++i), done);
+        benchmark(`IxList add ${length.toLocaleString('en')} with constraint`, () => {
+          list.unshift(i);
+        }, done);
       });
     }
 

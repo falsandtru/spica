@@ -56,6 +56,12 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
   public node(index: number): ReadonlyNode<K, V> | undefined {
     return this.nodes[index];
   }
+  public rotateToNext(): number {
+    return this.HEAD = this.tail?.index ?? this.HEAD;
+  }
+  public rotateToPrev(): number {
+    return this.HEAD = this.last?.index ?? this.HEAD;
+  }
   public clear(): void {
     this.nodes = {};
     this.buffers.clear();
@@ -222,6 +228,26 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
   public pop(): ReadonlyNode<K, V> | undefined {
     const node = this.last;
     return node && this.del(node.key, node.index);
+  }
+  public replace(this: IxList<K, undefined>, index: number, key: K, value?: V): ReadonlyNode<K, V> | undefined;
+  public replace(index: number, key: K, value: V): ReadonlyNode<K, V> | undefined;
+  public replace(index: number, key: K, value: V): ReadonlyNode<K, V> | undefined {
+    const node = this.nodes[index];
+    if (!node) return;
+    if (this.index && !equal(node.key, key)) {
+      this.index.delete(node.key, index);
+      this.index.set(key, index);
+    }
+    const clone = {
+      index: node.index,
+      key: node.key,
+      value: node.value,
+      next: node.next,
+      prev: node.prev,
+    };
+    node.key = key;
+    node.value = value;
+    return clone;
   }
   public move(index: number, before: number): boolean {
     if (index === before) return false;

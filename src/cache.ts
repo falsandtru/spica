@@ -122,16 +122,14 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         assert(!restore);
         restore = list;
         assert(restore.last!.index === index.index);
-        restore.HEAD = index.index;
+        restore.rotateToPrev();
         continue;
       }
       const record = this.memory.get(index.key)!;
       this.dispose(index.key, record, void 0);
       this.settings.disposer && this.stack.push({ key: index.key, value: record.value });
     }
-    if (restore && restore.length > 0) {
-      restore.HEAD = restore.tail!.index;
-    }
+    restore?.rotateToNext();
   }
   public put(this: Cache<K, undefined>, key: K, value?: V, size?: number, age?: number): boolean;
   public put(key: K, value: V, size?: number, age?: number): boolean;
