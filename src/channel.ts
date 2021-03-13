@@ -30,8 +30,8 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
         .then(finalizer);
     }
   }
-  public put(this: Channel<undefined>, msg?: T): AtomicPromise<undefined>;
   public put(msg: T): AtomicPromise<undefined>;
+  public put(this: Channel<undefined>, msg?: T): AtomicPromise<undefined>;
   public put(msg: T): AtomicPromise<undefined> {
     if (!this.alive) return fail();
     const { capacity, buffer, producers, consumers } = this[internal];

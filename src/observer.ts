@@ -16,10 +16,10 @@ export interface ObserverOptions {
   once?: boolean;
 }
 export interface Publisher<N extends readonly unknown[], D, R> {
-  emit(this: Publisher<N, undefined, R>, namespace: Readonly<N>, data?: D, tracker?: (data: D, results: R[]) => void): void;
   emit(namespace: Readonly<N>, data: D, tracker?: (data: D, results: R[]) => void): void;
-  reflect(this: Publisher<N, undefined, R>, namespace: Readonly<N | Inits<N>>, data?: D): R[];
+  emit(this: Publisher<N, undefined, R>, namespace: Readonly<N>, data?: D, tracker?: (data: D, results: R[]) => void): void;
   reflect(namespace: Readonly<N | Inits<N>>, data: D): R[];
+  reflect(this: Publisher<N, undefined, R>, namespace: Readonly<N | Inits<N>>, data?: D): R[];
 }
 export type Monitor<N extends readonly unknown[], D> = (data: D, namespace: Readonly<N | Inits<N>>) => void;
 export type Subscriber<N extends readonly unknown[], D, R> = (data: D, namespace: Readonly<N | Inits<N>>) => R;
@@ -131,13 +131,13 @@ export class Observation<N extends readonly unknown[], D, R>
         return void clear(node);
     }
   }
-  public emit(this: Publisher<N, void, R>, namespace: Readonly<N>, data?: D, tracker?: (data: D, results: R[]) => void): void
   public emit(namespace: Readonly<N>, data: D, tracker?: (data: D, results: R[]) => void): void
+  public emit(this: Publisher<N, void, R>, namespace: Readonly<N>, data?: D, tracker?: (data: D, results: R[]) => void): void
   public emit(namespace: Readonly<N>, data: D, tracker?: (data: D, results: R[]) => void): void {
     this.drain(namespace, data, tracker);
   }
-  public reflect(this: Publisher<N, void, R>, namespace: Readonly<N | Inits<N>>, data?: D): R[]
   public reflect(namespace: Readonly<N | Inits<N>>, data: D): R[]
+  public reflect(this: Publisher<N, void, R>, namespace: Readonly<N | Inits<N>>, data?: D): R[]
   public reflect(namespace: Readonly<N | Inits<N>>, data: D): R[] {
     let results!: R[];
     this.emit(namespace as N, data, (_, r) => results = r);

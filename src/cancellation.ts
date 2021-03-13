@@ -8,8 +8,8 @@ import { Either, Left, Right } from './either';
 
 export interface Canceller<L = undefined> {
   readonly cancel: {
-    (this: Canceller<undefined>, reason?: L): void;
     (reason: L): void;
+    (this: Canceller<undefined>, reason?: L): void;
   };
   readonly close: (reason?: unknown) => void;
 }

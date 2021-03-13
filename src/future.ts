@@ -19,8 +19,8 @@ export class Future<T = undefined> implements Promise<T> {
   }
   public readonly [internal]: Internal<T> = new Internal();
   public readonly bind: {
-    (this: Future<undefined>, value?: T | PromiseLike<T>): Future<T>;
     (value: T | PromiseLike<T>): Future<T>;
+    (this: Future<undefined>, value?: T | PromiseLike<T>): Future<T>;
   };
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): Promise<TResult1 | TResult2> {
     return new ESPromise((resolve, reject) =>
@@ -50,8 +50,8 @@ export class AtomicFuture<T = undefined> implements Future<T> {
   }
   public readonly [internal]: Internal<T> = new Internal();
   public readonly bind: {
-    (this: AtomicFuture<undefined>, value?: T | PromiseLike<T>): AtomicFuture<T>;
     (value: T | PromiseLike<T>): AtomicFuture<T>;
+    (this: AtomicFuture<undefined>, value?: T | PromiseLike<T>): AtomicFuture<T>;
   };
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
     return new AtomicPromise((resolve, reject) =>

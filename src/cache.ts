@@ -131,8 +131,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     }
     restore?.rotateToNext();
   }
-  public put(this: Cache<K, undefined>, key: K, value?: V, size?: number, age?: number): boolean;
   public put(key: K, value: V, size?: number, age?: number): boolean;
+  public put(this: Cache<K, undefined>, key: K, value?: V, size?: number, age?: number): boolean;
   public put(key: K, value: V, size: number = 1, age: number = this.settings.age!): boolean {
     if (size < 1) throw new Error(`Spica: Cache: Size must be 1 or more.`);
     if (age < 1) throw new Error(`Spica: Cache: Age must be 1 or more.`);
@@ -176,8 +176,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     assert(this.stack.length === 0);
     return false;
   }
-  public set(this: Cache<K, undefined>, key: K, value?: V, size?: number, age?: number): this;
   public set(key: K, value: V, size?: number, age?: number): this;
+  public set(this: Cache<K, undefined>, key: K, value?: V, size?: number, age?: number): this;
   public set(key: K, value: V, size?: number, age?: number): this {
     this.put(key, value, size, age);
     return this;

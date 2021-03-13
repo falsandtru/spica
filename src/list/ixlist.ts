@@ -70,8 +70,8 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     this.CURSOR = 0;
     this.LENGTH = 0;
   }
-  public add(this: IxList<K, undefined>, key: K, value?: V): number;
   public add(key: K, value: V): number;
+  public add(this: IxList<K, undefined>, key: K, value?: V): number;
   public add(key: K, value: V): number {
     const nodes = this.nodes;
     const head = nodes[this.HEAD];
@@ -137,8 +137,8 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
       return index;
     }
   }
-  public put(this: IxList<K, undefined>, key: K, value?: V, index?: number): number;
   public put(key: K, value: V, index?: number): number;
+  public put(this: IxList<K, undefined>, key: K, value?: V, index?: number): number;
   public put(key: K, value: V, index?: number): number {
     const node = this.search(key, index);
     if (!node) return this.add(key, value);
@@ -146,8 +146,8 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     node.value = value;
     return node.index;
   }
-  public set(this: IxList<K, undefined>, key: K, value?: V, index?: number): this;
   public set(key: K, value: V, index?: number): this;
+  public set(this: IxList<K, undefined>, key: K, value?: V, index?: number): this;
   public set(key: K, value: V, index?: number): this {
     this.put(key, value, index);
     return this;
@@ -211,8 +211,8 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     }
     return index;
   }
-  public unshift(this: IxList<K, undefined>, key: K, value?: V): number;
   public unshift(key: K, value: V): number;
+  public unshift(this: IxList<K, undefined>, key: K, value?: V): number;
   public unshift(key: K, value: V): number {
     return this.add(key, value);
   }
@@ -220,8 +220,8 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     const node = this.head;
     return node && this.del(node.key, node.index);
   }
-  public push(this: IxList<K, undefined>, key: K, value?: V): number;
   public push(key: K, value: V): number;
+  public push(this: IxList<K, undefined>, key: K, value?: V): number;
   public push(key: K, value: V): number {
     return this.insert(key, value, this.HEAD);
   }
@@ -229,8 +229,8 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     const node = this.last;
     return node && this.del(node.key, node.index);
   }
-  public replace(this: IxList<K, undefined>, index: number, key: K, value?: V): ReadonlyNode<K, V> | undefined;
   public replace(index: number, key: K, value: V): ReadonlyNode<K, V> | undefined;
+  public replace(this: IxList<K, undefined>, index: number, key: K, value?: V): ReadonlyNode<K, V> | undefined;
   public replace(index: number, key: K, value: V): ReadonlyNode<K, V> | undefined {
     const node = this.nodes[index];
     if (!node) return;
