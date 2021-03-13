@@ -96,11 +96,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       disposer!(value, key);
     }
   }
-  private dispose(key: K, { target, index, value, size }: Record<V>, disposer: CacheOptions<K, V>['disposer']): void {
+  private dispose(key: K, { target, index, value, size }: Record<V>, callback: boolean): void {
     this.indexes[target].del(key, index);
     this.memory.delete(key);
     this.space && (this.SIZE -= size);
-    disposer?.(value, key);
+    callback && this.settings.disposer?.(value, key);
   }
   private secure(margin: number, key?: K): void {
     assert(!this.space || margin <= this.space);
@@ -126,7 +126,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         continue;
       }
       const record = this.memory.get(index.key)!;
-      this.dispose(index.key, record, void 0);
+      this.dispose(index.key, record, false);
       this.settings.disposer && this.stack.push({ key: index.key, value: record.value });
     }
     restore?.rotateToNext();
@@ -186,7 +186,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const record = this.memory.get(key);
     if (!record) return;
     if (record.expiry !== Infinity && record.expiry <= now()) {
-      this.dispose(key, record, this.settings.disposer);
+      this.dispose(key, record, true);
       return;
     }
     this.access(key, record);
@@ -199,7 +199,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const record = this.memory.get(key);
     if (!record) return false;
     if (record.expiry !== Infinity && record.expiry <= now()) {
-      this.dispose(key, record, this.settings.disposer);
+      this.dispose(key, record, true);
       return false;
     }
     return true;
@@ -207,7 +207,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public delete(key: K): boolean {
     const record = this.memory.get(key);
     if (!record) return false;
-    this.dispose(key, record, this.settings.capture!.delete ? this.settings.disposer : void 0);
+    this.dispose(key, record, this.settings.capture!.delete === true);
     return true;
   }
   public clear(): void {
