@@ -40,7 +40,7 @@ interface Record<V> {
   value: V;
   size: number;
   expiry: number;
-};
+}
 
 export interface CacheOptions<K, V = undefined> {
   readonly space?: number;
