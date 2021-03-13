@@ -116,6 +116,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         || LRU.length === +(restore === LRU)
         || LFU.length > this.capacity * this.ratio / 100
         || LFU.length > this.capacity / 2 && LFU.last!.value.clock < this.clock - this.capacity * 8
+        || LFU.last && LFU.last.value.expiry < now()
         ? LFU
         : LRU;
       const index = list.last!.value;

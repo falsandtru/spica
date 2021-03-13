@@ -4,9 +4,15 @@ import { AtomicPromise } from './promise';
 import { causeAsyncException } from './exception';
 
 let now_: number | undefined;
+let count = 0;
 export function now(): number {
-  if (now_ !== void 0) return now_;
-  tick(() => now_ = void 0);
+  if (now_ === void 0) {
+    tick(() => now_ = void 0);
+  }
+  else {
+    if (++count !== 100) return now_;
+    count = 0;
+  }
   return now_ = Date.now();
 }
 
