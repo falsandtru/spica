@@ -12,14 +12,14 @@ interface Index<K, V> extends Collection<K, V> {
   clear(): void;
 }
 
-interface Node<K, V> {
+interface InternalNode<K, V> {
   readonly index: number;
   key: K;
   value: V;
   next: number;
   prev: number;
 }
-interface ReadonlyNode<K, V> {
+interface Node<K, V> {
   readonly index: number;
   readonly key: K;
   readonly value: V;
@@ -34,7 +34,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
   ) {
     assert(capacity > 0);
   }
-  private nodes: Record<number, Node<K, V> | undefined> = {};
+  private nodes: Record<number, InternalNode<K, V> | undefined> = {};
   private readonly buffers = new Stack<number>();
   public HEAD = 0;
   private CURSOR = 0;
@@ -42,18 +42,18 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
   public get length() {
     return this.LENGTH;
   }
-  public get head(): ReadonlyNode<K, V> | undefined {
+  public get head(): Node<K, V> | undefined {
     return this.nodes[this.HEAD];
   }
-  public get tail(): ReadonlyNode<K, V> | undefined {
+  public get tail(): Node<K, V> | undefined {
     const head = this.head;
     return head && this.nodes[head.next];
   }
-  public get last(): ReadonlyNode<K, V> | undefined {
+  public get last(): Node<K, V> | undefined {
     const head = this.head;
     return head && this.nodes[head.prev];
   }
-  public node(index: number): ReadonlyNode<K, V> | undefined {
+  public node(index: number): Node<K, V> | undefined {
     return this.nodes[index];
   }
   public rotateToNext(): number {
@@ -152,9 +152,9 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     this.put(key, value, index);
     return this;
   }
-  private search(key: K, cursor = this.CURSOR): Node<K, V> | undefined {
+  private search(key: K, cursor = this.CURSOR): InternalNode<K, V> | undefined {
     const nodes = this.nodes;
-    let node: Node<K, V> | undefined;
+    let node: InternalNode<K, V> | undefined;
     node = nodes[cursor];
     if (node && equal(node.key, key)) return this.CURSOR = cursor, node;
     if (!this.index) throw new Error(`Spica: IxList: Invalid index.`);
@@ -163,7 +163,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
     assert(!node || equal(node.key, key));
     if (node) return this.CURSOR = cursor, node;
   }
-  public find(key: K, index?: number): ReadonlyNode<K, V> | undefined {
+  public find(key: K, index?: number): Node<K, V> | undefined {
     return this.search(key, index);
   }
   public get(key: K, index?: number): V | undefined {
@@ -172,7 +172,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
   public has(key: K, index?: number): boolean {
     return this.search(key, index) !== undefined;
   }
-  public del(key: K, index?: number): ReadonlyNode<K, V> | undefined {
+  public del(key: K, index?: number): Node<K, V> | undefined {
     const cursor = this.CURSOR;
     const node = this.search(key, index);
     if (!node) return;
@@ -216,7 +216,7 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
   public unshift(key: K, value: V): number {
     return this.add(key, value);
   }
-  public shift(): ReadonlyNode<K, V> | undefined {
+  public shift(): Node<K, V> | undefined {
     const node = this.head;
     return node && this.del(node.key, node.index);
   }
@@ -225,13 +225,13 @@ export class IxList<K, V = undefined> implements IterableCollection<K, V> {
   public push(key: K, value: V): number {
     return this.insert(key, value, this.HEAD);
   }
-  public pop(): ReadonlyNode<K, V> | undefined {
+  public pop(): Node<K, V> | undefined {
     const node = this.last;
     return node && this.del(node.key, node.index);
   }
-  public replace(index: number, key: K, value: V): ReadonlyNode<K, V> | undefined;
-  public replace(this: IxList<K, undefined>, index: number, key: K, value?: V): ReadonlyNode<K, V> | undefined;
-  public replace(index: number, key: K, value: V): ReadonlyNode<K, V> | undefined {
+  public replace(index: number, key: K, value: V): Node<K, V> | undefined;
+  public replace(this: IxList<K, undefined>, index: number, key: K, value?: V): Node<K, V> | undefined;
+  public replace(index: number, key: K, value: V): Node<K, V> | undefined {
     const node = this.nodes[index];
     if (!node) return;
     if (this.index && !equal(node.key, key)) {
