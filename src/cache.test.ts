@@ -6,8 +6,8 @@ describe('Unit: lib/cache', () => {
   describe('Cache', () => {
     function inspect<K, V>(cache: Cache<K, V>) {
       return {
-        LRU: [...cache['indexes'].LRU].map(([k]) => k),
-        LFU: [...cache['indexes'].LFU].map(([k]) => k),
+        LRU: [...cache['indexes'].LRU].map(i => i.key),
+        LFU: [...cache['indexes'].LFU].map(i => i.key),
         memory: [...cache['memory']].map(([key, { value }]) => [key, value]),
       };
     }

@@ -2,7 +2,7 @@ import { Infinity, Map } from './global';
 import { max, min } from './alias';
 import { now } from './clock';
 import { IterableCollection } from './collection';
-import { IxList } from './ixlist';
+import { IvList, Node } from './ivlist';
 import { Stack } from './stack';
 import { extend } from './assign';
 import { tuple } from './tuple';
@@ -34,12 +34,15 @@ JavaScriptにおける需要を満たさない懸念がある。
 
 */
 
-interface Record<V> {
-  target: 'LRU' | 'LFU';
-  index: number;
+interface Index<K> {
+  key: K;
+  clock: number;
+  expiry: number;
+}
+interface Record<K, V> {
+  index: Node<Index<K>>;
   value: V;
   size: number;
-  expiry: number;
 }
 
 export interface CacheOptions<K, V = undefined> {
@@ -74,10 +77,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   // 1041 days < 2 ** 53 / 100,000,000 / 3600 / 24.
   private clock = 0;
   private clockR = 0;
-  private memory = new Map<K, Record<V>>();
+  private memory = new Map<K, Record<K, V>>();
   private readonly indexes = {
-    LRU: new IxList<K, number>(this.capacity),
-    LFU: new IxList<K, number>(this.capacity),
+    LRU: new IvList<Index<K>>(),
+    LFU: new IvList<Index<K>>(),
   } as const;
   public get length(): number {
     //assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
@@ -96,8 +99,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       disposer!(value, key);
     }
   }
-  private dispose(key: K, { target, index, value, size }: Record<V>, callback: boolean): void {
-    this.indexes[target].del(key, index);
+  private dispose(key: K, { index, value, size }: Record<K, V>, callback: boolean): void {
+    index.delete();
     this.memory.delete(key);
     this.space && (this.SIZE -= size);
     callback && this.settings.disposer?.(value, key);
@@ -107,29 +110,30 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (margin <= 0) return;
     const { LRU, LFU } = this.indexes;
     let miss: false | undefined = arguments.length < 2 ? false : void 0;
-    let restore: IxList<K, number> | undefined;
+    let restore: IvList<Index<K>> | undefined;
     while (this.length === this.capacity || this.space && this.size + margin > this.space) {
       const list = false
         || LRU.length === +(restore === LRU)
         || LFU.length > this.capacity * this.ratio / 100
-        || LFU.length > this.capacity / 2 && LFU.last!.value < this.clock - this.capacity * 8
+        || LFU.length > this.capacity / 2 && LFU.last!.value.clock < this.clock - this.capacity * 8
         ? LFU
         : LRU;
-      const index = list.last!;
+      const index = list.last!.value;
       assert(this.memory.has(index.key));
       if (miss ?? equal(index.key, key)) {
         miss = false;
         assert(!restore);
         restore = list;
-        assert(restore.last!.index === index.index);
-        restore.rotateToPrev();
+        restore.head = restore.last;
         continue;
       }
       const record = this.memory.get(index.key)!;
       this.dispose(index.key, record, false);
       this.settings.disposer && this.stack.push({ key: index.key, value: record.value });
     }
-    restore?.rotateToNext();
+    if (restore) {
+      restore.head = restore.tail;
+    }
   }
   public put(key: K, value: V, size?: number, age?: number): boolean;
   public put(this: Cache<K, undefined>, key: K, value?: V, size?: number, age?: number): boolean;
@@ -153,7 +157,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       assert(0 <= this.size && this.size <= this.space);
       record.value = value;
       record.size = size;
-      record.expiry = expiry;
+      record.index.value.expiry = expiry;
       this.resume();
       assert(this.stack.length === 0);
       return true;
@@ -162,15 +166,13 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     assert(!this.memory.has(key));
 
     const { LRU } = this.indexes;
-    assert(LRU.length !== LRU.capacity);
+    assert(LRU.length !== this.capacity);
     this.space && (this.SIZE += size);
     assert(0 <= this.size && this.size <= this.space);
     this.memory.set(key, {
-      target: 'LRU',
-      index: LRU.add(key, ++this.clockR),
+      index: LRU.unshift({ key, clock: ++this.clockR, expiry }),
       value,
       size,
-      expiry,
     });
     this.resume();
     assert(this.stack.length === 0);
@@ -185,11 +187,12 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public get(key: K): V | undefined {
     const record = this.memory.get(key);
     if (!record) return;
-    if (record.expiry !== Infinity && record.expiry <= now()) {
+    const expiry = record.index.value.expiry;
+    if (expiry !== Infinity && expiry <= now()) {
       this.dispose(key, record, true);
       return;
     }
-    this.access(key, record);
+    this.access(record);
     this.slide();
     return record.value;
   }
@@ -198,7 +201,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     //assert(this.memory.size === this.indexes.LFU.length + this.indexes.LRU.length);
     const record = this.memory.get(key);
     if (!record) return false;
-    if (record.expiry !== Infinity && record.expiry <= now()) {
+    const expiry = record.index.value.expiry;
+    if (expiry !== Infinity && expiry <= now()) {
       this.dispose(key, record, true);
       return false;
     }
@@ -264,38 +268,34 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       };
     }
   }
-  private access(key: K, record: Record<V>): boolean {
-    return this.accessLFU(key, record)
-        || this.accessLRU(key, record);
-  }
-  private accessLRU(key: K, record: Record<V>): boolean {
-    if (record.target !== 'LRU') return false;
-    const { LRU, LFU } = this.indexes;
+  private access(record: Record<K, V>): boolean {
     const { index } = record;
-    assert(LRU.node(index)!.key === key);
+    return this.accessLFU(index)
+        || this.accessLRU(index, record);
+  }
+  private accessLRU(index: Node<Index<K>>, record: Record<K, V>): boolean {
+    if (index.list !== this.indexes.LRU) return false;
+    const { LRU, LFU } = this.indexes;
     ++this.stats.LRU[0];
     ++this.clock;
     ++this.clockR;
-    if (LRU.node(index)!.value + LRU.length / 3 > this.clockR) {
-      LRU.put(key, this.clockR, index);
-      LRU.moveToHead(index);
+    if (index.value.clock + LRU.length / 3 > this.clockR) {
+      index.value.clock = this.clockR;
+      index.moveToHead();
       return true;
     }
-    LRU.del(key, index);
-    assert(LFU.length !== LFU.capacity);
-    record.target = 'LFU';
-    record.index = LFU.add(key, this.clock);
+    index.delete();
+    assert(LFU.length !== this.capacity);
+    index.value.clock = this.clock;
+    record.index = LFU.unshift(index.value);
     return true;
   }
-  private accessLFU(key: K, record: Record<V>): boolean {
-    if (record.target !== 'LFU') return false;
-    const { LFU } = this.indexes;
-    const { index } = record;
-    assert(LFU.node(index)!.key === key);
+  private accessLFU(index: Node<Index<K>>): boolean {
+    if (index.list !== this.indexes.LFU) return false;
     ++this.stats.LFU[0];
     ++this.clock;
-    LFU.put(key, this.clock, index);
-    LFU.moveToHead(index);
+    index.value.clock = this.clock;
+    index.moveToHead();
     return true;
   }
 }

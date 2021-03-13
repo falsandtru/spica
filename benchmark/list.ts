@@ -1,4 +1,5 @@
 import { benchmark } from './benchmark';
+import { IvList } from '..';
 import { IxList } from '..';
 import Yallist from 'yallist';
 
@@ -15,6 +16,10 @@ describe('Benchmark:', function () {
     });
 
     it('new', function (done) {
+      benchmark('IvList new', () => new IvList(), done);
+    });
+
+    it('new', function (done) {
       benchmark('IxList new', () => new IxList(100), done);
     });
 
@@ -27,6 +32,36 @@ describe('Benchmark:', function () {
           if (++i > cap) {
             list.pop();
             list.unshift(i);
+          }
+          else {
+            list.unshift(i);
+          }
+        }, done);
+      });
+
+      it(`IvList add ${length.toLocaleString('en')} by pop and unshift`, function (done) {
+        const cap = length;
+        const list = new IvList();
+        let i = 0;
+        benchmark(`IvList add ${length.toLocaleString('en')} by pop and unshift`, () => {
+          if (++i > cap) {
+            list.pop();
+            list.unshift(i);
+          }
+          else {
+            list.unshift(i);
+          }
+        }, done);
+      });
+
+      it(`IvList add ${length.toLocaleString('en')} by rotate and replace`, function (done) {
+        const cap = length;
+        const list = new IvList();
+        let i = 0;
+        benchmark(`IvList add ${length.toLocaleString('en')} by rotate and replace`, () => {
+          if (++i > cap) {
+            list.head = list.last;
+            list.head!.value = i;
           }
           else {
             list.unshift(i);

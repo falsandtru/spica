@@ -1,0 +1,127 @@
+// Circular inverse list
+
+const undefined = void 0;
+
+const LENGTH = Symbol('length');
+
+export class IvList<T> {
+  public [LENGTH] = 0;
+  public get length(): number {
+    return this[LENGTH];
+  }
+  public clear(): void {
+    this.head = undefined;
+    this[LENGTH] = 0;
+  }
+  public head: Node<T> | undefined = undefined;
+  public get tail(): Node<T> | undefined {
+    return this.head?.next;
+  }
+  public get last(): Node<T> | undefined {
+    return this.head?.prev;
+  }
+  public shift(): T | undefined {
+    return this.head?.delete();
+  }
+  public unshift(value: T): Node<T> {
+    return this.head = new Node(value, this.head, this.head?.prev, this);
+  }
+  public pop(): T | undefined {
+    return this.head?.prev?.delete();
+  }
+  public push(value: T): Node<T> {
+    return new Node(value, this.head, this.head?.prev, this);
+  }
+  public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
+    for (let node = this.head, i = 0; node && i < this.length; (node = node.next) && ++i) {
+      yield node.value;
+    }
+    return;
+  }
+}
+
+export class Node<T> {
+  constructor(
+    public value: T,
+    public next?: Node<T>,
+    public prev?: Node<T>,
+    public readonly list: IvList<T> = next?.list || prev?.list || new IvList(),
+  ) {
+    ++list[LENGTH];
+    list.head ??= this;
+    next
+      ? next.prev = this
+      : this.next = this;
+    prev
+      ? prev.next = this
+      : this.prev = this;
+  }
+  public get length(): number {
+    return this.list.length;
+  }
+  public get head(): Node<T> | undefined {
+    return this.list.head;
+  }
+  public get tail(): Node<T> | undefined {
+    return this.list.tail;
+  }
+  public get last(): Node<T> | undefined {
+    return this.list.last;
+  }
+  public delete(): T {
+    if (!this.next && !this.prev) return this.value;
+    --this.list[LENGTH];
+    if (this.head === this) {
+      this.list.head = this.next === this
+        ? undefined
+        : this.next;
+    }
+    if (this.next) {
+      this.next.prev = this.prev;
+    }
+    if (this.prev) {
+      this.prev.next = this.next;
+    }
+    this.next = this.prev = undefined;
+    return this.value;
+  }
+  public shift(): T | undefined {
+    return this.head?.delete();
+  }
+  public unshift(value: T): Node<T> {
+    return this.list.head = new Node(value, this.head, this.head?.prev, this.list);
+  }
+  public pop(): T | undefined {
+    return this.head?.prev?.delete();
+  }
+  public push(value: T): Node<T> {
+    return new Node(value, this.head, this.head?.prev, this.list);
+  }
+  public move(before: Node<T> | undefined): boolean {
+    if (!before) return false;
+    if (this === before) return false;
+    const a1 = this;
+    if (!a1) return false;
+    const b1 = before;
+    if (!b1) return false;
+    assert(a1 !== b1);
+    if (a1.next === b1) return false;
+    const b0 = b1.prev!;
+    const a0 = a1.prev!;
+    const a2 = a1.next!;
+    b0.next = a1;
+    a1.next = b1;
+    b1.prev = a1;
+    a1.prev = b0;
+    a0.next = a2;
+    a2.prev = a0;
+    return true;
+  }
+  public moveToHead(): void {
+    this.move(this.list.head);
+    this.list.head = this;
+  }
+  public moveToLast(): void {
+    this.move(this.list.head);
+  }
+}
