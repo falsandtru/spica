@@ -14,7 +14,7 @@ describe('Unit: lib/ixlist', () => {
     }
 
     it('put/delete 1', () => {
-      const list = new IxList<number, undefined>(1, new Map());
+      const list = new IxList<number>(1, new Map());
 
       assert.deepStrictEqual(inspect(list), {
         list: [],
@@ -100,7 +100,7 @@ describe('Unit: lib/ixlist', () => {
     });
 
     it('put/delete 2', () => {
-      const list = new IxList<number, undefined>(2, new Map());
+      const list = new IxList<number>(2, new Map());
 
       assert(list.put(0) === 0);
       assert.deepStrictEqual(inspect(list), {
@@ -185,7 +185,7 @@ describe('Unit: lib/ixlist', () => {
     });
 
     it('put/delete 3', () => {
-      const list = new IxList<number, undefined>(3, new Map());
+      const list = new IxList<number>(3, new Map());
 
       assert(list.put(0) === 0);
       assert.deepStrictEqual(inspect(list), {
