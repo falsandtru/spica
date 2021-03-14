@@ -91,10 +91,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   }
   private readonly stack = new Stack<{ key: K; value: V; }>();
   private resume(): void {
-    if (this.stack.length === 0) return;
+    if (this.stack.isEmpty()) return;
     const { stack, settings: { disposer } } = this;
     assert(disposer);
-    while (stack.length > 0) {
+    while (!stack.isEmpty()) {
       const { key, value } = stack.pop()!;
       disposer!(value, key);
     }
@@ -160,7 +160,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       record.size = size;
       record.index.value.expiry = expiry;
       this.resume();
-      assert(this.stack.length === 0);
+      assert(this.stack.isEmpty());
       return true;
     }
     this.secure(size);
@@ -176,7 +176,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       size,
     });
     this.resume();
-    assert(this.stack.length === 0);
+    assert(this.stack.isEmpty());
     return false;
   }
   public set(key: K, value: V, size?: number, age?: number): this;
