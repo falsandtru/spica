@@ -39,11 +39,11 @@ describe('Benchmark:', function () {
         }, done);
       });
 
-      it(`IvList add ${length.toLocaleString('en')} by pop and unshift`, function (done) {
+      it(`IvList add ${length.toLocaleString('en')}`, function (done) {
         const cap = length;
         const list = new IvList();
         let i = 0;
-        benchmark(`IvList add ${length.toLocaleString('en')} by pop and unshift`, () => {
+        benchmark(`IvList add ${length.toLocaleString('en')}`, () => {
           if (++i > cap) {
             list.pop();
             list.unshift(i);
@@ -54,14 +54,13 @@ describe('Benchmark:', function () {
         }, done);
       });
 
-      it(`IvList add ${length.toLocaleString('en')} by rotate and replace`, function (done) {
+      it(`IvList add ${length.toLocaleString('en')} rotationally`, function (done) {
         const cap = length;
         const list = new IvList();
         let i = 0;
-        benchmark(`IvList add ${length.toLocaleString('en')} by rotate and replace`, () => {
+        benchmark(`IvList add ${length.toLocaleString('en')} rotationally`, () => {
           if (++i > cap) {
-            list.head = list.last;
-            list.head!.value = i;
+            list.unshiftRotationally(i);
           }
           else {
             list.unshift(i);
@@ -69,11 +68,11 @@ describe('Benchmark:', function () {
         }, done);
       });
 
-      it(`IxList add ${length.toLocaleString('en')} by pop and unshift`, function (done) {
+      it(`IxList add ${length.toLocaleString('en')}`, function (done) {
         const cap = length;
         const list = new IxList();
         let i = 0;
-        benchmark(`IxList add ${length.toLocaleString('en')} by pop and unshift`, () => {
+        benchmark(`IxList add ${length.toLocaleString('en')}`, () => {
           if (++i > cap) {
             list.pop();
             list.unshift(i);
@@ -84,14 +83,13 @@ describe('Benchmark:', function () {
         }, done);
       });
 
-      it(`IxList add ${length.toLocaleString('en')} by rotate and replace`, function (done) {
+      it(`IxList add ${length.toLocaleString('en')} rotationally`, function (done) {
         const cap = length;
         const list = new IxList();
         let i = 0;
-        benchmark(`IxList add ${length.toLocaleString('en')} by rotate and replace`, () => {
+        benchmark(`IxList add ${length.toLocaleString('en')} rotationally`, () => {
           if (++i > cap) {
-            list.rotateToPrev();
-            list.replace(list.HEAD, i);
+            list.unshiftRotationally(i);
           }
           else {
             list.unshift(i);

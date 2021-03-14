@@ -216,6 +216,20 @@ export class List<K, V = undefined> implements IterableCollection<K, V> {
   public unshift(key: K, value: V): number {
     return this.add(key, value);
   }
+  public unshiftRotationally(key: K, value: V): number;
+  public unshiftRotationally(this: List<K, undefined>, key: K, value?: V): number;
+  public unshiftRotationally(key: K, value: V): number {
+    if (this.length === 0) return this.unshift(key, value);
+    const node: InternalNode<K, V> = this.last!;
+    if (this.index && !equal(node.key, key)) {
+      this.index.delete(node.key, node.index);
+      this.index.set(key, node.index);
+    }
+    this.HEAD = this.CURSOR = node.index;
+    node.key = key;
+    node.value = value;
+    return node.index;
+  }
   public shift(): Node<K, V> | undefined {
     const node = this.head;
     return node && this.del(node.key, node.index);
@@ -224,6 +238,20 @@ export class List<K, V = undefined> implements IterableCollection<K, V> {
   public push(this: List<K, undefined>, key: K, value?: V): number;
   public push(key: K, value: V): number {
     return this.insert(key, value, this.HEAD);
+  }
+  public pushRotationally(key: K, value: V): number;
+  public pushRotationally(this: List<K, undefined>, key: K, value?: V): number;
+  public pushRotationally(key: K, value: V): number {
+    if (this.length === 0) return this.push(key, value);
+    const node: InternalNode<K, V> = this.head!;
+    if (this.index && !equal(node.key, key)) {
+      this.index.delete(node.key, node.index);
+      this.index.set(key, node.index);
+    }
+    this.HEAD = this.CURSOR = node.next;
+    node.key = key;
+    node.value = value;
+    return node.index;
   }
   public pop(): Node<K, V> | undefined {
     const node = this.last;

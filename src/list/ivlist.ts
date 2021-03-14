@@ -23,11 +23,25 @@ export class List<T> {
   public unshift(value: T): Node<T> {
     return this.head = this.push(value);
   }
+  public unshiftRotationally(value: T): Node<T> {
+    if (!this.head) return this.unshift(value);
+    const node = this.last!;
+    node.value = value;
+    this.head = node;
+    return node;
+  }
   public shift(): T | undefined {
     return this.head?.delete();
   }
   public push(value: T): Node<T> {
     return new Node(value, this.head, this.head?.prev, this);
+  }
+  public pushRotationally(value: T): Node<T> {
+    if (!this.head) return this.push(value);
+    const node = this.head;
+    node.value = value;
+    this.head = node.next;
+    return node;
   }
   public pop(): T | undefined {
     return this.last?.delete();
@@ -95,11 +109,17 @@ export class Node<T> {
   public unshift(value: T): Node<T> {
     return this.list.unshift(value);
   }
+  public unshiftRotationally(value: T): Node<T> {
+    return this.list.unshiftRotationally(value);
+  }
   public shift(): T | undefined {
     return this.list.shift();
   }
   public push(value: T): Node<T> {
     return this.list.push(value);
+  }
+  public pushRotationally(value: T): Node<T> {
+    return this.list.pushRotationally(value);
   }
   public pop(): T | undefined {
     return this.list.pop();
