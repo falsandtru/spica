@@ -111,7 +111,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { LRU, LFU } = this.indexes;
     let miss: false | undefined = arguments.length < 2 ? false : void 0;
     let restore: List<Index<K>> | undefined;
-    while (this.length === this.capacity || this.space !== Infinity && this.size + margin > this.space) {
+    while (this.length === this.capacity || this.size + margin > this.space) {
       const list = false
         || LRU.length === +(restore === LRU)
         || LFU.length > this.capacity * this.ratio / 100
@@ -141,7 +141,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public put(key: K, value: V, size: number = 1, age: number = this.settings.age!): boolean {
     if (size < 1) throw new Error(`Spica: Cache: Size must be 1 or more.`);
     if (age < 1) throw new Error(`Spica: Cache: Age must be 1 or more.`);
-    if (this.space !== Infinity && size > this.space || age <= 0) {
+    if (size > this.space || age <= 0) {
       this.settings.disposer?.(value, key);
       return false;
     }
