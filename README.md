@@ -2,7 +2,7 @@
 
 ![CI](https://github.com/falsandtru/spica/workflows/CI/badge.svg)
 
-Supervisor, Coroutine, Channel, select, AtomicPromise, Cancellation, Cache, IxList, and some utils.
+Supervisor, Coroutine, Channel, select, AtomicPromise, Cancellation, Cache, IvList, IxList, and some utils.
 
 ## Install
 
