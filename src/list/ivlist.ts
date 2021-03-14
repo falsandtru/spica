@@ -71,22 +71,10 @@ export class Node<T> {
       ? prev.next = this
       : this.prev = this;
   }
-  public get length(): number {
-    return this.list.length;
-  }
-  public get head(): Node<T> | undefined {
-    return this.list.head;
-  }
-  public get tail(): Node<T> | undefined {
-    return this.list.tail;
-  }
-  public get last(): Node<T> | undefined {
-    return this.list.last;
-  }
   public delete(): T {
     if (!this.next && !this.prev) return this.value;
     --this.list[LENGTH];
-    if (this.head === this) {
+    if (this.list.head === this) {
       this.list.head = this.next === this
         ? undefined
         : this.next;
@@ -105,24 +93,6 @@ export class Node<T> {
   }
   public insertAfter(value: T): Node<T> {
     return new Node(value, this.next, this, this.list);
-  }
-  public unshift(value: T): Node<T> {
-    return this.list.unshift(value);
-  }
-  public unshiftRotationally(value: T): Node<T> {
-    return this.list.unshiftRotationally(value);
-  }
-  public shift(): T | undefined {
-    return this.list.shift();
-  }
-  public push(value: T): Node<T> {
-    return this.list.push(value);
-  }
-  public pushRotationally(value: T): Node<T> {
-    return this.list.pushRotationally(value);
-  }
-  public pop(): T | undefined {
-    return this.list.pop();
   }
   public move(before: Node<T> | undefined): boolean {
     if (!before) return false;
@@ -158,7 +128,7 @@ export class Node<T> {
     const node3 = node2.next!;
     node2.move(node1);
     node1.move(node3);
-    switch (this.head) {
+    switch (this.list.head) {
       case node1:
         this.list.head = node2;
         break;
