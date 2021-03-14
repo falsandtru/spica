@@ -29,10 +29,10 @@ interface Node<K, V> {
 
 export class List<K, V = undefined> implements IterableCollection<K, V> {
   constructor(
-    public readonly capacity: number = Number.MAX_SAFE_INTEGER,
+    public readonly capacity: number = 0,
     private readonly index?: Index<K, number>,
   ) {
-    assert(capacity > 0);
+    this.capacity ||= Number.MAX_SAFE_INTEGER;
   }
   private nodes: Record<number, InternalNode<K, V> | undefined> = {};
   private readonly buffers = new Stack<number>();
