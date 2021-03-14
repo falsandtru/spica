@@ -65,7 +65,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.space = this.settings.space!;
   }
   private readonly settings: CacheOptions<K, V> = {
-    space: 0,
+    space: Infinity,
     age: Infinity,
     capture: {
       delete: true,
@@ -102,16 +102,16 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private dispose({ index, value, size }: Record<K, V>, callback: boolean): void {
     index.delete();
     this.memory.delete(index.value.key);
-    this.space && (this.SIZE -= size);
+    this.space !== Infinity && (this.SIZE -= size);
     callback && this.settings.disposer?.(value, index.value.key);
   }
   private secure(margin: number, key?: K): void {
-    assert(!this.space || margin <= this.space);
+    assert(margin <= this.space);
     if (margin <= 0) return;
     const { LRU, LFU } = this.indexes;
     let miss: false | undefined = arguments.length < 2 ? false : void 0;
     let restore: List<Index<K>> | undefined;
-    while (this.length === this.capacity || this.space && this.size + margin > this.space) {
+    while (this.length === this.capacity || this.space !== Infinity && this.size + margin > this.space) {
       const list = false
         || LRU.length === +(restore === LRU)
         || LFU.length > this.capacity * this.ratio / 100
@@ -141,7 +141,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public put(key: K, value: V, size: number = 1, age: number = this.settings.age!): boolean {
     if (size < 1) throw new Error(`Spica: Cache: Size must be 1 or more.`);
     if (age < 1) throw new Error(`Spica: Cache: Age must be 1 or more.`);
-    if (this.space && size > this.space || age <= 0) {
+    if (this.space !== Infinity && size > this.space || age <= 0) {
       this.settings.disposer?.(value, key);
       return false;
     }
@@ -154,7 +154,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       assert(this.memory.has(key));
       this.settings.disposer && this.stack.push({ key, value: record.value });
       this.secure(size - record.size, key);
-      this.space && (this.SIZE += size - record.size);
+      this.space !== Infinity && (this.SIZE += size - record.size);
       assert(0 <= this.size && this.size <= this.space);
       record.value = value;
       record.size = size;
@@ -168,7 +168,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
 
     const { LRU } = this.indexes;
     assert(LRU.length !== this.capacity);
-    this.space && (this.SIZE += size);
+    this.space !== Infinity && (this.SIZE += size);
     assert(0 <= this.size && this.size <= this.space);
     this.memory.set(key, {
       index: LRU.unshift({ key, clock: ++this.clockR, expiry }),
