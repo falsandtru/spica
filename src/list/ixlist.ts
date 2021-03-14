@@ -225,7 +225,8 @@ export class List<K, V = undefined> implements IterableCollection<K, V> {
       this.index.delete(node.key, node.index);
       this.index.set(key, node.index);
     }
-    this.HEAD = this.CURSOR = node.index;
+    this.HEAD = node.index;
+    this.CURSOR = node.index;
     node.key = key;
     node.value = value;
     return node.index;
@@ -248,7 +249,8 @@ export class List<K, V = undefined> implements IterableCollection<K, V> {
       this.index.delete(node.key, node.index);
       this.index.set(key, node.index);
     }
-    this.HEAD = this.CURSOR = node.next;
+    this.HEAD = node.next;
+    this.CURSOR = node.index;
     node.key = key;
     node.value = value;
     return node.index;
