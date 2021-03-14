@@ -270,12 +270,12 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     }
   }
   private access(record: Record<K, V>): boolean {
-    const { index } = record;
-    return this.accessLFU(index)
-        || this.accessLRU(index, record);
+    return this.accessLFU(record)
+        || this.accessLRU(record);
   }
-  private accessLRU(index: Node<Index<K>>, record: Record<K, V>): boolean {
-    if (index.list !== this.indexes.LRU) return false;
+  private accessLRU(record: Record<K, V>): boolean {
+    const index = record.index;
+    assert(index.list === this.indexes.LRU);
     const { LRU, LFU } = this.indexes;
     ++this.stats.LRU[0];
     ++this.clock;
@@ -291,7 +291,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     record.index = LFU.unshift(index.value);
     return true;
   }
-  private accessLFU(index: Node<Index<K>>): boolean {
+  private accessLFU(record: Record<K, V>): boolean {
+    const index = record.index;
     if (index.list !== this.indexes.LFU) return false;
     ++this.stats.LFU[0];
     ++this.clock;
