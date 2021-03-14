@@ -130,4 +130,21 @@ export class Node<T> {
   public moveToLast(): void {
     this.move(this.list.head);
   }
+  public swap(node: Node<T>): boolean {
+    const node1 = this;
+    const node2 = node;
+    if (node1 === node2) return false;
+    const node3 = node2.next!;
+    node2.move(node1);
+    node1.move(node3);
+    switch (this.head) {
+      case node1:
+        this.list.head = node2;
+        break;
+      case node2:
+        this.list.head = node1;
+        break;
+    }
+    return true;
+  }
 }
