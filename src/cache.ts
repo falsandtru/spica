@@ -102,7 +102,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private dispose({ index, value, size }: Record<K, V>, callback: boolean): void {
     index.delete();
     this.memory.delete(index.value.key);
-    this.space !== Infinity && (this.SIZE -= size);
+    this.SIZE -= size;
     callback && this.settings.disposer?.(value, index.value.key);
   }
   private secure(margin: number, key?: K): void {
@@ -154,7 +154,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       assert(this.memory.has(key));
       this.settings.disposer && this.stack.push({ key, value: record.value });
       this.secure(size - record.size, key);
-      this.space !== Infinity && (this.SIZE += size - record.size);
+      this.SIZE += size - record.size;
       assert(0 <= this.size && this.size <= this.space);
       record.value = value;
       record.size = size;
@@ -168,7 +168,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
 
     const { LRU } = this.indexes;
     assert(LRU.length !== this.capacity);
-    this.space !== Infinity && (this.SIZE += size);
+    this.SIZE += size;
     assert(0 <= this.size && this.size <= this.space);
     this.memory.set(key, {
       index: LRU.unshift({ key, clock: ++this.clockR, expiry }),
