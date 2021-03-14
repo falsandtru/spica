@@ -85,17 +85,23 @@ export class Node<T> {
     this.next = this.prev = undefined;
     return this.value;
   }
+  public insertBefore(value: T): Node<T> {
+    return new Node(value, this, this.prev, this.list);
+  }
+  public insertAfter(value: T): Node<T> {
+    return new Node(value, this.next, this, this.list);
+  }
   public shift(): T | undefined {
-    return this.head?.delete();
+    return this.list.shift();
   }
   public unshift(value: T): Node<T> {
-    return this.list.head = new Node(value, this.head, this.head?.prev, this.list);
+    return this.list.unshift(value);
   }
   public pop(): T | undefined {
-    return this.head?.prev?.delete();
+    return this.list.pop();
   }
   public push(value: T): Node<T> {
-    return new Node(value, this.head, this.head?.prev, this.list);
+    return this.list.push(value);
   }
   public move(before: Node<T> | undefined): boolean {
     if (!before) return false;
