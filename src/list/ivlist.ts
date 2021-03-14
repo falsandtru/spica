@@ -33,10 +33,11 @@ export class List<T> {
     return new Node(value, this.head, this.head?.prev, this);
   }
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
-    for (let node = this.head, i = 0; node && i < this.length; (node = node.next) && ++i) {
+    for (let node = this.head; node;) {
       yield node.value;
+      node = node.next;
+      if (node === this.head) return;
     }
-    return;
   }
 }
 

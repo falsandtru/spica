@@ -305,9 +305,10 @@ export class List<K, V = undefined> implements IterableCollection<K, V> {
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
     const nodes = this.nodes;
-    for (let node = nodes[this.HEAD], i = 0; node && i < this.length; (node = nodes[node.next]) && ++i) {
+    for (let node = nodes[this.HEAD]; node;) {
       yield [node.key, node.value];
+      node = nodes[node.next];
+      if (node?.index === this.HEAD) return;
     }
-    return;
   }
 }
