@@ -24,10 +24,10 @@ export class List<T> {
     return this.head?.delete();
   }
   public unshift(value: T): Node<T> {
-    return this.head = new Node(value, this.head, this.head?.prev, this);
+    return this.head = this.push(value);
   }
   public pop(): T | undefined {
-    return this.head?.prev?.delete();
+    return this.last?.delete();
   }
   public push(value: T): Node<T> {
     return new Node(value, this.head, this.head?.prev, this);
