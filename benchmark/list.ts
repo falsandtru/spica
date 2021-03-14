@@ -99,7 +99,7 @@ describe('Benchmark:', function () {
 
       it(`IxList add ${length.toLocaleString('en')} with constraint`, function (done) {
         const cap = length;
-        const list = new IxList(cap);
+        const list = new IxList(undefined, cap);
         let i = 0;
         benchmark(`IxList add ${length.toLocaleString('en')} with constraint`, () => {
           list.unshift(i);
@@ -110,7 +110,7 @@ describe('Benchmark:', function () {
     for (const length of [10, 100, 1000, 10000, 100000]) {
       it(`IxList put ${length.toLocaleString('en')}`, function (done) {
         const cap = length;
-        const list = new IxList(cap, new Map());
+        const list = new IxList(new Map(), cap);
         let i = 0;
         benchmark(`IxList put ${length.toLocaleString('en')}`, () => list.put(++i % cap), done);
       });

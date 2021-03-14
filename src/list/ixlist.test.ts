@@ -14,7 +14,7 @@ describe('Unit: lib/ixlist', () => {
     }
 
     it('put/delete 1', () => {
-      const list = new List<number>(1, new Map());
+      const list = new List<number>(new Map(), 1);
 
       assert.deepStrictEqual(inspect(list), {
         list: [],
@@ -100,7 +100,7 @@ describe('Unit: lib/ixlist', () => {
     });
 
     it('put/delete 2', () => {
-      const list = new List<number>(2, new Map());
+      const list = new List<number>(new Map(), 2);
 
       assert(list.put(0) === 0);
       assert.deepStrictEqual(inspect(list), {
@@ -185,7 +185,7 @@ describe('Unit: lib/ixlist', () => {
     });
 
     it('put/delete 3', () => {
-      const list = new List<number>(3, new Map());
+      const list = new List<number>(new Map(), 3);
 
       assert(list.put(0) === 0);
       assert.deepStrictEqual(inspect(list), {
@@ -300,7 +300,7 @@ describe('Unit: lib/ixlist', () => {
     });
 
     it('insert', () => {
-      const list = new List<number, number>(2);
+      const list = new List<number, number>(undefined, 2);
 
       assert(list.insert(0, ~0, 0) === 0);
       assert.deepStrictEqual(inspect(list), {
@@ -347,7 +347,7 @@ describe('Unit: lib/ixlist', () => {
     });
 
     it('update', () => {
-      const list = new List<number, number>(3, new Map());
+      const list = new List<number, number>(new Map(), 3);
 
       assert(list.put(0, ~0) === 0);
       assert(list.put(1, ~1) === 1);
@@ -372,7 +372,7 @@ describe('Unit: lib/ixlist', () => {
     });
 
     it('duplicate', () => {
-      const list = new List<number, number>(3, new MultiMap());
+      const list = new List<number, number>(new MultiMap(), 3);
 
       list.add(0, 1);
       list.add(0, 2);
@@ -431,7 +431,7 @@ describe('Unit: lib/ixlist', () => {
     });
 
     it('swap', () => {
-      const list = new List<number, number>(4);
+      const list = new List<number, number>(undefined, 4);
 
       list.add(0, ~0);
       list.add(1, ~1);

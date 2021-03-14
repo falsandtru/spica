@@ -1,5 +1,5 @@
 import type { Inits, DeepImmutable, DeepRequired } from './type';
-import { Infinity, Number, Map, WeakSet, Error } from './global';
+import { Number, Map, WeakSet, Error } from './global';
 import { List } from './ixlist';
 import { extend } from './assign';
 import { once } from './function';
@@ -30,7 +30,7 @@ class ListenerNode<N extends readonly unknown[], D, R> {
     public readonly index: unknown,
   ) {
   }
-  public readonly children = new List<N[number], ListenerNode<N, D, R>>(Infinity, new Map());
+  public readonly children = new List<N[number], ListenerNode<N, D, R>>(new Map());
   public readonly monitors: MonitorItem<N, D>[] = [];
   public readonly subscribers: SubscriberItem<N, D, R>[] = [];
 }
