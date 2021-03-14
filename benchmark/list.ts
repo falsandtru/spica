@@ -20,7 +20,7 @@ describe('Benchmark:', function () {
     });
 
     it('new', function (done) {
-      benchmark('IxList new', () => new IxList(100), done);
+      benchmark('IxList new', () => new IxList(), done);
     });
 
     for (const length of [10, 100, 1000, 10000, 100000]) {
