@@ -4,7 +4,7 @@ const undefined = void 0;
 
 const LENGTH = Symbol('length');
 
-export class IvList<T> {
+export class List<T> {
   public [LENGTH] = 0;
   public get length(): number {
     return this[LENGTH];
@@ -45,7 +45,7 @@ export class Node<T> {
     public value: T,
     public next?: Node<T>,
     public prev?: Node<T>,
-    public readonly list: IvList<T> = next?.list || prev?.list || new IvList(),
+    public readonly list: List<T> = next?.list || prev?.list || new List(),
   ) {
     ++list[LENGTH];
     list.head ??= this;

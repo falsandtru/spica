@@ -1,9 +1,9 @@
-import { IvList } from './ivlist';
+import { List } from './ivlist';
 
 describe('Unit: lib/ivlist', () => {
   describe('List', () => {
     it('', () => {
-      const list = new IvList();
+      const list = new List();
 
       assert(list.length === 0);
       assert(list.shift() === undefined);

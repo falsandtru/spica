@@ -2,7 +2,7 @@ import { Infinity, Map } from './global';
 import { max, min } from './alias';
 import { now } from './clock';
 import { IterableCollection } from './collection';
-import { IvList, Node } from './ivlist';
+import { List, Node } from './ivlist';
 import { Stack } from './stack';
 import { extend } from './assign';
 import { tuple } from './tuple';
@@ -79,8 +79,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private clockR = 0;
   private memory = new Map<K, Record<K, V>>();
   private readonly indexes = {
-    LRU: new IvList<Index<K>>(),
-    LFU: new IvList<Index<K>>(),
+    LRU: new List<Index<K>>(),
+    LFU: new List<Index<K>>(),
   } as const;
   public get length(): number {
     //assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
@@ -110,7 +110,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (margin <= 0) return;
     const { LRU, LFU } = this.indexes;
     let miss: false | undefined = arguments.length < 2 ? false : void 0;
-    let restore: IvList<Index<K>> | undefined;
+    let restore: List<Index<K>> | undefined;
     while (this.length === this.capacity || this.space && this.size + margin > this.space) {
       const list = false
         || LRU.length === +(restore === LRU)
