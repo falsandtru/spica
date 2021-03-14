@@ -20,17 +20,17 @@ export class List<T> {
   public get last(): Node<T> | undefined {
     return this.head?.prev;
   }
-  public shift(): T | undefined {
-    return this.head?.delete();
-  }
   public unshift(value: T): Node<T> {
     return this.head = this.push(value);
   }
-  public pop(): T | undefined {
-    return this.last?.delete();
+  public shift(): T | undefined {
+    return this.head?.delete();
   }
   public push(value: T): Node<T> {
     return new Node(value, this.head, this.head?.prev, this);
+  }
+  public pop(): T | undefined {
+    return this.last?.delete();
   }
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
     for (let node = this.head; node;) {
@@ -92,17 +92,17 @@ export class Node<T> {
   public insertAfter(value: T): Node<T> {
     return new Node(value, this.next, this, this.list);
   }
-  public shift(): T | undefined {
-    return this.list.shift();
-  }
   public unshift(value: T): Node<T> {
     return this.list.unshift(value);
   }
-  public pop(): T | undefined {
-    return this.list.pop();
+  public shift(): T | undefined {
+    return this.list.shift();
   }
   public push(value: T): Node<T> {
     return this.list.push(value);
+  }
+  public pop(): T | undefined {
+    return this.list.pop();
   }
   public move(before: Node<T> | undefined): boolean {
     if (!before) return false;
