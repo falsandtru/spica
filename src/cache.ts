@@ -2,7 +2,7 @@ import { Infinity, Map } from './global';
 import { max, min } from './alias';
 import { now } from './clock';
 import { IterableCollection } from './collection';
-import { List, Node } from './ivlist';
+import { List, Node } from './invlist';
 import { Stack } from './stack';
 import { extend } from './assign';
 import { tuple } from './tuple';

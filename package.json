@@ -1,7 +1,7 @@
 {
   "name": "spica",
   "version": "0.0.471",
-  "description": "Supervisor, Coroutine, Channel, select, AtomicPromise, Cancellation, Cache, IxList, and some utils.",
+  "description": "Supervisor, Coroutine, Channel, select, AtomicPromise, Cancellation, Cache, InvList, IxList, and some utils.",
   "private": true,
   "homepage": "https://github.com/falsandtru/spica",
   "repository": {
@@ -24,7 +24,7 @@
     "monad",
     "list",
     "hlist",
-    "ivlist",
+    "invlist",
     "ixlist",
     "heap",
     "cache"

@@ -1,6 +1,6 @@
-import { List } from './ivlist';
+import { List } from './invlist';
 
-describe('Unit: lib/ivlist', () => {
+describe('Unit: lib/invlist', () => {
   describe('List', () => {
     it('', () => {
       const list = new List();

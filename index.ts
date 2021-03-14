@@ -16,7 +16,7 @@ export { Future, AtomicFuture } from './src/future';
 export { Cancellation } from './src/cancellation';
 export { Cache } from './src/cache';
 export { HList } from './src/hlist';
-export { List as IvList } from './src/ivlist';
+export { List as InvList } from './src/invlist';
 export { List as IxList } from './src/ixlist';
 export { Heap } from './src/heap';
 export { DataMap } from './src/datamap';
