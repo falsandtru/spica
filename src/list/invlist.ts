@@ -9,16 +9,16 @@ export class List<T> {
   public get length(): number {
     return this[LENGTH];
   }
-  public clear(): void {
-    this.head = undefined;
-    this[LENGTH] = 0;
-  }
   public head: Node<T> | undefined = undefined;
   public get tail(): Node<T> | undefined {
     return this.head?.next;
   }
   public get last(): Node<T> | undefined {
     return this.head?.prev;
+  }
+  public clear(): void {
+    this.head = undefined;
+    this[LENGTH] = 0;
   }
   public unshift(value: T): Node<T> {
     return this.head = this.push(value);
