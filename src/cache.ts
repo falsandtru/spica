@@ -99,11 +99,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       disposer!(value, key);
     }
   }
-  private dispose(key: K, { index, value, size }: Record<K, V>, callback: boolean): void {
+  private dispose({ index, value, size }: Record<K, V>, callback: boolean): void {
     index.delete();
-    this.memory.delete(key);
+    this.memory.delete(index.value.key);
     this.space && (this.SIZE -= size);
-    callback && this.settings.disposer?.(value, key);
+    callback && this.settings.disposer?.(value, index.value.key);
   }
   private secure(margin: number, key?: K): void {
     assert(!this.space || margin <= this.space);
@@ -129,7 +129,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         continue;
       }
       const record = this.memory.get(index.key)!;
-      this.dispose(index.key, record, false);
+      this.dispose(record, false);
       this.settings.disposer && this.stack.push({ key: index.key, value: record.value });
     }
     if (restore) {
@@ -190,7 +190,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (!record) return;
     const expiry = record.index.value.expiry;
     if (expiry !== Infinity && expiry <= now()) {
-      this.dispose(key, record, true);
+      this.dispose(record, true);
       return;
     }
     this.access(record);
@@ -204,7 +204,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (!record) return false;
     const expiry = record.index.value.expiry;
     if (expiry !== Infinity && expiry <= now()) {
-      this.dispose(key, record, true);
+      this.dispose(record, true);
       return false;
     }
     return true;
@@ -212,7 +212,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public delete(key: K): boolean {
     const record = this.memory.get(key);
     if (!record) return false;
-    this.dispose(key, record, this.settings.capture!.delete === true);
+    this.dispose(record, this.settings.capture!.delete === true);
     return true;
   }
   public clear(): void {
