@@ -22,7 +22,7 @@ interface InternalNode<K, V> {
 interface Node<K, V> {
   readonly index: number;
   readonly key: K;
-  readonly value: V;
+  value: V;
   readonly next: number;
   readonly prev: number;
 }
