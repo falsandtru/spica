@@ -45,7 +45,7 @@ export class Node<T> {
     public value: T,
     public next?: Node<T>,
     public prev?: Node<T>,
-    public readonly list: List<T> = next?.list || prev?.list || new List(),
+    public readonly list: List<T> = next ? next.list : new List(),
   ) {
     ++list[LENGTH];
     list.head ??= this;
