@@ -24,8 +24,8 @@ export class List<T> {
     return this.head = this.push(value);
   }
   public unshiftRotationally(value: T): Node<T> {
-    if (!this.head) return this.unshift(value);
-    const node = this.last!;
+    const node = this.last;
+    if (!node) return this.unshift(value);
     node.value = value;
     this.head = node;
     return node;
@@ -37,8 +37,8 @@ export class List<T> {
     return new Node(value, this.head, this.head?.prev, this);
   }
   public pushRotationally(value: T): Node<T> {
-    if (!this.head) return this.push(value);
     const node = this.head;
+    if (!node) return this.push(value);
     node.value = value;
     this.head = node.next;
     return node;
