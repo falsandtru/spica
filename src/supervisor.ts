@@ -255,7 +255,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       assert(this.messages[this.messages.length - 1][4] === 0);
       this.messages[this.messages.length - 1][4] = setTimeout(() =>
         void this.schedule()
-      , timeout + 3) as any;
+      , timeout + 3);
     }
   }
   public cast(name: N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), param: P, timeout = this.settings.timeout): boolean {
@@ -330,7 +330,8 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     void this.settings.scheduler.call(void 0, p.bind);
     this.settings.scheduler === global.requestAnimationFrame && void setTimeout(p.bind, 1000);
   }
-  private readonly messages: [N | NamePool<N>, P, Supervisor.Callback<R>, number, number][] = [];
+  // Bug: Karma and TypeScript
+  private readonly messages: [N | NamePool<N>, P, Supervisor.Callback<R>, number, ReturnType<typeof setTimeout> | 0][] = [];
   private deliver(): void {
     if (!this.available) return;
     assert(!this.scheduled);

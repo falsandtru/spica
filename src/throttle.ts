@@ -1,7 +1,8 @@
 import { setTimeout } from './global';
 
 export function throttle<T>(interval: number, callback: (last: T, buffer: T[]) => void, capacity: number = 1): (arg: T) => void {
-  let timer = 0;
+  // Bug: Karma and TypeScript
+  let timer: ReturnType<typeof setTimeout> | 0 = 0;
   let buffer: T[] = [];
   return (data: T) => {
     if (capacity === 1) {
@@ -20,13 +21,13 @@ export function throttle<T>(interval: number, callback: (last: T, buffer: T[]) =
       buffer = [];
       assert(buf.length > 0);
       void callback(buf[0], buf);
-    // Bug: Karma and TypeScript
-    }, interval) as any;
+    }, interval);
   };
 }
 
 export function debounce<T>(delay: number, callback: (last: T, buffer: T[]) => void, capacity: number = 1): (arg: T) => void {
-  let timer = 0;
+  // Bug: Karma and TypeScript
+  let timer: ReturnType<typeof setTimeout> | 0 = 0;
   let buffer: T[] = [];
   return (data: T) => {
     if (capacity === 1) {
@@ -49,7 +50,6 @@ export function debounce<T>(delay: number, callback: (last: T, buffer: T[]) => v
         assert(buf.length > 0);
         void callback(buf[0], buf);
       }, buffer.length > 1 ? delay : 0);
-    // Bug: Karma and TypeScript
-    }, delay) as any;
+    }, delay);
   };
 }
