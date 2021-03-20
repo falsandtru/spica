@@ -1,4 +1,4 @@
-import { global } from './global';
+import { global, undefined } from './global';
 
 describe('Unit: lib/global', () => {
   describe('global', () => {
@@ -6,7 +6,12 @@ describe('Unit: lib/global', () => {
       assert(global);
       assert(global.global === global);
     });
+  });
 
+  describe('undefined', () => {
+    it('', () => {
+      assert(undefined === void 0);
+    });
   });
 
 });
