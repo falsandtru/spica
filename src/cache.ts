@@ -193,6 +193,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       this.dispose(record, true);
       return;
     }
+    // Optimization for memoize.
+    if (this.capacity >= 10 && record.index === record.index.list.head) return record.value;
     this.access(record);
     this.slide();
     return record.value;
