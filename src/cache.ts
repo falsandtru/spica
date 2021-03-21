@@ -256,8 +256,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         LFU: [0, LFU[0]],
       };
     }
-    if (LRU[1] + LFU[1] === 0) return;
-    if ((LRU[0] + LFU[0]) % this.frequency) return;
+    if ((LRU[0] + LFU[0]) % this.frequency || LRU[1] + LFU[1] === 0) return;
     const rateR = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1]);
     const rateF = rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1]) * indexes.LRU.length / indexes.LFU.length | 0;
     if (ratio < 100 && rateF > rateR && indexes.LFU.length >= capacity * ratio / 100) {
