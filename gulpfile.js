@@ -112,8 +112,6 @@ gulp.task('ts:dist', () =>
   compile(config.ts.dist.src)
     .pipe($.unassert())
     .pipe($.header(config.banner))
-    .pipe(gulp.dest(config.ts.dist.dest))
-    .pipe($.minify({ output: { comments: /^!/ }, ext: { min: '.min.js' } }))
     .pipe(gulp.dest(config.ts.dist.dest)));
 
 gulp.task('karma:dev', done =>
