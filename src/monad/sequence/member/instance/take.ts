@@ -2,7 +2,7 @@ import { Sequence } from '../../core';
 import { compose } from '../../../../helper/compose';
 
 compose(Sequence, class <a, z> extends Sequence<a, z> {
-  public take(n: number): Sequence<a, Sequence.Iterator<a>> {
+  public override take(n: number): Sequence<a, Sequence.Iterator<a>> {
     return new Sequence<a, Sequence.Iterator<a>>((iter = () => this.iterate(), cons) =>
       Sequence.Iterator.when(
         n > 0 ? iter() : <Sequence.Thunk<a>>Sequence.Iterator.done(),

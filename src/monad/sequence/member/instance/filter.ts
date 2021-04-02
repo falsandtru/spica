@@ -2,7 +2,7 @@ import { Sequence } from '../../core';
 import { compose } from '../../../../helper/compose';
 
 compose(Sequence, class <a, z> extends Sequence<a, z> {
-  public filter(f: (a: a, i: number) => boolean): Sequence<a, Sequence.Iterator<a>> {
+  public override filter(f: (a: a, i: number) => boolean): Sequence<a, Sequence.Iterator<a>> {
     return new Sequence<a, Sequence.Iterator<a>>((iter = () => this.iterate(), cons) =>
       Sequence.Iterator.when(
         iter(),

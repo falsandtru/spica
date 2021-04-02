@@ -2,7 +2,7 @@ import { Sequence } from '../../core';
 import { compose } from '../../../../helper/compose';
 
 compose(Sequence, class <a, z> extends Sequence<a, z> {
-  public permutations(): Sequence<a[], [Sequence.Iterator<Sequence<a[], unknown>>, Sequence.Iterator<a[]>]> {
+  public override permutations(): Sequence<a[], [Sequence.Iterator<Sequence<a[], unknown>>, Sequence.Iterator<a[]>]> {
     return Sequence.from([0])
       .bind<a[]>(() => {
         const xs = this.extract();

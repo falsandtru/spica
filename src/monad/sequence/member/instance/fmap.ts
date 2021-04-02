@@ -2,7 +2,7 @@ import { Sequence } from '../../core';
 import { compose } from '../../../../helper/compose';
 
 compose(Sequence, class <a, z> extends Sequence<a, z> {
-  public fmap<b>(f: (a: a) => b): Sequence<b, Sequence.Iterator<a>> {
+  public override fmap<b>(f: (a: a) => b): Sequence<b, Sequence.Iterator<a>> {
     return new Sequence<b, Sequence.Iterator<a>>((iter = () => this.iterate()) =>
       Sequence.Iterator.when<a, Sequence.Data<b, Sequence.Iterator<a>>>(
         iter(),

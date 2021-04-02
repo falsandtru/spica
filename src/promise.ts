@@ -384,13 +384,13 @@ export const never: Promise<never> = new class Never extends Promise<never> {
   constructor() {
     super(noop);
   }
-  public then() {
+  public override then() {
     return this;
   }
-  public catch() {
+  public override catch() {
     return this;
   }
-  public finally() {
+  public override finally() {
     return this;
   }
 }();

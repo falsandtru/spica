@@ -309,10 +309,10 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     void this[Coroutine.exit](void 0);
     return true;
   }
-  public [Coroutine.terminate](reason?: unknown): void {
+  public override [Coroutine.terminate](reason?: unknown): void {
     void this.terminate(reason);
   }
-  public [Coroutine.port] = {
+  public override [Coroutine.port] = {
     ask: () => { throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot use coroutine port.`); },
     recv: () => { throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot use coroutine port.`); },
     send: () => { throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot use coroutine port.`); },

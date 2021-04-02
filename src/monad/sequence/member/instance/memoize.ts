@@ -6,7 +6,7 @@ import { memoize } from '../../../../memoize';
 const memory = memoize(<a>(_: Sequence<a, unknown>): Map<number, Sequence.Thunk<a>> => new Map());
 
 compose(Sequence, class <a, z> extends Sequence<a, z> {
-  public memoize(): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]> {
+  public override memoize(): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]> {
     return new Sequence<a, [number, Map<number, Sequence.Thunk<a>>]>(
       ([i, memo] = [0, memory(this)], cons) =>
         Sequence.Iterator.when(

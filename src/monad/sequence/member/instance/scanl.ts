@@ -2,7 +2,7 @@ import { Sequence } from '../../core';
 import { compose } from '../../../../helper/compose';
 
 compose(Sequence, class <a, z> extends Sequence<a, z> {
-  public scanl<b>(f: (b: b, a: a) => b, z: b): Sequence<b, [b, Sequence.Iterator<a>, number]> {
+  public override scanl<b>(f: (b: b, a: a) => b, z: b): Sequence<b, [b, Sequence.Iterator<a>, number]> {
     return new Sequence<b, [b, Sequence.Iterator<a>, number]>(([prev, iter, i] = [z, () => this.iterate(), 0]) =>
       Sequence.Iterator.when<a, Sequence.Data<b, [b, Sequence.Iterator<a>, number]>>(
         iter(),

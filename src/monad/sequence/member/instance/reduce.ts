@@ -3,7 +3,7 @@ import { Sequence } from '../../core';
 import { compose } from '../../../../helper/compose';
 
 compose(Sequence, class <a, z> extends Sequence<a, z> {
-  public reduce(): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]> {
+  public override reduce(): Sequence<a, [number, Map<number, Sequence.Thunk<a>>]> {
     return new Sequence<a, [number, Map<number, Sequence.Thunk<a>>]>(
       ([i, memo] = [0, new Map<number, Sequence.Thunk<a>>()], cons) =>
         Sequence.Iterator.when(

@@ -94,15 +94,15 @@ export class Left<a> extends Either<a, never> {
     super(throwCallError);
     void this.LEFT;
   }
-  public bind<_>(_: (_: never) => Left<a>): Left<a>
-  public bind<b>(_: (_: never) => Either<a, b>): Either<a, b>
-  public bind<b>(_: (_: never) => Either<a, b>): Either<a, b> {
+  public override bind<_>(_: (_: never) => Left<a>): Left<a>
+  public override bind<b>(_: (_: never) => Either<a, b>): Either<a, b>
+  public override bind<b>(_: (_: never) => Either<a, b>): Either<a, b> {
     return this;
   }
-  public extract(): never
-  public extract<c>(transform: (a: a) => c): c
-  public extract<c>(left: (a: a) => c, right: (b: never) => c): c
-  public extract<c>(left?: (a: a) => c): c {
+  public override extract(): never
+  public override extract<c>(transform: (a: a) => c): c
+  public override extract<c>(left: (a: a) => c, right: (b: never) => c): c
+  public override extract<c>(left?: (a: a) => c): c {
     if (!left) throw this.a;
     return left(this.a);
   }
@@ -114,16 +114,16 @@ export class Right<b> extends Either<never, b> {
     super(throwCallError);
     void this.RIGHT;
   }
-  public bind<c, _ = never>(f: (b: b) => Right<c>): Right<c>
-  public bind<c, a>(f: (b: b) => Either<a, c>): Either<a, c>
-  public bind<c, a>(f: (b: b) => Either<a, c>): Either<a, c> {
+  public override bind<c, _ = never>(f: (b: b) => Right<c>): Right<c>
+  public override bind<c, a>(f: (b: b) => Either<a, c>): Either<a, c>
+  public override bind<c, a>(f: (b: b) => Either<a, c>): Either<a, c> {
     return new Either(() => f(this.extract()));
   }
-  public extract(): b
-  public extract(transform: (a: never) => b): b
-  public extract<c>(transform: (a: never) => c): b
-  public extract<c>(left: (a: never) => c, right: (b: b) => c): c
-  public extract<c>(_?: (a: never) => c, right?: (b: b) => c): b | c {
+  public override extract(): b
+  public override extract(transform: (a: never) => b): b
+  public override extract<c>(transform: (a: never) => c): b
+  public override extract<c>(left: (a: never) => c, right: (b: b) => c): c
+  public override extract<c>(_?: (a: never) => c, right?: (b: b) => c): b | c {
     return !right
       ? this.b
       : right(this.b);

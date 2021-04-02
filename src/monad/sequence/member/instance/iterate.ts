@@ -2,7 +2,7 @@ import { Sequence } from '../../core';
 import { compose } from '../../../../helper/compose';
 
 compose(Sequence, class <a, z> extends Sequence<a, z> {
-  public iterate(): Sequence.Thunk<a> {
+  public override iterate(): Sequence.Thunk<a> {
     return this.iterate_();
   }
   private iterate_(z?: z, i = 0): Sequence.Thunk<a> {
