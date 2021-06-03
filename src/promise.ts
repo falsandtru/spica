@@ -378,7 +378,7 @@ function isAtomicPromiseLike(value: any): value is AtomicPromiseLike<any> {
 }
 
 export const never: Promise<never> = new class Never extends Promise<never> {
-  public static get [Symbol.species]() {
+  public static override get [Symbol.species]() {
     return Never;
   }
   constructor() {
