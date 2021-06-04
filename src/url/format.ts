@@ -79,6 +79,8 @@ type SharedURL = Partial<Mutable<global.URL>> & {
 export class ReadonlyURL implements Readonly<global.URL> {
   // Can't freeze URL object in the Firefox extension environment.
   // ref: https://github.com/falsandtru/pjax-api/issues/44#issuecomment-633915035
+  // Bug: Error in dependents.
+  // @ts-ignore
   private static readonly get: (url: string, base: string | undefined) => SharedURL
     = flip(uncurry(memoize((base: string | undefined) => memoize((url: string) =>
       ({
