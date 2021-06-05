@@ -13,12 +13,12 @@ export function clear<as extends unknown[]>(f: (...as: as) => void): (...as: as)
   return (...as) => void f(...as);
 }
 
-export function once<f extends (..._: unknown[]) => undefined>(f: f): f {
+export function once<f extends (..._: unknown[]) => unknown>(f: f): f {
+  let result: unknown;
   return ((...as) => {
-    if (f === noop) return;
-    f(...as);
+    if (f === noop) return result;
+    result = f(...as);
     f = noop as f;
-    as = [];
   }) as f;
 }
 
