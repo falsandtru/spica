@@ -19,6 +19,7 @@ export function once<f extends (..._: unknown[]) => unknown>(f: f): f {
     if (f === noop) return result;
     result = f(...as);
     f = noop as f;
+    return result;
   }) as f;
 }
 
