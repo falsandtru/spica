@@ -15,12 +15,12 @@ export function clear<as extends unknown[]>(f: (...as: as) => void): (...as: as)
 
 export function once<f extends (..._: unknown[]) => unknown>(f: f): f {
   let result: unknown;
-  return ((...as) => {
+  return function (this: unknown, ...as) {
     if (f === noop) return result;
-    result = f(...as);
+    result = f.call(this, ...as);
     f = noop as f;
     return result;
-  }) as f;
+  } as f;
 }
 
 export function run(fs: readonly (() => () => void)[]): () => undefined {

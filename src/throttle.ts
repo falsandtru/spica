@@ -1,10 +1,10 @@
 import { setTimeout } from './global';
 
-export function throttle<T>(interval: number, callback: (last: T, buffer: T[]) => void, capacity: number = 1): (arg: T) => void {
+export function throttle<T, C = unknown>(interval: number, callback: (this: C, last: T, buffer: T[]) => void, capacity: number = 1): (this: C, arg: T) => void {
   // Bug: Karma and TypeScript
   let timer: ReturnType<typeof setTimeout> | 0 = 0;
   let buffer: T[] = [];
-  return (data: T) => {
+  return function (this: unknown, data: T) {
     if (capacity === 1) {
       buffer = [data];
     }
@@ -20,16 +20,16 @@ export function throttle<T>(interval: number, callback: (last: T, buffer: T[]) =
       const buf = buffer;
       buffer = [];
       assert(buf.length > 0);
-      void callback(buf[0], buf);
+      void callback.call(this, buf[0], buf);
     }, interval);
   };
 }
 
-export function debounce<T>(delay: number, callback: (last: T, buffer: T[]) => void, capacity: number = 1): (arg: T) => void {
+export function debounce<T, C = unknown>(delay: number, callback: (this: C, last: T, buffer: T[]) => void, capacity: number = 1): (this: C, arg: T) => void {
   // Bug: Karma and TypeScript
   let timer: ReturnType<typeof setTimeout> | 0 = 0;
   let buffer: T[] = [];
-  return (data: T) => {
+  return function (this: unknown, data: T) {
     if (capacity === 1) {
       buffer = [data];
     }
@@ -48,7 +48,7 @@ export function debounce<T>(delay: number, callback: (last: T, buffer: T[]) => v
         const buf = buffer;
         buffer = [];
         assert(buf.length > 0);
-        void callback(buf[0], buf);
+        void callback.call(this, buf[0], buf);
       }, buffer.length > 1 ? delay : 0);
     }, delay);
   };
