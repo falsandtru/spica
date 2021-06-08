@@ -1,6 +1,16 @@
 import { Array } from './global';
 import { noop } from './noop';
 
+export function once<f extends (..._: unknown[]) => unknown>(f: f): f {
+  let result: unknown;
+  return function (this: unknown, ...as) {
+    if (f === noop) return result;
+    result = f.call(this, ...as);
+    f = noop as f;
+    return result;
+  } as f;
+}
+
 export function mapParameters<as extends unknown[], bs extends readonly unknown[], c>(f: (...b: bs) => c, g: (...as: as) => bs): (...as: as) => c {
   return (...as) => f(...g(...as));
 }
@@ -11,16 +21,6 @@ export function mapReturn<as extends unknown[], b, c>(f: (...as: as) => b, g: (b
 
 export function clear<as extends unknown[]>(f: (...as: as) => void): (...as: as) => undefined {
   return (...as) => void f(...as);
-}
-
-export function once<f extends (..._: unknown[]) => unknown>(f: f): f {
-  let result: unknown;
-  return function (this: unknown, ...as) {
-    if (f === noop) return result;
-    result = f.call(this, ...as);
-    f = noop as f;
-    return result;
-  } as f;
 }
 
 export function run(fs: readonly (() => () => void)[]): () => undefined {
