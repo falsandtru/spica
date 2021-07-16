@@ -1,21 +1,21 @@
 import { crypto } from './global';
 
-const FORMAT_V4 = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
-
 export function uuid(): string {
   // version 4
-  return body(rnd16, hex);
+  return body(rnd16, HEX);
 }
 
-const body = Function('rnd16', 'hex', [
+const HEX = [...Array(16)].map((_, i) => i.toString(16));
+
+const body = Function('rnd16', 'HEX', [
   '"use strict";',
   'return ""',
-  FORMAT_V4.replace(/./g, c => {
+  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/./g, c => {
     switch (c) {
       case 'x':
-        return `+ hex[rnd16()]`;
+        return `+ HEX[rnd16()]`;
       case 'y':
-        return `+ hex[rnd16() & 0x03 | 0x08]`;
+        return `+ HEX[rnd16() & 0x03 | 0x08]`;
       default:
         return `+ '${c}'`;
     }
@@ -49,5 +49,3 @@ function rnd16(): number {
     return buffer[index] >> offset & mask;
   }
 }
-
-const hex = [...Array(16)].map((_, i) => i.toString(16));
