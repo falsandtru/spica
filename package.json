@@ -48,12 +48,12 @@
     "LICENSE"
   ],
   "devDependencies": {
-    "@types/benchmark": "^2.1.1",
-    "@types/bluebird": "^3.5.36",
-    "@types/lru-cache": "^5.1.1",
-    "@types/mocha": "^9.0.0",
+    "@types/benchmark": "2.1.1",
+    "@types/bluebird": "3.5.36",
+    "@types/lru-cache": "5.1.1",
+    "@types/mocha": "9.0.0",
     "@types/power-assert": "1.5.4",
-    "@types/yallist": "^4.0.1",
+    "@types/yallist": "4.0.1",
     "benchmark": "^2.1.4",
     "bluebird": "^3.7.2",
     "browserify": "^17.0.0",
