@@ -10,7 +10,7 @@ import { noop } from './noop';
 export interface CofetchOptions {
   method?: string;
   headers?: Headers;
-  body?: Document | BodyInit | null;
+  body?: Document | XMLHttpRequestBodyInit | null;
   responseType?: XMLHttpRequestResponseType;
   timeout?: number;
   withCredentials?: boolean;

@@ -4,8 +4,8 @@ import { Collection } from '../collection';
 export class AttrMap<C, K, V> {
   constructor(
     entries: Iterable<[C, K, V]> = [],
-    private readonly KeyMap: new <K, V>(entries?: Iterable<[K, V]>) => Collection<K, V> = WeakMap,
-    private readonly ValueMap: new <K, V>(entries?: Iterable<[K, V]>) => Collection<K, V> = Map
+    private readonly KeyMap: new <K, V>(entries?: Iterable<[K, V]> | null) => Collection<K, V> = WeakMap,
+    private readonly ValueMap: new <K, V>(entries?: Iterable<[K, V]> | null) => Collection<K, V> = Map
   ) {
     for (const [c, k, v] of entries) {
       this.set(c, k, v);
