@@ -24,11 +24,11 @@ export class URL<T extends string> implements Readonly<global.URL> {
     T extends AbsoluteURL ? [string?] :
     T extends `${infer _}` ? [string] : [T])
   constructor(
-    public readonly url: string,
+    public readonly source: string,
     public readonly base?: string,
   ) {
     this[internal] = {
-      url: new ReadonlyURL(url, base),
+      url: new ReadonlyURL(source, base),
       searchParams: void 0,
     };
     assert(this[internal].url.href.endsWith(`${this.port}${this.pathname}${this.query}${this.fragment}`));

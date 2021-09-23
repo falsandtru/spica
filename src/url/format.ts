@@ -103,7 +103,7 @@ export class ReadonlyURL implements Readonly<global.URL> {
       })
       , new Cache(100)), new Cache(100))));
   constructor(
-    public readonly src: string,
+    public readonly source: string,
     public readonly base?: string,
   ) {
     const i = base?.indexOf('#') ?? -1;
@@ -111,11 +111,11 @@ export class ReadonlyURL implements Readonly<global.URL> {
       base = base?.slice(0, i);
     }
     const j = base?.indexOf('?') ?? -1;
-    if (i > -1 && src.indexOf('#') === -1) {
+    if (i > -1 && source.indexOf('#') === -1) {
       base = base?.slice(0, j);
     }
     this[internal] = {
-      share: ReadonlyURL.get(src, base),
+      share: ReadonlyURL.get(source, base),
       searchParams: void 0,
     };
   }
