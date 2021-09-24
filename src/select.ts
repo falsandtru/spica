@@ -1,4 +1,4 @@
-import { Set, Promise as ESPromise } from './global';
+import { Symbol, Set, Promise as ESPromise } from './global';
 import { ObjectEntries } from './alias';
 
 interface AsyncIterable<T = unknown, U = any, S = unknown> {

@@ -1,5 +1,5 @@
 import type { DeepImmutable, DeepRequired } from './type';
-import { Infinity, Object, Set, Map, WeakSet, setTimeout, clearTimeout, Error } from './global';
+import { Infinity, Symbol, Object, Set, Map, WeakSet, setTimeout, clearTimeout, Error } from './global';
 import { isFinite, ObjectFreeze } from './alias';
 import { tick } from './clock';
 import { Coroutine, CoroutineInterface, isCoroutine } from './coroutine';
