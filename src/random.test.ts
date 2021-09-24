@@ -58,8 +58,7 @@ describe('Unit: lib/random', () => {
   describe('unique', () => {
     it('', () => {
       const gen = unique(rnd0Z, 1);
-      assert(gen());
-      console.debug('lib/random unique rnd0Z', [...Array(62)].map(() => gen()).join(' '));
+      assert(new Set([...Array(999)].map(() => gen())).size === 999);
     });
 
   });
