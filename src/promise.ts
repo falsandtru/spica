@@ -86,7 +86,7 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
               return reject(status.reason);
           }
         }
-        (value as PromiseLike<T>).then(
+        value.then(
           value => {
             results[i] = value;
             ++count;
@@ -172,11 +172,11 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
               continue;
           }
         }
-        (value as PromiseLike<T>).then(
+        value.then(
           value => {
             results[i] = {
               status: 'fulfilled',
-              value: value as any,
+              value: value,
             };
             ++count;
             count === values.length && resolve(results);
@@ -213,7 +213,7 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
               continue;
           }
         }
-        (value as PromiseLike<T>).then(
+        value.then(
           value => {
             resolve(value);
             i = values.length;
@@ -377,7 +377,7 @@ export class Internal<T> {
 
 }
 
-function react(reactions: Array<FulfillReaction | RejectReaction>, param: unknown): void {
+function react(reactions: (FulfillReaction | RejectReaction)[], param: unknown): void {
   for (let i = 0; i < reactions.length; ++i) {
     const reaction = reactions[i];
     call(
