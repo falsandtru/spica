@@ -18,17 +18,19 @@ export const rnd0f = conv(rnd16);
 export const rnd0z = conv(rnd36);
 export const rnd0Z = conv(rnd62);
 
-export function unique(rnd: (len: number) => string, len: number, mem: Set<string> = new Set()): () => string {
+export function unique(rnd: (len: number) => string, len: number, mem?: Set<string>): () => string {
+  const clear = !mem;
+  mem ??= new Set();
   let limit = 5;
   return () => {
     while (true) {
       for (let i = 0; i < limit; ++i) {
         const r = rnd(len);
-        if (mem.has(r)) continue;
-        mem.add(r);
+        if (mem!.has(r)) continue;
+        mem!.add(r);
         return r;
       }
-      mem.clear();
+      clear && mem!.clear();
       ++len;
       limit = len < 3 ? limit : 3;
     }
