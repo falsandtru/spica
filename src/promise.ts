@@ -2,6 +2,26 @@ import { Array } from './global';
 import { isArray } from './alias';
 import { noop } from './noop';
 
+interface PromiseFulfilledResult<T> {
+  status: "fulfilled";
+  value: T;
+}
+interface PromiseRejectedResult {
+  status: "rejected";
+  reason: unknown;
+}
+export type PromiseSettledResult<T> = PromiseFulfilledResult<T> | PromiseRejectedResult;
+
+interface AggregateError extends Error {
+  readonly errors: any[];
+}
+interface AggregateErrorConstructor {
+  new(errors: Iterable<any>, message?: string): AggregateError;
+  (errors: Iterable<any>, message?: string): AggregateError;
+  readonly prototype: AggregateError;
+}
+declare var AggregateError: AggregateErrorConstructor;
+
 const enum State {
   pending,
   resolved,
@@ -22,31 +42,6 @@ type Status<T> =
     };
 
 const internal = Symbol.for('spica/promise::internal');
-
-
-interface PromiseFulfilledResult<T> {
-  status: "fulfilled";
-  value: T;
-}
-
-interface PromiseRejectedResult {
-  status: "rejected";
-  reason: unknown;
-}
-
-export type PromiseSettledResult<T> = PromiseFulfilledResult<T> | PromiseRejectedResult;
-
-interface AggregateError extends Error {
-  readonly errors: any[];
-}
-
-interface AggregateErrorConstructor {
-  new(errors: Iterable<any>, message?: string): AggregateError;
-  (errors: Iterable<any>, message?: string): AggregateError;
-  readonly prototype: AggregateError;
-}
-
-declare var AggregateError: AggregateErrorConstructor;
 
 interface AtomicPromiseLike<T> {
   readonly [internal]: Internal<T>;
