@@ -36,6 +36,18 @@ interface PromiseRejectedResult {
 
 export type PromiseSettledResult<T> = PromiseFulfilledResult<T> | PromiseRejectedResult;
 
+interface AggregateError extends Error {
+  readonly errors: any[];
+}
+
+interface AggregateErrorConstructor {
+  new(errors: Iterable<any>, message?: string): AggregateError;
+  (errors: Iterable<any>, message?: string): AggregateError;
+  readonly prototype: AggregateError;
+}
+
+declare var AggregateError: AggregateErrorConstructor;
+
 interface AtomicPromiseLike<T> {
   readonly [internal]: Internal<T>;
   then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2>;
@@ -76,9 +88,7 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
               ++count;
               continue;
             case State.rejected:
-              reject(status.reason);
-              i = values.length;
-              continue;
+              return reject(status.reason);
           }
         }
         (value as PromiseLike<T>).then(
@@ -186,6 +196,40 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
           });
       }
       count === values.length && resolve(results);
+    });
+  }
+  public static any<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<T>;
+  public static any<T>(vs: Iterable<T | PromiseLike<T>>): AtomicPromise<T> {
+    return new AtomicPromise<T>((resolve, reject) => {
+      const values = isArray(vs) ? vs : [...vs];
+      const reasons: unknown[] = Array(values.length);
+      let count = 0;
+      for (let i = 0; i < values.length; ++i) {
+        const value = values[i];
+        if (!isPromiseLike(value)) return resolve(value);
+        if (isAtomicPromiseLike(value)) {
+          const { status } = value[internal];
+          switch (status.state) {
+            case State.fulfilled:
+              return resolve(status.value);
+            case State.rejected:
+              reasons[i] = status.reason;
+              ++count;
+              continue;
+          }
+        }
+        (value as PromiseLike<T>).then(
+          value => {
+            resolve(value);
+            i = values.length;
+          },
+          reason => {
+            reasons[i] = reason;
+            ++count;
+            count === values.length && reject(new AggregateError(reasons, 'All promises were rejected'));
+          });
+      }
+      count === values.length && reject(new AggregateError(reasons, 'All promises were rejected'));
     });
   }
   public static resolve(): AtomicPromise<undefined>;

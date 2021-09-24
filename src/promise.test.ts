@@ -119,6 +119,37 @@ describe('Unit: lib/promise', () => {
         ]);
     });
 
+    it('any', async () => {
+      assert.deepEqual(
+        await AtomicPromise.any([]).catch((e: any) => e.errors),
+        []);
+      assert.deepEqual(
+        await AtomicPromise.any([
+          Promise.reject(1),
+          AtomicPromise.reject(2),
+        ]).catch((e: any) => e.errors),
+        [
+          1,
+          2,
+        ]);
+      assert.deepStrictEqual(
+        await AtomicPromise.any([
+          Promise.reject(1),
+          Promise.resolve(2),
+          3,
+          AtomicPromise.resolve(4),
+        ]),
+        3);
+      assert.deepStrictEqual(
+        await AtomicPromise.any([
+          Promise.reject(1),
+          Promise.resolve(2),
+          AtomicPromise.resolve(3),
+          4,
+        ]),
+        3);
+    });
+
     it('promise', async () => {
       (): Promise<void> => AtomicPromise.resolve();
       assert(await Promise.resolve(AtomicPromise.resolve(0)) === 0);
