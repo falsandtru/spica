@@ -1,4 +1,4 @@
-import { Symbol, Set, Promise as ESPromise } from './global';
+import { Symbol, Set, Promise } from './global';
 import { ObjectEntries } from './alias';
 
 interface AsyncIterable<T = unknown, U = any, S = unknown> {
@@ -24,7 +24,7 @@ export async function* select<T extends Channels>(
       chan = typeof chan === 'function' ? chan() : chan,
       take(name, chan[Symbol.asyncIterator]()))));
   while (reqs.size > 0) {
-    const [name, chan, req, result] = await ESPromise.race(reqs);
+    const [name, chan, req, result] = await Promise.race(reqs);
     assert(reqs.has(req));
     void reqs.delete(req);
     !result.done && void reqs.add(take(name, chan));

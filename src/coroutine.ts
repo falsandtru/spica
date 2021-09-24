@@ -1,5 +1,5 @@
 import type { Structural, DeepImmutable, DeepRequired } from './type';
-import { Array, Promise as ESPromise, Error } from './global';
+import { Array, Promise, Error } from './global';
 import { ObjectDefineProperty, ObjectGetOwnPropertyDescriptor } from './alias';
 import { tick, wait } from './clock';
 import { AtomicPromise, isPromiseLike } from './promise';
@@ -67,13 +67,13 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
             // Don't block.
             ? [[void 0, noop]]
             // Block.
-            : await ESPromise.all([
+            : await Promise.all([
                 // Don't block.
                 core.settings.capacity < 0
                   ? [void 0, noop] as const
                   : core.sendBuffer!.take() as unknown as [S, Reply<R, T>],
                 // Don't block.
-                ESPromise.all([
+                Promise.all([
                   core.settings.resume(),
                   core.settings.interval > 0
                     ? wait(core.settings.interval)
@@ -81,7 +81,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
                 ]),
               ]);
           reply = rpy;
-          assert(msg instanceof ESPromise === false);
+          assert(msg instanceof Promise === false);
           assert(msg instanceof AtomicPromise === false);
           if (!core.alive) break;
           // Block.
@@ -268,7 +268,7 @@ class Port<T, R, S> {
     const future = new Future<IteratorResult<R, T>>();
     core.sendBuffer!.put([msg, future.bind]);
     ++core.reception;
-    return ESPromise.all([future, core.recvBuffer.take()])
+    return Promise.all([future, core.recvBuffer.take()])
       .then(([result]) =>
         result.done
           ? core.result.then(({ value }) => ({ ...result, value }))
@@ -278,7 +278,7 @@ class Port<T, R, S> {
     const core = this[internal].co[internal];
     if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
     ++core.reception;
-    return ESPromise.resolve(core.recvBuffer.take())
+    return Promise.resolve(core.recvBuffer.take())
       .then(result =>
         result.done
           ? core.result.then(({ value }) => ({ ...result, value }))
@@ -291,7 +291,7 @@ class Port<T, R, S> {
     assert(core.sendBuffer instanceof Channel);
     core.settings.capacity >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
     const future = new Future<IteratorResult<R, T>>();
-    return ESPromise.resolve(core.sendBuffer!.put([msg, future.bind]));
+    return Promise.resolve(core.sendBuffer!.put([msg, future.bind]));
   }
   public connect<U>(com: (this: Coroutine<T, R, S>) => AsyncGenerator<S, U, R | T>): Promise<U> {
     const core = this[internal].co[internal];
