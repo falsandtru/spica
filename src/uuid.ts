@@ -2,12 +2,12 @@ import { crypto } from './global';
 
 export function uuid(): string {
   // version 4
-  return body(rnd16, HEX);
+  return gen(rnd16, HEX);
 }
 
 const HEX = [...Array(16)].map((_, i) => i.toString(16));
 
-const body = Function('rnd16', 'HEX', [
+const gen = Function('rnd16', 'HEX', [
   '"use strict";',
   'return ""',
   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/./g, c => {
