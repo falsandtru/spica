@@ -110,10 +110,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (margin <= 0) return;
     const { LRU, LFU } = this.indexes;
     let check = arguments.length !== 1;
-    let restore: List<Index<K>> | undefined;
+    let target: List<Index<K>> | undefined;
     while (this.length === this.capacity || this.size + margin > this.space) {
       const list = void 0
-        || LRU.length === +(restore === LRU)
+        || LRU.length === +(target === LRU)
         || LFU.length > this.capacity * this.ratio / 100
         || LFU.length > this.capacity / 2 && LFU.last!.value.clock < this.clock - this.capacity * 8
         || LFU.last && LFU.last.value.expiry < now()
@@ -123,17 +123,17 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       assert(this.memory.has(index.key));
       if (check && equal(index.key, key)) {
         check = false;
-        assert(!restore);
-        restore = list;
-        restore.head = restore.last;
+        assert(!target);
+        target = list;
+        target.head = target.last;
         continue;
       }
       const record = this.memory.get(index.key)!;
       this.dispose(record, false);
       this.settings.disposer && this.stack.push({ key: index.key, value: record.value });
     }
-    if (restore) {
-      restore.head = restore.tail;
+    if (target) {
+      target.head = target.tail;
     }
   }
   public put(key: K, value: V, size?: number, age?: number): boolean;
