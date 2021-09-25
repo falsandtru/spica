@@ -48,6 +48,7 @@ interface Record<K, V> {
 export interface CacheOptions<K, V = undefined> {
   readonly space?: number;
   readonly age?: number;
+  readonly life?: number;
   readonly disposer?: (value: V, key: K) => void;
   readonly capture?: {
     readonly delete?: boolean;
@@ -67,6 +68,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private readonly settings: CacheOptions<K, V> = {
     space: Infinity,
     age: Infinity,
+    life: 16,
     capture: {
       delete: true,
       clear: true,
@@ -115,7 +117,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       const list = void 0
         || LRU.length === +(target === LRU)
         || LFU.length > this.capacity * this.ratio / 100
-        || LFU.length > this.capacity / 2 && LFU.last!.value.clock < this.clock - this.capacity * 8
+        || LFU.last && LFU.last.value.clock < this.clock - this.capacity * this.settings.life!
         || LFU.last && LFU.last.value.expiry < now()
         ? LFU
         : LRU;
