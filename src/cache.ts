@@ -105,7 +105,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.SIZE -= size;
     callback && this.settings.disposer?.(value, index.value.key);
   }
-  private secure(margin: number, key?: K): void {
+  private ensure(margin: number, key?: K): void {
     assert(margin <= this.space);
     if (margin <= 0) return;
     const { LRU, LFU } = this.indexes;
@@ -153,7 +153,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (record) {
       assert(this.memory.has(key));
       this.settings.disposer && this.stack.push({ key, value: record.value });
-      this.secure(size - record.size, key);
+      this.ensure(size - record.size, key);
       this.SIZE += size - record.size;
       assert(0 <= this.size && this.size <= this.space);
       record.value = value;
@@ -163,7 +163,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       assert(this.stack.isEmpty());
       return true;
     }
-    this.secure(size);
+    this.ensure(size);
     assert(!this.memory.has(key));
 
     const { LRU } = this.indexes;
