@@ -3,7 +3,7 @@
 const undefined = void 0;
 
 interface Array<T> {
-  [i: number]: [number, T];
+  [i: number]: [priority: number, value: T];
   length: number;
 }
 
