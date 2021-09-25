@@ -21,7 +21,7 @@ import { equal } from './compare';
 比較検討
 
 ARC:
-ゴーストキャッシュの追加による走査コストおよびオーバヘッドの倍化を補えるほどのヒット率の増加を期待できない。
+操作コストの大幅な増加によりLRU上位互換に要求される速度性能を満たせない懸念がある。
 
 CLOCK(CAR):
 当実装の探索高速化手法および木構造と両立しない。
@@ -112,7 +112,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     let miss: false | undefined = arguments.length < 2 ? false : void 0;
     let restore: List<Index<K>> | undefined;
     while (this.length === this.capacity || this.size + margin > this.space) {
-      const list = false
+      const list = void 0
         || LRU.length === +(restore === LRU)
         || LFU.length > this.capacity * this.ratio / 100
         || LFU.length > this.capacity / 2 && LFU.last!.value.clock < this.clock - this.capacity * 8
@@ -248,7 +248,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private readonly frequency = max(this.capacity / 100 | 0, 1);
   private slide(): void {
     const { LRU, LFU } = this.stats;
-    const { capacity, ratio, indexes } = this;
+    const { capacity, frequency, ratio, indexes } = this;
     const window = capacity;
     if (LRU[0] + LFU[0] === window) {
       this.stats = {
@@ -256,16 +256,17 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         LFU: [0, LFU[0]],
       };
     }
-    if ((LRU[0] + LFU[0]) % this.frequency || LRU[1] + LFU[1] === 0) return;
+    if ((LRU[0] + LFU[0]) % frequency || LRU[1] + LFU[1] === 0) return;
     const rateR = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1]);
     const rateF = rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1]) * indexes.LRU.length / indexes.LFU.length | 0;
-    if (ratio < 100 && rateF > rateR && indexes.LFU.length >= capacity * ratio / 100) {
+    // 操作頻度を超えてキャッシュ比率を増減させても余剰比率の消化が追いつかず無駄
+    // LFUに収束させない
+    if (ratio < 98 && rateF > rateR && indexes.LFU.length >= capacity * ratio / 100) {
       //ratio % 10 || console.debug('+', this.ratio, LRU, LFU);
       ++this.ratio;
     }
-    // LRUに収束させない
     else
-    if (ratio > 10 && rateR > rateF && indexes.LRU.length >= capacity * (100 - ratio) / 100) {
+    if (ratio >  0 && rateR > rateF && indexes.LRU.length >= capacity * (100 - ratio) / 100) {
       //ratio % 10 || console.debug('-', this.ratio, LRU, LFU);
       --this.ratio;
     }
@@ -281,6 +282,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     ++this.stats.LRU[0];
     ++this.clock;
     ++this.clockR;
+    // Prevent LFU destruction.
     if (index.value.clock + LRU.length / 3 > this.clockR) {
       index.value.clock = this.clockR;
       index.moveToHead();
@@ -309,7 +311,7 @@ function rate(window: number, currHits: number, currTotal: number, prevHits: num
   const currRatio = min(currTotal * 100 / window | 0, 100);
   const prevRate = prevHits * 100 / prevTotal | 0;
   const prevRatio = 100 - currRatio;
-  return currRate * currRatio + prevRate * prevRatio | 0;
+  return currRate * currRatio + prevRate * prevRatio;
 }
 assert(rate(10, 5, 10, 0, 0) === 5000);
 assert(rate(10, 0, 0, 5, 10) === 5000);
