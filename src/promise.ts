@@ -67,8 +67,9 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
     return new AtomicPromise<T[]>((resolve, reject) => {
       const values = isArray(vs) ? vs : [...vs];
       const results: T[] = Array(values.length);
+      let done = false;
       let count = 0;
-      for (let i = 0; i < values.length; ++i) {
+      for (let i = 0; !done && i < values.length; ++i) {
         const value = values[i];
         if (!isPromiseLike(value)) {
           results[i] = value;
@@ -94,7 +95,7 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
           },
           reason => {
             reject(reason);
-            i = values.length;
+            done = true;
           });
       }
       count === values.length && resolve(results);
@@ -120,7 +121,7 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
         }
       }
       let done = false;
-      for (let i = 0; i < values.length; ++i) {
+      for (let i = 0; !done && i < values.length; ++i) {
         const value = values[i] as PromiseLike<T>;
         value.then(
           value => {
@@ -131,7 +132,6 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
             reject(reason);
             done = true;
           });
-        if (done) return;
       }
     });
   }
@@ -198,10 +198,13 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
     return new AtomicPromise<T>((resolve, reject) => {
       const values = isArray(vs) ? vs : [...vs];
       const reasons: unknown[] = Array(values.length);
+      let done = false;
       let count = 0;
-      for (let i = 0; i < values.length; ++i) {
+      for (let i = 0; !done && i < values.length; ++i) {
         const value = values[i];
-        if (!isPromiseLike(value)) return resolve(value);
+        if (!isPromiseLike(value)) {
+          return resolve(value);
+        }
         if (isAtomicPromiseLike(value)) {
           const { status } = value[internal];
           switch (status.state) {
@@ -216,7 +219,7 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
         value.then(
           value => {
             resolve(value);
-            i = values.length;
+            done = true;
           },
           reason => {
             reasons[i] = reason;
