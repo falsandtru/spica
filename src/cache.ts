@@ -109,7 +109,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     assert(margin <= this.space);
     if (margin <= 0) return;
     const { LRU, LFU } = this.indexes;
-    let miss: false | undefined = arguments.length < 2 ? false : void 0;
+    let check = arguments.length !== 1;
     let restore: List<Index<K>> | undefined;
     while (this.length === this.capacity || this.size + margin > this.space) {
       const list = void 0
@@ -121,8 +121,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         : LRU;
       const index = list.last!.value;
       assert(this.memory.has(index.key));
-      if (miss ?? equal(index.key, key)) {
-        miss = false;
+      if (check && equal(index.key, key)) {
+        check = false;
         assert(!restore);
         restore = list;
         restore.head = restore.last;
