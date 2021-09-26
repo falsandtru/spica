@@ -288,8 +288,8 @@ describe('Unit: lib/cache', () => {
       let hitdwc = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() * capacity * 10 | 0;
-        hitlru += +[lru.has(key), lru.set(key, i)][0];
-        hitdwc += [dwc.get(key)] && +dwc.put(key, i);
+        hitlru += lru.get(key) ? 1 : +lru.set(key, i + 1) & 0;
+        hitdwc += dwc.get(key) ? 1 : +dwc.put(key, i + 1);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitdwc = 0;
@@ -321,8 +321,8 @@ describe('Unit: lib/cache', () => {
         const key = Math.random() < 0.4
           ? Math.random() * capacity * 1 | 0
           : Math.random() * capacity * 9 + capacity | 0;
-        hitlru += +[lru.has(key), lru.set(key, i)][0];
-        hitdwc += [dwc.get(key)] && +dwc.put(key, i);
+        hitlru += lru.get(key) ? 1 : +lru.set(key, i + 1) & 0;
+        hitdwc += dwc.get(key) ? 1 : +dwc.put(key, i + 1);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitdwc = 0;
@@ -353,8 +353,8 @@ describe('Unit: lib/cache', () => {
       let hitdwc = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() * capacity * 10 | 0;
-        hitlru += +[lru.has(key), lru.set(key, i)][0];
-        hitdwc += [dwc.get(key)] && +dwc.put(key, i);
+        hitlru += lru.get(key) ? 1 : +lru.set(key, i + 1) & 0;
+        hitdwc += dwc.get(key) ? 1 : +dwc.put(key, i + 1);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitdwc = 0;
@@ -388,8 +388,8 @@ describe('Unit: lib/cache', () => {
         const key = Math.random() < 0.4
           ? Math.random() * capacity * 1 | 0
           : Math.random() * capacity * 9 + capacity | 0;
-        hitlru += +[lru.has(key), lru.set(key, i)][0];
-        hitdwc += [dwc.get(key)] && +dwc.put(key, i);
+        hitlru += lru.get(key) ? 1 : +lru.set(key, i + 1) & 0;
+        hitdwc += dwc.get(key) ? 1 : +dwc.put(key, i + 1);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitdwc = 0;
@@ -424,8 +424,8 @@ describe('Unit: lib/cache', () => {
           // Transitive distribution
           // DWCは推移的な分散には影響されない
           : Math.random() * capacity * 9 + capacity + i | 0;
-        hitlru += +[lru.has(key), lru.set(key, i)][0];
-        hitdwc += [dwc.get(key)] && +dwc.put(key, i);
+        hitlru += lru.get(key) ? 1 : +lru.set(key, i + 1) & 0;
+        hitdwc += dwc.get(key) ? 1 : +dwc.put(key, i + 1);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitdwc = 0;
@@ -465,8 +465,8 @@ describe('Unit: lib/cache', () => {
           // そのような状況が生じるならキャッシュサイズが小さすぎることに問題があることのほうが多いだろう
           ? Math.random() * capacity * 1 - i / 10 | 0
           : Math.random() * capacity * 9 + capacity + i | 0;
-        hitlru += +[lru.has(key), lru.set(key, i)][0];
-        hitdwc += [dwc.get(key)] && +dwc.put(key, i);
+        hitlru += lru.get(key) ? 1 : +lru.set(key, i + 1) & 0;
+        hitdwc += dwc.get(key) ? 1 : +dwc.put(key, i + 1);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitdwc = 0;
@@ -499,8 +499,8 @@ describe('Unit: lib/cache', () => {
         const key = Math.random() < 0.4
           ? Math.random() * capacity * 1 | 0
           : capacity + i % (capacity * 10);
-        hitlru += +[lru.has(key), lru.set(key, i)][0];
-        hitdwc += [dwc.get(key)] && +dwc.put(key, i);
+        hitlru += lru.get(key) ? 1 : +lru.set(key, i + 1) & 0;
+        hitdwc += dwc.get(key) ? 1 : +dwc.put(key, i + 1);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitdwc = 0;
@@ -533,8 +533,8 @@ describe('Unit: lib/cache', () => {
         const key = Math.random() < 0.1
           ? Math.random() * capacity * 1 | 0
           : capacity + i >> 1 << 1;
-        hitlru += +[lru.has(key), lru.set(key, i)][0];
-        hitdwc += [dwc.get(key)] && +dwc.put(key, i);
+        hitlru += lru.get(key) ? 1 : +lru.set(key, i + 1) & 0;
+        hitdwc += dwc.get(key) ? 1 : +dwc.put(key, i + 1);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitdwc = 0;
@@ -567,8 +567,8 @@ describe('Unit: lib/cache', () => {
         const key = Math.random() < 0.4
           ? Math.random() * capacity * 1 | 0
           : Math.random() * capacity * 9 + capacity | 0;
-        hitlru += +[lru.has(key), lru.set(key, i)][0];
-        hitdwc += [dwc.get(key)] && +dwc.put(key, i);
+        hitlru += lru.get(key) ? 1 : +lru.set(key, i + 1) & 0;
+        hitdwc += dwc.get(key) ? 1 : +dwc.put(key, i + 1);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitdwc = 0;
