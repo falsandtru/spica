@@ -289,8 +289,7 @@ describe('Unit: lib/cache', () => {
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() * capacity * 10 | 0;
         hitlru += +[lru.has(key), lru.set(key, i)][0];
-        dwc.get(key);
-        hitdwc += +dwc.put(key, i);
+        hitdwc += [dwc.get(key)] && +dwc.put(key, i);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitdwc = 0;
@@ -323,8 +322,7 @@ describe('Unit: lib/cache', () => {
           ? Math.random() * capacity * 1 | 0
           : Math.random() * capacity * 9 + capacity | 0;
         hitlru += +[lru.has(key), lru.set(key, i)][0];
-        dwc.get(key);
-        hitdwc += +dwc.put(key, i);
+        hitdwc += [dwc.get(key)] && +dwc.put(key, i);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitdwc = 0;
@@ -356,8 +354,7 @@ describe('Unit: lib/cache', () => {
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() * capacity * 10 | 0;
         hitlru += +[lru.has(key), lru.set(key, i)][0];
-        dwc.get(key);
-        hitdwc += +dwc.put(key, i);
+        hitdwc += [dwc.get(key)] && +dwc.put(key, i);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitdwc = 0;
@@ -392,8 +389,7 @@ describe('Unit: lib/cache', () => {
           ? Math.random() * capacity * 1 | 0
           : Math.random() * capacity * 9 + capacity | 0;
         hitlru += +[lru.has(key), lru.set(key, i)][0];
-        dwc.get(key);
-        hitdwc += +dwc.put(key, i);
+        hitdwc += [dwc.get(key)] && +dwc.put(key, i);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitdwc = 0;
@@ -429,8 +425,7 @@ describe('Unit: lib/cache', () => {
           // DWCは推移的な分散には影響されない
           : Math.random() * capacity * 9 + capacity + i | 0;
         hitlru += +[lru.has(key), lru.set(key, i)][0];
-        dwc.get(key);
-        hitdwc += +dwc.put(key, i);
+        hitdwc += [dwc.get(key)] && +dwc.put(key, i);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitdwc = 0;
@@ -471,8 +466,7 @@ describe('Unit: lib/cache', () => {
           ? Math.random() * capacity * 1 - i / 10 | 0
           : Math.random() * capacity * 9 + capacity + i | 0;
         hitlru += +[lru.has(key), lru.set(key, i)][0];
-        dwc.get(key);
-        hitdwc += +dwc.put(key, i);
+        hitdwc += [dwc.get(key)] && +dwc.put(key, i);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitdwc = 0;
@@ -506,8 +500,7 @@ describe('Unit: lib/cache', () => {
           ? Math.random() * capacity * 1 | 0
           : capacity + i % (capacity * 10);
         hitlru += +[lru.has(key), lru.set(key, i)][0];
-        dwc.get(key);
-        hitdwc += +dwc.put(key, i);
+        hitdwc += [dwc.get(key)] && +dwc.put(key, i);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitdwc = 0;
@@ -541,8 +534,7 @@ describe('Unit: lib/cache', () => {
           ? Math.random() * capacity * 1 | 0
           : capacity + i >> 1 << 1;
         hitlru += +[lru.has(key), lru.set(key, i)][0];
-        dwc.get(key);
-        hitdwc += +dwc.put(key, i);
+        hitdwc += [dwc.get(key)] && +dwc.put(key, i);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitdwc = 0;
@@ -576,8 +568,7 @@ describe('Unit: lib/cache', () => {
           ? Math.random() * capacity * 1 | 0
           : Math.random() * capacity * 9 + capacity | 0;
         hitlru += +[lru.has(key), lru.set(key, i)][0];
-        dwc.get(key);
-        hitdwc += +dwc.put(key, i);
+        hitdwc += [dwc.get(key)] && +dwc.put(key, i);
         if (i + 1 === warmup) {
           hitlru = 0;
           hitdwc = 0;
