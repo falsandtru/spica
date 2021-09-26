@@ -16,7 +16,7 @@ export function now(): number {
   return now_ = Date.now();
 }
 
-export const clock: Promise<undefined> = Promise.resolve(undefined);
+export const clock: Promise<undefined> = Promise.resolve(void 0);
 
 export function wait(ms: number): AtomicPromise<undefined> {
   assert(ms >= 0);
