@@ -550,12 +550,12 @@ describe('Unit: lib/cache', () => {
       assert(hitdwc / hitlru * 100 > 100);
     });
 
-    it('rate uneven 200', function () {
+    it('rate uneven 1,000', function () {
       if (!navigator.userAgent.includes('Chrome')) return;
       this.timeout(30 * 1e3);
       this.retries(3);
 
-      const capacity = 200;
+      const capacity = 1000;
       const lru = new LRUCache<number, number>(capacity);
       const dwc = new Cache<number, number>(capacity);
 
@@ -576,7 +576,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
       assert(dwc['memory'].size <= capacity);
-      console.debug('Cache uneven 200');
+      console.debug('Cache uneven 1,000');
       console.debug('LRU hit rate', hitlru * 100 / repeat);
       console.debug('DWC hit rate', hitdwc * 100 / repeat);
       console.debug('LFU ratio', dwc['ratio'], dwc['indexes'].LFU.length * 100 / dwc.length | 0);
