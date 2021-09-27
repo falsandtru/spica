@@ -109,11 +109,12 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.SIZE -= size;
     callback && this.settings.disposer?.(value, node.value.key);
   }
-  private ensure(margin: number, key?: K): void {
+  private ensure(margin: number, skip?: Record<K, V>): void {
+    margin -= skip?.size ?? 0;
     assert(margin <= this.space);
     if (margin <= 0) return;
+    const key = skip?.index.value.key;
     const { LRU, LFU } = this.indexes;
-    let check = arguments.length !== 1;
     let target: List<Index<K>> | undefined;
     while (this.length === this.capacity || this.size + margin > this.space) {
       const list = void 0
@@ -125,16 +126,17 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         : LRU;
       const index = list.last!.value;
       assert(this.memory.has(index.key));
-      if (check && equal(index.key, key)) {
-        check = false;
+      if (skip && equal(index.key, key)) {
         assert(!target);
         target = list;
         target.head = target.last;
-        continue;
+        skip = void 0;
       }
-      const record = this.memory.get(index.key)!;
-      this.dispose(record, false);
-      this.settings.disposer && this.stack.push({ key: index.key, value: record.value });
+      else {
+        const record = this.memory.get(index.key)!;
+        this.dispose(record, false);
+        this.settings.disposer && this.stack.push({ key: index.key, value: record.value });
+      }
     }
     if (target) {
       target.head = target.tail;
@@ -155,16 +157,15 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       : now() + age;
     const record = this.memory.get(key);
     if (record) {
-      assert(this.memory.has(key));
+      this.ensure(size, record);
       this.settings.disposer && this.stack.push({ key, value: record.value });
-      this.ensure(size - record.size, key);
+      assert(this.memory.has(key));
       this.SIZE += size - record.size;
       assert(0 <= this.size && this.size <= this.space);
       record.value = value;
       record.size = size;
       record.index.value.expiry = expiry;
       this.resume();
-      assert(this.stack.isEmpty());
       return true;
     }
     this.ensure(size);
@@ -180,7 +181,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       size,
     });
     this.resume();
-    assert(this.stack.isEmpty());
     return false;
   }
   public set(key: K, value: V, size?: number, age?: number): this;
@@ -226,7 +226,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.ratio = 50;
     this.indexes.LRU.clear();
     this.indexes.LFU.clear();
-    this.stack.clear();
     this.stats = {
       LRU: [0, 0],
       LFU: [0, 0],
