@@ -77,8 +77,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private readonly space: number;
   private SIZE = 0;
   // 1041 days < 2 ** 53 / 100,000,000 / 3600 / 24.
-  // LFU and LRU access counter only for LFU.
-  private clockF = 0;
+  // Hit counter only for LFU.
+  private clock = 0;
   // LRU access counter only for LRU.
   private clockR = 0;
   private memory = new Map<K, Record<K, V>>();
@@ -119,7 +119,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       const list = void 0
         || LRU.length === +(target === LRU)
         || LFU.length > this.capacity * this.ratio / 100
-        || LFU.last && LFU.last.value.clock < this.clockF - this.capacity * this.settings.life!
+        || LFU.last && LFU.last.value.clock < this.clock - this.capacity * this.settings.life!
         || LFU.last && LFU.last.value.expiry !== Infinity && LFU.last.value.expiry < now()
         ? LFU
         : LRU;
@@ -284,7 +284,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     assert(index.list === this.indexes.LRU);
     const { LRU, LFU } = this.indexes;
     ++this.stats.LRU[0];
-    ++this.clockF;
+    ++this.clock;
     ++this.clockR;
     // Prevent LFU destruction.
     if (index.value.clock + LRU.length / 3 > this.clockR) {
@@ -294,7 +294,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     }
     index.delete();
     assert(LFU.length !== this.capacity);
-    index.value.clock = this.clockF;
+    index.value.clock = this.clock;
     record.index = LFU.unshift(index.value);
     return true;
   }
@@ -302,8 +302,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const index = record.index;
     if (index.list !== this.indexes.LFU) return false;
     ++this.stats.LFU[0];
-    ++this.clockF;
-    index.value.clock = this.clockF;
+    ++this.clock;
+    index.value.clock = this.clock;
     index.moveToHead();
     return true;
   }
