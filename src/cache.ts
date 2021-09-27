@@ -103,11 +103,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       disposer!(value, key);
     }
   }
-  private dispose({ index, value, size }: Record<K, V>, callback: boolean): void {
-    index.delete();
-    this.memory.delete(index.value.key);
+  private dispose({ index: node, value, size }: Record<K, V>, callback: boolean): void {
+    node.delete();
+    this.memory.delete(node.value.key);
     this.SIZE -= size;
-    callback && this.settings.disposer?.(value, index.value.key);
+    callback && this.settings.disposer?.(value, node.value.key);
   }
   private ensure(margin: number, key?: K): void {
     assert(margin <= this.space);
@@ -280,31 +280,31 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         || this.accessLRU(record);
   }
   private accessLRU(record: Record<K, V>): boolean {
-    const index = record.index;
-    assert(index.list === this.indexes.LRU);
+    const node = record.index;
+    assert(node.list === this.indexes.LRU);
     const { LRU, LFU } = this.indexes;
     ++this.stats.LRU[0];
     ++this.clock;
     ++this.clockR;
     // Prevent LFU destruction.
-    if (index.value.clock + LRU.length / 3 > this.clockR) {
-      index.value.clock = this.clockR;
-      index.moveToHead();
+    if (node.value.clock + LRU.length / 3 > this.clockR) {
+      node.value.clock = this.clockR;
+      node.moveToHead();
       return true;
     }
-    index.delete();
+    node.delete();
     assert(LFU.length !== this.capacity);
-    index.value.clock = this.clock;
-    record.index = LFU.unshift(index.value);
+    node.value.clock = this.clock;
+    record.index = LFU.unshift(node.value);
     return true;
   }
   private accessLFU(record: Record<K, V>): boolean {
-    const index = record.index;
-    if (index.list !== this.indexes.LFU) return false;
+    const node = record.index;
+    if (node.list !== this.indexes.LFU) return false;
     ++this.stats.LFU[0];
     ++this.clock;
-    index.value.clock = this.clock;
-    index.moveToHead();
+    node.value.clock = this.clock;
+    node.moveToHead();
     return true;
   }
 }
