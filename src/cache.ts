@@ -98,10 +98,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (this.stack.isEmpty()) return;
     const { stack, settings: { disposer } } = this;
     assert(disposer);
-    while (!stack.isEmpty()) {
+    do {
       const { key, value } = stack.pop()!;
       disposer!(value, key);
-    }
+    } while (!stack.isEmpty())
   }
   private dispose({ index: node, value, size }: Record<K, V>, callback: boolean): void {
     node.delete();
