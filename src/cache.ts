@@ -3,7 +3,6 @@ import { max, min } from './alias';
 import { now } from './clock';
 import { IterableCollection } from './collection';
 import { List, Node } from './invlist';
-import { Stack } from './stack';
 import { extend } from './assign';
 import { tuple } from './tuple';
 import { equal } from './compare';
@@ -93,15 +92,15 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public get size(): number {
     return this.SIZE;
   }
-  private readonly stack = new Stack<{ key: K; value: V; }>();
+  private readonly garbages: { key: K; value: V; }[] = [];
   private resume(): void {
-    if (this.stack.isEmpty()) return;
-    const { stack, settings: { disposer } } = this;
+    if (this.garbages.length === 0) return;
+    const { garbages, settings: { disposer } } = this;
     assert(disposer);
     do {
-      const { key, value } = stack.pop()!;
+      const { key, value } = garbages.shift()!;
       disposer!(value, key);
-    } while (!stack.isEmpty())
+    } while (garbages.length !== 0)
   }
   private dispose({ index: node, value, size }: Record<K, V>, callback: boolean): void {
     node.delete();
@@ -135,7 +134,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       else {
         const record = this.memory.get(index.key)!;
         this.dispose(record, false);
-        this.settings.disposer && this.stack.push({ key: index.key, value: record.value });
+        this.settings.disposer && this.garbages.push({ key: index.key, value: record.value });
       }
     }
     if (target) {
@@ -157,8 +156,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       : now() + age;
     const record = this.memory.get(key);
     if (record) {
+      this.settings.disposer && this.garbages.push({ key, value: record.value });
       this.ensure(size, record);
-      this.settings.disposer && this.stack.push({ key, value: record.value });
       assert(this.memory.has(key));
       this.SIZE += size - record.size;
       assert(0 <= this.size && this.size <= this.space);
