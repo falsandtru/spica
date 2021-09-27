@@ -62,17 +62,19 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   ) {
     if (capacity < 1) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     extend(this.settings, opts);
+    this.life = this.settings.life!;
     this.space = this.settings.space!;
   }
   private readonly settings: CacheOptions<K, V> = {
     space: Infinity,
     age: Infinity,
-    life: 16,
+    life: 8,
     capture: {
       delete: true,
       clear: true,
     },
   };
+  private readonly life: number;
   private readonly space: number;
   private SIZE = 0;
   // 1041 days < 2 ** 53 / 100,000,000 / 3600 / 24.
@@ -119,7 +121,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       const list = void 0
         || LRU.length === +(target === LRU)
         || LFU.length > this.capacity * this.ratio / 100
-        || LFU.last && LFU.last.value.clock < this.clock - this.capacity * this.settings.life!
+        || LFU.last && LFU.last.value.clock < this.clock - this.capacity * this.life
         || LFU.last && LFU.last.value.expiry !== Infinity && LFU.last.value.expiry < now()
         ? LFU
         : LRU;
