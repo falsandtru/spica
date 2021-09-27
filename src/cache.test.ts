@@ -421,9 +421,8 @@ describe('Unit: lib/cache', () => {
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() < 0.4
           ? Math.random() * capacity * 1 | 0
-          // Transitive distribution
           // DWCは推移的な分散には影響されない
-          : Math.random() * capacity * 9 + capacity + i | 0;
+          : Math.random() * capacity * 9 + i * capacity / 100 + capacity | 0;
         hitlru += lru.get(key) ? 1 : +lru.set(key, i + 1) & 0;
         hitdwc += dwc.get(key) ? 1 : +dwc.put(key, i + 1);
         if (i + 1 === warmup) {
@@ -456,15 +455,14 @@ describe('Unit: lib/cache', () => {
       let hitdwc = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() < 0.4
-          // Transitive bias
-          // DWCは推移的な偏りに弱い
+          // DWCは推移的な偏りでやや精度低下する
           // 偏りの抽出が分布全体の推移により無効化され逆効果になるからであろう
           // 偏りの抽出によりLRUより精度を上げようとするキャッシュアルゴリズム全般のトレードオフと思われる
           // 単純に大きな分布なら問題ないが大きな分布の中で局所性の変化による疑似的な推移が生じる可能性はある
           // しかし推移により常に抽出を無効化し続ける状況は通常のアクセスパターンからは考えにくく
           // そのような状況が生じるならキャッシュサイズが小さすぎることに問題があることのほうが多いだろう
-          ? Math.random() * capacity * 1 - i / 10 | 0
-          : Math.random() * capacity * 9 + capacity + i | 0;
+          ? Math.random() * capacity * 1 - i * capacity / 100 | 0
+          : Math.random() * capacity * 9 + capacity | 0;
         hitlru += lru.get(key) ? 1 : +lru.set(key, i + 1) & 0;
         hitdwc += dwc.get(key) ? 1 : +dwc.put(key, i + 1);
         if (i + 1 === warmup) {
