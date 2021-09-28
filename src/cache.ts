@@ -60,7 +60,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     private readonly capacity: number,
     opts: CacheOptions<K, V> = {},
   ) {
-    if (capacity < 1) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
+    if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     extend(this.settings, opts);
     this.life = this.settings.life!;
     this.space = this.settings.space!;
@@ -148,8 +148,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public put(key: K, value: V, size?: number, age?: number): boolean;
   public put(this: Cache<K, undefined>, key: K, value?: V, size?: number, age?: number): boolean;
   public put(key: K, value: V, size: number = 1, age: number = this.settings.age!): boolean {
-    if (size < 1) throw new Error(`Spica: Cache: Size must be 1 or more.`);
-    if (age < 1) throw new Error(`Spica: Cache: Age must be 1 or more.`);
+    if (size >= 1 === false) throw new Error(`Spica: Cache: Size must be 1 or more.`);
+    if (age >= 1 === false) throw new Error(`Spica: Cache: Age must be 1 or more.`);
     if (size > this.space || age <= 0) {
       this.settings.disposer?.(value, key);
       return false;
