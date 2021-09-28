@@ -1,4 +1,4 @@
-import { Infinity, Map } from './global';
+import { Infinity, Number, Map } from './global';
 import { max, min } from './alias';
 import { now } from './clock';
 import { IterableCollection } from './collection';
@@ -79,9 +79,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private SIZE = 0;
   // 1041 days < 2 ** 53 / 100,000,000 / 3600 / 24.
   // Hit counter only for LFU.
-  private clock = 0;
+  private clock = Number.MIN_SAFE_INTEGER;
   // LRU access counter only for LRU.
-  private clockR = 0;
+  private clockR = Number.MIN_SAFE_INTEGER;
   private memory = new Map<K, Record<K, V>>();
   private readonly indexes = {
     LRU: new List<Index<K>>(),
