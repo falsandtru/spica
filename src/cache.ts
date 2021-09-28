@@ -35,13 +35,13 @@ JavaScriptにおける需要を満たさない懸念がある。
 
 interface Index<K> {
   key: K;
+  size: number;
   clock: number;
   expiry: number;
 }
 interface Record<K, V> {
   index: Node<Index<K>>;
   value: V;
-  size: number;
 }
 
 export interface CacheOptions<K, V = undefined> {
@@ -104,18 +104,20 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       disposer!(value, key);
     } while (garbages.length !== 0)
   }
-  private dispose({ index: node, value, size }: Record<K, V>, callback: boolean): void {
+  private dispose(node: Node<Index<K>>, value: V, callback: boolean): void;
+  private dispose(node: Node<Index<K>>, value: undefined, callback: false): void;
+  private dispose(node: Node<Index<K>>, value: V | undefined, callback?: boolean): void {
     if (!node.next) return;
     node.delete();
     this.memory.delete(node.value.key);
-    this.SIZE -= size;
-    callback && this.settings.disposer?.(value, node.value.key);
+    this.SIZE -= node.value.size;
+    callback && this.settings.disposer?.(value!, node.value.key);
   }
-  private ensure(margin: number, skip?: Record<K, V>): void {
-    margin -= skip?.size ?? 0;
+  private ensure(margin: number, skip?: Node<Index<K>>): void {
+    margin -= skip?.value.size ?? 0;
     assert(margin <= this.space);
     if (margin <= 0) return;
-    const key = skip?.index.value.key;
+    const key = skip?.value.key;
     const { LRU, LFU } = this.indexes;
     let target: List<Index<K>> | undefined;
     while (this.length === this.capacity || this.size + margin > this.space) {
@@ -135,9 +137,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         skip = void 0;
       }
       else {
-        const record = this.memory.get(index.key)!;
-        this.dispose(record, false);
-        this.settings.disposer && this.garbages.push({ key: index.key, value: record.value });
+        this.settings.disposer && this.garbages.push({ key: index.key, value: this.memory.get(index.key)!.value });
+        this.dispose(list.last!, void 0, false);
       }
     }
     if (target) {
@@ -160,13 +161,14 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const record = this.memory.get(key);
     if (record) {
       this.settings.disposer && this.garbages.push({ key, value: record.value });
-      this.ensure(size, record);
+      const node = record.index;
+      this.ensure(size, node);
       assert(this.memory.has(key));
-      this.SIZE += size - record.size;
+      this.SIZE += size - node.value.size;
       assert(0 <= this.size && this.size <= this.space);
       record.value = value;
-      record.size = size;
-      record.index.value.expiry = expiry;
+      node.value.size = size;
+      node.value.expiry = expiry;
       this.resume();
       return true;
     }
@@ -178,9 +180,13 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.SIZE += size;
     assert(0 <= this.size && this.size <= this.space);
     this.memory.set(key, {
-      index: LRU.unshift({ key, clock: ++this.clockR, expiry }),
+      index: LRU.unshift({
+        key,
+        size,
+        clock: ++this.clockR,
+        expiry,
+      }),
       value,
-      size,
     });
     this.resume();
     return false;
@@ -194,13 +200,14 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public get(key: K): V | undefined {
     const record = this.memory.get(key);
     if (!record) return;
-    const expiry = record.index.value.expiry;
+    const node = record.index;
+    const expiry = node.value.expiry;
     if (expiry !== Infinity && expiry <= now()) {
-      this.dispose(record, true);
+      this.dispose(node, record.value, true);
       return;
     }
     // Optimization for memoize.
-    if (this.capacity >= 10 && record.index === record.index.list.head) return record.value;
+    if (this.capacity >= 10 && node === node.list.head) return record.value;
     this.access(record);
     this.slide();
     return record.value;
@@ -212,7 +219,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (!record) return false;
     const expiry = record.index.value.expiry;
     if (expiry !== Infinity && expiry <= now()) {
-      this.dispose(record, true);
+      this.dispose(record.index, record.value, true);
       return false;
     }
     return true;
@@ -220,7 +227,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public delete(key: K): boolean {
     const record = this.memory.get(key);
     if (!record) return false;
-    this.dispose(record, this.settings.capture!.delete === true);
+    this.dispose(record.index, record.value, this.settings.capture!.delete === true);
     return true;
   }
   public clear(): void {
