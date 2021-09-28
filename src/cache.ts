@@ -105,6 +105,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     } while (garbages.length !== 0)
   }
   private dispose({ index: node, value, size }: Record<K, V>, callback: boolean): void {
+    if (!node.next) return;
     node.delete();
     this.memory.delete(node.value.key);
     this.SIZE -= size;
