@@ -282,7 +282,7 @@ describe('Unit: lib/cache', () => {
       const lru = new LRUCache<number, number>(capacity);
       const dwc = new Cache<number, number>(capacity);
 
-      const repeat = capacity * 2000;
+      const repeat = capacity * 1000;
       const warmup = capacity * 1000;
       let hitlru = 0;
       let hitdwc = 0;
@@ -313,7 +313,7 @@ describe('Unit: lib/cache', () => {
       const lru = new LRUCache<number, number>(capacity);
       const dwc = new Cache<number, number>(capacity);
 
-      const repeat = capacity * 2000;
+      const repeat = capacity * 1000;
       const warmup = capacity * 1000;
       let hitlru = 0;
       let hitdwc = 0;
@@ -347,7 +347,7 @@ describe('Unit: lib/cache', () => {
       const lru = new LRUCache<number, number>(capacity);
       const dwc = new Cache<number, number>(capacity);
 
-      const repeat = capacity * 2000;
+      const repeat = capacity * 1000;
       const warmup = capacity * 1000;
       let hitlru = 0;
       let hitdwc = 0;
@@ -379,7 +379,7 @@ describe('Unit: lib/cache', () => {
       const lru = new LRUCache<number, number>(capacity);
       const dwc = new Cache<number, number>(capacity);
 
-      const repeat = capacity * 2000;
+      const repeat = capacity * 1000;
       const warmup = capacity * 1000;
       let hitlru = 0;
       let hitdwc = 0;
@@ -414,7 +414,7 @@ describe('Unit: lib/cache', () => {
       const lru = new LRUCache<number, number>(capacity);
       const dwc = new Cache<number, number>(capacity);
 
-      const repeat = capacity * 2000;
+      const repeat = capacity * 1000;
       const warmup = capacity * 1000;
       let hitlru = 0;
       let hitdwc = 0;
@@ -449,7 +449,7 @@ describe('Unit: lib/cache', () => {
       const lru = new LRUCache<number, number>(capacity);
       const dwc = new Cache<number, number>(capacity);
 
-      const repeat = capacity * 2000;
+      const repeat = capacity * 1000;
       const warmup = capacity * 1000;
       let hitlru = 0;
       let hitdwc = 0;
@@ -489,7 +489,7 @@ describe('Unit: lib/cache', () => {
       const lru = new LRUCache<number, number>(capacity);
       const dwc = new Cache<number, number>(capacity);
 
-      const repeat = capacity * 2000;
+      const repeat = capacity * 1000;
       const warmup = capacity * 1000;
       let hitlru = 0;
       let hitdwc = 0;
@@ -523,7 +523,7 @@ describe('Unit: lib/cache', () => {
       const lru = new LRUCache<number, number>(capacity);
       const dwc = new Cache<number, number>(capacity);
 
-      const repeat = capacity * 2000;
+      const repeat = capacity * 1000;
       const warmup = capacity * 1000;
       let hitlru = 0;
       let hitdwc = 0;
