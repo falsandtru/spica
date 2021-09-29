@@ -97,12 +97,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private readonly garbages: { key: K; value: V; }[] = [];
   private resume(): void {
     if (this.garbages.length === 0) return;
-    const { garbages, settings: { disposer } } = this;
-    assert(disposer);
+    const { garbages, settings } = this;
     do {
       const { key, value } = garbages.shift()!;
-      disposer!(value, key);
-    } while (garbages.length !== 0)
+      settings.disposer!(value, key);
+    } while (garbages.length > 0)
   }
   private dispose(node: Node<Index<K>>, value: V, callback: boolean): void;
   private dispose(node: Node<Index<K>>, value: undefined, callback: false): void;
