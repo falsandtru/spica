@@ -68,7 +68,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private readonly settings: CacheOptions<K, V> = {
     space: Infinity,
     age: Infinity,
-    life: 8,
+    life: 10,
     capture: {
       delete: true,
       clear: true,
