@@ -6,7 +6,7 @@ import Yallist from 'yallist';
 describe('Benchmark:', function () {
   this.timeout(10 * 1e3);
 
-  describe('IxList', function () {
+  describe('List', function () {
     this.beforeEach(done => {
       setTimeout(done, 1000);
     });
@@ -113,6 +113,50 @@ describe('Benchmark:', function () {
         const list = new IxList(new Map(), cap);
         let i = 0;
         benchmark(`IxList put ${length.toLocaleString('en')}`, () => list.put(++i % cap), done);
+      });
+    }
+
+    for (const length of [10, 100, 1000, 10000, 100000]) {
+      it(`Yalist move ${length.toLocaleString('en')}`, function (done) {
+        const cap = length;
+        const list = new Yallist();
+        let i = 0;
+        benchmark(`Yalist move ${length.toLocaleString('en')}`, () => {
+          if (++i > cap) {
+            list.unshiftNode(list.tail!.prev!);
+          }
+          else {
+            list.unshift(i);
+          }
+        }, done);
+      });
+
+      it(`IvList move ${length.toLocaleString('en')}`, function (done) {
+        const cap = length;
+        const list = new InvList();
+        let i = 0;
+        benchmark(`IvList move ${length.toLocaleString('en')}`, () => {
+          if (++i > cap) {
+            list.last!.prev!.moveToHead();
+          }
+          else {
+            list.unshift(i);
+          }
+        }, done);
+      });
+
+      it(`IxList move ${length.toLocaleString('en')}`, function (done) {
+        const cap = length;
+        const list = new IxList();
+        let i = 0;
+        benchmark(`IxList move ${length.toLocaleString('en')}`, () => {
+          if (++i > cap) {
+            list.moveToHead(list.last!.prev);
+          }
+          else {
+            list.unshift(i);
+          }
+        }, done);
       });
     }
 
