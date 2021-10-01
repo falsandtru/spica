@@ -85,6 +85,8 @@ export class Node<T> {
     if (this.prev) {
       this.prev.next = this.next;
     }
+    // @ts-expect-error
+    this.list = undefined;
     this.next = this.prev = undefined;
     return this.value;
   }
