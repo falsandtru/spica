@@ -12,8 +12,21 @@ import { equal } from './compare';
 // Note: The logical clocks of a cache will overflow after 1041 days in 100,000,000 ops/sec.
 
 /*
-この実装はオーバーヘッド削減を優先して論理クロックのリセットを実装していないが他の高速な言語で
-これが問題になる場合はクロックの世代管理を行うだけでよいと思われる。
+この実装はオーバーヘッド削減を優先して論理クロックのリセットを実装していないが
+他の高速な言語でこれが問題となる場合はクロックのオーバーフローを利用して補正処理を行う方法が考えられ
+この場合十分大きなクロック上では世代の混同が生じる前にキャッシュの更新または破棄が完了すると期待でき
+わずかに前世代のキャッシュが混入したとしても一時的にわずかにキャッシュ効率が低下する程度の影響しかない。
+
+```
+assert(max(this.clock) > this.life * 8);
+const offset = this.clock - this.life < this.clock
+  ? 0
+  : this.life;
+if (LFU.last.clock - offset > this.clock - offset ||
+    LFU.last.clock - offset < this.clock - offset - this.life) {
+  LFU.pop();
+}
+```
 */
 
 /*
@@ -23,7 +36,7 @@ ARC:
 操作コストの大幅な増加によりLRU上位互換に要求される速度性能を満たせない懸念がある。
 
 CLOCK(CAR):
-当実装の探索高速化手法および木構造と両立しない。
+木構造と両立しない。
 
 TinyLFU:
 一部のワークロードへの最適化、アドミッションポリシーの相性、およびウインドウキャッシュの小ささから
