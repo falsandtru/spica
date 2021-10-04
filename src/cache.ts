@@ -62,7 +62,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   ) {
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     extend(this.settings, opts);
-    this.life = this.settings.life!;
+    this.life = this.capacity * this.settings.life!;
     this.space = this.settings.space!;
   }
   private readonly settings: CacheOptions<K, V> = {
@@ -123,7 +123,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       const list = void 0
         || LRU.length === +(target === LRU)
         || LFU.length > this.capacity * this.ratio / 100
-        || LFU.last && LFU.last.value.clock < this.clock - this.capacity * this.life
+        || LFU.last && LFU.last.value.clock < this.clock - this.life
         || LFU.last && LFU.last.value.expiry !== Infinity && LFU.last.value.expiry < now()
         ? LFU
         : LRU;
@@ -294,7 +294,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     ++this.clock;
     ++this.clockR;
     // Prevent LFU destruction.
-    if (node.value.clock + LRU.length / 3 > this.clockR) {
+    if (node.value.clock > this.clockR - LRU.length / 3) {
       node.value.clock = this.clockR;
       node.moveToHead();
       return true;
