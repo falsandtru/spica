@@ -281,8 +281,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       };
     }
     if ((LRU[0] + LFU[0]) % frequency || LRU[1] + LFU[1] === 0) return;
-    const rateR = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1]);
-    const rateF = rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1]) * indexes.LRU.length / indexes.LFU.length | 0;
+    const rateR = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1]) / (100 - ratio) * 100;
+    const rateF = rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1]) / (ratio || 1) * 100;
     // 操作頻度を超えてキャッシュ比率を増減させても余剰比率の消化が追いつかず無駄
     // LFUに収束させない
     if (ratio < 98 && rateF > rateR && indexes.LFU.length >= capacity * ratio / 100) {
