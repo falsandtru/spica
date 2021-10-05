@@ -320,7 +320,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   }
   private accessLFU(record: Record<K, V>): boolean {
     const node = record.index;
-    if (node.list !== this.indexes.LFU) return false;
+    const { LFU } = this.indexes;
+    if (node.list !== LFU) return false;
     ++this.stats.LFU[0];
     ++this.clock;
     node.value.clock = this.clock;
