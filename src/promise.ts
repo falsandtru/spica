@@ -53,16 +53,8 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
     return AtomicPromise;
   }
   public readonly [Symbol.toStringTag] = 'Promise';
-  public static all<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>, T10 | PromiseLike<T10>]): AtomicPromise<[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]>;
-  public static all<T1, T2, T3, T4, T5, T6, T7, T8, T9>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>]): AtomicPromise<[T1, T2, T3, T4, T5, T6, T7, T8, T9]>;
-  public static all<T1, T2, T3, T4, T5, T6, T7, T8>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>]): AtomicPromise<[T1, T2, T3, T4, T5, T6, T7, T8]>;
-  public static all<T1, T2, T3, T4, T5, T6, T7>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>]): AtomicPromise<[T1, T2, T3, T4, T5, T6, T7]>;
-  public static all<T1, T2, T3, T4, T5, T6>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>]): AtomicPromise<[T1, T2, T3, T4, T5, T6]>;
-  public static all<T1, T2, T3, T4, T5>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>]): AtomicPromise<[T1, T2, T3, T4, T5]>;
-  public static all<T1, T2, T3, T4>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>]): AtomicPromise<[T1, T2, T3, T4]>;
-  public static all<T1, T2, T3>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>]): AtomicPromise<[T1, T2, T3]>;
-  public static all<T1, T2>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>]): AtomicPromise<[T1, T2]>;
-  public static all<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<T[]>;
+  public static all<T extends readonly unknown[] | []>(values: T): AtomicPromise<{ -readonly [P in keyof T]: Awaited<T[P]> }>;
+  public static all<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<Awaited<T>[]>;
   public static all<T>(vs: Iterable<T | PromiseLike<T> | AtomicPromiseLike<T>>): AtomicPromise<T[]> {
     return new AtomicPromise<T[]>((resolve, reject) => {
       const values = isArray(vs) ? vs : [...vs];
@@ -101,7 +93,8 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
       count === values.length && resolve(results);
     });
   }
-  public static race<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<T>;
+  public static race<T extends readonly unknown[] | []>(values: T): AtomicPromise<Awaited<T[number]>>;
+  public static race<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<Awaited<T>>;
   public static race<T>(vs: Iterable<T | PromiseLike<T> | AtomicPromiseLike<T>>): AtomicPromise<T> {
     return new AtomicPromise<T>((resolve, reject) => {
       const values = isArray(vs) ? vs : [...vs];
@@ -135,9 +128,8 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
       }
     });
   }
-  public static allSettled<T extends readonly unknown[] | readonly [unknown]>(values: T):
-    AtomicPromise<{ -readonly [P in keyof T]: PromiseSettledResult<T[P] extends PromiseLike<infer U> ? U : T[P]> }>;
-  public static allSettled<T>(values: Iterable<T>): AtomicPromise<PromiseSettledResult<T extends PromiseLike<infer U> ? U : T>[]>;
+  public static allSettled<T extends readonly unknown[] | []>(values: T): AtomicPromise<{ -readonly [P in keyof T]: PromiseSettledResult<Awaited<T[P]>> }>;
+  public static allSettled<T>(values: Iterable<T>): AtomicPromise<PromiseSettledResult<Awaited<T>>[]>;
   public static allSettled<T>(vs: Iterable<T>): AtomicPromise<unknown> {
     return new AtomicPromise<PromiseSettledResult<T extends PromiseLike<infer U> ? U : T>[]>(resolve => {
       const values = isArray(vs) ? vs : [...vs];
@@ -193,7 +185,8 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
       count === values.length && resolve(results);
     });
   }
-  public static any<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<T>;
+  public static any<T extends readonly unknown[] | []>(values: T): AtomicPromise<Awaited<T[number]>>;
+  public static any<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<Awaited<T>>;
   public static any<T>(vs: Iterable<T | PromiseLike<T>>): AtomicPromise<T> {
     return new AtomicPromise<T>((resolve, reject) => {
       const values = isArray(vs) ? vs : [...vs];
