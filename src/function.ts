@@ -1,4 +1,5 @@
 import { Array } from './global';
+import { causeAsyncException } from './exception';
 import { noop } from './noop';
 
 export function singleton<f extends (..._: unknown[]) => unknown>(f: f): f {
@@ -31,15 +32,28 @@ export function run(fs: readonly (() => () => void)[]): () => undefined {
     }
   }
   catch (reason) {
+    // TODO: Use AggregateError and cause option.
     for (let i = 0; gs[i]; ++i) {
-      gs[i]();
+      try {
+        gs[i]();
+      } catch (reason) {
+        causeAsyncException(reason);
+      }
     }
     throw reason;
   }
   // @ts-ignore
   return singleton(() => {
+    const rs = [];
     for (let i = 0; gs[i]; ++i) {
-      gs[i]();
+      try {
+        gs[i]();
+      } catch (reason) {
+        rs.push(reason);
+      }
+    }
+    if (rs.length > 0) {
+      throw new AggregateError(rs);
     }
   });
 }
