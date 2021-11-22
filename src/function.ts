@@ -1,7 +1,7 @@
 import { Array } from './global';
 import { noop } from './noop';
 
-export function once<f extends (..._: unknown[]) => unknown>(f: f): f {
+export function singleton<f extends (..._: unknown[]) => unknown>(f: f): f {
   let result: unknown;
   return function (this: unknown, ...as) {
     if (f === noop) return result;
@@ -37,7 +37,7 @@ export function run(fs: readonly (() => () => void)[]): () => undefined {
     throw reason;
   }
   // @ts-ignore
-  return once(() => {
+  return singleton(() => {
     for (let i = 0; gs[i]; ++i) {
       gs[i]();
     }

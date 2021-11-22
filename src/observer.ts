@@ -2,7 +2,7 @@ import type { Inits, DeepImmutable, DeepRequired } from './type';
 import { Number, Map, WeakSet, Error } from './global';
 import { List } from './ixlist';
 import { extend } from './assign';
-import { once } from './function';
+import { singleton } from './function';
 import { push, splice } from './array';
 import { causeAsyncException } from './exception';
 
@@ -90,7 +90,7 @@ export class Observation<N extends readonly unknown[], D, R>
       options,
     };
     monitors.push(item);
-    return once(() => void this.off(namespace, item));
+    return singleton(() => void this.off(namespace, item));
   }
   public on(namespace: Readonly<N>, subscriber: Subscriber<N, D, R>, options: ObserverOptions = {}): () => void {
     if (typeof subscriber !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${subscriber}`);
@@ -105,7 +105,7 @@ export class Observation<N extends readonly unknown[], D, R>
       options,
     };
     subscribers.push(item);
-    return once(() => void this.off(namespace, item));
+    return singleton(() => void this.off(namespace, item));
   }
   public once(namespace: Readonly<N>, subscriber: Subscriber<N, D, R>): () => void {
     return this.on(namespace, subscriber, { once: true });

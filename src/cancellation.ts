@@ -1,5 +1,5 @@
 import { Set } from './global';
-import { once } from './function';
+import { singleton } from './function';
 import { noop } from './noop';
 import { AtomicPromise } from './promise';
 import { causeAsyncException } from './exception';
@@ -85,7 +85,7 @@ class Internal<L> implements Canceller<L>, Cancellee<L> {
       return noop;
     }
     this.listeners.add(handler);
-    return once(() => void this.listeners.delete(handler));
+    return singleton(() => void this.listeners.delete(handler));
 
     function handler(reason: L): void {
       try {
