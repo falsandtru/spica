@@ -22,6 +22,7 @@
     "maybe",
     "either",
     "monad",
+    "arrow",
     "list",
     "hlist",
     "invlist",

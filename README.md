@@ -31,6 +31,7 @@ $ npm i spica
 - Maybe, Just, Nothing
 - Either, Left, Right
 - Sequence
+- bundle, aggregate
 - curry
 - uncurry
 - flip
@@ -43,7 +44,6 @@ $ npm i spica
 - clone
 - extend
 - concat
-- sort
 
 ## Browsers
 
