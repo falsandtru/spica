@@ -42,21 +42,18 @@ interface NondeterminateTypeMap {
 export type Narrow<TS extends readonly unknown[]> =
   TS extends readonly [] ? [] :
   TS extends readonly [infer T] ? [T] :
-  TS extends readonly [infer T1, infer T2, ...infer TS]
-    ? Or<IsNever<T1>, IsAny<T1>> extends true
-      ? Or<IsNever<T2>, IsAny<T2>> extends true
-        ? Narrow<TS>
-        : Narrow<[T2, ...TS]>
-      : Or<IsNever<T2>, IsAny<T2>> extends true
-        ? Narrow<[T1, ...TS]>
-        : T1 extends T2
-          ? T2 extends T1
-            ? Narrow<[T1 | T2, ...TS]>
-            : Narrow<[T1, ...TS]>
-          : T2 extends T1
-            ? Narrow<[T2, ...TS]>
-            : [T1, ...Narrow<[T2, ...TS]>]
-    : never;
+  TS extends readonly [infer T1, infer T2, ...infer TS] ?
+    Or<IsNever<T1>, IsNever<T2>> extends true ? Narrow<[T1 | T2, ...TS]> :
+    IsAny<T1> extends true ? Narrow<[T2, ...TS]> :
+    IsAny<T2> extends true ? Narrow<[T1, ...TS]> :
+    [T1] extends [T2]
+      ? [T2] extends [T1]
+        ? Narrow<[T1 & T2, ...TS]>
+        : Narrow<[T1, ...TS]>
+      : [T2] extends [T1]
+        ? Narrow<[T2, ...TS]>
+        : [T1, ...Narrow<[T2, ...TS]>] :
+  never;
 export type Intersect<TS extends readonly unknown[]> =
   TS extends readonly [] ? never :
   TS extends readonly [infer T] ? T :
