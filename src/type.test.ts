@@ -4,7 +4,7 @@ import {
   Eq, TEq, DEq, If, Case,
   Split, Head, Tail, Init, Last, Inits, Tails, Reverse, Member, Index, AtLeast,
   Rewrite, ExactRewrite, ExactExtract, ExactExclude,
-  valueof, indexof,
+  ValueOf, IndexOf,
   Type, StrictType,
   OverwriteStruct,
   ExtractProp, DeepExtractProp, ExcludeProp, DeepExcludeProp, RewriteProp, DeepRewriteProp,
@@ -349,22 +349,22 @@ describe('Unit: lib/type', () => {
 
   });
 
-  describe('indexof', () => {
+  describe('IndexOf', () => {
     it('', () => {
-      assert((): true => true as TEq<indexof<[0, -1], -1>, 1>);
-      assert((): true => true as TEq<indexof<{ 0: 0; 1: -1 }, -1>, 1>);
+      assert((): true => true as TEq<IndexOf<[0, -1], -1>, 1>);
+      assert((): true => true as TEq<IndexOf<{ 0: 0; 1: -1 }, -1>, 1>);
     });
 
   });
 
-  describe('valueof', () => {
+  describe('ValueOf', () => {
     it('', () => {
-      assert((): true => true as TEq<valueof<{ 0: 0; a: 1; }>, 0 | 1>);
-      assert((): true => true as TEq<valueof<{ 0: 0; a: 1; }, 0>, 0>);
-      assert((): true => true as TEq<valueof<[0]>, 0>);
-      assert((): true => true as TEq<valueof<{ [i: number]: 0; }>, 0>);
-      assert((): true => true as TEq<valueof<Immutable<{ 0: 0; a: 1; }>>, 0 | 1>);
-      assert((): true => true as TEq<valueof<ReadonlyArray<0>>, 0>);
+      assert((): true => true as TEq<ValueOf<{ 0: 0; a: 1; }>, 0 | 1>);
+      assert((): true => true as TEq<ValueOf<{ 0: 0; a: 1; }, 0>, 0>);
+      assert((): true => true as TEq<ValueOf<[0]>, 0>);
+      assert((): true => true as TEq<ValueOf<{ [i: number]: 0; }>, 0>);
+      assert((): true => true as TEq<ValueOf<Immutable<{ 0: 0; a: 1; }>>, 0 | 1>);
+      assert((): true => true as TEq<ValueOf<ReadonlyArray<0>>, 0>);
     });
 
   });

@@ -28,12 +28,12 @@ export type TEq<T, U> =
 export type If<S, T, U> = S extends Falsy ? U : T;
 export type Case<T extends keyof U, U extends {}> = U[T];
 
-export type DEq<T extends valueof<NondeterminateTypeMap>, U extends valueof<NondeterminateTypeMap>> =
+export type DEq<T extends ValueOf<NondeterminateTypeMap>, U extends ValueOf<NondeterminateTypeMap>> =
   Determine<T> extends undefined ? undefined :
   Determine<U> extends undefined ? undefined :
   Eq<T, U>;
-type Determine<T extends valueof<NondeterminateTypeMap>> =
-  valueof<NondeterminateTypeMap> extends T ? undefined :
+type Determine<T extends ValueOf<NondeterminateTypeMap>> =
+  ValueOf<NondeterminateTypeMap> extends T ? undefined :
   T;
 interface NondeterminateTypeMap {
   boolean: boolean;
@@ -121,10 +121,10 @@ export type ExactRewrite<T, R extends [unknown, unknown]> =
 export type ExactExtract<T, U> = T extends U ? U extends T ? T : never : never;
 export type ExactExclude<T, U> = T extends ExactExtract<T, U> ? never : T;
 
-export type indexof<T, V extends valueof<T>> =
+export type IndexOf<T, V extends ValueOf<T>> =
   T extends readonly unknown[] ? Index<V, T> :
   { [P in keyof T]: If<TEq<T[P], V>, P, never>; }[keyof T];
-export type valueof<T, K extends string | number | symbol = T extends { [i: number]: unknown; length: number; } ? number : keyof T> = T[Extract<keyof T, K>];
+export type ValueOf<T, K extends string | number | symbol = T extends { [i: number]: unknown; length: number; } ? number : keyof T> = T[Extract<keyof T, K>];
 
 export type Type<T> =
   T extends void ? null extends void ? 'object' | 'undefined' : 'undefined' :
