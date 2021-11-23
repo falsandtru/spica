@@ -37,7 +37,7 @@ class HCons<as extends unknown[]> {
     this.TYPE;
   }
   public add<a>(a: a): HCons<[a, ...as]> {
-    return new HCons(a, this as any);
+    return new HCons(a, this);
   }
   public modify<a>(f: (a: as[0]) => a): HCons<[a, ...Split<as>[1]]> {
     return (this.tail.add as any)(f(this.head));
