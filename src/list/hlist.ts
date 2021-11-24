@@ -1,27 +1,21 @@
-import type { Split, Reverse, AtLeast } from '../type';
+import type { Tail, Reverse } from '../type';
 import { unshift } from '../array';
 
-export type HList<as extends unknown[]> =
-  as extends [unknown, ...unknown[]] ? HCons<as> :
-  HNil;
-export function HList<as extends unknown[]>(...as: as): HList<as>;
+export type HList<as extends [] | [unknown, ...unknown[]]> =
+  as extends readonly [] ? HNil :
+  HCons<as>;
+export function HList<as extends [] | [unknown, ...unknown[]]>(...as: as): HList<as>;
 export function HList<as extends unknown[]>(...as: as): HList<any> {
-  return as.length === 0
-    ? HNil
-    : as.reduceRight<HList<[unknown]>>((node, a) => node.add(a) as any, HNil as any);
+  return as.reduceRight<HList<any>>((node, a) => node.add(a), HNil as any);
 }
 
 type HNil = typeof HNil;
 const HNil = new class HNil {
-  private readonly TYPE!: [];
-  constructor() {
-    this.TYPE;
-  }
   public add<a>(a: a): HCons<[a]> {
     return new HCons(a, this);
   }
-  public unfold<a>(f: () => a): HCons<[a]> {
-    return this.add(f());
+  public reverse(): [] {
+    return [];
   }
   public tuple(): [] {
     return [];
@@ -29,27 +23,29 @@ const HNil = new class HNil {
 }();
 
 class HCons<as extends unknown[]> {
-  private readonly TYPE!: as;
   constructor(
-    public readonly head: Split<as>[0],
-    public readonly tail: as['length'] extends 1 ? HNil : HCons<Split<as>[1]>,
+    public readonly head: as[0],
+    public readonly tail: as extends readonly [unknown, unknown, ...unknown[]] ? HCons<Tail<as>> : HNil,
   ) {
-    this.TYPE;
   }
   public add<a>(a: a): HCons<[a, ...as]> {
+    // @ts-ignore
     return new HCons(a, this);
   }
-  public modify<a>(f: (a: as[0]) => a): HCons<[a, ...Split<as>[1]]> {
-    return (this.tail.add as any)(f(this.head));
+  public modify<a>(f: (a: as[0]) => a): HCons<[a, ...Tail<as>]> {
+    // @ts-ignore
+    return this.tail.add(f(this.head));
   }
-  public fold<a>(this: HCons<as extends AtLeast<2, unknown> ? as : never>, f: (l: as[0], r: as[1]) => a): HCons<[a, ...Split<Split<as>[1]>[1]]> {
-    return (this.tail as HCons<Split<as>[1]>).modify(r => f(this.head, r)) as any;
+  public fold<a>(this: HCons<[unknown, unknown, ...unknown[]]>, f: (l: as[0], r: as[1]) => a): HCons<[a, ...Tail<Tail<as>>]> {
+    // @ts-ignore
+    return this.tail.modify(r => f(this.head, r));
   }
   public unfold<a>(f: (a: as[0]) => a): HCons<[a, ...as]> {
+    // @ts-ignore
     return this.add(f(this.head));
   }
   public reverse(): Reverse<as> {
-    return this.tuple().reverse() as any;
+    return this.tuple().reverse() as Reverse<as>;
   }
   public tuple(): as {
     return unshift([this.head], this.tail.tuple()) as as;

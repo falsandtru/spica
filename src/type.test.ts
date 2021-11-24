@@ -2,7 +2,7 @@ import {
   Not, And, Or,
   IsNever, IsVoid, IsAny, IsUnknown,
   Eq, TEq, DEq, If, Case,
-  Split, Head, Tail, Init, Last, Inits, Tails, Reverse, Member, Index, AtLeast,
+  Head, Tail, Init, Last, Inits, Tails, Reverse, Member, Index,
   Rewrite, ExactRewrite, ExactExtract, ExactExclude,
   ValueOf, IndexOf,
   Type, StrictType,
@@ -187,18 +187,6 @@ describe('Unit: lib/type', () => {
 
   });
 
-  describe('Split', () => {
-    it('', () => {
-      assert((): true => true as TEq<Split<[]>, never>);
-      assert((): true => true as TEq<Split<[0]>, [0, []]>);
-      assert((): true => true as TEq<Split<[0, 1]>, [0, [1]]>);
-      assert((): true => true as TEq<Split<[0, 1, 2]>, [0, [1, 2]]>);
-      assert((): true => true as TEq<Split<number[]>, [number, number[]]>);
-      assert((): true => true as TEq<Split<[0, 1, ...number[]]>, [0, [1, ...number[]]]>);
-    });
-
-  });
-
   describe('Head', () => {
     it('', () => {
       assert((): true => true as TEq<Head<[]>, never>);
@@ -299,16 +287,6 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Index<0, 0[]>, -1>);
       assert((): true => true as TEq<Index<0, 1[]>, -1>);
       assert((): true => true as TEq<Index<0, [0, ...0[]]>, 0>);
-    });
-
-  });
-
-  describe('AtLeast', () => {
-    it('', () => {
-      assert((): AtLeast<0, number> => []);
-      assert((): AtLeast<0, number> => [0]);
-      assert((): AtLeast<1, number> => [0]);
-      assert((): AtLeast<1, number> => [0, 0]);
     });
 
   });
