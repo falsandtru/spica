@@ -3,10 +3,8 @@ import { AtomicPromise } from '../promise';
 import { noop } from '../noop';
 
 export class Maybe<a> extends MonadPlus<a> {
-  private readonly MAYBE!: Just<a> | Nothing;
   constructor(thunk: () => Maybe<a>) {
     super(thunk);
-    void this.MAYBE;
   }
   public fmap<b>(f: (a: a) => b): Maybe<b> {
     return this.bind(a => new Just(f(a)));
@@ -94,10 +92,8 @@ export namespace Maybe {
 }
 
 export class Just<a> extends Maybe<a> {
-  private readonly JUST!: a;
   constructor(private readonly a: a) {
     super(throwCallError);
-    void this.JUST;
   }
   public override bind<b>(f: (a: a) => Maybe<b>): Maybe<b> {
     return new Maybe(() => f(this.extract()));
@@ -114,10 +110,8 @@ export class Just<a> extends Maybe<a> {
 }
 
 export class Nothing extends Maybe<never> {
-  private readonly NOTHING!: void;
   constructor() {
     super(throwCallError);
-    void this.NOTHING;
   }
   public override bind<_>(_: (_: never) => Nothing): Nothing
   public override bind<a>(_: (_: never) => Maybe<a>): Maybe<a>

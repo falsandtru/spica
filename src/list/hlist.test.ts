@@ -2,6 +2,15 @@ import { HList } from './hlist';
 
 describe('Unit: lib/hlist', () => {
   describe('HList', () => {
+    it('type', () => {
+      type HNil = typeof HNil;
+      const HNil = HList();
+      // @ts-expect-error
+      (): HNil => HList(0);
+      // @ts-expect-error
+      (): HList<[0]> => HNil;
+    });
+
     it('HList 0', () => {
       const node: HList<[]> = HList();
       assert.deepStrictEqual(node.tuple(), []);

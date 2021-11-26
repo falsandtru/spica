@@ -3,10 +3,8 @@ import { AtomicPromise } from '../promise';
 import { noop } from '../noop';
 
 export class Either<a, b> extends Monad<b> {
-  private readonly EITHER!: Left<a> | Right<b>;
   constructor(thunk: () => Either<a, b>) {
     super(thunk);
-    void this.EITHER;
   }
   public fmap<c>(f: (b: b) => c): Either<a, c> {
     return this.bind(b => new Right(f(b)));
@@ -89,10 +87,8 @@ export namespace Either {
 }
 
 export class Left<a> extends Either<a, never> {
-  private readonly LEFT!: a;
   constructor(private a: a) {
     super(throwCallError);
-    void this.LEFT;
   }
   public override bind<_>(_: (_: never) => Left<a>): Left<a>
   public override bind<b>(_: (_: never) => Either<a, b>): Either<a, b>
@@ -109,10 +105,8 @@ export class Left<a> extends Either<a, never> {
 }
 
 export class Right<b> extends Either<never, b> {
-  private readonly RIGHT!: b;
   constructor(private readonly b: b) {
     super(throwCallError);
-    void this.RIGHT;
   }
   public override bind<c, _ = never>(f: (b: b) => Right<c>): Right<c>
   public override bind<c, a>(f: (b: b) => Either<a, c>): Either<a, c>
