@@ -1,4 +1,5 @@
 import type { Narrow, Intersect } from './type';
+import { singleton } from './function';
 
 type Functions2Parameters<FS extends readonly ((..._: unknown[]) => unknown)[]> = { [P in keyof FS]: FS[P] extends FS[number] ? Parameters<FS[P]>[0] : never; };
 type Functions2Returns<FS extends readonly ((..._: unknown[]) => unknown)[]> = { [P in keyof FS]: FS[P] extends FS[number] ? ReturnType<FS[P]> : never; };
@@ -21,4 +22,23 @@ export function aggregate<as extends ((b?: unknown) => unknown)[]>(...as: as): (
   return function (b) {
     return as.map(f => f.call(this, b)) as any;
   };
+}
+
+export function run(app: () => readonly (() => void)[]): () => undefined {
+  const fs = app();
+  return singleton((): undefined => {
+    const rs = [];
+    for (let i = 0; fs[i]; ++i) {
+      try {
+        fs[i]();
+      }
+      catch (reason) {
+        rs.push(reason);
+      }
+    }
+    if (rs.length > 0) {
+      throw new AggregateError(rs);
+    }
+    return;
+  });
 }

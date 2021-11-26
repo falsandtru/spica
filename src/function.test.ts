@@ -1,24 +1,24 @@
-import { mapParameters, mapReturn } from './function';
+import { singleton, clear } from './function';
 
 describe('Unit: lib/function', function () {
-  describe('mapParameters', function () {
+  describe('singleton', function () {
     it('', () => {
-      const f = (a: number, b: number[]) => a * b.length;
-      const g = (...ns: number[]) => [ns.reduce((n: number, m: number) => n + m, 0), ns];
-      assert(mapParameters(f, g)() === 0);
-      assert(mapParameters(f, g)(1) === 1);
-      assert(mapParameters(f, g)(1, 2) === 6);
+      let cnt = 0;
+      const f = singleton(() => ++cnt);
+      assert(cnt === 0);
+      assert(f() === 1);
+      assert(cnt === 1);
+      assert(f() === 1);
+      assert(cnt === 1);
     });
 
   });
 
-  describe('mapReturn', function () {
+  describe('clear', function () {
     it('', () => {
-      const f = (...ns: number[]) => ns;
-      const g = (ns: number[]) => ns.reduce((n: number, m: number) => n + m, 0);
-      assert(mapReturn(f, g)() === 0);
-      assert(mapReturn(f, g)(1) === 1);
-      assert(mapReturn(f, g)(1, 2) === 3);
+      assert.deepStrictEqual(
+        clear(() => 0)(),
+        undefined);
     });
 
   });

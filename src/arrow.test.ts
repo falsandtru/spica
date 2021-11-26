@@ -1,4 +1,4 @@
-import { bundle, aggregate } from './arrow';
+import { bundle, aggregate, run } from './arrow';
 
 describe('Unit: lib/arrow', function () {
   describe('bundle', function () {
@@ -36,6 +36,18 @@ describe('Unit: lib/arrow', function () {
       assert.deepStrictEqual(
         aggregate(c, c)(),
         [undefined, undefined]);
+    });
+
+  });
+
+  describe('run', function () {
+    it('', () => {
+      assert.deepStrictEqual(
+        run(aggregate(
+          () => () => 0,
+          () => () => 1,
+        ))(),
+        undefined);
     });
 
   });
