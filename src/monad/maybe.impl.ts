@@ -29,7 +29,7 @@ export class Maybe<a> extends MonadPlus<a> {
       if (m instanceof Maybe) {
         return m.bind(f);
       }
-      throw new TypeError(`Spica: Maybe: Invalid monad value.\n\t${m}`);
+      throw new TypeError(`Spica: Maybe: Invalid monad value: ${m}`);
     });
   }
   public guard(cond: boolean): Maybe<a> {
@@ -92,7 +92,7 @@ export namespace Maybe {
 }
 
 export class Just<a> extends Maybe<a> {
-  constructor(private readonly a: a) {
+  constructor(private readonly value: a) {
     super(throwCallError);
   }
   public override bind<b>(f: (a: a) => Maybe<b>): Maybe<b> {
@@ -104,8 +104,8 @@ export class Just<a> extends Maybe<a> {
   public override extract<b>(nothing: () => b, just: (a: a) => b): b
   public override extract<b>(_?: () => b, just?: (a: a) => b): a | b {
     return !just
-      ? this.a
-      : just(this.a);
+      ? this.value
+      : just(this.value);
   }
 }
 

@@ -29,7 +29,7 @@ export class Either<a, b> extends Monad<b> {
       if (m instanceof Either) {
         return m.bind(f);
       }
-      throw new TypeError(`Spica: Either: Invalid monad value.\n\t${m}`);
+      throw new TypeError(`Spica: Either: Invalid monad value: ${m}`);
     });
   }
   public join<c>(this: Either<a, Either<a, c>>): Either<a, c> {
@@ -87,7 +87,7 @@ export namespace Either {
 }
 
 export class Left<a> extends Either<a, never> {
-  constructor(private a: a) {
+  constructor(private value: a) {
     super(throwCallError);
   }
   public override bind<_>(_: (_: never) => Left<a>): Left<a>
@@ -99,13 +99,13 @@ export class Left<a> extends Either<a, never> {
   public override extract<c>(transform: (a: a) => c): c
   public override extract<c>(left: (a: a) => c, right: (b: never) => c): c
   public override extract<c>(left?: (a: a) => c): c {
-    if (!left) throw this.a;
-    return left(this.a);
+    if (!left) throw this.value;
+    return left(this.value);
   }
 }
 
 export class Right<b> extends Either<never, b> {
-  constructor(private readonly b: b) {
+  constructor(private readonly value: b) {
     super(throwCallError);
   }
   public override bind<c, _ = never>(f: (b: b) => Right<c>): Right<c>
@@ -119,8 +119,8 @@ export class Right<b> extends Either<never, b> {
   public override extract<c>(left: (a: never) => c, right: (b: b) => c): c
   public override extract<c>(_?: (a: never) => c, right?: (b: b) => c): b | c {
     return !right
-      ? this.b
-      : right(this.b);
+      ? this.value
+      : right(this.value);
   }
 }
 
