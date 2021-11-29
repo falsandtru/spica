@@ -57,7 +57,7 @@ export const uncurry: Uncurry = (f: (...xs: any[]) => any) =>
 function uncurry_(f: (...xs: any[]) => any): any {
   const arity = f.length;
   return (...xs: any[]) =>
-    arity === 0 || xs.length < 2 || xs.length <= arity
+    arity === 0 || xs.length <= arity
       ? f(...xs)
       : uncurry_(f(...shift(xs, arity)[0]))(...xs);
 }
