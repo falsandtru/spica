@@ -24,21 +24,38 @@ export function aggregate<fs extends ((a?: unknown) => unknown)[]>(...fs: fs): (
   };
 }
 
-export function run(app: () => readonly (() => void)[]): () => undefined {
-  const fs = app();
-  return singleton((): undefined => {
-    const rs = [];
-    for (let i = 0; fs[i]; ++i) {
-      try {
-        fs[i]();
+export function compile<fs extends ((this: undefined) => () => void)[]>(...fs: fs): () => () => undefined;
+export function compile<fs extends (() => () => void)[]>(...fs: fs): (this: Functions2Context<fs>) => () => undefined;
+export function compile<fs extends ((this: undefined, a?: unknown) => () => void)[]>(...fs: fs): (a: Intersect<Narrow<Functions2Parameters2<fs>>>) => () => undefined;
+export function compile<fs extends ((a?: unknown) => () => void)[]>(...fs: fs): (this: Functions2Context<fs>, a: Intersect<Narrow<Functions2Parameters2<fs>>>) => () => undefined;
+export function compile<fs extends ((a?: unknown) => () => void)[]>(...fs: fs): (this: Functions2Context<fs>, a: Intersect<Narrow<Functions2Parameters2<fs>>>) => () => undefined {
+  return function (a) {
+    const gs: (() => void)[] = [];
+    try {
+      for (let i = 0; i < fs.length; ++i) {
+        gs.push(fs[i].call(this, a));
       }
-      catch (reason) {
-        rs.push(reason);
-      }
+      return singleton(() => cancel(gs)) as any;
     }
-    if (rs.length > 0) {
-      throw new AggregateError(rs);
+    catch (reason: any) {
+      cancel(gs);
+      throw new Error(`Spica: Arrow: ${reason?.toString() ?? reason}`);
     }
-    return;
-  });
+  };
+}
+
+function cancel(cancellers: readonly (() => void)[]): undefined {
+  const reasons = [];
+  for (let i = 0; i < cancellers.length; ++i) {
+    try {
+      cancellers[i]();
+    }
+    catch (reason) {
+      reasons.push(reason);
+    }
+  }
+  if (reasons.length > 0) {
+    throw new AggregateError(reasons);
+  }
+  return;
 }
