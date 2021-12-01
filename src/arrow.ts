@@ -6,21 +6,21 @@ type Functions2Returns<FS extends readonly ((..._: unknown[]) => unknown)[]> = {
 type Functions2Context<FS extends readonly ((..._: unknown[]) => unknown)[]> = FS[number] extends (this: infer C, ..._: unknown[]) => unknown ? C : never;
 type Functions2Parameters2<FS extends readonly ((..._: unknown[]) => unknown)[]> = { [P in keyof FS]: FS[P] extends FS[number] ? FS[P] extends (_?: undefined) => unknown ? never : Parameters<FS[P]>[0] : never; };
 
-export function bundle<as extends ((this: undefined, b: unknown) => unknown)[]>(...as: as): (...bs: Functions2Parameters<as>) => Functions2Returns<as>;
-export function bundle<as extends ((b: unknown) => unknown)[]>(...as: as): (this: Functions2Context<as>, ...bs: Functions2Parameters<as>) => Functions2Returns<as>;
-export function bundle<as extends ((b: unknown) => unknown)[]>(...as: as): (this: Functions2Context<as>, ...bs: Functions2Parameters<as>) => Functions2Returns<as> {
+export function bundle<fs extends ((this: undefined, a: unknown) => unknown)[]>(...fs: fs): (...bs: Functions2Parameters<fs>) => Functions2Returns<fs>;
+export function bundle<fs extends ((a: unknown) => unknown)[]>(...fs: fs): (this: Functions2Context<fs>, ...bs: Functions2Parameters<fs>) => Functions2Returns<fs>;
+export function bundle<fs extends ((a: unknown) => unknown)[]>(...fs: fs): (this: Functions2Context<fs>, ...bs: Functions2Parameters<fs>) => Functions2Returns<fs> {
   return function (...bs) {
-    return as.map((f, i) => f.call(this, bs[i])) as any;
+    return fs.map((f, i) => f.call(this, bs[i])) as any;
   };
 }
 
-export function aggregate<as extends ((this: undefined) => unknown)[]>(...as: as): () => Functions2Returns<as>;
-export function aggregate<as extends (() => unknown)[]>(...as: as): (this: Functions2Context<as>) => Functions2Returns<as>;
-export function aggregate<as extends ((this: undefined, b?: unknown) => unknown)[]>(...as: as): (b: Intersect<Narrow<Functions2Parameters2<as>>>) => Functions2Returns<as>;
-export function aggregate<as extends ((b?: unknown) => unknown)[]>(...as: as): (this: Functions2Context<as>, b: Intersect<Narrow<Functions2Parameters2<as>>>) => Functions2Returns<as>;
-export function aggregate<as extends ((b?: unknown) => unknown)[]>(...as: as): (this: Functions2Context<as>, b: Intersect<Narrow<Functions2Parameters2<as>>>) => Functions2Returns<as> {
-  return function (b) {
-    return as.map(f => f.call(this, b)) as any;
+export function aggregate<fs extends ((this: undefined) => unknown)[]>(...fs: fs): () => Functions2Returns<fs>;
+export function aggregate<fs extends (() => unknown)[]>(...fs: fs): (this: Functions2Context<fs>) => Functions2Returns<fs>;
+export function aggregate<fs extends ((this: undefined, a?: unknown) => unknown)[]>(...fs: fs): (a: Intersect<Narrow<Functions2Parameters2<fs>>>) => Functions2Returns<fs>;
+export function aggregate<fs extends ((a?: unknown) => unknown)[]>(...fs: fs): (this: Functions2Context<fs>, a: Intersect<Narrow<Functions2Parameters2<fs>>>) => Functions2Returns<fs>;
+export function aggregate<fs extends ((a?: unknown) => unknown)[]>(...fs: fs): (this: Functions2Context<fs>, a: Intersect<Narrow<Functions2Parameters2<fs>>>) => Functions2Returns<fs> {
+  return function (a) {
+    return fs.map(f => f.call(this, a)) as any;
   };
 }
 
