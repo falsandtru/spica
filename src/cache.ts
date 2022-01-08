@@ -119,7 +119,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private dispose(node: Node<Index<K>>, value: V, callback: boolean): void;
   private dispose(node: Node<Index<K>>, value: undefined, callback: false): void;
   private dispose(node: Node<Index<K>>, value: V | undefined, callback?: boolean): void {
-    if (!node.next) return;
+    assert(node.next);
     node.delete();
     this.memory.delete(node.value.key);
     this.SIZE -= node.value.size;
