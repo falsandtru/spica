@@ -86,7 +86,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     space: Infinity,
     age: Infinity,
     life: 10,
-    limit: 100,
+    limit: 95,
     capture: {
       delete: true,
       clear: true,
