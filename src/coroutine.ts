@@ -1,7 +1,8 @@
 import type { Structural, DeepImmutable, DeepRequired } from './type';
 import { Array, Promise, Error } from './global';
 import { ObjectDefineProperty, ObjectGetOwnPropertyDescriptor } from './alias';
-import { tick, wait } from './clock';
+import { tick } from './clock';
+import { wait } from './timer';
 import { AtomicPromise, isPromiseLike } from './promise';
 import { Future, AtomicFuture } from './future';
 import { Channel } from './channel';

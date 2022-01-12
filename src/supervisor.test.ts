@@ -1,6 +1,7 @@
 import { Supervisor } from './supervisor';
 import { Coroutine } from './coroutine';
-import { tick, wait } from './clock';
+import { tick } from './clock';
+import { wait } from './timer';
 import { never } from './promise';
 import { Sequence } from './sequence';
 

@@ -1,6 +1,5 @@
-import { Date, setTimeout } from './global';
+import { Date } from './global';
 import { floor } from './alias';
-import { AtomicPromise } from './promise';
 import { causeAsyncException } from './exception';
 
 let now_: number | undefined;
@@ -17,13 +16,6 @@ export function now(): number {
 }
 
 export const clock: Promise<undefined> = Promise.resolve(void 0);
-
-export function wait(ms: number): AtomicPromise<undefined> {
-  assert(ms >= 0);
-  return ms === 0
-    ? AtomicPromise.resolve(clock)
-    : new AtomicPromise(resolve => void setTimeout(resolve, ms));
-}
 
 type Callback = () => void;
 
