@@ -12,6 +12,8 @@ import { equal } from './compare';
 // Note: The logical clocks of a cache will overflow after 1041 days in 100,000,000 ops/sec.
 
 /*
+キャッシュ比率をLFU論理寿命、LFUヒット率変化率、LRU下限により実験的に調整しているがこれらの要否は後で判断する。
+
 この実装はオーバーヘッド削減を優先して論理クロックのリセットを実装していないが
 他の高速な言語でこれが問題となる場合はクロックのオーバーフローを利用して補正処理を行う方法が考えられ
 この場合十分大きなクロック上では世代の混同が生じる前にキャッシュの更新または破棄が完了すると期待でき
@@ -61,6 +63,7 @@ export interface CacheOptions<K, V = undefined> {
   readonly space?: number;
   readonly age?: number;
   readonly life?: number;
+  readonly limit?: number;
   readonly disposer?: (value: V, key: K) => void;
   readonly capture?: {
     readonly delete?: boolean;
@@ -75,13 +78,15 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   ) {
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     extend(this.settings, opts);
-    this.life = this.capacity * this.settings.life!;
     this.space = this.settings.space!;
+    this.life = this.capacity * this.settings.life!;
+    this.limit = this.settings.limit!;
   }
   private readonly settings: CacheOptions<K, V> = {
     space: Infinity,
     age: Infinity,
     life: 10,
+    limit: 100,
     capture: {
       delete: true,
       clear: true,
@@ -136,6 +141,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       const list = void 0
         || LRU.length === +(target === LRU)
         || LFU.length > this.capacity * this.ratio / 100
+        // LRUの下限を確保すればわずかな性能低下と引き換えに消して一般化できる
         || LFU.last && LFU.last.value.clock < this.clock - this.life
         || LFU.last && LFU.last.value.expiry !== Infinity && LFU.last.value.expiry < now()
         ? LFU
@@ -269,10 +275,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     LFU: tuple(0, 0),
   };
   private ratio = 50;
+  private readonly limit: number;
   private readonly frequency = max(this.capacity / 100 | 0, 1);
   private slide(): void {
     const { LRU, LFU } = this.stats;
-    const { capacity, frequency, ratio, indexes } = this;
+    const { capacity, frequency, ratio, limit, indexes } = this;
     const window = capacity;
     if (LRU[0] + LFU[0] === window) {
       this.stats = {
@@ -293,7 +300,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       }
     }
     else
-    if (ratio < 100 && rateF > rateR) {
+    if (ratio < limit && rateF > rateR) {
       if (indexes.LFU.length >= capacity * ratio / 100) {
         //ratio % 10 || ratio === 0 || console.debug('+', this.ratio, LRU, LFU);
         ++this.ratio;
