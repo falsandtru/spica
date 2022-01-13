@@ -52,7 +52,7 @@ interface Index<K> {
   size: number;
   clock: number;
   expiry: number;
-  stat: 'LRU' | 'LFU';
+  stat: [number, number];
 }
 interface Record<K, V> {
   index: Node<Index<K>>;
@@ -196,7 +196,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         size,
         clock: ++this.clockR,
         expiry,
-        stat: 'LRU',
+        stat: this.stats.LRU,
       }),
       value,
     });
@@ -246,10 +246,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.ratio = 50;
     this.indexes.LRU.clear();
     this.indexes.LFU.clear();
-    this.stats = {
-      LRU: [0, 0],
-      LFU: [0, 0],
-    };
+    this.stats.LRU[0] = 0;
+    this.stats.LRU[1] = 0;
+    this.stats.LFU[0] = 0;
+    this.stats.LFU[1] = 0;
     if (!this.settings.disposer || !this.settings.capture!.clear) return void this.memory.clear();
     const memory = this.memory;
     this.memory = new Map();
@@ -263,10 +263,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     }
     return;
   }
-  private stats = {
+  private readonly stats = {
     LRU: tuple(0, 0),
     LFU: tuple(0, 0),
-  };
+  } as const;
   private ratio = 50;
   private readonly limit: number;
   private readonly frequency = max(this.capacity / 100 | 0, 1);
@@ -275,10 +275,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { capacity, frequency, ratio, limit, indexes } = this;
     const window = capacity;
     if (LRU[0] + LFU[0] === window) {
-      this.stats = {
-        LRU: [0, LRU[0]],
-        LFU: [0, LFU[0]],
-      };
+      LRU[1] = LRU[0];
+      LRU[0] = 0;
+      LFU[1] = LFU[0];
+      LFU[0] = 0;
     }
     if ((LRU[0] + LFU[0]) % frequency || LRU[1] + LFU[1] === 0) return;
     const rateR = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1]) / (100 - ratio) * 100;
@@ -308,7 +308,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const node = record.index;
     assert(node.list === this.indexes.LRU);
     const { LRU, LFU } = this.indexes;
-    ++this.stats[node.value.stat][0];
+    ++node.value.stat[0];
     ++this.clock;
     ++this.clockR;
     // Prevent LFU destruction.
@@ -320,7 +320,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     node.delete();
     assert(LFU.length !== this.capacity);
     node.value.clock = this.clock;
-    node.value.stat = 'LFU';
+    node.value.stat = this.stats.LFU;
     record.index = LFU.unshift(node.value);
     return true;
   }
@@ -328,7 +328,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const node = record.index;
     const { LFU } = this.indexes;
     if (node.list !== LFU) return false;
-    ++this.stats[node.value.stat][0];
+    ++node.value.stat[0];
     ++this.clock;
     node.value.clock = this.clock;
     node.moveToHead();
