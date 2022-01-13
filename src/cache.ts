@@ -52,6 +52,7 @@ interface Index<K> {
   size: number;
   clock: number;
   expiry: number;
+  stat: 'LRU' | 'LFU';
 }
 interface Record<K, V> {
   index: Node<Index<K>>;
@@ -195,6 +196,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         size,
         clock: ++this.clockR,
         expiry,
+        stat: 'LRU',
       }),
       value,
     });
@@ -306,7 +308,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const node = record.index;
     assert(node.list === this.indexes.LRU);
     const { LRU, LFU } = this.indexes;
-    ++this.stats.LRU[0];
+    ++this.stats[node.value.stat][0];
     ++this.clock;
     ++this.clockR;
     // Prevent LFU destruction.
@@ -318,6 +320,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     node.delete();
     assert(LFU.length !== this.capacity);
     node.value.clock = this.clock;
+    node.value.stat = 'LFU';
     record.index = LFU.unshift(node.value);
     return true;
   }
@@ -325,7 +328,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const node = record.index;
     const { LFU } = this.indexes;
     if (node.list !== LFU) return false;
-    ++this.stats.LFU[0];
+    ++this.stats[node.value.stat][0];
     ++this.clock;
     node.value.clock = this.clock;
     node.moveToHead();
