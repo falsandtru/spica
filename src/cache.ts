@@ -244,12 +244,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public clear(): void {
     this.SIZE = 0;
     this.ratio = 50;
+    this.stats.clear();
     this.indexes.LRU.clear();
     this.indexes.LFU.clear();
-    this.stats.LRU[0] = 0;
-    this.stats.LRU[1] = 0;
-    this.stats.LFU[0] = 0;
-    this.stats.LFU[1] = 0;
     if (!this.settings.disposer || !this.settings.capture!.clear) return void this.memory.clear();
     const memory = this.memory;
     this.memory = new Map();
@@ -266,6 +263,16 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private readonly stats = {
     LRU: tuple(0, 0),
     LFU: tuple(0, 0),
+    slide(): void {
+      this.LRU[1] = this.LRU[0];
+      this.LRU[0] = 0;
+      this.LFU[1] = this.LFU[0];
+      this.LFU[0] = 0;
+    },
+    clear(): void {
+      this.LRU[0] = this.LRU[1] = 0;
+      this.LFU[0] = this.LFU[1] = 0;
+    },
   } as const;
   private ratio = 50;
   private readonly limit: number;
@@ -274,12 +281,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { LRU, LFU } = this.stats;
     const { capacity, frequency, ratio, limit, indexes } = this;
     const window = capacity;
-    if (LRU[0] + LFU[0] === window) {
-      LRU[1] = LRU[0];
-      LRU[0] = 0;
-      LFU[1] = LFU[0];
-      LFU[0] = 0;
-    }
+    LRU[0] + LFU[0] === window && this.stats.slide();
     if ((LRU[0] + LFU[0]) % frequency || LRU[1] + LFU[1] === 0) return;
     const rateR = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1]) / (100 - ratio) * 100;
     const rateF = rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1]) / (ratio || 1) * 100;
