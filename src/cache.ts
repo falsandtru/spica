@@ -113,8 +113,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     return this.SIZE;
   }
   private dispose(node: Node<Index<K>>, record: Record<K, V> | undefined, callback: boolean): void {
-    const { disposer } = this.settings;
-    callback &&= !!disposer;
+    callback &&= !!this.settings.disposer;
     record = callback
       ? record ?? this.memory.get(node.value.key)
       : record;
@@ -122,7 +121,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     node.delete();
     this.memory.delete(node.value.key);
     this.SIZE -= node.value.size;
-    callback && disposer?.(record!.value, node.value.key);
+    callback && this.settings.disposer?.(record!.value, node.value.key);
   }
   private ensure(margin: number, skip?: Node<Index<K>>): void {
     let size = skip?.value.size ?? 0;
