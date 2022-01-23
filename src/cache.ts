@@ -60,7 +60,7 @@ interface Record<K, V> {
 }
 
 export interface CacheOptions<K, V = undefined> {
-  readonly space?: number;
+  readonly volume?: number;
   readonly age?: number;
   readonly life?: number;
   readonly limit?: number;
@@ -78,12 +78,12 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   ) {
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     extend(this.settings, opts);
-    this.space = this.settings.space!;
+    this.volume = this.settings.volume!;
     this.life = this.capacity * this.settings.life!;
     this.limit = this.settings.limit!;
   }
   private readonly settings: CacheOptions<K, V> = {
-    space: Infinity,
+    volume: Infinity,
     age: Infinity,
     life: 10,
     limit: 95,
@@ -93,7 +93,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     },
   };
   private readonly life: number;
-  private readonly space: number;
+  private readonly volume: number;
   private SIZE = 0;
   // 1041 days < 2 ** 53 / 100,000,000 / 3600 / 24.
   // Hit counter only for LFU.
@@ -125,10 +125,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   }
   private ensure(margin: number, skip?: Node<Index<K>>): void {
     let size = skip?.value.size ?? 0;
-    assert(margin - size <= this.space);
+    assert(margin - size <= this.volume);
     if (margin - size <= 0) return;
     const { LRU, LFU } = this.indexes;
-    while (this.length === this.capacity || this.size + margin - size > this.space) {
+    while (this.length === this.capacity || this.size + margin - size > this.volume) {
       let record: Record<K, V> | undefined;
       switch (true) {
         case !LFU.last:
@@ -160,7 +160,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public put(key: K, value: V, size: number = 1, age: number = this.settings.age!): boolean {
     if (size >= 1 === false) throw new Error(`Spica: Cache: Size must be 1 or more.`);
     if (age >= 1 === false) throw new Error(`Spica: Cache: Age must be 1 or more.`);
-    if (size > this.space || age <= 0) {
+    if (size > this.volume || age <= 0) {
       this.settings.disposer?.(value, key);
       return false;
     }
@@ -175,7 +175,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       this.ensure(size, node);
       assert(this.memory.has(key));
       this.SIZE += size - node.value.size;
-      assert(0 <= this.size && this.size <= this.space);
+      assert(0 <= this.size && this.size <= this.volume);
       record.value = value;
       node.value.size = size;
       node.value.expiry = expiry;
@@ -188,7 +188,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { LRU } = this.indexes;
     assert(LRU.length !== this.capacity);
     this.SIZE += size;
-    assert(0 <= this.size && this.size <= this.space);
+    assert(0 <= this.size && this.size <= this.volume);
     this.memory.set(key, {
       index: LRU.unshift({
         key,
