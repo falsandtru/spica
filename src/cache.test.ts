@@ -176,8 +176,8 @@ describe('Unit: lib/cache', () => {
       });
     });
 
-    it('volume', () => {
-      const cache = new Cache<number, number>(3, { volume: 3 });
+    it('space', () => {
+      const cache = new Cache<number, number>(3, { space: 3 });
 
       cache.put(0, 0);
       cache.put(1, 1);
