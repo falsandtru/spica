@@ -19,12 +19,11 @@ import { tuple } from './tuple';
 わずかに前世代のキャッシュが混入したとしても一時的にわずかにキャッシュ効率が低下する程度の影響しかない。
 
 ```
-assert(max(this.clock) > this.life * 8);
-const offset = this.clock - this.life < this.clock
+assert(max(this.clock) > this.life * 10);
+const offset = this.clock >= 0 && LFU.last.clock >= 0
   ? 0
   : this.life;
-if (LFU.last.clock - offset > this.clock - offset ||
-    LFU.last.clock - offset < this.clock - offset - this.life) {
+if (LFU.last.clock + offset < this.clock - this.life + offset) {
   LFU.pop();
 }
 ```
