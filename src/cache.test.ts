@@ -320,7 +320,6 @@ describe('Unit: lib/cache', () => {
       let lruhit = 0;
       let dwchit = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
-        // DWCは静的な偏りの抽出能力が高いだけのようだが偏りがない場合でもLRUとほぼ遜色ない
         const key = Math.random() < 0.4
           ? Math.random() * capacity * 1 | 0
           : Math.random() * capacity * 9 + capacity | 0;
@@ -357,7 +356,6 @@ describe('Unit: lib/cache', () => {
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() < 0.4
           ? Math.random() * capacity * 1 | 0
-          // DWCは推移的な分散には影響されない
           : Math.random() * capacity * 9 + i * capacity / 100 + capacity | 0;
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1);
@@ -391,12 +389,6 @@ describe('Unit: lib/cache', () => {
       let dwchit = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() < 0.4
-          // DWCは推移的な偏りでやや精度低下する
-          // 偏りの抽出が分布全体の推移により無効化され逆効果になるからであろう
-          // 偏りの抽出によりLRUより精度を上げようとするキャッシュアルゴリズム全般のトレードオフと思われる
-          // 単純に大きな分布なら問題ないが大きな分布の中で局所性の変化による疑似的な推移が生じる可能性はある
-          // しかし推移により常に抽出を無効化し続ける状況は通常のアクセスパターンからは考えにくく
-          // そのような状況が生じるならキャッシュサイズが小さすぎることに問題があることのほうが多いだろう
           ? Math.random() * capacity * 1 - i * capacity / 100 | 0
           : Math.random() * capacity * 9 + capacity | 0;
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
