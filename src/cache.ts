@@ -312,7 +312,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     ++this.clock;
     ++this.clockR;
     // Prevent LFU destruction.
-    if (node.value.clock > this.clockR - LRU.length / 3) {
+    if (node.value.clock > this.clockR - LRU.length / 3 && node.value.stat === this.stats.LRU) {
       node.value.clock = this.clockR;
       node.moveToHead();
       return true;
