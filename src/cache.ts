@@ -271,14 +271,16 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     LRU: tuple(0, 0),
     LFU: tuple(0, 0),
     slide(): void {
-      this.LRU[1] = this.LRU[0];
-      this.LRU[0] = 0;
-      this.LFU[1] = this.LFU[0];
-      this.LFU[0] = 0;
+      const { LRU, LFU } = this;
+      LRU[1] = LRU[0];
+      LRU[0] = 0;
+      LFU[1] = LFU[0];
+      LFU[0] = 0;
     },
     clear(): void {
-      this.LRU[0] = this.LRU[1] = 0;
-      this.LFU[0] = this.LFU[1] = 0;
+      const { LRU, LFU } = this;
+      LRU[0] = LRU[1] = 0;
+      LFU[0] = LFU[1] = 0;
     },
   } as const;
   private ratio = 50;
