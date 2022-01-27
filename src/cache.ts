@@ -112,15 +112,16 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     return this.SIZE;
   }
   private dispose(node: Node<Index<K>>, record: Record<K, V> | undefined, callback: boolean): void {
+    const index = node.value;
     callback &&= !!this.settings.disposer;
     record = callback
-      ? record ?? this.memory.get(node.value.key)
+      ? record ?? this.memory.get(index.key)
       : record;
     assert(node.list);
     node.delete();
-    this.memory.delete(node.value.key);
-    this.SIZE -= node.value.size;
-    callback && this.settings.disposer?.(record!.value, node.value.key);
+    this.memory.delete(index.key);
+    this.SIZE -= index.size;
+    callback && this.settings.disposer?.(record!.value, index.key);
   }
   private ensure(margin: number, skip?: Node<Index<K>>): void {
     let size = skip?.value.size ?? 0;
@@ -180,11 +181,12 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       const val = record.value;
       this.ensure(size, node);
       assert(this.memory.has(key));
-      this.SIZE += size - node.value.size;
+      const index = node.value;
+      this.SIZE += size - index.size;
       assert(0 <= this.size && this.size <= this.space);
       record.value = value;
-      node.value.size = size;
-      node.value.expiry = expiry;
+      index.size = size;
+      index.expiry = expiry;
       this.settings.disposer?.(val, key);
       return true;
     }
@@ -314,30 +316,32 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private accessLRU(record: Record<K, V>): boolean {
     const node = record.index;
     assert(node.list === this.indexes.LRU);
+    const index = node.value;
     const { LRU, LFU } = this.indexes;
-    ++node.value.stat[0];
+    ++index.stat[0];
     ++this.clock;
     ++this.clockR;
     // Prevent LFU destruction.
-    if (node.value.clock > this.clockR - LRU.length / 3 && node.value.stat === this.stats.LRU) {
-      node.value.clock = this.clockR;
+    if (index.clock > this.clockR - LRU.length / 3 && index.stat === this.stats.LRU) {
+      index.clock = this.clockR;
       node.moveToHead();
       return true;
     }
     node.delete();
     assert(LFU.length !== this.capacity);
-    node.value.clock = this.clock;
-    node.value.stat = this.stats.LFU;
-    record.index = LFU.unshift(node.value);
+    index.clock = this.clock;
+    index.stat = this.stats.LFU;
+    record.index = LFU.unshift(index);
     return true;
   }
   private accessLFU(record: Record<K, V>): boolean {
     const node = record.index;
+    const index = node.value;
     const { LFU } = this.indexes;
     if (node.list !== LFU) return false;
-    ++node.value.stat[0];
+    ++index.stat[0];
     ++this.clock;
-    node.value.clock = this.clock;
+    index.clock = this.clock;
     node.moveToHead();
     return true;
   }
