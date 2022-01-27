@@ -134,14 +134,21 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
           break;
         case LRU.length === 0:
         case LRU.length === +(LRU.last === skip):
-        case LFU.length > this.capacity * this.ratio / 100:
         // LRUの下限を確保すればわずかな性能低下と引き換えに消して一般化できる
         case LFU.last!.value.clock < this.clock - this.life:
-        case LFU.last!.value.expiry !== Infinity && LFU.last!.value.expiry < now():
+        case LFU.last!.value.expiry !== Infinity && LFU.last!.value.expiry < now(): {
+          const index = LFU.pop()!;
+          record = this.memory.get(index.key)!;
+          record.index = LRU.push(index);
+          break;
+        }
+        case LFU.length > this.capacity * this.ratio / 100: {
           const index = LFU.pop()!;
           index.clock = index.clock - this.clock + ++this.clockR;
           record = this.memory.get(index.key)!;
           record.index = LRU.unshift(index);
+          break;
+        }
       }
       assert(LRU.last);
       const node = LRU.last === skip
