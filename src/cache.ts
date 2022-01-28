@@ -59,30 +59,27 @@ interface Record<K, V> {
   value: V;
 }
 
-export interface CacheOptions<K, V = undefined> {
-  readonly space?: number;
-  readonly age?: number;
-  readonly life?: number;
-  readonly limit?: number;
-  readonly disposer?: (value: V, key: K) => void;
-  readonly capture?: {
-    readonly delete?: boolean;
-    readonly clear?: boolean;
-  };
-}
-
 export class Cache<K, V = undefined> implements IterableCollection<K, V> {
+  constructor(capacity: number, opts?: Cache.Options<K, V>);
+  constructor(opts: Cache.Options<K, V>);
   constructor(
-    private readonly capacity: number,
-    opts: CacheOptions<K, V> = {},
+    capacity: number | Cache.Options<K, V>,
+    opts: Cache.Options<K, V> = {},
   ) {
-    if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
-    extend(this.settings, opts);
-    this.space = this.settings.space!;
-    this.life = this.capacity * this.settings.life!;
-    this.limit = this.settings.limit!;
+    if (typeof capacity === 'object') {
+      opts = capacity;
+      capacity = opts.capacity ?? 0;
+    }
+    const settings = extend(this.settings, opts, { capacity });
+    this.capacity = settings.capacity!;
+    if (this.capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
+    this.frequency = max(this.capacity / 100 | 0, 1);
+    this.space = settings.space!;
+    this.life = this.capacity * settings.life!;
+    this.limit = settings.limit!;
   }
-  private readonly settings: CacheOptions<K, V> = {
+  private readonly settings: Cache.Options<K, V> = {
+    capacity: 0,
     space: Infinity,
     age: Infinity,
     life: 10,
@@ -92,6 +89,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       clear: true,
     },
   };
+  private readonly capacity: number;
   private readonly life: number;
   private readonly space: number;
   private SIZE = 0;
@@ -288,7 +286,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   } as const;
   private ratio = 50;
   private readonly limit: number;
-  private readonly frequency = max(this.capacity / 100 | 0, 1);
+  private readonly frequency: number;
   private slide(): void {
     const { LRU, LFU } = this.stats;
     const { capacity, frequency, ratio, limit, indexes } = this;
@@ -344,6 +342,20 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     index.clock = ++this.clock;
     node.moveToHead();
     return true;
+  }
+}
+namespace Cache {
+  export interface Options<K, V = undefined> {
+    readonly capacity?: number;
+    readonly space?: number;
+    readonly age?: number;
+    readonly life?: number;
+    readonly limit?: number;
+    readonly disposer?: (value: V, key: K) => void;
+    readonly capture?: {
+      readonly delete?: boolean;
+      readonly clear?: boolean;
+    };
   }
 }
 
