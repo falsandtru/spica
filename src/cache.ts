@@ -130,35 +130,29 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { LRU, LFU } = this.indexes;
     while (this.length === this.capacity || this.size + margin - size > this.space) {
       const lastLFU = LFU.last?.value;
-      let record: Record<K, V> | undefined;
+      let node: Node<Index<K>>;
       switch (true) {
+        // @ts-expect-error
+        case LFU.length > this.capacity * this.ratio / 100:
+          node = LRU.unshiftNode(LFU.last!);
+          node.value.clock -= this.clock - ++this.clockR;
         case !lastLFU:
+        default:
+          node = LRU.last === skip
+            ? LRU.last!.prev!
+            : LRU.last!;
           break;
         case LRU.length === 0:
-        case LRU.length === +(LRU.last === skip):
+        case LRU.length === 1 && LRU.last === skip:
         // LRUの下限を5%以上確保すればわずかな性能低下と引き換えに消して一般化できる
         case lastLFU!.clock < this.clock - this.life:
-        case lastLFU!.expiry !== Infinity && lastLFU!.expiry < now(): {
-          const index = LFU.pop()!;
-          record = this.memory.get(index.key)!;
-          record.index = LRU.push(index);
+        case lastLFU!.expiry !== Infinity && lastLFU!.expiry < now():
+          node = LFU.last!;
           break;
-        }
-        case LFU.length > this.capacity * this.ratio / 100: {
-          const index = LFU.pop()!;
-          index.clock = index.clock - this.clock + ++this.clockR;
-          record = this.memory.get(index.key)!;
-          record.index = LRU.unshift(index);
-          break;
-        }
       }
-      assert(LRU.last);
-      const node = LRU.last === skip
-        ? LRU.last!.prev!
-        : LRU.last!;
       assert(node !== skip);
       assert(this.memory.has(node.value.key));
-      this.dispose(node, record, true);
+      this.dispose(node, void 0, true);
       skip = skip?.list ? skip : void 0;
       size = skip?.value.size ?? 0;
     }
@@ -227,7 +221,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     }
     // Optimization for memoize.
     if (this.capacity >= 10 && node === node.list.head) return record.value;
-    this.access(record);
+    this.access(node);
     this.slide();
     return record.value;
   }
@@ -312,12 +306,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       }
     }
   }
-  private access(record: Record<K, V>): boolean {
-    return this.accessLFU(record)
-        || this.accessLRU(record);
+  private access(node: Node<Index<K>>): boolean {
+    return this.accessLFU(node)
+        || this.accessLRU(node);
   }
-  private accessLRU(record: Record<K, V>): boolean {
-    const node = record.index;
+  private accessLRU(node: Node<Index<K>>): boolean {
     assert(node.list === this.indexes.LRU);
     const index = node.value;
     const { LRU, LFU } = this.indexes;
@@ -330,15 +323,13 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       node.moveToHead();
       return true;
     }
-    node.delete();
     assert(LFU.length !== this.capacity);
     index.clock = this.clock;
     index.stat = this.stats.LFU;
-    record.index = LFU.unshift(index);
+    LFU.unshiftNode(node);
     return true;
   }
-  private accessLFU(record: Record<K, V>): boolean {
-    const node = record.index;
+  private accessLFU(node: Node<Index<K>>): boolean {
     const index = node.value;
     const { LFU } = this.indexes;
     if (node.list !== LFU) return false;

@@ -23,6 +23,9 @@ export class List<T> {
   public unshift(value: T): Node<T> {
     return this.head = this.push(value);
   }
+  public unshiftNode(node: Node<T>): Node<T> {
+    return this.head = this.pushNode(node);
+  }
   public unshiftRotationally(value: T): Node<T> {
     const node = this.last;
     if (!node) return this.unshift(value);
@@ -36,6 +39,9 @@ export class List<T> {
   public push(value: T): Node<T> {
     return new Node(value, this.head, this.head?.prev, this);
   }
+  public pushNode(node: Node<T>): Node<T> {
+    return this.insert(node, this.head);
+  }
   public pushRotationally(value: T): Node<T> {
     const node = this.head;
     if (!node) return this.push(value);
@@ -46,6 +52,18 @@ export class List<T> {
   public pop(): T | undefined {
     return this.last?.delete();
   }
+  public insert(node: Node<T>, before: Node<T> | undefined = this.head): Node<T> {
+    if (node.list === this) return before && node.move(before), node;
+    node.delete();
+    ++this[LENGTH];
+    this.head ??= node;
+    // @ts-expect-error
+    node.list = this;
+    const next = node.next = before || node;
+    const prev = node.prev = before?.prev || node;
+    next.prev = prev.next = node;
+    return node;
+  }
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
     for (let node = this.head; node;) {
       yield node.value;
@@ -55,21 +73,19 @@ export class List<T> {
   }
 }
 
-export class Node<T> {
+export { type Node };
+class Node<T> {
   constructor(
     public value: T,
     public next?: Node<T>,
     public prev?: Node<T>,
-    public readonly list: List<T> = next ? next.list : new List(),
+    public readonly list: List<T> = next?.list ?? new List(),
   ) {
     ++list[LENGTH];
     list.head ??= this;
-    next
-      ? next.prev = this
-      : this.next = this;
-    prev
-      ? prev.next = this
-      : this.prev = this;
+    next && prev
+      ? next.prev = prev.next = this
+      : this.next = this.prev = this;
   }
   public delete(): T {
     if (!this.next && !this.prev) return this.value;
@@ -99,11 +115,10 @@ export class Node<T> {
   public move(before: Node<T> | undefined): boolean {
     if (!before) return false;
     if (this === before) return false;
+    if (before.list !== this.list) return before.list.insert(this, before), true;
     const a1 = this;
-    if (!a1) return false;
     const b1 = before;
     if (!b1) return false;
-    assert(a1 !== b1);
     if (a1.next === b1) return false;
     const b0 = b1.prev!;
     const a0 = a1.prev!;
@@ -128,6 +143,7 @@ export class Node<T> {
     const node2 = node;
     if (node1 === node2) return false;
     const node3 = node2.next!;
+    if (node1.list !== node2.list) throw new Error(`Spica: InvList: Cannot swap nodes across lists.`);
     node2.move(node1);
     node1.move(node3);
     switch (this.list.head) {
