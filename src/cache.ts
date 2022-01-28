@@ -323,16 +323,14 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const index = node.value;
     const { LRU, LFU } = this.indexes;
     ++index.stat[0];
-    ++this.clock;
-    ++this.clockR;
     // Prevent LFU destruction.
-    if (!index.parent && index.clock > this.clockR - LRU.length / 3) {
-      index.clock = this.clockR;
+    if (!index.parent && index.clock >= this.clockR - LRU.length / 3 && this.capacity > 3) {
+      index.clock = ++this.clockR;
       node.moveToHead();
       return true;
     }
     assert(LFU.length !== this.capacity);
-    index.clock = this.clock;
+    index.clock = ++this.clock;
     index.stat = this.stats.LFU;
     index.parent?.delete();
     LFU.unshiftNode(node);
@@ -343,8 +341,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { LFU } = this.indexes;
     if (node.list !== LFU) return false;
     ++index.stat[0];
-    ++this.clock;
-    index.clock = this.clock;
+    index.clock = ++this.clock;
     node.moveToHead();
     return true;
   }
