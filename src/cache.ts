@@ -135,7 +135,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
           break;
         case LRU.length === 0:
         case LRU.length === +(LRU.last === skip):
-        // LRUの下限を確保すればわずかな性能低下と引き換えに消して一般化できる
+        // LRUの下限を5%以上確保すればわずかな性能低下と引き換えに消して一般化できる
         case LFU.last!.value.clock < this.clock - this.life:
         case LFU.last!.value.expiry !== Infinity && LFU.last!.value.expiry < now(): {
           const index = LFU.pop()!;
