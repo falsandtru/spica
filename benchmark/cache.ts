@@ -15,7 +15,7 @@ describe('Benchmark:', function () {
       benchmark('Cache new', () => new Cache(1000), done);
     });
 
-    for (const length of [10, 100, 1000, 10000, 100000]) {
+    for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
       it(`LRU set ${length.toLocaleString('en')} 0%`, function (done) {
         const capacity = length;
         const cache = new LRUCache<number, number>(capacity);
@@ -31,7 +31,7 @@ describe('Benchmark:', function () {
       });
     }
 
-    for (const length of [10, 100, 1000, 10000, 100000]) {
+    for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
       it(`LRU set ${length.toLocaleString('en')} 100%`, function (done) {
         const capacity = length;
         const cache = new LRUCache<number, number>(capacity);
@@ -47,7 +47,7 @@ describe('Benchmark:', function () {
       });
     }
 
-    for (const length of [10, 100, 1000, 10000, 100000]) {
+    for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
       it(`LRU get ${length.toLocaleString('en')} 0%`, function (done) {
         const capacity = length;
         const cache = new LRUCache<number, number>(capacity);
@@ -63,7 +63,7 @@ describe('Benchmark:', function () {
       });
     }
 
-    for (const length of [10, 100, 1000, 10000, 100000]) {
+    for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
       it(`LRU get ${length.toLocaleString('en')} 100%`, function (done) {
         const capacity = length;
         const cache = new LRUCache<number, number>(capacity);
@@ -79,7 +79,7 @@ describe('Benchmark:', function () {
       });
     }
 
-    for (const length of [10, 100, 1000, 10000, 100000]) {
+    for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
       it(`LRU simulation ${length.toLocaleString('en')}`, function (done) {
         const capacity = length;
         const cache = new LRUCache<number, number>(capacity);
