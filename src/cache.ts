@@ -52,6 +52,7 @@ interface Index<K> {
   clock: number;
   expiry: number;
   stat: [number, number];
+  parent?: Node<Node<Index<K>>>;
 }
 interface Record<K, V> {
   index: Node<Index<K>>;
@@ -103,6 +104,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private readonly indexes = {
     LRU: new List<Index<K>>(),
     LFU: new List<Index<K>>(),
+    OVF: new List<Node<Index<K>>>(),
   } as const;
   public get length(): number {
     //assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
@@ -119,6 +121,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       : record;
     assert(node.list);
     node.delete();
+    node.value.parent?.delete();
     this.memory.delete(index.key);
     this.SIZE -= index.size;
     callback && this.settings.disposer?.(record!.value, index.key);
@@ -127,32 +130,36 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     let size = skip?.value.size ?? 0;
     assert(margin - size <= this.space);
     if (margin - size <= 0) return;
-    const { LRU, LFU } = this.indexes;
+    const { LRU, LFU, OVF } = this.indexes;
     while (this.length === this.capacity || this.size + margin - size > this.space) {
-      const lastLFU = LFU.last?.value;
-      let node: Node<Index<K>>;
+      const lastNode = OVF.last?.value ?? LFU.last;
+      const lastIndex = lastNode?.value;
+      let target: Node<Index<K>>;
       switch (true) {
-        // @ts-expect-error
-        case LFU.length > this.capacity * this.ratio / 100:
-          node = LRU.unshiftNode(LFU.last!);
-          node.value.clock -= this.clock - ++this.clockR;
-        case !lastLFU:
-        default:
-          node = LRU.last === skip
-            ? LRU.last!.prev!
-            : LRU.last!;
-          break;
         case LRU.length === 0:
         case LRU.length === 1 && LRU.last === skip:
+          target = LFU.last!;
+          break;
         // LRUの下限を5%以上確保すればわずかな性能低下と引き換えに消して一般化できる
-        case lastLFU!.clock < this.clock - this.life:
-        case lastLFU!.expiry !== Infinity && lastLFU!.expiry < now():
-          node = LFU.last!;
+        case lastIndex && lastIndex!.clock < this.clock - this.life:
+        case lastIndex && lastIndex.expiry !== Infinity && lastIndex.expiry < now():
+          target = lastNode!;
+          break;
+        // @ts-expect-error
+        case LFU.length > this.capacity * this.ratio / 100:
+          const lastLFU = LFU.last!;
+          lastLFU.value.parent = OVF.unshift(LRU.unshiftNode(lastLFU));
+          assert(OVF.length <= LRU.length);
+        default:
+          const lastLRU = LRU.last!;
+          target = lastLRU === skip
+            ? lastLRU.prev!
+            : lastLRU!;
           break;
       }
-      assert(node !== skip);
-      assert(this.memory.has(node.value.key));
-      this.dispose(node, void 0, true);
+      assert(target !== skip);
+      assert(this.memory.has(target.value.key));
+      this.dispose(target, void 0, true);
       skip = skip?.list ? skip : void 0;
       size = skip?.value.size ?? 0;
     }
@@ -249,6 +256,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.stats.clear();
     this.indexes.LRU.clear();
     this.indexes.LFU.clear();
+    this.indexes.OVF.clear();
     if (!this.settings.disposer || !this.settings.capture!.clear) return void this.memory.clear();
     const memory = this.memory;
     this.memory = new Map();
@@ -318,7 +326,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     ++this.clock;
     ++this.clockR;
     // Prevent LFU destruction.
-    if (index.clock > this.clockR - LRU.length / 3 && index.stat === this.stats.LRU) {
+    if (!index.parent && index.clock > this.clockR - LRU.length / 3) {
       index.clock = this.clockR;
       node.moveToHead();
       return true;
@@ -326,6 +334,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     assert(LFU.length !== this.capacity);
     index.clock = this.clock;
     index.stat = this.stats.LFU;
+    index.parent?.delete();
     LFU.unshiftNode(node);
     return true;
   }
