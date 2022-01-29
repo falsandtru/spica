@@ -2,8 +2,6 @@ import type { Mutable } from '../type';
 import { global, encodeURI, encodeURIComponent, URLSearchParams } from '../global';
 import { memoize } from '../memoize';
 import { Cache } from '../cache';
-import { flip } from '../flip';
-import { uncurry } from '../curry';
 
 declare class Absolute {
   private static readonly IDENTITY: unique symbol;
@@ -81,27 +79,27 @@ export class ReadonlyURL implements Readonly<global.URL> {
   // ref: https://github.com/falsandtru/pjax-api/issues/44#issuecomment-633915035
   // Bug: Error in dependents.
   // @ts-ignore
-  private static readonly get: (url: string, base: string | undefined) => SharedURL
-    = flip(uncurry(memoize((base: string | undefined) => memoize((url: string) =>
-      ({
-        url: new global.URL(url, base),
-        href: void 0,
-        resource: void 0,
-        origin: void 0,
-        protocol: void 0,
-        username: void 0,
-        password: void 0,
-        host: void 0,
-        hostname: void 0,
-        port: void 0,
-        path: void 0,
-        pathname: void 0,
-        search: void 0,
-        query: void 0,
-        hash: void 0,
-        fragment: void 0,
-      })
-      , new Cache(100)), new Cache(100))));
+  private static readonly get = memoize((url: string, base: string | undefined): SharedURL =>
+    ({
+      url: new global.URL(url, base),
+      href: void 0,
+      resource: void 0,
+      origin: void 0,
+      protocol: void 0,
+      username: void 0,
+      password: void 0,
+      host: void 0,
+      hostname: void 0,
+      port: void 0,
+      path: void 0,
+      pathname: void 0,
+      search: void 0,
+      query: void 0,
+      hash: void 0,
+      fragment: void 0,
+    }),
+    (url, base = '') => `${base.indexOf('\n') > -1 ? base.replace(/\n+/g, '') : base}\n${url}`,
+    new Cache(10000));
   constructor(
     public readonly source: string,
     public readonly base?: string,
