@@ -88,7 +88,7 @@ class Node<T> {
       : this.next = this.prev = this;
   }
   public delete(): T {
-    if (!this.next && !this.prev) return this.value;
+    if (!this.list) return this.value;
     --this.list[LENGTH];
     if (this.list.head === this) {
       this.list.head = this.next === this
