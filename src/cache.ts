@@ -153,7 +153,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
           const lastLRU = LRU.last!;
           target = lastLRU === skip
             ? lastLRU.prev!
-            : lastLRU!;
+            : lastLRU;
           break;
       }
       assert(target !== skip);
