@@ -52,7 +52,7 @@ interface Index<K> {
   clock: number;
   expiry: number;
   stat: [number, number];
-  parent?: Node<Index<K>>;
+  overflow?: Node<Index<K>>;
 }
 interface Record<K, V> {
   index: Node<Index<K>>;
@@ -119,7 +119,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       : record;
     assert(node.list);
     node.delete();
-    node.value.parent?.delete();
+    node.value.overflow?.delete();
     this.memory.delete(index.key);
     this.SIZE -= index.size;
     callback && this.settings.disposer?.(record!.value, index.key);
@@ -147,7 +147,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         case LFU.length > this.capacity * this.ratio / 100:
           const lastLFU = LFU.last!;
           LRU.unshiftNode(lastLFU);
-          lastLFU.value.parent = OVF.unshift(lastLFU.value);
+          lastLFU.value.overflow = OVF.unshift(lastLFU.value);
           assert(OVF.length <= LRU.length);
         default:
           const lastLRU = LRU.last!;
@@ -323,7 +323,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { LRU, LFU } = this.indexes;
     ++index.stat[0];
     // Prevent LFU destruction.
-    if (!index.parent && index.clock >= this.clockR - LRU.length / 3 && this.capacity > 3) {
+    if (!index.overflow && index.clock >= this.clockR - LRU.length / 3 && this.capacity > 3) {
       index.clock = ++this.clockR;
       node.moveToHead();
       return true;
@@ -331,7 +331,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     assert(LFU.length !== this.capacity);
     index.clock = ++this.clock;
     index.stat = this.stats.LFU;
-    index.parent?.delete();
+    index.overflow?.delete();
     LFU.unshiftNode(node);
     return true;
   }
