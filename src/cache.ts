@@ -52,7 +52,7 @@ interface Index<K> {
   clock: number;
   expiry: number;
   stat: [number, number];
-  parent?: Node<Node<Index<K>>>;
+  parent?: Node<Index<K>>;
 }
 interface Record<K, V> {
   index: Node<Index<K>>;
@@ -102,7 +102,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private readonly indexes = {
     LRU: new List<Index<K>>(),
     LFU: new List<Index<K>>(),
-    OVF: new List<Node<Index<K>>>(),
+    OVF: new List<Index<K>>(),
   } as const;
   public get length(): number {
     //assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
@@ -130,7 +130,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (margin - size <= 0) return;
     const { LRU, LFU, OVF } = this.indexes;
     while (this.length === this.capacity || this.size + margin - size > this.space) {
-      const lastNode = OVF.last?.value ?? LFU.last;
+      const lastNode = OVF.last ?? LFU.last;
       const lastIndex = lastNode?.value;
       let target: Node<Index<K>>;
       switch (true) {
@@ -146,7 +146,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         // @ts-expect-error
         case LFU.length > this.capacity * this.ratio / 100:
           const lastLFU = LFU.last!;
-          lastLFU.value.parent = OVF.unshift(LRU.unshiftNode(lastLFU));
+          LRU.unshiftNode(lastLFU);
+          lastLFU.value.parent = OVF.unshift(lastLFU.value);
           assert(OVF.length <= LRU.length);
         default:
           const lastLRU = LRU.last!;
