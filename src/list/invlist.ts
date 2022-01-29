@@ -37,7 +37,7 @@ export class List<T> {
     return this.head?.delete();
   }
   public push(value: T): Node<T> {
-    return new Node(value, this.head, this.head?.prev, this);
+    return new Node(value, this.head!, this.head?.prev!, this);
   }
   public pushNode(node: Node<T>): Node<T> {
     return this.insert(node, this.head);
@@ -59,8 +59,8 @@ export class List<T> {
     this.head ??= node;
     // @ts-expect-error
     node.list = this;
-    const next = node.next = before || node;
-    const prev = node.prev = before?.prev || node;
+    const next = node.next = before ?? node;
+    const prev = node.prev = next.prev ?? node;
     next.prev = prev.next = node;
     return node;
   }
@@ -77,8 +77,8 @@ export { type Node };
 class Node<T> {
   constructor(
     public value: T,
-    public next?: Node<T>,
-    public prev?: Node<T>,
+    public next: Node<T>,
+    public prev: Node<T>,
     public readonly list: List<T> = next?.list ?? new List(),
   ) {
     ++list[LENGTH];
@@ -103,6 +103,7 @@ class Node<T> {
     }
     // @ts-expect-error
     this.list = undefined;
+    // @ts-expect-error
     this.next = this.prev = undefined;
     return this.value;
   }
@@ -120,9 +121,9 @@ class Node<T> {
     const b1 = before;
     if (!b1) return false;
     if (a1.next === b1) return false;
-    const b0 = b1.prev!;
-    const a0 = a1.prev!;
-    const a2 = a1.next!;
+    const b0 = b1.prev;
+    const a0 = a1.prev;
+    const a2 = a1.next;
     b0.next = a1;
     a1.next = b1;
     b1.prev = a1;
@@ -142,7 +143,7 @@ class Node<T> {
     const node1 = this;
     const node2 = node;
     if (node1 === node2) return false;
-    const node3 = node2.next!;
+    const node3 = node2.next;
     if (node1.list !== node2.list) throw new Error(`Spica: InvList: Cannot swap nodes across lists.`);
     node2.move(node1);
     node1.move(node3);

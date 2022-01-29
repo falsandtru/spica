@@ -137,7 +137,7 @@ describe('Benchmark:', function () {
         let i = 0;
         benchmark(`IvList move ${length.toLocaleString('en')}`, () => {
           if (++i > cap) {
-            list.last!.prev!.moveToHead();
+            list.last!.prev.moveToHead();
           }
           else {
             list.unshift(i);
