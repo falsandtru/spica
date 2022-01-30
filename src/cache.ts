@@ -139,6 +139,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
           target = LFU.last!;
           break;
         // LRUの下限を5%以上確保すればわずかな性能低下と引き換えに消して一般化できる
+        // NOTE: The following conditions must be ensured that they won't be true if `lastNode` is `skip`
+        // before calling this method.
         case lastIndex && lastIndex!.clock < this.clock - this.life:
         case lastIndex && lastIndex.expiry !== Infinity && lastIndex.expiry < now():
           target = lastNode!;
@@ -180,14 +182,18 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (record) {
       const node = record.index;
       const val = record.value;
-      this.ensure(size, node);
-      assert(this.memory.has(key));
       const index = node.value;
+      // Prevent wrong disposal in ensuring.
+      index.clock = this.clock;
+      index.expiry = Infinity;
+      this.ensure(size, node);
+      index.clock = ++this.clockR;
+      index.expiry = expiry;
+      assert(this.memory.has(key));
       this.SIZE += size - index.size;
       assert(0 <= this.size && this.size <= this.space);
-      record.value = value;
       index.size = size;
-      index.expiry = expiry;
+      record.value = value;
       this.settings.disposer?.(val, key);
       return true;
     }
