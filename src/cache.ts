@@ -102,6 +102,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private readonly indexes = {
     LRU: new List<Index<K>>(),
     LFU: new List<Index<K>>(),
+    // expiryとLFUのclockを消すなら消せる
     OVF: new List<Index<K>>(),
   } as const;
   public get length(): number {
@@ -125,38 +126,46 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     callback && this.settings.disposer?.(record!.value, index.key);
   }
   private ensure(margin: number, skip?: Node<Index<K>>): void {
+    if (skip) {
+      // Prevent wrong disposal of `skip`.
+      skip.value.clock = this.clock;
+      skip.value.expiry = Infinity;
+    }
     let size = skip?.value.size ?? 0;
     assert(margin - size <= this.space);
     if (margin - size <= 0) return;
     const { LRU, LFU, OVF } = this.indexes;
     while (this.length === this.capacity || this.size + margin - size > this.space) {
+      assert(this.length >= 1 + +!!skip);
       const lastNode = OVF.last ?? LFU.last;
       const lastIndex = lastNode?.value;
       let target: Node<Index<K>>;
       switch (true) {
         case LRU.length === 0:
-        case LRU.length === 1 && LRU.last === skip:
           target = LFU.last!;
+          target = target !== skip
+            ? target
+            : target.prev;
           break;
         // LRUの下限を5%以上確保すればわずかな性能低下と引き換えに消して一般化できる
-        // NOTE: The following conditions must be ensured that they won't be true if `lastNode` is `skip`
-        // before calling this method.
+        // NOTE: The following conditions must be ensured that they won't be true if `lastNode` is `skip`.
         case lastIndex && lastIndex!.clock < this.clock - this.life:
         case lastIndex && lastIndex.expiry !== Infinity && lastIndex.expiry < now():
           target = lastNode!;
           break;
         // @ts-expect-error
         case LFU.length > this.capacity * this.ratio / 100:
-          const lastLFU = LFU.last!;
-          LRU.unshiftNode(lastLFU);
-          lastLFU.value.overflow = OVF.unshift(lastLFU.value);
+          target = LFU.last!;
+          LRU.unshiftNode(target);
+          target.value.overflow = OVF.unshift(target.value);
           assert(OVF.length <= LRU.length);
         default:
-          const lastLRU = LRU.last!;
-          target = lastLRU === skip
-            ? lastLRU.prev
-            : lastLRU;
-          break;
+          target = LRU.last!;
+          target = target !== skip
+            ? target
+            : target.prev !== skip
+              ? target.prev
+              : LFU.last!;
       }
       assert(target !== skip);
       assert(this.memory.has(target.value.key));
@@ -183,9 +192,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       const node = record.index;
       const val = record.value;
       const index = node.value;
-      // Prevent wrong disposal in ensuring.
-      index.clock = this.clock;
-      index.expiry = Infinity;
       this.ensure(size, node);
       index.clock = ++this.clockR;
       index.expiry = expiry;
