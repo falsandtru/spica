@@ -170,7 +170,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       assert(target !== skip);
       assert(this.memory.has(target.value.key));
       this.dispose(target, void 0, true);
-      skip = skip?.list ? skip : void 0;
+      skip = skip?.list && skip;
       size = skip?.value.size ?? 0;
     }
   }
