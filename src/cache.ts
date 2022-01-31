@@ -197,7 +197,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       index.expiry = expiry;
       assert(this.memory.has(key));
       this.SIZE += size - index.size;
-      assert(0 <= this.size && this.size <= this.space);
+      assert(0 < this.size && this.size <= this.space);
       index.size = size;
       record.value = value;
       this.settings.disposer?.(val, key);
@@ -209,7 +209,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { LRU } = this.indexes;
     assert(LRU.length !== this.capacity);
     this.SIZE += size;
-    assert(0 <= this.size && this.size <= this.space);
+    assert(0 < this.size && this.size <= this.space);
     this.memory.set(key, {
       index: LRU.unshift({
         key,
@@ -386,3 +386,4 @@ function rate(window: number, currHits: number, currTotal: number, prevHits: num
 }
 assert(rate(10, 5, 10, 0, 0) === 5000);
 assert(rate(10, 0, 0, 5, 10) === 5000);
+assert(rate(10, 1, 5, 4, 10) === 3000);
