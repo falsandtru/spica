@@ -141,17 +141,17 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       const lastIndex = lastNode?.value;
       let target: Node<Index<K>>;
       switch (true) {
-        case LRU.length === 0:
-          target = LFU.last!;
-          target = target !== skip
-            ? target
-            : target.prev;
-          break;
         // LRUの下限を5%以上確保すればわずかな性能低下と引き換えに消して一般化できる
         // NOTE: The following conditions must be ensured that they won't be true if `lastNode` is `skip`.
         case lastIndex && lastIndex!.clock < this.clock - this.life:
         case lastIndex && lastIndex.expiry !== Infinity && lastIndex.expiry < now():
           target = lastNode!;
+          break;
+        case LRU.length === 0:
+          target = LFU.last!;
+          target = target !== skip
+            ? target
+            : target.prev;
           break;
         // @ts-expect-error
         case LFU.length > this.capacity * this.ratio / 100:
