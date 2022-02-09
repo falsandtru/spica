@@ -46,7 +46,7 @@ JavaScriptにおける需要を満たさない懸念がある。
 */
 
 interface Index<K> {
-  key: K;
+  readonly key: K;
   size: number;
   clock: number;
   expiry: number;
@@ -54,7 +54,7 @@ interface Index<K> {
   overflow?: Node<Index<K>>;
 }
 interface Record<K, V> {
-  index: Node<Index<K>>;
+  readonly index: Node<Index<K>>;
   value: V;
 }
 
@@ -191,9 +191,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       const val = record.value;
       const index = node.value;
       this.ensure(size, node);
+      assert(this.memory.has(key));
       index.clock = ++this.clockR;
       index.expiry = expiry;
-      assert(this.memory.has(key));
       this.SIZE += size - index.size;
       assert(0 < this.size && this.size <= this.space);
       index.size = size;
