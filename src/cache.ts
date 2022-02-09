@@ -307,9 +307,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const lenF = indexes.LFU.length;
     const lenV = indexes.OVF.length;
     const r = (lenF + lenV) * 1000 / (lenR + lenF) | 0;
-    const rateR0 = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1]) * (1 + r);
-    const rateF0 = rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1]) * (1001 - r);
-    const rateF1 = rate(window, LFU[1], LRU[1] + LFU[1], LFU[0], LRU[0] + LFU[0]) * (1001 - r);
+    const rateR0 = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1], 0) * (1 + r);
+    const rateF0 = rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1], 0) * (1001 - r);
+    const rateF1 = rate(window, LFU[1], LRU[1] + LFU[1], LFU[0], LRU[0] + LFU[0], 5) * (1001 - r);
     // 操作頻度を超えてキャッシュ比率を増減させても余剰比率の消化が追いつかず無駄
     // LRUの下限設定ではLRU拡大の要否を迅速に判定できないためLFUのヒット率低下の検出で代替する
     if (ratio > 0 && (rateR0 > rateF0 || rateF0 < rateF1 * 0.95)) {
@@ -373,14 +373,18 @@ namespace Cache {
   }
 }
 
-function rate(window: number, currHits: number, currTotal: number, prevHits: number, prevTotal: number): number {
+function rate(window: number, currHits: number, currTotal: number, prevHits: number, prevTotal: number, offset: number): number {
   assert(currTotal <= window);
-  const currRate = currHits * 100 / currTotal | 0;
-  const currRatio = currTotal * 100 / window | 0;
   const prevRate = prevHits * 100 / prevTotal | 0;
+  const currRatio = currTotal * 100 / window - offset | 0;
+  if (currRatio <= 0) return prevRate * 100;
+  const currRate = currHits * 100 / currTotal | 0;
   const prevRatio = 100 - currRatio;
   return currRate * currRatio + prevRate * prevRatio;
 }
-assert(rate(10, 5, 10, 0, 0) === 5000);
-assert(rate(10, 0, 0, 5, 10) === 5000);
-assert(rate(10, 1, 5, 4, 10) === 3000);
+assert(rate(10, 4, 10, 0, 0, 0) === 4000);
+assert(rate(10, 0, 0, 4, 10, 0) === 4000);
+assert(rate(10, 1, 5, 4, 10, 0) === 3000);
+assert(rate(10, 0, 0, 4, 10, 5) === 4000);
+assert(rate(10, 1, 5, 2, 10, 5) === 2000);
+assert(rate(10, 2, 5, 2, 10, 5) === 2900);
