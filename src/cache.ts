@@ -51,6 +51,7 @@ interface Index<K> {
   clock: number;
   expiry: number;
   stat: [number, number];
+  parent?: Node<Index<K>>;
   overflow?: Node<Index<K>>;
 }
 interface Record<K, V> {
@@ -111,15 +112,21 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     return this.SIZE;
   }
   private dispose(node: Node<Index<K>>, record: Record<K, V> | undefined, callback: boolean): void {
+    assert(this.indexes.OVF.length <= this.indexes.LRU.length);
+    assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     const index = node.value;
     callback &&= !!this.settings.disposer;
     record = callback
       ? record ?? this.memory.get(index.key)
       : record;
     assert(node.list);
+    assert(node.list !== this.indexes.OVF);
     node.delete();
     node.value.overflow?.delete();
+    assert(this.indexes.OVF.length <= this.indexes.LRU.length);
+    assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size - 1);
     this.memory.delete(index.key);
+    assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     this.SIZE -= index.size;
     callback && this.settings.disposer?.(record!.value, index.key);
   }
@@ -141,28 +148,30 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       switch (true) {
         // LRUの下限を5%以上確保すればわずかな性能低下と引き換えに消して一般化できる
         // NOTE: The following conditions must be ensured that they won't be true if `lastNode` is `skip`.
-        case lastIndex && lastIndex!.clock < this.clock - this.life:
+        case lastIndex && lastIndex.clock < this.clock - this.life:
         case lastIndex && lastIndex.expiry !== Infinity && lastIndex.expiry < now():
-          target = lastNode!;
+          target = lastNode!.list === OVF
+            ? lastNode!.value.parent!
+            : lastNode!;
+          assert(target.list !== this.indexes.OVF);
           break;
         case LRU.length === 0:
-          target = LFU.last!;
-          target = target !== skip
-            ? target
-            : target.prev;
+          target = LFU.last! !== skip
+            ? LFU.last!
+            : LFU.last!.prev;
           break;
         // @ts-expect-error
         case LFU.length > this.capacity * this.ratio / 100:
-          target = LFU.last!;
-          LRU.unshiftNode(target);
-          target.value.overflow = OVF.unshift(target.value);
+          LRU.unshiftNode(LFU.last!);
+          LRU.head!.value.parent = LRU.head!;
+          LRU.head!.value.overflow = OVF.unshift(LRU.head!.value);
           assert(OVF.length <= LRU.length);
         default:
-          target = LRU.last!;
-          target = target !== skip
-            ? target
-            : target.prev !== skip
-              ? target.prev
+          assert(LRU.last);
+          target = LRU.last! !== skip
+            ? LRU.last!
+            : LRU.last!.prev !== skip
+              ? LRU.last!.prev
               : LFU.last!;
       }
       assert(target !== skip);
