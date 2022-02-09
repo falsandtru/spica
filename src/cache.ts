@@ -314,9 +314,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const rateF0 = rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1]) * (1001 - r);
     const rateF1 = rate(window, LFU[1], LRU[1] + LFU[1], LFU[0], LRU[0] + LFU[0]) * (1001 - r);
     // 操作頻度を超えてキャッシュ比率を増減させても余剰比率の消化が追いつかず無駄
-    if (ratio > 0 && rateR0 > rateF0 ||
-        // LRUの下限設定ではLRU拡大の要否を迅速に判定できないためLFUのヒット率低下の検出で代替する
-        ratio > 0 && rateF0 < rateF1 * 0.95) {
+    // LRUの下限設定ではLRU拡大の要否を迅速に判定できないためLFUのヒット率低下の検出で代替する
+    if (ratio > 0 && (rateR0 > rateF0 || rateF0 < rateF1 * 0.95)) {
       if (lenR >= capacity * (100 - ratio) / 100) {
         //ratio % 10 || ratio === 100 || console.debug('-', ratio, LRU, LFU);
         --this.ratio;
