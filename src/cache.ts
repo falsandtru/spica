@@ -1,5 +1,4 @@
 import { Infinity, Number, Map } from './global';
-import { min } from './alias';
 import { now } from './clock';
 import { IterableCollection } from './collection';
 import { List, Node } from './invlist';
@@ -375,9 +374,9 @@ namespace Cache {
 }
 
 function rate(window: number, currHits: number, currTotal: number, prevHits: number, prevTotal: number): number {
-  window = min(currTotal + prevTotal, window);
+  assert(currTotal <= window);
   const currRate = currHits * 100 / currTotal | 0;
-  const currRatio = min(currTotal * 100 / window | 0, 100);
+  const currRatio = currTotal * 100 / window | 0;
   const prevRate = prevHits * 100 / prevTotal | 0;
   const prevRatio = 100 - currRatio;
   return currRate * currRatio + prevRate * prevRatio;
