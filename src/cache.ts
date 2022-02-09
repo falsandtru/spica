@@ -111,7 +111,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public get size(): number {
     return this.SIZE;
   }
-  private dispose(node: Node<Index<K>>, record: Record<K, V> | undefined, callback: boolean): void {
+  private evict(node: Node<Index<K>>, record: Record<K, V> | undefined, callback: boolean): void {
     assert(this.indexes.OVF.length <= this.indexes.LRU.length);
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     const index = node.value;
@@ -176,7 +176,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       }
       assert(target !== skip);
       assert(this.memory.has(target.value.key));
-      this.dispose(target, void 0, true);
+      this.evict(target, void 0, true);
       skip = skip?.list && skip;
       size = skip?.value.size ?? 0;
     }
@@ -241,7 +241,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const node = record.index;
     const expiry = node.value.expiry;
     if (expiry !== Infinity && expiry < now()) {
-      this.dispose(node, record, true);
+      this.evict(node, record, true);
       return;
     }
     // Optimization for memoize.
@@ -257,7 +257,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (!record) return false;
     const expiry = record.index.value.expiry;
     if (expiry !== Infinity && expiry < now()) {
-      this.dispose(record.index, record, true);
+      this.evict(record.index, record, true);
       return false;
     }
     return true;
@@ -265,7 +265,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public delete(key: K): boolean {
     const record = this.memory.get(key);
     if (!record) return false;
-    this.dispose(record.index, record, this.settings.capture!.delete === true);
+    this.evict(record.index, record, this.settings.capture!.delete === true);
     return true;
   }
   public clear(): void {
