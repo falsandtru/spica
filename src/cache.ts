@@ -1,5 +1,5 @@
 import { Infinity, Number, Map } from './global';
-import { max, min } from './alias';
+import { min } from './alias';
 import { now } from './clock';
 import { IterableCollection } from './collection';
 import { List, Node } from './invlist';
@@ -73,7 +73,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const settings = extend(this.settings, opts, { capacity });
     this.capacity = settings.capacity!;
     if (this.capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
-    this.frequency = max(this.capacity / 100 | 0, 1);
     this.space = settings.space!;
     this.life = this.capacity * settings.life!;
     this.limit = settings.limit!;
@@ -299,13 +298,12 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   } as const;
   private ratio = 50;
   private readonly limit: number;
-  private readonly frequency: number;
   private slide(): void {
     const { LRU, LFU } = this.stats;
-    const { capacity, frequency, ratio, limit, indexes } = this;
+    const { capacity, ratio, limit, indexes } = this;
     const window = capacity;
     LRU[0] + LFU[0] === window && this.stats.slide();
-    if ((LRU[0] + LFU[0]) % frequency || LRU[1] + LFU[1] === 0) return;
+    if ((LRU[0] + LFU[0]) * 100 % capacity || LRU[1] + LFU[1] === 0) return;
     const lenR = indexes.LRU.length;
     const lenF = indexes.LFU.length;
     const lenV = indexes.OVF.length;
