@@ -14,7 +14,7 @@ describe('Unit: lib/ixlist', () => {
     }
 
     it('put/delete 1', () => {
-      const list = new List<number>(new Map(), 1);
+      const list = new List<number>(1, new Map());
 
       assert.deepStrictEqual(inspect(list), {
         list: [],
@@ -63,7 +63,7 @@ describe('Unit: lib/ixlist', () => {
         length: 1,
       });
 
-      assert.deepStrictEqual(list.del(0), undefined);
+      assert.deepStrictEqual(list.delete(0), undefined);
       assert.deepStrictEqual(inspect(list), {
         list: [
           [1, undefined],
@@ -76,7 +76,7 @@ describe('Unit: lib/ixlist', () => {
         length: 1,
       });
 
-      assert.deepStrictEqual(list.del(1), { index: 0, key: 1, value: undefined, next: 0, prev: 0 });
+      assert.deepStrictEqual(list.delete(1), { index: 0, key: 1, value: undefined, next: 0, prev: 0 });
       assert.deepStrictEqual(inspect(list), {
         list: [],
         nodes: [
@@ -87,7 +87,7 @@ describe('Unit: lib/ixlist', () => {
         length: 0,
       });
 
-      assert.deepStrictEqual(list.del(1), undefined);
+      assert.deepStrictEqual(list.delete(1), undefined);
       assert.deepStrictEqual(inspect(list), {
         list: [],
         nodes: [
@@ -100,7 +100,7 @@ describe('Unit: lib/ixlist', () => {
     });
 
     it('put/delete 2', () => {
-      const list = new List<number>(new Map(), 2);
+      const list = new List<number>(2, new Map());
 
       assert(list.put(0) === 0);
       assert.deepStrictEqual(inspect(list), {
@@ -145,7 +145,7 @@ describe('Unit: lib/ixlist', () => {
         length: 2,
       });
 
-      assert.deepStrictEqual(list.del(0), { index: 0, key: 0, value: undefined, next: 1, prev: 1 });
+      assert.deepStrictEqual(list.delete(0), { index: 0, key: 0, value: undefined, next: 1, prev: 1 });
       assert.deepStrictEqual(inspect(list), {
         list: [
           [1, undefined],
@@ -159,7 +159,7 @@ describe('Unit: lib/ixlist', () => {
         length: 1,
       });
 
-      assert.deepStrictEqual(list.del(1), { index: 1, key: 1, value: undefined, next: 1, prev: 1 });
+      assert.deepStrictEqual(list.delete(1), { index: 1, key: 1, value: undefined, next: 1, prev: 1 });
       assert.deepStrictEqual(inspect(list), {
         list: [],
         nodes: [
@@ -171,7 +171,7 @@ describe('Unit: lib/ixlist', () => {
         length: 0,
       });
 
-      assert.deepStrictEqual(list.del(1), undefined);
+      assert.deepStrictEqual(list.delete(1), undefined);
       assert.deepStrictEqual(inspect(list), {
         list: [],
         nodes: [
@@ -185,7 +185,7 @@ describe('Unit: lib/ixlist', () => {
     });
 
     it('put/delete 3', () => {
-      const list = new List<number>(new Map(), 3);
+      const list = new List<number>(3, new Map());
 
       assert(list.put(0) === 0);
       assert.deepStrictEqual(inspect(list), {
@@ -249,7 +249,7 @@ describe('Unit: lib/ixlist', () => {
         length: 3,
       });
 
-      assert.deepStrictEqual(list.del(0), undefined);
+      assert.deepStrictEqual(list.delete(0), undefined);
       assert.deepStrictEqual(inspect(list), {
         list: [
           [3, undefined],
@@ -266,7 +266,7 @@ describe('Unit: lib/ixlist', () => {
         length: 3,
       });
 
-      assert.deepStrictEqual(list.del(1), { index: 1, key: 1, value: undefined, next: 0, prev: 2 });
+      assert.deepStrictEqual(list.delete(1), { index: 1, key: 1, value: undefined, next: 0, prev: 2 });
       assert.deepStrictEqual(inspect(list), {
         list: [
           [3, undefined],
@@ -282,7 +282,7 @@ describe('Unit: lib/ixlist', () => {
         length: 2,
       });
 
-      assert.deepStrictEqual(list.del(1), undefined);
+      assert.deepStrictEqual(list.delete(1), undefined);
       assert.deepStrictEqual(inspect(list), {
         list: [
           [3, undefined],
@@ -300,7 +300,7 @@ describe('Unit: lib/ixlist', () => {
     });
 
     it('insert', () => {
-      const list = new List<number, number>(undefined, 2);
+      const list = new List<number, number>(2);
 
       assert(list.insert(0, ~0, 0) === 0);
       assert.deepStrictEqual(inspect(list), {
@@ -347,7 +347,7 @@ describe('Unit: lib/ixlist', () => {
     });
 
     it('update', () => {
-      const list = new List<number, number>(new Map(), 3);
+      const list = new List<number, number>(3, new Map());
 
       assert(list.put(0, ~0) === 0);
       assert(list.put(1, ~1) === 1);
@@ -372,7 +372,7 @@ describe('Unit: lib/ixlist', () => {
     });
 
     it('duplicate', () => {
-      const list = new List<number, number>(new MultiMap(), 3);
+      const list = new List<number, number>(3, new MultiMap());
 
       list.add(0, 1);
       list.add(0, 2);
@@ -411,10 +411,10 @@ describe('Unit: lib/ixlist', () => {
         length: 3,
       });
 
-      assert(list.get(0) === 4);
-      assert(list.del(0)?.value === 4);
-      assert(list.del(0)?.value === 3);
-      assert(list.del(0)?.value === undefined);
+      assert(list.get(0)?.value === 4);
+      assert(list.delete(0)?.value === 4);
+      assert(list.delete(0)?.value === 3);
+      assert(list.delete(0)?.value === undefined);
       assert.deepStrictEqual(inspect(list), {
         list: [
           [1, 0],
@@ -431,7 +431,7 @@ describe('Unit: lib/ixlist', () => {
     });
 
     it('swap', () => {
-      const list = new List<number, number>(undefined, 4);
+      const list = new List<number, number>(4);
 
       list.add(0, ~0);
       list.add(1, ~1);

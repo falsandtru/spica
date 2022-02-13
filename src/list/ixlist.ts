@@ -1,11 +1,13 @@
-import { Number } from '../global';
-import { Collection, IterableCollection } from '../collection';
+import { Infinity, Array } from '../global';
+import { min } from '../alias';
+import { Collection } from '../collection';
 import { Stack } from '../stack';
 import { equal } from '../compare';
 
 // Circular indexed list
 
 const undefined = void 0;
+const BORDER = 1_000_000_000;
 
 interface Index<K, V> extends Collection<K, V> {
   delete(key: K, value?: V): boolean;
@@ -27,15 +29,22 @@ interface Node<K, V> {
   readonly prev: number;
 }
 
-export class List<K, V = undefined> implements IterableCollection<K, V> {
-  constructor(
-    private readonly index?: Index<K, number>,
-    public readonly capacity: number = 0,
-  ) {
-    this.capacity ||= Number.MAX_SAFE_INTEGER;
+export class List<K, V = undefined> {
+  constructor(capacity?: number, index?: Index<K, number>);
+  constructor(index: Index<K, number>);
+  constructor(capacity: number | Index<K, number> = Infinity, index?: Index<K, number>) {
+    if (typeof capacity === 'object') {
+      index = capacity;
+      capacity = Infinity;
+    }
+    this.capacity = capacity;
+    this.index = index;
+    this.nodes = this.capacity <= BORDER ? Array(min(this.capacity, BORDER)) : {};
   }
-  private nodes: Record<number, InternalNode<K, V> | undefined> = {};
-  private readonly buffers = new Stack<number>();
+  public readonly capacity: number;
+  private readonly index?: Index<K, number>;
+  private nodes: Record<number, InternalNode<K, V>>;
+  private readonly heap = new Stack<number>();
   public HEAD = 0;
   private CURSOR = 0;
   private LENGTH = 0;
@@ -54,7 +63,9 @@ export class List<K, V = undefined> implements IterableCollection<K, V> {
     return head && this.nodes[head.prev];
   }
   public node(index: number): Node<K, V> | undefined {
-    return this.nodes[index];
+    return 0 <= index && index < this.capacity
+      ? this.nodes[index]
+      : undefined;
   }
   public rotateToNext(): number {
     return this.HEAD = this.tail?.index ?? this.HEAD;
@@ -63,8 +74,8 @@ export class List<K, V = undefined> implements IterableCollection<K, V> {
     return this.HEAD = this.last?.index ?? this.HEAD;
   }
   public clear(): void {
-    this.nodes = {};
-    this.buffers.clear();
+    this.nodes = this.capacity <= BORDER ? Array(min(this.capacity, BORDER)) : {};
+    this.heap.clear();
     this.index?.clear();
     this.HEAD = 0;
     this.CURSOR = 0;
@@ -73,13 +84,16 @@ export class List<K, V = undefined> implements IterableCollection<K, V> {
   public add(key: K, value: V): number;
   public add(this: List<K, undefined>, key: K, value?: V): number;
   public add(key: K, value: V): number {
+    if (this.LENGTH === BORDER && 'length' in this.nodes) {
+      this.nodes = { ...this.nodes };
+    }
     const nodes = this.nodes;
     const head = nodes[this.HEAD];
     //assert(this.length === 0 ? !head : head);
     if (!head) {
       assert(this.length === 0);
-      const index = this.HEAD = this.CURSOR = this.buffers.length > 0
-        ? this.buffers.pop()!
+      const index = this.HEAD = this.CURSOR = this.heap.length > 0
+        ? this.heap.pop()!
         : this.length;
       assert(!nodes[index]);
       ++this.LENGTH;
@@ -98,8 +112,8 @@ export class List<K, V = undefined> implements IterableCollection<K, V> {
     //assert(head);
     if (this.length !== this.capacity) {
       assert(this.length < this.capacity);
-      const index = this.HEAD = this.CURSOR = this.buffers.length > 0
-        ? this.buffers.pop()!
+      const index = this.HEAD = this.CURSOR = this.heap.length > 0
+        ? this.heap.pop()!
         : this.length;
       //assert(!nodes[index]);
       ++this.LENGTH;
@@ -120,7 +134,7 @@ export class List<K, V = undefined> implements IterableCollection<K, V> {
     }
     else {
       assert(this.length === this.capacity);
-      assert(this.buffers.length === 0);
+      assert(this.heap.length === 0);
       const node = nodes[head.prev]!;
       const index = this.HEAD = this.CURSOR = node.index;
       //assert(nodes[index]);
@@ -140,49 +154,37 @@ export class List<K, V = undefined> implements IterableCollection<K, V> {
   public put(key: K, value: V, index?: number): number;
   public put(this: List<K, undefined>, key: K, value?: V, index?: number): number;
   public put(key: K, value: V, index?: number): number {
-    const node = this.search(key, index);
+    const node = this.find(key, index);
     if (!node) return this.add(key, value);
     assert(this.CURSOR === node.index);
     node.value = value;
     return node.index;
   }
-  public set(key: K, value: V, index?: number): this;
-  public set(this: List<K, undefined>, key: K, value?: V, index?: number): this;
-  public set(key: K, value: V, index?: number): this {
-    this.put(key, value, index);
-    return this;
-  }
-  private search(key: K, cursor = this.CURSOR): InternalNode<K, V> | undefined {
-    const nodes = this.nodes;
+  public find(key: K, index = this.CURSOR): InternalNode<K, V> | undefined {
     let node: InternalNode<K, V> | undefined;
-    node = nodes[cursor];
-    if (node && equal(node.key, key)) return this.CURSOR = cursor, node;
-    if (!this.index) throw new Error(`Spica: IxList: Invalid index.`);
+    node = this.node(index);
+    if (node && equal(node.key, key)) return this.CURSOR = index, node;
+    if (!this.index) throw new Error(`Spica: IxList: Need the index but not given.`);
     if (node ? this.length === 1 : this.length === 0) return;
-    node = nodes[cursor = this.index.get(key) ?? this.capacity];
+    node = this.node(index = this.index.get(key) ?? -1);
     assert(!node || equal(node.key, key));
-    if (node) return this.CURSOR = cursor, node;
+    if (node) return this.CURSOR = index, node;
   }
-  public find(key: K, index?: number): Node<K, V> | undefined {
-    return this.search(key, index);
+  public get(index: number): Node<K, V> | undefined {
+    return this.node(index);
   }
-  public get(key: K, index?: number): V | undefined {
-    return this.search(key, index)?.value;
+  public has(index: number): boolean {
+    return this.node(index) !== undefined;
   }
-  public has(key: K, index?: number): boolean {
-    return this.search(key, index) !== undefined;
-  }
-  public del(key: K, index?: number): Node<K, V> | undefined {
-    const cursor = this.CURSOR;
-    const node = this.search(key, index);
+  public del(index: number): Node<K, V> | undefined {
+    const node = this.node(index);
     if (!node) return;
-    this.CURSOR = cursor;
     assert(this.length > 0);
     //assert(this.length !== 1 || node === node.prev && node.prev === node.next);
     //assert(this.length !== 2 || node !== node.prev && node.prev === node.next);
     //assert(this.length < 3 || node !== node.prev && node.prev !== node.next);
     --this.LENGTH;
-    this.buffers.push(node.index);
+    this.heap.push(node.index);
     this.index?.delete(node.key, node.index);
     const nodes = this.nodes;
     nodes[node.prev]!.next = node.next;
@@ -193,14 +195,15 @@ export class List<K, V = undefined> implements IterableCollection<K, V> {
     if (this.CURSOR === node.index) {
       this.CURSOR = node.next;
     }
+    // @ts-expect-error
     nodes[node.index] = undefined;
     //assert(this.length === 0 ? !this.nodes[this.HEAD] : this.nodes[this.HEAD]);
     //assert(this.length === 0 ? !this.nodes[this.CURSOR] : this.nodes[this.CURSOR]);
     //assert(this.length > 10 || [...this].length === this.length);
     return node;
   }
-  public delete(key: K, index?: number): boolean {
-    return this.del(key, index) !== undefined;
+  public delete(key: K, index?: number): Node<K, V> | undefined {
+    return this.del(this.find(key, index)?.index ?? -1);
   }
   public insert(key: K, value: V, before: number): number {
     const head = this.HEAD;
@@ -233,7 +236,7 @@ export class List<K, V = undefined> implements IterableCollection<K, V> {
   }
   public shift(): Node<K, V> | undefined {
     const node = this.head;
-    return node && this.del(node.key, node.index);
+    return node && this.del(node.index);
   }
   public push(key: K, value: V): number;
   public push(this: List<K, undefined>, key: K, value?: V): number;
@@ -257,12 +260,12 @@ export class List<K, V = undefined> implements IterableCollection<K, V> {
   }
   public pop(): Node<K, V> | undefined {
     const node = this.last;
-    return node && this.del(node.key, node.index);
+    return node && this.del(node.index);
   }
   public replace(index: number, key: K, value: V): Node<K, V> | undefined;
   public replace(this: List<K, undefined>, index: number, key: K, value?: V): Node<K, V> | undefined;
   public replace(index: number, key: K, value: V): Node<K, V> | undefined {
-    const node = this.nodes[index];
+    const node: InternalNode<K, V> | undefined = this.node(index);
     if (!node) return;
     if (this.index && !equal(node.key, key)) {
       this.index.delete(node.key, index);
@@ -281,13 +284,13 @@ export class List<K, V = undefined> implements IterableCollection<K, V> {
   }
   public move(index: number, before: number): boolean {
     if (index === before) return false;
-    const nodes = this.nodes;
-    const a1 = nodes[index];
+    const a1: InternalNode<K, V> | undefined = this.node(index);
     if (!a1) return false;
-    const b1 = nodes[before];
+    const b1: InternalNode<K, V> | undefined = this.node(before);
     if (!b1) return false;
     assert(a1 !== b1);
     if (a1.next === b1.index) return false;
+    const nodes = this.nodes;
     const b0 = nodes[b1.prev]!;
     const a0 = nodes[a1.prev]!;
     const a2 = nodes[a1.next]!;
@@ -312,14 +315,17 @@ export class List<K, V = undefined> implements IterableCollection<K, V> {
   }
   public moveToLast(index: number): void {
     this.move(index, this.HEAD);
+    this.HEAD = index === this.HEAD
+      ? this.head!.next
+      : this.HEAD;
   }
   public swap(index1: number, index2: number): boolean {
     if (index1 === index2) return false;
-    const nodes = this.nodes;
-    const node1 = nodes[index1];
+    const node1 = this.node(index1);
     if (!node1) return false;
-    const node2 = nodes[index2];
+    const node2 = this.node(index2);
     if (!node2) return false;
+    const nodes = this.nodes;
     const node3 = nodes[node2.next]!;
     this.move(node2.index, node1.index);
     this.move(node1.index, node3.index);
