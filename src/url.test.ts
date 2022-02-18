@@ -20,6 +20,17 @@ describe('Unit: lib/url', () => {
       assert(new URL('', location.href).href === new global.URL('', location.href).href);
       assert(new URL(' ', location.href).href === location.href);
       assert(new URL(' ', location.href).href === new global.URL(' ', location.href).href);
+
+      assert.throws(() => new URL('http:' as URL.Origin<string>));
+      assert.throws(() => new global.URL('http:'));
+      assert(new URL('http:', location.href).href === new global.URL('http:', location.href).href);
+      assert.throws(() => new URL('http:/' as URL.Origin<string>));
+      assert.throws(() => new global.URL('http:/'));
+      assert(new URL('http:/', location.href).href === new global.URL('http:/', location.href).href);
+      assert.throws(() => new URL('http://'));
+      assert.throws(() => new global.URL('http://'));
+      assert.throws(() => new URL('http://', location.href));
+      assert.throws(() => new global.URL('http://', location.href));
     });
 
     it('origin', () => {

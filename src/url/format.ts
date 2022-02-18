@@ -29,10 +29,10 @@ export type AbsoluteURL = URL<Absolute>;
 export function standardize(url: URL<unknown>, base?: string): void
 export function standardize(url: string, base?: string): StandardURL
 export function standardize(url: string, base?: string): StandardURL {
-  const u = new ReadonlyURL(url, base);
-  url = u.origin !== 'null'
-    ? u.origin.toLowerCase() + u.href.slice(u.origin.length)
-    : u.protocol.toLowerCase() + u.href.slice(u.protocol.length);
+  const u = new ReadonlyURL(url, base!);
+  url = u.origin === 'null'
+    ? u.protocol.toLowerCase() + u.href.slice(u.protocol.length)
+    : u.origin.toLowerCase() + u.href.slice(u.origin.length);
   return encode(url as AbsoluteURL);
 }
 
@@ -74,7 +74,7 @@ type SharedURL = Partial<Mutable<global.URL>> & {
   query?: string;
   fragment?: string;
 };
-export class ReadonlyURL implements Readonly<global.URL> {
+export class ReadonlyURL<T extends string = string> implements Readonly<global.URL> {
   // Can't freeze URL object in the Firefox extension environment.
   // ref: https://github.com/falsandtru/pjax-api/issues/44#issuecomment-633915035
   // Bug: Error in dependents.
@@ -100,17 +100,32 @@ export class ReadonlyURL implements Readonly<global.URL> {
     }),
     (url, base = '') => `${base.indexOf('\n') > -1 ? base.replace(/\n+/g, '') : base}\n${url}`,
     new Cache(10000));
+  constructor(url: T, ...base:
+    T extends AbsoluteURL | `${string}:${string}` ? [string?] :
+    T extends `${infer _}` ? [string] :
+    [T]);
   constructor(
     public readonly source: string,
     public readonly base?: string,
   ) {
-    const i = base?.indexOf('#') ?? -1;
-    if (i > -1) {
-      base = base?.slice(0, i);
-    }
-    const j = base?.indexOf('?') ?? -1;
-    if (i > -1 && source.indexOf('#') === -1) {
-      base = base?.slice(0, j);
+    switch (source.slice(0, source.lastIndexOf('://', 9) + 1).toLowerCase()) {
+      case 'http:':
+      case 'https:':
+        base = void 0;
+        break;
+      default:
+        switch (base?.slice(0, base.lastIndexOf('://', 9) + 1).toLowerCase()) {
+          case 'http:':
+          case 'https:':
+            const i = base.indexOf('#');
+            if (i > -1) {
+              base = base.slice(0, i);
+            }
+            const j = base.indexOf('?');
+            if (i > -1 && source.indexOf('#') === -1) {
+              base = base.slice(0, j);
+            }
+        }
     }
     this[internal] = {
       share: ReadonlyURL.get(source, base),
@@ -121,9 +136,9 @@ export class ReadonlyURL implements Readonly<global.URL> {
     share: SharedURL;
     searchParams: URLSearchParams | undefined;
   };
-  public get href(): string {
+  public get href(): T {
     return this[internal].share.href
-       ??= this[internal].share.url.href;
+       ??= this[internal].share.url.href as any;
   }
   public get resource(): string {
     return this[internal].share.resource

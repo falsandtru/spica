@@ -7,6 +7,8 @@ export { ReadonlyURL } from './url/format';
 type Protocol
   = 'http://'
   | 'https://'
+  | 'ws:'
+  | 'wss:'
   | 'blob:'
   | 'data:'
   | 'file:'
@@ -18,17 +20,19 @@ type Fix<T> = T extends `${infer _}` ? string : T;
 const internal = Symbol.for('spica/url::internal');
 
 export class URL<T extends string> implements Readonly<global.URL> {
+  constructor(url: URL.Href<T> | URL.Resource<T> | URL.Origin<T>, base?: string);
+  constructor(url: URLSegment<string> & T, base: T);
   constructor(url: T, ...base:
-    T extends URL.Href<string> | URL.Resource<string> | URL.Origin<string> | `${Protocol}${infer _}` ? [string?] :
-    T extends URLSegment<infer U> ? [U] :
-    T extends AbsoluteURL ? [string?] :
-    T extends `${infer _}` ? [string] : [T])
+    T extends URLSegment<string> & infer U ? [U] :
+    T extends AbsoluteURL | `${Protocol}${infer _}` ? [string?] :
+    T extends `${infer _}` ? [string] :
+    [T]);
   constructor(
     public readonly source: string,
     public readonly base?: string,
   ) {
     this[internal] = {
-      url: new ReadonlyURL(source, base),
+      url: new ReadonlyURL(source, base!),
       searchParams: void 0,
     };
     assert(this[internal].url.href.endsWith(`${this.port}${this.pathname}${this.query}${this.fragment}`));
