@@ -171,7 +171,7 @@ export class ReadonlyURL implements Readonly<global.URL> {
   }
   public get query(): string {
     return this[internal].share.query
-       ??= this.search || this.href[this.href.length - this.fragment.length - 1] === '?' && '?' || '' as any;
+       ??= this.search || this.href[this.href.length - this.fragment.length - 1] === '?' && '?' || '';
   }
   public get hash(): string {
     return this[internal].share.hash
