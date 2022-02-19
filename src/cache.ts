@@ -45,6 +45,20 @@ JavaScriptにおける需要を満たさない懸念がある。
 
 */
 
+/*
+LRUとの比較
+
+- JS
+  - URL/DOM生成1回相当のコスト＋ヒット率2倍ではLRU優位
+  - URL/DOM生成2回相当のコスト＋ヒット率2倍で同等
+  - LRUに破壊的なアクセスパターンでDWC優位
+  - LRUより高効率のキャッシュライブラリは他にないため効率ではDWCが独占
+- Go, Rust, etc.
+  - オーバーヘッドの差が未知数
+  - 高速なLRUと高効率なTinyLFUなどとの間で比較される
+
+*/
+
 interface Index<K> {
   readonly key: K;
   size: number;

@@ -18,7 +18,7 @@ describe('Benchmark:', function () {
     for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
       it(`LRU set ${length.toLocaleString('en')} 0%`, function (done) {
         const capacity = length;
-        const cache = new LRUCache<number, number>(capacity);
+        const cache = new LRUCache<number, number>({ max: capacity });
         for (let i = 0; i < capacity; ++i) cache.set(i, i);
         benchmark(`LRUCache set ${length.toLocaleString('en')} 0%`, () => cache.set(Math.random() * -capacity - 1 | 0, 0), done);
       });
@@ -34,7 +34,7 @@ describe('Benchmark:', function () {
     for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
       it(`LRU set ${length.toLocaleString('en')} 100%`, function (done) {
         const capacity = length;
-        const cache = new LRUCache<number, number>(capacity);
+        const cache = new LRUCache<number, number>({ max: capacity });
         for (let i = 0; i < capacity; ++i) cache.set(i, i);
         benchmark(`LRUCache set ${length.toLocaleString('en')} 100%`, () => cache.set(Math.random() * capacity | 0, 0), done);
       });
@@ -50,7 +50,7 @@ describe('Benchmark:', function () {
     for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
       it(`LRU get ${length.toLocaleString('en')} 0%`, function (done) {
         const capacity = length;
-        const cache = new LRUCache<number, number>(capacity);
+        const cache = new LRUCache<number, number>({ max: capacity });
         for (let i = 0; i < capacity; ++i) cache.set(i, i);
         benchmark(`LRUCache get ${length.toLocaleString('en')} 0%`, () => cache.get(Math.random() * -capacity - 1 | 0), done);
       });
@@ -66,7 +66,7 @@ describe('Benchmark:', function () {
     for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
       it(`LRU get ${length.toLocaleString('en')} 100%`, function (done) {
         const capacity = length;
-        const cache = new LRUCache<number, number>(capacity);
+        const cache = new LRUCache<number, number>({ max: capacity });
         for (let i = 0; i < capacity; ++i) cache.set(i, i);
         benchmark(`LRUCache get ${length.toLocaleString('en')} 100%`, () => cache.get(Math.random() * capacity | 0), done);
       });
@@ -82,7 +82,7 @@ describe('Benchmark:', function () {
     for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
       it(`LRU simulation ${length.toLocaleString('en')}`, function (done) {
         const capacity = length;
-        const cache = new LRUCache<number, number>(capacity);
+        const cache = new LRUCache<number, number>({ max: capacity });
         for (let i = 0; i < capacity; ++i) cache.set(i, i);
         benchmark(`LRUCache simulation ${length.toLocaleString('en')}`, () => {
           const key = Math.random() < 0.4

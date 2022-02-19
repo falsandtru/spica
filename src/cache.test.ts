@@ -280,7 +280,7 @@ describe('Unit: lib/cache', () => {
       this.retries(3);
 
       const capacity = 100;
-      const lru = new LRUCache<number, number>(capacity);
+      const lru = new LRUCache<number, number>({ max: capacity });
       const dwc = new Cache<number, number>(capacity);
 
       const repeat = capacity * 100;
@@ -312,7 +312,7 @@ describe('Unit: lib/cache', () => {
       this.retries(3);
 
       const capacity = 100;
-      const lru = new LRUCache<number, number>(capacity);
+      const lru = new LRUCache<number, number>({ max: capacity });
       const dwc = new Cache<number, number>(capacity);
 
       const repeat = capacity * 100;
@@ -346,7 +346,7 @@ describe('Unit: lib/cache', () => {
       this.retries(3);
 
       const capacity = 100;
-      const lru = new LRUCache<number, number>(capacity);
+      const lru = new LRUCache<number, number>({ max: capacity });
       const dwc = new Cache<number, number>(capacity);
 
       const repeat = capacity * 100;
@@ -380,7 +380,7 @@ describe('Unit: lib/cache', () => {
       this.retries(3);
 
       const capacity = 100;
-      const lru = new LRUCache<number, number>(capacity);
+      const lru = new LRUCache<number, number>({ max: capacity });
       const dwc = new Cache<number, number>(capacity);
 
       const repeat = capacity * 100;
@@ -414,7 +414,7 @@ describe('Unit: lib/cache', () => {
       this.retries(3);
 
       const capacity = 100;
-      const lru = new LRUCache<number, number>(capacity);
+      const lru = new LRUCache<number, number>({ max: capacity });
       const dwc = new Cache<number, number>(capacity);
 
       const repeat = capacity * 100;
@@ -448,7 +448,7 @@ describe('Unit: lib/cache', () => {
       this.retries(3);
 
       const capacity = 100;
-      const lru = new LRUCache<number, number>(capacity);
+      const lru = new LRUCache<number, number>({ max: capacity });
       const dwc = new Cache<number, number>(capacity);
 
       const repeat = capacity * 100;
@@ -482,7 +482,7 @@ describe('Unit: lib/cache', () => {
       this.retries(3);
 
       const capacity = 1000;
-      const lru = new LRUCache<number, number>(capacity);
+      const lru = new LRUCache<number, number>({ max: capacity });
       const dwc = new Cache<number, number>(capacity);
 
       const repeat = capacity * 100;
