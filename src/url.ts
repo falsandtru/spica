@@ -4,7 +4,7 @@ import { AbsoluteURL, ReadonlyURL } from './url/format';
 export { StandardURL, standardize } from './url/format';
 export { ReadonlyURL } from './url/format';
 
-type Fix<T> = T extends `${infer _}` ? string : T;
+type Widen<T> = T extends `${infer _}` ? string : T;
 
 const internal = Symbol.for('spica/url::internal');
 
@@ -102,22 +102,22 @@ export class URL<T extends string> implements Readonly<global.URL> {
   }
 }
 export namespace URL {
-  export type Href<T extends string> = URLSegment<'href'> & Fix<T>;
-  export type Resource<T extends string> = URLSegment<'resource'> & Fix<T>;
-  export type Origin<T extends string> = URLSegment<'origin'> & Fix<T>;
+  export type Href<T extends string> = URLSegment<'href'> & Widen<T>;
+  export type Resource<T extends string> = URLSegment<'resource'> & Widen<T>;
+  export type Origin<T extends string> = URLSegment<'origin'> & Widen<T>;
   export type Scheme = URLSegment<'scheme'> & string;
   export type Protocol = URLSegment<'protocol'> & string;
   export type Username = URLSegment<'username'> & string;
   export type Password = URLSegment<'password'> & string;
-  export type Host<T extends string> = URLSegment<'host'> & Fix<T>;
-  export type Hostname<T extends string> = URLSegment<'hostname'> & Fix<T>;
+  export type Host<T extends string> = URLSegment<'host'> & Widen<T>;
+  export type Hostname<T extends string> = URLSegment<'hostname'> & Widen<T>;
   export type Port = URLSegment<'port'> & string;
-  export type Path<T extends string> = URLSegment<'path'> & Fix<T>;
-  export type Pathname<T extends string> = URLSegment<'pathname'> & Fix<T>;
-  export type Search<T extends string> = URLSegment<'search'> & Fix<T>;
-  export type Query<T extends string> = URLSegment<'query'> & Fix<T>;
-  export type Hash<T extends string> = URLSegment<'hash'> & Fix<T>;
-  export type Fragment<T extends string> = URLSegment<'fragment'> & Fix<T>;
+  export type Path<T extends string> = URLSegment<'path'> & Widen<T>;
+  export type Pathname<T extends string> = URLSegment<'pathname'> & Widen<T>;
+  export type Search<T extends string> = URLSegment<'search'> & Widen<T>;
+  export type Query<T extends string> = URLSegment<'query'> & Widen<T>;
+  export type Hash<T extends string> = URLSegment<'hash'> & Widen<T>;
+  export type Fragment<T extends string> = URLSegment<'fragment'> & Widen<T>;
 }
 
 declare class URLSegment<T extends string> {
