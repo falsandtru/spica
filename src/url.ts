@@ -4,17 +4,6 @@ import { AbsoluteURL, ReadonlyURL } from './url/format';
 export { StandardURL, standardize } from './url/format';
 export { ReadonlyURL } from './url/format';
 
-type Protocol
-  = 'http://'
-  | 'https://'
-  | 'ws:'
-  | 'wss:'
-  | 'blob:'
-  | 'data:'
-  | 'file:'
-  | 'mailto:'
-  | 'tel:';
-
 type Fix<T> = T extends `${infer _}` ? string : T;
 
 const internal = Symbol.for('spica/url::internal');
@@ -24,7 +13,7 @@ export class URL<T extends string> implements Readonly<global.URL> {
   constructor(url: URLSegment<string> & T, base: T);
   constructor(url: T, ...base:
     T extends URLSegment<string> & infer U ? [U] :
-    T extends AbsoluteURL | `${Protocol}${infer _}` ? [string?] :
+    T extends AbsoluteURL | `${string}:${string}` ? [string?] :
     T extends `${infer _}` ? [string] :
     [T]);
   constructor(
