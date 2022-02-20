@@ -215,7 +215,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       const index = node.value;
       this.ensure(size, node);
       assert(this.memory.has(key));
-      index.clock = ++this.clockR;
+      index.clock = index.stat === this.stats.LRU
+        ? ++this.clockR
+        : ++this.clock;
       index.expiry = expiry;
       this.SIZE += size - index.size;
       assert(0 < this.size && this.size <= this.space);
