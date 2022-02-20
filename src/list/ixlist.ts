@@ -21,7 +21,7 @@ interface InternalNode<K, V> {
   next: number;
   prev: number;
 }
-interface Node<K, V> {
+export interface Node<K, V = undefined> {
   readonly index: number;
   readonly key: K;
   value: V;
