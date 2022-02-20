@@ -64,7 +64,7 @@ interface Index<K> {
   size: number;
   clock: number;
   expiry: number;
-  stat: [number, number];
+  region: 'LRU' | 'LFU';
   parent?: Node<Index<K>>;
   overflow?: Node<Index<K>>;
 }
@@ -215,7 +215,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       const index = node.value;
       this.ensure(size, node);
       assert(this.memory.has(key));
-      index.clock = index.stat === this.stats.LRU
+      index.clock = index.region === 'LRU'
         ? ++this.clockR
         : ++this.clock;
       index.expiry = expiry;
@@ -239,7 +239,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         size,
         clock: ++this.clockR,
         expiry,
-        stat: this.stats.LRU,
+        region: 'LRU',
       }),
       value,
     });
@@ -359,7 +359,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     assert(node.list === this.indexes.LRU);
     const index = node.value;
     const { LRU, LFU } = this.indexes;
-    ++index.stat[0];
+    ++this.stats[index.region][0];
     // Prevent LFU destruction.
     if (!index.overflow && index.clock >= this.clockR - LRU.length / 3 && this.capacity > 3) {
       index.clock = ++this.clockR;
@@ -368,7 +368,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     }
     assert(LFU.length !== this.capacity);
     index.clock = ++this.clock;
-    index.stat = this.stats.LFU;
+    index.region = 'LFU';
     index.overflow?.delete();
     LFU.unshiftNode(node);
     return true;
@@ -377,7 +377,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const index = node.value;
     const { LFU } = this.indexes;
     if (node.list !== LFU) return false;
-    ++index.stat[0];
+    ++this.stats[index.region][0];
     index.clock = ++this.clock;
     node.moveToHead();
     return true;
