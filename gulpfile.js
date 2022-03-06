@@ -110,7 +110,12 @@ gulp.task('ts:test', () =>
       },
       'plugins': ['redos'],
       'rules': {
-        'redos/no-vulnerable': 'error',
+        'redos/no-vulnerable': [
+          'error',
+          {
+            ignoreErrors: false,
+          },
+        ],
       },
     }))
     .pipe($.eslint.format())
