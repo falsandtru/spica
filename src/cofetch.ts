@@ -74,6 +74,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
                 if (`${xhr.status}`.match(/^2..$/)) {
                   const cc = new Map<string, string>(
                     xhr.getResponseHeader('Cache-Control')
+                      // eslint-disable-next-line redos/no-vulnerable
                       ? xhr.getResponseHeader('Cache-Control')!.trim().split(/\s*,\s*/)
                           .filter(v => v.length > 0)
                           .map(v => [...v.split('='), ''] as [string, string])

@@ -7,6 +7,7 @@ const dict = [
   ...[...Array(36)].map((_, i) => i.toString(36).toUpperCase()).slice(-26),
 ];
 assert(dict.length === 62);
+// eslint-disable-next-line
 assert(dict.join('').match(/^0.*9a.*zA.*Z$/));
 
 export const rnd16 = cons(16);
