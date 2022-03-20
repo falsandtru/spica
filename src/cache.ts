@@ -160,8 +160,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       const lastIndex = lastNode?.value;
       let target: Node<Index<K>>;
       switch (true) {
-        // LRUの下限を5%以上確保すればわずかな性能低下と引き換えに消して一般化できる
         // NOTE: The following conditions must be ensured that they won't be true if `lastNode` is `skip`.
+        // LRUの下限を5%以上確保すればわずかな性能低下と引き換えにクロックを消せる
         case lastIndex && lastIndex.clock < this.clock - this.life:
         case lastIndex && lastIndex.expiry !== Infinity && lastIndex.expiry < now():
           target = lastNode!.list === OVF
