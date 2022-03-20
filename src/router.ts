@@ -51,9 +51,13 @@ export function compare(pattern: string, path: URL.Pathname<StandardURL>): boole
     .length > 0;
 }
 
-const expand = memoize((pattern: string): string[] => {
+function expand(pattern: string): string[] {
   if (pattern.match(/\*\*|[\[\]]/)) throw new Error(`Invalid pattern: ${pattern}`);
   assert(pattern === '' || pattern.match(/{[^{}]*}|.[^{]*/g)!.join('') === pattern);
+  return expand_(pattern);
+}
+
+const expand_ = memoize((pattern: string): string[] => {
   return pattern === ''
     ? [pattern]
     : Sequence.from(pattern.match(/{[^{}]*}|.[^{]*/g)!)
@@ -66,20 +70,20 @@ const expand = memoize((pattern: string): string[] => {
         .bind(p =>
           p === pattern
             ? Sequence.from([p])
-            : Sequence.from(expand(p)))
+            : Sequence.from(expand_(p)))
         .unique()
         .extract();
 });
 export { expand as _expand }
 
-const match = memoize((pattern: string, segment: string): boolean => {
+function match(pattern: string, segment: string): boolean {
   assert(segment === '/' || !segment.startsWith('/'));
   if (segment[0] === '.' && [...'?*'].includes(pattern[0])) return false;
   return match_(optimize(pattern), segment);
-}, (pat, seg) => `${pat}\n${seg}`, new Cache(10000));
+}
 export { match as _match }
 
-function match_(pattern: string, segment: string): boolean {
+const match_ = memoize((pattern: string, segment: string): boolean => {
   const [p = '', ...ps] = [...pattern];
   const [s = '', ...ss] = [...segment];
   assert(typeof p === 'string');
@@ -108,7 +112,7 @@ function match_(pattern: string, segment: string): boolean {
       return s === p
           && match_(ps.join(''), ss.join(''));
   }
-}
+}, (pat, seg) => `${pat}\n${seg}`, new Cache(10000));
 
 function optimize(pattern: string): string {
   const pat = pattern.replace(/\*(\?+)\*?/g, '$1*');
