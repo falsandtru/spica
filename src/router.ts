@@ -4,6 +4,7 @@ import { Sequence } from './sequence';
 import { curry } from './curry';
 import { flip } from './flip';
 import { memoize } from './memoize';
+import { Cache } from './cache';
 
 export function router<T>(config: Record<string, (path: string) => T>): (url: string) => T {
   return (url: string) => {
@@ -74,44 +75,44 @@ export { expand as _expand }
 const match = memoize((pattern: string, segment: string): boolean => {
   assert(segment === '/' || !segment.startsWith('/'));
   if (segment[0] === '.' && [...'?*'].includes(pattern[0])) return false;
-  return match(optimize(pattern), segment);
-
-  function match(pattern: string, segment: string): boolean {
-    const [p = '', ...ps] = [...pattern];
-    const [s = '', ...ss] = [...segment];
-    assert(typeof p === 'string');
-    assert(typeof s === 'string');
-    switch (p) {
-      case '':
-        return s === '';
-      case '?':
-        return s !== ''
-            && s !== '/'
-            && match(ps.join(''), ss.join(''));
-      case '*':
-        return s === '/'
-          ? match(ps.join(''), segment)
-          : Sequence
-              .zip(
-                Sequence.cycle([ps.join('')]),
-                Sequence.from(segment)
-                  .tails()
-                  .map(ss => ss.join('')))
-            .filter(([a, b]) => match(a, b))
-              .take(1)
-              .extract()
-              .length > 0;
-      default:
-        return s === p
-            && match(ps.join(''), ss.join(''));
-    }
-  }
-
-  function optimize(pattern: string): string {
-    const pat = pattern.replace(/\*(\?+)\*?/g, '$1*');
-    return pat === pattern
-      ? pat
-      : optimize(pat);
-  }
-}, (pat, seg) => `${pat}\n${seg}`);
+  return match_(optimize(pattern), segment);
+}, (pat, seg) => `${pat}\n${seg}`, new Cache(10000));
 export { match as _match }
+
+function match_(pattern: string, segment: string): boolean {
+  const [p = '', ...ps] = [...pattern];
+  const [s = '', ...ss] = [...segment];
+  assert(typeof p === 'string');
+  assert(typeof s === 'string');
+  switch (p) {
+    case '':
+      return s === '';
+    case '?':
+      return s !== ''
+          && s !== '/'
+          && match_(ps.join(''), ss.join(''));
+    case '*':
+      return s === '/'
+        ? match_(ps.join(''), segment)
+        : Sequence
+            .zip(
+              Sequence.cycle([ps.join('')]),
+              Sequence.from(segment)
+                .tails()
+                .map(ss => ss.join('')))
+          .filter(([a, b]) => match_(a, b))
+            .take(1)
+            .extract()
+            .length > 0;
+    default:
+      return s === p
+          && match_(ps.join(''), ss.join(''));
+  }
+}
+
+function optimize(pattern: string): string {
+  const pat = pattern.replace(/\*(\?+)\*?/g, '$1*');
+  return pat === pattern
+    ? pat
+    : optimize(pat);
+}
