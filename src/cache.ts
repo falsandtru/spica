@@ -176,15 +176,23 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
           break;
         // @ts-expect-error
         case LFU.length > this.capacity * this.ratio / 100:
-          LRU.unshiftNode(LFU.last!);
-          LRU.head!.value.parent = LRU.head!;
-          LRU.head!.value.overflow = OVF.unshift(LRU.head!.value);
-          assert(OVF.length <= LRU.length);
+          target = LFU.last! !== skip
+            ? LFU.last!
+            : LFU.length >= 2
+              ? LFU.last!.prev
+              : skip;
+          if (target !== skip) {
+            if (this.ratio > 50) break;
+            LRU.unshiftNode(target);
+            LRU.head!.value.parent = LRU.head!;
+            LRU.head!.value.overflow = OVF.unshift(LRU.head!.value);
+            assert(OVF.length <= LRU.length);
+          }
         default:
           assert(LRU.last);
           target = LRU.last! !== skip
             ? LRU.last!
-            : LRU.last!.prev !== skip
+            : LRU.length >= 2
               ? LRU.last!.prev
               : LFU.last!;
       }
