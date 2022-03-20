@@ -65,8 +65,8 @@ interface Index<K> {
   clock: number;
   expiry: number;
   region: 'LRU' | 'LFU';
-  parent?: Node<Index<K>>;
-  overflow?: Node<Index<K>>;
+  node?: Node<Index<K>>;
+  overlap?: Node<Index<K>>;
 }
 interface Record<K, V> {
   readonly index: Node<Index<K>>;
@@ -116,7 +116,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     LRU: new List<Index<K>>(),
     LFU: new List<Index<K>>(),
     // expiryとLFUのclockを消すなら消せる
-    OVF: new List<Index<K>>(),
+    OVL: new List<Index<K>>(),
   } as const;
   public get length(): number {
     //assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
@@ -126,7 +126,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     return this.SIZE;
   }
   private evict(node: Node<Index<K>>, record: Record<K, V> | undefined, callback: boolean): void {
-    assert(this.indexes.OVF.length <= this.indexes.LRU.length);
+    assert(this.indexes.OVL.length <= this.indexes.LRU.length);
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     const index = node.value;
     callback &&= !!this.settings.disposer;
@@ -134,10 +134,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       ? record ?? this.memory.get(index.key)
       : record;
     assert(node.list);
-    assert(node.list !== this.indexes.OVF);
+    assert(node.list !== this.indexes.OVL);
     node.delete();
-    node.value.overflow?.delete();
-    assert(this.indexes.OVF.length <= this.indexes.LRU.length);
+    node.value.overlap?.delete();
+    assert(this.indexes.OVL.length <= this.indexes.LRU.length);
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size - 1);
     this.memory.delete(index.key);
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
@@ -153,10 +153,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     let size = skip?.value.size ?? 0;
     assert(margin - size <= this.space);
     if (margin - size <= 0) return;
-    const { LRU, LFU, OVF } = this.indexes;
+    const { LRU, LFU, OVL } = this.indexes;
     while (this.length === this.capacity || this.size + margin - size > this.space) {
       assert(this.length >= 1 + +!!skip);
-      const lastNode = OVF.last ?? LFU.last;
+      const lastNode = OVL.last ?? LFU.last;
       const lastIndex = lastNode?.value;
       let target: Node<Index<K>>;
       switch (true) {
@@ -164,10 +164,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         // LRUの下限を5%以上確保すればわずかな性能低下と引き換えにクロックを消せる
         case lastIndex && lastIndex.clock < this.clock - this.life:
         case lastIndex && lastIndex.expiry !== Infinity && lastIndex.expiry < now():
-          target = lastNode!.list === OVF
-            ? lastNode!.value.parent!
+          target = lastNode!.list === OVL
+            ? lastNode!.value.node!
             : lastNode!;
-          assert(target.list !== this.indexes.OVF);
+          assert(target.list !== this.indexes.OVL);
           break;
         case LRU.length === 0:
           target = LFU.last! !== skip
@@ -184,9 +184,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
           if (target !== skip) {
             if (this.ratio > 50) break;
             LRU.unshiftNode(target);
-            LRU.head!.value.parent = LRU.head!;
-            LRU.head!.value.overflow = OVF.unshift(LRU.head!.value);
-            assert(OVF.length <= LRU.length);
+            LRU.head!.value.node = LRU.head!;
+            LRU.head!.value.overlap = OVL.unshift(LRU.head!.value);
+            assert(OVL.length <= LRU.length);
           }
         default:
           assert(LRU.last);
@@ -298,7 +298,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.stats.clear();
     this.indexes.LRU.clear();
     this.indexes.LFU.clear();
-    this.indexes.OVF.clear();
+    this.indexes.OVL.clear();
     if (!this.settings.disposer || !this.settings.capture!.clear) return void this.memory.clear();
     const memory = this.memory;
     this.memory = new Map();
@@ -338,7 +338,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if ((LRU[0] + LFU[0]) * 100 % capacity || LRU[1] + LFU[1] === 0) return;
     const lenR = indexes.LRU.length;
     const lenF = indexes.LFU.length;
-    const lenV = indexes.OVF.length;
+    const lenV = indexes.OVL.length;
     const r = (lenF + lenV) * 1000 / (lenR + lenF) | 0;
     const rateR0 = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1], 0) * (1 + r);
     const rateF0 = rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1], 0) * (1001 - r);
@@ -369,7 +369,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { LRU, LFU } = this.indexes;
     ++this.stats[index.region][0];
     // Prevent LFU destruction.
-    if (!index.overflow && index.clock >= this.clockR - LRU.length / 3 && this.capacity > 3) {
+    if (!index.overlap && index.clock >= this.clockR - LRU.length / 3 && this.capacity > 3) {
       index.clock = ++this.clockR;
       node.moveToHead();
       return true;
@@ -377,7 +377,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     assert(LFU.length !== this.capacity);
     index.clock = ++this.clock;
     index.region = 'LFU';
-    index.overflow?.delete();
+    index.overlap?.delete();
     LFU.unshiftNode(node);
     return true;
   }
