@@ -1,3 +1,5 @@
+import { floor } from './alias';
+
 // Max heap
 
 const undefined = void 0;
@@ -46,7 +48,7 @@ export class Heap<T> {
 function upHeapify<T>(array: Array<T>, priority: number): void {
   let index = array.length;
   while (index > 1) {
-    const parent = index / 2 | 0;
+    const parent = floor(index / 2);
     if (array[parent - 1][0] >= priority) break;
     [array[parent - 1], array[index - 1]] = [array[index - 1], array[parent - 1]];
     index = parent;
