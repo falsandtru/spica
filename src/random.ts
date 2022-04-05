@@ -5,10 +5,11 @@ assert.deepStrictEqual(bases, [1, 2, 4, 8, 16, 32, 64]);
 const dict = [
   ...[...Array(36)].map((_, i) => i.toString(36)),
   ...[...Array(36)].map((_, i) => i.toString(36).toUpperCase()).slice(-26),
+  '-', '_',
 ];
-assert(dict.length === 62);
+assert(dict.length === 64);
 // eslint-disable-next-line
-assert(dict.join('').match(/^0.*9a.*zA.*Z$/));
+assert(dict.join('').match(/^0.*9a.*zA.*Z-_$/));
 
 export const rnd16 = cons(16);
 export const rnd32 = cons(32);
@@ -18,6 +19,7 @@ export const rnd64 = cons(64);
 export const rnd0f = conv(rnd16);
 export const rnd0z = conv(rnd36);
 export const rnd0Z = conv(rnd62);
+export const rnd0_ = conv(rnd64);
 
 export function unique(rnd: (len: number) => string, len: number, mem?: Set<string>): () => string {
   const clear = !mem;

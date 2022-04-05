@@ -1,4 +1,4 @@
-import { rnd16, rnd62, rnd0z, rnd0Z, rnd36, unique } from './random';
+import { rnd16, rnd36, rnd62, rnd0z, rnd0Z, rnd0_, unique } from './random';
 
 describe('Unit: lib/random', () => {
   describe('rnd16', () => {
@@ -51,6 +51,16 @@ describe('Unit: lib/random', () => {
       console.debug('lib/random rnd0Z', rnd0Z(32));
       assert(rnd0Z(999).includes('0'));
       assert(rnd0Z(999).includes('Z'));
+    });
+
+  });
+
+  describe('rnd0_', () => {
+    it('', () => {
+      assert(rnd0_());
+      console.debug('lib/random rnd0_', rnd0_(32));
+      assert(rnd0_(999).includes('0'));
+      assert(rnd0_(999).includes('_'));
     });
 
   });
