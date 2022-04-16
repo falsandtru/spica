@@ -322,8 +322,8 @@ describe('Unit: lib/cache', () => {
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() < 0.4
           // 偏りが静的かつ容量に収まる場合小さなLRUでも偏りをLFUに蓄積できる
-          ? Math.random() * capacity * 1 | 0
-          : Math.random() * capacity * 9 + capacity | 0;
+          ? Math.random() * capacity * -1 | 0
+          : Math.random() * capacity * 10 | 0;
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1);
         if (i + 1 === warmup) {
@@ -338,7 +338,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC hit rate', dwchit * 100 / repeat);
       console.debug('DWC ratio', dwc['ratio'], dwc['indexes'].LFU.length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit rate ratio', `${dwchit / lruhit * 100 | 0}%`);
-      assert(dwchit / lruhit * 100 > 190);
+      assert(dwchit / lruhit * 100 > 200);
     });
 
     it('rate uneven 100 transitive distribution', function () {
@@ -356,8 +356,8 @@ describe('Unit: lib/cache', () => {
       let dwchit = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() < 0.4
-          ? Math.random() * capacity * 1 | 0
-          : Math.random() * capacity * 9 + i * capacity / 100 + capacity | 0;
+          ? Math.random() * capacity * -1 | 0
+          : Math.random() * capacity * 10 + i * capacity / 100 | 0;
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1);
         if (i + 1 === warmup) {
@@ -372,7 +372,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC hit rate', dwchit * 100 / repeat);
       console.debug('DWC ratio', dwc['ratio'], dwc['indexes'].LFU.length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit rate ratio', `${dwchit / lruhit * 100 | 0}%`);
-      assert(dwchit / lruhit * 100 > 190);
+      assert(dwchit / lruhit * 100 > 200);
     });
 
     it('rate uneven 100 transitive bias', function () {
@@ -392,9 +392,9 @@ describe('Unit: lib/cache', () => {
         const key = Math.random() < 0.5
           // LFUが機能するアクセスパターンの場合はLRUだけでも同等に効果的に動作し機能しない場合もLRUに縮退して同等
           // 偏りが推移的である場合これを捕捉するLRUと偏りを保持するLFUが必要であるため偏りの2倍の容量が必要となる
-          //? Math.random() * capacity * 1 - i / 2 * capacity / 100 | 0
-          ? Math.random() * capacity / 4 - i / 2 * capacity / 400 | 0
-          : Math.random() * capacity * 9 + capacity | 0;
+          //? Math.random() * capacity * -1 - i / 2 * capacity / 100 | 0
+          ? Math.random() * capacity / -4 - i / 2 * capacity / 400 | 0
+          : Math.random() * capacity * 10 | 0;
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1);
         if (i + 1 === warmup) {
@@ -427,9 +427,9 @@ describe('Unit: lib/cache', () => {
       let dwchit = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() < 0.4
-          ? Math.random() * capacity * 1 | 0
+          ? Math.random() * capacity * -1 | 0
           // LRU破壊
-          : capacity + i % (capacity * 10);
+          : i;
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1);
         if (i + 1 === warmup) {
@@ -462,9 +462,9 @@ describe('Unit: lib/cache', () => {
       let dwchit = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() < 0.1
-          ? Math.random() * capacity * 1 | 0
+          ? Math.random() * capacity * -1 | 0
           // LFU破壊
-          : capacity + i >> 1 << 1;
+          : i >> 1 << 1;
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1);
         if (i + 1 === warmup) {
@@ -497,8 +497,8 @@ describe('Unit: lib/cache', () => {
       let dwchit = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() < 0.4
-          ? Math.random() * capacity * 1 | 0
-          : Math.random() * capacity * 9 + capacity | 0;
+          ? Math.random() * capacity * -1 | 0
+          : Math.random() * capacity * 10 | 0;
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1);
         if (i + 1 === warmup) {
@@ -513,7 +513,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC hit rate', dwchit * 100 / repeat);
       console.debug('DWC ratio', dwc['ratio'], dwc['indexes'].LFU.length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit rate ratio', `${dwchit / lruhit * 100 | 0}%`);
-      assert(dwchit / lruhit * 100 > 190);
+      assert(dwchit / lruhit * 100 > 200);
     });
 
   });
