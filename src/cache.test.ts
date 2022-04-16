@@ -321,6 +321,7 @@ describe('Unit: lib/cache', () => {
       let dwchit = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() < 0.4
+          // 偏りが静的かつ容量に収まる場合小さなLRUでも偏りをLFUに蓄積できる
           ? Math.random() * capacity * 1 | 0
           : Math.random() * capacity * 9 + capacity | 0;
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
@@ -388,8 +389,11 @@ describe('Unit: lib/cache', () => {
       let lruhit = 0;
       let dwchit = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
-        const key = Math.random() < 0.4
-          ? Math.random() * capacity * 1 - i * capacity / 100 | 0
+        const key = Math.random() < 0.5
+          // LFUが機能するアクセスパターンの場合はLRUだけでも同等に効果的に動作し機能しない場合もLRUに縮退して同等
+          // 偏りが推移的である場合これを捕捉するLRUと偏りを保持するLFUが必要であるため偏りの2倍の容量が必要となる
+          //? Math.random() * capacity * 1 - i / 2 * capacity / 100 | 0
+          ? Math.random() * capacity / 4 - i / 2 * capacity / 400 | 0
           : Math.random() * capacity * 9 + capacity | 0;
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1);
@@ -424,6 +428,7 @@ describe('Unit: lib/cache', () => {
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() < 0.4
           ? Math.random() * capacity * 1 | 0
+          // LRU破壊
           : capacity + i % (capacity * 10);
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1);
@@ -458,6 +463,7 @@ describe('Unit: lib/cache', () => {
       for (let i = 0; i < repeat + warmup; ++i) {
         const key = Math.random() < 0.1
           ? Math.random() * capacity * 1 | 0
+          // LFU破壊
           : capacity + i >> 1 << 1;
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1);
