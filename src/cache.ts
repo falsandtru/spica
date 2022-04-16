@@ -73,6 +73,20 @@ interface Record<K, V> {
   value: V;
 }
 
+export namespace Cache {
+  export interface Options<K, V = undefined> {
+    readonly capacity?: number;
+    readonly space?: number;
+    readonly age?: number;
+    readonly life?: number;
+    readonly limit?: number;
+    readonly disposer?: (value: V, key: K) => void;
+    readonly capture?: {
+      readonly delete?: boolean;
+      readonly clear?: boolean;
+    };
+  }
+}
 export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   constructor(capacity: number, opts?: Cache.Options<K, V>);
   constructor(opts: Cache.Options<K, V>);
@@ -389,20 +403,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     index.clock = ++this.clock;
     node.moveToHead();
     return true;
-  }
-}
-namespace Cache {
-  export interface Options<K, V = undefined> {
-    readonly capacity?: number;
-    readonly space?: number;
-    readonly age?: number;
-    readonly life?: number;
-    readonly limit?: number;
-    readonly disposer?: (value: V, key: K) => void;
-    readonly capture?: {
-      readonly delete?: boolean;
-      readonly clear?: boolean;
-    };
   }
 }
 
