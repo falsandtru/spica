@@ -196,7 +196,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
               ? LFU.last!.prev
               : skip;
           if (target !== skip) {
-            if (this.ratio > 50) break;
+            if (this.ratio >= 50) break;
             LRU.unshiftNode(target);
             LRU.head!.value.node = LRU.head!;
             LRU.head!.value.overlap = OVL.unshift(LRU.head!.value);
