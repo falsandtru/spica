@@ -461,10 +461,10 @@ describe('Unit: lib/cache', () => {
       let lruhit = 0;
       let dwchit = 0;
       for (let i = 0; i < repeat + warmup; ++i) {
-        const key = Math.random() < 0.1
+        const key = Math.random() < 0.4
           ? Math.random() * capacity * -1 | 0
           // LFU破壊
-          : i >> 1 << 1;
+          : i % 2 ? i - 1 : i + capacity / 2 | 0;
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1);
         if (i + 1 === warmup) {
@@ -479,7 +479,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC hit rate', dwchit * 100 / repeat);
       console.debug('DWC ratio', dwc['ratio'], dwc['indexes'].LFU.length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit rate ratio', `${dwchit / lruhit * 100 | 0}%`);
-      assert(dwchit / lruhit * 100 > 115);
+      assert(dwchit / lruhit * 100 > 95);
     });
 
     it('rate uneven 1,000', function () {
