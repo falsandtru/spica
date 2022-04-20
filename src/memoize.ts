@@ -25,6 +25,7 @@ export function memoize<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (..
     },
     get(key) {
       assert(memory = memory as z[]);
+      assert(0 <= <any>key);
       return memory[key as any as number];
     },
     set(key, value) {
