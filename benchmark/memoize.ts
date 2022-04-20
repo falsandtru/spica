@@ -10,7 +10,8 @@ describe('Benchmark:', function () {
       for (let i = 0; i < 1000; ++i) {
         f(i);
       }
-      benchmark('memoize Map', () => f(0), done);
+      let i = 0;
+      benchmark('memoize Map', () => f(i = ++i % 1000), done);
     });
 
     it('Cache', function (done) {
@@ -18,7 +19,8 @@ describe('Benchmark:', function () {
       for (let i = 0; i < 1000; ++i) {
         f(i);
       }
-      benchmark('memoize Cache', () => f(0), done);
+      let i = 0;
+      benchmark('memoize Cache', () => f(i = ++i % 1000), done);
     });
   });
 
