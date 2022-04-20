@@ -19,15 +19,15 @@ export function memoize<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (..
   if (typeof identify === 'object') return memoize(f, void 0, identify as Collection<b, z>);
   if (memory === void 0) return memoize(f, identify, new Map());
   if (isArray(memory)) return memoize(f, identify, {
-    has(key: b) {
+    has(key) {
       assert(memory = memory as z[]);
       return memory[key as any as number] !== void 0;
     },
-    get(key: b) {
+    get(key) {
       assert(memory = memory as z[]);
       return memory[key as any as number];
     },
-    set(key: b, value: z) {
+    set(key, value) {
       assert(memory = memory as z[]);
       memory[key as any as number] = value;
       return this;
