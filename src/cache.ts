@@ -98,12 +98,14 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       opts = capacity;
       capacity = opts.capacity ?? 0;
     }
-    const settings = extend(this.settings, opts, { capacity });
-    this.capacity = settings.capacity!;
+    extend(this.settings, opts, {
+      capacity,
+    });
+    this.capacity = this.settings.capacity!;
     if (this.capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
-    this.space = settings.space!;
-    this.life = this.capacity * settings.life!;
-    this.limit = settings.limit!;
+    this.space = this.settings.space!;
+    this.life = this.capacity * this.settings.life!;
+    this.limit = this.settings.limit!;
   }
   private readonly settings: Cache.Options<K, V> = {
     capacity: 0,

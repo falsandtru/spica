@@ -1,12 +1,11 @@
 import type { Structural, DeepImmutable, DeepRequired } from './type';
 import { Array, Promise, Error } from './global';
-import { ObjectDefineProperty, ObjectGetOwnPropertyDescriptor } from './alias';
+import { ObjectAssign, ObjectDefineProperty, ObjectGetOwnPropertyDescriptor } from './alias';
 import { tick } from './clock';
 import { wait } from './timer';
 import { AtomicPromise, isPromiseLike } from './promise';
 import { Future, AtomicFuture } from './future';
 import { Channel } from './channel';
-import { extend } from './assign';
 import { causeAsyncException } from './exception';
 import { noop } from './noop';
 
@@ -225,7 +224,7 @@ class Internal<T, R, S> {
       this.recvBuffer.close();
     });
   }
-  public readonly settings: DeepImmutable<DeepRequired<CoroutineOptions>> = extend({
+  public readonly settings: DeepImmutable<DeepRequired<CoroutineOptions>> = ObjectAssign({
     run: true,
     delay: true,
     capacity: -1,

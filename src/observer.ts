@@ -1,7 +1,7 @@
 import type { Inits, DeepImmutable, DeepRequired } from './type';
 import { Number, Map, WeakSet, Error } from './global';
+import { ObjectAssign } from './alias';
 import { List } from './ixlist';
-import { extend } from './assign';
 import { singleton } from './function';
 import { push, splice } from './array';
 import { causeAsyncException } from './exception';
@@ -69,7 +69,7 @@ export interface ObservationOptions {
 export class Observation<N extends readonly unknown[], D, R>
   implements Observer<N, D, R>, Publisher<N, D, R> {
   constructor(opts: ObservationOptions = {}) {
-    extend(this.settings, opts);
+    ObjectAssign(this.settings, opts);
   }
   private id = 0;
   private readonly node: ListenerNode<N, D, R> = new ListenerNode(void 0, void 0);

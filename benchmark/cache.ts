@@ -11,8 +11,12 @@ describe('Benchmark:', function () {
       setTimeout(done, 1000);
     });
 
-    it('new', function (done) {
-      benchmark('Cache new', () => new Cache(1000), done);
+    it('LRU new', function (done) {
+      benchmark('LRUCache new', () => new LRUCache({ max: 1000 }), done);
+    });
+
+    it('DWC new', function (done) {
+      benchmark('DW-Cache new', () => new Cache(1000), done);
     });
 
     for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
