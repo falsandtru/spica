@@ -7,27 +7,18 @@ describe('Benchmark:', function () {
   describe('memoize', function () {
     it('Map', function (done) {
       const f = memoize(a => a, new Map());
-      for (let i = 0; i < 1000; ++i) {
-        f(i);
-      }
       let i = 0;
       benchmark('memoize Map', () => f(i = ++i % 1000), done);
     });
 
     it('Array', function (done) {
       const f = memoize(a => a, []);
-      for (let i = 0; i < 1000; ++i) {
-        f(i);
-      }
       let i = 0;
       benchmark('memoize Array', () => f(i = ++i % 1000), done);
     });
 
     it('Cache', function (done) {
       const f = memoize(a => a, new Cache(1000));
-      for (let i = 0; i < 1000; ++i) {
-        f(i);
-      }
       let i = 0;
       benchmark('memoize Cache', () => f(i = ++i % 1000), done);
     });
