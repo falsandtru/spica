@@ -29,7 +29,7 @@ export const overwrite = template((prop, target, source) => {
     case 'Object':
       switch (type(target[prop])) {
         case 'Object':
-          return target[prop] = overwrite(target[prop], source[prop]);
+          return overwrite(target[prop], source[prop]);
         default:
           return target[prop] = overwrite(empty(source[prop]), source[prop]);
       }
@@ -47,7 +47,7 @@ export const extend = template((prop, target, source) => {
     case 'Object':
       switch (type(target[prop])) {
         case 'Object':
-          return target[prop] = extend(target[prop], source[prop]);
+          return extend(target[prop], source[prop]);
         default:
           return target[prop] = extend(empty(source[prop]), source[prop]);
       }
@@ -70,7 +70,7 @@ export const merge = template((prop, target, source) => {
     case 'Object':
       switch (type(target[prop])) {
         case 'Object':
-          return target[prop] = merge(target[prop], source[prop]);
+          return merge(target[prop], source[prop]);
         default:
           return target[prop] = merge(empty(source[prop]), source[prop]);
       }
@@ -88,9 +88,9 @@ export const inherit = template((prop, target, source) => {
     case 'Object':
       switch (type(target[prop])) {
         case 'Object':
-          return target[prop] = hasOwnProperty(target, prop)
+          return hasOwnProperty(target, prop)
             ? inherit(target[prop], source[prop])
-            : inherit(ObjectCreate(target[prop]), source[prop]);
+            : target[prop] = inherit(ObjectCreate(target[prop]), source[prop]);
         default:
           return target[prop] = ObjectCreate(source[prop]);
       }
@@ -125,12 +125,6 @@ export function template(strategy: (prop: string, target: object, source: object
 }
 
 function empty(source: object): object {
-  switch (type(source)) {
-    case 'Array':
-      return [];
-    case 'Object':
-      return source instanceof Object ? {} : ObjectCreate(null);
-    default:
-      return source;
-  }
+  assert(type(source) === 'Object');
+  return source instanceof Object ? {} : ObjectCreate(null);
 }
