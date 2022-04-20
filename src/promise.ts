@@ -350,7 +350,6 @@ export class Internal<T> {
         return;
     }
   }
-
 }
 
 function react(reactions: (FulfillReaction | RejectReaction)[], param: unknown): void {
