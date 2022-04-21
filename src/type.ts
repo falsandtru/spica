@@ -61,6 +61,13 @@ export type Intersect<TS extends readonly unknown[]> =
   TS extends readonly [infer T, ...infer TS] ? T & Intersect<TS> :
   never;
 
+// 型計算中の編集により不正な計算結果が出力されるため実用不可(再入不可)
+export type StrToNum<T extends string> =
+  T extends `-${number}` ? never :
+  T extends `${number}` ? StringToNumber<T> : never;
+type StringToNumber<T extends `${number}`, as extends 0[] = []> =
+  T extends keyof [0, ...as] ? as['length'] : StringToNumber<T, [0, ...as]>;
+
 export type Head<as extends readonly unknown[]> =
   as extends readonly [infer a, ...unknown[]] ? a :
   never;
