@@ -18,7 +18,7 @@ export function memoize<as extends [unknown, ...unknown[]], z, b extends number 
 export function memoize<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...as: as) => z, identify: Collection<b, z> | z[] | ((...as: as) => b) = (...as) => as[0] as b, memory?: Collection<b, z> | z[]): typeof f {
   if (typeof identify === 'object') return memoize(f, void 0, identify as Collection<b, z>);
   if (memory === void 0) return memoize(f, identify, new Map());
-  if (isArray(memory)) return memoize(f, identify, {
+  if (isArray(memory)) return memoize<as, z, b>(f, identify, {
     has(key) {
       assert(memory = memory as z[]);
       return memory[key as any as number] !== void 0;
@@ -36,7 +36,7 @@ export function memoize<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (..
     delete() {
       throw 0;
     },
-  } as Collection<b, z>);
+  });
   let nullish = false;
   return (...as) => {
     assert(memory = memory as Collection<b, z>);
