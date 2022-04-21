@@ -5,38 +5,38 @@ import { Coroutine } from './coroutine';
 describe('Unit: lib/select', function () {
   describe('select', function () {
     it('generator', async function () {
-      const gen = select({
-        a: async function* () { yield* [0, 2] },
-        b: async function* () { yield* [1] }(),
-      });
+      const gen = select([
+        async function* () { yield* [0, 2] },
+        async function* () { yield* [1] }(),
+      ]);
       assert.deepStrictEqual(
         await gen.next(),
         {
-          value: { name: 'a', result: { value: 0, done: false } },
+          value: { name: '0', result: { value: 0, done: false } },
           done: false
         });
       assert.deepStrictEqual(
         await gen.next(),
         {
-          value: { name: 'b', result: { value: 1, done: false } },
+          value: { name: '1', result: { value: 1, done: false } },
           done: false
         });
       assert.deepStrictEqual(
         await gen.next(),
         {
-          value: { name: 'a', result: { value: 2, done: false } },
+          value: { name: '0', result: { value: 2, done: false } },
           done: false
         });
       assert.deepStrictEqual(
         await gen.next(),
         {
-          value: { name: 'b', result: { value: undefined, done: true } },
+          value: { name: '1', result: { value: undefined, done: true } },
           done: false
         });
       assert.deepStrictEqual(
         await gen.next(),
         {
-          value: { name: 'a', result: { value: undefined, done: true } },
+          value: { name: '0', result: { value: undefined, done: true } },
           done: false
         });
       assert.deepStrictEqual(
@@ -105,9 +105,9 @@ describe('Unit: lib/select', function () {
         yield* [0, 1, 2];
         return 3;
       }, { capacity: 0 });
-      const gen = select({
-        a: co,
-      });
+      const gen = select([
+        co,
+      ]);
       (async () => {
         await 0;
         await co[Coroutine.port].send(0),
@@ -117,25 +117,25 @@ describe('Unit: lib/select', function () {
       assert.deepStrictEqual(
         await gen.next(),
         {
-          value: { name: 'a', result: { value: 0, done: false } },
+          value: { name: '0', result: { value: 0, done: false } },
           done: false
         });
       assert.deepStrictEqual(
         await gen.next(),
         {
-          value: { name: 'a', result: { value: 1, done: false } },
+          value: { name: '0', result: { value: 1, done: false } },
           done: false
         });
       assert.deepStrictEqual(
         await gen.next(),
         {
-          value: { name: 'a', result: { value: 2, done: false } },
+          value: { name: '0', result: { value: 2, done: false } },
           done: false
         });
       assert.deepStrictEqual(
         await gen.next(),
         {
-          value: { name: 'a', result: { value: 3, done: true } },
+          value: { name: '0', result: { value: 3, done: true } },
           done: false
         });
       assert.deepStrictEqual(
