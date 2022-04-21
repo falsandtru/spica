@@ -13,11 +13,10 @@ type Channels =
   | readonly Channel[]
   | Record<string, Channel>;
 type ChannelResult<T extends Channels> =
-  T extends readonly unknown[]
-  ? number extends T['length']
-  ? T[number] extends Channel ? { readonly name: string; readonly result: ChannelIteratorResult<T[number]>; } : never
-  : { [P in keyof T]: T[P] extends Channel ? { readonly name: P; readonly result: ChannelIteratorResult<T[P]>; } : never; }[number]
-  : { [P in keyof T]: T[P] extends Channel ? { readonly name: P; readonly result: ChannelIteratorResult<T[P]>; } : never; }[keyof T];
+  T extends readonly unknown[] ? number extends T['length'] ?
+  { readonly name: string; readonly result: T[number] extends Channel ? ChannelIteratorResult<T[number]> : never; } :
+  { [P in keyof T]: T[P] extends Channel ? { readonly name: P; readonly result: ChannelIteratorResult<T[P]>; } : never; }[number] :
+  { [P in keyof T]: T[P] extends Channel ? { readonly name: P; readonly result: ChannelIteratorResult<T[P]>; } : never; }[keyof T];
 type ChannelIteratorResult<C extends Channel> =
   C extends () => AsyncIterable<infer T, infer U> ? IteratorResult<T, U> :
   C extends AsyncIterable<infer T, infer U> ? IteratorResult<T, U> :
