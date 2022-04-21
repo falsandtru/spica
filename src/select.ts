@@ -10,7 +10,7 @@ type Channel =
   | (() => AsyncIterable<unknown, unknown, undefined>);
 type Channels = Record<string, Channel>;
 type ChannelResult<T extends Channels, P = keyof T> =
-  P extends keyof T ? readonly [P, ChannelIteratorResult<T[P]>] :
+  P extends keyof T ? { readonly name: P; readonly result: ChannelIteratorResult<T[P]>; } :
   never;
 type ChannelIteratorResult<C extends Channel> =
   C extends () => AsyncIterable<infer T, infer U> ? IteratorResult<T, U> :
@@ -29,7 +29,7 @@ export async function* select<T extends Channels>(
     assert(reqs.has(req));
     void reqs.delete(req);
     !result.done && void reqs.add(take(name, chan));
-    yield [name as keyof T, result as ChannelIteratorResult<T[keyof T]>] as const as ChannelResult<T>;
+    yield { name, result } as ChannelResult<T>;
   }
   return;
 }

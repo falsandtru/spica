@@ -24,10 +24,10 @@ export class Coaggregator<T = unknown, R = T, S = unknown> extends Coroutine<T, 
         });
       const results: T[] = Array(coroutines.length);
       // FIXME: Remove the next type assertion after #28801 is fixed.
-      for await (const [i, result] of select({ ...coroutines } as unknown as Record<string, Coroutine<T, R, S>>)) {
-        assert(Number.isSafeInteger(+i));
+      for await (const { name, result } of select({ ...coroutines } as unknown as Record<string, Coroutine<T, R, S>>)) {
+        assert(Number.isSafeInteger(+name));
         if (result.done) {
-          results[i] = result.value;
+          results[name] = result.value;
         }
         else {
           yield result.value;
