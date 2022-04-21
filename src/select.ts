@@ -32,8 +32,8 @@ export async function* select<T extends Channels>(
   while (reqs.size > 0) {
     const [name, chan, req, result] = await Promise.race(reqs);
     assert(reqs.has(req));
-    void reqs.delete(req);
-    !result.done && void reqs.add(take(name, chan));
+    reqs.delete(req);
+    !result.done && reqs.add(take(name, chan));
     yield { name, result } as ChannelResult<T>;
   }
   return;
