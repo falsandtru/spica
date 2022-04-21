@@ -12,19 +12,19 @@ type Channels =
   | readonly [] | readonly [Channel, ...Channel[]]
   | readonly Channel[]
   | Record<string, Channel>;
-type ChannelResult<T extends Channels> =
-  T extends readonly unknown[] ? number extends T['length'] ?
-  { readonly name: string; readonly result: T[number] extends Channel ? ChannelIteratorResult<T[number]> : never; } :
-  { [P in keyof T]: T[P] extends Channel ? { readonly name: P; readonly result: ChannelIteratorResult<T[P]>; } : never; }[number] :
-  { [P in keyof T]: T[P] extends Channel ? { readonly name: P; readonly result: ChannelIteratorResult<T[P]>; } : never; }[keyof T];
 type ChannelIteratorResult<C extends Channel> =
   C extends () => AsyncIterable<infer T, infer U> ? IteratorResult<T, U> :
   C extends AsyncIterable<infer T, infer U> ? IteratorResult<T, U> :
   never;
+type Selection<T extends Channels> =
+  T extends readonly unknown[] ? number extends T['length'] ?
+  { readonly name: string; readonly result: T[number] extends Channel ? ChannelIteratorResult<T[number]> : never; } :
+  { [P in keyof T]: T[P] extends Channel ? { readonly name: P; readonly result: ChannelIteratorResult<T[P]>; } : never; }[number] :
+  { [P in keyof T]: T[P] extends Channel ? { readonly name: P; readonly result: ChannelIteratorResult<T[P]>; } : never; }[keyof T];
 
 export async function* select<T extends Channels>(
   channels: T,
-): AsyncGenerator<ChannelResult<T>, undefined, undefined> {
+): AsyncGenerator<Selection<T>, undefined, undefined> {
   const reqs = new Set(ObjectEntries(channels)
     .map(([name, chan]) => (
       chan = typeof chan === 'function' ? chan() : chan,
@@ -34,7 +34,7 @@ export async function* select<T extends Channels>(
     assert(reqs.has(req));
     reqs.delete(req);
     !result.done && reqs.add(take(name, chan));
-    yield { name, result } as ChannelResult<T>;
+    yield { name, result } as Selection<T>;
   }
   return;
 }
