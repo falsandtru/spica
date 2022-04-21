@@ -30,7 +30,7 @@ export async function* select<T extends Channels>(
       chan = typeof chan === 'function' ? chan() : chan,
       take(name, chan[Symbol.asyncIterator]()))));
   while (reqs.size > 0) {
-    const [name, chan, req, result] = await Promise.race(reqs);
+    const [req, name, chan, result] = await Promise.race(reqs);
     assert(reqs.has(req));
     reqs.delete(req);
     !result.done && reqs.add(take(name, chan));
@@ -39,8 +39,8 @@ export async function* select<T extends Channels>(
   return;
 }
 
-type Request = Promise<readonly [string, AsyncIterator<unknown, unknown, undefined>, Request, IteratorResult<unknown, unknown>]>;
+type Request = Promise<readonly [Request, string, AsyncIterator<unknown, unknown, undefined>, IteratorResult<unknown, unknown>]>;
 function take(name: string, chan: AsyncIterator<unknown, unknown, undefined>): Request {
-  const req: Request = chan.next().then(result => [name, chan, req, result]);
+  const req: Request = chan.next().then(result => [req, name, chan, result]);
   return req;
 }
