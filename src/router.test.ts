@@ -1,8 +1,8 @@
-import { router, _helpers } from './router';
+import { router } from './router';
 import { URL, standardize } from './url';
 import { Sequence } from './sequence';
 
-const { compare, match, expand } = _helpers();
+const { compare, match, expand } = router.helpers();
 
 describe('Unit: lib/router', () => {
   describe('router', () => {
