@@ -2,24 +2,32 @@ import { Set, crypto } from './global';
 
 const bases = [...Array(7)].map((_, i) => 1 << i);
 assert.deepStrictEqual(bases, [1, 2, 4, 8, 16, 32, 64]);
-const dict = [
+const dict0_ = [
   ...[...Array(36)].map((_, i) => i.toString(36)),
   ...[...Array(36)].map((_, i) => i.toString(36).toUpperCase()).slice(-26),
   '-', '_',
 ];
-assert(dict.length === 64);
+assert(dict0_.length === 64);
 // eslint-disable-next-line
-assert(dict.join('').match(/^0.*9a.*zA.*Z-_$/));
+assert(dict0_.join('').match(/^0.*9a.*zA.*Z-_$/));
+const dictAz = [
+  ...[...Array(36)].map((_, i) => i.toString(36).toUpperCase()).slice(-26),
+  ...[...Array(36)].map((_, i) => i.toString(36)).slice(-26),
+];
+assert(dictAz.length === 52);
+// eslint-disable-next-line
+assert(dictAz.join('').match(/^A.*Za.*z$/));
 
 export const rnd16 = cons(16);
 export const rnd32 = cons(32);
-export const rnd36 = cons(36);
 export const rnd62 = cons(62);
 export const rnd64 = cons(64);
-export const rnd0f = conv(rnd16);
-export const rnd0z = conv(rnd36);
-export const rnd0Z = conv(rnd62);
-export const rnd0_ = conv(rnd64);
+export const rnd0f = conv(rnd16, dict0_);
+export const rnd0v = conv(rnd32, dict0_);
+export const rnd0Z = conv(rnd62, dict0_);
+export const rnd0_ = conv(rnd64, dict0_);
+export const rndAP = conv(rnd16, dictAz);
+export const rndAf = conv(rnd32, dictAz);
 
 export function unique(rnd: (len: number) => string, len: number, mem?: Set<string>): () => string {
   const clear = !mem;
@@ -53,7 +61,7 @@ function cons(radix: number): () => number {
   };
 }
 
-function conv(rnd: () => number): (len?: number) => string {
+function conv(rnd: () => number, dict: string[]): (len?: number) => string {
   return (len = 1) => {
     let acc = '';
     while (len--) {

@@ -1,5 +1,5 @@
 import { benchmark } from './benchmark';
-import { rnd16, rnd62, rnd0f, rnd0z, rnd0Z, unique } from '../';
+import { rnd16, rnd62, rnd0f, rnd0Z, unique } from '../';
 import { crypto } from '../src/global';
 
 describe('Benchmark:', function () {
@@ -61,13 +61,6 @@ describe('Benchmark:', function () {
   describe('rnd0f', function () {
     it('', function (done) {
       benchmark('random rnd0f', () => rnd0f(), done);
-    });
-
-  });
-
-  describe('rnd0z', function () {
-    it('', function (done) {
-      benchmark('random rnd0z', () => rnd0z(), done);
     });
 
   });

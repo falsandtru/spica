@@ -31,7 +31,7 @@ export { flip } from './src/flip';
 export { tuple } from './src/tuple';
 export { tick } from './src/clock';
 export { throttle, debounce } from './src/throttle';
-export { rnd16, rnd32, rnd36, rnd62, rnd64, rnd0f, rnd0z, rnd0Z, unique } from './src/random';
+export { rnd16, rnd32, rnd62, rnd64, rnd0f, rnd0Z, unique } from './src/random';
 export { uuid } from './src/uuid';
 export { sqid } from './src/sqid';
 export { assign, clone, extend } from './src/assign';
