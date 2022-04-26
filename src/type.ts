@@ -5,8 +5,8 @@ type Unique = typeof Unique;
 declare const Unique: unique symbol;
 
 export type Not<T extends boolean> = T extends true ? false : true;
-export type And<T, U> = T extends Falsy ? T : U;
-export type Or<T, U> = T extends Falsy ? U : T;
+export type And<T, U> = [T] extends [Falsy] ? T : U;
+export type Or<T, U> = [T] extends [Falsy] ? U : T;
 
 export type IsNever<T> = [T] extends [never] ? true : false;
 export type IsVoid<T> = [void] extends [T] ? Not<Or<IsAny<T>, IsUnknown<T>>> : false;

@@ -35,6 +35,9 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<And<'', 1>, ''>);
       assert((): true => true as TEq<And<null, 1>, null>);
       assert((): true => true as TEq<And<void, 1>, void>);
+      assert((): true => true as TEq<And<never, 1>, never>);
+      assert((): true => true as TEq<And<0, never>, 0>);
+      assert((): true => true as TEq<And<1, never>, never>);
     });
 
   });
@@ -45,6 +48,10 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Or<true, false>, true>);
       assert((): true => true as TEq<Or<false, true>, true>);
       assert((): true => true as TEq<Or<false, false>, false>);
+      assert((): true => true as TEq<Or<never, true>, true>);
+      assert((): true => true as TEq<Or<never, false>, false>);
+      assert((): true => true as TEq<Or<true, never>, true>);
+      assert((): true => true as TEq<Or<false, never>, never>);
     });
 
   });
