@@ -1,3 +1,4 @@
+import { Symbol } from './global';
 import { ObjectGetPrototypeOf } from './alias';
 
 type Falsy = undefined | false | 0 | '' | null | void;
@@ -227,8 +228,9 @@ export function type(value: unknown): string {
   if (value === null) return 'null';
   const type = typeof value;
   if (type === 'object') {
+    if ((value as object)[Symbol.toStringTag]) return (value as object)[Symbol.toStringTag];
     const proto = ObjectGetPrototypeOf(value);
-    if (proto === ObjectPrototype || proto === null) return 'Object';
+    if (proto === ObjectPrototype) return 'Object';
     if (proto === ArrayPrototype) return 'Array';
     return toString(value).slice(8, -1);
   }
