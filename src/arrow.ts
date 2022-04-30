@@ -35,11 +35,11 @@ export function assemble<fs extends ((a?: unknown) => () => void)[]>(...fs: fs):
       for (let i = 0; i < fs.length; ++i) {
         gs.push(fs[i].call(this, a));
       }
-      return singleton(() => cancel(gs)) as any;
+      return singleton(() => cancel(gs));
     }
-    catch (reason: any) {
+    catch (reason) {
       cancel(gs);
-      throw new Error(`Spica: Arrow: ${reason?.toString() ?? reason}`);
+      throw reason;
     }
   };
 }
@@ -48,7 +48,7 @@ function cancel(cancellers: readonly (() => void)[]): undefined {
   const reasons = [];
   for (let i = 0; i < cancellers.length; ++i) {
     try {
-      cancellers[i]();
+      (void 0, cancellers[i])();
     }
     catch (reason) {
       reasons.push(reason);
