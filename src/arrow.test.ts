@@ -22,7 +22,7 @@ describe('Unit: lib/arrow', function () {
   describe('aggregate', function () {
     it('', () => {
       const a = (s: string) => s;
-      const b = (s: string) => s.length * 2;
+      const b = (s: '1') => s.length * 2;
       const c = () => undefined;
       assert.deepStrictEqual(
         aggregate(a)(''),
