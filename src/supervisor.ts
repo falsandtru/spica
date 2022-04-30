@@ -335,13 +335,20 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       for (name of typeof names === 'string' ? [names] : names) {
         if (result = this.workers.get(name)?.call([param, expiry])) break;
       }
-      if (result === void 0 && Date.now() < expiry) continue;
+      if (!result && Date.now() < expiry) continue;
       void splice(this.messages, i, 1);
       void --i;
       void --len;
       timer && void clearTimeout(timer);
 
-      if (result === void 0) {
+      if (result) {
+        void result.then(
+          reply =>
+            void callback(void 0, reply),
+          () =>
+            void callback(new Error(`Spica: Supervisor: A process has failed.`), void 0));
+      }
+      else {
         void this.events_?.loss.emit([name], [name, param]);
         try {
           void callback(new Error(`Spica: Supervisor: A process has failed.`), void 0);
@@ -349,14 +356,6 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
         catch (reason) {
           void causeAsyncException(reason);
         }
-      }
-      else {
-        void result
-          .then(
-            reply =>
-              void callback(void 0, reply),
-            () =>
-              void callback(new Error(`Spica: Supervisor: A process has failed.`), void 0));
       }
     }
   }
