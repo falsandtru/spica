@@ -248,17 +248,16 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       , timeout + 3);
     }
   }
-  public cast(name: N | ((names: Iterable<N>) => Iterable<N>), param: P, timeout = this.settings.timeout): boolean {
+  public cast(name: N | ((names: Iterable<N>) => Iterable<N>), param: P, timeout = this.settings.timeout): AtomicPromise<R> | undefined {
     void this.throwErrorIfNotAvailable();
     const expire = Date.now() + timeout;
     let result: AtomicPromise<R> | undefined;
     for (name of typeof name === 'string' ? [name] : new NamePool(this.workers, name)) {
       if (result = this.workers.get(name)?.call([param, expire])) break;
     }
-    if (result) return true;
+    if (result) return result;
     const n = typeof name === 'string' ? name : void 0;
     void this.events_?.loss.emit([n], [n, param]);
-    return false;
   }
   public refs(name?: N): [N, Supervisor.Process.Regular<P, R, S>, S, (reason?: unknown) => boolean][] {
     assert(this.available || this.workers.size === 0);
