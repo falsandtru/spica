@@ -120,7 +120,6 @@ describe('Unit: lib/supervisor', function () {
           done();
         }
       });
-      assert(+sv.id > 0);
       assert(sv.name === '');
       sv.events.init
         .monitor([], ([name, process, state]) => {

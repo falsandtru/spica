@@ -7,7 +7,6 @@ import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future';
 import { Observation, Observer, Publisher } from './observer';
 import { splice } from './array';
-import { sqid } from './sqid';
 import { causeAsyncException } from './exception';
 import { noop } from './noop';
 
@@ -65,7 +64,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     ObjectAssign(this.settings, opts);
     this.name = this.settings.name;
     // FIXME: Remove the next type assertion after #37383 is fixed.
-    if (this.constructor === Supervisor as any) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot instantiate abstract classes.`);
+    if (this.constructor === Supervisor as any) throw new Error(`Spica: Supervisor: <${this.name}>: Cannot instantiate abstract classes.`);
     // @ts-ignore #31251
     void this.constructor.instances.add(this);
   }
@@ -94,7 +93,6 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     void this.settings.destructor(reason);
     void this.state.bind(reason === void 0 ? void 0 : AtomicPromise.reject(reason));
   }
-  public readonly id: string = sqid();
   public readonly name: string;
   private readonly settings: DeepImmutable<DeepRequired<SupervisorOptions>> = {
     name: '',
@@ -124,7 +122,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
   private alive = true;
   private available = true;
   private throwErrorIfNotAvailable(): void {
-    if (!this.available) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot use terminated supervisors.`);
+    if (!this.available) throw new Error(`Spica: Supervisor: <${this.name}>: Cannot use terminated supervisors.`);
   }
   // Workaround for #36053
   public register(this: Supervisor<N, P, R, undefined>, name: N, process: Supervisor.Process.Function<P, R, S>, state?: S): (reason?: unknown) => boolean;
@@ -192,7 +190,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
         },
         state);
     }
-    if (this.workers.has(name)) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: Cannot register another process with tha same name.`);
+    if (this.workers.has(name)) throw new Error(`Spica: Supervisor: <${this.name}/${name}>: Cannot register another process with tha same name.`);
     void this.schedule();
     const worker: Worker<N, P, R, S> = new Worker(
       name,
@@ -234,7 +232,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       const name: N | undefined = names[Symbol.iterator]().next().value;
       void this.events_?.loss.emit([name], [name, param]);
       try {
-        void callback(new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Message overflowed.`), void 0);
+        void callback(new Error(`Spica: Supervisor: <${this.name}>: Message overflowed.`), void 0);
       }
       catch (reason) {
         void causeAsyncException(reason);
@@ -305,10 +303,10 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     void this.terminate(reason);
   }
   public override [Coroutine.port] = {
-    ask: () => { throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot use coroutine port.`); },
-    recv: () => { throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot use coroutine port.`); },
-    send: () => { throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot use coroutine port.`); },
-    connect: () => { throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot use coroutine port.`); },
+    ask: () => { throw new Error(`Spica: Supervisor: <${this.name}>: Cannot use coroutine port.`); },
+    recv: () => { throw new Error(`Spica: Supervisor: <${this.name}>: Cannot use coroutine port.`); },
+    send: () => { throw new Error(`Spica: Supervisor: <${this.name}>: Cannot use coroutine port.`); },
+    connect: () => { throw new Error(`Spica: Supervisor: <${this.name}>: Cannot use coroutine port.`); },
   } as const;
   private scheduled = false;
   private schedule(): void {
@@ -348,12 +346,12 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
           reply =>
             void callback(void 0, reply),
           () =>
-            void callback(new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Process failed.`), void 0));
+            void callback(new Error(`Spica: Supervisor: <${this.name}>: Process failed.`), void 0));
       }
       else {
         void this.events_?.loss.emit([name], [name, param]);
         try {
-          void callback(new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Message expired.`), void 0);
+          void callback(new Error(`Spica: Supervisor: <${this.name}>: Message expired.`), void 0);
         }
         catch (reason) {
           void causeAsyncException(reason);
