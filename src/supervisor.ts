@@ -394,8 +394,8 @@ class NamePool<N extends string> implements Iterable<N> {
     private readonly selector: (names: Iterable<N>) => Iterable<N>,
   ) {
   }
-  public *[Symbol.iterator](): Iterator<N, void, undefined> {
-    yield* this.selector(this.workers.keys());
+  public [Symbol.iterator](): Iterator<N, undefined, undefined> {
+    return this.selector(this.workers.keys())[Symbol.iterator]();
   }
 }
 
