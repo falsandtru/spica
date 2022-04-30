@@ -166,7 +166,7 @@ describe('Unit: lib/supervisor', function () {
           assert(state === 0);
           return state;
         },
-        main(n: number, state: number): [number, number] {
+        main(n, state) {
           assert(TestSupervisor.status.processes === 1);
           switch (cnt) {
             case 3:
