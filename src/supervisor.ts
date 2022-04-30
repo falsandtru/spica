@@ -79,9 +79,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     void ObjectFreeze(this.workers);
     while (this.messages.length > 0) {
       const [names, param, , , timer] = this.messages.shift()!;
-      const name = typeof names === 'string'
-        ? names
-        : names[Symbol.iterator]().next().value!;
+      const name: N | undefined = names[Symbol.iterator]().next().value;
       timer && void clearTimeout(timer);
       void this.events_?.loss.emit([name], [name, param]);
     }
@@ -108,18 +106,18 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
   };
   private events_?: {
     readonly init: Observation<[N], Supervisor.Event.Data.Init<N, P, R, S>, unknown>;
-    readonly loss: Observation<[N], Supervisor.Event.Data.Loss<N, P>, unknown>;
     readonly exit: Observation<[N], Supervisor.Event.Data.Exit<N, P, R, S>, unknown>;
+    readonly loss: Observation<[N | undefined], Supervisor.Event.Data.Loss<N, P>, unknown>;
   };
   public get events(): {
     readonly init: Observer<[N], Supervisor.Event.Data.Init<N, P, R, S>, unknown>;
-    readonly loss: Observer<[N], Supervisor.Event.Data.Loss<N, P>, unknown>;
     readonly exit: Observer<[N], Supervisor.Event.Data.Exit<N, P, R, S>, unknown>;
+    readonly loss: Observer<[N | undefined], Supervisor.Event.Data.Loss<N, P>, unknown>;
   } {
     return this.events_ ??= {
       init: new Observation<[N], Supervisor.Event.Data.Init<N, P, R, S>, unknown>(),
-      loss: new Observation<[N], Supervisor.Event.Data.Loss<N, P>, unknown>(),
       exit: new Observation<[N], Supervisor.Event.Data.Exit<N, P, R, S>, unknown>(),
+      loss: new Observation<[N | undefined], Supervisor.Event.Data.Loss<N, P>, unknown>(),
     };
   }
   private readonly workers = new Map<N, Worker<N, P, R, S>>();
@@ -218,16 +216,13 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       return process[Symbol.toStringTag] === 'GeneratorFunction';
     }
   }
-  public call(name: N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), param: P, timeout?: number): AtomicPromise<R>;
-  public call(name: N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), param: P, callback: Supervisor.Callback<R>, timeout?: number): void;
-  public call(name: N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), param: P, callback: Supervisor.Callback<R> | number = this.settings.timeout, timeout = this.settings.timeout): AtomicPromise<R> | void {
+  public call(name: N | ((names: Iterable<N>) => Iterable<N>), param: P, timeout?: number): AtomicPromise<R>;
+  public call(name: N | ((names: Iterable<N>) => Iterable<N>), param: P, callback: Supervisor.Callback<R>, timeout?: number): void;
+  public call(name: N | ((names: Iterable<N>) => Iterable<N>), param: P, callback: Supervisor.Callback<R> | number = this.settings.timeout, timeout = this.settings.timeout): AtomicPromise<R> | void {
     if (typeof callback !== 'function') return new AtomicPromise<R>((resolve, reject) =>
       void this.call(name, param, (result, err) => err ? reject(err) : resolve(result), callback));
     void this.throwErrorIfNotAvailable();
-    void this.messages.push([
-      typeof name === 'string'
-        ? name
-        : new NamePool(this.workers, name),
+    void this.messages.push([typeof name === 'string' ? [name] : new NamePool(this.workers, name),
       param,
       callback,
       Date.now() + timeout,
@@ -236,9 +231,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     while (this.messages.length > (this.available ? this.settings.capacity : 0)) {
       const [names, param, callback, , timer] = this.messages.shift()!;
       timer && void clearTimeout(timer);
-      const name = typeof names === 'string'
-        ? names
-        : names[Symbol.iterator]().next().value!;
+      const name: N | undefined = names[Symbol.iterator]().next().value;
       void this.events_?.loss.emit([name], [name, param]);
       try {
         void callback(void 0 as any, new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A message overflowed.`));
@@ -257,14 +250,13 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       , timeout + 3);
     }
   }
-  public cast(name: N | ('' extends N ? undefined | ((names: Iterable<N>) => Iterable<N>) : never), param: P, timeout = this.settings.timeout): boolean {
+  public cast(name: N | ((names: Iterable<N>) => Iterable<N>), param: P, timeout = this.settings.timeout): boolean {
     void this.throwErrorIfNotAvailable();
     let result: AtomicPromise<unknown> | undefined;
     for (name of typeof name === 'string' ? [name] : new NamePool(this.workers, name)) {
       if (result = this.workers.get(name)?.call([param, Date.now() + timeout])) break;
     }
     name = name as N;
-    assert(name !== void 0);
     if (result) return true;
     void this.events_?.loss.emit([name], [name, param]);
     return false;
@@ -330,7 +322,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     this.settings.scheduler === global.requestAnimationFrame && void setTimeout(p.bind, 1000);
   }
   // Bug: Karma and TypeScript
-  private readonly messages: [N | NamePool<N>, P, Supervisor.Callback<R>, number, ReturnType<typeof setTimeout> | 0][] = [];
+  private readonly messages: [Iterable<N>, P, Supervisor.Callback<R>, number, ReturnType<typeof setTimeout> | 0][] = [];
   private deliver(): void {
     if (!this.available) return;
     assert(!this.scheduled);
@@ -339,11 +331,10 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       if (this.settings.resource - (Date.now() - since) <= 0) return void this.schedule();
       const [names, param, callback, expiry, timer] = this.messages[i];
       let result: AtomicPromise<R> | undefined;
-      let name!: N;
+      let name: N | undefined;
       for (name of typeof names === 'string' ? [names] : names) {
         if (result = this.workers.get(name)?.call([param, expiry])) break;
       }
-      assert(name !== void 0);
       if (result === void 0 && Date.now() < expiry) continue;
       void splice(this.messages, i, 1);
       void --i;
@@ -363,7 +354,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
         void result
           .then(
             reply =>
-              void callback(reply),
+              void callback(reply, void 0),
             () =>
               void callback(void 0 as any, new Error(`Spica: Supervisor: A process has failed.`)));
       }
@@ -393,8 +384,8 @@ export namespace Supervisor {
   export namespace Event {
     export namespace Data {
       export type Init<N extends string, P, R, S> = readonly [N, Process.Regular<P, R, S>, S];
-      export type Loss<N extends string, P> = readonly [N, P];
       export type Exit<N extends string, P, R, S> = readonly [N, Process.Regular<P, R, S>, S, unknown];
+      export type Loss<N extends string, P> = readonly [N | undefined, P];
     }
   }
 }
@@ -402,20 +393,11 @@ export namespace Supervisor {
 class NamePool<N extends string> implements Iterable<N> {
   constructor(
     private readonly workers: ReadonlyMap<N, unknown>,
-    private readonly selector: (names: Iterable<N>) => Iterable<N> = ns => ns,
+    private readonly selector: (names: Iterable<N>) => Iterable<N>,
   ) {
-    assert([...this].length > 0);
   }
-  public *[Symbol.iterator](): Iterator<N, undefined, undefined> {
-    let cnt = 0;
-    for (const name of this.selector(this.workers.keys())) {
-      void ++cnt;
-      yield name;
-    }
-    if (cnt === 0) {
-      yield '' as N;
-    }
-    return;
+  public *[Symbol.iterator](): Iterator<N, void, undefined> {
+    yield* this.selector(this.workers.keys());
   }
 }
 

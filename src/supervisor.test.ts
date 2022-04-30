@@ -461,10 +461,11 @@ describe('Unit: lib/supervisor', function () {
       sv.register('0', (_, s) => [s + ++cnt, 0], 0);
       sv.register('1', (_, s) => [s + ++cnt, 0], 1);
       sv.register('2', (_, s) => [s + ++cnt, 0], 2);
-      sv.call(undefined, 0, r => assert(r === 1));
-      sv.call(undefined, 0, r => assert(r === 3));
-      sv.call(undefined, 0, r => assert(r === 5));
-      sv.call(undefined, 0, r => void assert(r === 4) || done());
+      sv.call(() => [], 0, (r, e) => void assert(r === undefined) || void assert(e instanceof Error) || assert(cnt === 0 && ++cnt), 0);
+      sv.call(ns => ns, 0, r => assert(r === 2));
+      sv.call(ns => ns, 0, r => assert(r === 4));
+      sv.call(ns => ns, 0, r => assert(r === 6));
+      sv.call(ns => ns, 0, r => void assert(r === 5) || done());
     });
 
     it('select', function (done) {
