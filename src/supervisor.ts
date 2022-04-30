@@ -216,7 +216,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
   }
   public call(name: N | ((names: Iterable<N>) => Iterable<N>), param: P, timeout?: number): AtomicPromise<R>;
   public call(name: N | ((names: Iterable<N>) => Iterable<N>), param: P, callback: Supervisor.Callback<R>, timeout?: number): void;
-  public call(name: N | ((names: Iterable<N>) => Iterable<N>), param: P, callback: Supervisor.Callback<R> | number = this.settings.timeout, timeout = this.settings.timeout): AtomicPromise<R> | void {
+  public call(name: N | ((names: Iterable<N>) => Iterable<N>), param: P, callback?: Supervisor.Callback<R> | number, timeout = this.settings.timeout): AtomicPromise<R> | void {
     if (typeof callback !== 'function') return new AtomicPromise<R>((resolve, reject) =>
       void this.call(name, param, (err, result) => err ? reject(err) : resolve(result), callback));
     void this.throwErrorIfNotAvailable();
