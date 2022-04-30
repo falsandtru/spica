@@ -1,4 +1,4 @@
-import { bundle, aggregate, compile } from './arrow';
+import { bundle, aggregate, assemble } from './arrow';
 
 describe('Unit: lib/arrow', function () {
   describe('bundle', function () {
@@ -46,16 +46,16 @@ describe('Unit: lib/arrow', function () {
 
   });
 
-  describe('compile', function () {
+  describe('assemble', function () {
     it('', () => {
       assert.deepStrictEqual(
-        compile(
+        assemble(
           () => () => 0,
           () => () => 1,
         )()(),
         undefined);
       assert.deepStrictEqual(
-        compile(compile(
+        assemble(assemble(
           () => () => 0,
           () => () => 1,
         ))()(),

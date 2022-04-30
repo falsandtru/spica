@@ -24,11 +24,11 @@ export function aggregate<fs extends ((a?: unknown) => unknown)[]>(...fs: fs): (
   };
 }
 
-export function compile<fs extends ((this: undefined) => () => void)[]>(...fs: fs): () => () => undefined;
-export function compile<fs extends (() => () => void)[]>(...fs: fs): (this: Functions2Context<fs>) => () => undefined;
-export function compile<fs extends ((this: undefined, a?: unknown) => () => void)[]>(...fs: fs): (a: Intersect<Narrow<Functions2Parameters2<fs>>>) => () => undefined;
-export function compile<fs extends ((a?: unknown) => () => void)[]>(...fs: fs): (this: Functions2Context<fs>, a: Intersect<Narrow<Functions2Parameters2<fs>>>) => () => undefined;
-export function compile<fs extends ((a?: unknown) => () => void)[]>(...fs: fs): (this: Functions2Context<fs>, a: Intersect<Narrow<Functions2Parameters2<fs>>>) => () => undefined {
+export function assemble<fs extends ((this: undefined) => () => void)[]>(...fs: fs): () => () => undefined;
+export function assemble<fs extends (() => () => void)[]>(...fs: fs): (this: Functions2Context<fs>) => () => undefined;
+export function assemble<fs extends ((this: undefined, a?: unknown) => () => void)[]>(...fs: fs): (a: Intersect<Narrow<Functions2Parameters2<fs>>>) => () => undefined;
+export function assemble<fs extends ((a?: unknown) => () => void)[]>(...fs: fs): (this: Functions2Context<fs>, a: Intersect<Narrow<Functions2Parameters2<fs>>>) => () => undefined;
+export function assemble<fs extends ((a?: unknown) => () => void)[]>(...fs: fs): (this: Functions2Context<fs>, a: Intersect<Narrow<Functions2Parameters2<fs>>>) => () => undefined {
   return function (a) {
     const gs: (() => void)[] = [];
     try {
