@@ -362,11 +362,16 @@ describe('Unit: lib/supervisor', function () {
         sv.events.loss.once([''], ([, n]) => {
           assert(n === 1);
           assert(cnt === 2 && ++cnt);
-          done();
         });
+      });
+      sv.events.loss.once([undefined], ([, n]) => {
+        assert(n === 3);
+        assert(cnt === 4 && ++cnt);
+        done();
       });
       sv.call('', 1, (e, r) => void assert(r === undefined) || void assert(e instanceof Error) || assert(cnt === 3 && ++cnt), 100);
       sv.call('', 2, (e, r) => void assert(r === undefined) || void assert(e instanceof Error) || assert(cnt === 1 && ++cnt));
+      sv.call(() => [], 3, (e, r) => void assert(r === undefined) || void assert(e instanceof Error) || assert(cnt === 5 && ++cnt), 100);
     });
 
     it('timeout of processing', function (done) {
