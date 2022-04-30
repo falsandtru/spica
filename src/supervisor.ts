@@ -124,7 +124,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
   private alive = true;
   private available = true;
   private throwErrorIfNotAvailable(): void {
-    if (!this.available) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A supervisor is already terminated.`);
+    if (!this.available) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Cannot use terminated supervisors.`);
   }
   // Workaround for #36053
   public register(this: Supervisor<N, P, R, undefined>, name: N, process: Supervisor.Process.Function<P, R, S>, state?: S): (reason?: unknown) => boolean;
@@ -192,7 +192,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
         },
         state);
     }
-    if (this.workers.has(name)) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: Cannot register a process multiply with the same name.`);
+    if (this.workers.has(name)) throw new Error(`Spica: Supervisor: <${this.id}/${this.name}/${name}>: Cannot register another process with tha same name.`);
     void this.schedule();
     const worker: Worker<N, P, R, S> = new Worker(
       name,
@@ -234,7 +234,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       const name: N | undefined = names[Symbol.iterator]().next().value;
       void this.events_?.loss.emit([name], [name, param]);
       try {
-        void callback(new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A message overflowed.`), void 0);
+        void callback(new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Message overflowed.`), void 0);
       }
       catch (reason) {
         void causeAsyncException(reason);
@@ -348,12 +348,12 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
           reply =>
             void callback(void 0, reply),
           () =>
-            void callback(new Error(`Spica: Supervisor: A process has failed.`), void 0));
+            void callback(new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Process failed.`), void 0));
       }
       else {
         void this.events_?.loss.emit([name], [name, param]);
         try {
-          void callback(new Error(`Spica: Supervisor: A process has failed.`), void 0);
+          void callback(new Error(`Spica: Supervisor: <${this.id}/${this.name}>: Message expired.`), void 0);
         }
         catch (reason) {
           void causeAsyncException(reason);
