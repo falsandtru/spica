@@ -190,7 +190,7 @@ describe('Unit: lib/supervisor', function () {
       }, 0);
       assert(cnt === 0 && ++cnt);
       sv.call('', 1, (_, r) => void assert(TestSupervisor.status.processes === 1) || void assert(r === -1) || assert(cnt === 6 && ++cnt));
-      assert(sv.cast('', 2) === true);
+      assert(sv.cast('', 2));
       sv.call('', 3, (e, r) => void assert(r === undefined) || void assert(e instanceof Error) || assert(cnt === 10 && ++cnt));
       sv.call('', 4, (e, r) => void assert(r === undefined) || void assert(e instanceof Error) || void assert(cnt === 12 && ++cnt) || sv.terminate(), 100);
       assert(cnt === 4 && ++cnt);
@@ -432,8 +432,8 @@ describe('Unit: lib/supervisor', function () {
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
       });
       sv.events.loss.on([''], ([, param]) => assert(cnt === 0 && param === 2 && ++cnt));
-      sv.register('', n => void assert(sv.cast('', 2) === false) || void assert(n === 1) && void assert(cnt === 1 && ++cnt) || void tick(() => done()) || [0 , 0], 0);
-      assert(sv.cast('', 1) === true);
+      sv.register('', n => void assert(!sv.cast('', 2)) || void assert(n === 1) && void assert(cnt === 1 && ++cnt) || void tick(() => done()) || [0, 0], 0);
+      assert(sv.cast('', 1));
     });
 
     it('block async', function (done) {
