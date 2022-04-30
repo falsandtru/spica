@@ -234,7 +234,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       const name: N | undefined = names[Symbol.iterator]().next().value;
       void this.events_?.loss.emit([name], [name, param]);
       try {
-        void callback(void 0 as any, new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A message overflowed.`));
+        void callback(void 0, new Error(`Spica: Supervisor: <${this.id}/${this.name}>: A message overflowed.`));
       }
       catch (reason) {
         void causeAsyncException(reason);
@@ -344,7 +344,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       if (result === void 0) {
         void this.events_?.loss.emit([name], [name, param]);
         try {
-          void callback(void 0 as any, new Error(`Spica: Supervisor: A process has failed.`));
+          void callback(void 0, new Error(`Spica: Supervisor: A process has failed.`));
         }
         catch (reason) {
           void causeAsyncException(reason);
@@ -356,7 +356,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
             reply =>
               void callback(reply, void 0),
             () =>
-              void callback(void 0 as any, new Error(`Spica: Supervisor: A process has failed.`)));
+              void callback(void 0, new Error(`Spica: Supervisor: A process has failed.`)));
       }
     }
   }
@@ -380,7 +380,7 @@ export namespace Supervisor {
     export type Coroutine<P, R> = CoroutineInterface<R, R, P>;
     export type Result<R, S> = readonly [R, S];
   }
-  export type Callback<R> = (reply: R, error?: Error) => void;
+  export type Callback<R> = (..._: [reply: R, error: undefined] | [reply: undefined, error: Error]) => void;
   export namespace Event {
     export namespace Data {
       export type Init<N extends string, P, R, S> = readonly [N, Process.Regular<P, R, S>, S];

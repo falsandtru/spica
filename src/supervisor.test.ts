@@ -191,7 +191,7 @@ describe('Unit: lib/supervisor', function () {
         }
       }, 0);
       assert(cnt === 0 && ++cnt);
-      sv.call('', 1, r => void assert(TestSupervisor.status.processes === 1) || void assert(r === -1) || assert(cnt === 6 && ++cnt));
+      sv.call('', 1, (r, _) => void assert(TestSupervisor.status.processes === 1) || void assert(r === -1) || assert(cnt === 6 && ++cnt));
       assert(sv.cast('', 2) === true);
       sv.call('', 3, (r, e) => void assert(r === undefined) || void assert(e instanceof Error) || assert(cnt === 10 && ++cnt));
       sv.call('', 4, (r, e) => void assert(r === undefined) || void assert(e instanceof Error) || void assert(cnt === 12 && ++cnt) || sv.terminate(), 100);
@@ -218,8 +218,8 @@ describe('Unit: lib/supervisor', function () {
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
       });
       sv.register('', (n, s) => Promise.resolve([n + s, ++s]), 0);
-      sv.call('', 1, n => assert(n === 1));
-      sv.call('', 2, n => void assert(n === 3) || done(), 100);
+      sv.call('', 1, (n, _) => assert(n === 1));
+      sv.call('', 2, (n, _) => void assert(n === 3) || done(), 100);
     });
 
     it('exit', function (done) {
@@ -439,9 +439,9 @@ describe('Unit: lib/supervisor', function () {
       });
       sv.register('', n => new Promise(resolve => void setTimeout(() => void resolve([n, 0]), 100)), 0);
       sv.events.loss.on([''], ([, param]) => assert(cnt === 0 && param === 2 && ++cnt));
-      sv.call('', 1, r => void assert(r === 1) || assert(cnt === 2 && ++cnt), 1000);
+      sv.call('', 1, (r, _) => void assert(r === 1) || assert(cnt === 2 && ++cnt), 1000);
       sv.call('', 2, (r, e) => void assert(r === undefined) || void assert(e instanceof Error) || assert(cnt === 1 && ++cnt), 0);
-      sv.call('', 3, r => void assert(r === 3) || void assert(cnt === 3 && ++cnt) || done(), Infinity);
+      sv.call('', 3, (r, _) => void assert(r === 3) || void assert(cnt === 3 && ++cnt) || done(), Infinity);
     });
 
     it('scheduler', function (done) {
@@ -462,10 +462,10 @@ describe('Unit: lib/supervisor', function () {
       sv.register('1', (_, s) => [s + ++cnt, 0], 1);
       sv.register('2', (_, s) => [s + ++cnt, 0], 2);
       sv.call(() => [], 0, (r, e) => void assert(r === undefined) || void assert(e instanceof Error) || assert(cnt === 0 && ++cnt), 0);
-      sv.call(ns => ns, 0, r => assert(r === 2));
-      sv.call(ns => ns, 0, r => assert(r === 4));
-      sv.call(ns => ns, 0, r => assert(r === 6));
-      sv.call(ns => ns, 0, r => void assert(r === 5) || done());
+      sv.call(ns => ns, 0, (r, _) => assert(r === 2));
+      sv.call(ns => ns, 0, (r, _) => assert(r === 4));
+      sv.call(ns => ns, 0, (r, _) => assert(r === 6));
+      sv.call(ns => ns, 0, (r, _) => void assert(r === 5) || done());
     });
 
     it('select', function (done) {
@@ -475,10 +475,10 @@ describe('Unit: lib/supervisor', function () {
       sv.register('0', (_, s) => [s + ++cnt, 0], 0);
       sv.register('1', (_, s) => [s + ++cnt, 0], 1);
       sv.register('2', (_, s) => [s + ++cnt, 0], 2);
-      sv.call(ns => Sequence.from(ns).filter(n => n === '2'), 0, r => assert(r === 3));
-      sv.call(ns => Sequence.from(ns).filter(n => n === '1'), 0, r => assert(r === 5));
-      sv.call(ns => Sequence.from(ns).filter(n => n === '0'), 0, r => assert(r === 6));
-      sv.call(ns => ns, 0, r => void assert(r === 4) || done());
+      sv.call(ns => Sequence.from(ns).filter(n => n === '2'), 0, (r, _) => assert(r === 3));
+      sv.call(ns => Sequence.from(ns).filter(n => n === '1'), 0, (r, _) => assert(r === 5));
+      sv.call(ns => Sequence.from(ns).filter(n => n === '0'), 0, (r, _) => assert(r === 6));
+      sv.call(ns => ns, 0, (r, _) => void assert(r === 4) || done());
     });
 
     it('kill', function (done) {
