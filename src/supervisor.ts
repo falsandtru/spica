@@ -252,13 +252,14 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
   }
   public cast(name: N | ((names: Iterable<N>) => Iterable<N>), param: P, timeout = this.settings.timeout): boolean {
     void this.throwErrorIfNotAvailable();
-    let result: AtomicPromise<unknown> | undefined;
+    const expire = Date.now() + timeout;
+    let result: AtomicPromise<R> | undefined;
     for (name of typeof name === 'string' ? [name] : new NamePool(this.workers, name)) {
-      if (result = this.workers.get(name)?.call([param, Date.now() + timeout])) break;
+      if (result = this.workers.get(name)?.call([param, expire])) break;
     }
-    name = name as N;
     if (result) return true;
-    void this.events_?.loss.emit([name], [name, param]);
+    const n = typeof name === 'string' ? name : void 0;
+    void this.events_?.loss.emit([n], [n, param]);
     return false;
   }
   public refs(name?: N): [N, Supervisor.Process.Regular<P, R, S>, S, (reason?: unknown) => boolean][] {
@@ -333,6 +334,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       let result: AtomicPromise<R> | undefined;
       let name: N | undefined;
       for (name of typeof names === 'string' ? [names] : names) {
+        if (Date.now() > expiry) break;
         if (result = this.workers.get(name)?.call([param, expiry])) break;
       }
       if (!result && Date.now() < expiry) continue;
@@ -457,10 +459,9 @@ class Worker<N extends string, P, R, S> {
     }
   }
   public call([param, expiry]: [P, number]): AtomicPromise<R> | undefined {
-    const now = Date.now();
-    if (!this.available || now > expiry) return;
+    if (!this.available) return;
     return new AtomicPromise<Supervisor.Process.Result<R, S>>((resolve, reject) => {
-      isFinite(expiry) && void setTimeout(() => void reject(new Error()), expiry - now);
+      isFinite(expiry) && void setTimeout(() => void reject(new Error()), expiry - Date.now());
       assert(this.alive);
       assert(this.available);
       this.available = false;
