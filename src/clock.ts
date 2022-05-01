@@ -37,7 +37,7 @@ function run(): void {
   [index, queue, jobs] = [0, jobs, queue];
   for (let i = 0; i < count; ++i) {
     try {
-      jobs[i]!();
+      (void 0, jobs[i]!)();
       // Release the reference.
       jobs[i] = void 0;
     }
