@@ -89,14 +89,14 @@ export type Tails<as extends readonly unknown[]> =
   number extends as['length'] ? never :
   as extends readonly [] ? [] :
   as | Tails<Tail<as>>;
-export type Reverse<as extends readonly unknown[]> =
-  as extends readonly [infer head, ...infer as, infer last] ? [last, ...Reverse<as>, head] :
-  as;
-export type Member<a, as extends readonly unknown[]> = Index<a, as> extends -1 ? false : true;
 export type Index<a, as extends readonly unknown[]> = Idx<a, as, []>;
 type Idx<a, as extends readonly unknown[], bs extends readonly void[]> =
   TEq<Readonly<as>, Readonly<Tail<as> | as>> extends true ? -1 :
   If<TEq<as[0], a>, bs['length'], Idx<a, Tail<as>, [void, ...bs]>>;
+export type Member<a, as extends readonly unknown[]> = Index<a, as> extends -1 ? false : true;
+export type Reverse<as extends readonly unknown[]> =
+  as extends readonly [infer a, ...infer as] ? [...Reverse<as>, a] :
+  as;
 
 export type Rewrite<T, R extends [unknown, unknown]> =
   [T] extends [never]

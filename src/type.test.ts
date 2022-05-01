@@ -2,7 +2,7 @@ import {
   Not, And, Or,
   IsNever, IsVoid, IsAny, IsUnknown,
   Eq, TEq, DEq, If, Case,
-  Head, Tail, Init, Last, Inits, Tails, Reverse, Member, Index,
+  Head, Tail, Init, Last, Inits, Tails, Index, Member, Reverse,
   Rewrite, ExactRewrite, ExactExtract, ExactExclude,
   ValueOf, IndexOf,
   Type, StrictType,
@@ -260,13 +260,16 @@ describe('Unit: lib/type', () => {
 
   });
 
-  describe('Reverse', () => {
+  describe('Index', () => {
     it('', () => {
-      assert((): true => true as TEq<Reverse<[]>, []>);
-      assert((): true => true as TEq<Reverse<[0]>, [0]>);
-      assert((): true => true as TEq<Reverse<[0, 1]>, [1, 0]>);
-      assert((): true => true as TEq<Reverse<[0, 1, 2]>, [2, 1, 0]>);
-      assert((): true => true as TEq<Reverse<number[]>, number[]>);
+      assert((): true => true as TEq<Index<0, []>, -1>);
+      assert((): true => true as TEq<Index<0, [0]>, 0>);
+      assert((): true => true as TEq<Index<0, [0, 1]>, 0>);
+      assert((): true => true as TEq<Index<1, [0, 1]>, 1>);
+      assert((): true => true as TEq<Index<2, [0, 1]>, -1>);
+      assert((): true => true as TEq<Index<0, 0[]>, -1>);
+      assert((): true => true as TEq<Index<0, 1[]>, -1>);
+      assert((): true => true as TEq<Index<0, [0, ...0[]]>, 0>);
     });
 
   });
@@ -284,16 +287,13 @@ describe('Unit: lib/type', () => {
 
   });
 
-  describe('Index', () => {
+  describe('Reverse', () => {
     it('', () => {
-      assert((): true => true as TEq<Index<0, []>, -1>);
-      assert((): true => true as TEq<Index<0, [0]>, 0>);
-      assert((): true => true as TEq<Index<0, [0, 1]>, 0>);
-      assert((): true => true as TEq<Index<1, [0, 1]>, 1>);
-      assert((): true => true as TEq<Index<2, [0, 1]>, -1>);
-      assert((): true => true as TEq<Index<0, 0[]>, -1>);
-      assert((): true => true as TEq<Index<0, 1[]>, -1>);
-      assert((): true => true as TEq<Index<0, [0, ...0[]]>, 0>);
+      assert((): true => true as TEq<Reverse<[]>, []>);
+      assert((): true => true as TEq<Reverse<[0]>, [0]>);
+      assert((): true => true as TEq<Reverse<[0, 1]>, [1, 0]>);
+      assert((): true => true as TEq<Reverse<[0, 1, 2]>, [2, 1, 0]>);
+      assert((): true => true as TEq<Reverse<number[]>, number[]>);
     });
 
   });
