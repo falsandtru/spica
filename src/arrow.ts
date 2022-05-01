@@ -35,7 +35,7 @@ export function assemble<fs extends ((a?: unknown) => () => void)[]>(...fs: fs):
       for (let i = 0; i < fs.length; ++i) {
         gs.push(fs[i].call(this, a));
       }
-      return singleton(() => cancel(gs));
+      return singleton(() => void cancel(gs));
     }
     catch (reason) {
       cancel(gs);
@@ -44,7 +44,7 @@ export function assemble<fs extends ((a?: unknown) => () => void)[]>(...fs: fs):
   };
 }
 
-function cancel(cancellers: readonly (() => void)[]): undefined {
+function cancel(cancellers: readonly (() => void)[]): unknown[] {
   const reasons = [];
   for (let i = 0; i < cancellers.length; ++i) {
     try {
@@ -54,8 +54,5 @@ function cancel(cancellers: readonly (() => void)[]): undefined {
       reasons.push(reason);
     }
   }
-  if (reasons.length > 0) {
-    throw new AggregateError(reasons);
-  }
-  return;
+  return reasons;
 }
