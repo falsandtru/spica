@@ -15,6 +15,9 @@ describe('Unit: lib/arrow', function () {
       assert.deepStrictEqual(
         bundle(a, b, c, s => s)('1', 2, undefined, ''),
         ['1', 4, undefined, '']);
+      assert.deepStrictEqual(
+        bundle(c, c)(undefined, undefined),
+        [undefined, undefined]);
     });
 
   });
@@ -23,7 +26,8 @@ describe('Unit: lib/arrow', function () {
     it('', () => {
       const a = (s: string) => s;
       const b = (s: '1') => s.length * 2;
-      const c = () => undefined;
+      const c = (_?: '1') => undefined;
+      const d = () => undefined;
       assert.deepStrictEqual(
         aggregate(a)(''),
         ['']);
@@ -31,11 +35,14 @@ describe('Unit: lib/arrow', function () {
         aggregate(a, b)('1'),
         ['1', 2]);
       assert.deepStrictEqual(
-        aggregate(a, b, c, s => s)('1'),
-        ['1', 2, undefined, '1']);
+        aggregate(a, b, c, d, s => s)('1'),
+        ['1', 2, undefined, undefined, '1']);
       assert.deepStrictEqual(
-        aggregate(c, c)(),
+        aggregate(c, d)(),
         [undefined, undefined]);
+      assert.deepStrictEqual(
+        aggregate(c, a)('1'),
+        [undefined, '1']);
       assert.deepStrictEqual(
         aggregate(...aggregate(
           () => () => 0,
