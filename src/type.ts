@@ -6,17 +6,25 @@ type Unique = typeof Unique;
 declare const Unique: unique symbol;
 
 export type Not<T extends boolean> = T extends true ? false : true;
-export type And<T, U> = [T] extends [Falsy] ? T : U;
-export type Or<T, U> = [T] extends [Falsy] ? U : T;
+export type And<TS extends readonly unknown[]> =
+  TS extends readonly [] ? never :
+  TS extends readonly [infer T1] ? T1 :
+  TS extends readonly [infer T1, ...infer TS] ? [T1] extends [Falsy] ? T1 : And<TS> :
+  never;
+export type Or<TS extends readonly unknown[]> =
+  TS extends readonly [] ? never :
+  TS extends readonly [infer T1] ? T1 :
+  TS extends readonly [infer T1, ...infer TS] ? [T1] extends [Falsy] ? Or<TS> : T1 :
+  never;
 
 export type IsNever<T> = [T] extends [never] ? true : false;
-export type IsVoid<T> = [void] extends [T] ? Not<Or<IsAny<T>, IsUnknown<T>>> : false;
+export type IsVoid<T> = [void] extends [T] ? Not<Or<[IsAny<T>, IsUnknown<T>]>> : false;
 export type IsAny<T> = [T] extends [Unique] ? Not<IsNever<T>> : false;
 export type IsUnknown<T> = [T] extends [Unique | {} | void | null] ? false : true;
 
 export type Eq<T, U> =
   // Exclude never type from T and U.
-  Or<IsNever<T>, IsNever<U>> extends true ? And<IsNever<T>, IsNever<U>> :
+  Or<[IsNever<T>, IsNever<U>]> extends true ? And<[IsNever<T>, IsNever<U>]> :
   // T and U below are a type except never.
   // Distribute U.
   U extends never
@@ -25,7 +33,7 @@ export type Eq<T, U> =
   // Compare distributed T and U.
   T extends U ? U extends T ? true : false : false;
 export type TEq<T, U> =
-  Or<IsAny<T>, IsAny<U>> extends true ? And<IsAny<T>, IsAny<U>> :
+  Or<[IsAny<T>, IsAny<U>]> extends true ? And<[IsAny<T>, IsAny<U>]> :
   [T] extends [U] ? [U] extends [T] ? true : false : false;
 export type If<S, T, U> = S extends Falsy ? U : T;
 export type Case<T extends keyof U, U extends {}> = U[T];
@@ -41,20 +49,12 @@ interface NondeterminateTypeMap {
   boolean: boolean;
 }
 
-export type Narrow<TS extends readonly unknown[]> =
+export type Narrow<TS extends readonly unknown[]> = Narrow_<Filter<TS, [any, never]>, []>;
+type Narrow_<TS extends readonly unknown[], US extends TS[number][]> =
   TS extends readonly [] ? [] :
-  TS extends readonly [infer T] ? [T] :
-  TS extends readonly [infer T1, infer T2, ...infer TS] ?
-    Or<IsNever<T1>, IsNever<T2>> extends true ? Narrow<[T1 | T2, ...TS]> :
-    IsAny<T1> extends true ? Narrow<[T2, ...TS]> :
-    IsAny<T2> extends true ? Narrow<[T1, ...TS]> :
-    [T1] extends [T2]
-      ? [T2] extends [T1]
-        ? Narrow<[T1 & T2, ...TS]>
-        : Narrow<[T1, ...TS]>
-      : [T2] extends [T1]
-        ? Narrow<[T2, ...TS]>
-        : [T1, ...Narrow<[T2, ...TS]>] :
+  TS extends readonly [infer T1, ...infer TS] ?
+  [Extract<TS[number] | US[number], T1>] extends [never] ? [T1, ...Narrow_<TS, [T1, ...US]>] :
+  Narrow_<TS, [T1, ...US]> :
   never;
 export type Intersect<TS extends readonly unknown[]> =
   TS extends readonly [] ? never :
@@ -97,6 +97,18 @@ export type Member<a, as extends readonly unknown[]> = Index<a, as> extends -1 ?
 export type Reverse<as extends readonly unknown[]> =
   as extends readonly [infer a, ...infer as] ? [...Reverse<as>, a] :
   as;
+export type Filter<TS extends readonly unknown[], ES extends readonly unknown[] = []> =
+  TS extends readonly [] ? [] :
+  TS extends readonly [infer T1, ...infer TS] ?
+  If<Member<T1, ES>, Filter<TS, ES>, [T1, ...Filter<TS, ES>]> :
+  If<Member<TS[number], ES>, ExactExclude<TS[number], ES[number]>[], TS>;
+export type TupleIndex<as extends readonly unknown[]> =
+  number extends as['length'] ? number :
+  as extends [unknown, ...infer as] ? TupleIdx<as> :
+  never;
+type TupleIdx<as extends readonly unknown[], bs extends readonly unknown[] = as extends [unknown, ...infer bs] ? bs : never> =
+  bs extends readonly unknown[] ? bs['length'] | TupleIdx<bs> :
+  never;
 
 export type Rewrite<T, R extends [unknown, unknown]> =
   [T] extends [never]
@@ -150,7 +162,7 @@ export type ExtractProp<T, V> =
 export type DeepExtractProp<T, V, E = never> =
   T extends E ? never :
   T extends V ? T :
-  Or<IsAny<T>, IsUnknown<T>> extends true ? T :
+  Or<[IsAny<T>, IsUnknown<T>]> extends true ? T :
   T extends readonly unknown[] | Function ? never :
   T extends object ? ExcludeProp<{ [Q in { [P in keyof T]: If<TEq<V, never>, T[P] extends never ? P : never, T[P] extends V | object ? T[P] extends E ? never : P : never>; }[keyof T]]: ExactExclude<DeepExtractProp<T[Q], V, E>, {}>; }, never> :
   never;
@@ -160,7 +172,7 @@ export type DeepExcludeProp<T, V, E = never> =
   T extends E ? T :
   T extends V ? never :
   T extends readonly unknown[] | Function ? T :
-  Or<IsAny<T>, IsUnknown<T>> extends true ? T :
+  Or<[IsAny<T>, IsUnknown<T>]> extends true ? T :
   T extends object ? ExcludeProp<{ [Q in { [P in keyof T]: If<TEq<V, never>, T[P] extends never ? P : P, If<Includes<T[P], V>, T[P] extends E ? P : never, P>>; }[keyof T]]: ExactExclude<DeepExcludeProp<T[Q], V, E>, {}>; }, never> :
   T;
 export type RewriteProp<T, R extends [unknown, unknown]> =
@@ -169,35 +181,35 @@ export type DeepRewriteProp<T, R extends [unknown, unknown], E = never> =
   [T] extends [never] ? Rewrite<T, R> :
   T extends E ? T :
   true extends (R extends never ? never : T extends R[0] ? true : never) ? Rewrite<T, R> :
-  Or<IsAny<T>, IsUnknown<T>> extends true ? T :
+  Or<[IsAny<T>, IsUnknown<T>]> extends true ? T :
   T extends readonly unknown[] | Function ? T :
   T extends object ? ExcludeProp<{ [P in keyof T]: DeepRewriteProp<T[P], R, E>; }, never> :
   T;
 type Includes<T, U> = true extends (T extends U ? true : never) ? true : false;
 
 export type Partial<T> =
-  Or<IsAny<T>, IsUnknown<T>> extends true ? T :
+  Or<[IsAny<T>, IsUnknown<T>]> extends true ? T :
   { [P in keyof T]+?: T[P]; };
 export type DeepPartial<T, E = readonly unknown[]> =
-  Or<IsAny<T>, IsUnknown<T>> extends true ? T :
+  Or<[IsAny<T>, IsUnknown<T>]> extends true ? T :
   T extends E | Function ? T :
   { [P in keyof T]+?: DeepPartial<T[P], E>; };
 export type Required<T> =
-  Or<IsAny<T>, IsUnknown<T>> extends true ? T :
+  Or<[IsAny<T>, IsUnknown<T>]> extends true ? T :
   { [P in keyof T]-?: T[P]; };
 export type DeepRequired<T, E = readonly unknown[]> =
-  Or<IsAny<T>, IsUnknown<T>> extends true ? T :
+  Or<[IsAny<T>, IsUnknown<T>]> extends true ? T :
   T extends E | Function ? T :
   { [P in keyof T]-?: DeepRequired<T[P], E>; };
 export type Immutable<T> =
-  Or<IsAny<T>, IsUnknown<T>> extends true ? T :
+  Or<[IsAny<T>, IsUnknown<T>]> extends true ? T :
   T extends ReadonlySet<infer V> ? ReadonlySet<V> :
   T extends ReadonlyMap<infer K, infer V> ? ReadonlyMap<K, V> :
   T extends ReadonlyArray<infer V> ? TEq<T, V[]> extends true ? readonly V[] :
   { readonly [P in keyof T]: T[P]; } :
   { readonly [P in keyof T]: T[P]; };
 export type DeepImmutable<T, E = never> =
-  Or<IsAny<T>, IsUnknown<T>> extends true ? T :
+  Or<[IsAny<T>, IsUnknown<T>]> extends true ? T :
   T extends E | Function ? T :
   T extends ReadonlySet<infer V> ? ReadonlySet<V> :
   T extends ReadonlyMap<infer K, infer V> ? ReadonlyMap<K, V> :
@@ -205,14 +217,14 @@ export type DeepImmutable<T, E = never> =
   { readonly [P in keyof T]: DeepImmutable<T[P], E>; } :
   { readonly [P in keyof T]: DeepImmutable<T[P], E>; };
 export type Mutable<T> =
-  Or<IsAny<T>, IsUnknown<T>> extends true ? T :
+  Or<[IsAny<T>, IsUnknown<T>]> extends true ? T :
   T extends ReadonlySet<infer V> ? Set<V> :
   T extends ReadonlyMap<infer K, infer V> ? Map<K, V> :
   T extends ReadonlyArray<infer V> ? TEq<T, readonly V[]> extends true ? V[] :
   { -readonly [P in keyof T]: T[P]; } :
   { -readonly [P in keyof T]: T[P]; };
 export type DeepMutable<T, E = never> =
-  Or<IsAny<T>, IsUnknown<T>> extends true ? T :
+  Or<[IsAny<T>, IsUnknown<T>]> extends true ? T :
   T extends E | Function ? T :
   T extends ReadonlySet<infer V> ? Set<V> :
   T extends ReadonlyMap<infer K, infer V> ? Map<K, V> :

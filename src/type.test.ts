@@ -2,7 +2,8 @@ import {
   Not, And, Or,
   IsNever, IsVoid, IsAny, IsUnknown,
   Eq, TEq, DEq, If, Case,
-  Head, Tail, Init, Last, Inits, Tails, Index, Member, Reverse,
+  Narrow, Intersect,
+  Head, Tail, Init, Last, Inits, Tails, Index, Member, Reverse, Filter,
   Rewrite, ExactRewrite, ExactExtract, ExactExclude,
   ValueOf, IndexOf,
   Type, StrictType,
@@ -23,35 +24,35 @@ describe('Unit: lib/type', () => {
 
   describe('And', () => {
     it('', () => {
-      assert((): true => true as TEq<And<true, true>, true>);
-      assert((): true => true as TEq<And<true, false>, false>);
-      assert((): true => true as TEq<And<false, true>, false>);
-      assert((): true => true as TEq<And<false, false>, false>);
-      assert((): true => true as TEq<And<true, undefined>, undefined>);
-      assert((): true => true as TEq<And<false, undefined>, false>);
-      assert((): true => true as TEq<And<undefined, true>, undefined>);
-      assert((): true => true as TEq<And<undefined, false>, undefined>);
-      assert((): true => true as TEq<And<0, 1>, 0>);
-      assert((): true => true as TEq<And<'', 1>, ''>);
-      assert((): true => true as TEq<And<null, 1>, null>);
-      assert((): true => true as TEq<And<void, 1>, void>);
-      assert((): true => true as TEq<And<never, 1>, never>);
-      assert((): true => true as TEq<And<0, never>, 0>);
-      assert((): true => true as TEq<And<1, never>, never>);
+      assert((): true => true as TEq<And<[true, true]>, true>);
+      assert((): true => true as TEq<And<[true, false]>, false>);
+      assert((): true => true as TEq<And<[false, true]>, false>);
+      assert((): true => true as TEq<And<[false, false]>, false>);
+      assert((): true => true as TEq<And<[true, undefined]>, undefined>);
+      assert((): true => true as TEq<And<[false, undefined]>, false>);
+      assert((): true => true as TEq<And<[undefined, true]>, undefined>);
+      assert((): true => true as TEq<And<[undefined, false]>, undefined>);
+      assert((): true => true as TEq<And<[0, 1]>, 0>);
+      assert((): true => true as TEq<And<['', 1]>, ''>);
+      assert((): true => true as TEq<And<[null, 1]>, null>);
+      assert((): true => true as TEq<And<[void, 1]>, void>);
+      assert((): true => true as TEq<And<[never, 1]>, never>);
+      assert((): true => true as TEq<And<[0, never]>, 0>);
+      assert((): true => true as TEq<And<[1, never]>, never>);
     });
 
   });
 
   describe('Or', () => {
     it('', () => {
-      assert((): true => true as TEq<Or<true, true>, true>);
-      assert((): true => true as TEq<Or<true, false>, true>);
-      assert((): true => true as TEq<Or<false, true>, true>);
-      assert((): true => true as TEq<Or<false, false>, false>);
-      assert((): true => true as TEq<Or<never, true>, true>);
-      assert((): true => true as TEq<Or<never, false>, false>);
-      assert((): true => true as TEq<Or<true, never>, true>);
-      assert((): true => true as TEq<Or<false, never>, never>);
+      assert((): true => true as TEq<Or<[true, true]>, true>);
+      assert((): true => true as TEq<Or<[true, false]>, true>);
+      assert((): true => true as TEq<Or<[false, true]>, true>);
+      assert((): true => true as TEq<Or<[false, false]>, false>);
+      assert((): true => true as TEq<Or<[never, true]>, true>);
+      assert((): true => true as TEq<Or<[never, false]>, false>);
+      assert((): true => true as TEq<Or<[true, never]>, true>);
+      assert((): true => true as TEq<Or<[false, never]>, never>);
     });
 
   });
@@ -194,6 +195,39 @@ describe('Unit: lib/type', () => {
 
   });
 
+  describe('Narrow', () => {
+    it('', () => {
+      assert((): true => true as TEq<Narrow<[]>, []>);
+      assert((): true => true as TEq<Narrow<[any]>, []>);
+      assert((): true => true as TEq<Narrow<[never]>, []>);
+      assert((): true => true as TEq<Narrow<[unknown]>, [unknown]>);
+      assert((): true => true as TEq<Narrow<[void]>, [void]>);
+      assert((): true => true as TEq<Narrow<[void, undefined]>, [undefined]>);
+      assert((): true => true as TEq<Narrow<[0]>, [0]>);
+      assert((): true => true as TEq<Narrow<[0, any]>, [0]>);
+      assert((): true => true as TEq<Narrow<[0, never]>, [0]>);
+      assert((): true => true as TEq<Narrow<[0, unknown]>, [0]>);
+      assert((): true => true as TEq<Narrow<[0, void]>, [0, void]>);
+      assert((): true => true as TEq<Narrow<[0, undefined]>, [0, undefined]>);
+      assert((): true => true as TEq<Narrow<[0, 1]>, [0, 1]>);
+      assert((): true => true as TEq<Narrow<[0, number]>, [0]>);
+      assert((): true => true as TEq<Narrow<[0, number]>, [0]>);
+      assert((): true => true as TEq<Narrow<[0, string, number]>, [0, string]>);
+      assert((): true => true as TEq<Narrow<[number, string, 0]>, [string, 0]>);
+    });
+
+  });
+
+  describe('Intersect', () => {
+    it('', () => {
+      assert((): true => true as TEq<Intersect<[]>, never>);
+      assert((): true => true as TEq<Intersect<[0]>, 0>);
+      assert((): true => true as TEq<Intersect<[0, 1]>, never>);
+      assert((): true => true as TEq<Intersect<[0, number]>, 0>);
+    });
+
+  });
+
   describe('Head', () => {
     it('', () => {
       assert((): true => true as TEq<Head<[]>, never>);
@@ -294,6 +328,29 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Reverse<[0, 1]>, [1, 0]>);
       assert((): true => true as TEq<Reverse<[0, 1, 2]>, [2, 1, 0]>);
       assert((): true => true as TEq<Reverse<number[]>, number[]>);
+    });
+
+  });
+
+  describe('Filter', () => {
+    it('', () => {
+      assert((): true => true as TEq<Filter<[], []>, []>);
+      assert((): true => true as TEq<Filter<[], [0]>, []>);
+      assert((): true => true as TEq<Filter<[0], []>, [0]>);
+      assert((): true => true as TEq<Filter<[0], [0]>, []>);
+      assert((): true => true as TEq<Filter<[0], [1]>, [0]>);
+      assert((): true => true as TEq<Filter<[0, 1], []>, [0, 1]>);
+      assert((): true => true as TEq<Filter<[0, 1], [0]>, [1]>);
+      assert((): true => true as TEq<Filter<[0, 1], [1]>, [0]>);
+      assert((): true => true as TEq<Filter<[0, 1], [0, 1]>, []>);
+      assert((): true => true as TEq<Filter<[0, 1, 2], []>, [0, 1, 2]>);
+      assert((): true => true as TEq<Filter<[0, 1, 2], [1]>, [0, 2]>);
+      assert((): true => true as TEq<Filter<0[], []>, 0[]>);
+      assert((): true => true as TEq<Filter<0[], [0]>, never[]>);
+      assert((): true => true as TEq<Filter<[0, ...0[]], []>, [0, ...0[]]>);
+      assert((): true => true as TEq<Filter<[0, ...0[]], [0]>, never[]>);
+      assert((): true => true as TEq<Filter<[0, ...1[]], [0]>, 1[]>);
+      assert((): true => true as TEq<Filter<[0, ...1[]], [1]>, [0, ...never[]]>);
     });
 
   });
