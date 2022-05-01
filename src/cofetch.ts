@@ -1,3 +1,5 @@
+/// <reference lib="DOM" />
+/// <reference lib="DOM.Iterable" />
 import { location } from './global';
 import { ObjectKeys } from './alias';
 import { Coroutine } from './coroutine';

@@ -3,9 +3,7 @@
     "target": "ES2019",
     "lib": [
       "ES2019",
-      "ES2021.Promise",
-      "DOM",
-      "DOM.Iterable"
+      "ES2021.Promise"
     ],
     "module": "commonjs",
     "moduleResolution": "node",
