@@ -1,6 +1,6 @@
 import { noop } from './noop';
 
-export function singleton<f extends (..._: unknown[]) => unknown>(f: f): f {
+export function singleton<f extends (...args: unknown[]) => unknown>(f: f): f {
   let result: unknown;
   return function (this: unknown, ...as) {
     if (f === noop) return result;

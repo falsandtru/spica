@@ -378,7 +378,7 @@ export namespace Supervisor {
     export type Coroutine<P, R> = CoroutineInterface<R, R, P>;
     export type Result<R, S> = readonly [R, S];
   }
-  export type Callback<R> = (..._: [error: undefined, reply: R] | [error: Error, reply: undefined]) => void;
+  export type Callback<R> = (...args: [error: undefined, reply: R] | [error: Error, reply: undefined]) => void;
   export namespace Event {
     export namespace Data {
       export type Init<N extends string, P, R, S> = readonly [N, Process.Regular<P, R, S>, S];
