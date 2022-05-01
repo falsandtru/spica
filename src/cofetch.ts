@@ -1,5 +1,3 @@
-/// <reference lib="DOM" />
-/// <reference lib="DOM.Iterable" />
 import { location } from './global';
 import { ObjectKeys } from './alias';
 import { Coroutine } from './coroutine';
@@ -124,9 +122,8 @@ function fetch(xhr: XMLHttpRequest, url: string, opts: CofetchOptions): void {
       case 'cache':
         continue;
       case 'headers':
-        for (const [name, value] of opts.headers || []) {
-          void xhr.setRequestHeader(name, value);
-        }
+        void opts.headers?.forEach(([name, value]) =>
+          void xhr.setRequestHeader(name, value));
         continue;
       default:
         if (key in xhr) xhr[key] = opts[key];
