@@ -1,4 +1,3 @@
-import { Set } from './global';
 import { singleton } from './function';
 import { noop } from './noop';
 import { AtomicPromise } from './promise';
@@ -55,19 +54,29 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
   }
   public get promise(): <T>(val: T) => AtomicPromise<T> {
     return <T>(val: T): AtomicPromise<T> =>
-      this[internal].promise(val);
+      this.cancelled
+        ? AtomicPromise.reject(this[internal].reason)
+        : AtomicPromise.resolve(val);
   }
   public get maybe(): <T>(val: T) => Maybe<T> {
     return <T>(val: T): Maybe<T> =>
-      this[internal].maybe(val);
+      Just(val)
+        .bind(val =>
+          this.cancelled
+            ? Nothing
+            : Just(val));
   }
   public get either(): <R>(val: R) => Either<L, R> {
     return <R>(val: R): Either<L, R> =>
-      this[internal].either(val);
+      Right<L, R>(val)
+        .bind(val =>
+          this.cancelled
+            ? Left(this[internal].reason!)
+            : Right(val));
   }
 }
 
-class Internal<L> implements Canceller<L>, Cancellee<L> {
+class Internal<L> {
   constructor(
     public resolve: (reason: L | PromiseLike<never>) => void,
   ) {
@@ -78,14 +87,16 @@ class Internal<L> implements Canceller<L>, Cancellee<L> {
   public get cancelled(): boolean {
     return 'reason' in this;
   }
-  public readonly listeners: Set<Listener<L>> = new Set();
+  public readonly listeners: (Listener<L> | undefined)[] = [];
   public register(listener: Listener<L>): () => void {
     if (!this.alive) {
       this.cancelled && handler(this.reason!);
       return noop;
     }
-    this.listeners.add(handler);
-    return singleton(() => void this.listeners.delete(handler));
+    const i = this.listeners.push(handler) - 1;
+    return singleton(() => {
+      this.listeners[i] = void 0;
+    });
 
     function handler(reason: L): void {
       try {
@@ -101,7 +112,7 @@ class Internal<L> implements Canceller<L>, Cancellee<L> {
     this.available = false;
     this.reason = reason!;
     for (const listener of this.listeners) {
-      listener(reason!);
+      listener?.(reason!);
     }
     this.resolve(this.reason!);
     this.alive = false;
@@ -111,24 +122,5 @@ class Internal<L> implements Canceller<L>, Cancellee<L> {
     this.available = false;
     this.resolve(AtomicPromise.reject(reason));
     this.alive = false;
-  }
-  public promise<T>(val: T): AtomicPromise<T> {
-    return this.cancelled
-      ? AtomicPromise.reject(this.reason)
-      : AtomicPromise.resolve(val);
-  }
-  public maybe<T>(val: T): Maybe<T> {
-    return Just(val)
-      .bind(val =>
-        this.cancelled
-          ? Nothing
-          : Just(val));
-  }
-  public either<R>(val: R): Either<L, R> {
-    return Right<L, R>(val)
-      .bind(val =>
-        this.cancelled
-          ? Left(this.reason!)
-          : Right(val));
   }
 }
