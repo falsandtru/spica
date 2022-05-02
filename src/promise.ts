@@ -21,7 +21,7 @@ type Status<T> =
       readonly reason: unknown;
     };
 
-const internal = Symbol.for('spica/promise::internal');
+export const internal = Symbol.for('spica/promise::internal');
 
 interface AtomicPromiseLike<T> {
   readonly [internal]: Internal<T>;
