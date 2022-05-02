@@ -1,6 +1,7 @@
 import { singleton } from './function';
 import { noop } from './noop';
-import { AtomicPromise } from './promise';
+import { AtomicPromise, Internal as PromiseInternal, internal as promiseinternal } from './promise';
+import { AtomicFuture } from './future';
 import { causeAsyncException } from './exception';
 import { Maybe, Just, Nothing } from './maybe';
 import { Either, Left, Right } from './either';
@@ -12,7 +13,7 @@ export interface Canceller<L = undefined> {
   };
   readonly close: (reason?: unknown) => void;
 }
-export interface Cancellee<L = undefined> {
+export interface Cancellee<L = undefined> extends Promise<L> {
   readonly alive: boolean;
   readonly cancelled: boolean;
   readonly register: (listener: Listener<L>) => () => void;
@@ -24,21 +25,22 @@ type Listener<L> = (reason: L) => void;
 
 const internal = Symbol.for('spica/cancellation::internal');
 
-export class Cancellation<L = undefined> extends AtomicPromise<L> implements Canceller<L>, Cancellee<L> {
+export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, AtomicPromise<L> {
+  public readonly [Symbol.toStringTag] = 'Promise';
   constructor(cancellees: Iterable<Cancellee<L>> = []) {
-    super(res => resolve = res);
-    var resolve!: (v: L | PromiseLike<never>) => void;
-    this[internal] = new Internal(resolve);
     for (const cancellee of cancellees) {
       cancellee.register(this.cancel);
     }
   }
-  public readonly [internal]: Internal<L>;
+  public readonly [internal]: Internal<L> = new Internal();
+  public get [promiseinternal](): PromiseInternal<L> {
+    return this[internal].promise[promiseinternal];
+  }
   public get alive(): boolean {
     return this[internal].alive;
   }
   public get cancelled(): boolean {
-    return this[internal].cancelled;
+    return this[internal].reason.length === 1;
   }
   public get register(): (listener: Listener<L>) => () => void {
     return (listener: Listener<L>) =>
@@ -52,10 +54,19 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
     return (reason?: unknown) =>
       this[internal].close(reason);
   }
+  public get then(): AtomicPromise<L>['then'] {
+    return this[internal].promise.then;
+  }
+  public get catch(): AtomicPromise<L>['catch'] {
+    return this[internal].promise.catch;
+  }
+  public get finally(): AtomicPromise<L>['finally'] {
+    return this[internal].promise.finally;
+  }
   public get promise(): <T>(val: T) => AtomicPromise<T> {
     return <T>(val: T): AtomicPromise<T> =>
       this.cancelled
-        ? AtomicPromise.reject(this[internal].reason)
+        ? AtomicPromise.reject(this[internal].reason[0])
         : AtomicPromise.resolve(val);
   }
   public get maybe(): <T>(val: T) => Maybe<T> {
@@ -71,26 +82,31 @@ export class Cancellation<L = undefined> extends AtomicPromise<L> implements Can
       Right<L, R>(val)
         .bind(val =>
           this.cancelled
-            ? Left(this[internal].reason!)
+            ? Left(this[internal].reason[0] as L)
             : Right(val));
   }
 }
 
 class Internal<L> {
-  constructor(
-    public resolve: (reason: L | PromiseLike<never>) => void,
-  ) {
-  }
   public alive: boolean = true;
-  public available: boolean = true;
-  public reason?: L;
-  public get cancelled(): boolean {
-    return 'reason' in this;
+  public reason: [] | [L] | [void, unknown] = [];
+  public future?: AtomicFuture<L>;
+  public get promise(): AtomicPromise<L> {
+    if (!this.future) {
+      this.future = new AtomicFuture<L>();
+      switch (this.reason.length) {
+        case 1:
+          return this.future.bind(this.reason[0]);
+        case 2:
+          return this.future.bind(AtomicPromise.reject(this.reason[1]));
+      }
+    }
+    return this.future;
   }
   public readonly listeners: (Listener<L> | undefined)[] = [];
   public register(listener: Listener<L>): () => void {
     if (!this.alive) {
-      this.cancelled && handler(this.reason!);
+      this.reason.length === 1 && handler(this.reason[0]);
       return noop;
     }
     const i = this.listeners.push(handler) - 1;
@@ -100,7 +116,7 @@ class Internal<L> {
 
     function handler(reason: L): void {
       try {
-        listener(reason!);
+        listener(reason);
       }
       catch (reason) {
         causeAsyncException(reason);
@@ -108,19 +124,18 @@ class Internal<L> {
     }
   }
   public cancel(reason?: L): void {
-    if (!this.available) return;
-    this.available = false;
-    this.reason = reason!;
+    if (this.reason.length !== 0) return;
+    this.reason = [reason!];
     for (const listener of this.listeners) {
       listener?.(reason!);
     }
-    this.resolve(this.reason!);
+    this.future?.bind(reason!);
     this.alive = false;
   }
   public close(reason?: unknown): void {
-    if (!this.available) return;
-    this.available = false;
-    this.resolve(AtomicPromise.reject(reason));
+    if (this.reason.length !== 0) return;
+    this.reason = [, reason!];
+    this.future?.bind(AtomicPromise.reject(reason));
     this.alive = false;
   }
 }
