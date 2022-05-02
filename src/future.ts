@@ -5,7 +5,7 @@ export class Future<T = undefined> implements Promise<T> {
   public static get [Symbol.species]() {
     return Promise;
   }
-  public readonly [Symbol.toStringTag] = 'Promise';
+  public readonly [Symbol.toStringTag]: string = 'Promise';
   constructor(strict: boolean = true) {
     this.bind = (value: T) => {
       const core = this[internal];
@@ -36,7 +36,7 @@ export class AtomicFuture<T = undefined> implements Future<T> {
   public static get [Symbol.species]() {
     return AtomicPromise;
   }
-  public readonly [Symbol.toStringTag] = 'Promise';
+  public readonly [Symbol.toStringTag]: string = 'Promise';
   constructor(strict: boolean = true) {
     this.bind = (value: T) => {
       const core = this[internal];

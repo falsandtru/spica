@@ -32,7 +32,7 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
   public static get [Symbol.species]() {
     return AtomicPromise;
   }
-  public readonly [Symbol.toStringTag] = 'Promise';
+  public readonly [Symbol.toStringTag]: string = 'Promise';
   public static all<T extends readonly unknown[] | []>(values: T): AtomicPromise<{ -readonly [P in keyof T]: Awaited<T[P]> }>;
   public static all<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<Awaited<T>[]>;
   public static all<T>(vs: Iterable<T | PromiseLike<T> | AtomicPromiseLike<T>>): AtomicPromise<T[]> {
