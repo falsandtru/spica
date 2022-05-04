@@ -45,6 +45,9 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
   public get isClosed(): boolean {
     return this[internal].reason.length === 2;
   }
+  public get isFinished(): boolean {
+    return this[internal].reason.length !== 0;
+  }
   public get register(): (listener: Listener<L>) => () => void {
     return (listener: Listener<L>) =>
       this[internal].register(listener);
