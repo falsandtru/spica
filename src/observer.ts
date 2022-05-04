@@ -27,7 +27,7 @@ export type Subscriber<N extends readonly unknown[], D, R> = (data: D, namespace
 class ListenerNode<N extends readonly unknown[], D, R> {
   constructor(
     public readonly parent: ListenerNode<N, D, R> | undefined,
-    public readonly index: unknown,
+    public readonly index: N[number],
   ) {
   }
   public readonly children = new List<N[number], ListenerNode<N, D, R>>(new Map());
