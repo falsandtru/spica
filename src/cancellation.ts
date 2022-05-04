@@ -27,8 +27,8 @@ const internal = Symbol.for('spica/cancellation::internal');
 
 export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, AtomicPromise<L> {
   public readonly [Symbol.toStringTag]: string = 'Cancellation';
-  constructor(cancellees: Iterable<Cancellee<L>> = []) {
-    for (const cancellee of cancellees) {
+  constructor(cancellees?: Iterable<Cancellee<L>>) {
+    if (cancellees) for (const cancellee of cancellees) {
       cancellee.register(this.cancel);
     }
   }
@@ -116,9 +116,7 @@ class Internal<L> {
       return noop;
     }
     const i = this.listeners.push(handler) - 1;
-    return singleton(() => {
-      this.listeners[i] = void 0;
-    });
+    return singleton(() => this.listeners[i] = void 0);
 
     function handler(reason: L): void {
       try {
@@ -132,8 +130,8 @@ class Internal<L> {
   public cancel(reason?: L): void {
     if (this.reason.length !== 0) return;
     this.reason = [reason!];
-    for (const listener of this.listeners) {
-      listener?.(reason!);
+    for (let i = 0, { listeners } = this; i < listeners.length; ++i) {
+      listeners[i]?.(reason!);
     }
     this.future?.bind(reason!);
     this.isFinished = true;
