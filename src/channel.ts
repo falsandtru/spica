@@ -13,14 +13,14 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
     this[internal] = new Internal(capacity);
   }
   public readonly [internal]: Internal<T>;
-  public get alive(): boolean {
-    return this[internal].alive;
+  public get isAlive(): boolean {
+    return this[internal].isAlive;
   }
   public close(finalizer?: (msgs: T[]) => void): void {
-    if (!this.alive) return;
+    if (!this.isAlive) return;
     const core = this[internal];
     const { buffer, producers, consumers } = core;
-    core.alive = false;
+    core.isAlive = false;
     while (producers.length || consumers.length) {
       producers.length && producers.shift()!.bind(fail());
       consumers.length && consumers.shift()!.bind(fail());
@@ -33,7 +33,7 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
   public put(msg: T): AtomicPromise<undefined>;
   public put(this: Channel<undefined>, msg?: T): AtomicPromise<undefined>;
   public put(msg: T): AtomicPromise<undefined> {
-    if (!this.alive) return fail();
+    if (!this.isAlive) return fail();
     const { capacity, buffer, producers, consumers } = this[internal];
     switch (true) {
       case buffer.length < capacity:
@@ -53,7 +53,7 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
     }
   }
   public take(): AtomicPromise<T> {
-    if (!this.alive) return fail();
+    if (!this.isAlive) return fail();
     const { buffer, producers, consumers } = this[internal];
     switch (true) {
       case buffer.length > 0:
@@ -78,12 +78,12 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
   }
   public async *[Symbol.asyncIterator](): AsyncGenerator<T, undefined, undefined> {
     try {
-      while (this.alive) {
+      while (this.isAlive) {
         yield this.take();
       }
     }
     catch (reason) {
-      if (this.alive) throw reason;
+      if (this.isAlive) throw reason;
     }
     return;
   }
@@ -94,7 +94,7 @@ class Internal<T> {
     public readonly capacity: number = 0,
   ) {
   }
-  public alive: boolean = true;
+  public isAlive: boolean = true;
   public readonly buffer: T[] = [];
   public readonly producers: AtomicFuture<undefined>[] = [];
   public readonly consumers: AtomicFuture<T>[] = [];

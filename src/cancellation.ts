@@ -14,8 +14,8 @@ export interface Canceller<L = undefined> {
   readonly close: (reason?: unknown) => void;
 }
 export interface Cancellee<L = undefined> extends Promise<L> {
-  readonly alive: boolean;
-  readonly cancelled: boolean;
+  readonly isAlive: boolean;
+  readonly isCancelled: boolean;
   readonly register: (listener: Listener<L>) => () => void;
   readonly promise: <T>(val: T) => AtomicPromise<T>;
   readonly maybe: <T>(val: T) => Maybe<T>;
@@ -36,13 +36,13 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
   public get [promiseinternal](): PromiseInternal<L> {
     return this[internal].promise[promiseinternal];
   }
-  public get alive(): boolean {
+  public get isAlive(): boolean {
     return this[internal].reason.length === 0;
   }
-  public get cancelled(): boolean {
+  public get isCancelled(): boolean {
     return this[internal].reason.length === 1;
   }
-  public get closed(): boolean {
+  public get isClosed(): boolean {
     return this[internal].reason.length === 2;
   }
   public get register(): (listener: Listener<L>) => () => void {
@@ -68,7 +68,7 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
   }
   public get promise(): <T>(val: T) => AtomicPromise<T> {
     return <T>(val: T): AtomicPromise<T> =>
-      this.cancelled
+      this.isCancelled
         ? AtomicPromise.reject(this[internal].reason[0])
         : AtomicPromise.resolve(val);
   }
@@ -76,7 +76,7 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
     return <T>(val: T): Maybe<T> =>
       Just(val)
         .bind(val =>
-          this.cancelled
+          this.isCancelled
             ? Nothing
             : Just(val));
   }
@@ -84,7 +84,7 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
     return <R>(val: R): Either<L, R> =>
       Right<L, R>(val)
         .bind(val =>
-          this.cancelled
+          this.isCancelled
             ? Left(this[internal].reason[0] as L)
             : Right(val));
   }

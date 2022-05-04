@@ -11,7 +11,7 @@ export class Colistener<T, U = undefined> extends Coroutine<U, T> {
       let notifier: AtomicFuture<undefined> = new AtomicFuture();
       let notifiable: boolean = true;
       void this.finally(listen.call(this, (value: T) => {
-        assert(this[Coroutine.alive]);
+        assert(this[Coroutine.isAlive]);
         if (notifiable) {
           void notifier.bind();
           notifiable = false;
