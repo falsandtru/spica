@@ -1,10 +1,9 @@
-import { singleton } from './function';
-import { noop } from './noop';
 import { AtomicPromise, Internal as PromiseInternal, internal as promiseinternal } from './promise';
 import { AtomicFuture } from './future';
 import { causeAsyncException } from './exception';
 import { Maybe, Just, Nothing } from './maybe';
 import { Either, Left, Right } from './either';
+import { noop } from './noop';
 
 export interface Canceller<L = undefined> {
   readonly cancel: {
@@ -27,8 +26,8 @@ const internal = Symbol.for('spica/cancellation::internal');
 
 export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, AtomicPromise<L> {
   public readonly [Symbol.toStringTag]: string = 'Cancellation';
-  constructor(cancellees?: Iterable<Cancellee<L>>) {
-    if (cancellees) for (const cancellee of cancellees) {
+  constructor(cancellees: Iterable<Cancellee<L>> = []) {
+    for (const cancellee of cancellees) {
       cancellee.register(this.cancel);
     }
   }
@@ -116,7 +115,7 @@ class Internal<L> {
       return noop;
     }
     const i = this.listeners.push(handler) - 1;
-    return singleton(() => this.listeners[i] = void 0);
+    return () => this.listeners[i] = void 0;
 
     function handler(reason: L): void {
       try {
