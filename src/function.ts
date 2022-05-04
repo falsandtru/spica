@@ -12,6 +12,10 @@ export function clear<as extends unknown[]>(f: (...as: as) => void): (...as: as)
   return (...as) => void f(...as);
 }
 
+export function id<a>(a: a): a {
+  return a;
+}
+
 // @ts-ignore
 export function noop(): undefined {
 }
