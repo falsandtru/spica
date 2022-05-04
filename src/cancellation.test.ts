@@ -3,30 +3,39 @@ import { Cancellation } from './cancellation';
 describe('Unit: lib/cancellation', () => {
   describe('Cancellation', () => {
     it('cancel', done => {
-      let cnt = 1;
+      let cnt = 0;
       const cancellation = new Cancellation<number>();
       const unregister = cancellation.register(n => {
-        assert(cnt === 1 && ++cnt);
+        assert(cnt === 0 && ++cnt);
         assert(n === 0);
+        assert(cancellation.alive === false);
+        assert(cancellation.cancelled === true);
+        assert(cancellation.closed === false);
         unregister();
         cancellation.register(n => {
-          assert(cnt === 3 && ++cnt);
+          assert(cnt === 2 && ++cnt);
           assert(n === 0);
         });
         unregister();
       });
       cancellation.register(n => {
-        assert(cnt === 2 && ++cnt);
+        assert(cnt === 1 && ++cnt);
         assert(n === 0);
       });
       cancellation.register(cancellation.register(() => {
         done(false);
       }));
       cancellation.then(reason => {
-        assert(cnt === 4 && ++cnt);
+        assert(cnt === 3 && ++cnt);
         assert(reason === 0);
+        assert(cancellation.alive === false);
+        assert(cancellation.cancelled === true);
+        assert(cancellation.closed === false);
         done();
       });
+      assert(cancellation.alive === true);
+      assert(cancellation.cancelled === false);
+      assert(cancellation.closed === false);
       cancellation.cancel(0);
       cancellation.cancel(NaN);
     });
@@ -37,22 +46,28 @@ describe('Unit: lib/cancellation', () => {
         done(false));
       assert(cancellation.alive === true);
       assert(cancellation.cancelled === false);
+      assert(cancellation.closed === false);
       cancellation.close();
       assert(cancellation.alive === false);
       assert(cancellation.cancelled === false);
+      assert(cancellation.closed === true);
       cancellation.close();
       assert(cancellation.alive === false);
       assert(cancellation.cancelled === false);
+      assert(cancellation.closed === true);
       cancellation.cancel();
       assert(cancellation.alive === false);
       assert(cancellation.cancelled === false);
+      assert(cancellation.closed === true);
       cancellation.register(() =>
         done(false));
       assert(cancellation.alive === false);
       assert(cancellation.cancelled === false);
+      assert(cancellation.closed === true);
       cancellation.close();
       assert(cancellation.alive === false);
       assert(cancellation.cancelled === false);
+      assert(cancellation.closed === true);
       cancellation.catch(done);
     });
 
@@ -67,10 +82,13 @@ describe('Unit: lib/cancellation', () => {
       b.cancel();
       assert(a.alive === true);
       assert(a.cancelled === false);
+      assert(a.closed === false);
       assert(b.alive === false);
       assert(b.cancelled === true);
+      assert(a.closed === false);
       assert(c.alive === false);
       assert(c.cancelled === true);
+      assert(a.closed === false);
       assert(cnt === 2);
       done();
     });

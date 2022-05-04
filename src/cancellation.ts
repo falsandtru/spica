@@ -37,10 +37,13 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
     return this[internal].promise[promiseinternal];
   }
   public get alive(): boolean {
-    return this[internal].alive;
+    return this[internal].reason.length === 0;
   }
   public get cancelled(): boolean {
     return this[internal].reason.length === 1;
+  }
+  public get closed(): boolean {
+    return this[internal].reason.length === 2;
   }
   public get register(): (listener: Listener<L>) => () => void {
     return (listener: Listener<L>) =>
@@ -88,7 +91,7 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
 }
 
 class Internal<L> {
-  public alive: boolean = true;
+  public isFinished: boolean = false;
   public reason: [] | [L] | [void, unknown] = [];
   public future?: AtomicFuture<L>;
   public get promise(): AtomicPromise<L> {
@@ -105,7 +108,7 @@ class Internal<L> {
   }
   public readonly listeners: (Listener<L> | undefined)[] = [];
   public register(listener: Listener<L>): () => void {
-    if (!this.alive) {
+    if (this.isFinished) {
       this.reason.length === 1 && handler(this.reason[0]);
       return noop;
     }
@@ -130,12 +133,12 @@ class Internal<L> {
       listener?.(reason!);
     }
     this.future?.bind(reason!);
-    this.alive = false;
+    this.isFinished = true;
   }
   public close(reason?: unknown): void {
     if (this.reason.length !== 0) return;
     this.reason = [, reason];
     this.future?.bind(AtomicPromise.reject(reason));
-    this.alive = false;
+    this.isFinished = true;
   }
 }
