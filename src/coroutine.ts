@@ -6,8 +6,8 @@ import { wait } from './timer';
 import { AtomicPromise, isPromiseLike } from './promise';
 import { Future, AtomicFuture } from './future';
 import { Channel } from './channel';
+import { noop } from './function';
 import { causeAsyncException } from './exception';
-import { noop } from './noop';
 
 export interface CoroutineOptions {
   readonly run?: boolean;

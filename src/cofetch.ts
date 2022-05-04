@@ -5,7 +5,7 @@ import { Colistener } from './colistener';
 import { Cancellation } from './cancellation';
 import { Collection } from './collection';
 import { ReadonlyURL } from './url';
-import { noop } from './noop';
+import { noop } from './function';
 
 export interface CofetchOptions {
   method?: string;

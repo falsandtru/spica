@@ -1,5 +1,5 @@
 import * as Monad from './maybe.impl';
-import { noop } from '../noop';
+import { noop } from '../function';
 
 export class Maybe<a> extends Monad.Maybe<a> {
   private constructor() {

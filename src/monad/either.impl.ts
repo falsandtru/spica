@@ -1,6 +1,6 @@
 import { Monad } from './monad';
 import { AtomicPromise } from '../promise';
-import { noop } from '../noop';
+import { noop } from '../function';
 
 export class Either<a, b> extends Monad<b> {
   constructor(thunk: () => Either<a, b>) {

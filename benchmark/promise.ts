@@ -3,7 +3,7 @@ import { AtomicPromise } from '../';
 import { Promise } from '../src/global';
 import Bluebird from 'bluebird';
 import { clock } from '../src/clock';
-import { noop } from '../src/noop';
+import { noop } from '../src/function';
 
 describe('Benchmark:', function () {
   this.timeout(30 * 1e3);

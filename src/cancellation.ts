@@ -3,7 +3,7 @@ import { AtomicFuture } from './future';
 import { causeAsyncException } from './exception';
 import { Maybe, Just, Nothing } from './maybe';
 import { Either, Left, Right } from './either';
-import { noop } from './noop';
+import { noop } from './function';
 
 export interface Canceller<L = undefined> {
   readonly cancel: {

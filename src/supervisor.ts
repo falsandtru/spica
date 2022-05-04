@@ -6,9 +6,9 @@ import { Coroutine, CoroutineInterface, isCoroutine } from './coroutine';
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future';
 import { Observation, Observer, Publisher } from './observer';
+import { noop } from './function';
 import { splice } from './array';
 import { causeAsyncException } from './exception';
-import { noop } from './noop';
 
 export interface SupervisorOptions {
   readonly name?: string;

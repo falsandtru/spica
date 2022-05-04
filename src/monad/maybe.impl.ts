@@ -1,6 +1,6 @@
 import { MonadPlus } from './monadplus';
 import { AtomicPromise } from '../promise';
-import { noop } from '../noop';
+import { noop } from '../function';
 
 export class Maybe<a> extends MonadPlus<a> {
   constructor(thunk: () => Maybe<a>) {

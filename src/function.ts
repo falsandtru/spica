@@ -1,5 +1,3 @@
-import { noop } from './noop';
-
 export function singleton<f extends (...args: unknown[]) => unknown>(f: f): f {
   let result: unknown;
   return function (this: unknown, ...as) {
@@ -12,4 +10,8 @@ export function singleton<f extends (...args: unknown[]) => unknown>(f: f): f {
 
 export function clear<as extends unknown[]>(f: (...as: as) => void): (...as: as) => undefined {
   return (...as) => void f(...as);
+}
+
+// @ts-ignore
+export function noop(): undefined {
 }

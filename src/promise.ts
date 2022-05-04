@@ -1,6 +1,6 @@
 import { Array } from './global';
 import { isArray } from './alias';
-import { noop } from './noop';
+import { noop } from './function';
 
 const enum State {
   pending,
