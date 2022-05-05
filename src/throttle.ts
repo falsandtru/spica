@@ -65,7 +65,8 @@ export function debounce<T, C = unknown>(delay: number, callback: (this: C, last
           causeAsyncException(reason);
         }
         callable = true;
-        timer === 0 && buffer.length > 0 && self.call(this, buffer.shift()!);
+        assert(timer === 0);
+        buffer.length > 0 && self.call(this, buffer.shift()!);
       }, delay);
     }, delay);
   };
