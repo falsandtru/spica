@@ -122,7 +122,7 @@ export class Nothing extends Maybe<never> {
   public override extract<b>(transform: () => b): b
   public override extract<b>(nothing: () => b, just: (a: never) => b): b
   public override extract<b>(nothing?: () => b): b {
-    if (!nothing) throw void 0;
+    if (!nothing) throw new Error(`Spica: Maybe: Nothig value is extracted.`);
     return nothing();
   }
 }

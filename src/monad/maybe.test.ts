@@ -37,7 +37,7 @@ describe('Unit: lib/maybe', () => {
         throw 1;
       }
       catch (reason) {
-        assert(reason === undefined);
+        assert(reason instanceof Error);
       }
     });
 
