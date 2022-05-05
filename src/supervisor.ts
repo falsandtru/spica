@@ -52,7 +52,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
   public static clear(reason?: unknown): void {
     while (this.instances.size > 0) {
       for (const sv of this.instances) {
-        void sv.terminate(reason);
+        sv.terminate(reason);
       }
     }
   }
@@ -66,32 +66,32 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     // FIXME: Remove the next type assertion after #37383 is fixed.
     if (this.constructor === Supervisor as any) throw new Error(`Spica: Supervisor: <${this.name}>: Cannot instantiate abstract classes.`);
     // @ts-ignore #31251
-    void this.constructor.instances.add(this);
+    this.constructor.instances.add(this);
   }
   private readonly state = new AtomicFuture();
   private destructor(reason: unknown): void {
     assert(this.isAlive === true);
     assert(this.available === true);
     this.available = false;
-    void this.clear(reason);
+    this.clear(reason);
     assert(this.workers.size === 0);
-    void ObjectFreeze(this.workers);
+    ObjectFreeze(this.workers);
     while (this.messages.length > 0) {
       const [names, param, , , timer] = this.messages.shift()!;
       const name: N | undefined = names[Symbol.iterator]().next().value;
-      timer && void clearTimeout(timer);
-      void this.events_?.loss.emit([name], [name, param]);
+      timer && clearTimeout(timer);
+      this.events_?.loss.emit([name], [name, param]);
     }
     assert(this.messages.length === 0);
     assert(!Object.isFrozen(this.messages));
     this.isAlive = false;
     // @ts-ignore #31251
-    void this.constructor.instances.delete(this);
-    void ObjectFreeze(this);
+    this.constructor.instances.delete(this);
+    ObjectFreeze(this);
     assert(this.isAlive === false);
     assert(this.available === false);
-    void this.settings.destructor(reason);
-    void this.state.bind(reason === void 0 ? void 0 : AtomicPromise.reject(reason));
+    this.settings.destructor(reason);
+    this.state.bind(reason === void 0 ? void 0 : AtomicPromise.reject(reason));
   }
   public readonly name: string;
   private readonly settings: DeepImmutable<DeepRequired<SupervisorOptions>> = {
@@ -135,7 +135,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
   public register(name: N, process: Supervisor.Process<P, R, S>, state: S): (reason?: unknown) => boolean;
   public register(name: N, process: Supervisor.Process<P, R, S>, state?: S): (reason?: unknown) => boolean {
     state = state!;
-    void this.throwErrorIfNotAvailable();
+    this.throwErrorIfNotAvailable();
     if (isCoroutine(process)) {
       const port = process[process.constructor.port] as Coroutine<R, R, P>[typeof Coroutine.port];
       const proc: Supervisor.Process.Regular<P, R, S> = {
@@ -146,9 +146,9 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
               done && void kill() || [reply, state]),
         exit: reason => void process[process.constructor.terminate](reason),
       };
-      void this.constructor.standalone.add(proc);
+      this.constructor.standalone.add(proc);
       const kill = this.register(name, proc, state);
-      void process.catch(kill);
+      process.catch(kill);
       return kill;
     }
     if (isAsyncGeneratorFunction(process)) {
@@ -156,7 +156,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       return this.register(
         name,
         {
-          init: (state, kill) => (iter = process(state, kill), void iter.next().catch(kill), state),
+          init: (state, kill) => (iter = process(state, kill), iter.next().catch(kill), state),
           main: (param, state, kill) =>
             AtomicPromise.resolve(iter.next(param))
               .then(({ value: reply, done }) =>
@@ -171,7 +171,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
         return this.register(
           name,
           {
-            init: (state, kill) => (iter = process(state, kill), void iter.next(), state),
+            init: (state, kill) => (iter = process(state, kill), iter.next(), state),
             main: (param, state, kill) => {
               const { value: reply, done } = iter.next(param);
               done && kill();
@@ -191,7 +191,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
         state);
     }
     if (this.workers.has(name)) throw new Error(`Spica: Supervisor: <${this.name}/${name}>: Cannot register another process with tha same name.`);
-    void this.schedule();
+    this.schedule();
     const worker: Worker<N, P, R, S> = new Worker(
       name,
       process,
@@ -200,10 +200,8 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       () => void this.schedule(),
       this.constructor.standalone.has(process),
       this.events_,
-      () =>
-        this.workers.get(name) === worker &&
-        void this.workers.delete(name));
-    void this.workers.set(name, worker);
+      () => { this.workers.get(name) === worker && void this.workers.delete(name); });
+    this.workers.set(name, worker);
     return worker.terminate;
 
     function isAsyncGeneratorFunction(process: Supervisor.Process<P, R, S>): process is Supervisor.Process.AsyncGeneratorFunction<P, R, S> {
@@ -219,8 +217,8 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
   public call(name: N | ((names: Iterable<N>) => Iterable<N>), param: P, callback?: Supervisor.Callback<R> | number, timeout = this.settings.timeout): AtomicPromise<R> | void {
     if (typeof callback !== 'function') return new AtomicPromise<R>((resolve, reject) =>
       void this.call(name, param, (err, result) => err ? reject(err) : resolve(result), callback));
-    void this.throwErrorIfNotAvailable();
-    void this.messages.push([typeof name === 'string' ? [name] : new NamePool(this.workers, name),
+    this.throwErrorIfNotAvailable();
+    this.messages.push([typeof name === 'string' ? [name] : new NamePool(this.workers, name),
       param,
       callback,
       Date.now() + timeout,
@@ -228,19 +226,19 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     ]);
     while (this.messages.length > (this.available ? this.settings.capacity : 0)) {
       const [names, param, callback, , timer] = this.messages.shift()!;
-      timer && void clearTimeout(timer);
+      timer && clearTimeout(timer);
       const name: N | undefined = names[Symbol.iterator]().next().value;
-      void this.events_?.loss.emit([name], [name, param]);
+      this.events_?.loss.emit([name], [name, param]);
       try {
-        void callback(new Error(`Spica: Supervisor: <${this.name}>: Message overflowed.`), void 0);
+        callback(new Error(`Spica: Supervisor: <${this.name}>: Message overflowed.`), void 0);
       }
       catch (reason) {
-        void causeAsyncException(reason);
+        causeAsyncException(reason);
       }
     }
     if (this.messages.length === 0) return;
-    void this.throwErrorIfNotAvailable();
-    void this.schedule();
+    this.throwErrorIfNotAvailable();
+    this.schedule();
     if (timeout > 0 && timeout !== Infinity) {
       assert(this.messages[this.messages.length - 1][4] === 0);
       this.messages[this.messages.length - 1][4] = setTimeout(() =>
@@ -249,7 +247,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     }
   }
   public cast(name: N | ((names: Iterable<N>) => Iterable<N>), param: P, timeout = this.settings.timeout): AtomicPromise<R> | undefined {
-    void this.throwErrorIfNotAvailable();
+    this.throwErrorIfNotAvailable();
     const expire = Date.now() + timeout;
     let result: AtomicPromise<R> | undefined;
     for (name of typeof name === 'string' ? [name] : new NamePool(this.workers, name)) {
@@ -257,7 +255,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     }
     if (result) return result;
     const n = typeof name === 'string' ? name : void 0;
-    void this.events_?.loss.emit([n], [n, param]);
+    this.events_?.loss.emit([n], [n, param]);
   }
   public refs(name?: N): [N, Supervisor.Process.Regular<P, R, S>, S, (reason?: unknown) => boolean][] {
     assert(this.available || this.workers.size === 0);
@@ -287,19 +285,19 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
   public clear(reason?: unknown): void {
     while (this.workers.size > 0) {
       for (const worker of this.workers.values()) {
-        void worker.terminate(reason);
+        worker.terminate(reason);
       }
     }
   }
   public terminate(reason?: unknown): boolean {
     if (!this.available) return false;
     assert(this.isAlive === true);
-    void this.destructor(reason);
-    void this[Coroutine.exit](void 0);
+    this.destructor(reason);
+    this[Coroutine.exit](void 0);
     return true;
   }
   public override [Coroutine.terminate](reason?: unknown): void {
-    void this.terminate(reason);
+    this.terminate(reason);
   }
   public override [Coroutine.port] = {
     ask: () => { throw new Error(`Spica: Supervisor: <${this.name}>: Cannot use coroutine port.`); },
@@ -312,12 +310,12 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     if (!this.available || this.scheduled || this.messages.length === 0) return;
     this.scheduled = true;
     const p = new AtomicFuture(false);
-    void p.finally(() => {
+    p.finally(() => {
       this.scheduled = false;
-      void this.deliver();
+      this.deliver();
     });
-    void this.settings.scheduler.call(void 0, p.bind);
-    this.settings.scheduler === global.requestAnimationFrame && void setTimeout(p.bind, 1000);
+    this.settings.scheduler.call(void 0, p.bind);
+    this.settings.scheduler === global.requestAnimationFrame && setTimeout(p.bind, 1000);
   }
   // Bug: Karma and TypeScript
   private readonly messages: [Iterable<N>, P, Supervisor.Callback<R>, number, ReturnType<typeof setTimeout> | 0][] = [];
@@ -335,25 +333,25 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
         if (result = this.workers.get(name)?.call([param, expiry])) break;
       }
       if (!result && Date.now() < expiry) continue;
-      void splice(this.messages, i, 1);
-      void --i;
-      void --len;
-      timer && void clearTimeout(timer);
+      splice(this.messages, i, 1);
+      --i;
+      --len;
+      timer && clearTimeout(timer);
 
       if (result) {
-        void result.then(
+        result.then(
           reply =>
             void callback(void 0, reply),
           () =>
             void callback(new Error(`Spica: Supervisor: <${this.name}>: Process failed.`), void 0));
       }
       else {
-        void this.events_?.loss.emit([name], [name, param]);
+        this.events_?.loss.emit([name], [name, param]);
         try {
-          void callback(new Error(`Spica: Supervisor: <${this.name}>: Message expired.`), void 0);
+          callback(new Error(`Spica: Supervisor: <${this.name}>: Message expired.`), void 0);
         }
         catch (reason) {
-          void causeAsyncException(reason);
+          causeAsyncException(reason);
         }
       }
     }
@@ -413,23 +411,23 @@ class Worker<N extends string, P, R, S> {
     } | undefined,
     private readonly destructor_: () => void,
   ) {
-    initiated && void this.init();
+    initiated && this.init();
   }
   private destructor(reason: unknown): void {
     assert(this.isAlive === true);
     this.isAlive = false;
     this.available = false;
-    void ObjectFreeze(this);
+    ObjectFreeze(this);
     assert(this.isAlive === false);
     assert(this.available === false);
     try {
-      void this.destructor_();
+      this.destructor_();
     }
     catch (reason) {
-      void causeAsyncException(reason);
+      causeAsyncException(reason);
     }
     if (this.initiated) {
-      void this.exit(reason);
+      this.exit(reason);
     }
   }
   private isAlive = true;
@@ -438,42 +436,42 @@ class Worker<N extends string, P, R, S> {
   private init(): void {
     assert(!this.initiated);
     this.initiated = true;
-    void this.events?.init
+    this.events?.init
       .emit([this.name], [this.name, this.process, this.state]);
     this.state = this.process.init(this.state, this.terminate);
   }
   private exit(reason: unknown): void {
     assert(this.initiated);
     try {
-      void this.process.exit(reason, this.state);
-      void this.events?.exit
+      this.process.exit(reason, this.state);
+      this.events?.exit
         .emit([this.name], [this.name, this.process, this.state, reason]);
     }
     catch (reason_) {
-      void this.events?.exit
+      this.events?.exit
         .emit([this.name], [this.name, this.process, this.state, reason]);
-      void this.sv.terminate(reason_);
+      this.sv.terminate(reason_);
     }
   }
   public call([param, expiry]: [P, number]): AtomicPromise<R> | undefined {
     if (!this.available) return;
     return new AtomicPromise<Supervisor.Process.Result<R, S>>((resolve, reject) => {
-      isFinite(expiry) && void setTimeout(() => void reject(new Error()), expiry - Date.now());
+      isFinite(expiry) && setTimeout(() => void reject(new Error()), expiry - Date.now());
       assert(this.isAlive);
       assert(this.available);
       this.available = false;
       if (!this.initiated) {
-        void this.init();
+        this.init();
         if (!this.isAlive) return void reject();
       }
       assert(this.isAlive);
       assert(!this.available);
-      void AtomicPromise.resolve(this.process.main(param, this.state, this.terminate))
+      AtomicPromise.resolve(this.process.main(param, this.state, this.terminate))
         .then(resolve, reject);
     })
       .then(([reply, state]) => {
         if (this.isAlive) {
-          void this.schedule();
+          this.schedule();
           assert(!Object.isFrozen(this));
           this.state = state;
           this.available = true;
@@ -481,14 +479,14 @@ class Worker<N extends string, P, R, S> {
         return reply;
       })
       .catch(reason => {
-        void this.schedule();
-        void this.terminate(reason);
+        this.schedule();
+        this.terminate(reason);
         throw reason;
       });
   }
   public readonly terminate = (reason: unknown): boolean => {
     if (!this.isAlive) return false;
-    void this.destructor(reason);
+    this.destructor(reason);
     return true;
   };
 }

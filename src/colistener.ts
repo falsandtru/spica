@@ -10,15 +10,15 @@ export class Colistener<T, U = undefined> extends Coroutine<U, T> {
       const queue: T[] = [];
       let notifier: AtomicFuture<undefined> = new AtomicFuture();
       let notifiable: boolean = true;
-      void this.finally(listen.call(this, (value: T) => {
+      this.finally(listen.call(this, (value: T) => {
         assert(this[Coroutine.isAlive]);
         if (notifiable) {
-          void notifier.bind();
+          notifier.bind();
           notifiable = false;
         }
-        void queue.push(value);
+        queue.push(value);
         while (queue.length > (opts.capacity || 1)) {
-          void queue.shift()!;
+          queue.shift()!;
         }
         assert(queue.length > 0);
       }));
@@ -31,11 +31,11 @@ export class Colistener<T, U = undefined> extends Coroutine<U, T> {
         }
       }
     }, { ...opts, capacity: -1, run: false });
-    void this[Coroutine.init]();
+    this[Coroutine.init]();
   }
   public close(this: Colistener<T, undefined>, value?: U): void;
   public close(value: U): void;
   public close(value: U): void {
-    void this[Coroutine.exit](value);
+    this[Coroutine.exit](value);
   }
 }

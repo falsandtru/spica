@@ -50,7 +50,7 @@ export function debounce<T, C = unknown>(delay: number, callback: (this: C, last
       assert(timer !== 0);
       assert(buffer.length > 0);
       timer = 0;
-      void setTimeout(async () => {
+      setTimeout(async () => {
         if (timer !== 0) return;
         if (!callable) return;
         assert(buffer.length > 0);

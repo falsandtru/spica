@@ -13,19 +13,19 @@ export class Copropagator<T = unknown, R = T, S = unknown> extends Coroutine<T, 
   ) {
     assert(new Set(coroutines).size === [...coroutines].length);
     super(async function* () {
-      void this.then(
+      this.then(
         result => {
           for (const co of coroutines) {
-            void co[Coroutine.exit](result);
+            co[Coroutine.exit](result);
           }
         },
         reason => {
           const rejection = AtomicPromise.reject(reason);
           for (const co of coroutines) {
-            void co[Coroutine.exit](rejection);
+            co[Coroutine.exit](rejection);
           }
         });
-      void all(coroutines).then(
+      all(coroutines).then(
         results =>
           results.length === 0
             ? void this[Coroutine.terminate](new Error(`Spica: Copropagator: No result.`))
@@ -49,7 +49,7 @@ function all<T>(sources: Iterable<PromiseLike<T>>, memory?: Map<PromiseLike<T>, 
     if (!memory && same) return values;
     memory ??= new Map();
     for (let i = 0; i < values.length; ++i) {
-      void memory.set(before[i], values[i]);
+      memory.set(before[i], values[i]);
     }
     return same
       ? [...memory.values()]

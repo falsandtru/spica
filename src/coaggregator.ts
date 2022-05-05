@@ -10,16 +10,16 @@ export class Coaggregator<T = unknown, R = T, S = unknown> extends Coroutine<T, 
     opts?: CoroutineOptions,
   ) {
     super(async function* () {
-      void this.then(
+      this.then(
         result => {
           for (const co of coroutines) {
-            void co[Coroutine.exit](result);
+            co[Coroutine.exit](result);
           }
         },
         reason => {
           const rejection = AtomicPromise.reject(reason);
           for (const co of coroutines) {
-            void co[Coroutine.exit](rejection);
+            co[Coroutine.exit](rejection);
           }
         });
       const results: T[] = Array(coroutines.length);
@@ -35,8 +35,8 @@ export class Coaggregator<T = unknown, R = T, S = unknown> extends Coroutine<T, 
       assert(Object.keys(results).length === results.length);
       assert(results.length === coroutines.length);
       results.length === 0
-        ? void this[Coroutine.terminate](new Error(`Spica: Coaggregator: No result.`))
-        : void this[Coroutine.exit](reducer(results));
+        ? this[Coroutine.terminate](new Error(`Spica: Coaggregator: No result.`))
+        : this[Coroutine.exit](reducer(results));
       return never;
     }, { delay: false, ...opts });
   }
