@@ -1,11 +1,11 @@
 import { setTimeout } from './global';
 import { causeAsyncException } from './exception';
 
-export function throttle<T, C = unknown>(interval: number, callback: (this: C, last: T, buffer: T[]) => void, capacity: number = 1): (this: C, arg: T) => void {
+export function throttle<T, C = unknown>(interval: number, callback: (this: C, last: T, buffer: T[]) => Promise<unknown> | unknown, capacity: number = 1): (this: C, arg: T) => void {
   // Bug: Karma and TypeScript
   let timer: ReturnType<typeof setTimeout> | 0 = 0;
   let buffer: T[] = [];
-  return function self(this: unknown, data: T) {
+  return function self(this: C, data: T) {
     if (capacity === 1) {
       buffer = [data];
     }
@@ -32,12 +32,12 @@ export function throttle<T, C = unknown>(interval: number, callback: (this: C, l
   };
 }
 
-export function debounce<T, C = unknown>(delay: number, callback: (this: C, last: T, buffer: T[]) => void, capacity: number = 1): (this: C, arg: T) => void {
+export function debounce<T, C = unknown>(delay: number, callback: (this: C, last: T, buffer: T[]) => Promise<unknown> | unknown, capacity: number = 1): (this: C, arg: T) => void {
   // Bug: Karma and TypeScript
   let timer: ReturnType<typeof setTimeout> | 0 = 0;
   let buffer: T[] = [];
   let callable = true;
-  return function self(this: unknown, data: T) {
+  return function self(this: C, data: T) {
     if (capacity === 1) {
       buffer = [data];
     }

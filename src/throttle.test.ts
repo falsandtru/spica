@@ -22,6 +22,7 @@ describe('Unit: lib/throttle', () => {
           default:
             throw step;
         }
+        return false;
       }, 3);
       let count = 0;
       step = 1;
@@ -44,6 +45,7 @@ describe('Unit: lib/throttle', () => {
           default:
             throw step;
         }
+        return false;
       }, 3);
       let count = 0;
       step = 1;
