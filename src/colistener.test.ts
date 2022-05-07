@@ -1,5 +1,5 @@
 import { Colistener } from './colistener';
-import { wait } from './timer';
+import { wait } from './promise';
 
 describe('Unit: lib/colistener', () => {
   describe('Colistener', () => {

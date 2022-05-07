@@ -1,5 +1,5 @@
 import { Channel } from './channel';
-import { wait } from './timer';
+import { wait } from './promise';
 
 describe('Unit: lib/channel', function () {
   describe('channel', function () {
