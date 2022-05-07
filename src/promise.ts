@@ -1,6 +1,5 @@
-import { Array, setTimeout } from './global';
+import { Array } from './global';
 import { isArray } from './alias';
-import { clock } from './clock';
 import { noop } from './function';
 
 const enum State {
@@ -409,10 +408,3 @@ export const never: Promise<never> = new class Never extends Promise<never> {
     return this;
   }
 }();
-
-export function wait(ms: number): AtomicPromise<undefined> {
-  assert(ms >= 0);
-  return ms === 0
-    ? AtomicPromise.resolve(clock)
-    : new AtomicPromise(resolve => void setTimeout(resolve, ms));
-}

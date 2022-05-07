@@ -1,6 +1,6 @@
 import { Cache } from './cache';
 import LRUCache from 'lru-cache';
-import { wait } from './promise';
+import { wait } from './timer';
 
 describe('Unit: lib/cache', () => {
   describe('Cache', () => {

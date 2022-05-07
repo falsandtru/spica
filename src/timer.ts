@@ -14,3 +14,10 @@ function template(set: Function, unset: Function) {
     });
   };
 }
+
+export function wait(ms: number): Promise<undefined> {
+  assert(ms >= 0);
+  return ms === 0
+    ? Promise.resolve(void 0)
+    : new Promise<undefined>(resolve => void global.setTimeout(resolve, ms));
+}
