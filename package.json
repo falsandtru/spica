@@ -76,7 +76,7 @@
     "karma-espower-preprocessor": "^1.2.0",
     "karma-firefox-launcher": "^2.1.2",
     "karma-mocha": "^2.0.1",
-    "lru-cache": "^7.9.0",
+    "lru-cache": "^7.10.1",
     "mocha": "^10.0.0",
     "npm-check-updates": "^12.5.11",
     "power-assert": "^1.6.1",
