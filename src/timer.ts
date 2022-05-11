@@ -1,15 +1,20 @@
 import { global } from './global';
 import { singleton } from './function';
 
-export const setTimeout = template(global.setTimeout, global.clearTimeout);
-export const setInterval = template(global.setInterval, global.clearInterval);
+export const setTimeout = template(1);
+export const setInterval = template(Infinity);
 
-function template(set: Function, unset: Function) {
+function template(count: number) {
+  const { setTimeout, clearTimeout } = global;
   return <a>(wait: number, handler: () => a, unhandler?: (a: a) => void): () => void => {
     let params: [a];
-    const timer = set(() => params = [handler()], wait);
+    let timer = global.setTimeout(function loop() {
+      params = [handler()];
+      if (--count === 0) return;
+      timer = setTimeout(loop, wait);
+    }, wait);
     return singleton(() => {
-      unset(timer);
+      clearTimeout(timer);
       params && unhandler?.(params[0]);
     });
   };
