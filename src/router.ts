@@ -56,10 +56,10 @@ export namespace router {
     function match(pattern: string, segment: string): boolean {
       assert(segment === '/' || !segment.startsWith('/'));
       if (segment[0] === '.' && ['?', '*'].includes(pattern[0])) return false;
-      return match_(optimize(pattern), segment);
+      return match$(optimize(pattern), segment);
     }
 
-    const match_ = memoize((pattern: string, segment: string): boolean => {
+    const match$ = memoize((pattern: string, segment: string): boolean => {
       const [p = '', ...ps] = [...pattern];
       const [s = '', ...ss] = [...segment];
       assert(typeof p === 'string');
@@ -70,33 +70,33 @@ export namespace router {
         case '?':
           return s !== ''
               && s !== '/'
-              && match_(ps.join(''), ss.join(''));
+              && match$(ps.join(''), ss.join(''));
         case '*':
           return s === '/'
-            ? match_(ps.join(''), segment)
+            ? match$(ps.join(''), segment)
             : Sequence
                 .zip(
                   Sequence.cycle([ps.join('')]),
                   Sequence.from(segment)
                     .tails()
                     .map(ss => ss.join('')))
-                .filter(([a, b]) => match_(a, b))
+                .filter(([a, b]) => match$(a, b))
                   .take(1)
                   .extract()
                   .length > 0;
         default:
           return s === p
-              && match_(ps.join(''), ss.join(''));
+              && match$(ps.join(''), ss.join(''));
       }
     }, (pat, seg) => `${pat}\n${seg}`, new Cache(10000));
 
     function expand(pattern: string): string[] {
       if (pattern.match(/\*\*|[\[\]]/)) throw new Error(`Invalid pattern: ${pattern}`);
       assert(pattern === '' || pattern.match(/{[^{}]*}|.[^{]*/g)!.join('') === pattern);
-      return expand_(pattern);
+      return expand$(pattern);
     }
 
-    const expand_ = memoize((pattern: string): string[] => {
+    const expand$ = memoize((pattern: string): string[] => {
       return pattern === ''
         ? [pattern]
         : Sequence.from(pattern.match(/{[^{}]*}|.[^{]*/g)!)
@@ -109,7 +109,7 @@ export namespace router {
             .bind(p =>
               p === pattern
                 ? Sequence.from([p])
-                : Sequence.from(expand_(p)))
+                : Sequence.from(expand$(p)))
             .unique()
             .extract();
     });

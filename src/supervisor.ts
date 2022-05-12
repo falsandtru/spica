@@ -24,20 +24,20 @@ export interface Supervisor<N extends string = string, P = undefined, R = P, S =
   constructor: typeof Supervisor & typeof Coroutine;
 }
 export abstract class Supervisor<N extends string, P = undefined, R = P, S = undefined> extends Coroutine<undefined, undefined, undefined> {
-  private static instances_: Set<Supervisor<string, unknown, unknown, unknown>>;
+  private static $instances: Set<Supervisor<string, unknown, unknown, unknown>>;
   private static get instances() {
-    return this.hasOwnProperty('instances_')
-      ? this.instances_
-      : this.instances_ = new Set();
+    return this.hasOwnProperty('$instances')
+      ? this.$instances
+      : this.$instances = new Set();
   }
-  private static status_: {
+  private static $status: {
     readonly instances: number;
     readonly processes: number;
   };
   public static get status() {
-    if (this.hasOwnProperty('status_')) return this.status_;
+    if (this.hasOwnProperty('$status')) return this.$status;
     const { instances } = this;
-    return this.status_ = {
+    return this.$status = {
       get instances(): number {
         return instances.size;
       },
@@ -80,7 +80,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       const [names, param, , , timer] = this.messages.shift()!;
       const name: N | undefined = names[Symbol.iterator]().next().value;
       timer && clearTimeout(timer);
-      this.events_?.loss.emit([name], [name, param]);
+      this.$events?.loss.emit([name], [name, param]);
     }
     assert(this.messages.length === 0);
     assert(!Object.isFrozen(this.messages));
@@ -102,7 +102,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     scheduler: tick,
     resource: 10,
   };
-  private events_?: {
+  private $events?: {
     readonly init: Observation<[N], Supervisor.Event.Data.Init<N, P, R, S>, unknown>;
     readonly exit: Observation<[N], Supervisor.Event.Data.Exit<N, P, R, S>, unknown>;
     readonly loss: Observation<[N | undefined], Supervisor.Event.Data.Loss<N, P>, unknown>;
@@ -112,7 +112,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     readonly exit: Observer<[N], Supervisor.Event.Data.Exit<N, P, R, S>, unknown>;
     readonly loss: Observer<[N | undefined], Supervisor.Event.Data.Loss<N, P>, unknown>;
   } {
-    return this.events_ ??= {
+    return this.$events ??= {
       init: new Observation<[N], Supervisor.Event.Data.Init<N, P, R, S>, unknown>(),
       exit: new Observation<[N], Supervisor.Event.Data.Exit<N, P, R, S>, unknown>(),
       loss: new Observation<[N | undefined], Supervisor.Event.Data.Loss<N, P>, unknown>(),
@@ -199,7 +199,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       this,
       () => void this.schedule(),
       this.constructor.standalone.has(process),
-      this.events_,
+      this.$events,
       () => { this.workers.get(name) === worker && void this.workers.delete(name); });
     this.workers.set(name, worker);
     return worker.terminate;
@@ -228,7 +228,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       const [names, param, callback, , timer] = this.messages.shift()!;
       timer && clearTimeout(timer);
       const name: N | undefined = names[Symbol.iterator]().next().value;
-      this.events_?.loss.emit([name], [name, param]);
+      this.$events?.loss.emit([name], [name, param]);
       try {
         callback(new Error(`Spica: Supervisor: <${this.name}>: Message overflowed.`), void 0);
       }
@@ -255,7 +255,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     }
     if (result) return result;
     const n = typeof name === 'string' ? name : void 0;
-    this.events_?.loss.emit([n], [n, param]);
+    this.$events?.loss.emit([n], [n, param]);
   }
   public refs(name?: N): [N, Supervisor.Process.Regular<P, R, S>, S, (reason?: unknown) => boolean][] {
     assert(this.available || this.workers.size === 0);
@@ -346,7 +346,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
             void callback(new Error(`Spica: Supervisor: <${this.name}>: Process failed.`), void 0));
       }
       else {
-        this.events_?.loss.emit([name], [name, param]);
+        this.$events?.loss.emit([name], [name, param]);
         try {
           callback(new Error(`Spica: Supervisor: <${this.name}>: Message expired.`), void 0);
         }
