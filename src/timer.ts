@@ -5,10 +5,10 @@ export const setTimer = template(1);
 export const setRepeatTimer = template(Infinity);
 
 function template(count: number) {
-  return <a>(time: number, handler: () => a, unhandler?: (a: a) => void): () => void => {
-    let params: [a];
-    let id = setTimeout(function loop() {
-      params = [handler()];
+  return <a>(time: number, handler: () => a, unhandler?: (a: Awaited<a>) => void): () => void => {
+    let params: [Awaited<a>];
+    let id = setTimeout(async function loop() {
+      params = [await handler()];
       if (--count === 0) return;
       id = setTimeout(loop, time);
     }, time);
