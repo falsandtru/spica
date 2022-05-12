@@ -8,7 +8,7 @@ function template(count: number) {
   const { setTimeout, clearTimeout } = global;
   return <a>(wait: number, handler: () => a, unhandler?: (a: a) => void): () => void => {
     let params: [a];
-    let timer = global.setTimeout(function loop() {
+    let timer = setTimeout(function loop() {
       params = [handler()];
       if (--count === 0) return;
       timer = setTimeout(loop, wait);
