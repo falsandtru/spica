@@ -5,13 +5,13 @@ export const setTimer = template(1);
 export const setRepeatTimer = template(Infinity);
 
 function template(count: number) {
-  return <a>(time: number, handler: () => a, unhandler?: (a: Awaited<a>) => void): () => void => {
+  return <a>(timeout: number, handler: () => a, unhandler?: (a: Awaited<a>) => void): () => void => {
     let params: [Awaited<a>];
     let id = setTimeout(async function loop() {
       params = [await handler()];
       if (--count === 0) return;
-      id = setTimeout(loop, time);
-    }, time);
+      id = setTimeout(loop, timeout);
+    }, timeout);
     return singleton(() => {
       clearTimeout(id);
       params && unhandler?.(params[0]);
