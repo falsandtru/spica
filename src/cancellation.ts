@@ -137,7 +137,7 @@ class Internal<L> {
   }
   public close(reason?: unknown): void {
     if (this.reason.length !== 0) return;
-    this.reason = [, reason];
+    this.reason = [void 0, reason];
     this.future?.bind(AtomicPromise.reject(reason));
     this.isFinished = true;
   }

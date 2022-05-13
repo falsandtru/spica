@@ -15,6 +15,7 @@
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "suppressImplicitAnyIndexErrors": true,
+    "exactOptionalPropertyTypes": true,
     "noFallthroughCasesInSwitch": true,
     "noErrorTruncation": true,
     "rootDir": "./",

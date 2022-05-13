@@ -38,7 +38,7 @@ export class List<K, V = undefined> {
       capacity = Infinity;
     }
     this.capacity = capacity;
-    this.index = index;
+    this.index = index!;
     this.nodes = this.capacity <= BORDER ? Array(min(this.capacity, BORDER)) : {};
   }
   public readonly capacity: number;

@@ -80,24 +80,7 @@ export class ReadonlyURL<T extends string = string> implements Readonly<global.U
   // Bug: Error in dependents.
   // @ts-ignore
   private static readonly get = memoize((url: string, base: string | undefined): SharedURL =>
-    ({
-      url: new global.URL(url, base),
-      href: void 0,
-      resource: void 0,
-      origin: void 0,
-      protocol: void 0,
-      username: void 0,
-      password: void 0,
-      host: void 0,
-      hostname: void 0,
-      port: void 0,
-      path: void 0,
-      pathname: void 0,
-      search: void 0,
-      query: void 0,
-      hash: void 0,
-      fragment: void 0,
-    }),
+    ({ url: new global.URL(url, base) }),
     (url, base = '') => `${base.indexOf('\n') > -1 ? base.replace(/\n+/g, '') : base}\n${url}`,
     new Cache(10000));
   constructor(url: T, ...base:
@@ -137,8 +120,8 @@ export class ReadonlyURL<T extends string = string> implements Readonly<global.U
     searchParams: URLSearchParams | undefined;
   };
   public get href(): T {
-    return this[internal].share.href
-       ??= this[internal].share.url.href as any;
+    return (this[internal].share.href as T)
+       ??= this[internal].share.url.href as T;
   }
   public get resource(): string {
     return this[internal].share.resource
