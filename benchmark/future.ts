@@ -1,5 +1,5 @@
 import { benchmark } from './benchmark';
-import { AtomicFuture } from '..';
+import { AtomicFuture } from '../src/future';
 
 describe('Benchmark:', function () {
   this.timeout(10 * 1e3);

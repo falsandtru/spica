@@ -1,5 +1,5 @@
 import { benchmark } from './benchmark';
-import { AtomicPromise } from '../';
+import { AtomicPromise } from '../src/promise';
 import { Promise } from '../src/global';
 import Bluebird from 'bluebird';
 import { clock } from '../src/clock';

@@ -1,5 +1,5 @@
 import { benchmark } from './benchmark';
-import { Maybe, Just } from '../';
+import { Maybe, Just } from '../src/maybe';
 
 describe('Benchmark:', function () {
   this.timeout(10 * 1e3);

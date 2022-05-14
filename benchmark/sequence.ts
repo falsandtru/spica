@@ -1,5 +1,5 @@
 import { benchmark } from './benchmark';
-import { Sequence } from '../';
+import { Sequence } from '../src/sequence';
 
 describe('Benchmark:', function () {
   this.timeout(10 * 1e3);

@@ -1,6 +1,6 @@
 import { benchmark } from './benchmark';
-import { InvList } from '..';
-import { IxList } from '..';
+import { List as InvList } from '../src/invlist';
+import { List as IxList } from '../src/ixlist';
 import Yallist from 'yallist';
 
 describe('Benchmark:', function () {

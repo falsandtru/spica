@@ -1,6 +1,6 @@
 import { benchmark } from './benchmark';
-import { Coroutine } from '..';
-import { AtomicPromise } from '..';
+import { Coroutine } from '../src/coroutine';
+import { AtomicPromise } from '../src/promise';
 
 describe('Benchmark:', function () {
   this.timeout(30 * 1e3);

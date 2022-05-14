@@ -1,5 +1,5 @@
 import { benchmark } from './benchmark';
-import { Cache } from '../';
+import { Cache } from '../src/cache';
 import LRUCache from 'lru-cache';
 import { Math } from '../src/global';
 

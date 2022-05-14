@@ -1,5 +1,5 @@
 import { benchmark } from './benchmark';
-import { Either, Right } from '../';
+import { Either, Right } from '../src/either';
 
 describe('Benchmark:', function () {
   this.timeout(10 * 1e3);

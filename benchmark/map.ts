@@ -1,5 +1,6 @@
 import { benchmark } from './benchmark';
-import { DataMap, AttrMap } from '../';
+import { DataMap } from '../src/datamap';
+import { AttrMap } from '../src/attrmap';
 
 describe('Benchmark:', function () {
   this.timeout(10 * 1e3);

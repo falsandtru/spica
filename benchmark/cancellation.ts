@@ -1,5 +1,5 @@
 import { benchmark } from './benchmark';
-import { Cancellation } from '..';
+import { Cancellation } from '../src/cancellation';
 
 describe('Benchmark:', function () {
   this.timeout(10 * 1e3);

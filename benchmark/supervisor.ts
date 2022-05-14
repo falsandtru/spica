@@ -1,5 +1,5 @@
 import { benchmark } from './benchmark';
-import { Supervisor } from '../';
+import { Supervisor } from '../src/supervisor';
 
 describe('Benchmark:', function () {
   this.timeout(20 * 1e3);

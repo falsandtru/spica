@@ -1,5 +1,5 @@
 import { benchmark } from './benchmark';
-import { type, global } from '../';
+import { type } from '../src/type';
 
 describe('Benchmark:', function () {
   this.timeout(10 * 1e3);
