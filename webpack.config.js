@@ -26,13 +26,13 @@ module.exports = env => {
   const config = {
     mode: 'production',
     resolve: {
-      extensions: ['.ts'],
+      extensions: ['.ts', '.js'],
     },
     entry: Object.fromEntries(glob.sync('./src/*.ts', {
       ignore: './**/*{.d,.test}.ts',
     }).map(path => [path.match(/[\w.]+(?=\.)/)[0], path])),
     output: {
-      filename: 'bundle.js',
+      filename: 'index.js',
       path: path.resolve(__dirname, 'dist'),
       library: pkg.name,
       libraryTarget: 'umd',
@@ -40,10 +40,6 @@ module.exports = env => {
     },
     optimization: {
       minimize: false,
-    },
-    performance: {
-      maxEntrypointSize: Infinity,
-      maxAssetSize: Infinity,
     },
     module: {
       rules: [
@@ -106,6 +102,10 @@ module.exports = env => {
             },
           }),
         ],
+        performance: {
+          maxEntrypointSize: Infinity,
+          maxAssetSize: Infinity,
+        },
       });
     case 'test':
       return merge(config, {
@@ -126,12 +126,20 @@ module.exports = env => {
             },
           ],
         },
+        performance: {
+          maxEntrypointSize: Infinity,
+          maxAssetSize: Infinity,
+        },
       });
     case 'bench':
       return merge(config, {
         entry: glob.sync('./benchmark/**/*.ts', {
           ignore: './**/*.d.ts',
         }),
+        performance: {
+          maxEntrypointSize: Infinity,
+          maxAssetSize: Infinity,
+        },
       });
     case 'dist':
       return merge(config, {
@@ -149,6 +157,7 @@ module.exports = env => {
                   loader: 'ts-loader',
                   options: {
                     compilerOptions: {
+                      "declaration": true,
                       "rootDir": "src",
                       "outDir": "",
                     },

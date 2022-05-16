@@ -30,7 +30,7 @@
     "heap",
     "cache"
   ],
-  "main": "./dist/spica.js",
+  "main": "./dist/index.js",
   "files": [
     "dist",
     "index.*",
@@ -44,6 +44,7 @@
     "*.ts",
     "*.js",
     "*.json",
+    "*.map",
     "*.md",
     "NOTICE",
     "LICENSE"
