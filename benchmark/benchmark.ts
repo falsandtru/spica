@@ -1,3 +1,5 @@
+import Benchmark from 'benchmark';
+
 export function benchmark(name: string, proc: (done: () => void) => unknown, done: (err?: unknown) => void, options: Benchmark.Options = {}) {
   new Benchmark.Suite()
     .add({

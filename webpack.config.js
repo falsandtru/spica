@@ -71,6 +71,9 @@ module.exports = env => {
         extensions: ['ts'],
       }),
     ],
+    externals: {
+      benchmark: 'Benchmark',
+    },
   };
   switch (env.mode) {
     case 'dev':
