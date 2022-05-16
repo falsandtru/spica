@@ -51,10 +51,9 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - run: |
           npm install
-          gulp dist
+          npm run dist
           sed -i 's/"private":\ true/"private":\ false/' package.json
           sed -i -E 's/^dist\/?.*$//' .gitignore
-          cp -r src/* .
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
@@ -80,4 +79,4 @@ jobs:
           node-version: '14'
       - run: |
           npm install
-          xvfb-run --auto-servernum gulp bench
+          xvfb-run --auto-servernum npm run bench

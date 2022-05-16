@@ -1,44 +1,25 @@
 module.exports = function (config) {
   config.set({
-    basePath: '',
+    browsers: ['Chrome', 'Firefox'],
     frameworks: ['mocha'],
     files: [
-      { pattern: 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js', watched: false, served: false, included: true },
-      { pattern: 'node_modules/power-assert/build/power-assert.js', watched: true, served: true, included: true },
-      { pattern: 'node_modules/benchmark/benchmark.js', watched: true, served: true, included: true },
-      { pattern: 'dist/*.test.js', watched: true, served: true, included: true }
+      { pattern: 'https://cdn.jsdelivr.net/npm/power-assert@1.6.1/build/power-assert.js', watched: false, served: false, included: true, integrity: 'sha256-MuDC5CQFh3oWtiG0YE000HlkK08xAilD2v0ndZR+Kds=' },
+      { pattern: 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js', watched: false, served: false, included: true, integrity: 'sha512-WFN04846sdKMIP5LKNphMaWzU7YpMyCU245etK3g/2ARYbPK9Ub18eG+ljU96qKRCWh+quCY7yefSmlkQw1ANQ==' },
+      { pattern: 'https://cdnjs.cloudflare.com/ajax/libs/benchmark/2.1.4/benchmark.js', watched: false, served: false, included: true, integrity: 'sha512-XnVGk21Ij51MbU8XezQpkwZ1/GA8b5qmoVGIOdJLBYycutjkaeemipzRJP7P6mEJl99OfnweA7M3e4WLfuG7Aw==' },
+      { pattern: 'dist/**/*.{js,map}', watched: true, served: true, included: true },
     ],
-    exclude: [
-    ],
-    espowerPreprocessor: {
-      options: {
-        emitActualCode: false,
-        ignoreUpstreamSourceMap: true
-      }
+    reporters: ['dots', 'coverage'],
+    preprocessors: {
+      'dist/**/*.js': ['coverage'],
     },
-    reporters: ['dots'],
-    coverageIstanbulReporter: {
-      reports: ['html', 'lcovonly', 'text-summary'],
+    coverageReporter: {
       dir: 'coverage',
-      combineBrowserReports: true,
-      skipFilesWithNoCoverage: false,
-      verbose: false,
-      'report-config': {
-        html: {
-          subdir: 'html',
-        },
-      },
-      instrumentation: {
-        'default-excludes': false,
-      },
+      reporters: [
+        { type: 'html', subdir: browser => browser.split(/\s/)[0] },
+        { type: 'text-summary', subdir: '.', file: 'summary.txt' },
+      ],
     },
-    coverageIstanbulInstrumenter: {
-      esModules: true,
-    },
-    autoWatch: true,
-    autoWatchBatchDelay: 500,
-    browserDisconnectTimeout: 30000,
-    browsers: ['Chrome'],
-    singleRun: true,
+    browserDisconnectTimeout: 60 * 1e3,
+    browserNoActivityTimeout: 90 * 1e3,
   });
 };
