@@ -1,3 +1,4 @@
+import { global } from './global';
 import { ObjectKeys } from './alias';
 import { URL, StandardURL, standardize } from './url';
 import { Sequence } from './sequence';
@@ -9,7 +10,7 @@ import { Cache } from './cache';
 export function router<T>(config: Record<string, (path: string) => T>): (url: string) => T {
   const { compare } = router.helpers();
   return (url: string) => {
-    const { path, pathname } = new URL(standardize(url, window.location.href));
+    const { path, pathname } = new URL(standardize(url, global.location.href));
     return Sequence.from(ObjectKeys(config).filter(p => p[0] === '/').sort().reverse())
       .filter(curry(flip(compare))(pathname))
       .map(pattern => config[pattern])
