@@ -82,7 +82,7 @@
   },
   "scripts": {
     "update": "ncu -u && npm i --no-shrinkwrap",
-    "dev": "concurrently \"webpack --env mode=dev -w\" \"karma start --auto-watch\"",
+    "dev": "concurrently \"webpack --env mode=test -w\" \"karma start --auto-watch\"",
     "test": "webpack --env mode=test && karma start --single-run --concurrency 1",
     "bench": "webpack --env mode=bench && karma start --single-run --concurrency 1 --reporters dots",
     "lint": "webpack --env mode=lint",

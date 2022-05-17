@@ -1,4 +1,5 @@
-/// <reference types="./global" />
+import './global.type.ts';
+
 const global: { undefined: undefined } & typeof globalThis = void 0
   || typeof globalThis !== 'undefined' && globalThis
   // @ts-ignore
