@@ -34,7 +34,7 @@ module.exports = env => {
     output: {
       filename: 'index.js',
       path: path.resolve(__dirname, 'dist'),
-      library: pkg.name,
+      //library: pkg.name,
       libraryTarget: 'umd',
       globalObject: 'globalThis',
     },
@@ -146,6 +146,9 @@ module.exports = env => {
       });
     case 'dist':
       return merge(config, {
+        // Awaiting https://github.com/webpack/webpack/issues/5866
+        // to avoid duplicate bundling of modules.
+        //
         output: {
           filename: '[name].js',
           path: path.resolve(__dirname),

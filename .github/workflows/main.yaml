@@ -51,9 +51,10 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - run: |
           npm install
-          npm run dist
+          #npm run dist
           sed -i 's/"private":\ true/"private":\ false/' package.json
           sed -i -E 's/^dist\/?.*$//' .gitignore
+          cp -r src/* .
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
