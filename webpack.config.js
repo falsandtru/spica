@@ -74,6 +74,15 @@ module.exports = env => {
   switch (env.mode) {
     case 'test':
       return merge(config);
+    case 'lint':
+      return merge(config, {
+        entry: glob.sync('./!(node_modules)**/*.ts'),
+        plugins: [
+          new ESLintPlugin({
+            extensions: ['ts'],
+          }),
+        ],
+      });
     case 'bench':
       return merge(config, {
         entry: glob.sync('./benchmark/**/*.ts'),
@@ -92,15 +101,6 @@ module.exports = env => {
             },
           ],
         },
-      });
-    case 'lint':
-      return merge(config, {
-        entry: glob.sync('./!(node_modules)**/*.ts'),
-        plugins: [
-          new ESLintPlugin({
-            extensions: ['ts'],
-          }),
-        ],
       });
     // Awaiting https://github.com/webpack/webpack/issues/5866
     // to avoid duplicate bundling of modules.

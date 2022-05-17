@@ -15,6 +15,7 @@
       "error",
       {
         "ignoreErrors": false,
+        "attackTimeout": null,
         "timeout": 30000
       }
     ]
