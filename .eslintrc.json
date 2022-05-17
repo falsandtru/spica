@@ -14,7 +14,8 @@
     "redos/no-vulnerable": [
       "error",
       {
-        "ignoreErrors": false
+        "ignoreErrors": false,
+        "timeout": 20000
       }
     ]
   },
