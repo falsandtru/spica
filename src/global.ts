@@ -1,4 +1,4 @@
-/// <reference path="./global.d.ts" />
+/// <reference types="./global" />
 const global: { undefined: undefined } & typeof globalThis = void 0
   || typeof globalThis !== 'undefined' && globalThis
   // @ts-ignore

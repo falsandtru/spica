@@ -21,25 +21,25 @@ module.exports = env => {
         },
       },
     },
-    plugins: 'replace',
+    plugins: 'append',
   });
   const config = {
     mode: 'production',
+    externals: {
+      benchmark: 'Benchmark',
+    },
     resolve: {
       extensions: ['.ts', '.js'],
     },
-    entry: Object.fromEntries(glob.sync('./src/*.ts', {
+    entry: glob.sync('./src/*.ts', {
       ignore: './**/*{.d,.test}.ts',
-    }).map(path => [path.match(/[\w.]+(?=\.)/)[0], path])),
+    }),
     output: {
       filename: 'index.js',
       path: path.resolve(__dirname, 'dist'),
       //library: pkg.name,
       libraryTarget: 'umd',
       globalObject: 'globalThis',
-    },
-    optimization: {
-      minimize: false,
     },
     module: {
       rules: [
@@ -49,9 +49,6 @@ module.exports = env => {
           use: [
             {
               loader: 'babel-loader',
-              options: {
-                plugins: ['babel-plugin-unassert'],
-              },
             },
             {
               loader: 'ts-loader',
@@ -67,12 +64,13 @@ module.exports = env => {
       new webpack.BannerPlugin({
         banner: `${pkg.name} v${pkg.version} ${pkg.repository.url} | (c) 2015, ${pkg.author} | ${pkg.license} License`,
       }),
-      new ESLintPlugin({
-        extensions: ['ts'],
-      }),
     ],
-    externals: {
-      benchmark: 'Benchmark',
+    performance: {
+      maxEntrypointSize: Infinity,
+      maxAssetSize: Infinity,
+    },
+    optimization: {
+      minimize: false,
     },
   };
   switch (env.mode) {
@@ -81,93 +79,27 @@ module.exports = env => {
         entry: glob.sync('./{src,test}/**/*.ts', {
           ignore: './**/*.d.ts',
         }),
-        module: {
-          rules: [
-            {
-              test: /\.ts$/,
-              exclude: /node_modules/,
-              use: [
-                {
-                  loader: 'babel-loader',
-                  options: {},
-                },
-              ],
-            },
-          ],
-        },
-        plugins: [
-          new ESLintPlugin({
-            extensions: ['ts'],
-            overrideConfig: {
-              rules: {
-                'redos/no-vulnerable': 'off',
-              },
-            },
-          }),
-        ],
-        performance: {
-          maxEntrypointSize: Infinity,
-          maxAssetSize: Infinity,
-        },
       });
     case 'test':
       return merge(config, {
         entry: glob.sync('./{src,test}/**/*.ts', {
           ignore: './**/*.d.ts',
         }),
-        module: {
-          rules: [
-            {
-              test: /\.ts$/,
-              exclude: /node_modules/,
-              use: [
-                {
-                  loader: 'babel-loader',
-                  options: {},
-                },
-              ],
-            },
-          ],
-        },
-        performance: {
-          maxEntrypointSize: Infinity,
-          maxAssetSize: Infinity,
-        },
       });
     case 'bench':
       return merge(config, {
         entry: glob.sync('./benchmark/**/*.ts', {
           ignore: './**/*.d.ts',
         }),
-        performance: {
-          maxEntrypointSize: Infinity,
-          maxAssetSize: Infinity,
-        },
-      });
-    case 'dist':
-      return merge(config, {
-        // Awaiting https://github.com/webpack/webpack/issues/5866
-        // to avoid duplicate bundling of modules.
-        //
-        output: {
-          filename: '[name].js',
-          path: path.resolve(__dirname),
-        },
         module: {
           rules: [
             {
               test: /\.ts$/,
-              exclude: /node_modules/,
               use: [
                 {
-                  loader: 'ts-loader',
+                  loader: 'babel-loader',
                   options: {
-                    compilerOptions: {
-                      "declaration": true,
-                      "rootDir": "src",
-                      "outDir": "",
-                    },
-                    onlyCompileBundledFiles: true,
+                    plugins: ['babel-plugin-unassert'],
                   },
                 },
               ],
@@ -175,5 +107,54 @@ module.exports = env => {
           ],
         },
       });
+    case 'lint':
+      return merge(config, {
+        entry: glob.sync('./!(node_modules)**/*.ts', {
+          ignore: './**/*.d.ts',
+        }),
+        plugins: [
+          new ESLintPlugin({
+            extensions: ['ts'],
+          }),
+        ],
+      });
+    // Awaiting https://github.com/webpack/webpack/issues/5866
+    // to avoid duplicate bundling of modules.
+    //case 'dist':
+    //  return merge(config, {
+    //    entry: Object.fromEntries(glob.sync('./src/*.ts', {
+    //      ignore: './**/*{.d,.test}.ts',
+    //    }).map(path => [path.match(/[\w.]+(?=\.)/)[0], path])),
+    //    output: {
+    //      filename: '[name].js',
+    //      path: path.resolve(__dirname),
+    //    },
+    //    module: {
+    //      rules: [
+    //        {
+    //          loader: 'babel-loader',
+    //          options: {
+    //            plugins: ['babel-plugin-unassert'],
+    //          },
+    //        },
+    //        {
+    //          test: /\.ts$/,
+    //          use: [
+    //            {
+    //              loader: 'ts-loader',
+    //              options: {
+    //                compilerOptions: {
+    //                  "declaration": true,
+    //                  "rootDir": "src",
+    //                  "outDir": "",
+    //                },
+    //                onlyCompileBundledFiles: true,
+    //              },
+    //            },
+    //          ],
+    //        },
+    //      ],
+    //    },
+    //  });
   }
 };
