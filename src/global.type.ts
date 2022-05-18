@@ -1,3 +1,4 @@
 // @ts-ignore
+var globalThis: typeof globalThis;
+// @ts-ignore
 import global = globalThis;
-declare var global: typeof globalThis;
