@@ -116,14 +116,14 @@ module.exports = env => {
     //    module: {
     //      rules: [
     //        {
-    //          loader: 'babel-loader',
-    //          options: {
-    //            plugins: ['babel-plugin-unassert'],
-    //          },
-    //        },
-    //        {
     //          test: /\.ts$/,
     //          use: [
+    //            {
+    //              loader: 'babel-loader',
+    //              options: {
+    //                plugins: ['babel-plugin-unassert'],
+    //              },
+    //            },
     //            {
     //              loader: 'ts-loader',
     //              options: {
