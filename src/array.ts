@@ -102,13 +102,3 @@ export function splice<a>(as: a[], index: number, count?: number, ...inserts: a[
     ? as.splice(index, count!, ...inserts)
     : as.splice(index);
 }
-
-export function join(as: readonly (string | number)[], sep = ''): string {
-  let acc = '';
-  for (let i = 0; i < as.length; ++i) {
-    acc += i === 0
-      ? as[i]
-      : sep + as[i];
-  }
-  return acc;
-}
