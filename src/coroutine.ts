@@ -55,7 +55,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     var res!: (v: T | AtomicPromise<T>) => void;
     this[internal] = new Internal(opts);
     let count = 0;
-    this[Coroutine.init] = async () => {
+    this[init] = async () => {
       const core = this[internal];
       if (!core.isAlive) return;
       if (count !== 0) return;
@@ -158,8 +158,8 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     }
     if (this[internal].settings.run) {
       this[internal].settings.delay
-        ? tick(this[Coroutine.init])
-        : this[Coroutine.init]();
+        ? tick(this[init])
+        : this[init]();
     }
   }
   public readonly [internal]: Internal<T, R, S>;
