@@ -22,6 +22,8 @@ export interface Cancellee<L = undefined> extends Promise<L> {
 }
 type Listener<L> = (reason: L) => void;
 
+const internal = Symbol.for('spica/cancellation::internal');
+
 export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, AtomicPromise<L> {
   public readonly [Symbol.toStringTag]: string = 'Cancellation';
   constructor(cancellees: Iterable<Cancellee<L>> = []) {
@@ -29,47 +31,47 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
       cancellee.register(this.cancel);
     }
   }
-  readonly #internal: Internal<L> = new Internal();
+  public readonly [internal]: Internal<L> = new Internal();
   public get [promiseinternal](): PromiseInternal<L> {
-    return this.#internal.promise[promiseinternal];
+    return this[internal].promise[promiseinternal];
   }
   public get isAlive(): boolean {
-    return this.#internal.reason.length === 0;
+    return this[internal].reason.length === 0;
   }
   public get isCancelled(): boolean {
-    return this.#internal.reason.length === 1;
+    return this[internal].reason.length === 1;
   }
   public get isClosed(): boolean {
-    return this.#internal.reason.length === 2;
+    return this[internal].reason.length === 2;
   }
   public get isFinished(): boolean {
-    return this.#internal.reason.length !== 0;
+    return this[internal].reason.length !== 0;
   }
   public get register(): (listener: Listener<L>) => () => void {
     return (listener: Listener<L>) =>
-      this.#internal.register(listener);
+      this[internal].register(listener);
   }
   public get cancel(): Canceller<L>['cancel'] {
     return (reason?: L) =>
-      this.#internal.cancel(reason);
+      this[internal].cancel(reason);
   }
   public get close(): (reason?: unknown) => void {
     return (reason?: unknown) =>
-      this.#internal.close(reason);
+      this[internal].close(reason);
   }
   public get then(): AtomicPromise<L>['then'] {
-    return this.#internal.promise.then;
+    return this[internal].promise.then;
   }
   public get catch(): AtomicPromise<L>['catch'] {
-    return this.#internal.promise.catch;
+    return this[internal].promise.catch;
   }
   public get finally(): AtomicPromise<L>['finally'] {
-    return this.#internal.promise.finally;
+    return this[internal].promise.finally;
   }
   public get promise(): <T>(val: T) => AtomicPromise<T> {
     return <T>(val: T): AtomicPromise<T> =>
       this.isCancelled
-        ? AtomicPromise.reject(this.#internal.reason[0])
+        ? AtomicPromise.reject(this[internal].reason[0])
         : AtomicPromise.resolve(val);
   }
   public get maybe(): <T>(val: T) => Maybe<T> {
@@ -85,7 +87,7 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
       Right<L, R>(val)
         .bind(val =>
           this.isCancelled
-            ? Left(this.#internal.reason[0] as L)
+            ? Left(this[internal].reason[0] as L)
             : Right(val));
   }
 }

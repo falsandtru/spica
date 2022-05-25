@@ -3,20 +3,22 @@ import { AtomicFuture } from './future';
 
 const fail = () => AtomicPromise.reject(new Error('Spica: Channel: Closed.'));
 
+const internal = Symbol.for('spica/channel::internal');
+
 export class Channel<T = undefined> implements AsyncIterable<T> {
   constructor(
     capacity: number = 0,
   ) {
     assert(capacity >= 0);
-    this.#internal = new Internal(capacity);
+    this[internal] = new Internal(capacity);
   }
-  readonly #internal: Internal<T>;
+  public readonly [internal]: Internal<T>;
   public get isAlive(): boolean {
-    return this.#internal.isAlive;
+    return this[internal].isAlive;
   }
   public close(finalizer?: (msgs: T[]) => void): void {
     if (!this.isAlive) return;
-    const core = this.#internal;
+    const core = this[internal];
     const { buffer, producers, consumers } = core;
     core.isAlive = false;
     while (producers.length || consumers.length) {
@@ -32,7 +34,7 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
   public put(this: Channel<undefined>, msg?: T): AtomicPromise<undefined>;
   public put(msg: T): AtomicPromise<undefined> {
     if (!this.isAlive) return fail();
-    const { capacity, buffer, producers, consumers } = this.#internal;
+    const { capacity, buffer, producers, consumers } = this[internal];
     switch (true) {
       case buffer.length < capacity:
       case consumers.length > 0:
@@ -52,7 +54,7 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
   }
   public take(): AtomicPromise<T> {
     if (!this.isAlive) return fail();
-    const { buffer, producers, consumers } = this.#internal;
+    const { buffer, producers, consumers } = this[internal];
     switch (true) {
       case buffer.length > 0:
         assert(consumers.length === 0);
@@ -72,7 +74,7 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
     }
   }
   public get size(): number {
-    return this.#internal.buffer.length;
+    return this[internal].buffer.length;
   }
   public async *[Symbol.asyncIterator](): AsyncGenerator<T, undefined, undefined> {
     try {
