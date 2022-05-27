@@ -204,6 +204,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
             LRU.head!.value.overlap = OVL.unshift(LRU.head!.value);
             assert(OVL.length <= LRU.length);
           }
+          // fallthrough
         default:
           assert(LRU.last);
           target = LRU.last! !== skip

@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 export function duff(count: number, proc: (index: number) => void): void {
   if (count > 0) {
     let i = 0, m = count % 8, d = (count - m) / 8;
