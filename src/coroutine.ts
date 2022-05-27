@@ -1,6 +1,6 @@
 import type { Structural, DeepImmutable, DeepRequired } from './type';
-import { Array, Promise, Error } from './global';
-import { ObjectAssign, ObjectDefineProperty, ObjectGetOwnPropertyDescriptor } from './alias';
+import { Array, Object, Promise, Error } from './global';
+import { ObjectAssign } from './alias';
 import { tick } from './clock';
 import { AtomicPromise, isPromiseLike } from './promise';
 import { Future, AtomicFuture } from './future';
@@ -120,7 +120,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
       for (const prop of Array<string | symbol>().concat(core.settings.trigger)) {
         if (prop in this && this.hasOwnProperty(prop)) continue;
         if (prop in this) {
-          ObjectDefineProperty(this, prop, {
+          Object.defineProperty(this, prop, {
             set(this: Coroutine, value: unknown) {
               delete this[prop];
               this[prop] = value;
@@ -136,15 +136,15 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
           });
         }
         else {
-          const desc = ObjectGetOwnPropertyDescriptor(this, prop) || {
+          const desc = Object.getOwnPropertyDescriptor(this, prop) || {
             value: this[prop],
             enumerable: true,
             configurable: true,
             writable: true,
           };
-          ObjectDefineProperty(this, prop, {
+          Object.defineProperty(this, prop, {
             set(this: Coroutine, value: unknown) {
-              ObjectDefineProperty(this, prop, { ...desc, value });
+              Object.defineProperty(this, prop, { ...desc, value });
               this[init]();
             },
             get(this: Coroutine) {

@@ -14,8 +14,8 @@ describe('Unit: lib/assign', () => {
           b?: 0;
         };
       }
-      assert((): Setting => extend({} as Setting, {} as Option));
-      assert((): Setting => extend({}, {} as Setting, {} as Option));
+      (): Setting => extend({} as Setting, {} as Option);
+      (): Setting => extend({}, {} as Setting, {} as Option);
     });
 
   });

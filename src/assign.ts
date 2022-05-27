@@ -1,5 +1,5 @@
 import { Object } from './global';
-import { hasOwnProperty, ObjectCreate, ObjectKeys } from './alias';
+import { hasOwnProperty, ObjectCreate } from './alias';
 import { type, isPrimitive } from './type';
 import { push } from './array';
 
@@ -102,10 +102,10 @@ export const inherit = template((prop, target, source) => {
 export function template(strategy: (prop: string, target: object, source: object) => void) {
   return walk;
 
-  function walk<T extends U, U extends object>(target: Partial<U>, source1: T, source2: Partial<U>, ...sources: Partial<U>[]): T;
   function walk<T extends U, U extends object>(target: T, source: Partial<U>, ...sources: Partial<U>[]): T;
-  function walk<T extends object>(target: Partial<T>, source1: T, source2: Partial<T>, ...sources: Partial<T>[]): T;
+  function walk<T extends U, U extends object>(target: Partial<U>, source1: T, source2: Partial<U>, ...sources: Partial<U>[]): T;
   function walk<T extends object>(target: T, ...sources: Partial<T>[]): T;
+  function walk<T extends object>(target: Partial<T>, source1: T, source2: Partial<T>, ...sources: Partial<T>[]): T;
   function walk<T extends object>(target: T, ...sources: T[]): T {
     assert(!isPrimitive(target));
     if (isPrimitive(target)) return target;
@@ -115,7 +115,7 @@ export function template(strategy: (prop: string, target: object, source: object
       assert(!isPrimitive(source));
       if (isPrimitive(source)) continue;
       assert(!isPrimitive(target) && !isPrimitive(source));
-      const keys = ObjectKeys(source);
+      const keys = Object.keys(source);
       for (let i = 0; i < keys.length; ++i) {
         strategy(keys[i], target, source);
       }

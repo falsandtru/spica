@@ -1,5 +1,4 @@
-import { Symbol, Set, Promise } from './global';
-import { ObjectEntries } from './alias';
+import { Symbol, Object, Set, Promise } from './global';
 
 interface AsyncIterable<T = unknown, U = any, S = unknown> {
   [Symbol.asyncIterator](): AsyncIterator<T, U, S>;
@@ -25,7 +24,7 @@ type Selection<T extends Channels> =
 export async function* select<T extends Channels>(
   channels: T,
 ): AsyncGenerator<Selection<T>, undefined, undefined> {
-  const reqs = new Set(ObjectEntries(channels)
+  const reqs = new Set(Object.entries(channels)
     .map(([name, chan]) => (
       chan = typeof chan === 'function' ? chan() : chan,
       take(name, chan[Symbol.asyncIterator]()))));

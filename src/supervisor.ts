@@ -1,6 +1,6 @@
 import type { DeepImmutable, DeepRequired } from './type';
 import { global, Infinity, Symbol, Object, Set, Map, WeakSet, setTimeout, clearTimeout, Error } from './global';
-import { isFinite, ObjectAssign, ObjectFreeze } from './alias';
+import { isFinite, ObjectAssign } from './alias';
 import { tick } from './clock';
 import { Coroutine, CoroutineInterface, isCoroutine } from './coroutine';
 import { AtomicPromise } from './promise';
@@ -75,7 +75,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     this.available = false;
     this.clear(reason);
     assert(this.workers.size === 0);
-    ObjectFreeze(this.workers);
+    Object.freeze(this.workers);
     while (this.messages.length > 0) {
       const [names, param, , , timer] = this.messages.shift()!;
       const name: N | undefined = names[Symbol.iterator]().next().value;
@@ -87,7 +87,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     this.isAlive = false;
     // @ts-ignore #31251
     this.constructor.instances.delete(this);
-    ObjectFreeze(this);
+    Object.freeze(this);
     assert(this.isAlive === false);
     assert(this.available === false);
     this.settings.destructor(reason);
@@ -417,7 +417,7 @@ class Worker<N extends string, P, R, S> {
     assert(this.isAlive === true);
     this.isAlive = false;
     this.available = false;
-    ObjectFreeze(this);
+    Object.freeze(this);
     assert(this.isAlive === false);
     assert(this.available === false);
     try {

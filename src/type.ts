@@ -1,5 +1,5 @@
 import { Symbol } from './global';
-import { ObjectGetPrototypeOf } from './alias';
+import { toString, ObjectGetPrototypeOf } from './alias';
 
 type Falsy = undefined | false | 0 | '' | null | void;
 type Unique = typeof Unique;
@@ -232,7 +232,6 @@ export type DeepMutable<T, E = never> =
   { -readonly [P in keyof T]: DeepMutable<T[P], E>; } :
   { -readonly [P in keyof T]: DeepMutable<T[P], E>; };
 
-const toString = Object.prototype.toString.call.bind(Object.prototype.toString) as (target: unknown) => string;
 const ObjectPrototype = Object.prototype;
 const ArrayPrototype = Array.prototype;
 export function type(value: unknown): string {
