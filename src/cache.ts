@@ -123,8 +123,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private readonly space: number;
   private SIZE = 0;
   // 1041 days < 2 ** 53 / 100,000,000 / 3600 / 24.
-  // Hit counter only for LFU.
-  private clock = Number.MIN_SAFE_INTEGER;
+  // LFU access counter only for LFU.
+  private clockF = Number.MIN_SAFE_INTEGER;
   // LRU access counter only for LRU.
   private clockR = Number.MIN_SAFE_INTEGER;
   private memory = new Map<K, Record<K, V>>();
@@ -163,7 +163,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private ensure(margin: number, skip?: Node<Index<K>>): void {
     if (skip) {
       // Prevent wrong disposal of `skip`.
-      skip.value.clock = this.clock;
+      skip.value.clock = this.clockF;
       skip.value.expiry = Infinity;
     }
     let size = skip?.value.size ?? 0;
@@ -178,7 +178,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       switch (true) {
         // NOTE: The following conditions must be ensured that they won't be true if `lastNode` is `skip`.
         // LRUの下限を5%以上確保すればわずかな性能低下と引き換えにクロックを消せる
-        case lastIndex && lastIndex.clock < this.clock - this.life:
+        case lastIndex && lastIndex.clock < this.clockF - this.life:
         case lastIndex && lastIndex.expiry !== Infinity && lastIndex.expiry < now():
           target = lastNode!.list === OVL
             ? lastNode!.value.node!
@@ -242,7 +242,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       assert(this.memory.has(key));
       index.clock = index.region === 'LRU'
         ? ++this.clockR
-        : ++this.clock;
+        : ++this.clockF;
       index.expiry = expiry;
       this.SIZE += size - index.size;
       assert(0 < this.size && this.size <= this.space);
@@ -392,7 +392,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       return true;
     }
     assert(LFU.length !== this.capacity);
-    index.clock = ++this.clock;
+    index.clock = ++this.clockF;
     index.region = 'LFU';
     index.overlap?.delete();
     LFU.unshiftNode(node);
@@ -403,7 +403,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { LFU } = this.indexes;
     if (node.list !== LFU) return false;
     ++this.stats[index.region][0];
-    index.clock = ++this.clock;
+    index.clock = ++this.clockF;
     node.moveToHead();
     return true;
   }
