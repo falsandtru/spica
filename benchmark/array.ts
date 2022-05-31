@@ -16,8 +16,6 @@ describe('Benchmark:', function () {
     });
 
     it('1000', function (done) {
-      this.timeout(20 * 1e3);
-
       const r = `${rnd0Z(999)}-`.split('');
       benchmark('array indexOf 1000', () => r.indexOf('-'), done);
     });

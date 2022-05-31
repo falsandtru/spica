@@ -86,7 +86,7 @@
     "dev": "concurrently \"webpack --env mode=test -w\" \"karma start --auto-watch --reporters dots\"",
     "test": "webpack --env mode=test && karma start --single-run --concurrency 1",
     "lint": "webpack --env mode=lint",
-    "bench": "webpack --env mode=bench && karma start --single-run --concurrency 1 --reporters dots",
+    "bench": "webpack --env mode=bench && karma start --single-run --concurrency 1 --reporters dots --browsers Chrome",
     "dist": "webpack --env mode=dist"
   },
   "author": "falsandtru",

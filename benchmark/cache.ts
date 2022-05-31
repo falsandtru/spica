@@ -109,6 +109,32 @@ describe('Benchmark:', function () {
       });
     }
 
+    for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
+      it(`LRU simulation ${length.toLocaleString('en')} URL`, function (done) {
+        const capacity = length;
+        const cache = new LRUCache<number, URL>({ max: capacity });
+        for (let i = 0; i < capacity; ++i) cache.set(i, new URL(`https://localhost/${i}`));
+        benchmark(`LRUCache simulation ${length.toLocaleString('en')} URL`, () => {
+          const key = Math.random() < 0.4
+            ? Math.random() * capacity * 1 | 0
+            : Math.random() * capacity * 9 + capacity | 0;
+          cache.get(key) ?? cache.set(key, new URL(`https://localhost/${key}`));
+        }, done);
+      });
+
+      it(`DWC simulation ${length.toLocaleString('en')} URL`, function (done) {
+        const capacity = length;
+        const cache = new Cache<number, URL>(capacity);
+        for (let i = 0; i < capacity; ++i) cache.set(i, new URL(`https://localhost/${i}`));
+        benchmark(`DW-Cache simulation ${length.toLocaleString('en')} URL`, () => {
+          const key = Math.random() < 0.4
+            ? Math.random() * capacity * 1 | 0
+            : Math.random() * capacity * 9 + capacity | 0;
+          cache.get(key) ?? cache.set(key, new URL(`https://localhost/${key}`));
+        }, done);
+      });
+    }
+
   });
 
 });
