@@ -7,7 +7,7 @@ module.exports = function (config) {
       { pattern: 'https://cdnjs.cloudflare.com/ajax/libs/benchmark/2.1.4/benchmark.js', watched: false, served: false, included: true, integrity: 'sha512-XnVGk21Ij51MbU8XezQpkwZ1/GA8b5qmoVGIOdJLBYycutjkaeemipzRJP7P6mEJl99OfnweA7M3e4WLfuG7Aw==' },
       { pattern: 'dist/**/*.{js,map}', watched: true, served: true, included: true },
     ],
-    reporters: ['dots', 'coverage'],
+    reporters: ['dots'],
     preprocessors: {
       'dist/**/*.js': ['coverage'],
     },

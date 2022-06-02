@@ -83,10 +83,10 @@
   },
   "scripts": {
     "update": "ncu -u && npm i --no-shrinkwrap",
-    "dev": "concurrently \"webpack --env mode=test -w\" \"karma start --auto-watch --reporters dots\"",
-    "test": "webpack --env mode=test && karma start --single-run --concurrency 1",
+    "dev": "concurrently \"webpack --env mode=test -w\" \"karma start --auto-watch\"",
+    "test": "webpack --env mode=test && karma start --single-run --concurrency 1 --reporters dots,coverage",
     "lint": "webpack --env mode=lint",
-    "bench": "webpack --env mode=bench && karma start --single-run --concurrency 1 --reporters dots --browsers Chrome",
+    "bench": "webpack --env mode=bench && karma start --single-run --concurrency 1 --browsers Chrome",
     "dist": "webpack --env mode=dist"
   },
   "author": "falsandtru",
