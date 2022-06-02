@@ -386,7 +386,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { LRU, LFU } = this.indexes;
     ++this.stats[index.region][0];
     // Prevent LFU destruction.
-    if (!index.overlap && index.clock >= this.clockR - LRU.length / 3 && this.capacity > 3) {
+    // 範囲を広げるとS3でスコアが下がるので狭める
+    if (!index.overlap && index.clock >= this.clockR - LRU.length / 30 && this.capacity > 3) {
       index.clock = ++this.clockR;
       node.moveToHead();
       return true;
