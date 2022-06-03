@@ -409,7 +409,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC hit rate', dwchit * 100 / repeat);
       console.debug('DWC ratio', dwc['ratio'], dwc['indexes'].LFU.length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit rate ratio', `${dwchit / lruhit * 100 | 0}%`);
-      assert(dwchit / lruhit * 100 > 89);
+      assert(dwchit / lruhit * 100 > 88);
     });
 
     it('rate uneven 100 sequential', function () {
@@ -513,7 +513,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC hit rate', dwchit * 100 / repeat);
       console.debug('DWC ratio', dwc['ratio'], dwc['indexes'].LFU.length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit rate ratio', `${dwchit / lruhit * 100 | 0}%`);
-      assert(dwchit / lruhit * 100 > 200);
+      assert(dwchit / lruhit * 100 > 195);
     });
 
   });

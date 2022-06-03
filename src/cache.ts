@@ -1,4 +1,4 @@
-import { Infinity, Number, Map } from './global';
+import { Infinity, Map } from './global';
 import { now } from './clock';
 import { IterableCollection } from './collection';
 import { List, Node } from './invlist';
@@ -7,25 +7,10 @@ import { tuple } from './tuple';
 
 // Dual Window Cache
 
-// Note: The logical clocks of a cache will overflow after 1041 days in 100,000,000 ops/sec.
-
 /*
-キャッシュ比率をLFU論理寿命、LFUヒット率変化率、LRU下限により実験的に調整しているがこれらの要否は後で判断する。
-
-この実装はオーバーヘッド削減を優先して論理クロックのリセットを実装していないが
-他の高速な言語でこれが問題となる場合はクロックのオーバーフローを利用して補正処理を行う方法が考えられ
-この場合十分大きなクロック上では世代の混同が生じる前にキャッシュの更新または破棄が完了すると期待でき
-わずかに前世代のキャッシュが混入したとしても一時的にわずかにキャッシュ効率が低下する程度の影響しかない。
-
-```
-assert(max(this.clock) > this.life * 10);
-const offset = this.clock >= 0 && LFU.last.clock >= 0
-  ? 0
-  : this.life;
-if (LFU.last.clock + offset < this.clock - this.life + offset) {
-  LFU.pop();
-}
-```
+LFU論理寿命：小容量で小効果のみにつきLRU下限で代替し廃止
+LRU下限：小容量で大効果につき採用
+LFUヒット率変化率：効果確認できないが必要と思われるので残置
 */
 
 /*
@@ -45,24 +30,9 @@ JavaScriptにおける需要を満たさない懸念がある。
 
 */
 
-/*
-LRUとの比較
-
-- JS
-  - URL/DOM生成1回相当のコスト＋ヒット率2倍ではLRU優位
-  - URL/DOM生成2回相当のコスト＋ヒット率2倍で同等
-  - LRUに破壊的なアクセスパターンでDWC優位
-  - LRUより高効率のキャッシュライブラリは他にないため効率ではDWCが独占
-- Go, Rust, etc.
-  - オーバーヘッドの差が未知数
-  - 高速なLRUと高効率なTinyLFUなどとの間で比較される
-
-*/
-
 interface Index<K> {
   readonly key: K;
   size: number;
-  clock: number;
   expiry: number;
   region: 'LRU' | 'LFU';
   node?: Node<Index<K>>;
@@ -78,7 +48,6 @@ export namespace Cache {
     readonly capacity?: number;
     readonly space?: number;
     readonly age?: number;
-    readonly life?: number;
     readonly limit?: number;
     readonly disposer?: (value: V, key: K) => void;
     readonly capture?: {
@@ -104,14 +73,12 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.capacity = this.settings.capacity!;
     if (this.capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     this.space = this.settings.space!;
-    this.life = this.capacity * this.settings.life!;
     this.limit = this.settings.limit!;
   }
   private readonly settings: Cache.Options<K, V> = {
     capacity: 0,
     space: Infinity,
     age: Infinity,
-    life: 10,
     limit: 95,
     capture: {
       delete: true,
@@ -119,14 +86,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     },
   };
   private readonly capacity: number;
-  private readonly life: number;
   private readonly space: number;
   private SIZE = 0;
-  // 1041 days < 2 ** 53 / 100,000,000 / 3600 / 24.
-  // LFU access counter only for LFU.
-  private clockF = Number.MIN_SAFE_INTEGER;
-  // LRU access counter only for LRU.
-  private clockR = Number.MIN_SAFE_INTEGER;
   private memory = new Map<K, Record<K, V>>();
   private readonly indexes = {
     LRU: new List<Index<K>>(),
@@ -163,7 +124,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private ensure(margin: number, skip?: Node<Index<K>>): void {
     if (skip) {
       // Prevent wrong disposal of `skip`.
-      skip.value.clock = this.clockF;
       skip.value.expiry = Infinity;
     }
     let size = skip?.value.size ?? 0;
@@ -177,8 +137,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       let target: Node<Index<K>>;
       switch (true) {
         // NOTE: The following conditions must be ensured that they won't be true if `lastNode` is `skip`.
-        // LRUの下限を5%以上確保すればわずかな性能低下と引き換えにクロックを消せる
-        case lastIndex && lastIndex.clock < this.clockF - this.life:
         case lastIndex && lastIndex.expiry !== Infinity && lastIndex.expiry < now():
           target = lastNode!.list === OVL
             ? lastNode!.value.node!
@@ -240,9 +198,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       const index = node.value;
       this.ensure(size, node);
       assert(this.memory.has(key));
-      index.clock = index.region === 'LRU'
-        ? ++this.clockR
-        : ++this.clockF;
       index.expiry = expiry;
       this.SIZE += size - index.size;
       assert(0 < this.size && this.size <= this.space);
@@ -262,7 +217,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       index: LRU.unshift({
         key,
         size,
-        clock: ++this.clockR,
         expiry,
         region: 'LRU',
       }),
@@ -383,17 +337,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private accessLRU(node: Node<Index<K>>): boolean {
     assert(node.list === this.indexes.LRU);
     const index = node.value;
-    const { LRU, LFU } = this.indexes;
+    const { LFU } = this.indexes;
     ++this.stats[index.region][0];
-    // Prevent LFU destruction.
-    // 範囲を広げるとS3でスコアが下がるので狭める
-    if (!index.overlap && index.clock >= this.clockR - LRU.length / 30 && this.capacity > 3) {
-      index.clock = ++this.clockR;
-      node.moveToHead();
-      return true;
-    }
     assert(LFU.length !== this.capacity);
-    index.clock = ++this.clockF;
     index.region = 'LFU';
     index.overlap?.delete();
     LFU.unshiftNode(node);
@@ -404,7 +350,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { LFU } = this.indexes;
     if (node.list !== LFU) return false;
     ++this.stats[index.region][0];
-    index.clock = ++this.clockF;
     node.moveToHead();
     return true;
   }
