@@ -286,7 +286,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       return;
     }
     // Optimization for memoize.
-    if (this.capacity >= 10 && node === node.list.head) return record.value;
+    if (this.capacity > 3 && node === node.list.head) return record.value;
     this.access(node);
     this.slide();
     return record.value;
