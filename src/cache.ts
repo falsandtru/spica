@@ -89,7 +89,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     space: Infinity,
     age: Infinity,
     overlap: true,
-    limit: 95,
+    limit: 950,
     capture: {
       delete: true,
       clear: true,
@@ -162,14 +162,14 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
             : LFU.last!.prev;
           break;
         // @ts-expect-error
-        case LFU.length > this.capacity * this.ratio / 100:
+        case LFU.length > this.capacity * this.ratio / 1000:
           target = LFU.last! !== skip
             ? LFU.last!
             : LFU.length >= 2
               ? LFU.last!.prev
               : skip;
           if (target !== skip) {
-            if (this.ratio > 50) break;
+            if (this.ratio > 500) break;
             target.value.node = LRU.unshiftNode(target);
             target.value.overlap = this.overlaplist && target.value.expiry !== Infinity
               ? OVL.unshift(target.value)
@@ -281,7 +281,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   }
   public clear(): void {
     this.SIZE = 0;
-    this.ratio = 50;
+    this.ratio = 500;
     this.stats.clear();
     this.indexes.LRU.clear();
     this.indexes.LFU.clear();
@@ -315,14 +315,14 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       LFU[0] = LFU[1] = 0;
     },
   } as const;
-  private ratio = 50;
+  private ratio = 500;
   private readonly limit: number;
   private slide(): void {
     const { LRU, LFU } = this.stats;
     const { capacity, ratio, limit, indexes } = this;
     const window = capacity;
     LRU[0] + LFU[0] === window && this.stats.slide();
-    if ((LRU[0] + LFU[0]) * 100 % capacity || LRU[1] + LFU[1] === 0) return;
+    if ((LRU[0] + LFU[0]) * 1000 % capacity || LRU[1] + LFU[1] === 0) return;
     const lenR = indexes.LRU.length;
     const lenF = indexes.LFU.length;
     const lenV = this.overlap;
@@ -333,15 +333,15 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     // 操作頻度を超えてキャッシュ比率を増減させても余剰比率の消化が追いつかず無駄
     // LRUの下限設定ではLRU拡大の要否を迅速に判定できないためLFUのヒット率低下の検出で代替する
     if (ratio > 0 && (rateR0 > rateF0 || rateF0 < rateF1 * 0.95)) {
-      if (lenR >= capacity * (100 - ratio) / 100) {
-        //ratio % 10 || ratio === 100 || console.debug('-', ratio, LRU, LFU);
+      if (lenR >= capacity * (1000 - ratio) / 1000) {
+        //ratio % 100 || ratio === 1000 || console.debug('-', ratio, LRU, LFU);
         --this.ratio;
       }
     }
     else
     if (ratio < limit && rateF0 > rateR0) {
-      if (lenF >= capacity * ratio / 100) {
-        //ratio % 10 || ratio === 0 || console.debug('+', ratio, LRU, LFU);
+      if (lenF >= capacity * ratio / 1000) {
+        //ratio % 100 || ratio === 0 || console.debug('+', ratio, LRU, LFU);
         ++this.ratio;
       }
     }
