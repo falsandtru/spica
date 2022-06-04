@@ -168,9 +168,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
           if (target !== skip) {
             if (this.ratio > 50) break;
             target.value.node = LRU.unshiftNode(target);
-            if (this.overlap) {
-              target.value.overlap = OVL.unshift(target.value);
-            }
+            target.value.overlap = this.overlap && target.value.expiry !== Infinity
+              ? OVL.unshift(target.value)
+              : void 0;
             assert(OVL.length <= LRU.length);
           }
           // fallthrough
