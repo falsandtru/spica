@@ -55,6 +55,7 @@ export namespace Cache {
     readonly capacity?: number;
     readonly space?: number;
     readonly age?: number;
+    readonly overlap?: boolean;
     readonly limit?: number;
     readonly disposer?: (value: V, key: K) => void;
     readonly capture?: {
@@ -80,12 +81,14 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.capacity = this.settings.capacity!;
     if (this.capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     this.space = this.settings.space!;
+    this.overlap = this.settings.overlap!;
     this.limit = this.settings.limit!;
   }
   private readonly settings: Cache.Options<K, V> = {
     capacity: 0,
     space: Infinity,
     age: Infinity,
+    overlap: true,
     limit: 95,
     capture: {
       delete: true,
@@ -94,6 +97,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   };
   private readonly capacity: number;
   private readonly space: number;
+  private readonly overlap: boolean;
   private SIZE = 0;
   private memory = new Map<K, Record<K, V>>();
   private readonly indexes = {
@@ -162,9 +166,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
               ? LFU.last!.prev
               : skip;
           if (target !== skip) {
-            if (this.ratio >= 50) break;
+            if (this.ratio > 50) break;
             target.value.node = LRU.unshiftNode(target);
-            target.value.overlap = OVL.unshift(target.value);
+            if (this.overlap) {
+              target.value.overlap = OVL.unshift(target.value);
+            }
             assert(OVL.length <= LRU.length);
           }
           // fallthrough
