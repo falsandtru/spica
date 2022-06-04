@@ -81,7 +81,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.capacity = this.settings.capacity!;
     if (this.capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     this.space = this.settings.space!;
-    this.overlap = this.settings.overlap!;
+    this.overlaplist = this.settings.overlap!;
     this.limit = this.settings.limit!;
   }
   private readonly settings: Cache.Options<K, V> = {
@@ -97,7 +97,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   };
   private readonly capacity: number;
   private readonly space: number;
-  private readonly overlap: boolean;
+  private readonly overlaplist: boolean;
+  private overlap = 0;
   private SIZE = 0;
   private memory = new Map<K, Record<K, V>>();
   private readonly indexes = {
@@ -122,6 +123,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       : record;
     assert(node.list);
     assert(node.list !== this.indexes.OVL);
+    this.overlap -= +(index.region === 'LFU' && node.list === this.indexes.LRU);
+    assert(this.overlap >= 0);
     node.delete();
     node.value.overlap?.delete();
     assert(this.indexes.OVL.length <= this.indexes.LRU.length);
@@ -168,10 +171,12 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
           if (target !== skip) {
             if (this.ratio > 50) break;
             target.value.node = LRU.unshiftNode(target);
-            target.value.overlap = this.overlap && target.value.expiry !== Infinity
+            target.value.overlap = this.overlaplist && target.value.expiry !== Infinity
               ? OVL.unshift(target.value)
               : void 0;
+            ++this.overlap;
             assert(OVL.length <= LRU.length);
+            assert(this.overlap <= LRU.length);
           }
           // fallthrough
         default:
@@ -320,7 +325,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if ((LRU[0] + LFU[0]) * 100 % capacity || LRU[1] + LFU[1] === 0) return;
     const lenR = indexes.LRU.length;
     const lenF = indexes.LFU.length;
-    const lenV = indexes.OVL.length;
+    const lenV = this.overlap;
     const r = (lenF + lenV) * 1000 / (lenR + lenF) | 0;
     const rateR0 = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1], 0) * (1 + r);
     const rateF0 = rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1], 0) * (1001 - r);
@@ -350,6 +355,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const index = node.value;
     ++this.stats[index.region][0];
     assert(this.indexes.LFU.length < this.capacity);
+    this.overlap -= +(index.region === 'LFU');
+    assert(this.overlap >= 0);
     index.region = 'LFU';
     index.overlap?.delete();
     index.overlap = void 0;
