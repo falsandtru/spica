@@ -99,7 +99,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private readonly indexes = {
     LRU: new List<Index<K>>(),
     LFU: new List<Index<K>>(),
-    // expiryとLFUのclockを消すなら消せる
     OVL: new List<Index<K>>(),
   } as const;
   public get length(): number {
@@ -164,9 +163,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
               : skip;
           if (target !== skip) {
             if (this.ratio >= 50) break;
-            LRU.unshiftNode(target);
-            LRU.head!.value.node = LRU.head!;
-            LRU.head!.value.overlap = OVL.unshift(LRU.head!.value);
+            target.value.node = LRU.unshiftNode(target);
+            target.value.overlap = OVL.unshift(target.value);
             assert(OVL.length <= LRU.length);
           }
           // fallthrough
@@ -344,18 +342,17 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private accessLRU(node: Node<Index<K>>): boolean {
     assert(node.list === this.indexes.LRU);
     const index = node.value;
-    const { LFU } = this.indexes;
     ++this.stats[index.region][0];
-    assert(LFU.length !== this.capacity);
+    assert(this.indexes.LFU.length < this.capacity);
     index.region = 'LFU';
     index.overlap?.delete();
-    LFU.unshiftNode(node);
+    index.overlap = void 0;
+    this.indexes.LFU.unshiftNode(node);
     return true;
   }
   private accessLFU(node: Node<Index<K>>): boolean {
     const index = node.value;
-    const { LFU } = this.indexes;
-    if (node.list !== LFU) return false;
+    if (node.list !== this.indexes.LFU) return false;
     ++this.stats[index.region][0];
     node.moveToHead();
     return true;
