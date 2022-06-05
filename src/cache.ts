@@ -350,18 +350,18 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     assert(node.list === this.indexes.LRU);
     const index = node.value;
     ++this.stats[index.region][0];
-    assert(this.indexes.LFU.length < this.capacity);
     this.overlap -= +(index.region === 'LFU');
     assert(this.overlap >= 0);
     index.region = 'LFU';
     index.overlap?.delete();
     index.overlap = void 0;
+    assert(this.indexes.LFU.length < this.capacity);
     this.indexes.LFU.unshiftNode(node);
     return true;
   }
   private accessLFU(node: Node<Index<K>>): boolean {
-    const index = node.value;
     if (node.list !== this.indexes.LFU) return false;
+    const index = node.value;
     ++this.stats[index.region][0];
     node.moveToHead();
     return true;
