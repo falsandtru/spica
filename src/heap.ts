@@ -23,6 +23,9 @@ export class Heap<T> {
     // @ts-expect-error
     array[this.$length] = undefined;
     downHeapify(array, this.$length);
+    if (array.length > 2 ** 16 && array.length > this.$length * 2) {
+      array.splice(array.length / 2, array.length)
+    }
     return value;
   }
   public replace(priority: number, value: T): T | undefined {
