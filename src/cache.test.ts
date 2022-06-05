@@ -274,8 +274,9 @@ describe('Unit: lib/cache', () => {
       assert(cache.has(0) === false);
     });
 
+    if (!navigator.userAgent.includes('Chrome')) return;
+
     it('rate even 100', function () {
-      if (!navigator.userAgent.includes('Chrome')) return;
       this.timeout(10 * 1e3);
       this.retries(3);
 
@@ -307,7 +308,6 @@ describe('Unit: lib/cache', () => {
     });
 
     it('rate uneven 100', function () {
-      if (!navigator.userAgent.includes('Chrome')) return;
       this.timeout(10 * 1e3);
       this.retries(3);
 
@@ -342,7 +342,6 @@ describe('Unit: lib/cache', () => {
     });
 
     it('rate uneven 100 transitive distribution', function () {
-      if (!navigator.userAgent.includes('Chrome')) return;
       this.timeout(10 * 1e3);
       this.retries(3);
 
@@ -376,7 +375,6 @@ describe('Unit: lib/cache', () => {
     });
 
     it('rate uneven 100 transitive bias', function () {
-      if (!navigator.userAgent.includes('Chrome')) return;
       this.timeout(10 * 1e3);
       this.retries(3);
 
@@ -413,7 +411,6 @@ describe('Unit: lib/cache', () => {
     });
 
     it('rate uneven 100 sequential', function () {
-      if (!navigator.userAgent.includes('Chrome')) return;
       this.timeout(10 * 1e3);
       this.retries(3);
 
@@ -448,7 +445,6 @@ describe('Unit: lib/cache', () => {
     });
 
     it('rate uneven 100 adversarial', function () {
-      if (!navigator.userAgent.includes('Chrome')) return;
       this.timeout(10 * 1e3);
       this.retries(3);
 
@@ -483,7 +479,6 @@ describe('Unit: lib/cache', () => {
     });
 
     it('rate uneven 1,000', function () {
-      if (!navigator.userAgent.includes('Chrome')) return;
       this.timeout(30 * 1e3);
       this.retries(3);
 
