@@ -298,6 +298,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
       assert(dwc['memory'].size <= capacity);
+      assert(dwc['indexes'].OVL.length === 0);
       console.debug('Cache even 100');
       console.debug('LRU hit rate', lruhit * 100 / repeat);
       console.debug('DWC hit rate', dwchit * 100 / repeat);
@@ -333,6 +334,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
       assert(dwc['memory'].size <= capacity);
+      assert(dwc['indexes'].OVL.length === 0);
       console.debug('Cache uneven 100');
       console.debug('LRU hit rate', lruhit * 100 / repeat);
       console.debug('DWC hit rate', dwchit * 100 / repeat);
@@ -367,6 +369,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
       assert(dwc['memory'].size <= capacity);
+      assert(dwc['indexes'].OVL.length === 0);
       console.debug('Cache uneven 100 transitive distribution');
       console.debug('LRU hit rate', lruhit * 100 / repeat);
       console.debug('DWC hit rate', dwchit * 100 / repeat);
@@ -404,6 +407,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
       assert(dwc['memory'].size <= capacity);
+      assert(dwc['indexes'].OVL.length === 0);
       console.debug('Cache uneven 100 transitive bias');
       console.debug('LRU hit rate', lruhit * 100 / repeat);
       console.debug('DWC hit rate', dwchit * 100 / repeat);
@@ -439,6 +443,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
       assert(dwc['memory'].size <= capacity);
+      assert(dwc['indexes'].OVL.length === 0);
       console.debug('Cache uneven 100 sequential');
       console.debug('LRU hit rate', lruhit * 100 / repeat);
       console.debug('DWC hit rate', dwchit * 100 / repeat);
@@ -474,6 +479,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
       assert(dwc['memory'].size <= capacity);
+      assert(dwc['indexes'].OVL.length === 0);
       console.debug('Cache uneven 100 adversarial');
       console.debug('LRU hit rate', lruhit * 100 / repeat);
       console.debug('DWC hit rate', dwchit * 100 / repeat);
@@ -508,6 +514,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
       assert(dwc['memory'].size <= capacity);
+      assert(dwc['indexes'].OVL.length === 0);
       console.debug('Cache uneven 1,000');
       console.debug('LRU hit rate', lruhit * 100 / repeat);
       console.debug('DWC hit rate', dwchit * 100 / repeat);
