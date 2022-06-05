@@ -4,7 +4,7 @@ import LRUCache from 'lru-cache';
 import { Math } from '../src/global';
 
 describe('Benchmark:', function () {
-  this.timeout(10 * 1e3);
+  this.timeout(20 * 1e3);
 
   describe('Cache', function () {
     this.beforeEach(done => {
@@ -101,6 +101,32 @@ describe('Benchmark:', function () {
         const cache = new Cache<number, number>(capacity);
         for (let i = 0; i < capacity; ++i) cache.set(i, i);
         benchmark(`DW-Cache simulation ${length.toLocaleString('en')}`, () => {
+          const key = Math.random() < 0.4
+            ? Math.random() * capacity * 1 | 0
+            : Math.random() * capacity * 9 + capacity | 0;
+          cache.get(key) ?? cache.set(key, key);
+        }, done);
+      });
+    }
+
+    for (const length of [10, 100, 1000]) {
+      it(`LRU simulation ${length.toLocaleString('en')} expire`, function (done) {
+        const capacity = length;
+        const cache = new LRUCache<number, number>({ max: capacity, ttl: 1, ttlAutopurge: true });
+        for (let i = 0; i < capacity; ++i) cache.set(i, i);
+        benchmark(`LRUCache simulation ${length.toLocaleString('en')} expire`, () => {
+          const key = Math.random() < 0.4
+            ? Math.random() * capacity * 1 | 0
+            : Math.random() * capacity * 9 + capacity | 0;
+          cache.get(key) ?? cache.set(key, key);
+        }, done);
+      });
+
+      it(`DWC simulation ${length.toLocaleString('en')} expire`, function (done) {
+        const capacity = length;
+        const cache = new Cache<number, number>(capacity, { age: 1 });
+        for (let i = 0; i < capacity; ++i) cache.set(i, i);
+        benchmark(`DW-Cache simulation ${length.toLocaleString('en')} expire`, () => {
           const key = Math.random() < 0.4
             ? Math.random() * capacity * 1 | 0
             : Math.random() * capacity * 9 + capacity | 0;
