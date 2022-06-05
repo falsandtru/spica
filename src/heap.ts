@@ -4,49 +4,45 @@ import { floor } from './alias';
 
 const undefined = void 0;
 
-interface Array<T> {
-  [i: number]: [priority: number, value: T];
-  length: number;
-}
-
 export class Heap<T> {
-  private array: Array<T> = { length: 0 };
+  private array: [priority: number, value: T][] = [];
+  private $length = 0;
   public get length(): number {
-    return this.array.length;
+    return this.$length;
   }
   public insert(priority: number, value: T): void {
     const array = this.array;
-    array[array.length++] = [priority, value];
-    upHeapify(array, priority);
+    array[this.$length++] = [priority, value];
+    upHeapify(array, this.$length, priority);
   }
   public extract(): T | undefined {
     const array = this.array;
-    if (array.length === 0) return;
+    if (this.$length === 0) return;
     const value = array[0][1];
-    array[0] = array[--array.length];
+    array[0] = array[--this.$length];
     // @ts-expect-error
-    array[array.length] = undefined;
-    downHeapify(array);
+    array[this.$length] = undefined;
+    downHeapify(array, this.$length);
     return value;
   }
   public replace(priority: number, value: T): T | undefined {
     const array = this.array;
-    if (array.length === 0) return void this.insert(priority, value);
+    if (this.$length === 0) return void this.insert(priority, value);
     const result = array[0][1];
     array[0] = [priority, value];
-    downHeapify(array);
+    downHeapify(array, this.$length);
     return result;
   }
   public peek(): T | undefined {
     const array = this.array;
-    return array.length === 0
+    return this.$length === 0
       ? undefined
       : array[0][1];
   }
 }
 
-function upHeapify<T>(array: Array<T>, priority: number): void {
-  let index = array.length;
+function upHeapify<T>(array: T[], length: number, priority: number): void {
+  let index = length;
   while (index > 1) {
     const parent = floor(index / 2);
     if (array[parent - 1][0] >= priority) break;
@@ -55,8 +51,7 @@ function upHeapify<T>(array: Array<T>, priority: number): void {
   }
 }
 
-function downHeapify<T>(array: Array<T>): void {
-  const length = array.length;
+function downHeapify<T>(array: T[], length: number): void {
   for (let index = 1; index < length;) {
     const left = index * 2;
     const right = index * 2 + 1;
