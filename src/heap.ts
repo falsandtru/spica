@@ -2,10 +2,13 @@ import { floor } from './alias';
 
 // Max heap
 
-export type Node<T> = [priority: number, value: T, index: number];
-
 const undefined = void 0;
 
+type Node<T> = [priority: number, value: T, index: number];
+
+export namespace Heap {
+  export type Node<T> = readonly unknown[] | { _: T; };
+}
 export class Heap<T> {
   constructor(private readonly stable = false) {
   }
@@ -14,7 +17,7 @@ export class Heap<T> {
   public get length(): number {
     return this.$length;
   }
-  public insert(priority: number, value: T): Node<T> {
+  public insert(priority: number, value: T): Heap.Node<T> {
     const array = this.array;
     const node = array[this.$length] = [priority, value, this.$length++];
     upHeapify(array, this.$length, priority);
@@ -34,6 +37,7 @@ export class Heap<T> {
     this.delete(node);
     return node[1];
   }
+  public delete(node: Heap.Node<T>): void;
   public delete(node: Node<T>): void {
     const array = this.array;
     if (array[node[2]] !== node) throw new Error('Invalid node');
@@ -47,6 +51,7 @@ export class Heap<T> {
       array.splice(array.length / 2, array.length)
     }
   }
+  public update(node: Heap.Node<T>, priority: number, value?: T): void;
   public update(node: Node<T>, priority: number, value: T = node[1]): void {
     const array = this.array;
     if (array[node[2]] !== node) throw new Error('Invalid node');
@@ -55,6 +60,7 @@ export class Heap<T> {
     node[0] = priority;
     this.sort(node);
   }
+  private sort(node: Heap.Node<T>): boolean;
   private sort(node: Node<T>): boolean {
     const array = this.array;
     assert(array[node[2]] === node);

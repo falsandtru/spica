@@ -1,8 +1,8 @@
 import { Infinity, Map } from './global';
 import { now } from './clock';
 import { IterableCollection } from './collection';
-import { List, Node } from './invlist';
-import { Heap, Node as HNode } from './heap';
+import { List } from './invlist';
+import { Heap } from './heap';
 import { extend } from './assign';
 import { tuple } from './tuple';
 
@@ -42,11 +42,11 @@ interface Index<K> {
   readonly key: K;
   size: number;
   expiry: number;
-  enode?: HNode<Node<Index<K>>>;
+  enode?: Heap.Node<List.Node<Index<K>>>;
   region: 'LRU' | 'LFU';
 }
 interface Record<K, V> {
-  readonly inode: Node<Index<K>>;
+  readonly inode: List.Node<Index<K>>;
   value: V;
 }
 
@@ -101,7 +101,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     LRU: new List<Index<K>>(),
     LFU: new List<Index<K>>(),
   } as const;
-  private readonly expiries = new Heap<Node<Index<K>>>();
+  private readonly expiries = new Heap<List.Node<Index<K>>>();
   public get length(): number {
     //assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     return this.indexes.LRU.length + this.indexes.LFU.length;
@@ -109,7 +109,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public get size(): number {
     return this.SIZE;
   }
-  private evict(node: Node<Index<K>>, record: Record<K, V> | undefined, callback: boolean): void {
+  private evict(node: List.Node<Index<K>>, record: Record<K, V> | undefined, callback: boolean): void {
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     const index = node.value;
     callback &&= !!this.settings.disposer;
@@ -126,14 +126,14 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.SIZE -= index.size;
     callback && this.settings.disposer?.(record!.value, index.key);
   }
-  private ensure(margin: number, skip?: Node<Index<K>>): void {
+  private ensure(margin: number, skip?: List.Node<Index<K>>): void {
     let size = skip?.value.size ?? 0;
     assert(margin - size <= this.space);
     if (margin - size <= 0) return;
     const { LRU, LFU } = this.indexes;
     while (this.length === this.capacity || this.size + margin - size > this.space) {
       assert(this.length >= 1 + +!!skip);
-      let target: Node<Index<K>>;
+      let target: List.Node<Index<K>>;
       switch (true) {
         case (target = this.expiries.peek()!)
           && target !== skip
@@ -339,11 +339,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       }
     }
   }
-  private access(node: Node<Index<K>>): boolean {
+  private access(node: List.Node<Index<K>>): boolean {
     return this.accessLFU(node)
         || this.accessLRU(node);
   }
-  private accessLRU(node: Node<Index<K>>): boolean {
+  private accessLRU(node: List.Node<Index<K>>): boolean {
     assert(node.list === this.indexes.LRU);
     const index = node.value;
     ++this.stats[index.region][0];
@@ -354,7 +354,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.indexes.LFU.unshiftNode(node);
     return true;
   }
-  private accessLFU(node: Node<Index<K>>): boolean {
+  private accessLFU(node: List.Node<Index<K>>): boolean {
     if (node.list !== this.indexes.LFU) return false;
     const index = node.value;
     ++this.stats[index.region][0];

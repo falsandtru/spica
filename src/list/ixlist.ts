@@ -21,14 +21,16 @@ interface InternalNode<K, V> {
   next: number;
   prev: number;
 }
-export interface Node<K, V = undefined> {
-  readonly index: number;
-  readonly key: K;
-  value: V;
-  readonly next: number;
-  readonly prev: number;
-}
 
+export namespace List {
+  export interface Node<K, V = undefined> {
+    readonly index: number;
+    readonly key: K;
+    value: V;
+    readonly next: number;
+    readonly prev: number;
+  }
+}
 export class List<K, V = undefined> {
   constructor(capacity?: number, index?: Index<K, number>);
   constructor(index: Index<K, number>);
@@ -51,18 +53,18 @@ export class List<K, V = undefined> {
   public get length() {
     return this.LENGTH;
   }
-  public get head(): Node<K, V> | undefined {
+  public get head(): List.Node<K, V> | undefined {
     return this.nodes[this.HEAD];
   }
-  public get tail(): Node<K, V> | undefined {
+  public get tail(): List.Node<K, V> | undefined {
     const head = this.head;
     return head && this.nodes[head.next];
   }
-  public get last(): Node<K, V> | undefined {
+  public get last(): List.Node<K, V> | undefined {
     const head = this.head;
     return head && this.nodes[head.prev];
   }
-  public node(index: number): Node<K, V> | undefined {
+  public node(index: number): List.Node<K, V> | undefined {
     return 0 <= index && index < this.capacity
       ? this.nodes[index]
       : undefined;
@@ -170,13 +172,13 @@ export class List<K, V = undefined> {
     assert(!node || equal(node.key, key));
     if (node) return this.CURSOR = index, node;
   }
-  public get(index: number): Node<K, V> | undefined {
+  public get(index: number): List.Node<K, V> | undefined {
     return this.node(index);
   }
   public has(index: number): boolean {
     return this.node(index) !== undefined;
   }
-  public del(index: number): Node<K, V> | undefined {
+  public del(index: number): List.Node<K, V> | undefined {
     const node = this.node(index);
     if (!node) return;
     assert(this.length > 0);
@@ -202,7 +204,7 @@ export class List<K, V = undefined> {
     //assert(this.length > 10 || [...this].length === this.length);
     return node;
   }
-  public delete(key: K, index?: number): Node<K, V> | undefined {
+  public delete(key: K, index?: number): List.Node<K, V> | undefined {
     return this.del(this.find(key, index)?.index ?? -1);
   }
   public insert(key: K, value: V, before: number): number {
@@ -234,7 +236,7 @@ export class List<K, V = undefined> {
     node.value = value;
     return node.index;
   }
-  public shift(): Node<K, V> | undefined {
+  public shift(): List.Node<K, V> | undefined {
     const node = this.head;
     return node && this.del(node.index);
   }
@@ -258,13 +260,13 @@ export class List<K, V = undefined> {
     node.value = value;
     return node.index;
   }
-  public pop(): Node<K, V> | undefined {
+  public pop(): List.Node<K, V> | undefined {
     const node = this.last;
     return node && this.del(node.index);
   }
-  public replace(index: number, key: K, value: V): Node<K, V> | undefined;
-  public replace(this: List<K, undefined>, index: number, key: K, value?: V): Node<K, V> | undefined;
-  public replace(index: number, key: K, value: V): Node<K, V> | undefined {
+  public replace(index: number, key: K, value: V): List.Node<K, V> | undefined;
+  public replace(this: List<K, undefined>, index: number, key: K, value?: V): List.Node<K, V> | undefined;
+  public replace(index: number, key: K, value: V): List.Node<K, V> | undefined {
     const node: InternalNode<K, V> | undefined = this.node(index);
     if (!node) return;
     if (this.index && !equal(node.key, key)) {

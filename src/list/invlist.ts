@@ -9,24 +9,24 @@ export class List<T> {
   public get length(): number {
     return this[LENGTH];
   }
-  public head: Node<T> | undefined = undefined;
-  public get tail(): Node<T> | undefined {
+  public head: List.Node<T> | undefined = undefined;
+  public get tail(): List.Node<T> | undefined {
     return this.head?.next;
   }
-  public get last(): Node<T> | undefined {
+  public get last(): List.Node<T> | undefined {
     return this.head?.prev;
   }
   public clear(): void {
     this.head = undefined;
     this[LENGTH] = 0;
   }
-  public unshift(value: T): Node<T> {
+  public unshift(value: T): List.Node<T> {
     return this.head = this.push(value);
   }
-  public unshiftNode(node: Node<T>): Node<T> {
+  public unshiftNode(node: List.Node<T>): List.Node<T> {
     return this.head = this.pushNode(node);
   }
-  public unshiftRotationally(value: T): Node<T> {
+  public unshiftRotationally(value: T): List.Node<T> {
     const node = this.last;
     if (!node) return this.unshift(value);
     node.value = value;
@@ -36,13 +36,13 @@ export class List<T> {
   public shift(): T | undefined {
     return this.head?.delete();
   }
-  public push(value: T): Node<T> {
+  public push(value: T): List.Node<T> {
     return new Node(value, this.head!, this.head?.prev!, this);
   }
-  public pushNode(node: Node<T>): Node<T> {
+  public pushNode(node: List.Node<T>): List.Node<T> {
     return this.insert(node, this.head);
   }
-  public pushRotationally(value: T): Node<T> {
+  public pushRotationally(value: T): List.Node<T> {
     const node = this.head;
     if (!node) return this.push(value);
     node.value = value;
@@ -52,7 +52,7 @@ export class List<T> {
   public pop(): T | undefined {
     return this.last?.delete();
   }
-  public insert(node: Node<T>, before: Node<T> | undefined = this.head): Node<T> {
+  public insert(node: List.Node<T>, before: List.Node<T> | undefined = this.head): List.Node<T> {
     if (node.list === this) return before && node.move(before), node;
     node.delete();
     ++this[LENGTH];
@@ -72,8 +72,12 @@ export class List<T> {
     }
   }
 }
+export namespace List {
+  export type Node<T> = NodeType<T>;
+}
 
-export { type Node };
+type NodeType<T> = Node<T>;
+
 class Node<T> {
   constructor(
     public value: T,
