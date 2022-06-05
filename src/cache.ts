@@ -42,8 +42,6 @@ interface Index<K> {
   size: number;
   expiry: number;
   region: 'LRU' | 'LFU';
-  node?: Node<Index<K>>;
-  overlap?: Node<Index<K>>;
 }
 interface Record<K, V> {
   readonly index: Node<Index<K>>;
@@ -100,7 +98,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private readonly indexes = {
     LRU: new List<Index<K>>(),
     LFU: new List<Index<K>>(),
-    OVL: new List<Index<K>>(),
   } as const;
   public get length(): number {
     //assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
@@ -110,7 +107,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     return this.SIZE;
   }
   private evict(node: Node<Index<K>>, record: Record<K, V> | undefined, callback: boolean): void {
-    assert(this.indexes.OVL.length <= this.indexes.LRU.length);
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     const index = node.value;
     callback &&= !!this.settings.disposer;
@@ -118,12 +114,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       ? record ?? this.memory.get(index.key)
       : record;
     assert(node.list);
-    assert(node.list !== this.indexes.OVL);
     this.overlap -= +(index.region === 'LFU' && node.list === this.indexes.LRU);
     assert(this.overlap >= 0);
     node.delete();
-    node.value.overlap?.delete();
-    assert(this.indexes.OVL.length <= this.indexes.LRU.length);
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size - 1);
     this.memory.delete(index.key);
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
@@ -131,27 +124,14 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     callback && this.settings.disposer?.(record!.value, index.key);
   }
   private ensure(margin: number, skip?: Node<Index<K>>): void {
-    if (skip) {
-      // Prevent wrong disposal of `skip`.
-      skip.value.expiry = Infinity;
-    }
     let size = skip?.value.size ?? 0;
     assert(margin - size <= this.space);
     if (margin - size <= 0) return;
-    const { LRU, LFU, OVL } = this.indexes;
+    const { LRU, LFU } = this.indexes;
     while (this.length === this.capacity || this.size + margin - size > this.space) {
       assert(this.length >= 1 + +!!skip);
-      const lastNode = OVL.last ?? LFU.last;
-      const lastIndex = lastNode?.value;
       let target: Node<Index<K>>;
       switch (true) {
-        // NOTE: The following conditions must be ensured that they won't be true if `lastNode` is `skip`.
-        case lastIndex && lastIndex.expiry !== Infinity && lastIndex.expiry < now():
-          target = lastNode!.list === OVL
-            ? lastNode!.value.node!
-            : lastNode!;
-          assert(target.list !== this.indexes.OVL);
-          break;
         case LRU.length === 0:
           target = LFU.last! !== skip
             ? LFU.last!
@@ -166,12 +146,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
               : skip;
           if (target !== skip) {
             if (this.ratio > 500) break;
-            target.value.node = LRU.unshiftNode(target);
-            target.value.overlap = target.value.expiry !== Infinity
-              ? OVL.unshift(target.value)
-              : void 0;
+            LRU.unshiftNode(target);
             ++this.overlap;
-            assert(OVL.length <= LRU.length);
             assert(this.overlap <= LRU.length);
           }
           // fallthrough
@@ -281,7 +257,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.stats.clear();
     this.indexes.LRU.clear();
     this.indexes.LFU.clear();
-    this.indexes.OVL.clear();
     if (!this.settings.disposer || !this.settings.capture!.clear) return void this.memory.clear();
     const memory = this.memory;
     this.memory = new Map();
@@ -353,8 +328,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.overlap -= +(index.region === 'LFU');
     assert(this.overlap >= 0);
     index.region = 'LFU';
-    index.overlap?.delete();
-    index.overlap = void 0;
     assert(this.indexes.LFU.length < this.capacity);
     this.indexes.LFU.unshiftNode(node);
     return true;
