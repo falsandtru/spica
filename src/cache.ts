@@ -259,6 +259,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     return true;
   }
   public clear(): void {
+    this.overlap = 0;
     this.SIZE = 0;
     this.ratio = 500;
     this.stats.clear();
