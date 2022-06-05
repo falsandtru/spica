@@ -2,6 +2,7 @@ import { Infinity, Map } from './global';
 import { now } from './clock';
 import { IterableCollection } from './collection';
 import { List, Node } from './invlist';
+import { Heap, Node as HNode } from './heap';
 import { extend } from './assign';
 import { tuple } from './tuple';
 
@@ -41,10 +42,11 @@ interface Index<K> {
   readonly key: K;
   size: number;
   expiry: number;
+  enode?: HNode<Node<Index<K>>>;
   region: 'LRU' | 'LFU';
 }
 interface Record<K, V> {
-  readonly index: Node<Index<K>>;
+  readonly inode: Node<Index<K>>;
   value: V;
 }
 
@@ -54,7 +56,6 @@ export namespace Cache {
     readonly space?: number;
     readonly age?: number;
     readonly limit?: number;
-    readonly expire?: () => K | undefined;
     readonly disposer?: (value: V, key: K) => void;
     readonly capture?: {
       readonly delete?: boolean;
@@ -100,6 +101,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     LRU: new List<Index<K>>(),
     LFU: new List<Index<K>>(),
   } as const;
+  private readonly expiries = new Heap<Node<Index<K>>>();
   public get length(): number {
     //assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     return this.indexes.LRU.length + this.indexes.LFU.length;
@@ -131,13 +133,12 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { LRU, LFU } = this.indexes;
     while (this.length === this.capacity || this.size + margin - size > this.space) {
       assert(this.length >= 1 + +!!skip);
-      let key: K | undefined;
       let target: Node<Index<K>>;
       switch (true) {
-        case (key = this.settings.expire?.()) !== void 0
-          && (target = this.memory.get(key)!.index)
-          && target !== skip:
-          assert(target = target!);
+        case (target = this.expiries.peek()!)
+          && target !== skip
+          && target.value.expiry < now():
+          target = this.expiries.extract()!;
           break;
         case LRU.length === 0:
           target = LFU.last! !== skip
@@ -188,15 +189,23 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       : now() + age;
     const record = this.memory.get(key);
     if (record) {
-      const node = record.index;
+      const node = record.inode;
       const val = record.value;
       const index = node.value;
       this.ensure(size, node);
       assert(this.memory.has(key));
-      index.expiry = expiry;
       this.SIZE += size - index.size;
       assert(0 < this.size && this.size <= this.space);
       index.size = size;
+      index.expiry = expiry;
+      if (expiry !== Infinity) {
+        index.enode
+          ? this.expiries.update(index.enode, -expiry)
+          : this.expiries.insert(-expiry, node);
+      }
+      else {
+        index.enode && this.expiries.delete(index.enode);
+      }
       record.value = value;
       this.settings.disposer?.(val, key);
       return true;
@@ -208,15 +217,19 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     assert(LRU.length !== this.capacity);
     this.SIZE += size;
     assert(0 < this.size && this.size <= this.space);
+    const node = LRU.unshift({
+      key,
+      size,
+      expiry,
+      region: 'LRU',
+    });
     this.memory.set(key, {
-      index: LRU.unshift({
-        key,
-        size,
-        expiry,
-        region: 'LRU',
-      }),
+      inode: node,
       value,
     });
+    if (expiry !== Infinity) {
+      node.value.enode = this.expiries.insert(-expiry, node);
+    }
     return false;
   }
   public set(key: K, value: V, size?: number, age?: number): this;
@@ -228,7 +241,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public get(key: K): V | undefined {
     const record = this.memory.get(key);
     if (!record) return;
-    const node = record.index;
+    const node = record.inode;
     const expiry = node.value.expiry;
     if (expiry !== Infinity && expiry < now()) {
       this.evict(node, record, true);
@@ -245,9 +258,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     //assert(this.memory.size === this.indexes.LFU.length + this.indexes.LRU.length);
     const record = this.memory.get(key);
     if (!record) return false;
-    const expiry = record.index.value.expiry;
+    const expiry = record.inode.value.expiry;
     if (expiry !== Infinity && expiry < now()) {
-      this.evict(record.index, record, true);
+      this.evict(record.inode, record, true);
       return false;
     }
     return true;
@@ -255,7 +268,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public delete(key: K): boolean {
     const record = this.memory.get(key);
     if (!record) return false;
-    this.evict(record.index, record, this.settings.capture!.delete === true);
+    this.evict(record.inode, record, this.settings.capture!.delete === true);
     return true;
   }
   public clear(): void {
@@ -265,6 +278,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.stats.clear();
     this.indexes.LRU.clear();
     this.indexes.LFU.clear();
+    this.expiries.clear();
     if (!this.settings.disposer || !this.settings.capture!.clear) return void this.memory.clear();
     const memory = this.memory;
     this.memory = new Map();
