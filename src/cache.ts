@@ -54,6 +54,7 @@ export namespace Cache {
     readonly space?: number;
     readonly age?: number;
     readonly limit?: number;
+    readonly expire?: () => K | undefined;
     readonly disposer?: (value: V, key: K) => void;
     readonly capture?: {
       readonly delete?: boolean;
@@ -130,8 +131,14 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { LRU, LFU } = this.indexes;
     while (this.length === this.capacity || this.size + margin - size > this.space) {
       assert(this.length >= 1 + +!!skip);
+      let key: K | undefined;
       let target: Node<Index<K>>;
       switch (true) {
+        case (key = this.settings.expire?.()) !== void 0
+          && (target = this.memory.get(key)!.index)
+          && target !== skip:
+          assert(target = target!);
+          break;
         case LRU.length === 0:
           target = LFU.last! !== skip
             ? LFU.last!
