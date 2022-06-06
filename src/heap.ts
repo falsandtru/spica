@@ -37,8 +37,8 @@ export class Heap<T> {
     this.delete(node);
     return node[1];
   }
-  public delete(node: Heap.Node<T>): void;
-  public delete(node: Node<T>): void {
+  public delete(node: Heap.Node<T>): T;
+  public delete(node: Node<T>): T {
     const array = this.array;
     if (array[node[2]] !== node) throw new Error('Invalid node');
     array[node[2]] = array[--this.$length];
@@ -49,6 +49,7 @@ export class Heap<T> {
     if (array.length > 2 ** 16 && array.length > this.$length * 2) {
       array.splice(array.length / 2, array.length)
     }
+    return node[1];
   }
   public update(node: Heap.Node<T>, priority: number, value?: T): void;
   public update(node: Node<T>, priority: number, value: T = node[1]): void {
