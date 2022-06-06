@@ -183,8 +183,6 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public put(key: K, value: V, opts?: { size?: number; age?: number; }): boolean;
   public put(this: Cache<K, undefined>, key: K, value?: V, opts?: { size?: number; age?: number; }): boolean;
   public put(key: K, value: V, { size = 1, age = this.settings.age! }: { size?: number; age?: number; } = {}): boolean {
-    if (size >= 1 === false) throw new Error(`Spica: Cache: Size must be 1 or more.`);
-    if (age >= 1 === false) throw new Error(`Spica: Cache: Age must be 1 or more.`);
     if (size > this.space || age <= 0) {
       this.disposer?.(value, key);
       return false;
