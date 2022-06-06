@@ -109,7 +109,7 @@ describe('Benchmark:', function () {
       });
     }
 
-    for (const length of [10, 100, 1000, 10000]) {
+    for (const length of [10, 100, 1000]) {
       it(`LRU simulation ${length.toLocaleString('en')} expire`, function (done) {
         const capacity = length;
         const cache = new LRUCache<number, number>({ max: capacity, ttl: 1, ttlAutopurge: true });
@@ -121,7 +121,9 @@ describe('Benchmark:', function () {
           cache.get(key) ?? cache.set(key, key);
         }, done);
       });
+    }
 
+    for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
       it(`DWC simulation ${length.toLocaleString('en')} expire`, function (done) {
         const capacity = length;
         const cache = new Cache<number, number>(capacity, { age: 1, earlyExpiring: true });
