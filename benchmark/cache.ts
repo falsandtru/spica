@@ -89,7 +89,7 @@ describe('Benchmark:', function () {
         const cache = new LRUCache<number, number>({ max: capacity });
         for (let i = 0; i < capacity; ++i) cache.set(i, i);
         benchmark(`LRUCache simulation ${length.toLocaleString('en')}`, () => {
-          const key = Math.random() < 0.4
+          const key = Math.random() < 0.8
             ? Math.random() * capacity * 1 | 0
             : Math.random() * capacity * 9 + capacity | 0;
           cache.get(key) ?? cache.set(key, key);
@@ -101,7 +101,7 @@ describe('Benchmark:', function () {
         const cache = new Cache<number, number>(capacity);
         for (let i = 0; i < capacity; ++i) cache.set(i, i);
         benchmark(`DW-Cache simulation ${length.toLocaleString('en')}`, () => {
-          const key = Math.random() < 0.4
+          const key = Math.random() < 0.8
             ? Math.random() * capacity * 1 | 0
             : Math.random() * capacity * 9 + capacity | 0;
           cache.get(key) ?? cache.set(key, key);
@@ -115,7 +115,7 @@ describe('Benchmark:', function () {
         const cache = new LRUCache<number, number>({ max: capacity, ttl: 1, ttlAutopurge: true });
         for (let i = 0; i < capacity; ++i) cache.set(i, i);
         benchmark(`LRUCache simulation ${length.toLocaleString('en')} expire`, () => {
-          const key = Math.random() < 0.4
+          const key = Math.random() < 0.8
             ? Math.random() * capacity * 1 | 0
             : Math.random() * capacity * 9 + capacity | 0;
           cache.get(key) ?? cache.set(key, key);
@@ -129,7 +129,7 @@ describe('Benchmark:', function () {
         const cache = new Cache<number, number>(capacity, { age: 1, earlyExpiring: true });
         for (let i = 0; i < capacity; ++i) cache.set(i, i);
         benchmark(`DW-Cache simulation ${length.toLocaleString('en')} expire`, () => {
-          const key = Math.random() < 0.4
+          const key = Math.random() < 0.8
             ? Math.random() * capacity * 1 | 0
             : Math.random() * capacity * 9 + capacity | 0;
           cache.get(key) ?? cache.set(key, key);
