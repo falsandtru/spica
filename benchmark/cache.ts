@@ -124,7 +124,7 @@ describe('Benchmark:', function () {
 
       it(`DWC simulation ${length.toLocaleString('en')} expire`, function (done) {
         const capacity = length;
-        const cache = new Cache<number, number>(capacity, { age: 1 });
+        const cache = new Cache<number, number>(capacity, { age: 1, earlyExpiring: true });
         for (let i = 0; i < capacity; ++i) cache.set(i, i);
         benchmark(`DW-Cache simulation ${length.toLocaleString('en')} expire`, () => {
           const key = Math.random() < 0.4

@@ -55,6 +55,7 @@ export namespace Cache {
     readonly capacity?: number;
     readonly space?: number;
     readonly age?: number;
+    readonly earlyExpiring?: boolean;
     readonly limit?: number;
     readonly disposer?: (value: V, key: K) => void;
     readonly capture?: {
@@ -81,11 +82,14 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (this.capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     this.space = this.settings.space!;
     this.limit = this.settings.limit!;
+    this.earlyExpiring = this.settings.earlyExpiring!;
+    this.disposer = this.settings.disposer!;
   }
   private readonly settings: Cache.Options<K, V> = {
     capacity: 0,
     space: Infinity,
     age: Infinity,
+    earlyExpiring: false,
     limit: 950,
     capture: {
       delete: true,
@@ -102,6 +106,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     LFU: new List<Index<K>>(),
   } as const;
   private readonly expiries = new Heap<List.Node<Index<K>>>();
+  private readonly earlyExpiring: boolean;
+  private readonly disposer?: (value: V, key: K) => void;
   public get length(): number {
     //assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     return this.indexes.LRU.length + this.indexes.LFU.length;
@@ -112,7 +118,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private evict(node: List.Node<Index<K>>, record: Record<K, V> | undefined, callback: boolean): void {
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     const index = node.value;
-    callback &&= !!this.settings.disposer;
+    callback &&= !!this.disposer;
     record = callback
       ? record ?? this.memory.get(index.key)
       : record;
@@ -124,7 +130,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.memory.delete(index.key);
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     this.SIZE -= index.size;
-    callback && this.settings.disposer?.(record!.value, index.key);
+    callback && this.disposer?.(record!.value, index.key);
   }
   private ensure(margin: number, skip?: List.Node<Index<K>>): void {
     let size = skip?.value.size ?? 0;
@@ -180,7 +186,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (size >= 1 === false) throw new Error(`Spica: Cache: Size must be 1 or more.`);
     if (age >= 1 === false) throw new Error(`Spica: Cache: Age must be 1 or more.`);
     if (size > this.space || age <= 0) {
-      this.settings.disposer?.(value, key);
+      this.disposer?.(value, key);
       return false;
     }
 
@@ -198,16 +204,16 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       assert(0 < this.size && this.size <= this.space);
       index.size = size;
       index.expiry = expiry;
-      if (expiry !== Infinity) {
+      if (this.earlyExpiring && expiry !== Infinity) {
         index.enode
           ? this.expiries.update(index.enode, -expiry)
           : this.expiries.insert(-expiry, node);
       }
-      else {
+      else if (this.earlyExpiring) {
         index.enode && this.expiries.delete(index.enode);
       }
       record.value = value;
-      this.settings.disposer?.(val, key);
+      this.disposer?.(val, key);
       return true;
     }
     this.ensure(size);
@@ -227,7 +233,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       inode: node,
       value,
     });
-    if (expiry !== Infinity) {
+    if (this.earlyExpiring && expiry !== Infinity) {
       node.value.enode = this.expiries.insert(-expiry, node);
     }
     return false;
@@ -279,11 +285,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.indexes.LRU.clear();
     this.indexes.LFU.clear();
     this.expiries.clear();
-    if (!this.settings.disposer || !this.settings.capture!.clear) return void this.memory.clear();
+    if (!this.disposer || !this.settings.capture!.clear) return void this.memory.clear();
     const memory = this.memory;
     this.memory = new Map();
     for (const [key, { value }] of memory) {
-      this.settings.disposer(value, key);
+      this.disposer(value, key);
     }
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
