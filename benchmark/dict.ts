@@ -6,7 +6,7 @@ describe('Benchmark:', function () {
   this.timeout(10 * 1e3);
 
   describe('Dict', function () {
-    this.beforeEach(done => {
+    this.afterEach(done => {
       setTimeout(done, 1000);
     });
 
