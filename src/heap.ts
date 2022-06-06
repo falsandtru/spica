@@ -40,14 +40,14 @@ export class Heap<T> {
   public delete(node: Heap.Node<T>): T;
   public delete(node: Node<T>): T {
     const array = this.array;
-    if (array[node[2]] !== node) throw new Error('Invalid node');
-    array[node[2]] = array[--this.$length];
-    array[node[2]][2] = node[2];
+    const index = node[2];
+    if (array[index] !== node) throw new Error('Invalid node');
+    swap(array, index, --this.$length);
     // @ts-expect-error
     array[this.$length] = undefined;
-    array[node[2]] && this.sort(array[node[2]]);
+    index < this.$length && this.sort(array[index]);
     if (array.length > 2 ** 16 && array.length > this.$length * 2) {
-      array.splice(array.length / 2, array.length)
+      array.splice(array.length / 2, array.length);
     }
     return node[1];
   }
@@ -82,8 +82,7 @@ function upHeapify<T>(array: Node<T>[], index: number): boolean {
   while (index > 1) {
     const parent = floor(index / 2);
     if (array[parent - 1][0] >= priority) break;
-    [array[parent - 1], array[index - 1]] = [array[index - 1], array[parent - 1]];
-    [array[parent - 1][2], array[index - 1][2]] = [array[index - 1][2], array[parent - 1][2]];
+    swap(array, index - 1, parent - 1);
     index = parent;
     changed ||= true;
   }
@@ -109,10 +108,19 @@ function downHeapify<T>(array: Node<T>[], index: number, length: number, stable:
       max = right;
     }
     if (max === index) break;
-    [array[index - 1], array[max - 1]] = [array[max - 1], array[index - 1]];
-    [array[index - 1][2], array[max - 1][2]] = [array[max - 1][2], array[index - 1][2]];
+    swap(array, index - 1, max - 1);
     index = max;
     changed ||= true;
   }
   return changed;
+}
+
+function swap<T>(array: Node<T>[], index1: number, index2: number): void {
+  if (index1 === index2) return;
+  const node1 = array[index1];
+  const node2 = array[index2];
+  node1[2] = index2;
+  node2[2] = index1;
+  array[index1] = node2;
+  array[index2] = node1;
 }
