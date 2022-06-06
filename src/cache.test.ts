@@ -257,7 +257,7 @@ describe('Unit: lib/cache', () => {
     });
 
     it('age', async () => {
-      const cache = new Cache<number, number>(2, { earlyExpiring: true });
+      const cache = new Cache<number, number>(3);
 
       cache.put(0, 0, 1, 10);
       assert(cache.has(0));
@@ -265,6 +265,11 @@ describe('Unit: lib/cache', () => {
       await wait(20);
       assert(cache.has(0) === false);
       assert(cache.get(0) === undefined);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [],
+        LFU: [],
+        memory: [],
+      });
 
       cache.put(0, 0, 1, 10);
       assert(cache.get(0) === 0);
@@ -272,18 +277,28 @@ describe('Unit: lib/cache', () => {
       await wait(20);
       assert(cache.get(0) === undefined);
       assert(cache.has(0) === false);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [],
+        LFU: [],
+        memory: [],
+      });
+    });
 
-      cache.clear();
-      cache.put(0, 0);
-      cache.put(1, 1, 1, 10);
+    it('age early', async () => {
+      const cache = new Cache<number, number>(3, { earlyExpiring: true });
+
+      cache.put(0, 0, 1, 10);
+      cache.put(1, 1, 1, 5);
+      cache.put(2, 2, 1, 10);
       await wait(20);
-      assert(cache.length === 2);
-      assert(cache.has(0) === true);
-      cache.put(2, 2);
-      assert(cache.length === 2);
-      assert(cache.has(0) === true);
-      assert(cache.has(1) === false);
-      assert(cache.has(2) === true);
+      assert(cache.length === 3);
+      cache.put(3, 3);
+      assert(cache.length === 3);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [3, 2, 0],
+        LFU: [],
+        memory: [[0, 0], [2, 2], [3, 3]],
+      });
     });
 
     if (!navigator.userAgent.includes('Chrome')) return;
