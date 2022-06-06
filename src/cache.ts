@@ -205,10 +205,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       if (this.earlyExpiring && expiry !== Infinity) {
         index.enode
           ? this.expiries.update(index.enode, -expiry)
-          : this.expiries.insert(-expiry, node);
+          : index.enode = this.expiries.insert(-expiry, node);
       }
-      else if (this.earlyExpiring) {
-        index.enode && this.expiries.delete(index.enode);
+      else if (index.enode) {
+        this.expiries.delete(index.enode);
+        index.enode = void 0;
       }
       record.value = value;
       this.disposer?.(val, key);
