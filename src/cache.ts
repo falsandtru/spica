@@ -180,9 +180,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       size = skip?.value.size ?? 0;
     }
   }
-  public put(key: K, value: V, size?: number, age?: number): boolean;
-  public put(this: Cache<K, undefined>, key: K, value?: V, size?: number, age?: number): boolean;
-  public put(key: K, value: V, size: number = 1, age: number = this.settings.age!): boolean {
+  public put(key: K, value: V, opts?: { size?: number; age?: number; }): boolean;
+  public put(this: Cache<K, undefined>, key: K, value?: V, opts?: { size?: number; age?: number; }): boolean;
+  public put(key: K, value: V, { size = 1, age = this.settings.age! }: { size?: number; age?: number; } = {}): boolean {
     if (size >= 1 === false) throw new Error(`Spica: Cache: Size must be 1 or more.`);
     if (age >= 1 === false) throw new Error(`Spica: Cache: Age must be 1 or more.`);
     if (size > this.space || age <= 0) {
@@ -238,10 +238,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     }
     return false;
   }
-  public set(key: K, value: V, size?: number, age?: number): this;
-  public set(this: Cache<K, undefined>, key: K, value?: V, size?: number, age?: number): this;
-  public set(key: K, value: V, size?: number, age?: number): this {
-    this.put(key, value, size, age);
+  public set(key: K, value: V, opts?: { size?: number; age?: number; }): this;
+  public set(this: Cache<K, undefined>, key: K, value?: V, opts?: { size?: number; age?: number; }): this;
+  public set(key: K, value: V, opts?: { size?: number; age?: number; }): this {
+    this.put(key, value, opts);
     return this;
   }
   public get(key: K): V | undefined {

@@ -181,7 +181,7 @@ describe('Unit: lib/cache', () => {
 
       cache.put(0, 0);
       cache.put(1, 1);
-      cache.put(2, 2, 2);
+      cache.put(2, 2, { size: 2 });
       assert(cache.length === 2);
       assert(cache.size === 3);
       assert.deepStrictEqual(inspect(cache), {
@@ -190,7 +190,7 @@ describe('Unit: lib/cache', () => {
         memory: [[1, 1], [2, 2]],
       });
 
-      cache.put(1, 1, 2);
+      cache.put(1, 1, { size: 2 });
       assert(cache.length === 1);
       assert(cache.size === 2);
       assert.deepStrictEqual(inspect(cache), {
@@ -199,7 +199,7 @@ describe('Unit: lib/cache', () => {
         memory: [[1, 1]],
       });
 
-      cache.put(2, 2, 2);
+      cache.put(2, 2, { size: 2 });
       assert(cache.length === 1);
       assert(cache.size === 2);
       assert.deepStrictEqual(inspect(cache), {
@@ -226,7 +226,7 @@ describe('Unit: lib/cache', () => {
         memory: [[2, 2], [3, 3]],
       });
 
-      cache.put(1, 1, 3);
+      cache.put(1, 1, { size: 3 });
       assert(cache.length === 1);
       assert(cache.size === 3);
       assert.deepStrictEqual(inspect(cache), {
@@ -236,7 +236,7 @@ describe('Unit: lib/cache', () => {
       });
 
       cache.put(1, 1);
-      cache.put(2, 2, 2);
+      cache.put(2, 2, { size: 2 });
       cache.get(2);
       assert(cache.length === 2);
       assert(cache.size === 3);
@@ -246,7 +246,7 @@ describe('Unit: lib/cache', () => {
         memory: [[1, 1], [2, 2]],
       });
 
-      cache.put(1, 1, 3);
+      cache.put(1, 1, { size: 3 });
       assert(cache.length === 1);
       assert(cache.size === 3);
       assert.deepStrictEqual(inspect(cache), {
@@ -259,7 +259,7 @@ describe('Unit: lib/cache', () => {
     it('age', async () => {
       const cache = new Cache<number, number>(3);
 
-      cache.put(0, 0, 1, 10);
+      cache.put(0, 0, { age: 10 });
       assert(cache.has(0));
       assert(cache.get(0) === 0);
       await wait(20);
@@ -271,7 +271,7 @@ describe('Unit: lib/cache', () => {
         memory: [],
       });
 
-      cache.put(0, 0, 1, 10);
+      cache.put(0, 0, { age: 10 });
       assert(cache.get(0) === 0);
       assert(cache.has(0));
       await wait(20);
@@ -287,9 +287,9 @@ describe('Unit: lib/cache', () => {
     it('age early', async () => {
       const cache = new Cache<number, number>(3, { earlyExpiring: true });
 
-      cache.put(0, 0, 1, 10);
-      cache.put(1, 1, 1, 5);
-      cache.put(2, 2, 1, 10);
+      cache.put(0, 0, { age: 10 });
+      cache.put(1, 1, { age: 5 });
+      cache.put(2, 2, { age: 10 });
       await wait(20);
       assert(cache.length === 3);
       cache.put(3, 3);
