@@ -20,7 +20,7 @@ export class Heap<T> {
   public insert(priority: number, value: T): Heap.Node<T> {
     const array = this.array;
     const node = array[this.$length] = [priority, value, this.$length++];
-    upHeapify(array, this.$length, priority);
+    upHeapify(array, this.$length);
     return node;
   }
   public replace(priority: number, value: T): T | undefined {
@@ -64,7 +64,7 @@ export class Heap<T> {
   private sort(node: Node<T>): boolean {
     const array = this.array;
     assert(array[node[2]] === node);
-    return upHeapify(array, node[2] + 1, node[0])
+    return upHeapify(array, node[2] + 1)
       || downHeapify(array, node[2] + 1, this.$length, this.stable);
   }
   public peek(): T | undefined {
@@ -76,7 +76,8 @@ export class Heap<T> {
   }
 }
 
-function upHeapify<T>(array: Node<T>[], index: number, priority: number): boolean {
+function upHeapify<T>(array: Node<T>[], index: number): boolean {
+  const priority = array[index - 1][0];
   let changed = false;
   while (index > 1) {
     const parent = floor(index / 2);
