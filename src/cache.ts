@@ -125,6 +125,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     assert(node.list);
     this.overlap -= +(index.region === 'LFU' && node.list === this.indexes.LRU);
     assert(this.overlap >= 0);
+    index.enode && this.expiries.delete(index.enode);
     node.delete();
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size - 1);
     this.memory.delete(index.key);
@@ -145,6 +146,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
           && target !== skip
           && target.value.expiry < now():
           target = this.expiries.extract()!;
+          target.value.enode = void 0;
           break;
         case LRU.length === 0:
           target = LFU.last! !== skip
@@ -206,6 +208,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         index.enode
           ? this.expiries.update(index.enode, -expiry)
           : index.enode = this.expiries.insert(-expiry, node);
+        assert(this.expiries.length <= this.length);
       }
       else if (index.enode) {
         this.expiries.delete(index.enode);
@@ -234,6 +237,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     });
     if (this.earlyExpiring && expiry !== Infinity) {
       node.value.enode = this.expiries.insert(-expiry, node);
+      assert(this.expiries.length <= this.length);
     }
     return false;
   }
