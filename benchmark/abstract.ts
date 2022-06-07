@@ -6,7 +6,7 @@ describe('Benchmark:', function () {
   this.timeout(10 * 1e3);
 
   describe('abstract', function () {
-    for (const length of [1, 10, 100, 1000, 10000, 100000]) {
+    for (const length of [1, 10, 100, 1000, 10000, 100000, 1000000]) {
       it(`array ${length.toLocaleString('en')}`, function (done) {
         const data: unknown[] = [];
         for (let i = 0; i < length - 1; ++i) data.push(0);

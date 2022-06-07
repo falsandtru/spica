@@ -23,7 +23,7 @@ describe('Benchmark:', function () {
       benchmark('IxList new', () => new IxList(), done);
     });
 
-    for (const length of [10, 100, 1000, 10000, 100000]) {
+    for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
       it(`Yalist add ${length.toLocaleString('en')}`, function (done) {
         const cap = length;
         const list = new Yallist();
