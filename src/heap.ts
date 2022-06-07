@@ -46,8 +46,8 @@ export class Heap<T> {
     // @ts-expect-error
     array[this.$length] = undefined;
     index < this.$length && this.sort(array[index]);
-    if (array.length > 2 ** 16 && array.length > this.$length * 2) {
-      array.splice(array.length / 2, array.length);
+    if (array.length >= 2 ** 16 && array.length >= this.$length * 2) {
+      array.splice(array.length / 2, array.length / 2);
     }
     return node[1];
   }
