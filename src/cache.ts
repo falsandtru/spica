@@ -145,8 +145,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         case (target = this.expiries.peek()!)
           && target !== skip
           && target.value.expiry < now():
-          target = this.expiries.extract()!;
-          target.value.enode = void 0;
+          assert(target = target!);
           break;
         case LRU.length === 0:
           target = LFU.last! !== skip
