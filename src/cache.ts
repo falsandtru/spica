@@ -322,8 +322,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const { LRU, LFU } = this.stats;
     const { capacity, ratio, limit, indexes } = this;
     const window = capacity;
-    LRU[0] + LFU[0] === window && this.stats.slide();
-    if ((LRU[0] + LFU[0]) * 1000 % capacity || LRU[1] + LFU[1] === 0) return;
+    const total = LRU[0] + LFU[0];
+    total === window && this.stats.slide();
+    if (total * 1000 % capacity || (LRU[1] && LFU[1]) === 0) return;
     const lenR = indexes.LRU.length;
     const lenF = indexes.LFU.length;
     const lenV = this.overlap;
