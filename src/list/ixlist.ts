@@ -1,5 +1,4 @@
 import { Infinity, Array } from '../global';
-import { min } from '../alias';
 import { Collection } from '../collection';
 import { Stack } from '../stack';
 import { equal } from '../compare';
@@ -41,7 +40,7 @@ export class List<K, V = undefined> {
     }
     this.capacity = capacity;
     this.index = index!;
-    this.nodes = this.capacity <= BORDER ? Array(min(this.capacity, BORDER)) : {};
+    this.nodes = this.capacity <= BORDER ? Array(this.capacity) : {};
   }
   public readonly capacity: number;
   private readonly index?: Index<K, number>;
@@ -82,7 +81,7 @@ export class List<K, V = undefined> {
     return this.HEAD = this.last?.index ?? this.HEAD;
   }
   public clear(): void {
-    this.nodes = this.capacity <= BORDER ? Array(min(this.capacity, BORDER)) : {};
+    this.nodes = this.capacity <= BORDER ? Array(this.capacity) : {};
     this.heap.clear();
     this.index?.clear();
     this.HEAD = 0;
