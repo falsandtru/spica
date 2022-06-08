@@ -57,16 +57,13 @@ DWCはこの最適化を行っても状態数が多いぶん増加したオー�
 
 */
 
-interface Index<K> {
+interface Index<K, V> {
   readonly key: K;
+  value: V;
   size: number;
   expiry: number;
-  enode?: Heap.Node<List.Node<Index<K>>>;
+  enode?: Heap.Node<List.Node<Index<K, V>>>;
   region: 'LRU' | 'LFU';
-}
-interface Record<K, V> {
-  readonly inode: List.Node<Index<K>>;
-  value: V;
 }
 
 export namespace Cache {
@@ -119,12 +116,12 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   private readonly space: number;
   private overlap = 0;
   private SIZE = 0;
-  private memory = new Map<K, Record<K, V>>();
+  private memory = new Map<K, List.Node<Index<K, V>>>();
   private readonly indexes = {
-    LRU: new List<Index<K>>(),
-    LFU: new List<Index<K>>(),
+    LRU: new List<Index<K, V>>(),
+    LFU: new List<Index<K, V>>(),
   } as const;
-  private readonly expiries = new Heap<List.Node<Index<K>>>();
+  private readonly expiries = new Heap<List.Node<Index<K, V>>>();
   private readonly earlyExpiring: boolean;
   private readonly disposer?: (value: V, key: K) => void;
   public get length(): number {
@@ -134,13 +131,10 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
   public get size(): number {
     return this.SIZE;
   }
-  private evict(node: List.Node<Index<K>>, record: Record<K, V> | undefined, callback: boolean): void {
+  private evict(node: List.Node<Index<K, V>>, callback: boolean): void {
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     const index = node.value;
     callback &&= !!this.disposer;
-    record = callback
-      ? record ?? this.memory.get(index.key)
-      : record;
     assert(node.list);
     this.overlap -= +(index.region === 'LFU' && node.list === this.indexes.LRU);
     assert(this.overlap >= 0);
@@ -150,16 +144,16 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.memory.delete(index.key);
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     this.SIZE -= index.size;
-    callback && this.disposer?.(record!.value, index.key);
+    callback && this.disposer?.(node.value.value, index.key);
   }
-  private ensure(margin: number, skip?: List.Node<Index<K>>): void {
+  private ensure(margin: number, skip?: List.Node<Index<K, V>>): void {
     let size = skip?.value.size ?? 0;
     assert(margin - size <= this.space);
     if (margin - size <= 0) return;
     const { LRU, LFU } = this.indexes;
     while (this.length === this.capacity || this.size + margin - size > this.space) {
       assert(this.length >= 1 + +!!skip);
-      let target: List.Node<Index<K>>;
+      let target: List.Node<Index<K, V>>;
       switch (true) {
         case (target = this.expiries.peek()!)
           && target !== skip
@@ -195,7 +189,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       }
       assert(target !== skip);
       assert(this.memory.has(target.value.key));
-      this.evict(target, void 0, true);
+      this.evict(target, true);
       skip = skip?.list && skip;
       size = skip?.value.size ?? 0;
     }
@@ -211,10 +205,9 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     const expiry = age === Infinity
       ? Infinity
       : now() + age;
-    const record = this.memory.get(key);
-    if (record) {
-      const node = record.inode;
-      const val = record.value;
+    const node = this.memory.get(key);
+    if (node) {
+      const val = node.value.value;
       const index = node.value;
       this.ensure(size, node);
       assert(this.memory.has(key));
@@ -232,7 +225,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
         this.expiries.delete(index.enode);
         index.enode = void 0;
       }
-      record.value = value;
+      node.value.value = value;
       this.disposer?.(val, key);
       return true;
     }
@@ -243,18 +236,15 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     assert(LRU.length !== this.capacity);
     this.SIZE += size;
     assert(0 < this.size && this.size <= this.space);
-    const node = LRU.unshift({
+    this.memory.set(key, LRU.unshift({
       key,
+      value,
       size,
       expiry,
       region: 'LRU',
-    });
-    this.memory.set(key, {
-      inode: node,
-      value,
-    });
+    }));
     if (this.earlyExpiring && expiry !== Infinity) {
-      node.value.enode = this.expiries.insert(-expiry, node);
+      LRU.head!.value.enode = this.expiries.insert(-expiry, LRU.head!);
       assert(this.expiries.length <= this.length);
     }
     return false;
@@ -266,36 +256,35 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     return this;
   }
   public get(key: K): V | undefined {
-    const record = this.memory.get(key);
-    if (!record) return;
-    const node = record.inode;
+    const node = this.memory.get(key);
+    if (!node) return;
     const expiry = node.value.expiry;
     if (expiry !== Infinity && expiry < now()) {
-      this.evict(node, record, true);
+      this.evict(node, true);
       return;
     }
     // Optimization for memoize.
-    if (this.capacity > 3 && node === node.list.head) return record.value;
+    if (this.capacity > 3 && node === node.list.head) return node.value.value;
     this.access(node);
     this.slide();
-    return record.value;
+    return node.value.value;
   }
   public has(key: K): boolean {
     //assert(this.memory.has(key) === (this.indexes.LFU.has(key) || this.indexes.LRU.has(key)));
     //assert(this.memory.size === this.indexes.LFU.length + this.indexes.LRU.length);
-    const record = this.memory.get(key);
-    if (!record) return false;
-    const expiry = record.inode.value.expiry;
+    const node = this.memory.get(key);
+    if (!node) return false;
+    const expiry = node.value.expiry;
     if (expiry !== Infinity && expiry < now()) {
-      this.evict(record.inode, record, true);
+      this.evict(node, true);
       return false;
     }
     return true;
   }
   public delete(key: K): boolean {
-    const record = this.memory.get(key);
-    if (!record) return false;
-    this.evict(record.inode, record, this.settings.capture!.delete === true);
+    const node = this.memory.get(key);
+    if (!node) return false;
+    this.evict(node, this.settings.capture!.delete === true);
     return true;
   }
   public clear(): void {
@@ -309,12 +298,12 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     if (!this.disposer || !this.settings.capture!.clear) return void this.memory.clear();
     const memory = this.memory;
     this.memory = new Map();
-    for (const [key, { value }] of memory) {
+    for (const [key, { value: { value } }] of memory) {
       this.disposer(value, key);
     }
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
-    for (const [key, { value }] of this.memory) {
+    for (const [key, { value: { value } }] of this.memory) {
       yield [key, value];
     }
     return;
@@ -367,11 +356,11 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       }
     }
   }
-  private access(node: List.Node<Index<K>>): boolean {
+  private access(node: List.Node<Index<K, V>>): boolean {
     return this.accessLFU(node)
         || this.accessLRU(node);
   }
-  private accessLRU(node: List.Node<Index<K>>): boolean {
+  private accessLRU(node: List.Node<Index<K, V>>): boolean {
     assert(node.list === this.indexes.LRU);
     const index = node.value;
     ++this.stats[index.region][0];
@@ -382,7 +371,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     this.indexes.LFU.unshiftNode(node);
     return true;
   }
-  private accessLFU(node: List.Node<Index<K>>): boolean {
+  private accessLFU(node: List.Node<Index<K, V>>): boolean {
     if (node.list !== this.indexes.LFU) return false;
     const index = node.value;
     ++this.stats[index.region][0];

@@ -8,7 +8,7 @@ describe('Unit: lib/cache', () => {
       return {
         LRU: [...cache['indexes'].LRU].map(i => i.key),
         LFU: [...cache['indexes'].LFU].map(i => i.key),
-        memory: [...cache['memory']].map(([key, { value }]) => [key, value]),
+        memory: [...cache['memory']].map(([key, { value: { value } }]) => [key, value]),
       };
     }
 
