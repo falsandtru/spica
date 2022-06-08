@@ -64,10 +64,16 @@ export class List<K, V = undefined> {
     const head = this.head;
     return head && this.nodes[head.prev];
   }
+  public next(index: number): List.Node<K, V> | undefined {
+    const node = this.node(index);
+    return node && this.nodes[node.next];
+  }
+  public prev(index: number): List.Node<K, V> | undefined {
+    const node = this.node(index);
+    return node && this.nodes[node.prev];
+  }
   public node(index: number): List.Node<K, V> | undefined {
-    return 0 <= index && index < this.capacity
-      ? this.nodes[index]
-      : undefined;
+    return this.nodes[index];
   }
   public rotateToNext(): number {
     return this.HEAD = this.tail?.index ?? this.HEAD;
@@ -341,10 +347,10 @@ export class List<K, V = undefined> {
     }
     return true;
   }
-  public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
+  public *[Symbol.iterator](): Iterator<[K, V, number], undefined, undefined> {
     const nodes = this.nodes;
     for (let node = nodes[this.HEAD]; node;) {
-      yield [node.key, node.value];
+      yield [node.key, node.value, node.index];
       node = nodes[node.next];
       if (node?.index === this.HEAD) return;
     }
