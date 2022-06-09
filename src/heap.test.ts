@@ -7,7 +7,7 @@ describe('Unit: lib/heap', () => {
     }
 
     it('insert/extract', () => {
-      const heap = new Heap<number>();
+      const heap = new Heap<number>((a, b) => b - a);
 
       assert(heap.extract() === undefined);
 
@@ -65,7 +65,7 @@ describe('Unit: lib/heap', () => {
     });
 
     it('replace', () => {
-      const heap = new Heap<number>();
+      const heap = new Heap<number>((a, b) => b - a);
 
       assert(heap.replace(0, 0) === undefined);
       assert(heap.length === 1);
@@ -109,7 +109,7 @@ describe('Unit: lib/heap', () => {
     });
 
     it('stable', () => {
-      const heap = new Heap<number>(true);
+      const heap = new Heap<number>((a, b) => b - a, true);
 
       assert.deepStrictEqual(heap.insert(1, 1), [1, 1, 0]);
       assert.deepStrictEqual(inspect(heap), [
@@ -122,14 +122,14 @@ describe('Unit: lib/heap', () => {
         [1, 1, 1],
       ]);
 
-      assert.deepStrictEqual(heap.insert(2, 2.1), [2, 2.1, 2]);
+      assert.deepStrictEqual(heap.insert(2.1, 2), [2, 2.1, 2]);
       assert.deepStrictEqual(inspect(heap), [
         [3, 3, 0],
         [1, 1, 1],
         [2, 2.1, 2],
       ]);
 
-      assert.deepStrictEqual(heap.insert(2, 2.2), [2, 2.2, 1]);
+      assert.deepStrictEqual(heap.insert(2.2, 2), [2, 2.2, 1]);
       assert.deepStrictEqual(inspect(heap), [
         [3, 3, 0],
         [2, 2.2, 1],
@@ -145,12 +145,12 @@ describe('Unit: lib/heap', () => {
       heap.clear();
       const nodes = [
         heap.insert(0, 0),
-        heap.insert(0, 1),
-        heap.insert(0, 2),
-        heap.insert(0, 3),
-        heap.insert(0, 4),
-        heap.insert(0, 5),
-        heap.insert(0, 6),
+        heap.insert(1, 0),
+        heap.insert(2, 0),
+        heap.insert(3, 0),
+        heap.insert(4, 0),
+        heap.insert(5, 0),
+        heap.insert(6, 0),
       ];
       assert.deepStrictEqual(inspect(heap), [
         [0, 0, 0],

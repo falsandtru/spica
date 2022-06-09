@@ -121,7 +121,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
     LRU: new List<Index<K, V>>(),
     LFU: new List<Index<K, V>>(),
   } as const;
-  private readonly expiries = new Heap<List.Node<Index<K, V>>>();
+  private readonly expiries = new Heap<List.Node<Index<K, V>>>((a, b) => a.value.expiry - b.value.expiry);
   private readonly earlyExpiring: boolean;
   private readonly disposer?: (value: V, key: K) => void;
   public get length(): number {
@@ -217,8 +217,8 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       index.expiry = expiry;
       if (this.earlyExpiring && expiry !== Infinity) {
         index.enode
-          ? this.expiries.update(index.enode, -expiry)
-          : index.enode = this.expiries.insert(-expiry, node);
+          ? this.expiries.update(index.enode)
+          : index.enode = this.expiries.insert(node);
         assert(this.expiries.length <= this.length);
       }
       else if (index.enode) {
@@ -244,7 +244,7 @@ export class Cache<K, V = undefined> implements IterableCollection<K, V> {
       region: 'LRU',
     }));
     if (this.earlyExpiring && expiry !== Infinity) {
-      LRU.head!.value.enode = this.expiries.insert(-expiry, LRU.head!);
+      LRU.head!.value.enode = this.expiries.insert(LRU.head!);
       assert(this.expiries.length <= this.length);
     }
     return false;
