@@ -1,1 +1,1 @@
-export * from './collection/multimap';
+export * from './dict/multimap';

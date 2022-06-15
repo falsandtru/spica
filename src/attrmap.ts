@@ -1,1 +1,1 @@
-export * from './collection/attrmap';
+export * from './dict/attrmap';

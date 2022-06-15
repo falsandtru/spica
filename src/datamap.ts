@@ -1,1 +1,1 @@
-export * from './collection/datamap';
+export * from './dict/datamap';
