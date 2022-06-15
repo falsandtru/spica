@@ -2,7 +2,7 @@ import { Object, location } from './global';
 import { Coroutine } from './coroutine';
 import { Colistener } from './colistener';
 import { Cancellation } from './cancellation';
-import { Collection } from './collection';
+import { Dict } from './collection';
 import { ReadonlyURL } from './url';
 import { noop } from './function';
 
@@ -13,7 +13,7 @@ export interface CofetchOptions {
   responseType?: XMLHttpRequestResponseType;
   timeout?: number;
   withCredentials?: boolean;
-  cache?: Collection<string, XMLHttpRequest>;
+  cache?: Dict<string, XMLHttpRequest>;
 }
 
 const memory = new WeakMap<XMLHttpRequest, { expiry: number; }>();

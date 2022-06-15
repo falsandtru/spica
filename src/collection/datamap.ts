@@ -1,9 +1,9 @@
 import { Map } from '../global';
-import { IterableCollection } from '../collection';
+import { IterableDict } from '../collection';
 import { type } from '../type';
 import { memoize } from '../memoize';
 
-export class DataMap<K, V> implements IterableCollection<K, V> {
+export class DataMap<K, V> implements IterableDict<K, V> {
   constructor(
     entries: Iterable<[K, V]> = [],
     private indentify: (key: K) => unknown = stringify,

@@ -1,5 +1,5 @@
 import { Infinity, Array } from '../global';
-import { Collection } from '../collection';
+import { Dict } from '../collection';
 import { Stack } from '../stack';
 import { equal } from '../compare';
 
@@ -8,7 +8,7 @@ import { equal } from '../compare';
 const undefined = void 0;
 const BORDER = 1_000_000_000;
 
-interface Index<K, V> extends Collection<K, V> {
+interface Index<K, V> extends Dict<K, V> {
   delete(key: K, value?: V): boolean;
   clear(): void;
 }

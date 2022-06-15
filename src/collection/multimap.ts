@@ -1,12 +1,12 @@
 import { Map } from '../global';
-import { IterableCollection } from '../collection';
+import { IterableDict } from '../collection';
 import { indexOf, splice } from '../array';
 
-interface Collection<K, V> extends IterableCollection<K, V> {
+interface Collection<K, V> extends IterableDict<K, V> {
   clear(): void;
 }
 
-export class MultiMap<K, V> implements IterableCollection<K, V> {
+export class MultiMap<K, V> implements IterableDict<K, V> {
   constructor(
     entries: Iterable<[K, V]> = [],
     private memory: Collection<K, V[]> = new Map(),

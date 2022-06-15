@@ -1,6 +1,6 @@
 import { Infinity, Map } from './global';
 import { now } from './clock';
-import { IterableCollection } from './collection';
+import { IterableDict } from './collection';
 import { List } from './invlist';
 import { Heap } from './heap';
 import { extend } from './assign';
@@ -80,7 +80,7 @@ export namespace Cache {
     };
   }
 }
-export class Cache<K, V = undefined> implements IterableCollection<K, V> {
+export class Cache<K, V = undefined> implements IterableDict<K, V> {
   constructor(capacity: number, opts?: Cache.Options<K, V>);
   constructor(opts: Cache.Options<K, V>);
   constructor(

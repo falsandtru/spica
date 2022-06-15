@@ -1,17 +1,17 @@
 import { Map, WeakMap } from '../global';
-import { Collection } from '../collection';
+import { Dict } from '../collection';
 
 export class AttrMap<C, K, V> {
   constructor(
     entries: Iterable<[C, K, V]> = [],
-    private readonly KeyMap: new <K, V>(entries?: Iterable<[K, V]> | null) => Collection<K, V> = WeakMap,
-    private readonly ValueMap: new <K, V>(entries?: Iterable<[K, V]> | null) => Collection<K, V> = Map
+    private readonly KeyMap: new <K, V>(entries?: Iterable<[K, V]> | null) => Dict<K, V> = WeakMap,
+    private readonly ValueMap: new <K, V>(entries?: Iterable<[K, V]> | null) => Dict<K, V> = Map
   ) {
     for (const [c, k, v] of entries) {
       this.set(c, k, v);
     }
   }
-  private readonly memory = new this.KeyMap<C, Collection<K, V>>();
+  private readonly memory = new this.KeyMap<C, Dict<K, V>>();
   public get(ctx: C, key: K): V | undefined {
     return this.memory.get(ctx)?.get(key);
   }
