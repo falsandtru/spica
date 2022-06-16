@@ -1,5 +1,5 @@
 import { Infinity, Array } from '../global';
-import { Dict } from '../collection';
+import { Dict } from '../dict';
 import { Stack } from '../stack';
 import { equal } from '../compare';
 

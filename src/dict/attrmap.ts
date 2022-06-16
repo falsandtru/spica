@@ -1,5 +1,5 @@
 import { Map, WeakMap } from '../global';
-import { Dict } from '../collection';
+import { Dict } from '../dict';
 
 export class AttrMap<C, K, V> {
   constructor(

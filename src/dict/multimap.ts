@@ -1,15 +1,15 @@
 import { Map } from '../global';
-import { IterableDict } from '../collection';
+import { IterableDict } from '../dict';
 import { indexOf, splice } from '../array';
 
-interface Collection<K, V> extends IterableDict<K, V> {
+interface Dict<K, V> extends IterableDict<K, V> {
   clear(): void;
 }
 
 export class MultiMap<K, V> implements IterableDict<K, V> {
   constructor(
     entries: Iterable<[K, V]> = [],
-    private memory: Collection<K, V[]> = new Map(),
+    private memory: Dict<K, V[]> = new Map(),
   ) {
     for (const [k, v] of entries) {
       this.set(k, v);

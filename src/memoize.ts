@@ -1,6 +1,6 @@
 import { Map } from './global';
 import { isArray } from './alias';
-import { Dict } from './collection';
+import { Dict } from './dict';
 import { equal } from './compare';
 
 export function memoize<f extends (...as: [unknown, ...unknown[]]) => unknown, b = Parameters<f>[0]>(f: f, memory?: Dict<b, ReturnType<f>>): f;

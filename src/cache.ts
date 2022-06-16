@@ -1,6 +1,6 @@
 import { Infinity, Map } from './global';
 import { now } from './clock';
-import { IterableDict } from './collection';
+import { IterableDict } from './dict';
 import { List } from './invlist';
 import { Heap } from './heap';
 import { extend } from './assign';

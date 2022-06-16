@@ -2,7 +2,7 @@ import { Object, location } from './global';
 import { Coroutine } from './coroutine';
 import { Colistener } from './colistener';
 import { Cancellation } from './cancellation';
-import { Dict } from './collection';
+import { Dict } from './dict';
 import { ReadonlyURL } from './url';
 import { noop } from './function';
 
