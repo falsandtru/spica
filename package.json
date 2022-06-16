@@ -38,7 +38,7 @@
     "test",
     "helper",
     "list",
-    "collection",
+    "dict",
     "monad",
     "url",
     "*.ts",
