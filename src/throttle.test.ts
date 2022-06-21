@@ -1,4 +1,5 @@
-import { throttle, debounce } from './throttle';
+import { throttle, debounce, cothrottle } from './throttle';
+import { wait } from './timer';
 
 describe('Unit: lib/throttle', () => {
   describe('throttle', () => {
@@ -52,6 +53,31 @@ describe('Unit: lib/throttle', () => {
       setTimeout(() => call(++count), 100);
       setTimeout(() => call(++count), 200);
       call(++count);
+    });
+  });
+
+  describe('cothrottle', () => {
+    it('', async () => {
+      const since = Date.now();
+      for await (const count of cothrottle(async function* (count = 0) {
+        await wait(50);
+        yield ++count;
+      }, 100, () => wait(100))()) {
+        switch (count) {
+          case 1:
+            assert(Date.now() - since >= 50);
+            continue;
+          case 2:
+            assert(Date.now() - since >= 100);
+            continue;
+          case 3:
+            assert(Date.now() - since >= 200);
+            continue;
+          case 4:
+            assert(Date.now() - since >= 250);
+            return;
+        }
+      }
     });
   });
 
