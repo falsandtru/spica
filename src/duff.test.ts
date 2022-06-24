@@ -1,4 +1,4 @@
-import { duff, duffbk } from './duff';
+import { duff, duffbk, duffEach, duffReduce } from './duff';
 
 describe('Unit: lib/duff', () => {
   describe('duff', () => {
@@ -38,6 +38,26 @@ describe('Unit: lib/duff', () => {
       });
       assert(count === 50);
 
+    });
+
+  });
+
+  describe('duffEach', () => {
+    it('', () => {
+      duffEach(Array.from(Array(100), (_, i) => i), (v, i) => {
+        assert(v === i);
+      });
+    });
+
+  });
+
+  describe('duffReduce', () => {
+    it('', () => {
+      duffReduce(Array.from(Array(100), (_, i) => i), (acc, v, i) => {
+        assert(v === i);
+        assert(acc++ === i);
+        return acc;
+      }, 0);
     });
 
   });
