@@ -53,11 +53,11 @@ describe('Unit: lib/duff', () => {
 
   describe('duffReduce', () => {
     it('', () => {
-      duffReduce(Array.from(Array(100), (_, i) => i), (acc, v, i) => {
+      assert(100 === duffReduce(Array.from(Array(100), (_, i) => i), (acc, v, i) => {
         assert(v === i);
         assert(acc++ === i);
         return acc;
-      }, 0);
+      }, 0));
     });
 
   });
