@@ -277,7 +277,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     // Optimization for memoize.
     if (this.capacity > 3 && node === node.list.head) return node.value.value;
     this.access(node);
-    this.slide();
+    this.adjust();
     return node.value.value;
   }
   public has(key: K): boolean {
@@ -337,7 +337,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   } as const;
   private ratio = 500;
   private readonly limit: number;
-  private slide(): void {
+  private adjust(): void {
     const { LRU, LFU } = this.stats;
     const { capacity, ratio, limit, indexes } = this;
     const window = capacity;
