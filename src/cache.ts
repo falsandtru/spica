@@ -332,11 +332,11 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const window = capacity;
     const total = LRU[0] + LFU[0];
     total === window && this.stats.slide();
-    if (total * 1000 % capacity || (!LRU[1] || !LFU[1])) return;
+    if (total * 1000 % capacity || !LRU[1] || !LFU[1]) return;
     const lenR = indexes.LRU.length;
     const lenF = indexes.LFU.length;
-    const lenV = this.overlap;
-    const r = (lenF + lenV) * 1000 / (lenR + lenF || 1) | 0;
+    const lenO = this.overlap;
+    const r = (lenF + lenO) * 1000 / (lenR + lenF || 1) | 0;
     const rateR0 = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1], 0) * r;
     const rateF0 = rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1], 0) * (1000 - r);
     const rateF1 = rate(window, LFU[1], LRU[1] + LFU[1], LFU[0], LRU[0] + LFU[0], 5) * (1000 - r);
@@ -380,7 +380,14 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
 }
 
-function rate(window: number, currHits: number, currTotal: number, prevHits: number, prevTotal: number, offset: number): number {
+function rate(
+  window: number,
+  currHits: number,
+  currTotal: number,
+  prevHits: number,
+  prevTotal: number,
+  offset: number,
+): number {
   assert(currTotal <= window);
   const prevRate = prevHits * 100 / prevTotal | 0;
   const currRatio = currTotal * 100 / window - offset | 0;
