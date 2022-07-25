@@ -352,12 +352,13 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const lenF = indexes.LFU.length;
     const lenO = this.overlap;
     const r = (lenF + lenO) * 1000 / (lenR + lenF || 1) | 0;
+    const offset = capacity / window * 5;
     const rateR0 = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1], 0) * r;
     const rateF0 = rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1], 0) * (1000 - r);
-    const rateF1 = rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1], 5) * (1000 - r);
+    const rateF1 = rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1], offset) * (1000 - r);
     // 操作頻度を超えてキャッシュ比率を増減させても余剰比率の消化が追いつかず無駄
     // LRUの下限設定ではLRU拡大の要否を迅速に判定できないためLFUのヒット率低下の検出で代替する
-    if (ratio > 0 && (rateR0 > rateF0 || rateF0 < rateF1 * 0.95)) {
+    if (ratio > 0 && (rateR0 > rateF0 || rateF0 * 100 < rateF1 * (100 - offset))) {
       if (lenR >= capacity * (1000 - ratio) / 1000) {
         //ratio % 100 || ratio === 1000 || console.debug('-', ratio, LRU, LFU);
         --this.ratio;
@@ -405,11 +406,11 @@ function rate(
 ): number {
   assert(currTotal <= window);
   const prevRate = prevHits * 100 / prevTotal | 0;
-  const currRatio = currTotal * 100 / window - offset | 0;
+  const currRatio = currTotal * 100 / window - offset;
   if (currRatio <= 0) return prevRate * 100;
   const currRate = currHits * 100 / currTotal | 0;
   const prevRatio = 100 - currRatio;
-  return currRate * currRatio + prevRate * prevRatio;
+  return currRate * currRatio + prevRate * prevRatio | 0;
 }
 assert(rate(10, 4, 10, 0, 0, 0) === 4000);
 assert(rate(10, 0, 0, 4, 10, 0) === 4000);
