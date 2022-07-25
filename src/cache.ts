@@ -353,9 +353,9 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const lenO = this.overlap;
     const r = (lenF + lenO) * 1000 / (lenR + lenF || 1) | 0;
     const offset = capacity / window * 5;
-    const rateR0 = rate(window, LRU[0], LRU[0] + LFU[0], LRU[1], LRU[1] + LFU[1], 0) * r;
-    const rateF0 = rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1], 0) * (1000 - r);
-    const rateF1 = rate(window, LFU[0], LRU[0] + LFU[0], LFU[1], LRU[1] + LFU[1], offset) * (1000 - r);
+    const rateR0 = rate(window, LRU, LFU, 0) * r;
+    const rateF0 = rate(window, LFU, LRU, 0) * (1000 - r);
+    const rateF1 = rate(window, LFU, LRU, offset) * (1000 - r);
     // 操作頻度を超えてキャッシュ比率を増減させても余剰比率の消化が追いつかず無駄
     // LRUの下限設定ではLRU拡大の要否を迅速に判定できないためLFUのヒット率低下の検出で代替する
     if (ratio > 0 && (rateR0 > rateF0 || rateF0 * 100 < rateF1 * (100 - offset))) {
@@ -398,12 +398,14 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
 
 function rate(
   window: number,
-  currHits: number,
-  currTotal: number,
-  prevHits: number,
-  prevTotal: number,
+  hits1: readonly [number, number],
+  hits2: readonly [number, number],
   offset: number,
 ): number {
+  const currTotal = hits1[0] + hits2[0];
+  const prevTotal = hits1[1] + hits2[1];
+  const currHits = hits1[0];
+  const prevHits = hits1[1];
   assert(currTotal <= window);
   const prevRate = prevHits * 100 / prevTotal | 0;
   const currRatio = currTotal * 100 / window - offset;
@@ -412,9 +414,9 @@ function rate(
   const prevRatio = 100 - currRatio;
   return currRate * currRatio + prevRate * prevRatio | 0;
 }
-assert(rate(10, 4, 10, 0, 0, 0) === 4000);
-assert(rate(10, 0, 0, 4, 10, 0) === 4000);
-assert(rate(10, 1, 5, 4, 10, 0) === 3000);
-assert(rate(10, 0, 0, 4, 10, 5) === 4000);
-assert(rate(10, 1, 5, 2, 10, 5) === 2000);
-assert(rate(10, 2, 5, 2, 10, 5) === 2900);
+assert(rate(10, [4, 0], [6, 0], 0) === 4000);
+assert(rate(10, [0, 4], [0, 6], 0) === 4000);
+assert(rate(10, [1, 4], [4, 6], 0) === 3000);
+assert(rate(10, [0, 4], [0, 6], 5) === 4000);
+assert(rate(10, [1, 2], [4, 8], 5) === 2000);
+assert(rate(10, [2, 2], [3, 8], 5) === 2900);
