@@ -79,6 +79,7 @@ interface Index<K, V> {
 
 export namespace Cache {
   export interface Options<K, V = undefined> {
+    readonly window?: number;
     readonly capacity?: number;
     readonly space?: number;
     readonly age?: number;
@@ -107,12 +108,15 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     });
     this.capacity = this.settings.capacity!;
     if (this.capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
+    this.window = this.settings.window || this.capacity;
+    if (this.window * 1000 < this.capacity) throw new Error(`Spica: Cache: Window must be 0.1% of capacity or more.`);
     this.space = this.settings.space!;
     this.limit = this.settings.limit!;
     this.earlyExpiring = this.settings.earlyExpiring!;
     this.disposer = this.settings.disposer!;
   }
   private readonly settings: Cache.Options<K, V> = {
+    window: 0,
     capacity: 0,
     space: Infinity,
     age: Infinity,
@@ -123,6 +127,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       clear: true,
     },
   };
+  private readonly window: number;
   private readonly capacity: number;
   private readonly space: number;
   private overlap = 0;
@@ -339,8 +344,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private readonly limit: number;
   private adjust(): void {
     const { LRU, LFU } = this.stats;
-    const { capacity, ratio, limit, indexes } = this;
-    const window = capacity;
+    const { window, capacity, ratio, limit, indexes } = this;
     const total = LRU[0] + LFU[0];
     total === window && this.stats.slide();
     if (total * 1000 % capacity || !LRU[1] || !LFU[1]) return;
