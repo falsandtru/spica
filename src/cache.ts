@@ -1,22 +1,25 @@
 import { Infinity, Map } from './global';
+import { ceil, min } from './alias';
 import { now } from './clock';
 import { IterableDict } from './dict';
 import { List } from './invlist';
 import { Heap } from './heap';
 import { extend } from './assign';
-import { tuple } from './tuple';
 
 // Dual Window Cache
 
 /*
 LFU論理寿命：
-小容量で小効果のみにつきLRU下限で代替し廃止
+小容量で小効果のみにつきLRU下限で代替し廃止。
 
 LRU下限：
-小容量で大効果につき採用
+小容量で大効果につき採用。
 
 LFUヒット率変化率：
-効果確認できないが必要と思われるので残置
+効果確認できないが必要と思われるので残置。
+
+統計解像度：
+効果ないが検証用に残置。
 
 */
 
@@ -80,6 +83,7 @@ interface Index<K, V> {
 export namespace Cache {
   export interface Options<K, V = undefined> {
     readonly window?: number;
+    readonly resolution?: number;
     readonly capacity?: number;
     readonly space?: number;
     readonly age?: number;
@@ -110,6 +114,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (this.capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     this.window = this.settings.window || this.capacity;
     if (this.window * 1000 < this.capacity) throw new Error(`Spica: Cache: Window must be 0.1% of capacity or more.`);
+    this.stats.resolution = this.settings.resolution!;
     this.space = this.settings.space!;
     this.limit = this.settings.limit!;
     this.earlyExpiring = this.settings.earlyExpiring!;
@@ -117,6 +122,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
   private readonly settings: Cache.Options<K, V> = {
     window: 0,
+    resolution: 1,
     capacity: 0,
     space: Infinity,
     age: Infinity,
@@ -325,33 +331,37 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     return;
   }
   private readonly stats = {
-    LRU: tuple(0, 0),
-    LFU: tuple(0, 0),
+    resolution: 0,
+    LRU: [0] as number[],
+    LFU: [0] as number[],
     slide(): void {
-      const { LRU, LFU } = this;
-      LRU[1] = LRU[0];
-      LRU[0] = 0;
-      LFU[1] = LFU[0];
-      LFU[0] = 0;
+      const { LRU, LFU, resolution } = this;
+      if (LRU.length >= ceil(resolution * 1.05) + 1) {
+        LRU.pop();
+        LFU.pop();
+      }
+      LRU.unshift(0);
+      LFU.unshift(0);
+      assert(LRU.length === LFU.length);
     },
     clear(): void {
-      const { LRU, LFU } = this;
-      LRU[0] = LRU[1] = 0;
-      LFU[0] = LFU[1] = 0;
+      this.LRU = [];
+      this.LFU = [];
     },
-  } as const;
+  };
   private ratio = 500;
   private readonly limit: number;
   private adjust(): void {
-    const { LRU, LFU } = this.stats;
-    const { window, capacity, ratio, limit, indexes } = this;
+    const { window, capacity, ratio, limit, stats, indexes } = this;
+    const { LRU, LFU } = stats;
     const total = LRU[0] + LFU[0];
-    total === window && this.stats.slide();
-    if (total * 1000 % capacity || (!LRU[1] && !LFU[1])) return;
+    total >= window / stats.resolution && stats.slide();
+    if (total * 1000 % capacity || LRU.length < stats.resolution + 1) return;
     const lenR = indexes.LRU.length;
     const lenF = indexes.LFU.length;
     const lenO = this.overlap;
-    const r = (lenF + lenO) * 1000 / (lenR + lenF || 1) | 0;
+    const r = (lenF + lenO) * 1000 / (lenR + lenF) | 0;
+    assert(Number.isSafeInteger(r));
     const offset = capacity / window * 5;
     const rateR0 = rate(window, LRU, LFU, 0) * r;
     const rateF0 = rate(window, LFU, LRU, 0) * (1000 - r);
@@ -398,21 +408,28 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
 
 function rate(
   window: number,
-  hits1: readonly [number, number],
-  hits2: readonly [number, number],
+  hits1: readonly number[],
+  hits2: readonly number[],
   offset: number,
 ): number {
-  const currTotal = hits1[0] + hits2[0];
-  const prevTotal = hits1[1] + hits2[1];
-  const currHits = hits1[0];
-  const prevHits = hits1[1];
-  assert(currTotal <= window);
-  const prevRate = prevHits * 100 / prevTotal | 0;
-  const currRatio = currTotal * 100 / window - offset;
-  if (currRatio <= 0) return prevRate * 100;
-  const currRate = currHits * 100 / currTotal | 0;
-  const prevRatio = 100 - currRatio;
-  return currRate * currRatio + prevRate * prevRatio | 0;
+  assert(hits1.length === hits2.length);
+  let total = 0;
+  let hits = 0;
+  let ratio = 100;
+  for (let i = 0, len = hits1.length; i < len; ++i) {
+    const subtotal = hits1[i] + hits2[i];
+    if (subtotal === 0) continue;
+    offset = i + 1 === len ? 0 : offset;
+    const subratio = min(subtotal * 100 / window, ratio) - offset;
+    offset = offset && subratio < 0 ? -subratio : 0;
+    if (subratio <= 0) continue;
+    const rate = window * subratio / subtotal;
+    total += subtotal * rate;
+    hits += hits1[i] * rate;
+    ratio -= subratio;
+    if (ratio <= 0) break;
+  }
+  return hits * 10000 / total | 0;
 }
 assert(rate(10, [4, 0], [6, 0], 0) === 4000);
 assert(rate(10, [0, 4], [0, 6], 0) === 4000);
