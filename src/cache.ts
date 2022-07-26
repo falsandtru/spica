@@ -337,8 +337,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private readonly limit: number;
   private adjust(): void {
     const { capacity, ratio, limit, stats, indexes } = this;
-    const subtotal = stats.subtotal();
-    if (subtotal * 1000 % capacity || !stats.full()) return;
+    if (stats.subtotal() * 1000 % capacity || !stats.full()) return;
     const lenR = indexes.LRU.length;
     const lenF = indexes.LFU.length;
     const lenO = this.overlap;
@@ -425,9 +424,7 @@ class Stats {
     }
     const subtotal = LRU[+offset && 1] + LFU[+offset && 1] || 0;
     subtotal >= window / resolution && this.slide();
-    return LRU[0] + LFU[0]
-        || LRU[1] + LFU[1]
-        || 0;
+    return LRU[0] + LFU[0];
   }
   public slide(): void {
     const { LRU, LFU, max } = this;
