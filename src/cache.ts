@@ -115,6 +115,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.window = this.settings.window || this.capacity;
     if (this.window * 1000 < this.capacity) throw new Error(`Spica: Cache: Window must be 0.1% of capacity or more.`);
     this.stats.resolution = this.settings.resolution!;
+    this.stats.offset = this.capacity / this.window * 5;
     this.space = this.settings.space!;
     this.limit = this.settings.limit!;
     this.earlyExpiring = this.settings.earlyExpiring!;
@@ -332,6 +333,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
   private readonly stats = {
     resolution: 0,
+    offset: 0,
     LRU: [0] as number[],
     LFU: [0] as number[],
     slide(): void {
@@ -353,16 +355,15 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private readonly limit: number;
   private adjust(): void {
     const { window, capacity, ratio, limit, stats, indexes } = this;
-    const { LRU, LFU } = stats;
+    const { LRU, LFU, resolution, offset } = stats;
     const total = LRU[0] + LFU[0];
-    total >= window / stats.resolution && stats.slide();
-    if (total * 1000 % capacity || LRU.length < stats.resolution + 1) return;
+    total >= window / resolution && stats.slide();
+    if (total * 1000 % capacity || LRU.length < resolution + 1) return;
     const lenR = indexes.LRU.length;
     const lenF = indexes.LFU.length;
     const lenO = this.overlap;
     const r = (lenF + lenO) * 1000 / (lenR + lenF) | 0;
     assert(Number.isSafeInteger(r));
-    const offset = capacity / window * 5;
     const rateR0 = rate(window, LRU, LFU, 0) * r;
     const rateF0 = rate(window, LFU, LRU, 0) * (1000 - r);
     const rateF1 = rate(window, LFU, LRU, offset) * (1000 - r);
