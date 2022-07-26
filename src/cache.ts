@@ -108,18 +108,18 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       opts = capacity;
       capacity = opts.capacity ?? 0;
     }
-    extend(this.settings, opts, {
+    const settings = extend(this.settings, opts, {
       capacity,
     });
-    this.capacity = this.settings.capacity!;
+    this.capacity = settings.capacity!;
     if (this.capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
-    this.window = this.settings.window || this.capacity;
+    this.window = settings.window || this.capacity;
     if (this.window * 1000 < this.capacity) throw new Error(`Spica: Cache: Window must be 0.1% of capacity or more.`);
-    this.space = this.settings.space!;
-    this.limit = this.settings.limit!;
-    this.earlyExpiring = this.settings.earlyExpiring!;
-    this.disposer = this.settings.disposer!;
-    this.stats = new Stats(this.window, this.settings.resolution!, this.settings.offset!);
+    this.space = settings.space!;
+    this.limit = settings.limit!;
+    this.earlyExpiring = settings.earlyExpiring!;
+    this.disposer = settings.disposer!;
+    this.stats = new Stats(this.window, settings.resolution!, settings.offset!);
   }
   private readonly settings: Cache.Options<K, V> = {
     window: 0,
