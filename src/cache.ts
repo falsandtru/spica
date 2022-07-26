@@ -84,6 +84,7 @@ export namespace Cache {
   export interface Options<K, V = undefined> {
     readonly window?: number;
     readonly resolution?: number;
+    readonly offset?: number;
     readonly capacity?: number;
     readonly space?: number;
     readonly age?: number;
@@ -118,11 +119,12 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.limit = this.settings.limit!;
     this.earlyExpiring = this.settings.earlyExpiring!;
     this.disposer = this.settings.disposer!;
-    this.stats = new Stats(this.window, this.settings.resolution!);
+    this.stats = new Stats(this.window, this.settings.resolution!, this.settings.offset!);
   }
   private readonly settings: Cache.Options<K, V> = {
     window: 0,
     resolution: 1,
+    offset: 0,
     capacity: 0,
     space: Infinity,
     age: Infinity,
@@ -390,9 +392,9 @@ class Stats {
   constructor(
     private readonly window: number,
     public readonly resolution: number,
+    public readonly offset: number,
   ) {
   }
-  public readonly offset = 0;
   private readonly max = ceil(this.resolution * (100 + this.offset) / 100) + 1;
   private LRU = [0];
   private LFU = [0];
