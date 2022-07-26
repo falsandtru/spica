@@ -118,7 +118,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.limit = this.settings.limit!;
     this.earlyExpiring = this.settings.earlyExpiring!;
     this.disposer = this.settings.disposer!;
-    this.stats = new Stats(capacity, this.window, this.settings.resolution!);
+    this.stats = new Stats(this.window, this.settings.resolution!);
   }
   private readonly settings: Cache.Options<K, V> = {
     window: 0,
@@ -336,7 +336,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private adjust(): void {
     const { capacity, ratio, limit, stats, indexes } = this;
     const subtotal = stats.subtotal();
-    if (subtotal * 1000 % capacity || stats.length < stats.resolution + 1) return;
+    if (subtotal * 1000 % capacity || !stats.full()) return;
     const lenR = indexes.LRU.length;
     const lenF = indexes.LFU.length;
     const lenO = this.overlap;
@@ -344,10 +344,11 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     assert(Number.isSafeInteger(r));
     const rateR0 = stats.rateLRU() * r;
     const rateF0 = stats.rateLFU() * (1000 - r);
-    const rateF1 = stats.rateLFU(true) * (1000 - r);
+    const rateF1 = stats.offset && stats.rateLFU(true) * (1000 - r);
     // 操作頻度を超えてキャッシュ比率を増減させても余剰比率の消化が追いつかず無駄
     // LRUの下限設定ではLRU拡大の要否を迅速に判定できないためLFUのヒット率低下の検出で代替する
-    if (ratio > 0 && (rateR0 > rateF0 || rateF0 * 100 < rateF1 * (100 - stats.offset))) {
+    if (ratio > 0 && (rateR0 > rateF0 || stats.offset && rateF0 * 100 < rateF1 * (100 - stats.offset))) {
+      //rateR0 <= rateF0 && rateF0 * 100 < rateF1 * (100 - stats.offset) && console.debug(0);
       if (lenR >= capacity * (1000 - ratio) / 1000) {
         //ratio % 100 || ratio === 1000 || console.debug('-', ratio, LRU, LFU);
         --this.ratio;
@@ -387,17 +388,19 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
 
 class Stats {
   constructor(
-    capacity: number,
     private readonly window: number,
     public readonly resolution: number,
   ) {
-    this.offset = capacity / window * 5;
   }
-  public readonly offset: number;
+  public readonly offset = 5;
+  private readonly max = ceil(this.resolution * (100 + this.offset) / 100) + 1;
   private LRU = [0];
   private LFU = [0];
   public get length(): number {
     return this.LRU.length;
+  }
+  public full(): boolean {
+    return this.length === this.max;
   }
   public rateLRU(offset = false): number {
     return rate(this.window, this.LRU, this.LFU, +offset && this.offset);
@@ -406,13 +409,25 @@ class Stats {
     return rate(this.window, this.LFU, this.LRU, +offset && this.offset);
   }
   public subtotal(): number {
-    const subtotal = this.LRU[0] + this.LFU[0];
-    subtotal >= this.window / this.resolution && this.slide();
+    const { LRU, LFU, window, resolution, offset } = this;
+    if (offset && LRU[0] + LFU[0] >= window * offset / 100) {
+      if (this.length === 1) {
+        this.slide();
+      }
+      else {
+        LRU[1] += LRU[0];
+        LFU[1] += LFU[0];
+        LRU[0] = 0;
+        LFU[0] = 0;
+      }
+    }
+    const subtotal = LRU[+offset && 1] + LFU[+offset && 1] || 0;
+    subtotal >= window / resolution && this.slide();
     return subtotal;
   }
   public slide(): void {
-    const { LRU, LFU, resolution } = this;
-    if (LRU.length >= ceil(resolution * 1.05) + 1) {
+    const { LRU, LFU, max } = this;
+    if (LRU.length === max) {
       LRU.pop();
       LFU.pop();
     }
