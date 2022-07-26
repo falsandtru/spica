@@ -423,7 +423,9 @@ class Stats {
     }
     const subtotal = LRU[+offset && 1] + LFU[+offset && 1] || 0;
     subtotal >= window / resolution && this.slide();
-    return subtotal;
+    return LRU[0] + LFU[0]
+        || LRU[1] + LFU[1]
+        || 0;
   }
   public slide(): void {
     const { LRU, LFU, max } = this;
