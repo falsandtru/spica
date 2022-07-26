@@ -21,6 +21,9 @@ S3での逆効果のみ確認。
 統計解像度：
 効果ないが検証用に残置。
 
+ランダムウォーク：
+大効果につき採用。
+
 */
 
 /*
@@ -204,6 +207,9 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
           // fallthrough
         default:
           assert(LRU.last);
+          if (this.misses >= LRU.length) {
+            LRU.head = LRU.head!.next!.next!.next!;
+          }
           target = LRU.last! !== skip
             ? LRU.last!
             : LRU.length >= 2
@@ -278,8 +284,10 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.put(key, value, opts);
     return this;
   }
+  private misses = 0;
   public get(key: K): V | undefined {
     const node = this.memory.get(key);
+    node ? this.misses &&= 0 : ++this.misses;
     if (!node) return;
     const expiry = node.value.expiry;
     if (expiry !== Infinity && expiry < now()) {
