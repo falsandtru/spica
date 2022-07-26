@@ -109,7 +109,7 @@ describe('Benchmark:', function () {
       });
     }
 
-    for (const length of [10, 100, 1000]) {
+    for (const length of [10, 100, 1000, 10000, 100000]) {
       it(`LRU simulation ${length.toLocaleString('en')} expire`, function (done) {
         const capacity = length;
         const cache = new LRUCache<number, number>({ max: capacity, ttl: 1, ttlAutopurge: true });
