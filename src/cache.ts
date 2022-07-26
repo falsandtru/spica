@@ -114,12 +114,11 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (this.capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     this.window = this.settings.window || this.capacity;
     if (this.window * 1000 < this.capacity) throw new Error(`Spica: Cache: Window must be 0.1% of capacity or more.`);
-    this.stats.resolution = this.settings.resolution!;
-    this.stats.offset = this.capacity / this.window * 5;
     this.space = this.settings.space!;
     this.limit = this.settings.limit!;
     this.earlyExpiring = this.settings.earlyExpiring!;
     this.disposer = this.settings.disposer!;
+    this.stats = new Stats(capacity, this.window, this.settings.resolution!);
   }
   private readonly settings: Cache.Options<K, V> = {
     window: 0,
@@ -331,45 +330,24 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     }
     return;
   }
-  private readonly stats = {
-    resolution: 0,
-    offset: 0,
-    LRU: [0] as number[],
-    LFU: [0] as number[],
-    slide(): void {
-      const { LRU, LFU, resolution } = this;
-      if (LRU.length >= ceil(resolution * 1.05) + 1) {
-        LRU.pop();
-        LFU.pop();
-      }
-      LRU.unshift(0);
-      LFU.unshift(0);
-      assert(LRU.length === LFU.length);
-    },
-    clear(): void {
-      this.LRU = [];
-      this.LFU = [];
-    },
-  };
+  private readonly stats: Stats;
   private ratio = 500;
   private readonly limit: number;
   private adjust(): void {
-    const { window, capacity, ratio, limit, stats, indexes } = this;
-    const { LRU, LFU, resolution, offset } = stats;
-    const total = LRU[0] + LFU[0];
-    total >= window / resolution && stats.slide();
-    if (total * 1000 % capacity || LRU.length < resolution + 1) return;
+    const { capacity, ratio, limit, stats, indexes } = this;
+    const subtotal = stats.subtotal();
+    if (subtotal * 1000 % capacity || stats.length < stats.resolution + 1) return;
     const lenR = indexes.LRU.length;
     const lenF = indexes.LFU.length;
     const lenO = this.overlap;
     const r = (lenF + lenO) * 1000 / (lenR + lenF) | 0;
     assert(Number.isSafeInteger(r));
-    const rateR0 = rate(window, LRU, LFU, 0) * r;
-    const rateF0 = rate(window, LFU, LRU, 0) * (1000 - r);
-    const rateF1 = rate(window, LFU, LRU, offset) * (1000 - r);
+    const rateR0 = stats.rateLRU() * r;
+    const rateF0 = stats.rateLFU() * (1000 - r);
+    const rateF1 = stats.rateLFU(true) * (1000 - r);
     // 操作頻度を超えてキャッシュ比率を増減させても余剰比率の消化が追いつかず無駄
     // LRUの下限設定ではLRU拡大の要否を迅速に判定できないためLFUのヒット率低下の検出で代替する
-    if (ratio > 0 && (rateR0 > rateF0 || rateF0 * 100 < rateF1 * (100 - offset))) {
+    if (ratio > 0 && (rateR0 > rateF0 || rateF0 * 100 < rateF1 * (100 - stats.offset))) {
       if (lenR >= capacity * (1000 - ratio) / 1000) {
         //ratio % 100 || ratio === 1000 || console.debug('-', ratio, LRU, LFU);
         --this.ratio;
@@ -404,6 +382,47 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     ++this.stats[index.region][0];
     node.moveToHead();
     return true;
+  }
+}
+
+class Stats {
+  constructor(
+    capacity: number,
+    private readonly window: number,
+    public readonly resolution: number,
+  ) {
+    this.offset = capacity / window * 5;
+  }
+  public readonly offset: number;
+  private LRU = [0];
+  private LFU = [0];
+  public get length(): number {
+    return this.LRU.length;
+  }
+  public rateLRU(offset = false): number {
+    return rate(this.window, this.LRU, this.LFU, +offset && this.offset);
+  }
+  public rateLFU(offset = false): number {
+    return rate(this.window, this.LFU, this.LRU, +offset && this.offset);
+  }
+  public subtotal(): number {
+    const subtotal = this.LRU[0] + this.LFU[0];
+    subtotal >= this.window / this.resolution && this.slide();
+    return subtotal;
+  }
+  public slide(): void {
+    const { LRU, LFU, resolution } = this;
+    if (LRU.length >= ceil(resolution * 1.05) + 1) {
+      LRU.pop();
+      LFU.pop();
+    }
+    LRU.unshift(0);
+    LFU.unshift(0);
+    assert(LRU.length === LFU.length);
+  }
+  public clear(): void {
+    this.LRU = [0];
+    this.LFU = [0];
   }
 }
 
