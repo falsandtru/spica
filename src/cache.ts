@@ -16,7 +16,7 @@ LRU下限：
 小容量で大効果につき採用。
 
 LFUヒット率変化率：
-効果確認できないが必要と思われるので残置。
+S3での逆効果のみ確認。
 
 統計解像度：
 効果ないが検証用に残置。
@@ -392,7 +392,7 @@ class Stats {
     public readonly resolution: number,
   ) {
   }
-  public readonly offset = 5;
+  public readonly offset = 0;
   private readonly max = ceil(this.resolution * (100 + this.offset) / 100) + 1;
   private LRU = [0];
   private LFU = [0];
