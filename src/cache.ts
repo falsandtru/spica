@@ -211,8 +211,9 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
           // fallthrough
         default:
           assert(LRU.last);
-          if (this.misses >= LRU.length) {
-            LRU.head = this.misses % this.interval === 0
+          // 20%で有効化しても効果的だが繊細なため安定性を優先し100%とする
+          if (this.misses > LRU.length) {
+            LRU.head = (this.misses - LRU.length) % this.interval === 0
               ? LRU.head!.next!.next!
               : LRU.head!.next!;
           }
