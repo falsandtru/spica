@@ -92,6 +92,7 @@ export namespace Cache {
     readonly space?: number;
     readonly age?: number;
     readonly earlyExpiring?: boolean;
+    readonly interval?: number;
     readonly limit?: number;
     readonly disposer?: (value: V, key: K) => void;
     readonly capture?: {
@@ -119,6 +120,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.window = settings.window || this.capacity;
     if (this.window * 1000 < this.capacity) throw new Error(`Spica: Cache: Window must be 0.1% of capacity or more.`);
     this.space = settings.space!;
+    this.interval = settings.interval || this.capacity / 10 | 0 || 1;
     this.limit = settings.limit!;
     this.earlyExpiring = settings.earlyExpiring!;
     this.disposer = settings.disposer!;
@@ -132,6 +134,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     space: Infinity,
     age: Infinity,
     earlyExpiring: false,
+    interval: 0,
     limit: 950,
     capture: {
       delete: true,
@@ -208,7 +211,9 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         default:
           assert(LRU.last);
           if (this.misses >= LRU.length) {
-            LRU.head = LRU.head!.next!;
+            LRU.head = this.misses % this.interval === 0
+              ? LRU.head!.next!.next!
+              : LRU.head!.next!;
           }
           target = LRU.last! !== skip
             ? LRU.last!
@@ -284,7 +289,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.put(key, value, opts);
     return this;
   }
-  private misses = 0;
   public get(key: K): V | undefined {
     const node = this.memory.get(key);
     node ? this.misses &&= 0 : ++this.misses;
@@ -339,6 +343,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     }
     return;
   }
+  private misses = 0;
+  private readonly interval: number;
   private readonly stats: Stats;
   private ratio = 500;
   private readonly limit: number;
