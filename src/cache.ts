@@ -292,8 +292,11 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
   public get(key: K): V | undefined {
     const node = this.memory.get(key);
-    node ? this.misses &&= 0 : ++this.misses;
-    if (!node) return;
+    if (!node) {
+      ++this.misses;
+      return;
+    }
+    this.misses &&= 0;
     const expiry = node.value.expiry;
     if (expiry !== Infinity && expiry < now()) {
       this.evict(node, true);
