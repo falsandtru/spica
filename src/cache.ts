@@ -208,9 +208,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         default:
           assert(LRU.last);
           if (this.misses >= LRU.length) {
-            LRU.head = LRU.length & 1
-              ? LRU.head!.next!.next!
-              : LRU.head!.next!.next!.next!;
+            LRU.head = LRU.head!.next!;
           }
           target = LRU.last! !== skip
             ? LRU.last!
