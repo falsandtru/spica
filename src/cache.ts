@@ -1,5 +1,5 @@
 import { Infinity, Map } from './global';
-import { ceil, min } from './alias';
+import { ceil, min, sqrt } from './alias';
 import { now } from './clock';
 import { IterableDict } from './dict';
 import { List } from './invlist';
@@ -120,7 +120,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.window = settings.window || this.capacity;
     if (this.window * 1000 < this.capacity) throw new Error(`Spica: Cache: Window must be 0.1% of capacity or more.`);
     this.space = settings.space!;
-    this.interval = settings.interval || this.capacity / 10 | 0 || 1;
+    this.interval = settings.interval || sqrt(this.capacity) | 0 || 1;
     this.limit = settings.limit!;
     this.earlyExpiring = settings.earlyExpiring!;
     this.disposer = settings.disposer!;

@@ -17,6 +17,10 @@ export const {
   random,
   round,
   sign,
+  cos,
+  tan,
+  log,
+  sqrt,
 } = Math;
 
 export const isArray: {
