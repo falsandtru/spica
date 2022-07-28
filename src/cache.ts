@@ -98,6 +98,7 @@ export namespace Cache {
     // Mainly for experiments.
     readonly resolution?: number;
     readonly offset?: number;
+    readonly block?: number;
     readonly sweep?: number;
     readonly limit?: number;
   }
@@ -121,6 +122,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.window = settings.window || this.capacity;
     if (this.window * 1000 < this.capacity) throw new Error(`Spica: Cache: Window must be 0.1% of capacity or more.`);
     this.space = settings.space!;
+    this.block = settings.block!;
     this.limit = settings.limit!;
     this.earlyExpiring = settings.earlyExpiring!;
     this.disposer = settings.disposer!;
@@ -138,6 +140,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     },
     resolution: 1,
     offset: 0,
+    block: 20,
     sweep: 10,
     limit: 950,
   };
@@ -210,7 +213,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
           // fallthrough
         default:
           assert(LRU.last);
-          if (this.misses > LRU.length) {
+          if (this.misses * 100 > LRU.length * this.block) {
             this.sweep ||= this.sweep = LRU.length * this.settings.sweep! / 100 | 0 || 1;
             if (this.sweep > 0) {
               LRU.head = this.misses === LRU.length + 1
@@ -360,6 +363,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     return;
   }
   private misses = 0;
+  private block: number;
   private sweep = 0;
   private readonly stats: Stats;
   private ratio = 500;
