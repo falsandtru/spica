@@ -138,7 +138,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     },
     resolution: 1,
     offset: 0,
-    sweep: 50,
+    sweep: 10,
     limit: 950,
   };
   private readonly window: number;
@@ -223,7 +223,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
             else {
               this.sweep === -1
                 ? LRU.head = LRU.head!.next
-                : ++this.sweep;
+                : void 0;
+              ++this.sweep;
             }
           }
           target = LRU.last! !== skip
