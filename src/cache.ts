@@ -21,7 +21,7 @@ S3での逆効果のみ確認につきオプション化。
 統計解像度：
 効果ないが検証用に残置。
 
-リバースウォーク：
+サイクリックスウィープ：
 大効果につき採用。
 
 */
@@ -98,7 +98,7 @@ export namespace Cache {
     // Mainly for experiments.
     readonly resolution?: number;
     readonly offset?: number;
-    readonly interval?: number;
+    readonly sweep?: number;
     readonly limit?: number;
   }
 }
@@ -121,7 +121,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.window = settings.window || this.capacity;
     if (this.window * 1000 < this.capacity) throw new Error(`Spica: Cache: Window must be 0.1% of capacity or more.`);
     this.space = settings.space!;
-    this.interval = settings.interval!;
     this.limit = settings.limit!;
     this.earlyExpiring = settings.earlyExpiring!;
     this.disposer = settings.disposer!;
@@ -139,7 +138,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     },
     resolution: 1,
     offset: 0,
-    interval: 10,
+    sweep: 50,
     limit: 950,
   };
   private readonly window: number;
@@ -211,11 +210,21 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
           // fallthrough
         default:
           assert(LRU.last);
-          // 20%で有効化しても効果的だが繊細なため安定性を優先し100%とする
           if (this.misses > LRU.length) {
-            LRU.head = (this.misses - LRU.length) % this.interval === 0
-              ? LRU.head!.next!.next!
-              : LRU.head!.next!;
+            this.sweep ||= this.sweep = LRU.length * this.settings.sweep! / 100 | 0 || 1;
+            if (this.sweep > 0) {
+              LRU.head = this.misses === LRU.length + 1
+                ? LRU.head!.next
+                : LRU.head!.next.next;
+              this.sweep === 1
+                ? this.sweep = -LRU.length * this.settings.sweep! / 100 | 0
+                : --this.sweep;
+            }
+            else {
+              this.sweep === -1
+                ? LRU.head = LRU.head!.next
+                : ++this.sweep;
+            }
           }
           target = LRU.last! !== skip
             ? LRU.last!
@@ -350,7 +359,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     return;
   }
   private misses = 0;
-  private readonly interval: number;
+  private sweep = 0;
   private readonly stats: Stats;
   private ratio = 500;
   private readonly limit: number;
