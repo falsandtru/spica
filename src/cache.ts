@@ -310,9 +310,9 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       ++this.misses;
       return;
     }
-    this.misses &&= 0;
     const expiry = node.value.expiry;
     if (expiry !== Infinity && expiry < now()) {
+      ++this.misses;
       this.evict(node, true);
       return;
     }
@@ -320,6 +320,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (this.capacity > 3 && node === node.list.head) return node.value.value;
     this.access(node);
     this.adjust();
+    this.misses &&= 0;
+    this.sweep = 0;
     return node.value.value;
   }
   public has(key: K): boolean {
@@ -341,6 +343,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     return true;
   }
   public clear(): void {
+    this.misses = 0;
+    this.sweep = 0;
     this.overlap = 0;
     this.SIZE = 0;
     this.ratio = 500;
