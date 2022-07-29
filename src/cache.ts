@@ -216,12 +216,11 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
           if (this.misses * 100 > LRU.length * this.block) {
             this.sweep ||= this.sweep = LRU.length * this.settings.sweep! / 100 | 0 || 1;
             if (this.sweep > 0) {
-              LRU.head = this.misses === LRU.length + 1
-                ? LRU.head!.next
-                : LRU.head!.next.next;
               this.sweep === 1
-                ? this.sweep = -LRU.length * this.settings.sweep! / 100 | 0
-                : --this.sweep;
+                ? LRU.head = LRU.head!.next
+                : LRU.head = LRU.head!.next.next;
+              --this.sweep;
+              this.sweep ||= -LRU.length * this.settings.sweep! / 100 | 0;
             }
             else {
               this.sweep === -1
