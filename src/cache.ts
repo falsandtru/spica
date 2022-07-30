@@ -1,5 +1,5 @@
 import { Infinity, Map } from './global';
-import { ceil, min } from './alias';
+import { min, round, ceil } from './alias';
 import { now } from './clock';
 import { IterableDict } from './dict';
 import { List } from './invlist';
@@ -218,7 +218,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
             if (this.sweep > 0) {
               LRU.head = LRU.head!.next.next;
               --this.sweep;
-              this.sweep ||= -LRU.length * this.settings.sweep! / 100 | 0;
+              this.sweep ||= -round(LRU.length * this.settings.sweep! / 100 * 99 / 100);
             }
             else {
               ++this.sweep;
