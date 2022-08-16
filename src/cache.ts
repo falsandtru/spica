@@ -311,12 +311,12 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       this.evict(node, true);
       return;
     }
+    this.misses &&= 0;
+    this.sweep &&= 0;
     // Optimization for memoize.
     if (this.capacity > 3 && node === node.list.head) return node.value.value;
     this.access(node);
     this.adjust();
-    this.misses &&= 0;
-    this.sweep = 0;
     return node.value.value;
   }
   public has(key: K): boolean {
