@@ -87,7 +87,6 @@ export namespace Cache {
   export interface Options<K, V = undefined> {
     readonly window?: number;
     readonly capacity?: number;
-    readonly space?: number;
     readonly age?: number;
     readonly earlyExpiring?: boolean;
     readonly disposer?: (value: V, key: K) => void;
@@ -121,7 +120,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (this.capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     this.window = settings.window || this.capacity;
     if (this.window * 1000 < this.capacity) throw new Error(`Spica: Cache: Window must be 0.1% of capacity or more.`);
-    this.space = settings.space!;
     this.block = settings.block!;
     this.limit = settings.limit!;
     this.earlyExpiring = settings.earlyExpiring!;
@@ -131,7 +129,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private readonly settings: Cache.Options<K, V> = {
     window: 0,
     capacity: 0,
-    space: Infinity,
     age: Infinity,
     earlyExpiring: false,
     capture: {
@@ -146,7 +143,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   };
   private readonly window: number;
   private readonly capacity: number;
-  private readonly space: number;
   private overlap = 0;
   private SIZE = 0;
   private memory = new Map<K, List.Node<Index<K, V>>>();
@@ -181,10 +177,10 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
   private ensure(margin: number, skip?: List.Node<Index<K, V>>): boolean {
     let size = skip?.value.size ?? 0;
-    assert(margin - size <= this.space);
+    assert(margin - size <= this.capacity);
     if (margin - size <= 0) return true;
     const { LRU, LFU } = this.indexes;
-    while (this.length === this.capacity || this.size + margin - size > this.space) {
+    while (this.size + margin - size > this.capacity) {
       assert(this.length >= 1 + +!!skip);
       let target: List.Node<Index<K, V>>;
       switch (true) {
@@ -241,7 +237,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   public put(key: K, value: V, opts?: { size?: number; age?: number; }): boolean;
   public put(this: Cache<K, undefined>, key: K, value?: V, opts?: { size?: number; age?: number; }): boolean;
   public put(key: K, value: V, { size = 1, age = this.settings.age! }: { size?: number; age?: number; } = {}): boolean {
-    if (size > this.space || age <= 0) {
+    if (size < 1 || this.capacity < size || age <= 0) {
       this.disposer?.(value, key);
       return false;
     }
@@ -256,7 +252,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       const val = node.value.value;
       const index = node.value;
       this.SIZE += size - index.size;
-      assert(0 < this.size && this.size <= this.space);
+      assert(0 < this.size && this.size <= this.capacity);
       index.size = size;
       index.expiry = expiry;
       if (this.earlyExpiring && expiry !== Infinity) {
@@ -279,7 +275,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const { LRU } = this.indexes;
     assert(LRU.length !== this.capacity);
     this.SIZE += size;
-    assert(0 < this.size && this.size <= this.space);
+    assert(0 < this.size && this.size <= this.capacity);
     this.memory.set(key, LRU.unshift({
       key,
       value,
