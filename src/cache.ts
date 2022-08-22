@@ -126,7 +126,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.capacity = settings.capacity!;
     if (this.capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     this.window = settings.window || this.capacity;
-    if (this.window * 1000 < this.capacity) throw new Error(`Spica: Cache: Window must be 0.1% of capacity or more.`);
+    if (this.window * 1000 >= this.capacity === false) throw new Error(`Spica: Cache: Window must be 0.1% of capacity or more.`);
     this.block = settings.block!;
     this.limit = settings.limit!;
     this.earlyExpiring = settings.earlyExpiring!;
@@ -148,8 +148,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     sweep: 10,
     limit: 950,
   };
-  private readonly window: number;
-  private readonly capacity: number;
+  private window: number;
+  private capacity: number;
   private overlap = 0;
   private SIZE = 0;
   private memory = new Map<K, List.Node<Index<K, V>>>();
@@ -185,7 +185,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private ensure(margin: number, skip?: List.Node<Index<K, V>>): boolean {
     let size = skip?.value.size ?? 0;
     assert(margin - size <= this.capacity);
-    if (margin - size <= 0) return true;
     const { LRU, LFU } = this.indexes;
     while (this.size + margin - size > this.capacity) {
       assert(this.length >= 1 + +!!skip);
@@ -356,6 +355,13 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     for (const [key, { value: { value } }] of memory) {
       this.disposer(value, key);
     }
+  }
+  public resize(capacity: number): void {
+    if (this.capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
+    this.capacity = capacity;
+    this.window = this.settings.window || this.capacity;
+    if (this.window * 1000 >= this.capacity === false) throw new Error(`Spica: Cache: Window must be 0.1% of capacity or more.`);
+    this.ensure(0);
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
     for (const [key, { value: { value } }] of this.memory) {

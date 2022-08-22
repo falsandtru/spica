@@ -176,7 +176,7 @@ describe('Unit: lib/cache', () => {
       });
     });
 
-    it('space', () => {
+    it('size', () => {
       const cache = new Cache<number, number>(3);
 
       cache.put(0, 0);
@@ -254,6 +254,23 @@ describe('Unit: lib/cache', () => {
         LFU: [],
         memory: [[1, 1]],
       });
+    });
+
+    it('resize', () => {
+      const cache = new Cache<number>(2);
+
+      cache.put(0);
+      cache.put(1);
+      cache.resize(3);
+      cache.put(2);
+      assert(cache.length === 3);
+      assert(cache.size === 3);
+      cache.resize(2);
+      assert(cache.length === 2);
+      assert(cache.size === 2);
+      cache.resize(4);
+      assert(cache.length === 2);
+      assert(cache.size === 2);
     });
 
     it('age', async () => {
