@@ -39,23 +39,83 @@ export namespace router {
       return false;
     }
 
-    const expand = memoize((pattern: string): string[] =>
-      pattern === ''
-        ? [pattern]
-        // Expand from innermost.
-        : Sequence.from(pattern.match(/{[^{}]*}|.[^{]*/g)!)
-            .map(frag =>
-              frag[0] + frag.slice(-1) === '{}'
-                ? frag.slice(1, -1).split(',')
-                : [frag])
-            .mapM(Sequence.from)
-            .map(frags => frags.join(''))
-            .bind(pat =>
-              pat === pattern
-                ? Sequence.from([pat])
-                : Sequence.from(expand(pat)))
-            .unique()
-            .extract());
+    const expand = memoize(function expand(pattern: string): readonly string[] {
+      return Sequence.from(
+        parse(pattern)
+          .map(token =>
+            token[0] + token.slice(-1) === '{}'
+              ? split(token.slice(1, -1)).flatMap(expand)
+              : [token]))
+        .mapM(Sequence.from)
+        .extract()
+        .map(tokens => tokens.join(''));
+    });
+    function parse(pattern: string): string[] {
+      const results: string[] = [];
+      const stack: '{'[] = [];
+      let buffer = '';
+      for (const token of pattern.match(/[{}]|[^{}]+|$/g) ?? []) {
+        switch (token) {
+          case '':
+            flush(true);
+            continue;
+          case ',':
+            stack.length === 0
+              ? flush()
+              : buffer += token;
+            continue;
+          case '{':
+            stack.length === 0 && flush();
+            buffer += token;
+            stack.unshift(token);
+            continue;
+          case '}':
+            stack[0] === '{' && stack.shift();
+            buffer += token;
+            stack.length === 0 && flush();
+            continue;
+        }
+        buffer += token;
+      }
+      return results;
+
+      function flush(force = false): void {
+        (buffer || force) && results.push(buffer);
+        buffer = '';
+      }
+    }
+    function split(pattern: string): string[] {
+      const results: string[] = [];
+      const stack: '{'[] = [];
+      let buffer = '';
+      for (const token of pattern.match(/[,{}]|[^,{}]+|$/g) ?? []) {
+        switch (token) {
+          case '':
+            flush();
+            continue;
+          case ',':
+            stack.length === 0
+              ? flush()
+              : buffer += token;
+            continue;
+          case '{':
+            buffer += token;
+            stack.unshift(token);
+            continue;
+          case '}':
+            stack[0] === '{' && stack.shift();
+            buffer += token;
+            continue;
+        }
+        buffer += token;
+      }
+      return results;
+
+      function flush(): void {
+        results.push(buffer);
+        buffer = '';
+      }
+    }
 
     function match(pattern: string, segment: string): boolean {
       assert(segment === '/' || !segment.startsWith('/'));

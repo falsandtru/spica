@@ -80,6 +80,7 @@ describe('Unit: lib/router', () => {
 
   describe('expand', () => {
     it('{}', () => {
+      assert.deepStrictEqual(expand(''), ['']);
       assert.deepStrictEqual(expand('{}'), ['']);
       assert.deepStrictEqual(expand('{a}'), ['a']);
       assert.deepStrictEqual(expand('{a,bc,d}'), ['a', 'bc', 'd']);
