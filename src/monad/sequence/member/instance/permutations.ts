@@ -28,7 +28,7 @@ function perms<a>(ts: Sequence<a, unknown>, is: Sequence<a, unknown>): Sequence<
           () => cons(),
           tt => {
             const t = Sequence.Thunk.value(tt);
-            const ts = Sequence.resume(Sequence.Thunk.iterator(tt)).memoize();
+            const ts = Sequence.resume(Sequence.Thunk.iterator(tt));
             return cons(
               is.permutations()
                 .foldr<a[]>((ys, r) =>
