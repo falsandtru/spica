@@ -15,6 +15,16 @@ export function id<a>(a: a): a {
   return a;
 }
 
+export function fix<a>(f: (a: a) => a): (a: a) => a {
+  return a1 => {
+    const a2 = f(a1);
+    return a1 === a2
+        || a2 !== a2
+      ? a2
+      : f(a2);
+  };
+}
+
 // @ts-ignore
 export function noop(): undefined {
 }

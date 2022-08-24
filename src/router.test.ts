@@ -1,5 +1,4 @@
 import { router } from './router';
-import { URL, standardize } from './url';
 import { Sequence } from './sequence';
 
 const { compare, match, expand } = router.helpers();
@@ -39,39 +38,42 @@ describe('Unit: lib/router', () => {
 
   describe('compare', () => {
     it('root', () => {
-      assert(compare('/', new URL(standardize('/', window.location.href)).pathname));
-      assert(compare('/', new URL(standardize('/a', window.location.href)).pathname));
-      assert(compare('/', new URL(standardize('/abc', window.location.href)).pathname));
-      assert(compare('/', new URL(standardize('/a/', window.location.href)).pathname));
-      assert(compare('/', new URL(standardize('/abc/', window.location.href)).pathname));
-      assert(compare('/', new URL(standardize('/a/b', window.location.href)).pathname));
-      assert(compare('/', new URL(standardize('/abc/bcd', window.location.href)).pathname));
+      assert(compare('/', '/'));
+      assert(compare('/', '/a'));
+      assert(compare('/', '/abc'));
+      assert(compare('/', '/a/'));
+      assert(compare('/', '/abc/'));
+      assert(compare('/', '/a/b'));
+      assert(compare('/', '/abc/bcd'));
     });
 
     it('dir', () => {
-      assert(!compare('/abc', new URL(standardize('/', window.location.href)).pathname));
-      assert(compare('/abc', new URL(standardize('/abc', window.location.href)).pathname));
-      assert(compare('/abc', new URL(standardize('/abc/', window.location.href)).pathname));
-      assert(!compare('/abc/', new URL(standardize('/abc', window.location.href)).pathname));
-      assert(compare('/abc/', new URL(standardize('/abc/', window.location.href)).pathname));
-      assert(!compare('/abc', new URL(standardize('/ab', window.location.href)).pathname));
-      assert(!compare('/ab', new URL(standardize('/abc', window.location.href)).pathname));
+      assert(!compare('/abc', '/'));
+      assert(compare('/abc', '/abc'));
+      assert(compare('/abc', '/abc/'));
+      assert(!compare('/abc/', '/abc'));
+      assert(compare('/abc/', '/abc/'));
+      assert(!compare('/abc', '/ab'));
+      assert(!compare('/ab', '/abc'));
     });
 
     it('file', () => {
-      assert(compare('/a/b/c.d', new URL(standardize('/a/b/c.d', window.location.href)).pathname));
-      assert(!compare('/a/b/c', new URL(standardize('/a/b/c.d', window.location.href)).pathname));
-      assert(!compare('/a/b/c.d', new URL(standardize('/a/b/c', window.location.href)).pathname));
+      assert(compare('/a/b/c.d', '/a/b/c.d'));
+      assert(!compare('/a/b/c', '/a/b/c.d'));
+      assert(!compare('/a/b/c.d', '/a/b/c'));
     });
 
     it('expand', () => {
-      assert(compare('/{a,b}', new URL(standardize('/a', window.location.href)).pathname));
-      assert(compare('/{a,b}', new URL(standardize('/b', window.location.href)).pathname));
+      assert(compare('/{a,b}', '/a'));
+      assert(compare('/{a,b}', '/b'));
+      assert.throws(() => compare('**', ''));
+      assert.throws(() => compare('[]', ''));
     });
 
     it('match', () => {
-      assert(compare('/*/{a,b}?/*/{1?3}', new URL(standardize('/---/ac/-/103', window.location.href)).pathname));
-      assert(compare('/*/{a,b}?/*/{1?3}', new URL(standardize('/---/bc/-/103', window.location.href)).pathname));
+      assert(compare('/a*b', '/ab'));
+      assert(compare('/*/{a,b}?/*/{1?3}', '/---/ac/-/103'));
+      assert(compare('/*/{a,b}?/*/{1?3}', '/---/bc/-/103'));
     });
 
   });
@@ -80,18 +82,10 @@ describe('Unit: lib/router', () => {
     it('{}', () => {
       assert.deepStrictEqual(expand('{}'), ['']);
       assert.deepStrictEqual(expand('{a}'), ['a']);
+      assert.deepStrictEqual(expand('{a,bc,d}'), ['a', 'bc', 'd']);
       assert.deepStrictEqual(expand('{a}{b,c}d{e}{,f}'), ['abde', 'abdef', 'acde', 'acdef']);
-      assert.deepStrictEqual(expand('{ab,bc,cd}'), ['ab', 'bc', 'cd']);
       assert.deepStrictEqual(expand('{{}}'), ['']);
       assert.deepStrictEqual(expand('{a,{b,}c}'), ['a', 'bc', 'c']);
-    });
-
-    it('[]', () => {
-      assert.throws(() => expand('[]'));
-    });
-
-    it('**', () => {
-      assert.throws(() => expand('**'));
     });
 
   });

@@ -1,130 +1,109 @@
-import { global, Object } from './global';
-import { URL, StandardURL, standardize } from './url';
+import { Object } from './global';
 import { Sequence } from './sequence';
-import { curry } from './curry';
-import { flip } from './flip';
+import { fix } from './function';
 import { memoize } from './memoize';
-import { Cache } from './cache';
 
-export function router<T>(config: Record<string, (path: string) => T>): (url: string) => T {
+export function router<T>(config: Record<string, (path: string) => T>): (path: string) => T {
   const { compare } = router.helpers();
-  return (url: string) => {
-    const { path, pathname } = new URL(standardize(url, global.location.href));
-    return Sequence.from(Object.keys(config).filter(p => p[0] === '/').sort().reverse())
-      .filter(curry(flip(compare))(pathname))
-      .map(pattern => config[pattern])
-      .take(1)
-      .extract()
-      .pop()!
-      .call(config, path);
+  const patterns = Object.keys(config).reverse();
+  for (const pattern of patterns) {
+    if (pattern[0] !== '/') throw new Error(`Spica: Router: Pattern must start with "/": ${pattern}`);
+    if (/\s/.test(pattern)) throw new Error(`Spica: Router: Pattern must not have whitespace: ${pattern}`);
+    if (/\*\*|[\[\]]/.test(pattern)) throw new Error(`Spica: Router: Invalid pattern: ${pattern}`);
+  }
+  return (path: string) => {
+    const pathname = path.slice(0, path.search(/[?#]|$/));
+    for (const pattern of patterns) {
+      if (compare(pattern, pathname)) return config[pattern](path);
+    }
+    throw new Error(`Spica: Router: No matches found`);
   };
 }
 export namespace router {
   export function helpers() {
-    function compare(pattern: string, path: URL.Pathname<StandardURL>): boolean {
+    function compare(pattern: string, path: string): boolean {
       assert(path[0] === '/');
       assert(!path.includes('?'));
       const regSegment = /\/|[^/]+\/?/g;
       const regTrailingSlash = /\/$/;
-      assert(expand(pattern).every(p => p.match(regSegment)!.join('') === p));
-      return Sequence
-        .zip(
-          Sequence.from(expand(pattern)),
-          Sequence.cycle([path]))
-        .map(([pattern, path]) =>
-          [
-            pattern.match(regSegment) || [],
-            pattern.match(regTrailingSlash)
-              ? path.match(regSegment) || []
-              : path.replace(regTrailingSlash, '').match(regSegment) || []
-          ])
-        .filter(([ps, ss]) =>
-          ps.length <= ss.length &&
-          Sequence
-            .zip(
-              Sequence.from(ps),
-              Sequence.from(ss))
-            .dropWhile(([a, b]) => match(a, b))
-            .take(1)
-            .extract()
-            .length === 0)
-        .take(1)
-        .extract()
-        .length > 0;
+      const ss1 = path.match(regSegment)!;
+      const ss2 = path.replace(regTrailingSlash, '').match(regSegment) ?? [];
+      for (const pat of expand(pattern)) {
+        assert(pat.match(regSegment)!.join('') === pat);
+        const ps = pat.match(regSegment)!;
+        const ss = pat.slice(-1) === '/'
+          ? ss1
+          : ss2;
+        if (ps.every((_, i) => ss[i] && match(ps[i], ss[i]))) return true;
+      }
+      return false;
     }
+
+    const expand = memoize((pattern: string): string[] =>
+      pattern === ''
+        ? [pattern]
+        // Expand from innermost.
+        : Sequence.from(pattern.match(/{[^{}]*}|.[^{]*/g)!)
+            .map(frag =>
+              frag[0] + frag.slice(-1) === '{}'
+                ? frag.slice(1, -1).split(',')
+                : [frag])
+            .mapM(Sequence.from)
+            .map(frags => frags.join(''))
+            .bind(pat =>
+              pat === pattern
+                ? Sequence.from([pat])
+                : Sequence.from(expand(pat)))
+            .unique()
+            .extract());
 
     function match(pattern: string, segment: string): boolean {
       assert(segment === '/' || !segment.startsWith('/'));
       if (segment[0] === '.' && ['?', '*'].includes(pattern[0])) return false;
-      return match$(optimize(pattern), segment);
+      return match$([...optimize(pattern)], 0, [...segment], 0);
     }
 
-    const match$ = memoize((pattern: string, segment: string): boolean => {
-      const [p = '', ...ps] = [...pattern];
-      const [s = '', ...ss] = [...segment];
-      assert(typeof p === 'string');
-      assert(typeof s === 'string');
-      switch (p) {
-        case '':
-          return s === '';
-        case '?':
-          return s !== ''
-              && s !== '/'
-              && match$(ps.join(''), ss.join(''));
-        case '*':
-          return s === '/'
-            ? match$(ps.join(''), segment)
-            : Sequence
-                .zip(
-                  Sequence.cycle([ps.join('')]),
-                  Sequence.from(segment)
-                    .tails()
-                    .map(ss => ss.join('')))
-                .filter(([a, b]) => match$(a, b))
-                  .take(1)
-                  .extract()
-                  .length > 0;
-        default:
-          return s === p
-              && match$(ps.join(''), ss.join(''));
+    function match$(ps: readonly string[], i: number, ss: readonly string[], j: number): boolean {
+      for (; i < ps.length || 1; ++i, ++j) {
+        const p = ps[i] ?? '';
+        const s = ss[j] ?? '';
+        switch (p) {
+          case '':
+            return s === '';
+          case '?':
+            switch (s) {
+              case '':
+              case '/':
+                return false;
+              default:
+                continue;
+            }
+          case '*':
+            switch (s) {
+              case '':
+              case '/':
+                --j;
+                continue;
+            }
+            for (let k = ss.length; k >= j; --k) {
+              if (match$(ps, i + 1, ss, k)) return true;
+            }
+            return false;
+          default:
+            if (s === p) continue;
+            return false;
+        }
       }
-    }, (pat, seg) => `${pat}\n${seg}`, new Cache(10000));
-
-    function expand(pattern: string): string[] {
-      if (pattern.match(/\*\*|[\[\]]/)) throw new Error(`Invalid pattern: ${pattern}`);
-      assert(pattern === '' || pattern.match(/{[^{}]*}|.[^{]*/g)!.join('') === pattern);
-      return expand$(pattern);
+      return true;
     }
-
-    const expand$ = memoize((pattern: string): string[] => {
-      return pattern === ''
-        ? [pattern]
-        : Sequence.from(pattern.match(/{[^{}]*}|.[^{]*/g)!)
-            .map(p =>
-              p.match(/^{[^{}]*}$/)
-                ? p.slice(1, -1).split(',')
-                : [p])
-            .mapM(Sequence.from)
-            .map(ps => ps.join(''))
-            .bind(p =>
-              p === pattern
-                ? Sequence.from([p])
-                : Sequence.from(expand$(p)))
-            .unique()
-            .extract();
-    });
 
     return {
       compare,
-      match,
       expand,
+      match,
     };
   }
 }
 
-function optimize(pattern: string): string {
-  const p = pattern.replace(/\*(\?+)\*?/g, '$1*');
-  return p === pattern
-    ? p
-    : optimize(p);
-}
+const optimize = fix((pattern: string) =>
+  pattern.replace(/(\*)\*|\*(\?+)\*?(?!\*)/g, '$1$2*'));
