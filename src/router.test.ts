@@ -84,6 +84,7 @@ describe('Unit: lib/router', () => {
       assert(match('/**/b', '/a/b'));
       assert(match('/**/b/c', '/a/b/c'));
       assert(match('/**/**/', '/'));
+      assert(match('**', '/a/b'));
     });
 
   });

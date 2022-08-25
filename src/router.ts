@@ -9,8 +9,6 @@ export function router<T>(config: Record<string, (path: string) => T>): (path: s
   for (const pattern of patterns) {
     if (pattern[0] !== '/') throw new Error(`Spica: Router: Pattern must start with "/": ${pattern}`);
     if (/\s/.test(pattern)) throw new Error(`Spica: Router: Pattern must not have whitespace: ${pattern}`);
-    // Prohibit unimplemented patterns.
-    if (pattern.includes('**')) throw new Error(`Spica: Router: Invalid pattern: ${pattern}`);
   }
   return (path: string) => {
     const pathname = path.slice(0, path.search(/[?#]|$/));
@@ -142,6 +140,7 @@ export namespace router {
       }
       for (; i < pats.length; ++i, ++j) {
         const pat = pats[i];
+        if (pat === '**') return true;
         if (pat === '**/') {
           let min = pats.length - j;
           for (let k = j; k < pats.length; ++k) {
