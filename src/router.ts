@@ -28,7 +28,7 @@ export namespace router {
       const ss = path.match(regSegment) ?? [];
       for (const pat of expand(pattern)) {
         assert(pat.match(regSegment)!.join('') === pat);
-        const ps = pat.match(regSegment) ?? [];
+        const ps = optimize(pat).match(regSegment) ?? [];
         if (cmp(ps, ss)) return true;
       }
       return false;
@@ -141,11 +141,10 @@ export namespace router {
         if (segs[0] === '.' && ['?', '*'].includes(pats[0][0])) return false;
       }
       for (; i < pats.length; ++i, ++j) {
-        if (j === segs.length) return false;
         const pat = pats[i];
         if (pat === '**/') {
           let min = pats.length - j;
-          for (let k = i; k < pats.length; ++k) {
+          for (let k = j; k < pats.length; ++k) {
             pats[k] === '**/' && --min;
           }
           for (let k = segs.length - min; k >= j; --k) {
@@ -154,10 +153,11 @@ export namespace router {
           return false;
         }
         else {
+          if (j === segs.length) return false;
           const seg = pat.slice(-1) !== '/' && segs[j].slice(-1) === '/'
             ? segs[j].slice(0, -1) || segs[j]
             : segs[j];
-          if (!cmp$(split(optimize(pat)), 0, seg, 0)) return false;
+          if (!cmp$(split(pat), 0, seg, 0)) return false;
         }
       }
       return true;
@@ -244,7 +244,7 @@ export namespace router {
       }
     }
     const optimize = memoize(fix((pattern: string) =>
-      pattern.replace(/((?:^|\/)\*)\*(?=[^/]|$)|\*+(\?+)?/g, '$1$2*')));
+      pattern.replace(/((?:^|\/)\*)\*(?:\/\*\*)*(?=\/|$)|\*+(\?+)?/g, '$1$2*')));
 
     return {
       match,

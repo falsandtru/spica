@@ -73,11 +73,17 @@ describe('Unit: lib/router', () => {
     it('meta', () => {
       assert(!match('/*', '/'));
       assert(match('/a*b', '/ab'));
-      assert(match('/a**b', '/ab'));
       assert(match('/*/{a,b}?/*/{1?3}', '/---/ac/-/103'));
       assert(match('/*/{a,b}?/*/{1?3}', '/---/bc/-/103'));
+      assert(match('/a**b', '/ab'));
+      assert(match('/**/', '/'));
+      assert(!match('/**/*', '/'));
       assert(match('/**/a', '/a'));
       assert(match('/**/a', '/a/b'));
+      assert(match('/**/a/b', '/a/b/c'));
+      assert(match('/**/b', '/a/b'));
+      assert(match('/**/b/c', '/a/b/c'));
+      assert(match('/**/**/', '/'));
     });
 
   });
@@ -162,6 +168,7 @@ describe('Unit: lib/router', () => {
       assert(!cmp(['*.'], ['.']));
       assert(cmp(['*.*'], ['a.b']));
       assert(cmp(['?*.*'], ['a.b']));
+      assert(cmp(['/', '**/', '**/'], ['/']));
     });
 
   });
