@@ -134,6 +134,8 @@ export namespace router {
     }
 
     function cmp(pats: readonly string[], segs: readonly string[], i = 0, j = 0): boolean {
+      assert(i <= pats.length);
+      assert(j <= segs.length);
       if (i + j === 0 && pats.length > 0 && segs.length > 0) {
         assert(segs[0] === '/' || !segs[0].startsWith('/'));
         if (segs[0] === '.' && ['?', '*'].includes(pats[0][0])) return false;
@@ -142,7 +144,11 @@ export namespace router {
         if (j === segs.length) return false;
         const pat = pats[i];
         if (pat === '**/') {
-          for (let k = segs.length; k >= j; --k) {
+          let min = pats.length - j;
+          for (let k = i; k < pats.length; ++k) {
+            pats[k] === '**/' && --min;
+          }
+          for (let k = segs.length - min; k >= j; --k) {
             if (cmp(pats, segs, i + 1, k)) return true;
           }
           return false;
@@ -158,12 +164,12 @@ export namespace router {
     }
 
     function cmp$(ps: readonly string[], i: number, segment: string, j: number): boolean {
-      for (; i < ps.length || 1; ++i) {
-        const p = ps[i] ?? '';
+      assert(i <= ps.length);
+      assert(j <= segment.length);
+      for (; i < ps.length; ++i) {
+        const p = ps[i];
         const s = segment.slice(j);
         switch (p) {
-          case '':
-            return s === '';
           case '?':
             switch (s) {
               case '':
@@ -184,12 +190,12 @@ export namespace router {
             }
             return false;
           default:
-            if (s.slice(0, p.length) !== p) return false;
+            if (s.length < p.length || s.slice(0, p.length) !== p) return false;
             j += p.length;
             continue;
         }
       }
-      return true;
+      return j === segment.length;
     }
     function split(pattern: string): string[] {
       const results: string[] = [];
