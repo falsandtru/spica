@@ -23,19 +23,13 @@ export function router<T>(config: Record<string, (path: string) => T>): (path: s
 export namespace router {
   export function helpers() {
     function compare(pattern: string, path: string): boolean {
-      assert(path[0] === '/');
       assert(!path.includes('?'));
       const regSegment = /\/|[^/]+\/?/g;
-      const regTrailingSlash = /\/$/;
-      const ss1 = path.match(regSegment)!;
-      const ss2 = path.replace(regTrailingSlash, '').match(regSegment) ?? [];
+      const ss = path.match(regSegment) ?? [];
       for (const pat of expand(pattern)) {
         assert(pat.match(regSegment)!.join('') === pat);
-        const ps = pat.match(regSegment)!;
-        const ss = pat.slice(-1) === '/'
-          ? ss1
-          : ss2;
-        if (ps.every((_, i) => ss[i] && match(ps[i], ss[i]))) return true;
+        const ps = pat.match(regSegment) ?? [];
+        if (match(ps, ss)) return true;
       }
       return false;
     }
@@ -139,10 +133,28 @@ export namespace router {
       }
     }
 
-    function match(pattern: string, segment: string): boolean {
-      assert(segment === '/' || !segment.startsWith('/'));
-      if (segment[0] === '.' && ['?', '*'].includes(pattern[0])) return false;
-      return match$(split(optimize(pattern)), 0, segment, 0);
+    function match(pats: readonly string[], segs: readonly string[], i = 0, j = 0): boolean {
+      if (i + j === 0 && pats.length > 0 && segs.length > 0) {
+        assert(segs[0] === '/' || !segs[0].startsWith('/'));
+        if (segs[0] === '.' && ['?', '*'].includes(pats[0][0])) return false;
+      }
+      for (; i < pats.length; ++i, ++j) {
+        if (j === segs.length) return false;
+        const pat = pats[i];
+        if (pat === '**/') {
+          for (let k = segs.length; k >= j; --k) {
+            if (match(pats, segs, i + 1, k)) return true;
+          }
+          return false;
+        }
+        else {
+          const seg = pat.slice(-1) !== '/' && segs[j].slice(-1) === '/'
+            ? segs[j].slice(0, -1) || segs[j]
+            : segs[j];
+          if (!match$(split(optimize(pat)), 0, seg, 0)) return false;
+        }
+      }
+      return true;
     }
 
     function match$(ps: readonly string[], i: number, segment: string, j: number): boolean {
@@ -224,7 +236,7 @@ export namespace router {
       }
     }
     const optimize = memoize(fix((pattern: string) =>
-      pattern.replace(/(\*)\*|\*(\?+)\*?(?!\*)/g, '$1$2*')));
+      pattern.replace(/((?:^|\/)\*)\*(?=[^/]|$)|\*+(\?+)?/g, '$1$2*')));
 
     return {
       compare,
