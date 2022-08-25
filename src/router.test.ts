@@ -115,6 +115,11 @@ describe('Unit: lib/router', () => {
           assert(cmp(['abc'], [subs]) === (subs === 'abc')));
     });
 
+    it('\\', () => {
+      assert(cmp(['\\\\'], ['\\']));
+      assert(cmp(['\\*'], ['*']));
+    });
+
     it('?', () => {
       assert(!cmp([''], ['?']));
       assert(!cmp(['?'], ['']));

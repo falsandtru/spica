@@ -226,7 +226,9 @@ export namespace router {
             buffer += token;
             continue;
         }
-        buffer += token;
+        buffer += token[0] === '\\'
+          ? token.slice(1)
+          : token;
       }
       return results;
 
