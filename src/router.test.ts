@@ -1,7 +1,7 @@
 import { router } from './router';
 import { Sequence } from './sequence';
 
-const { compare, match, expand } = router.helpers();
+const { match, expand, cmp } = router.helpers();
 
 describe('Unit: lib/router', () => {
   describe('router', () => {
@@ -36,48 +36,48 @@ describe('Unit: lib/router', () => {
 
   });
 
-  describe('compare', () => {
+  describe('match', () => {
     it('root', () => {
-      assert(!compare('/', ''));
-      assert(compare('/', '/'));
-      assert(compare('/', '/a'));
-      assert(compare('/', '/abc'));
-      assert(compare('/', '/a/'));
-      assert(compare('/', '/abc/'));
-      assert(compare('/', '/a/b'));
-      assert(compare('/', '/abc/bcd'));
+      assert(!match('/', ''));
+      assert(match('/', '/'));
+      assert(match('/', '/a'));
+      assert(match('/', '/abc'));
+      assert(match('/', '/a/'));
+      assert(match('/', '/abc/'));
+      assert(match('/', '/a/b'));
+      assert(match('/', '/abc/bcd'));
     });
 
     it('dir', () => {
-      assert(!compare('/abc', '/'));
-      assert(compare('/abc', '/abc'));
-      assert(compare('/abc', '/abc/'));
-      assert(!compare('/abc/', '/abc'));
-      assert(compare('/abc/', '/abc/'));
-      assert(!compare('/abc', '/ab'));
-      assert(!compare('/ab', '/abc'));
+      assert(!match('/abc', '/'));
+      assert(match('/abc', '/abc'));
+      assert(match('/abc', '/abc/'));
+      assert(!match('/abc/', '/abc'));
+      assert(match('/abc/', '/abc/'));
+      assert(!match('/abc', '/ab'));
+      assert(!match('/ab', '/abc'));
     });
 
     it('file', () => {
-      assert(compare('/a/b/c.d', '/a/b/c.d'));
-      assert(!compare('/a/b/c', '/a/b/c.d'));
-      assert(!compare('/a/b/c.d', '/a/b/c'));
+      assert(match('/a/b/c.d', '/a/b/c.d'));
+      assert(!match('/a/b/c', '/a/b/c.d'));
+      assert(!match('/a/b/c.d', '/a/b/c'));
     });
 
     it('expand', () => {
-      assert(compare('/{a,b}', '/a'));
-      assert(compare('/{a,b}', '/b'));
-      assert.throws(() => compare('[]', '/'));
+      assert(match('/{a,b}', '/a'));
+      assert(match('/{a,b}', '/b'));
+      assert.throws(() => match('[]', '/'));
     });
 
-    it('match', () => {
-      assert(!compare('/*', '/'));
-      assert(compare('/a*b', '/ab'));
-      assert(compare('/a**b', '/ab'));
-      assert(compare('/*/{a,b}?/*/{1?3}', '/---/ac/-/103'));
-      assert(compare('/*/{a,b}?/*/{1?3}', '/---/bc/-/103'));
-      assert(compare('/**/a', '/a'));
-      assert(compare('/**/a', '/a/b'));
+    it('meta', () => {
+      assert(!match('/*', '/'));
+      assert(match('/a*b', '/ab'));
+      assert(match('/a**b', '/ab'));
+      assert(match('/*/{a,b}?/*/{1?3}', '/---/ac/-/103'));
+      assert(match('/*/{a,b}?/*/{1?3}', '/---/bc/-/103'));
+      assert(match('/**/a', '/a'));
+      assert(match('/**/a', '/a/b'));
     });
 
   });
@@ -95,15 +95,15 @@ describe('Unit: lib/router', () => {
 
   });
 
-  describe('match', () => {
+  describe('cmp', () => {
     it('char', () => {
-      assert(match([''], ['']));
-      assert(!match([''], ['a']));
-      assert(match(['a'], ['a']));
-      assert(!match(['a'], ['A']));
-      assert(!match(['A'], ['a']));
-      assert(!match(['a'], ['ab']));
-      assert(!match(['ab'], ['a']));
+      assert(cmp([''], ['']));
+      assert(!cmp([''], ['a']));
+      assert(cmp(['a'], ['a']));
+      assert(!cmp(['a'], ['A']));
+      assert(!cmp(['A'], ['a']));
+      assert(!cmp(['a'], ['ab']));
+      assert(!cmp(['ab'], ['a']));
       Sequence.mappend(
         Sequence.from(['a', 'b', 'c'])
           .subsequences(),
@@ -112,51 +112,51 @@ describe('Unit: lib/router', () => {
         .map(subs => subs.join(''))
         .extract()
         .forEach(subs =>
-          assert(match(['abc'], [subs]) === (subs === 'abc')));
+          assert(cmp(['abc'], [subs]) === (subs === 'abc')));
     });
 
     it('?', () => {
-      assert(!match([''], ['?']));
-      assert(!match(['?'], ['']));
-      assert(match(['?'], ['a']));
-      assert(!match(['?'], ['/']));
-      assert(!match(['a?'], ['a/']));
-      assert(!match(['?'], ['.']));
-      assert(match(['.?'], ['.a']));
-      assert(match(['a?'], ['a.']));
+      assert(!cmp([''], ['?']));
+      assert(!cmp(['?'], ['']));
+      assert(cmp(['?'], ['a']));
+      assert(!cmp(['?'], ['/']));
+      assert(!cmp(['a?'], ['a/']));
+      assert(!cmp(['?'], ['.']));
+      assert(cmp(['.?'], ['.a']));
+      assert(cmp(['a?'], ['a.']));
     });
 
     it('*', () => {
-      assert(!match([''], ['*']));
-      assert(match(['*'], ['']));
-      assert(match(['*'], ['a']));
-      assert(match(['*'], ['abc']));
-      assert(match(['a*'], ['a']));
-      assert(match(['a*'], ['abc']));
-      assert(match(['ab*'], ['abc']));
-      assert(match(['*c'], ['c']));
-      assert(match(['*c'], ['abc']));
-      assert(match(['*bc'], ['abc']));
-      assert(match(['a*c'], ['ac']));
-      assert(match(['a*c'], ['abc']));
-      assert(match(['*b*'], ['b']));
-      assert(match(['*b*'], ['abc']));
-      assert(match(['*bc'], ['abbc']));
-      assert(match(['*c'], ['abcc']));
-      assert(!match(['a?*c'], ['ac']));
-      assert(!match(['a*?c'], ['ac']));
-      assert(match(['a?*c'], ['abc']));
-      assert(match(['a*?c'], ['abc']));
-      assert(match(['a?*c'], ['abbc']));
-      assert(match(['a*?c'], ['abbc']));
-      assert(!match(['*'], ['/']));
-      assert(match(['*/'], ['/']));
-      assert(match(['.*'], ['.']));
-      assert(!match(['*'], ['.']));
-      assert(match(['*'], ['a.b']));
-      assert(!match(['*.'], ['.']));
-      assert(match(['*.*'], ['a.b']));
-      assert(match(['?*.*'], ['a.b']));
+      assert(!cmp([''], ['*']));
+      assert(cmp(['*'], ['']));
+      assert(cmp(['*'], ['a']));
+      assert(cmp(['*'], ['abc']));
+      assert(cmp(['a*'], ['a']));
+      assert(cmp(['a*'], ['abc']));
+      assert(cmp(['ab*'], ['abc']));
+      assert(cmp(['*c'], ['c']));
+      assert(cmp(['*c'], ['abc']));
+      assert(cmp(['*bc'], ['abc']));
+      assert(cmp(['a*c'], ['ac']));
+      assert(cmp(['a*c'], ['abc']));
+      assert(cmp(['*b*'], ['b']));
+      assert(cmp(['*b*'], ['abc']));
+      assert(cmp(['*bc'], ['abbc']));
+      assert(cmp(['*c'], ['abcc']));
+      assert(!cmp(['a?*c'], ['ac']));
+      assert(!cmp(['a*?c'], ['ac']));
+      assert(cmp(['a?*c'], ['abc']));
+      assert(cmp(['a*?c'], ['abc']));
+      assert(cmp(['a?*c'], ['abbc']));
+      assert(cmp(['a*?c'], ['abbc']));
+      assert(!cmp(['*'], ['/']));
+      assert(cmp(['*/'], ['/']));
+      assert(cmp(['.*'], ['.']));
+      assert(!cmp(['*'], ['.']));
+      assert(cmp(['*'], ['a.b']));
+      assert(!cmp(['*.'], ['.']));
+      assert(cmp(['*.*'], ['a.b']));
+      assert(cmp(['?*.*'], ['a.b']));
     });
 
   });

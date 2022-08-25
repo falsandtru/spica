@@ -4,7 +4,7 @@ import { fix } from './function';
 import { memoize } from './memoize';
 
 export function router<T>(config: Record<string, (path: string) => T>): (path: string) => T {
-  const { compare } = router.helpers();
+  const { match } = router.helpers();
   const patterns = Object.keys(config).reverse();
   for (const pattern of patterns) {
     if (pattern[0] !== '/') throw new Error(`Spica: Router: Pattern must start with "/": ${pattern}`);
@@ -15,21 +15,21 @@ export function router<T>(config: Record<string, (path: string) => T>): (path: s
   return (path: string) => {
     const pathname = path.slice(0, path.search(/[?#]|$/));
     for (const pattern of patterns) {
-      if (compare(pattern, pathname)) return config[pattern](path);
+      if (match(pattern, pathname)) return config[pattern](path);
     }
     throw new Error(`Spica: Router: No matches found`);
   };
 }
 export namespace router {
   export function helpers() {
-    function compare(pattern: string, path: string): boolean {
+    function match(pattern: string, path: string): boolean {
       assert(!path.includes('?'));
       const regSegment = /\/|[^/]+\/?/g;
       const ss = path.match(regSegment) ?? [];
       for (const pat of expand(pattern)) {
         assert(pat.match(regSegment)!.join('') === pat);
         const ps = pat.match(regSegment) ?? [];
-        if (match(ps, ss)) return true;
+        if (cmp(ps, ss)) return true;
       }
       return false;
     }
@@ -133,7 +133,7 @@ export namespace router {
       }
     }
 
-    function match(pats: readonly string[], segs: readonly string[], i = 0, j = 0): boolean {
+    function cmp(pats: readonly string[], segs: readonly string[], i = 0, j = 0): boolean {
       if (i + j === 0 && pats.length > 0 && segs.length > 0) {
         assert(segs[0] === '/' || !segs[0].startsWith('/'));
         if (segs[0] === '.' && ['?', '*'].includes(pats[0][0])) return false;
@@ -143,7 +143,7 @@ export namespace router {
         const pat = pats[i];
         if (pat === '**/') {
           for (let k = segs.length; k >= j; --k) {
-            if (match(pats, segs, i + 1, k)) return true;
+            if (cmp(pats, segs, i + 1, k)) return true;
           }
           return false;
         }
@@ -151,13 +151,13 @@ export namespace router {
           const seg = pat.slice(-1) !== '/' && segs[j].slice(-1) === '/'
             ? segs[j].slice(0, -1) || segs[j]
             : segs[j];
-          if (!match$(split(optimize(pat)), 0, seg, 0)) return false;
+          if (!cmp$(split(optimize(pat)), 0, seg, 0)) return false;
         }
       }
       return true;
     }
 
-    function match$(ps: readonly string[], i: number, segment: string, j: number): boolean {
+    function cmp$(ps: readonly string[], i: number, segment: string, j: number): boolean {
       for (; i < ps.length || 1; ++i) {
         const p = ps[i] ?? '';
         const s = segment.slice(j);
@@ -180,7 +180,7 @@ export namespace router {
                 continue;
             }
             for (let k = segment.length; k >= j; --k) {
-              if (match$(ps, i + 1, segment, k)) return true;
+              if (cmp$(ps, i + 1, segment, k)) return true;
             }
             return false;
           default:
@@ -239,9 +239,9 @@ export namespace router {
       pattern.replace(/((?:^|\/)\*)\*(?=[^/]|$)|\*+(\?+)?/g, '$1$2*')));
 
     return {
-      compare,
-      expand,
       match,
+      expand,
+      cmp,
     };
   }
 }
