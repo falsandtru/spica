@@ -70,7 +70,7 @@ describe('Unit: lib/router', () => {
       assert.throws(() => match('[]', '/'));
     });
 
-    it('meta', () => {
+    it('cmp', () => {
       assert(!match('/*', '/'));
       assert(match('/a*b', '/ab'));
       assert(match('/*/{a,b}?/*/{1?3}', '/---/ac/-/103'));
@@ -98,6 +98,7 @@ describe('Unit: lib/router', () => {
       assert.deepStrictEqual(expand('{a}{b,c}d{e}{,f}'), ['abde', 'abdef', 'acde', 'acdef']);
       assert.deepStrictEqual(expand('{{}}'), ['']);
       assert.deepStrictEqual(expand('{a,{b,}c}'), ['a', 'bc', 'c']);
+      assert.deepStrictEqual(expand('{,{}'), ['{,']);
     });
 
   });

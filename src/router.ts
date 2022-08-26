@@ -49,12 +49,21 @@ export namespace router {
       const mirror = {
         ']': '[',
         ')': '(',
+        '}': '{',
       } as const;
       let buffer = '';
-      for (const token of pattern.match(/\\.?|[\[\](){}]|[^\\\[\](){}]+|$/g) ?? []) {
+      BT: while (pattern) for (const token of pattern.match(/\\.?|[\[\](){}]|[^\\\[\](){}]+|$/g) ?? []) {
         switch (token) {
           case '':
+            if (stack.length !== 0) {
+              pattern = buffer.slice(1);
+              buffer = buffer[0];
+              flush();
+              stack.splice(0, stack.length);
+              continue BT;
+            }
             flush();
+            pattern = '';
             continue;
           case '[':
           case '(':
@@ -74,7 +83,7 @@ export namespace router {
             stack[0] !== '[' && stack.unshift(token);
             continue;
           case '}':
-            stack[0] === '{' && stack.shift();
+            stack[0] === mirror[token] && stack.shift();
             buffer += token;
             stack.length === 0 && flush();
             continue;
