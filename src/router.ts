@@ -45,45 +45,52 @@ export namespace router {
     });
     function parse(pattern: string): string[] {
       const results: string[] = [];
+      // 先頭の加除はChromeで非常に遅いので末尾を加除する
       const stack: ('{' | '(' | '[')[] = [];
       const mirror = {
         ']': '[',
         ')': '(',
         '}': '{',
       } as const;
+      const nonsyms: number[] = [];
+      let inonsyms = 0;
+      let len = pattern.length;
       let buffer = '';
-      BT: while (pattern) for (const token of pattern.match(/\\.?|[\[\](){}]|[^\\\[\](){}]+|$/g) ?? []) {
+      BT: while (len) for (const token of pattern.match(/\\.?|[\[\](){}]|[^\\\[\](){}]+|$/g) ?? []) {
         switch (token) {
           case '':
             if (stack.length !== 0) {
-              pattern = buffer.slice(1);
-              buffer = buffer[0];
-              flush();
+              assert(nonsyms[0] === buffer.length);
+              assert(inonsyms === 0);
+              pattern = buffer;
               stack.splice(0, stack.length);
+              len = pattern.length;
+              buffer = '';
               continue BT;
             }
             flush();
-            pattern = '';
             continue;
           case '[':
           case '(':
             // Prohibit unimplemented patterns.
             if (1) throw new Error(`Spica: Router: Invalid pattern: ${pattern}`);
+            if (len - buffer.length === nonsyms[inonsyms] && ++inonsyms) break;
+            stack[stack.length - 1] !== '[' && stack.push(token) && nonsyms.push(len - buffer.length);
             buffer += token;
-            stack[0] !== '[' && stack.unshift(token);
             continue;
           case ']':
           case ')':
-            stack[0] === mirror[token] && stack.shift();
+            stack[stack.length - 1] === mirror[token] && stack.pop() && nonsyms.pop();
             buffer += token;
             continue;
           case '{':
+            if (len - buffer.length === nonsyms[inonsyms] && ++inonsyms) break;
             stack.length === 0 && flush();
+            stack[stack.length - 1] !== '[' && stack.push(token) && nonsyms.push(len - buffer.length);
             buffer += token;
-            stack[0] !== '[' && stack.unshift(token);
             continue;
           case '}':
-            stack[0] === mirror[token] && stack.shift();
+            stack[0] === mirror[token] && stack.pop() && nonsyms.pop();
             buffer += token;
             stack.length === 0 && flush();
             continue;
@@ -94,10 +101,12 @@ export namespace router {
       return results;
 
       function flush(): void {
+        len -= buffer.length;
         buffer && results.push(buffer);
         buffer = '';
       }
     }
+    assert.deepStrictEqual(parse('{'.repeat(1e6) + '}'), ['{'.repeat(1e6 - 1), '{}']);
     function separate(pattern: string): string[] {
       const results: string[] = [];
       const stack: ('{' | '(' | '[')[] = [];
@@ -121,12 +130,12 @@ export namespace router {
           case '(':
           case '{':
             buffer += token;
-            stack[0] !== '[' && stack.unshift(token);
+            stack[stack.length - 1] !== '[' && stack.push(token);
             continue;
           case ']':
           case ')':
           case '}':
-            stack[0] === mirror[token] && stack.shift();
+            stack[stack.length - 1] === mirror[token] && stack.pop();
             buffer += token;
             continue;
         }
@@ -229,13 +238,13 @@ export namespace router {
           case '(':
           case '{':
             buffer += token;
-            stack[0] !== '[' && stack.unshift(token);
+            stack[stack.length - 1] !== '[' && stack.push(token);
             continue;
           case ']':
           case ')':
           case '}':
             if (token === '}' && stack[0] === '{') throw new Error(`Spica: Router: Invalid pattern: ${pattern}`);
-            stack[0] === mirror[token] && stack.shift();
+            stack[stack.length - 1] === mirror[token] && stack.pop();
             buffer += token;
             continue;
         }
