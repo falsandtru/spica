@@ -199,7 +199,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
       if (result.done) return result.value;
       yield result.value;
     }
-    return this;
+    return await this;
   }
   public readonly [port]: Structural<Port<T, R, S>> = new Port(this);
 }
