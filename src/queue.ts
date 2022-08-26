@@ -14,9 +14,10 @@ export class Queue<T> {
   public enqueue(value: T): void {
     const edges = this.edges;
     const node = edges[1];
+    const values = node[0];
     ++this.length;
-    node[0].push(value);
-    if (node[0].length === 100) {
+    values.push(value);
+    if (values.length === 100) {
       edges[1] = node[1] = [[], undefined];
     }
   }
