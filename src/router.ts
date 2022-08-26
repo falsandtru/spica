@@ -45,7 +45,7 @@ export namespace router {
     });
     function parse(pattern: string): string[] {
       const results: string[] = [];
-      const stack: ('[' | '(' | '{')[] = [];
+      const stack: ('{' | '(' | '[')[] = [];
       const mirror = {
         ']': '[',
         ')': '(',
@@ -56,6 +56,18 @@ export namespace router {
           case '':
             flush();
             continue;
+          case '[':
+          case '(':
+            // Prohibit unimplemented patterns.
+            if (1) throw new Error(`Spica: Router: Invalid pattern: ${pattern}`);
+            buffer += token;
+            stack[0] !== '[' && stack.unshift(token);
+            continue;
+          case ']':
+          case ')':
+            stack[0] === mirror[token] && stack.shift();
+            buffer += token;
+            continue;
           case '{':
             stack.length === 0 && flush();
             buffer += token;
@@ -65,18 +77,6 @@ export namespace router {
             stack[0] === '{' && stack.shift();
             buffer += token;
             stack.length === 0 && flush();
-            continue;
-          case '(':
-          case '[':
-            // Prohibit unimplemented patterns.
-            if (1) throw new Error(`Spica: Router: Invalid pattern: ${pattern}`);
-            buffer += token;
-            stack[0] !== '[' && stack.unshift(token);
-            continue;
-          case ')':
-          case ']':
-            stack[0] === mirror[token] && stack.shift();
-            buffer += token;
             continue;
         }
         buffer += token;
@@ -91,7 +91,7 @@ export namespace router {
     }
     function separate(pattern: string): string[] {
       const results: string[] = [];
-      const stack: ('[' | '(' | '{')[] = [];
+      const stack: ('{' | '(' | '[')[] = [];
       const mirror = {
         ']': '[',
         ')': '(',
@@ -198,7 +198,7 @@ export namespace router {
     }
     function split(pattern: string): string[] {
       const results: string[] = [];
-      const stack: ('[' | '(' | '{')[] = [];
+      const stack: ('{' | '(' | '[')[] = [];
       const mirror = {
         ']': '[',
         ')': '(',
@@ -216,17 +216,16 @@ export namespace router {
             buffer += token;
             stack.length === 0 && flush();
             continue;
-          case '{':
           case '[':
           case '(':
+          case '{':
             buffer += token;
             stack[0] !== '[' && stack.unshift(token);
             continue;
-          // @ts-expect-error
-          case '}':
-            if (stack[0] === '{') throw new Error(`Spica: Router: Invalid pattern: ${pattern}`);
           case ']':
           case ')':
+          case '}':
+            if (token === '}' && stack[0] === '{') throw new Error(`Spica: Router: Invalid pattern: ${pattern}`);
             stack[0] === mirror[token] && stack.shift();
             buffer += token;
             continue;
