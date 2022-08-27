@@ -2,7 +2,7 @@ import { Stack } from './stack';
 
 describe('Unit: lib/stack', () => {
   describe('Stack', () => {
-    it('', () => {
+    it('push/pop', () => {
       const stack = new Stack();
       assert(stack.pop() === undefined);
       assert(stack.push(0) === undefined);

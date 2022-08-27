@@ -5,35 +5,10 @@ export class Queue<T> {
   private head = 0;
   private tail = 0;
   public enqueue(value: T): void {
-    if (this.length === 0 && this.head !== 0) {
-      this.head = this.tail = 0;
-    }
-    const array = this.array;
-    const i = this.head++;
-    if (this.length !== 0 && this.head === this.tail) {
-      array.splice(i, 0, ...space);
-      this.tail += space.length;
-    }
-    else {
-      this.tail ||= this.head;
-    }
-    array[i] = value;
-    ++this.length;
+    return this.push(value)
   }
   public dequeue(): T | undefined {
-    if (this.length === 0) return;
-    if (this.tail < this.head) {
-      this.head = this.tail - 1;
-    }
-    const array = this.array;
-    const i = this.tail++ - 1;
-    const value = array[i];
-    array[i] = void 0;
-    if (this.tail === array.length + 1) {
-      this.tail = this.length && 1;
-    }
-    --this.length;
-    return value;
+    return this.shift();
   }
   public clear(): void {
     this.array = [];
@@ -42,6 +17,59 @@ export class Queue<T> {
   public isEmpty(): boolean {
     return this.head === this.tail;
   }
+  public peek(): T | undefined {
+    return this.array[(this.head || 1) - 1];
+  }
+  public push(value: T): void {
+    const array = this.array;
+    let { head, tail } = this;
+    tail = this.tail = next(tail, head, tail, array.length);
+    head = this.head ||= tail;
+    if (head === tail && this.length !== 0) {
+      array.splice(tail - 1, 0, ...space);
+      head = this.head += space.length;
+    }
+    array[tail - 1] = value;
+    ++this.length;
+  }
+  public unshift(value: T): void {
+    const array = this.array;
+    let { head, tail } = this;
+    head = this.head = prev(head, head, tail, array.length);
+    tail = this.tail ||= head;
+    if (head === tail && this.length !== 0) {
+      array.splice(head, 0, ...space);
+      head = this.head += space.length;
+    }
+    array[head - 1] = value;
+    ++this.length;
+  }
+  public pop(): T | undefined {
+    if (this.length === 0) return;
+    const array = this.array;
+    const i = this.tail - 1;
+    const value = array[i];
+    array[i] = void 0;
+    --this.length === 0
+      ? this.head = this.tail = 0
+      : this.tail = this.tail === 1
+        ? array.length
+        : this.tail - 1;
+    return value;
+  }
+  public shift(): T | undefined {
+    if (this.length === 0) return;
+    const array = this.array;
+    const i = this.head - 1;
+    const value = array[i];
+    array[i] = void 0;
+    --this.length === 0
+      ? this.head = this.tail = 0
+      : this.head = this.head === array.length
+        ? 1
+        : this.head + 1;
+    return value;
+  }
   public length = 0;
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
     while (!this.isEmpty()) {
@@ -49,4 +77,42 @@ export class Queue<T> {
     }
     return;
   }
+}
+
+function next(cursor: number, head: number, tail: number, length: number): number {
+  switch (cursor) {
+    case 0:
+      return 1;
+    case head:
+      return head === length
+          && tail !== 1
+        ? 1
+        : head + 1;
+    case tail:
+      return tail === length
+          && head !== 1
+        ? 1
+        : tail + 1;
+  }
+  throw new Error('Unreachable');
+}
+
+function prev(cursor: number, head: number, tail: number, length: number): number {
+  switch (cursor) {
+    case 0:
+      return 1;
+    case head:
+      return head === 1
+        ? tail === length
+          ? length + 1
+          : length
+        : head - 1;
+    case tail:
+      return tail === 1
+        ? head === length
+          ? length + 1
+          : length
+        : tail - 1;
+  }
+  throw new Error('Unreachable');
 }
