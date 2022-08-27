@@ -7,7 +7,7 @@ describe('Benchmark:', function () {
   this.timeout(10 * 1e3);
 
   describe('List', function () {
-    this.afterEach(done => {
+    afterEach(done => {
       setTimeout(done, 1000);
     });
 

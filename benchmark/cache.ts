@@ -7,7 +7,7 @@ describe('Benchmark:', function () {
   this.timeout(20 * 1e3);
 
   describe('Cache', function () {
-    this.afterEach(done => {
+    afterEach(done => {
       setTimeout(done, 1000);
     });
 

@@ -6,6 +6,10 @@ describe('Benchmark:', function () {
   this.timeout(10 * 1e3);
 
   describe('abstract', function () {
+    afterEach(done => {
+      setTimeout(done, 1000);
+    });
+
     for (const length of [1, 10, 100, 1000, 10000, 100000, 1000000]) {
       it(`array head ${length.toLocaleString('en')}`, function (done) {
         const data: unknown[] = [];
