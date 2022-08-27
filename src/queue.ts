@@ -71,6 +71,11 @@ export class Queue<T> {
     return value;
   }
   public length = 0;
+  public toArray(): T[] {
+    return this.head <= this.tail
+      ? this.array.slice((this.head || 1) - 1, this.tail) as T[]
+      : this.array.slice((this.head || 1) - 1).concat(this.array.slice(0, this.tail)) as T[];
+  }
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
     while (!this.isEmpty()) {
       yield this.dequeue()!;

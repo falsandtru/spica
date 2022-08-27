@@ -4,6 +4,7 @@ export class Stack<T> {
     this.array[this.length++] = value;
   }
   public pop(): T | undefined {
+    if (this.length === 0) return;
     const array = this.array;
     const i = --this.length;
     const value = array[i];
@@ -20,6 +21,9 @@ export class Stack<T> {
     return this.array[(this.length || 1) - 1];
   }
   public length = 0;
+  public toArray(): T[] {
+    return this.array.slice(0, this.length) as T[];
+  }
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
     while (!this.isEmpty()) {
       yield this.pop()!;
