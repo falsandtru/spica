@@ -17,8 +17,15 @@ export class Queue<T> {
   public isEmpty(): boolean {
     return this.head === this.tail;
   }
-  public peek(): T | undefined {
-    return this.array[(this.head || 1) - 1];
+  public peek(index: 0 | -1 = 0): T | undefined {
+    switch (index) {
+      case 0:
+        return this.array[(this.head || 1) - 1];
+      case -1:
+        return this.array[(this.tail || 1) - 1];
+      default:
+        throw new Error(`Spica: Queue: Index must be 0 or -1`);
+    }
   }
   public push(value: T): void {
     const array = this.array;
