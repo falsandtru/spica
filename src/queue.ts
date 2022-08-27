@@ -1,46 +1,48 @@
-import type { Node } from './list/list';
-
-// Note: Generally much slower than arrays.
-
-const undefined = void 0;
+const space = Object.freeze(Array<undefined>(100));
 
 export class Queue<T> {
-  constructor() {
-    const node: Node<T[]> = [[], undefined];
-    this.edges = [node, node];
-  }
-  private readonly edges: [Node<T[]>, Node<T[]>];
-  public length = 0;
+  private array: (T | undefined)[] = [];
+  private head = 0;
+  private tail = 0;
   public enqueue(value: T): void {
-    const edges = this.edges;
-    const node = edges[1];
-    const values = node[0];
-    ++this.length;
-    values.push(value);
-    if (values.length === 100) {
-      edges[1] = node[1] = [[], undefined];
+    if (this.length === 0 && this.head !== 0) {
+      this.head = this.tail = 0;
     }
+    const array = this.array;
+    const i = this.head++;
+    if (this.length !== 0 && this.head === this.tail) {
+      array.splice(i, 0, ...space);
+      this.tail += space.length;
+    }
+    else {
+      this.tail ||= this.head;
+    }
+    array[i] = value;
+    ++this.length;
   }
   public dequeue(): T | undefined {
-    const edges = this.edges;
-    const node = edges[0];
-    const values = node[0];
-    if (values.length === 0) return;
+    if (this.length === 0) return;
+    if (this.tail < this.head) {
+      this.head = this.tail - 1;
+    }
+    const array = this.array;
+    const i = this.tail++ - 1;
+    const value = array[i];
+    array[i] = void 0;
+    if (this.tail === array.length + 1) {
+      this.tail = this.length && 1;
+    }
     --this.length;
-    if (!node[1] || values.length !== 1) return values.shift();
-    edges[0] = node[1];
-    node[1] = undefined;
-    return values[0];
+    return value;
   }
   public clear(): void {
-    this.edges[0] = this.edges[1] = [[], undefined];
+    this.array = [];
+    this.head = this.tail = 0;
   }
   public isEmpty(): boolean {
-    return this.edges[0][0].length === 0;
+    return this.head === this.tail;
   }
-  public peek(): T | undefined {
-    return this.edges[0][0][0];
-  }
+  public length = 0;
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
     while (!this.isEmpty()) {
       yield this.dequeue()!;

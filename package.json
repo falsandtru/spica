@@ -23,12 +23,14 @@
     "either",
     "monad",
     "arrow",
+    "cache",
     "list",
     "hlist",
     "invlist",
     "ixlist",
     "heap",
-    "cache"
+    "queue",
+    "stack"
   ],
   "main": "./dist/index.js",
   "files": [
