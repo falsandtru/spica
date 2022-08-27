@@ -11,8 +11,8 @@ export function throttle<T, C = unknown>(interval: number, callback: (this: C, l
       buffer = [data];
     }
     else {
-      buffer.length === capacity && buffer.pop();
-      buffer.unshift(data);
+      buffer.length === capacity && buffer.shift();
+      buffer.push(data);
     }
     if (timer !== 0) return;
     timer = setTimeout(async () => {
@@ -22,13 +22,13 @@ export function throttle<T, C = unknown>(interval: number, callback: (this: C, l
       buffer = [];
       assert(buf.length > 0);
       try {
-        await callback.call(this, buf[0], buf);
+        await callback.call(this, buf[buf.length - 1], buf);
       }
       catch (reason) {
         causeAsyncException(reason);
       }
       timer = 0;
-      buffer.length > 0 && self.call(this, buffer.shift()!);
+      buffer.length > 0 && self.call(this, buffer.pop()!);
     }, interval);
   };
 }
@@ -43,8 +43,8 @@ export function debounce<T, C = unknown>(delay: number, callback: (this: C, last
       buffer = [data];
     }
     else {
-      buffer.length === capacity && buffer.pop();
-      buffer.unshift(data);
+      buffer.length === capacity && buffer.shift();
+      buffer.push(data);
     }
     if (timer !== 0) return;
     timer = setTimeout(() => {
@@ -60,14 +60,14 @@ export function debounce<T, C = unknown>(delay: number, callback: (this: C, last
         assert(buf.length > 0);
         callable = false;
         try {
-          await callback.call(this, buf[0], buf);
+          await callback.call(this, buf[buf.length - 1], buf);
         }
         catch (reason) {
           causeAsyncException(reason);
         }
         callable = true;
         assert(timer === 0);
-        buffer.length > 0 && self.call(this, buffer.shift()!);
+        buffer.length > 0 && self.call(this, buffer.pop()!);
       }, delay);
     }, delay);
   };

@@ -10,7 +10,7 @@ describe('Unit: lib/throttle', () => {
           case 1:
             assert(count === 2);
             assert(last === 2);
-            assert.deepStrictEqual(buf, [2, 1]);
+            assert.deepStrictEqual(buf, [1, 2]);
             step = 2;
             call(++count);
             break;
@@ -40,7 +40,7 @@ describe('Unit: lib/throttle', () => {
           case 1:
             assert(count === 3);
             assert(last === 3);
-            assert.deepStrictEqual(buf, [3, 2, 1]);
+            assert.deepStrictEqual(buf, [1, 2, 3]);
             done();
             break;
           default:
