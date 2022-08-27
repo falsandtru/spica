@@ -11,11 +11,10 @@ describe('Benchmark:', function () {
 
     for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
       it(`Heap insert/extract ${length.toLocaleString('en')}`, function (done) {
-        const capacity = length;
         const heap = new Heap<number>();
-        for (let i = 0; i < capacity; ++i) heap.insert(i, 1);
+        for (let i = 0; i < length; ++i) heap.insert(i, 1);
         let i = 0;
-        benchmark(`Heap insert/extract ${length.toLocaleString('en')}`, () => heap.extract() && heap.insert(1, capacity - i++ % capacity), done);
+        benchmark(`Heap insert/extract ${length.toLocaleString('en')}`, () => heap.extract() && heap.insert(1, length - i++ % length), done);
       });
     }
 

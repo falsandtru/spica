@@ -20,44 +20,40 @@ describe('Benchmark:', function () {
 
     for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
       it(`Map set ${length.toLocaleString('en')}`, function (done) {
-        const cap = length;
         const dict = new Map();
         let i = 0;
         benchmark(`Map set ${length.toLocaleString('en')}`, () => {
-          dict.set(++i % cap, undefined);
+          dict.set(++i % length, undefined);
         }, done);
       });
 
       it(`IxList set ${length.toLocaleString('en')}`, function (done) {
-        const cap = length;
         const dict = new IxList(new Map());
         let i = 0;
         benchmark(`IxList set ${length.toLocaleString('en')}`, () => {
-          dict.put(++i % cap, undefined);
+          dict.put(++i % length, undefined);
         }, done);
       });
     }
 
     for (const length of [10, 100, 1000, 10000, 100000]) {
       it(`Map has/get ${length.toLocaleString('en')}`, function (done) {
-        const cap = length;
         const dict = new Map();
         let i = 0;
         benchmark(`Map has/get ${length.toLocaleString('en')}`, () => {
-          dict.has(++i % cap)
-            ? dict.get(i % cap)
-            : dict.set(i % cap, undefined);
+          dict.has(++i % length)
+            ? dict.get(i % length)
+            : dict.set(i % length, undefined);
         }, done);
       });
 
       it(`IxList has/get ${length.toLocaleString('en')}`, function (done) {
-        const cap = length;
         const dict = new IxList(new Map());
         let i = 0;
         benchmark(`IxList has/get ${length.toLocaleString('en')}`, () => {
-          dict.has(++i % cap)
-            ? dict.get(i % cap)
-            : dict.put(i % cap, undefined);
+          dict.has(++i % length)
+            ? dict.get(i % length)
+            : dict.put(i % length, undefined);
         }, done);
       });
     }

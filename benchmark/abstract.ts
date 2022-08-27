@@ -7,21 +7,33 @@ describe('Benchmark:', function () {
 
   describe('abstract', function () {
     for (const length of [1, 10, 100, 1000, 10000, 100000, 1000000]) {
-      it(`array ${length.toLocaleString('en')}`, function (done) {
+      it(`array head ${length.toLocaleString('en')}`, function (done) {
         const data: unknown[] = [];
-        for (let i = 0; i < length - 1; ++i) data.push(0);
-        benchmark(`abstract array ${length.toLocaleString('en')}`, () => (data.pop(), data.push(0)), done);
+        for (let i = 0; i < length; ++i) data.push(0);
+        benchmark(`abstract array head ${length.toLocaleString('en')}`, () => (data.shift(), data.unshift(0)), done);
+      });
+
+      it(`array stack ${length.toLocaleString('en')}`, function (done) {
+        const data: unknown[] = [];
+        for (let i = 0; i < length; ++i) data.push(0);
+        benchmark(`abstract array stack ${length.toLocaleString('en')}`, () => (data.pop(), data.push(0)), done);
+      });
+
+      it(`array queue ${length.toLocaleString('en')}`, function (done) {
+        const data: unknown[] = [];
+        for (let i = 0; i < length; ++i) data.push(0);
+        benchmark(`abstract array queue ${length.toLocaleString('en')}`, () => (data.shift(), data.push(0)), done);
       });
 
       it(`stack ${length.toLocaleString('en')}`, function (done) {
         const data = new Stack();
-        for (let i = 0; i < length - 1; ++i) data.push(0);
+        for (let i = 0; i < length; ++i) data.push(0);
         benchmark(`abstract stack ${length.toLocaleString('en')}`, () => (data.pop(), data.push(0)), done);
       });
 
       it(`queue ${length.toLocaleString('en')}`, function (done) {
         const data = new Queue();
-        for (let i = 0; i < length - 1; ++i) data.enqueue(0);
+        for (let i = 0; i < length; ++i) data.enqueue(0);
         benchmark(`abstract queue ${length.toLocaleString('en')}`, () => (data.dequeue(), data.enqueue(0)), done);
       });
     }

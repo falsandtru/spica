@@ -25,137 +25,88 @@ describe('Benchmark:', function () {
 
     for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
       it(`Yalist add ${length.toLocaleString('en')}`, function (done) {
-        const cap = length;
         const list = new Yallist();
-        let i = 0;
+        for (let i = 0; i < length; ++i) list.push(0);
         benchmark(`Yalist add ${length.toLocaleString('en')}`, () => {
-          if (++i > cap) {
-            list.pop();
-            list.unshift(i);
-          }
-          else {
-            list.unshift(i);
-          }
+          list.pop();
+          list.unshift(0);
         }, done);
       });
 
       it(`IvList add ${length.toLocaleString('en')}`, function (done) {
-        const cap = length;
         const list = new InvList();
-        let i = 0;
+        for (let i = 0; i < length; ++i) list.push(0);
         benchmark(`IvList add ${length.toLocaleString('en')}`, () => {
-          if (++i > cap) {
-            list.pop();
-            list.unshift(i);
-          }
-          else {
-            list.unshift(i);
-          }
+          list.pop();
+          list.unshift(0);
         }, done);
       });
 
       it(`IvList add ${length.toLocaleString('en')} rotationally`, function (done) {
-        const cap = length;
         const list = new InvList();
-        let i = 0;
+        for (let i = 0; i < length; ++i) list.push(0);
         benchmark(`IvList add ${length.toLocaleString('en')} rotationally`, () => {
-          if (++i > cap) {
-            list.unshiftRotationally(i);
-          }
-          else {
-            list.unshift(i);
-          }
+          list.unshiftRotationally(0);
         }, done);
       });
 
       it(`IxList add ${length.toLocaleString('en')}`, function (done) {
-        const cap = length;
         const list = new IxList();
-        let i = 0;
+        for (let i = 0; i < length; ++i) list.push(0);
         benchmark(`IxList add ${length.toLocaleString('en')}`, () => {
-          if (++i > cap) {
-            list.pop();
-            list.unshift(i);
-          }
-          else {
-            list.unshift(i);
-          }
+          list.pop();
+          list.unshift(0);
         }, done);
       });
 
       it(`IxList add ${length.toLocaleString('en')} rotationally`, function (done) {
-        const cap = length;
         const list = new IxList();
-        let i = 0;
+        for (let i = 0; i < length; ++i) list.push(0);
         benchmark(`IxList add ${length.toLocaleString('en')} rotationally`, () => {
-          if (++i > cap) {
-            list.unshiftRotationally(i);
-          }
-          else {
-            list.unshift(i);
-          }
+          list.unshiftRotationally(0);
         }, done);
       });
 
       it(`IxList add ${length.toLocaleString('en')} with constraint`, function (done) {
-        const cap = length;
-        const list = new IxList(cap);
-        let i = 0;
+        const list = new IxList(length);
+        for (let i = 0; i < length; ++i) list.push(0);
         benchmark(`IxList add ${length.toLocaleString('en')} with constraint`, () => {
-          list.unshift(i);
+          list.unshift(0);
         }, done);
       });
     }
 
     for (const length of [10, 100, 1000, 10000, 100000]) {
       it(`IxList put ${length.toLocaleString('en')}`, function (done) {
-        const cap = length;
-        const list = new IxList(cap, new Map());
+        const list = new IxList(length, new Map());
+        for (let i = 0; i < length; ++i) list.push(0);
         let i = 0;
-        benchmark(`IxList put ${length.toLocaleString('en')}`, () => list.put(++i % cap), done);
+        benchmark(`IxList put ${length.toLocaleString('en')}`, () => list.put(++i % length), done);
       });
     }
 
     for (const length of [10, 100, 1000, 10000, 100000]) {
       it(`Yalist move ${length.toLocaleString('en')}`, function (done) {
-        const cap = length;
         const list = new Yallist();
-        let i = 0;
+        for (let i = 0; i < length; ++i) list.push(0);
         benchmark(`Yalist move ${length.toLocaleString('en')}`, () => {
-          if (++i > cap) {
-            list.unshiftNode(list.tail!.prev!);
-          }
-          else {
-            list.unshift(i);
-          }
+          list.unshiftNode(list.tail!.prev!);
         }, done);
       });
 
       it(`IvList move ${length.toLocaleString('en')}`, function (done) {
-        const cap = length;
         const list = new InvList();
-        let i = 0;
+        for (let i = 0; i < length; ++i) list.push(0);
         benchmark(`IvList move ${length.toLocaleString('en')}`, () => {
-          if (++i > cap) {
-            list.last!.prev.moveToHead();
-          }
-          else {
-            list.unshift(i);
-          }
+          list.last!.prev.moveToHead();
         }, done);
       });
 
       it(`IxList move ${length.toLocaleString('en')}`, function (done) {
-        const cap = length;
         const list = new IxList();
-        let i = 0;
+        for (let i = 0; i < length; ++i) list.push(0);
         benchmark(`IxList move ${length.toLocaleString('en')}`, () => {
-          if (++i > cap) {
-            list.moveToHead(list.last!.prev);
-          }
-          else {
-            list.unshift(i);
-          }
+          list.moveToHead(list.last!.prev);
         }, done);
       });
     }
