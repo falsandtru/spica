@@ -1,5 +1,4 @@
 import { Date } from './global';
-import { floor } from './alias';
 import { causeAsyncException } from './exception';
 
 let mem: number | undefined;
@@ -27,24 +26,17 @@ const scheduler = Promise.resolve();
 
 export function tick(cb: Callback): void {
   index === 0 && scheduler.then(run);
-  index++ === queue.length
-    ? queue.push(cb)
-    : queue[index - 1] = cb;
+  queue[index++] = cb;
 }
 
 function run(): void {
-  const count = index;
   [index, queue, jobs] = [0, jobs, queue];
-  for (let i = 0; i < count; ++i) {
+  for (let i = 0, cb: Callback | undefined; cb = jobs[i]; ++i) {
     try {
-      (void 0, jobs[i]!)();
-      // Release the reference.
-      jobs[i] = void 0;
+      jobs[i] = void cb();
     }
     catch (reason) {
       causeAsyncException(reason);
     }
   }
-  // Gradually reduce the unused buffer space.
-  jobs.length > 1000 && count < jobs.length * 0.5 && jobs.splice(floor(jobs.length * 0.9), jobs.length);
 }
