@@ -22,8 +22,6 @@ export function cofetch(url: string, options?: CofetchOptions): Cofetch {
   return new Cofetch(url, options);
 }
 
-const internal = Symbol.for('spica/cofetch::internal');
-
 class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
   constructor(
     url: string,
@@ -52,7 +50,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
           opts.headers!.set('If-None-Match', opts.cache.get(key)!.getResponseHeader('ETag')!);
         }
         fetch(xhr, url, opts);
-        this[internal].register(() => { xhr.readyState < 4 && xhr.abort(); });
+        this.cancellation.register(() => { xhr.readyState < 4 && xhr.abort(); });
         return noop;
       });
       for await (const ev of listener) {
@@ -102,9 +100,9 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
     }, { run: false });
     this[Coroutine.init]();
   }
-  public readonly [internal] = new Cancellation();
+  private readonly cancellation = new Cancellation();
   public cancel(): void {
-    this[internal].cancel();
+    this.cancellation.cancel();
   }
 }
 

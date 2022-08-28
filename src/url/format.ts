@@ -65,8 +65,6 @@ function encode(url: string): EncodedURL {
 export { encode as _encode }
 
 
-const internal = Symbol.for('spica/url::internal');
-
 type SharedURL = Partial<Mutable<global.URL>> & {
   url: global.URL;
   resource?: string;
@@ -110,77 +108,72 @@ export class ReadonlyURL<T extends string = string> implements Readonly<global.U
             }
         }
     }
-    this[internal] = {
-      share: ReadonlyURL.get(source, base),
-      searchParams: void 0,
-    };
+    this.share = ReadonlyURL.get(source, base);
   }
-  private readonly [internal]: {
-    share: SharedURL;
-    searchParams: URLSearchParams | undefined;
-  };
+  private readonly share: SharedURL;
+  private params: URLSearchParams | undefined;
   public get href(): T {
-    return (this[internal].share.href as T)
-       ??= this[internal].share.url.href as T;
+    return (this.share.href as T)
+       ??= this.share.url.href as T;
   }
   public get resource(): string {
-    return this[internal].share.resource
+    return this.share.resource
        ??= this.href.slice(0, -this.fragment.length - this.query.length || this.href.length) + this.search;
   }
   public get origin(): string {
-    return this[internal].share.origin
-       ??= this[internal].share.url.origin;
+    return this.share.origin
+       ??= this.share.url.origin;
   }
   public get protocol(): string {
-    return this[internal].share.protocol
-       ??= this[internal].share.url.protocol;
+    return this.share.protocol
+       ??= this.share.url.protocol;
   }
   public get username(): string {
-    return this[internal].share.username
-       ??= this[internal].share.url.username;
+    return this.share.username
+       ??= this.share.url.username;
   }
   public get password(): string {
-    return this[internal].share.password
-       ??= this[internal].share.url.password;
+    return this.share.password
+       ??= this.share.url.password;
   }
   public get host(): string {
-    return this[internal].share.host
-       ??= this[internal].share.url.host;
+    return this.share.host
+       ??= this.share.url.host;
   }
   public get hostname(): string {
-    return this[internal].share.hostname
-       ??= this[internal].share.url.hostname;
+    return this.share.hostname
+       ??= this.share.url.hostname;
   }
   public get port(): string {
-    return this[internal].share.port
-       ??= this[internal].share.url.port;
+    return this.share.port
+       ??= this.share.url.port;
   }
   public get path(): string {
-    return this[internal].share.path
+    return this.share.path
        ??= `${this.pathname}${this.search}`;
   }
   public get pathname(): string {
-    return this[internal].share.pathname
-       ??= this[internal].share.url.pathname;
+    return this.share.pathname
+       ??= this.share.url.pathname;
   }
   public get search(): string {
-    return this[internal].share.search
-       ??= this[internal].share.url.search;
+    return this.share.search
+       ??= this.share.url.search;
   }
   public get query(): string {
-    return this[internal].share.query
+    return this.share.query
        ??= this.search || this.href[this.href.length - this.fragment.length - 1] === '?' && '?' || '';
   }
   public get hash(): string {
-    return this[internal].share.hash
-       ??= this[internal].share.url.hash;
+    return this.share.hash
+       ??= this.share.url.hash;
   }
   public get fragment(): string {
-    return this[internal].share.fragment
+    return this.share.fragment
        ??= this.hash || this.href[this.href.length - 1] === '#' && '#' || '';
   }
   public get searchParams(): URLSearchParams {
-    return this[internal].searchParams
+    return this.params
        ??= new URLSearchParams(this.search);
   }
   public toString(): string {
