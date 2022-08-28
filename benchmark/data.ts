@@ -45,8 +45,8 @@ describe('Benchmark:', function () {
 
       it(`Queue ${length.toLocaleString('en')}`, function (done) {
         const data = new Queue();
-        for (let i = 0; i < length; ++i) data.enqueue(0);
-        benchmark(`Queue ${length.toLocaleString('en')}`, () => (data.dequeue(), data.enqueue(0)), done);
+        for (let i = 0; i < length; ++i) data.push(0);
+        benchmark(`Queue ${length.toLocaleString('en')}`, () => (data.pop(), data.push(0)), done);
       });
     }
 
