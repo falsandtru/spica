@@ -435,8 +435,8 @@ class Stats {
   ) {
   }
   private readonly max = ceil(this.resolution * (100 + this.offset) / 100) + 1;
-  private LRU = [0];
-  private LFU = [0];
+  public LRU = [0];
+  public LFU = [0];
   public get length(): number {
     return this.LRU.length;
   }
