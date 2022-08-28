@@ -2,7 +2,7 @@
 
 ![CI](https://github.com/falsandtru/spica/workflows/CI/badge.svg)
 
-Supervisor, Coroutine, Channel, select, AtomicPromise, Cancellation, Cache, InvList, IxList, and some utils.
+Supervisor, Coroutine, Channel, select, AtomicPromise, Cancellation, Cache, InvList, HList, Queue, Stack, and some utils.
 
 ## Install
 
@@ -21,10 +21,11 @@ $ npm i spica
 - AtomicPromise
 - Cancellation
 - Cache
-- HList
 - InvList
-- IxList
+- HList
 - Heap
+- Queue
+- Stack
 - DataMap
 - MultiMap
 - AttrMap
