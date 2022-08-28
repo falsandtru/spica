@@ -1,5 +1,3 @@
-import { Infinity } from './global';
-
 export function indexOf<a>(as: readonly a[], a: a): number {
   if (as.length === 0) return -1;
   return a === a
@@ -58,47 +56,34 @@ export function pop<a>(as: a[], count?: number): [a[], a | undefined | a[]] {
 }
 
 export function splice<a>(as: a[], index: number, count?: number): a[];
-export function splice<a>(as: a[], index: number, count: number, ...inserts: a[]): a[];
-export function splice<a>(as: a[], index: number, count?: number, ...inserts: a[]): a[] {
-  if (count === 0 && inserts.length === 0) return [];
+export function splice<a>(as: a[], index: number, count: number, ...values: a[]): a[];
+export function splice<a>(as: a[], index: number, count?: number, ...values: a[]): a[] {
+  if (as.length === 0) return push(as, values), [];
+  if (index > as.length) {
+    index = as.length;
+  }
+  else if (index < 0) {
+    index = -index > as.length
+      ? 0
+      : as.length + index;
+  }
   count = count! > as.length
     ? as.length
     : count;
+  if (count === 0 && values.length === 0) return [];
+  if (count === 1 && values.length === 1) return [[as[index], as[index] = values[0]][0]];
   switch (index) {
     case 0:
-      switch (count) {
-        case 0:
-          return [[], unshift(inserts, as)][0];
-        case 1:
-          return as.length === 0
-            ? [[], unshift(inserts, as)][0]
-            : [[as.shift()!], unshift(inserts, as)][0];
-        case void 0:
-          if (as.length > 1 || arguments.length > 2) break;
-          return as.length === 0
-            ? []
-            : splice(as, index, 1);
-      }
+      if (count === 0) return unshift(values, as), [];
+      if (count === 1) return [[as.shift()!], unshift(values, as)][0];
       break;
-    case -1:
     case as.length - 1:
-      switch (count) {
-        case 1:
-          return as.length === 0
-            ? [[], push(as, inserts)][0]
-            : [[as.pop()!], push(as, inserts)][0];
-        case void 0:
-          if (as.length > 1 || arguments.length > 2) break;
-          return as.length === 0
-            ? []
-            : splice(as, index, 1);
-      }
+      if (count === 1) return [[as.pop()!], push(as, values)][0];
       break;
     case as.length:
-    case Infinity:
-      return [[], push(as, inserts)][0];
+      return push(as, values), [];
   }
   return arguments.length > 2
-    ? as.splice(index, count!, ...inserts)
+    ? as.splice(index, count!, ...values)
     : as.splice(index);
 }

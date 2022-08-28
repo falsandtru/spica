@@ -3,11 +3,11 @@ import { global, Infinity, Symbol, Object, Set, Map, WeakSet, setTimeout, clearT
 import { isFinite, ObjectAssign } from './alias';
 import { tick } from './clock';
 import { Coroutine, CoroutineInterface, isCoroutine } from './coroutine';
+import { Observation, Observer, Publisher } from './observer';
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future';
-import { Observation, Observer, Publisher } from './observer';
+import { Ring } from './ring';
 import { noop } from './function';
-import { splice } from './array';
 import { causeAsyncException } from './exception';
 
 export interface SupervisorOptions {
@@ -83,7 +83,6 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       this.$events?.loss.emit([name], [name, param]);
     }
     assert(this.messages.length === 0);
-    assert(!Object.isFrozen(this.messages));
     this.isAlive = false;
     // @ts-ignore #31251
     this.constructor.instances.delete(this);
@@ -241,8 +240,8 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     this.throwErrorIfNotAvailable();
     this.schedule();
     if (timeout > 0 && timeout !== Infinity) {
-      assert(this.messages[this.messages.length - 1][4] === 0);
-      this.messages[this.messages.length - 1][4] = setTimeout(() =>
+      assert(this.messages.at(this.messages.length - 1)![4] === 0);
+      this.messages.at(this.messages.length - 1)![4] = setTimeout(() =>
         void this.schedule()
       , timeout + 3);
     }
@@ -319,14 +318,14 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     this.settings.scheduler === global.requestAnimationFrame && setTimeout(p.bind, 1000);
   }
   // Bug: Karma and TypeScript
-  private readonly messages: [Iterable<N>, P, Supervisor.Callback<R>, number, ReturnType<typeof setTimeout> | 0][] = [];
+  private readonly messages: Ring<[Iterable<N>, P, Supervisor.Callback<R>, number, ReturnType<typeof setTimeout> | 0]> = new Ring();
   private deliver(): void {
     if (!this.available) return;
     assert(!this.scheduled);
     const since = Date.now();
     for (let i = 0, len = this.messages.length; this.available && i < len; ++i) {
       if (this.settings.resource - (Date.now() - since) <= 0) return void this.schedule();
-      const [names, param, callback, expiry, timer] = this.messages[i];
+      const [names, param, callback, expiry, timer] = this.messages.at(i)!;
       let result: AtomicPromise<R> | undefined;
       let name: N | undefined;
       for (name of typeof names === 'string' ? [names] : names) {
@@ -334,7 +333,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
         if (result = this.workers.get(name)?.call([param, expiry])) break;
       }
       if (!result && Date.now() < expiry) continue;
-      splice(this.messages, i, 1);
+      this.messages.splice(i, 1);
       --i;
       --len;
       timer && clearTimeout(timer);
