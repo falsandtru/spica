@@ -5,8 +5,8 @@ describe('Unit: lib/queue', () => {
     it('enqueue/dequeue', () => {
       const queue = new Queue();
       assert(queue.length === 0);
-      assert(queue.peek() === undefined);
-      assert(queue.peek(-1) === undefined);
+      assert(queue.at(0) === undefined);
+      assert(queue.at(-1) === undefined);
       assert.deepStrictEqual(queue.toArray(), []);
       assert(queue.dequeue() === undefined);
       assert.deepStrictEqual(queue['array'], []);
@@ -15,8 +15,8 @@ describe('Unit: lib/queue', () => {
       assert(queue.enqueue(0) === undefined);
       assert.deepStrictEqual(queue['array'], [0]);
       assert(queue.length === 1);
-      assert(queue.peek() === 0);
-      assert(queue.peek(-1) === 0);
+      assert(queue.at(0) === 0);
+      assert(queue.at(-1) === 0);
       assert.deepStrictEqual(queue.toArray(), [0]);
       assert(queue.dequeue() === 0);
       assert(queue.length === 0);
@@ -29,8 +29,8 @@ describe('Unit: lib/queue', () => {
       assert(queue.enqueue(1) === undefined);
       assert.deepStrictEqual(queue['array'], [0, 1]);
       assert(queue.length === 2);
-      assert(queue.peek() === 0);
-      assert(queue.peek(-1) === 1);
+      assert(queue.at(0) === 0);
+      assert(queue.at(-1) === 1);
       assert(queue.dequeue() === 0);
       assert(queue.length === 1);
       assert(queue.enqueue(2) === undefined);

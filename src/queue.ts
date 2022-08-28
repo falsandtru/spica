@@ -4,27 +4,30 @@ export class Queue<T> {
   private array: (T | undefined)[] = [];
   private head = 0;
   private tail = 0;
+  public length = 0;
   public enqueue(value: T): void {
     return this.push(value)
   }
   public dequeue(): T | undefined {
     return this.shift();
   }
-  public clear(): void {
-    this.array = [];
-    this.head = this.tail = 0;
+  public peek(): T | undefined {
+    return this.at(0);
   }
   public isEmpty(): boolean {
     return this.head === this.tail;
   }
-  public peek(index: 0 | -1 = 0): T | undefined {
-    switch (index) {
-      case 0:
-        return this.array[(this.head || 1) - 1];
-      case -1:
-        return this.array[(this.tail || 1) - 1];
-      default:
-        throw new Error(`Spica: Queue: Index must be 0 or -1`);
+  public at(index: number): T | undefined {
+    const array = this.array;
+    if (index >= 0) {
+      if (index >= this.length) return;
+      return array[this.head + index % array.length - 1];
+    }
+    else {
+      if (-index > this.length) return;
+      return this.tail + index > 0
+        ? array[this.tail + index]
+        : array[array.length + this.tail + index - 1];
     }
   }
   public push(value: T): void {
@@ -77,7 +80,10 @@ export class Queue<T> {
         : this.head + 1;
     return value;
   }
-  public length = 0;
+  public clear(): void {
+    this.array = [];
+    this.head = this.tail = 0;
+  }
   public toArray(): T[] {
     return this.head <= this.tail
       ? this.array.slice((this.head || 1) - 1, this.tail) as T[]

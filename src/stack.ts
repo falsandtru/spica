@@ -1,5 +1,6 @@
 export class Stack<T> {
   private array: (T | undefined)[] = [];
+  public length = 0;
   public push(value: T): void {
     this.array[this.length++] = value;
   }
@@ -11,16 +12,15 @@ export class Stack<T> {
     array[i] = void 0;
     return value;
   }
-  public clear(): void {
-    this.array = [];
+  public peek(): T | undefined {
+    return this.array[(this.length || 1) - 1];
   }
   public isEmpty(): boolean {
     return this.length === 0;
   }
-  public peek(): T | undefined {
-    return this.array[(this.length || 1) - 1];
+  public clear(): void {
+    this.array = [];
   }
-  public length = 0;
   public toArray(): T[] {
     return this.array.slice(0, this.length) as T[];
   }
