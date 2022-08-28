@@ -218,7 +218,8 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     if (typeof callback !== 'function') return new AtomicPromise<R>((resolve, reject) =>
       void this.call(name, param, (err, result) => err ? reject(err) : resolve(result), callback));
     this.throwErrorIfNotAvailable();
-    this.messages.push([typeof name === 'string' ? [name] : new NamePool(this.workers, name),
+    this.messages.push(
+      [typeof name === 'string' ? [name] : new NamePool(this.workers, name),
       param,
       callback,
       Date.now() + timeout,

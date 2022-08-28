@@ -13,7 +13,7 @@ describe('Unit: lib/clock', function () {
     });
 
     it('serial', function (done) {
-      const size = 1000 * 1000;
+      const size = 1e6;
       let cnt = 0;
       for (let i = 0; i < size; ++i) {
         tick(() => ++cnt);
