@@ -18,7 +18,7 @@ describe('Benchmark:', function () {
       benchmark('Queue new', () => new Queue(), done);
     });
 
-    for (const length of [1, 10, 100, 1000, 10000, 100000, 1000000]) {
+    for (const length of [1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`Array first ${length.toLocaleString('en')}`, function (done) {
         const data: unknown[] = [];
         for (let i = 0; i < length; ++i) data.push(0);

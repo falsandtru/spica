@@ -18,7 +18,7 @@ describe('Benchmark:', function () {
       benchmark('IxList new', () => new IxList(), done);
     });
 
-    for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
+    for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`Map set ${length.toLocaleString('en')}`, function (done) {
         const dict = new Map();
         let i = 0;
@@ -36,7 +36,7 @@ describe('Benchmark:', function () {
       });
     }
 
-    for (const length of [10, 100, 1000, 10000, 100000]) {
+    for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`Map has/get ${length.toLocaleString('en')}`, function (done) {
         const dict = new Map();
         let i = 0;

@@ -9,7 +9,7 @@ describe('Benchmark:', function () {
       benchmark('Heap uint new', () => new Heap(), done);
     });
 
-    for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
+    for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`Heap uint insert/extract ${length.toLocaleString('en')}`, function (done) {
         const heap = new Heap<number>();
         for (let i = 0; i < length; ++i) heap.insert(i, 1);

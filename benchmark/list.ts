@@ -23,7 +23,7 @@ describe('Benchmark:', function () {
       benchmark('IxList  new', () => new IxList(), done);
     });
 
-    for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
+    for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`Yallist add ${length.toLocaleString('en')}`, function (done) {
         const list = new Yallist();
         for (let i = 0; i < length; ++i) list.push(0);
@@ -76,7 +76,7 @@ describe('Benchmark:', function () {
       });
     }
 
-    for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
+    for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`IxList  put ${length.toLocaleString('en')}`, function (done) {
         const list = new IxList(length, new Map());
         for (let i = 0; i < length; ++i) list.push(0);
@@ -85,7 +85,7 @@ describe('Benchmark:', function () {
       });
     }
 
-    for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
+    for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`Yallist move ${length.toLocaleString('en')}`, function (done) {
         const list = new Yallist();
         for (let i = 0; i < length; ++i) list.push(0);
