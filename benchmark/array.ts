@@ -5,7 +5,7 @@ describe('Benchmark:', function () {
   this.timeout(10 * 1e3);
 
   describe('indexOf', function () {
-    for (const length of [1e1, 1e2, 1e3, 1e4]) {
+    for (const length of [1, 1e1, 1e2, 1e3, 1e4]) {
       it(length.toLocaleString('en'), function (done) {
         const r = `${rnd0Z(length - 1)}-`;
         benchmark(`Array indexOf ${length.toLocaleString('en')}`, () => r.indexOf('-'), done);
@@ -14,50 +14,48 @@ describe('Benchmark:', function () {
 
   });
 
-  describe('for-of', function () {
-    function f(arr: any[]) {
-      return () => {
-        const acc = [];
-        for (const a of arr) {
-          acc.push(a);
-        }
-      };
+  describe('unshift', function () {
+    for (const length of [1, 1e1, 1e2, 1e3]) {
+      it(`for-of ${length.toLocaleString('en')}`, function (done) {
+        const as = Array(length).fill(1);
+        benchmark(`Array unshift for-of ${length.toLocaleString('en')}`, () => {
+          const acc = [];
+          for (const a of as) {
+            acc.unshift(a);
+          }
+        }, done);
+      });
+
+      it(`spread ${length.toLocaleString('en')}`, function (done) {
+        const as = Array(length).fill(1);
+        benchmark(`Array unshift spread ${length.toLocaleString('en')}`, () => {
+          const acc = [];
+          acc.unshift(...as);
+        }, done);
+      });
     }
-
-    it('1', function (done) {
-      benchmark('Array push for-of 1', f(Array(1).fill(1)), done);
-    });
-
-    it('10', function (done) {
-      benchmark('Array push for-of 10', f(Array(10).fill(1)), done);
-    });
-
-    it('100', function (done) {
-      benchmark('Array push for-of 100', f(Array(100).fill(1)), done);
-    });
-
   });
 
-  describe('spread', function () {
-    function f(arr: any[]) {
-      return () => {
-        const acc = [];
-        acc.push(...arr);
-      };
+  describe('push', function () {
+    for (const length of [1, 1e1, 1e2, 1e3]) {
+      it(`for-of ${length.toLocaleString('en')}`, function (done) {
+        const as = Array(length).fill(1);
+        benchmark(`Array push for-of ${length.toLocaleString('en')}`, () => {
+          const acc = [];
+          for (const a of as) {
+            acc.push(a);
+          }
+        }, done);
+      });
+
+      it(`spread ${length.toLocaleString('en')}`, function (done) {
+        const as = Array(length).fill(1);
+        benchmark(`Array push spread ${length.toLocaleString('en')}`, () => {
+          const acc = [];
+          acc.push(...as);
+        }, done);
+      });
     }
-
-    it('1', function (done) {
-      benchmark('Array push spread 1', f(Array(1).fill(1)), done);
-    });
-
-    it('10', function (done) {
-      benchmark('Array push spread 10', f(Array(10).fill(1)), done);
-    });
-
-    it('100', function (done) {
-      benchmark('Array push spread 100', f(Array(100).fill(1)), done);
-    });
-
   });
 
 });
