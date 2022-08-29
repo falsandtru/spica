@@ -7,7 +7,7 @@ describe('Benchmark:', function () {
 
   describe('data', function () {
     afterEach(done => {
-      setTimeout(done, 1000);
+      setTimeout(done, 2000);
     });
 
     it('Stack new', function (done) {

@@ -7,7 +7,7 @@ describe('Benchmark:', function () {
 
   describe('Dict', function () {
     afterEach(done => {
-      setTimeout(done, 1000);
+      setTimeout(done, 2000);
     });
 
     it('new', function (done) {

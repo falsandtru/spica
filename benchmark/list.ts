@@ -8,7 +8,7 @@ describe('Benchmark:', function () {
 
   describe('List', function () {
     afterEach(done => {
-      setTimeout(done, 1000);
+      setTimeout(done, 2000);
     });
 
     it('new', function (done) {
@@ -76,7 +76,7 @@ describe('Benchmark:', function () {
       });
     }
 
-    for (const length of [10, 100, 1000, 10000, 100000]) {
+    for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
       it(`IxList  put ${length.toLocaleString('en')}`, function (done) {
         const list = new IxList(length, new Map());
         for (let i = 0; i < length; ++i) list.push(0);
@@ -85,7 +85,7 @@ describe('Benchmark:', function () {
       });
     }
 
-    for (const length of [10, 100, 1000, 10000, 100000]) {
+    for (const length of [10, 100, 1000, 10000, 100000, 1000000]) {
       it(`Yallist move ${length.toLocaleString('en')}`, function (done) {
         const list = new Yallist();
         for (let i = 0; i < length; ++i) list.push(0);
