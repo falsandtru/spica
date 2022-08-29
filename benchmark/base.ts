@@ -1,13 +1,18 @@
 import { benchmark } from './benchmark';
+import { Ring } from '../src/ring';
 import { Stack } from '../src/stack';
 import { Queue } from '../src/queue';
 
 describe('Benchmark:', function () {
   this.timeout(10 * 1e3);
 
-  describe('data', function () {
+  describe('base', function () {
     afterEach(done => {
       setTimeout(done, 2000);
+    });
+
+    it('Ring  new', function (done) {
+      benchmark('Ring  new', () => new Ring(), done);
     });
 
     it('Stack new', function (done) {
@@ -35,6 +40,12 @@ describe('Benchmark:', function () {
         const data: unknown[] = [];
         for (let i = 0; i < length; ++i) data.push(0);
         benchmark(`Array queue ${length.toLocaleString('en')}`, () => (data.shift(), data.push(0)), done);
+      });
+
+      it(`Ring  queue ${length.toLocaleString('en')}`, function (done) {
+        const data = new Ring();
+        for (let i = 0; i < length; ++i) data.push(0);
+        benchmark(`Ring  queue ${length.toLocaleString('en')}`, () => (data.shift(), data.push(0)), done);
       });
 
       it(`Stack ${length.toLocaleString('en')}`, function (done) {
