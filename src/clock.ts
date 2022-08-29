@@ -18,22 +18,22 @@ export const clock: Promise<undefined> = Promise.resolve(void 0);
 
 type Callback = () => void;
 
+let buffer: (Callback | undefined)[] = [];
 let queue: (Callback | undefined)[] = [];
-let jobs: (Callback | undefined)[] = [];
 let index = 0;
 
 const scheduler = Promise.resolve();
 
 export function tick(cb: Callback): void {
   index === 0 && scheduler.then(run);
-  queue[index++] = cb;
+  buffer[index++] = cb;
 }
 
 function run(): void {
-  [index, queue, jobs] = [0, jobs, queue];
-  for (let i = 0, cb: Callback | undefined; cb = jobs[i]; ++i) {
+  [index, buffer, queue] = [0, queue, buffer];
+  for (let i = 0, cb: Callback | undefined; cb = queue[i]; ++i) {
     try {
-      jobs[i] = void cb();
+      queue[i] = void cb();
     }
     catch (reason) {
       causeAsyncException(reason);
