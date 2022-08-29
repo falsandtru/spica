@@ -25,24 +25,19 @@ export class Ring<T> {
     const array = this.array;
     if (index >= 0) {
       if (index >= this.length) throw new RangeError('Invalid index');
-      const i = (this.head - 1 + index) % array.length;
-      const val = array[i]!;
-      array[i] = replacer
-        ? replacer(val, value)
-        : value;
-      return val;
+      index = (this.head - 1 + index) % array.length;
     }
     else {
       if (-index > this.length) throw new RangeError('Invalid index');
-      const i = this.tail + index >= 0
+      index = this.tail + index >= 0
         ? this.tail + index
         : array.length - 1 + this.tail + index;
-      const val = array[i]!;
-      array[i] = replacer
-        ? replacer(val, value)
-        : value;
-      return val;
     }
+    const val = array[index]!;
+    array[index] = replacer
+      ? replacer(val, value)
+      : value;
+    return val;
   }
   public push(value: T): void {
     const array = this.array;
