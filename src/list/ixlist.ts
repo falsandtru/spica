@@ -3,7 +3,7 @@ import { Dict } from '../dict';
 import { Stack } from '../stack';
 import { equal } from '../compare';
 
-// Circular indexed list
+// Circular Indexed List
 
 const undefined = void 0;
 const BORDER = 1_000_000_000;

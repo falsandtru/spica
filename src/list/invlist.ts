@@ -1,4 +1,6 @@
-// Circular inverse list
+// Circular Inverse List
+
+// 1-2x faster than yallist.
 
 const undefined = void 0;
 
