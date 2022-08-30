@@ -89,8 +89,10 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
           // `result.value` will never be a Promise value when using async iterators.
           const result = await iter.next(msg!);
           assert(!isPromiseLike(result.value));
+          if (!core.isAlive) break;
           if (!result.done) {
             // Block.
+            assert(core.isAlive);
             reply({ ...result });
             await core.recvBuffer.put({ ...result });
             continue;

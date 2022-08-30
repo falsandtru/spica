@@ -9,6 +9,7 @@ export class Ring<T> {
   private tail = 0;
   public length = 0;
   public at(index: number): T | undefined {
+    // Inline the code for optimization.
     const array = this.array;
     if (index >= 0) {
       if (index >= this.length) return;

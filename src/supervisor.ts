@@ -6,8 +6,8 @@ import { Coroutine, CoroutineInterface, isCoroutine } from './coroutine';
 import { Observation, Observer, Publisher } from './observer';
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future';
-import { Ring } from './ring';
 import { noop } from './function';
+import { Queue } from './queue';
 import { causeAsyncException } from './exception';
 
 export interface SupervisorOptions {
@@ -77,7 +77,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     assert(this.workers.size === 0);
     Object.freeze(this.workers);
     while (this.messages.length > 0) {
-      const [names, param, , , timer] = this.messages.shift()!;
+      const [names, param, , , timer] = this.messages.pop()!;
       const name: N | undefined = names[Symbol.iterator]().next().value;
       timer && clearTimeout(timer);
       this.$events?.loss.emit([name], [name, param]);
@@ -225,7 +225,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       0,
     ]);
     while (this.messages.length > (this.available ? this.settings.capacity : 0)) {
-      const [names, param, callback, , timer] = this.messages.shift()!;
+      const [names, param, callback, , timer] = this.messages.pop()!;
       timer && clearTimeout(timer);
       const name: N | undefined = names[Symbol.iterator]().next().value;
       this.$events?.loss.emit([name], [name, param]);
@@ -240,8 +240,8 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     this.throwErrorIfNotAvailable();
     this.schedule();
     if (timeout > 0 && timeout !== Infinity) {
-      assert(this.messages.at(this.messages.length - 1)![4] === 0);
-      this.messages.at(this.messages.length - 1)![4] = setTimeout(() =>
+      assert(this.messages.at(-1)![4] === 0);
+      this.messages.at(-1)![4] = setTimeout(() =>
         void this.schedule()
       , timeout + 3);
     }
@@ -318,7 +318,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     this.settings.scheduler === global.requestAnimationFrame && setTimeout(p.bind, 1000);
   }
   // Bug: Karma and TypeScript
-  private readonly messages: Ring<[Iterable<N>, P, Supervisor.Callback<R>, number, ReturnType<typeof setTimeout> | 0]> = new Ring();
+  private readonly messages: Queue<[Iterable<N>, P, Supervisor.Callback<R>, number, ReturnType<typeof setTimeout> | 0]> = new Queue();
   private deliver(): void {
     if (!this.available) return;
     assert(!this.scheduled);
@@ -333,7 +333,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
         if (result = this.workers.get(name)?.call([param, expiry])) break;
       }
       if (!result && Date.now() < expiry) continue;
-      this.messages.splice(i, 1);
+      this.messages.delete(i);
       --i;
       --len;
       timer && clearTimeout(timer);

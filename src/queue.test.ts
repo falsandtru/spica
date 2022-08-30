@@ -54,6 +54,28 @@ describe('Unit: lib/queue', () => {
       assert(queue.length === 0);
     });
 
+    it('at', () => {
+      const queue = new Queue();
+      assert(queue.at(0) === undefined);
+      assert(queue.at(-1) === undefined);
+      queue.push(1);
+      assert(queue.at(0) === 1);
+      assert(queue.at(-1) === 1);
+      queue.push(2);
+      assert(queue.at(0) === 1);
+      assert(queue.at(-1) === 2);
+      queue.pop();
+      assert(queue.at(0) === 2);
+      assert(queue.at(-1) === 2);
+      queue.push(3);
+      assert(queue.at(0) === 2);
+      assert(queue.at(1) === 3);
+      assert(queue.at(2) === undefined);
+      assert(queue.at(-1) === 3);
+      assert(queue.at(-2) === 2);
+      assert(queue.at(-3) === undefined);
+    });
+
   });
 
 });
