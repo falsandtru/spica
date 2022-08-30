@@ -7,10 +7,6 @@ describe('Benchmark:', function () {
   this.timeout(10 * 1e3);
 
   describe('List', function () {
-    afterEach(done => {
-      setTimeout(done, 2000);
-    });
-
     it('new', function (done) {
       benchmark('Yallist new', () => Yallist.create(), done);
     });

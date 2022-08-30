@@ -7,10 +7,6 @@ describe('Benchmark:', function () {
   this.timeout(10 * 1e3);
 
   describe('base', function () {
-    afterEach(done => {
-      setTimeout(done, 2000);
-    });
-
     it('Ring  new', function (done) {
       benchmark('Ring  new', () => new Ring(), done);
     });

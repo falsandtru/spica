@@ -7,10 +7,6 @@ describe('Benchmark:', function () {
   this.timeout(20 * 1e3);
 
   describe('Cache', function () {
-    afterEach(done => {
-      setTimeout(done, 2000);
-    });
-
     it('LRU new', function (done) {
       benchmark('LRUCache new', () => new LRUCache({ max: 1000 }), done);
     });

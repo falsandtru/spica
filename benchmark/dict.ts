@@ -6,10 +6,6 @@ describe('Benchmark:', function () {
   this.timeout(10 * 1e3);
 
   describe('Dict', function () {
-    afterEach(done => {
-      setTimeout(done, 2000);
-    });
-
     it('new', function (done) {
       benchmark('Map new', () => new Map(), done);
     });
