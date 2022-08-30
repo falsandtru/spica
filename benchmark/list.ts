@@ -8,7 +8,7 @@ describe('Benchmark:', function () {
 
   describe('List', function () {
     afterEach(done => {
-      setTimeout(done, 3000);
+      setTimeout(done, 2000);
     });
 
     it('new', function (done) {
