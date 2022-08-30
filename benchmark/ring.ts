@@ -6,7 +6,7 @@ describe('Benchmark:', function () {
 
   describe('Ring', function () {
     afterEach(done => {
-      setTimeout(done, 2000);
+      setTimeout(done, 3000);
     });
 
     it('Ring new', function (done) {

@@ -8,7 +8,7 @@ describe('Benchmark:', function () {
 
   describe('Cache', function () {
     afterEach(done => {
-      setTimeout(done, 2000);
+      setTimeout(done, 3000);
     });
 
     it('LRU new', function (done) {
