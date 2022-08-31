@@ -1,5 +1,10 @@
+import { Array } from './global';
+
+let size = 16
+assert([size = 0]);
+
 export class Stack<T> {
-  private array: (T | undefined)[] = [];
+  private array: (T | undefined)[] = Array(size);
   public length = 0;
   public push(value: T): void {
     this.array[this.length++] = value;
@@ -19,7 +24,8 @@ export class Stack<T> {
     return this.length === 0;
   }
   public clear(): void {
-    this.array = [];
+    this.array = Array(size);
+    this.length = 0;
   }
   public toArray(): T[] {
     return this.array.slice(0, this.length) as T[];

@@ -1,3 +1,4 @@
+import { Array } from './global';
 import { splice } from './array';
 
 // 1-200,000x faster than Array.
@@ -6,9 +7,12 @@ import { splice } from './array';
 // 'Ring  queue 1,000,000 x 117,987,767 ops/sec ±0.43% (65 runs sampled)'
 // 'Queue       1,000,000 x 142,427,381 ops/sec ±0.46% (66 runs sampled)'
 
+let size = 16
+assert([size = 0]);
+
 export class Queue<T> {
-  private buffer: (T | undefined)[] = [];
-  private queue: (T | undefined)[] = [];
+  private buffer: (T | undefined)[] = Array(size);
+  private queue: (T | undefined)[] = Array(size);
   private index = 0;
   private head = 0;
   private tail = 0;
@@ -40,8 +44,8 @@ export class Queue<T> {
     return this.length === 0;
   }
   public clear(): void {
-    this.buffer = [];
-    this.queue = [];
+    this.buffer = Array(size);
+    this.queue = Array(size);
     this.length = this.index = this.head = this.tail = 0;
   }
   public at(index: number): T | undefined {
@@ -86,7 +90,7 @@ export class Queue<T> {
     return val;
   }
   public delete(index: number): T {
-    //if (index === 0 && this.length !== 0) return this.pop()!;
+    if (index === 0 && this.length !== 0) return this.pop()!;
     const { 0: array, 1: i } = this.target(index);
     --this.length;
     array === this.buffer

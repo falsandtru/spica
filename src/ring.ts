@@ -1,10 +1,14 @@
+import { Array } from './global';
 import { max, min } from './alias';
 import { splice } from './array';
 
 const space = Object.freeze(Array<undefined>(100));
 
+let size = 16
+assert([size = 0]);
+
 export class Ring<T> {
-  private array: (T | undefined)[] = [];
+  private array: (T | undefined)[] = Array(size);
   private head = 0;
   private tail = 0;
   public length = 0;
@@ -143,7 +147,7 @@ export class Ring<T> {
     return vs as T[];
   }
   public clear(): void {
-    this.array = [];
+    this.array = Array(size);
     this.length = this.head = this.tail = 0;
   }
   public toArray(): T[] {
