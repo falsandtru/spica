@@ -90,8 +90,8 @@ export class Queue<T> {
     return val;
   }
   public delete(index: number): T {
-    if (index === 0 && this.length !== 0) return this.pop()!;
     const { 0: array, 1: i } = this.target(index);
+    if (i === 0 && this.length !== 0) return this.pop()!;
     array === this.buffer
       ? --this.index
       : --this.tail;

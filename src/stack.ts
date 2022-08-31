@@ -1,4 +1,5 @@
 import { Array } from './global';
+import { splice } from './array';
 
 let size = 16
 assert([size = 0]);
@@ -29,6 +30,38 @@ export class Stack<T> {
   public clear(): void {
     this.array = Array(size);
     this.index = 0;
+  }
+  public at(index: number): T | undefined {
+    if (-index > this.length) return;
+    return index >= 0
+      ? this.array[index]
+      : this.array[this.index + index];
+  }
+  private absolute(index: number): number {
+    if (index >= 0) {
+      if (index >= this.length) throw new RangeError('Invalid index');
+      return index;
+    }
+    else {
+      if (-index > this.length) throw new RangeError('Invalid index');
+      return this.index + index;
+    }
+  }
+  public replace(index: number, value: T, replacer?: (oldValue: T, newValue: T) => T): T {
+    index = this.absolute(index);
+    const array = this.array;
+    const val = array[index]!;
+    array[index] = replacer
+      ? replacer(val, value)
+      : value;
+    return val;
+  }
+  public delete(index: number): T {
+    index = this.absolute(index);
+    if (index === 0 && this.length !== 0) return this.pop()!;
+    const array = this.array;
+    --this.index
+    return splice(array, index, 1)[0]!;
   }
   public toArray(): T[] {
     return this.array.slice(0, this.index) as T[];
