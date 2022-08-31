@@ -1,3 +1,4 @@
+import { Array } from './global';
 import { floor } from './alias';
 
 // Min heap
@@ -5,6 +6,9 @@ import { floor } from './alias';
 const undefined = void 0;
 
 type Node<T, O> = [order: O, value: T, index: number];
+
+let size = 16;
+assert([size = 0]);
 
 export namespace Heap {
   export type Node<T, O = T> = readonly unknown[] | { _: [T, O]; };
@@ -15,7 +19,7 @@ export class Heap<T, O = T> {
     private readonly stable = false,
   ) {
   }
-  private array: Node<T, O>[] = [];
+  private array: Node<T, O>[] = Array(size);
   private $length = 0;
   public get length(): number {
     return this.$length;
@@ -78,7 +82,7 @@ export class Heap<T, O = T> {
     return this.array[0]?.[1];
   }
   public clear(): void {
-    this.array = [];
+    this.array = Array(size);
     this.$length = 0;
   }
 }

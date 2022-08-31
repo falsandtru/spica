@@ -1,3 +1,4 @@
+import { Array } from './global';
 import type { Narrow, Intersect } from './type';
 import { singleton } from './function';
 
@@ -30,10 +31,10 @@ export function assemble<fs extends ((this: undefined, a?: unknown) => () => voi
 export function assemble<fs extends ((a?: unknown) => () => void)[]>(...fs: fs): (this: Context<fs>, a: Intersect<Narrow<ParamNs<fs, 0, undefined>>>) => () => undefined;
 export function assemble<fs extends ((a?: unknown) => () => void)[]>(...fs: fs): (this: Context<fs>, a: Intersect<Narrow<ParamNs<fs, 0, undefined>>>) => () => undefined {
   return function (a) {
-    const gs: (() => void)[] = [];
+    const gs: (() => void)[] = Array(16);
     try {
       for (let i = 0; i < fs.length; ++i) {
-        gs.push(fs[i].call(this, a));
+        gs[i] = fs[i].call(this, a);
       }
       return singleton(() => void cancel(gs));
     }
@@ -46,9 +47,9 @@ export function assemble<fs extends ((a?: unknown) => () => void)[]>(...fs: fs):
 
 function cancel(cancellers: readonly (() => void)[]): unknown[] {
   const reasons = [];
-  for (let i = 0; i < cancellers.length; ++i) {
+  for (let i = 0, g: () => void; g = cancellers[i]; ++i) {
     try {
-      (void 0, cancellers[i])();
+      g();
     }
     catch (reason) {
       reasons.push(reason);

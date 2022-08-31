@@ -1,7 +1,7 @@
 import { Array } from './global';
 import { splice } from './array';
 
-let size = 16
+let size = 16;
 assert([size = 0]);
 
 export class Stack<T> {

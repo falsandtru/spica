@@ -7,6 +7,7 @@ import { Future, AtomicFuture } from './future';
 import { Channel } from './channel';
 import { wait } from './timer';
 import { noop } from './function';
+import { Queue } from './queue';
 import { causeAsyncException } from './exception';
 
 export interface CoroutineOptions {
@@ -333,14 +334,13 @@ class BroadcastChannel<T> {
     return this[internal].isAlive;
   }
   public close(finalizer?: (msg: T[]) => void): void {
-    if (!this.isAlive) return;
+    if (!this.isAlive) return void finalizer?.([]);
     const core = this[internal];
     const { consumers } = core;
     core.isAlive = false;
-    for (let i = 0; consumers[i]; ++i) {
-      consumers[i]?.bind(BroadcastChannel.fail());
+    while (consumers.length > 0) {
+      consumers.pop()!.bind(BroadcastChannel.fail());
     }
-    consumers.splice(0, consumers.length);
     if (finalizer) {
       finalizer([]);
     }
@@ -349,21 +349,21 @@ class BroadcastChannel<T> {
     if (!this.isAlive) return BroadcastChannel.fail();
     const { consumers } = this[internal];
     while (consumers.length > 0) {
-      consumers.shift()!.bind(msg);
+      consumers.pop()!.bind(msg);
     }
     return AtomicPromise.resolve();
   }
   public take(): AtomicPromise<T> {
     if (!this.isAlive) return BroadcastChannel.fail();
     const { consumers } = this[internal];
-    return consumers[consumers.push(new AtomicFuture()) - 1]
-      .then();
+    consumers.push(new AtomicFuture());
+    return consumers.at(-1)!.then();
   }
 }
 namespace BroadcastChannel {
   export const fail = () => AtomicPromise.reject(new Error('Spica: Channel: Closed.'));
   export class Internal<T> {
     public isAlive: boolean = true;
-    public readonly consumers: AtomicFuture<T>[] = [];
+    public readonly consumers: Queue<AtomicFuture<T>> = new Queue();
   }
 }

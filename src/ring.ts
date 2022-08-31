@@ -4,7 +4,7 @@ import { splice } from './array';
 
 const space = Object.freeze(Array<undefined>(100));
 
-let size = 16
+let size = 16;
 assert([size = 0]);
 
 export class Ring<T> {

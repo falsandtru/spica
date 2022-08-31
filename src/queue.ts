@@ -7,7 +7,7 @@ import { splice } from './array';
 // 'Ring  queue 1,000,000 x 117,987,767 ops/sec ±0.43% (65 runs sampled)'
 // 'Queue       1,000,000 x 142,427,381 ops/sec ±0.46% (66 runs sampled)'
 
-let size = 16
+let size = 16;
 assert([size = 0]);
 
 export class Queue<T> {
