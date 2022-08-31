@@ -1,4 +1,5 @@
 import { Date } from './global';
+import { Queue } from './queue';
 import { causeAsyncException } from './exception';
 
 let mem: number | undefined;
@@ -17,23 +18,19 @@ export function now(nocache = false): number {
 export const clock: Promise<undefined> = Promise.resolve(void 0);
 
 type Callback = () => void;
-
-let buffer: (Callback | undefined)[] = [];
-let queue: (Callback | undefined)[] = [];
-let index = 0;
-
+const queue = new Queue<Callback>();
 const scheduler = Promise.resolve();
 
 export function tick(cb: Callback): void {
-  index === 0 && scheduler.then(run);
-  buffer[index++] = cb;
+  queue.isEmpty() && scheduler.then(run);
+  queue.push(cb);
 }
 
 function run(): void {
-  [index, buffer, queue] = [0, queue, buffer];
-  for (let i = 0, cb: Callback | undefined; cb = queue[i]; ++i) {
+  for (let i = queue.length; i--;) {
     try {
-      queue[i] = void cb();
+      // @ts-expect-error
+      (0, queue.pop()!)();
     }
     catch (reason) {
       causeAsyncException(reason);

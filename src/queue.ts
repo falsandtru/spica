@@ -9,15 +9,18 @@ export class Queue<T> {
   private count = 0;
   public get length(): number {
     return this.count === 0
-      ? this.tail.length
-      : this.tail.length + this.head.length + capacity * (this.count - 1);
+      ? this.head.length
+      : this.head.length + this.tail.length + (capacity - 1) * (this.count - 1);
   }
   public isEmpty(): boolean {
-    return this.tail.isEmpty();
+    return this.head.isEmpty();
   }
   public push(value: T): void {
-    if (this.tail.isFull()) {
-      this.tail = this.tail.next = new FixedQueue(Array(capacity));
+    const tail = this.tail;
+    if (tail.isFull()) {
+      tail.next.isEmpty()
+        ? this.tail = tail.next
+        : this.tail = tail.next = new FixedQueue(Array(capacity), tail.next);
       ++this.count;
     }
     this.tail.push(value);
@@ -25,7 +28,7 @@ export class Queue<T> {
   public pop(): T | undefined {
     const head = this.head;
     const value = head.pop();
-    if (head.isEmpty() && head.next) {
+    if (head.isEmpty() && !head.next.isEmpty()) {
       --this.count;
       this.head = head.next;
     }
@@ -51,11 +54,13 @@ export class Queue<T> {
 class FixedQueue<T> {
   constructor(
     private array: Array<T | undefined>,
-    public next: FixedQueue<T> | undefined = void 0,
+    next?: FixedQueue<T>,
   ) {
     assert((this.array.length & this.array.length - 1) === 0);
+    this.next = next ?? this;
   }
-  private mask = this.array.length - 1;
+  public next: FixedQueue<T>;
+  private readonly mask = this.array.length - 1;
   private head = 0;
   private tail = 0;
   public get length(): number {

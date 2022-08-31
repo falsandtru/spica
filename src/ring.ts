@@ -23,7 +23,7 @@ export class Ring<T> {
       if (-index > this.length) return;
       return this.tail + index >= 0
         ? array[this.tail + index]
-        : array[array.length - 1 + this.tail + index];
+        : array[array.length + this.tail + index];
     }
   }
   public replace(index: number, value: T, replacer?: (oldValue: T, newValue: T) => T): T {
@@ -36,7 +36,7 @@ export class Ring<T> {
       if (-index > this.length) throw new RangeError('Invalid index');
       index = this.tail + index >= 0
         ? this.tail + index
-        : array.length - 1 + this.tail + index;
+        : array.length + this.tail + index;
     }
     const val = array[index]!;
     array[index] = replacer

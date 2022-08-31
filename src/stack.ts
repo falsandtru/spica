@@ -9,15 +9,16 @@ export class Stack<T> {
   private count = 0;
   public get length(): number {
     return this.count === 0
-      ? this.tail.length
-      : this.tail.length + this.head.length + capacity * (this.count - 1);
+      ? this.head.length
+      : this.head.length + this.tail.length + capacity * (this.count - 1);
   }
   public isEmpty(): boolean {
-    return this.tail.isEmpty();
+    return this.head.isEmpty();
   }
   public push(value: T): void {
-    if (this.tail.isFull()) {
-      this.tail = new FixedStack<T>(Array(capacity), this.tail);
+    const tail = this.tail;
+    if (tail.isFull()) {
+      this.tail = tail.next ??= new FixedStack<T>(Array(capacity), tail);
       ++this.count;
     }
     this.tail.push(value);
@@ -51,12 +52,13 @@ export class Stack<T> {
 class FixedStack<T> {
   constructor(
     private array: Array<T | undefined>,
-    public prev: FixedStack<T> | undefined = void 0,
+    public prev?: FixedStack<T>,
   ) {
     assert((this.array.length & this.array.length - 1) === 0);
   }
-  private mask = this.array.length - 1;
+  private readonly mask = this.array.length - 1;
   private tail = 0;
+  public next?: FixedStack<T>;
   public get length(): number {
     return this.tail;
   }
@@ -64,7 +66,7 @@ class FixedStack<T> {
     return this.tail === 0;
   }
   public isFull(): boolean {
-    return this.tail + 1 === this.array.length;
+    return this.tail === this.array.length;
   }
   public push(value: T): void {
     this.array[this.tail++] = value;
