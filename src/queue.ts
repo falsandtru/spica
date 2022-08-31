@@ -16,14 +16,14 @@ export class Queue<T> {
   private index = 0;
   private head = 0;
   private tail = 0;
-  public length = 0;
+  public get length(): number {
+    return this.index + this.tail - this.head;
+  }
   public push(value: T): void {
     this.buffer[this.index++] = value;
-    ++this.length;
   }
   public pop(): T | undefined {
     if (this.length === 0) return;
-    --this.length;
     let { queue, buffer } = this;
     if (this.head === this.tail) {
       this.buffer = queue;
@@ -46,7 +46,7 @@ export class Queue<T> {
   public clear(): void {
     this.buffer = Array(size);
     this.queue = Array(size);
-    this.length = this.index = this.head = this.tail = 0;
+    this.index = this.head = this.tail = 0;
   }
   public at(index: number): T | undefined {
     // Inline the code for optimization.
@@ -92,7 +92,6 @@ export class Queue<T> {
   public delete(index: number): T {
     if (index === 0 && this.length !== 0) return this.pop()!;
     const { 0: array, 1: i } = this.target(index);
-    --this.length;
     array === this.buffer
       ? --this.index
       : --this.tail;

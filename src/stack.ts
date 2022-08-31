@@ -5,30 +5,33 @@ assert([size = 0]);
 
 export class Stack<T> {
   private array: (T | undefined)[] = Array(size);
-  public length = 0;
+  private index = 0;
+  public get length(): number {
+    return this.index;
+  }
   public push(value: T): void {
-    this.array[this.length++] = value;
+    this.array[this.index++] = value;
   }
   public pop(): T | undefined {
-    if (this.length === 0) return;
+    if (this.index === 0) return;
     const array = this.array;
-    const i = --this.length;
+    const i = --this.index;
     const value = array[i];
     array[i] = void 0;
     return value;
   }
   public peek(): T | undefined {
-    return this.array[(this.length || 1) - 1];
+    return this.array[(this.index || 1) - 1];
   }
   public isEmpty(): boolean {
-    return this.length === 0;
+    return this.index === 0;
   }
   public clear(): void {
     this.array = Array(size);
-    this.length = 0;
+    this.index = 0;
   }
   public toArray(): T[] {
-    return this.array.slice(0, this.length) as T[];
+    return this.array.slice(0, this.index) as T[];
   }
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
     while (!this.isEmpty()) {
