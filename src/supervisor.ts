@@ -7,7 +7,7 @@ import { Observation, Observer, Publisher } from './observer';
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future';
 import { noop } from './function';
-import { Queue } from './queue';
+import { Ring } from './ring';
 import { causeAsyncException } from './exception';
 
 export interface SupervisorOptions {
@@ -77,7 +77,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     assert(this.workers.size === 0);
     Object.freeze(this.workers);
     while (this.messages.length > 0) {
-      const [names, param, , , timer] = this.messages.pop()!;
+      const [names, param, , , timer] = this.messages.shift()!;
       const name: N | undefined = names[Symbol.iterator]().next().value;
       timer && clearTimeout(timer);
       this.$events?.loss.emit([name], [name, param]);
@@ -225,7 +225,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       0,
     ]);
     while (this.messages.length > (this.available ? this.settings.capacity : 0)) {
-      const [names, param, callback, , timer] = this.messages.pop()!;
+      const [names, param, callback, , timer] = this.messages.shift()!;
       timer && clearTimeout(timer);
       const name: N | undefined = names[Symbol.iterator]().next().value;
       this.$events?.loss.emit([name], [name, param]);
@@ -318,7 +318,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     this.settings.scheduler === global.requestAnimationFrame && setTimeout(p.bind, 1000);
   }
   // Bug: Karma and TypeScript
-  private readonly messages: Queue<[Iterable<N>, P, Supervisor.Callback<R>, number, ReturnType<typeof setTimeout> | 0]> = new Queue();
+  private readonly messages = new Ring<[Iterable<N>, P, Supervisor.Callback<R>, number, ReturnType<typeof setTimeout> | 0]>();
   private deliver(): void {
     if (!this.available) return;
     assert(!this.scheduled);
@@ -333,7 +333,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
         if (result = this.workers.get(name)?.call([param, expiry])) break;
       }
       if (!result && Date.now() < expiry) continue;
-      this.messages.delete(i);
+      this.messages.splice(i, 1);
       --i;
       --len;
       timer && clearTimeout(timer);

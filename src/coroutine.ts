@@ -338,7 +338,7 @@ class BroadcastChannel<T> {
     const core = this[internal];
     const { consumers } = core;
     core.isAlive = false;
-    while (consumers.length > 0) {
+    while (!consumers.isEmpty()) {
       consumers.pop()!.bind(BroadcastChannel.fail());
     }
     if (finalizer) {
@@ -348,7 +348,7 @@ class BroadcastChannel<T> {
   public put(msg: T): AtomicPromise<undefined> {
     if (!this.isAlive) return BroadcastChannel.fail();
     const { consumers } = this[internal];
-    while (consumers.length > 0) {
+    while (!consumers.isEmpty()) {
       consumers.pop()!.bind(msg);
     }
     return AtomicPromise.resolve();
@@ -357,13 +357,13 @@ class BroadcastChannel<T> {
     if (!this.isAlive) return BroadcastChannel.fail();
     const { consumers } = this[internal];
     consumers.push(new AtomicFuture());
-    return consumers.at(-1)!.then();
+    return consumers.peek(-1)!.then();
   }
 }
 namespace BroadcastChannel {
   export const fail = () => AtomicPromise.reject(new Error('Spica: Channel: Closed.'));
   export class Internal<T> {
     public isAlive: boolean = true;
-    public readonly consumers: Queue<AtomicFuture<T>> = new Queue();
+    public readonly consumers = new Queue<AtomicFuture<T>>();
   }
 }

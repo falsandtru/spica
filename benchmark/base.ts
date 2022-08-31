@@ -67,19 +67,19 @@ describe('Benchmark:', function () {
       it(`Ring  index ${length.toLocaleString('en')}`, function (done) {
         const data = new Ring();
         for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Ring  index ${length.toLocaleString('en')}`, () => data.at(length - 1), done);
+        benchmark(`Ring  index ${length.toLocaleString('en')}`, () => data.at(-1), done);
       });
 
       it(`Stack index ${length.toLocaleString('en')}`, function (done) {
         const data = new Stack();
         for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Stack index ${length.toLocaleString('en')}`, () => data.at(length - 1), done);
+        benchmark(`Stack index ${length.toLocaleString('en')}`, () => data.peek(-1), done);
       });
 
       it(`Queue index ${length.toLocaleString('en')}`, function (done) {
         const data = new Queue();
         for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Queue index ${length.toLocaleString('en')}`, () => data.at(length - 1), done);
+        benchmark(`Queue index ${length.toLocaleString('en')}`, () => data.peek(-1), done);
       });
     }
 
@@ -93,19 +93,7 @@ describe('Benchmark:', function () {
       it(`Ring  set ${length.toLocaleString('en')}`, function (done) {
         const data = new Ring();
         for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Ring  set ${length.toLocaleString('en')}`, () => data.replace(length - 1, 0), done);
-      });
-
-      it(`Stack set ${length.toLocaleString('en')}`, function (done) {
-        const data = new Stack();
-        for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Stack set ${length.toLocaleString('en')}`, () => data.replace(length - 1, 0), done);
-      });
-
-      it(`Queue set ${length.toLocaleString('en')}`, function (done) {
-        const data = new Queue();
-        for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Queue set ${length.toLocaleString('en')}`, () => data.replace(length - 1, 0), done);
+        benchmark(`Ring  set ${length.toLocaleString('en')}`, () => data.replace(-1, 0), done);
       });
     }
   });

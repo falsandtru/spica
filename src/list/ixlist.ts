@@ -99,7 +99,7 @@ export class List<K, V = undefined> {
     //assert(this.length === 0 ? !head : head);
     if (!head) {
       assert(this.length === 0);
-      const index = this.HEAD = this.CURSOR = this.heap.length === 0
+      const index = this.HEAD = this.CURSOR = this.heap.isEmpty()
         ? this.length
         : this.heap.pop()!;
       assert(!nodes[index]);
@@ -119,7 +119,7 @@ export class List<K, V = undefined> {
     //assert(head);
     if (this.length !== this.capacity) {
       assert(this.length < this.capacity);
-      const index = this.HEAD = this.CURSOR = this.heap.length === 0
+      const index = this.HEAD = this.CURSOR = this.heap.isEmpty()
         ? this.length
         : this.heap.pop()!;
       //assert(!nodes[index]);
@@ -141,7 +141,7 @@ export class List<K, V = undefined> {
     }
     else {
       assert(this.length === this.capacity);
-      assert(this.heap.length === 0);
+      assert(this.heap.isEmpty());
       const node = nodes[head.prev]!;
       const index = this.HEAD = this.CURSOR = node.index;
       //assert(nodes[index]);

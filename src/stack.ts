@@ -1,75 +1,83 @@
 import { Array } from './global';
-import { splice } from './array';
 
-let size = 16;
-assert([size = 0]);
+const capacity = 2048;
+const initcap = 16;
 
 export class Stack<T> {
-  private array: (T | undefined)[] = Array(size);
-  private index = 0;
+  private head = new FixedStack<T>(Array(initcap));
+  private tail = this.head;
+  private count = 0;
   public get length(): number {
-    return this.index;
-  }
-  public push(value: T): void {
-    this.array[this.index++] = value;
-  }
-  public pop(): T | undefined {
-    if (this.index === 0) return;
-    const array = this.array;
-    const i = --this.index;
-    const value = array[i];
-    array[i] = void 0;
-    return value;
-  }
-  public peek(): T | undefined {
-    return this.array[(this.index || 1) - 1];
+    return this.count === 0
+      ? this.tail.length
+      : this.tail.length + this.head.length + capacity * (this.count - 1);
   }
   public isEmpty(): boolean {
-    return this.index === 0;
+    return this.tail.isEmpty();
+  }
+  public push(value: T): void {
+    if (this.tail.isFull()) {
+      this.tail = new FixedStack<T>(Array(capacity), this.tail);
+      ++this.count;
+    }
+    this.tail.push(value);
+  }
+  public pop(): T | undefined {
+    const tail = this.tail;
+    const value = tail.pop();
+    if (tail.isEmpty() && tail.prev) {
+      --this.count;
+      this.tail = tail.prev;
+    }
+    return value;
+  }
+  public peek(index: 0 | -1 = 0): T | undefined {
+    return index === 0
+      ? this.tail.peek(0)
+      : this.head.peek(-1);
   }
   public clear(): void {
-    this.array = Array(size);
-    this.index = 0;
-  }
-  public at(index: number): T | undefined {
-    if (-index > this.length) return;
-    return index >= 0
-      ? this.array[index]
-      : this.array[this.index + index];
-  }
-  private absolute(index: number): number {
-    if (index >= 0) {
-      if (index >= this.length) throw new RangeError('Invalid index');
-      return index;
-    }
-    else {
-      if (-index > this.length) throw new RangeError('Invalid index');
-      return this.index + index;
-    }
-  }
-  public replace(index: number, value: T, replacer?: (oldValue: T, newValue: T) => T): T {
-    index = this.absolute(index);
-    const array = this.array;
-    const val = array[index]!;
-    array[index] = replacer
-      ? replacer(val, value)
-      : value;
-    return val;
-  }
-  public delete(index: number): T {
-    index = this.absolute(index);
-    if (index === 0 && this.length !== 0) return this.pop()!;
-    const array = this.array;
-    --this.index
-    return splice(array, index, 1)[0]!;
-  }
-  public toArray(): T[] {
-    return this.array.slice(0, this.index) as T[];
+    this.head = this.tail = new FixedStack(Array(initcap));
+    this.count = 0;
   }
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
     while (!this.isEmpty()) {
       yield this.pop()!;
     }
     return;
+  }
+}
+
+class FixedStack<T> {
+  constructor(
+    private array: Array<T | undefined>,
+    public prev: FixedStack<T> | undefined = void 0,
+  ) {
+    assert((this.array.length & this.array.length - 1) === 0);
+  }
+  private mask = this.array.length - 1;
+  private tail = 0;
+  public get length(): number {
+    return this.tail;
+  }
+  public isEmpty(): boolean {
+    return this.tail === 0;
+  }
+  public isFull(): boolean {
+    return this.tail + 1 === this.array.length;
+  }
+  public push(value: T): void {
+    this.array[this.tail++] = value;
+  }
+  public pop(): T | undefined {
+    if (this.isEmpty()) return;
+    const value = this.array[--this.tail];
+    this.array[this.tail] = void 0;
+    return value;
+  }
+  public peek(index: 0 | -1 = 0): T | undefined {
+    return index === 0
+      ? this.array[this.tail - 1 & this.mask]
+      : this.array[0];
   }
 }
