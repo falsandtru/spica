@@ -2,7 +2,11 @@ import { setTimeout } from './global';
 import { now } from './clock';
 import { causeAsyncException } from './exception';
 
-export function throttle<T, C = unknown>(interval: number, callback: (this: C, last: T, buffer: T[]) => Promise<unknown> | unknown, capacity: number = 1): (this: C, arg: T) => void {
+export function throttle<T, C = unknown>(
+  interval: number,
+  callback: (this: C, last: T, buffer: T[]) => Promise<unknown> | unknown,
+  capacity: number = 1,
+): (this: C, arg: T) => void {
   // Bug: Karma and TypeScript
   let timer: ReturnType<typeof setTimeout> | 0 = 0;
   let buffer: T[] = [];
@@ -33,7 +37,11 @@ export function throttle<T, C = unknown>(interval: number, callback: (this: C, l
   };
 }
 
-export function debounce<T, C = unknown>(delay: number, callback: (this: C, last: T, buffer: T[]) => Promise<unknown> | unknown, capacity: number = 1): (this: C, arg: T) => void {
+export function debounce<T, C = unknown>(
+  delay: number,
+  callback: (this: C, last: T, buffer: T[]) => Promise<unknown> | unknown,
+  capacity: number = 1,
+): (this: C, arg: T) => void {
   // Bug: Karma and TypeScript
   let timer: ReturnType<typeof setTimeout> | 0 = 0;
   let buffer: T[] = [];

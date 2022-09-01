@@ -60,21 +60,21 @@ describe('Unit: lib/throttle', () => {
     it('', async () => {
       const since = Date.now();
       for await (const count of cothrottle(async function* (count = 0) {
-        await wait(50);
+        await wait(100);
         yield ++count;
-      }, 100, () => wait(100))()) {
+      }, 200, () => wait(150))()) {
         switch (count) {
           case 1:
-            assert(Date.now() - since >= 50);
-            continue;
-          case 2:
             assert(Date.now() - since >= 100);
             continue;
-          case 3:
+          case 2:
             assert(Date.now() - since >= 200);
             continue;
+          case 3:
+            assert(Date.now() - since >= 450);
+            continue;
           case 4:
-            assert(Date.now() - since >= 250);
+            assert(Date.now() - since >= 550);
             return;
         }
       }
