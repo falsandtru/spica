@@ -19,11 +19,18 @@ export class Queue<T> {
   public push(value: T): void {
     const tail = this.tail;
     if (tail.isFull()) {
-      tail.next.isEmpty()
-        ? this.tail = tail.next.next.isEmpty()
-          ? tail.next.next
-          : tail.next
-        : this.tail = tail.next = new FixedQueue(size, tail.next);
+      if (tail.next.isEmpty()) {
+        if(tail.next.next.isEmpty()) {
+          const next = tail.next;
+          tail.next = next.next;
+          // @ts-expect-error
+          next.next = void 0;
+        }
+        this.tail = tail.next;
+      }
+      else {
+        this.tail = tail.next = new FixedQueue(size, tail.next);
+      }
       ++this.count;
       if (tail.size !== size && tail !== this.head) {
         this.irregular = tail.size;
