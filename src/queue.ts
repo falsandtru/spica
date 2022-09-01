@@ -1,16 +1,17 @@
 import { Array } from './global';
 
-const capacity = 2048;
-const initcap = 16;
+const size = 2048;
+const initsize = 16;
 
 export class Queue<T> {
-  private head = new FixedQueue<T>(Array(initcap));
+  private head = new FixedQueue<T>(initsize);
   private tail = this.head;
   private count = 0;
+  private irregular = 0;
   public get length(): number {
     return this.count === 0
       ? this.head.length
-      : this.head.length + this.tail.length + (capacity - 1) * (this.count - 1);
+      : this.head.length + this.tail.length + (size - 1) * (this.count - 2) + (this.irregular || size) - 1;
   }
   public isEmpty(): boolean {
     return this.head.isEmpty();
@@ -20,8 +21,11 @@ export class Queue<T> {
     if (tail.isFull()) {
       tail.next.isEmpty()
         ? this.tail = tail.next
-        : this.tail = tail.next = new FixedQueue(Array(capacity), tail.next);
+        : this.tail = tail.next = new FixedQueue(size, tail.next);
       ++this.count;
+      if (tail.size !== size && tail !== this.head) {
+        this.irregular = tail.size;
+      }
     }
     this.tail.push(value);
   }
@@ -31,6 +35,9 @@ export class Queue<T> {
     if (head.isEmpty() && !head.next.isEmpty()) {
       --this.count;
       this.head = head.next;
+      if (this.head.size === this.irregular) {
+        this.irregular = 0;
+      }
     }
     return value;
   }
@@ -40,7 +47,7 @@ export class Queue<T> {
       : this.tail.peek(-1);
   }
   public clear(): void {
-    this.head = this.tail = new FixedQueue(Array(initcap));
+    this.head = this.tail = new FixedQueue(initsize);
     this.count = 0;
   }
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
@@ -53,16 +60,17 @@ export class Queue<T> {
 
 class FixedQueue<T> {
   constructor(
-    private array: Array<T | undefined>,
+    public readonly size: number,
     next?: FixedQueue<T>,
   ) {
     assert((this.array.length & this.array.length - 1) === 0);
     this.next = next ?? this;
   }
-  public next: FixedQueue<T>;
+  private readonly array = Array<T | undefined>(this.size);
   private readonly mask = this.array.length - 1;
   private head = 0;
   private tail = 0;
+  public next: FixedQueue<T>;
   public get length(): number {
     return this.tail >= this.head
       ? this.tail - this.head
