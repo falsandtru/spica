@@ -89,18 +89,20 @@ export function duffEach<T>(array: ArrayLike<T>, proc: (value: T, index: number,
 export function duffReduce<T, U>(array: ArrayLike<T>, proc: (prev: U, value: T, index: number, array: ArrayLike<T>) => U, initial: U): U {
   let count = array.length;
   let i = 0, m = count % 8, d = (count - m) / 8;
+  // Must not overwrite function parameters, for performance.
+  let acc = initial;
   while (m--) {
-    initial = proc(initial, array[i], i++, array);
+    acc = proc(acc, array[i], i++, array);
   }
   while (d--) {
-    initial = proc(initial, array[i], i++, array);
-    initial = proc(initial, array[i], i++, array);
-    initial = proc(initial, array[i], i++, array);
-    initial = proc(initial, array[i], i++, array);
-    initial = proc(initial, array[i], i++, array);
-    initial = proc(initial, array[i], i++, array);
-    initial = proc(initial, array[i], i++, array);
-    initial = proc(initial, array[i], i++, array);
+    acc = proc(acc, array[i], i++, array);
+    acc = proc(acc, array[i], i++, array);
+    acc = proc(acc, array[i], i++, array);
+    acc = proc(acc, array[i], i++, array);
+    acc = proc(acc, array[i], i++, array);
+    acc = proc(acc, array[i], i++, array);
+    acc = proc(acc, array[i], i++, array);
+    acc = proc(acc, array[i], i++, array);
   }
-  return initial;
+  return acc;
 }
