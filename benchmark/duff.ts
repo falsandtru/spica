@@ -20,6 +20,13 @@ describe('Benchmark:', function () {
         benchmark(`duffbk ${length.toLocaleString('en')}`, () => duffbk(1, i => i), done);
       });
 
+      it(`for array ${length.toLocaleString('en')}`, function (done) {
+        const as = Array(length).fill(0);
+        benchmark(`for array ${length.toLocaleString('en')}`, () => {
+          for (let i = 0; i < length; ++i) as[i];
+        }, done);
+      });
+
       it(`duffEach ${length.toLocaleString('en')}`, function (done) {
         const as = Array(length).fill(0);
         benchmark(`duffEach ${length.toLocaleString('en')}`, () => duffEach(as, v => v), done);
