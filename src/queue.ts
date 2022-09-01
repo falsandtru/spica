@@ -20,7 +20,9 @@ export class Queue<T> {
     const tail = this.tail;
     if (tail.isFull()) {
       tail.next.isEmpty()
-        ? this.tail = tail.next
+        ? this.tail = tail.next.next.isEmpty()
+          ? tail.next.next
+          : tail.next
         : this.tail = tail.next = new FixedQueue(size, tail.next);
       ++this.count;
       if (tail.size !== size && tail !== this.head) {
