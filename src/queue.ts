@@ -6,6 +6,7 @@ const initsize = 16;
 export class Queue<T> {
   private head = new FixedQueue<T>(initsize);
   private tail = this.head;
+  private buffer = this.head;
   private count = 0;
   private irregular = 0;
   public get length(): number {
@@ -19,17 +20,14 @@ export class Queue<T> {
   public push(value: T): void {
     const tail = this.tail;
     if (tail.isFull()) {
-      if (tail.next.isEmpty()) {
-        if(tail.next.next.isEmpty()) {
-          const next = tail.next;
-          tail.next = next.next;
-          // @ts-expect-error
-          next.next = void 0;
-        }
-        this.tail = tail.next;
+      const buffer = this.buffer;
+      if (buffer.isEmpty()) {
+        this.buffer = buffer.next ?? buffer;
+        buffer.next = void 0;
+        this.tail = tail.next = buffer;
       }
       else {
-        this.tail = tail.next = new FixedQueue(size, tail.next);
+        this.tail = tail.next = new FixedQueue(size);
       }
       ++this.count;
       if (tail.size !== size && tail !== this.head) {
@@ -41,7 +39,7 @@ export class Queue<T> {
   public pop(): T | undefined {
     const head = this.head;
     const value = head.pop();
-    if (head.isEmpty() && !head.next.isEmpty()) {
+    if (head.isEmpty() && head.next) {
       --this.count;
       this.head = head.next;
       if (this.head.size === this.irregular) {
@@ -70,16 +68,14 @@ export class Queue<T> {
 class FixedQueue<T> {
   constructor(
     public readonly size: number,
-    next?: FixedQueue<T>,
   ) {
     assert((this.array.length & this.array.length - 1) === 0);
-    this.next = next ?? this;
   }
   private readonly array = Array<T | undefined>(this.size);
   private readonly mask = this.array.length - 1;
   private head = 0;
   private tail = 0;
-  public next: FixedQueue<T>;
+  public next: FixedQueue<T> | undefined;
   public get length(): number {
     return this.tail >= this.head
       ? this.tail - this.head
