@@ -22,7 +22,8 @@ export class Queue<T> {
     if (tail.isFull()) {
       const buffer = this.buffer;
       if (buffer.isEmpty()) {
-        this.buffer = buffer.next ?? buffer;
+        assert(buffer.next);
+        this.buffer = buffer.next!;
         buffer.next = void 0;
         this.tail = tail.next = buffer;
       }
