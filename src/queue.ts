@@ -20,12 +20,6 @@ export class Queue<T> {
     const tail = this.tail;
     if (tail.isFull()) {
       if (tail.next.isEmpty()) {
-        if (tail.next.next.isEmpty()) {
-          const next = tail.next;
-          tail.next = next.next;
-          // @ts-expect-error
-          next.next = void 0;
-        }
         this.tail = tail.next;
       }
       else {
