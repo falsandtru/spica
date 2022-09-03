@@ -57,6 +57,7 @@ export class Queue<T> {
   public clear(): void {
     this.head = this.tail = new FixedQueue(initsize);
     this.count = 0;
+    this.irregular = 0;
   }
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
     while (!this.isEmpty()) {
