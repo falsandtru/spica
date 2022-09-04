@@ -6,6 +6,10 @@ const undefined = void 0;
 
 const LENGTH = Symbol('length');
 
+type NodeType<T> = Node<T>;
+export namespace List {
+  export type Node<T> = NodeType<T>;
+}
 export class List<T> {
   public [LENGTH] = 0;
   public get length(): number {
@@ -25,8 +29,14 @@ export class List<T> {
   public unshift(value: T): List.Node<T> {
     return this.head = this.push(value);
   }
+  public push(value: T): List.Node<T> {
+    return new Node(this, value, this.head!, this.head?.prev!);
+  }
   public unshiftNode(node: List.Node<T>): List.Node<T> {
     return this.head = this.pushNode(node);
+  }
+  public pushNode(node: List.Node<T>): List.Node<T> {
+    return this.insert(node, this.head);
   }
   public unshiftRotationally(value: T): List.Node<T> {
     const node = this.last;
@@ -35,15 +45,6 @@ export class List<T> {
     this.head = node;
     return node;
   }
-  public shift(): T | undefined {
-    return this.head?.delete();
-  }
-  public push(value: T): List.Node<T> {
-    return new Node(value, this.head!, this.head?.prev!, this);
-  }
-  public pushNode(node: List.Node<T>): List.Node<T> {
-    return this.insert(node, this.head);
-  }
   public pushRotationally(value: T): List.Node<T> {
     const node = this.head;
     if (!node) return this.push(value);
@@ -51,11 +52,14 @@ export class List<T> {
     this.head = node.next;
     return node;
   }
+  public shift(): T | undefined {
+    return this.head?.delete();
+  }
   public pop(): T | undefined {
     return this.last?.delete();
   }
   public insert(node: List.Node<T>, before: List.Node<T> | undefined = this.head): List.Node<T> {
-    if (node.list === this) return before && node.move(before), node;
+    if (node.list === this) return node.move(before), node;
     node.delete();
     ++this[LENGTH];
     this.head ??= node;
@@ -74,18 +78,13 @@ export class List<T> {
     }
   }
 }
-export namespace List {
-  export type Node<T> = NodeType<T>;
-}
-
-type NodeType<T> = Node<T>;
 
 class Node<T> {
   constructor(
+    public readonly list: List<T>,
     public value: T,
     public next: Node<T>,
     public prev: Node<T>,
-    public readonly list: List<T> = next?.list ?? new List(),
   ) {
     ++list[LENGTH];
     list.head ??= this;
@@ -96,16 +95,17 @@ class Node<T> {
   public delete(): T {
     if (!this.list) return this.value;
     --this.list[LENGTH];
+    const { next, prev } = this;
     if (this.list.head === this) {
-      this.list.head = this.next === this
+      this.list.head = next === this
         ? undefined
-        : this.next;
+        : next;
     }
-    if (this.next) {
-      this.next.prev = this.prev;
+    if (next) {
+      next.prev = prev;
     }
-    if (this.prev) {
-      this.prev.next = this.next;
+    if (prev) {
+      prev.next = next;
     }
     // @ts-expect-error
     this.list = undefined;
@@ -114,10 +114,10 @@ class Node<T> {
     return this.value;
   }
   public insertBefore(value: T): Node<T> {
-    return new Node(value, this, this.prev, this.list);
+    return new Node(this.list, value, this, this.prev);
   }
   public insertAfter(value: T): Node<T> {
-    return new Node(value, this.next, this, this.list);
+    return new Node(this.list, value, this.next, this);
   }
   public move(before: Node<T> | undefined): boolean {
     if (!before) return false;
