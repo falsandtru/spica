@@ -2,8 +2,6 @@ import { benchmark } from './benchmark';
 import { ObjectGetPrototypeOf, hasOwnProperty } from '../src/alias';
 
 describe('Benchmark:', function () {
-  this.timeout(10 * 1e3);
-
   describe('ObjectGetPrototypeOf', function () {
     it('', function (done) {
       const obj = {};

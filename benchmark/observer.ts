@@ -2,8 +2,6 @@ import { benchmark } from './benchmark';
 import { Observation } from '../src/observer';
 
 describe('Benchmark:', function () {
-  this.timeout(10 * 1e3);
-
   function noop(): unknown {
     return;
   }

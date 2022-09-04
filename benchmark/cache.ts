@@ -4,8 +4,6 @@ import LRUCache from 'lru-cache';
 import { Math } from '../src/global';
 
 describe('Benchmark:', function () {
-  this.timeout(20 * 1e3);
-
   describe('Cache', function () {
     it('LRU new', function (done) {
       benchmark('LRUCache new', () => new LRUCache({ max: 1000 }), done);

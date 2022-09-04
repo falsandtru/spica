@@ -2,11 +2,7 @@ import { benchmark } from './benchmark';
 import { Sequence } from '../src/sequence';
 
 describe('Benchmark:', function () {
-  this.timeout(10 * 1e3);
-
   describe('Sequence', function () {
-    this.timeout(100 * 1e3);
-
     function array(n: number) {
       return Array(n).fill(0).map((_, i) => i);
     }

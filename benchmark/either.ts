@@ -2,8 +2,6 @@ import { benchmark } from './benchmark';
 import { Either, Right } from '../src/either';
 
 describe('Benchmark:', function () {
-  this.timeout(10 * 1e3);
-
   describe('Either', function () {
     it('Right', function (done) {
       benchmark('Either Right', () => Right(0), done);

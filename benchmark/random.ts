@@ -3,8 +3,6 @@ import { rnd16, rnd62, rnd0f, rnd0Z, unique } from '../src/random';
 import { crypto } from '../src/global';
 
 describe('Benchmark:', function () {
-  this.timeout(10 * 1e3);
-
   describe('Uint8Array', function () {
     it('256', function (done) {
       const buf = new Uint8Array(256);

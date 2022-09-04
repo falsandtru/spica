@@ -3,8 +3,6 @@ import { memoize, reduce } from '../src/memoize';
 import { Cache } from '../src/cache';
 
 describe('Benchmark:', function () {
-  this.timeout(10 * 1e3);
-
   describe('memoize', function () {
     it('Map', function (done) {
       const f = memoize(a => a, new Map());

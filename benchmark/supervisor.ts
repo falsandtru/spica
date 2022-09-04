@@ -2,8 +2,6 @@ import { benchmark } from './benchmark';
 import { Supervisor } from '../src/supervisor';
 
 describe('Benchmark:', function () {
-  this.timeout(20 * 1e3);
-
   describe('Supervisor', function () {
     it('new', function (done) {
       class SV extends Supervisor<string, number> {

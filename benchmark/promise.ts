@@ -6,8 +6,6 @@ import { clock } from '../src/clock';
 import { noop } from '../src/function';
 
 describe('Benchmark:', function () {
-  this.timeout(10 * 1e3);
-
   Bluebird.config({
     longStackTraces: false,
   });

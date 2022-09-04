@@ -3,8 +3,6 @@ import { undefined, Map } from '../src/global';
 import { List as IxList } from '../src/ixlist';
 
 describe('Benchmark:', function () {
-  this.timeout(10 * 1e3);
-
   describe('Dict', function () {
     it('new', function (done) {
       benchmark('Map new', () => new Map(), done);

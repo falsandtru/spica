@@ -2,8 +2,6 @@ import { benchmark } from './benchmark';
 import { duff, duffbk, duffEach, duffReduce } from '../src/duff';
 
 describe('Benchmark:', function () {
-  this.timeout(10 * 1e3);
-
   describe('Duff', function () {
     for (const length of [1, 1e1, 1e2, 1e3, 1e4]) {
       it(`for ${length.toLocaleString('en')}`, function (done) {

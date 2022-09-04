@@ -1,8 +1,6 @@
 import { benchmark } from './benchmark';
 
 describe('Benchmark:', function () {
-  this.timeout(10 * 1e3);
-
   describe('unshift', function () {
     for (const length of [1, 1e1, 1e2, 1e3]) {
       it(`for-of ${length.toLocaleString('en')}`, function (done) {

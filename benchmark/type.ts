@@ -2,8 +2,6 @@ import { benchmark } from './benchmark';
 import { type } from '../src/type';
 
 describe('Benchmark:', function () {
-  this.timeout(10 * 1e3);
-
   describe('type', function () {
     it('undefined', function (done) {
       benchmark('type undefined', () => type(void 0), done);

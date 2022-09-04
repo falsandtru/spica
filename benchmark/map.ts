@@ -3,8 +3,6 @@ import { DataMap } from '../src/datamap';
 import { AttrMap } from '../src/attrmap';
 
 describe('Benchmark:', function () {
-  this.timeout(10 * 1e3);
-
   describe('DataMap', function () {
     it('get', function (done) {
       const map = new DataMap<string[], number>();

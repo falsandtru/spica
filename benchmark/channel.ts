@@ -2,8 +2,6 @@ import { benchmark } from './benchmark';
 import { Channel } from '../src/channel';
 
 describe('Benchmark:', function () {
-  this.timeout(10 * 1e3);
-
   describe('Channel', function () {
     it('new', function (done) {
       benchmark('Channel new', () => new Channel(), done);

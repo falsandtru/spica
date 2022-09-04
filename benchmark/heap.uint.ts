@@ -2,8 +2,6 @@ import { benchmark } from './benchmark';
 import { Heap } from '../src/heap.uint';
 
 describe('Benchmark:', function () {
-  this.timeout(10 * 1e3);
-
   describe('Heap uint', function () {
     it('Heap uint new', function (done) {
       benchmark('Heap uint new', () => new Heap(), done);

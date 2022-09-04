@@ -1,8 +1,6 @@
 import { benchmark } from './benchmark';
 
 describe('Benchmark:', function () {
-  this.timeout(10 * 1e3);
-
   describe('Generator', function () {
     function f(as: Iterable<any>) {
       for (const a of as) a;

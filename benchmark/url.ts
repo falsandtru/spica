@@ -2,7 +2,6 @@ import { benchmark } from './benchmark';
 import { ReadonlyURL, URL } from '../src/url';
 
 describe('Benchmark:', function () {
-  this.timeout(10 * 1e3);
   const { origin } = location;
 
   describe('URL', function () {

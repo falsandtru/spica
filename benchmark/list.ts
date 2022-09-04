@@ -4,8 +4,6 @@ import { List as IxList } from '../src/ixlist';
 import Yallist from 'yallist';
 
 describe('Benchmark:', function () {
-  this.timeout(10 * 1e3);
-
   describe('List', function () {
     it('Yallist new', function (done) {
       benchmark('Yallist new', () => Yallist.create(), done);

@@ -4,8 +4,6 @@ import { Stack } from '../src/stack';
 import { Queue } from '../src/queue';
 
 describe('Benchmark:', function () {
-  this.timeout(10 * 1e3);
-
   describe('base', function () {
     it('Ring  new', function (done) {
       benchmark('Ring  new', () => new Ring(), done);

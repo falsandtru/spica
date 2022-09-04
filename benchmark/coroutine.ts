@@ -3,7 +3,6 @@ import { Coroutine } from '../src/coroutine';
 import { AtomicPromise } from '../src/promise';
 
 describe('Benchmark:', function () {
-  this.timeout(30 * 1e3);
   afterEach(() => new AtomicPromise(requestAnimationFrame));
 
   describe('Asyncgenerator', function () {
@@ -22,12 +21,10 @@ describe('Benchmark:', function () {
     });
 
     it('run', function (done) {
-      this.timeout(90 * 1e3);
       benchmark('Coroutine run', done => void new Coroutine(async function* () { }, { capacity: 0, delay: false }).then(done), done, { defer: true, async: true });
     });
 
     it('ask', function (done) {
-      this.timeout(90 * 1e3);
       const port = new Coroutine(async function* () {
         while (true) yield;
       }, { capacity: 0, delay: false })[Coroutine.port];

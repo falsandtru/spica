@@ -2,8 +2,6 @@ import { benchmark } from './benchmark';
 import { Maybe, Just } from '../src/maybe';
 
 describe('Benchmark:', function () {
-  this.timeout(10 * 1e3);
-
   describe('Maybe', function () {
     it('Just', function (done) {
       benchmark('Maybe Just', () => Just(0), done);

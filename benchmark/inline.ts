@@ -1,8 +1,6 @@
 import { benchmark } from './benchmark';
 
 describe('Benchmark:', function () {
-  this.timeout(10 * 1e3);
-
   describe('Inline', function () {
     function inline(len: number) {
       return Function('arr', [
