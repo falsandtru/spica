@@ -92,7 +92,6 @@ interface Index<K, V> {
 
 export namespace Cache {
   export interface Options<K, V = undefined> {
-    readonly window?: number;
     readonly capacity?: number;
     readonly age?: number;
     readonly earlyExpiring?: boolean;
@@ -102,6 +101,7 @@ export namespace Cache {
       readonly clear?: boolean;
     };
     // Mainly for experiments.
+    readonly window?: number;
     readonly resolution?: number;
     readonly offset?: number;
     readonly block?: number;
@@ -134,7 +134,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.stats = new Stats(this.window, settings.resolution!, settings.offset!);
   }
   private readonly settings: Cache.Options<K, V> = {
-    window: 0,
     capacity: 0,
     age: Infinity,
     earlyExpiring: false,
@@ -142,6 +141,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       delete: true,
       clear: true,
     },
+    window: 0,
     resolution: 1,
     offset: 0,
     block: 20,
