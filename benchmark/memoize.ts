@@ -4,22 +4,25 @@ import { Cache } from '../src/cache';
 
 describe('Benchmark:', function () {
   describe('memoize', function () {
+    const size = 2 << 14;
+    const mask = size - 1;
+
     it('Map', function (done) {
       const f = memoize(a => a, new Map());
       let i = 0;
-      benchmark('memoize Map', () => f(i = ++i % 1000), done);
+      benchmark('memoize Map', () => f(i = ++i & mask), done);
     });
 
     it('Array', function (done) {
       const f = memoize(a => a, []);
       let i = 0;
-      benchmark('memoize Array', () => f(i = ++i % 1000), done);
+      benchmark('memoize Array', () => f(i = ++i & mask), done);
     });
 
     it('Cache', function (done) {
-      const f = memoize(a => a, new Cache(1000));
+      const f = memoize(a => a, new Cache(size));
       let i = 0;
-      benchmark('memoize Cache', () => f(i = ++i % 1000), done);
+      benchmark('memoize Cache', () => f(i = ++i & mask), done);
     });
   });
 
