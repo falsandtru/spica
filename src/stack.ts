@@ -1,35 +1,24 @@
-import { Array } from './global';
-
-const size = 16;
-
 export class Stack<T> {
-  private array = Array<T | undefined>(size);
-  private index = 0;
+  private array: T[] = [];
   public get length(): number {
-    return this.index;
+    return this.array.length;
   }
   public isEmpty(): boolean {
-    return this.index === 0;
+    return this.length === 0;
   }
   public push(value: T): void {
-    this.array[this.index++] = value;
+    this.array.push(value);
   }
   public pop(): T | undefined {
-    if (this.index === 0) return;
-    const array = this.array;
-    const i = --this.index;
-    const value = array[i];
-    array[i] = void 0;
-    return value;
+    return this.array.pop();
   }
   public peek(index: 0 | -1 = 0): T | undefined {
     return index === 0
-      ? this.array[(this.index || 1) - 1]
+      ? this.array[this.array.length - 1]
       : this.array[0];
   }
   public clear(): void {
-    this.array = Array(size);
-    this.index = 0;
+    this.array = [];
   }
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
     while (!this.isEmpty()) {
