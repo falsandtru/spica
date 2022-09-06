@@ -3,7 +3,7 @@ import { duff, duffbk, duffEach, duffReduce } from '../src/duff';
 
 describe('Benchmark:', function () {
   describe('Duff', function () {
-    for (const length of [1, 1e1, 1e2, 1e3, 1e4]) {
+    for (const length of [1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`for ${length.toLocaleString('en')}`, function (done) {
         benchmark(`for ${length.toLocaleString('en')}`, () => {
           for (let i = 0; i < length; ++i);
@@ -11,11 +11,11 @@ describe('Benchmark:', function () {
       });
 
       it(`duff ${length.toLocaleString('en')}`, function (done) {
-        benchmark(`duff ${length.toLocaleString('en')}`, () => duff(1, i => i), done);
+        benchmark(`duff ${length.toLocaleString('en')}`, () => duff(length, i => i), done);
       });
 
       it(`duffbk ${length.toLocaleString('en')}`, function (done) {
-        benchmark(`duffbk ${length.toLocaleString('en')}`, () => duffbk(1, i => i), done);
+        benchmark(`duffbk ${length.toLocaleString('en')}`, () => duffbk(length, i => i), done);
       });
 
       it(`for array ${length.toLocaleString('en')}`, function (done) {
