@@ -14,8 +14,9 @@ export namespace Heap {
   export type Node<T, O = T> = readonly unknown[] | { _: [T, O]; };
 }
 export class Heap<T, O = T> {
+  public static readonly cmp = <O>(a: O, b: O): number => a > b ? 1 : a < b ? -1 : 0;
   constructor(
-    private readonly cmp = (a: O, b: O): number => a > b ? 1 : a < b ? -1 : 0,
+    private readonly cmp: (a: O, b: O) => number = Heap.cmp,
     private readonly stable = false,
   ) {
   }

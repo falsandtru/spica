@@ -103,7 +103,7 @@ describe('Benchmark:', function () {
       });
     }
 
-    for (const length of [1e1, 1e2, 1e3, 1e4, 1e5]) {
+    for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`LRU simulation ${length.toLocaleString('en')} expire`, function (done) {
         const capacity = length;
         const cache = new LRUCache<number, number>({ max: capacity, ttl: 1, ttlAutopurge: true });
@@ -115,9 +115,7 @@ describe('Benchmark:', function () {
           cache.get(key) ?? cache.set(key, key);
         }, done);
       });
-    }
 
-    for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`DWC simulation ${length.toLocaleString('en')} expire`, function (done) {
         const capacity = length;
         const cache = new Cache<number, number>(capacity, { age: 1, earlyExpiring: true });
