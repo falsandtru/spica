@@ -1,5 +1,4 @@
 import { Array } from './global';
-import { floor } from './alias';
 import { List } from './invlist';
 import { memoize } from './memoize';
 
@@ -112,7 +111,7 @@ export class MultiHeap<T, O = T> {
     return this.$length === 0;
   }
   public peek(): T | undefined {
-    return this.heap.peek()?.[0].last!.value;
+    return this.heap.peek()?.[0].head!.value;
   }
   public insert(this: Heap<T, T>, value: T): MultiHeap.Node<T, O>;
   public insert(value: T, order: O): MultiHeap.Node<T, O>;
@@ -125,7 +124,7 @@ export class MultiHeap<T, O = T> {
     if (this.$length === 0) return;
     --this.$length;
     const { 0: list, 1: order } = this.heap.peek()!;
-    const value = list.pop();
+    const value = list.shift();
     if (list.length === 0) {
       this.heap.extract();
       this.dict.delete(order);
@@ -155,6 +154,7 @@ export class MultiHeap<T, O = T> {
   public clear(): void {
     this.heap.clear();
     this.dict.clear();
+    this.$length = 0;
   }
 }
 
@@ -177,7 +177,7 @@ function upHeapify<T, O>(
   const order = array[index - 1][0];
   let changed = false;
   while (index > 1) {
-    const parent = floor(index / 2);
+    const parent = index / 2 | 0;
     if (cmp(array[parent - 1][0], order) <= 0) break;
     swap(array, index - 1, parent - 1);
     index = parent;

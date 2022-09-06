@@ -141,14 +141,16 @@ export class PriorityQueue<T, O = T> {
     if (this.$length === 0) return;
     --this.$length;
     const { 0: queue, 1: order } = this.heap.peek()!;
+    const value = queue.pop();
     if (queue.isEmpty()) {
       this.heap.extract();
       this.dict.delete(order);
     }
-    return queue.pop();
+    return value;
   }
   public clear(): void {
     this.heap.clear();
     this.dict.clear();
+    this.$length = 0;
   }
 }
