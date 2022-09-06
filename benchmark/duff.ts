@@ -25,6 +25,11 @@ describe('Benchmark:', function () {
         }, done);
       });
 
+      it(`duff array ${length.toLocaleString('en')}`, function (done) {
+        const as = Array(length).fill(0);
+        benchmark(`duff array ${length.toLocaleString('en')}`, () => duff(as.length, i => as[i]), done);
+      });
+
       it(`duffEach ${length.toLocaleString('en')}`, function (done) {
         const as = Array(length).fill(0);
         benchmark(`duffEach ${length.toLocaleString('en')}`, () => duffEach(as, v => v), done);
