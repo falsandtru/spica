@@ -56,7 +56,7 @@ export namespace router {
       let inonsyms = 0;
       let len = pattern.length;
       let buffer = '';
-      BT: while (len) for (const token of pattern.match(/\\.?|[\[\](){}]|[^\\\[\](){}]+|$/g) ?? []) {
+      BT: while (len) for (const token of pattern.match(/\\.?|[\[\](){}]|[^\\\[\](){}]+|$/g)!) {
         switch (token) {
           case '':
             if (stack.length !== 0) {
@@ -116,7 +116,7 @@ export namespace router {
         '}': '{',
       } as const;
       let buffer = '';
-      for (const token of pattern.match(/\\.?|[,\[\](){}]|[^\\,\[\](){}]+|$/g) ?? []) {
+      for (const token of pattern.match(/\\.?|[,\[\](){}]|[^\\,\[\](){}]+|$/g)!) {
         switch (token) {
           case '':
             flush();
@@ -223,7 +223,7 @@ export namespace router {
         '}': '{',
       } as const;
       let buffer = '';
-      for (const token of pattern.match(/\\.?|[*?\[\](){}]|[^\\*?\[\](){}]+|$/g) ?? []) {
+      for (const token of pattern.match(/\\.?|[*?\[\](){}]|[^\\*?\[\](){}]+|$/g)!) {
         switch (token) {
           case '':
             flush();

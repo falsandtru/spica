@@ -73,8 +73,8 @@ function escape(str: string): string {
 function stringifyArray(arr: unknown[]): string {
   assert(Array.isArray(arr));
   let acc = '';
-  for (const k of arr) {
-    acc += `${stringify(k)},\n`;
+  for (let i = 0; i < arr.length; ++i) {
+    acc += `${stringify(arr[i])},\n`;
   }
   return `[\n${acc}]`;
 }
