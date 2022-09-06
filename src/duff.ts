@@ -40,14 +40,17 @@ export function duffbk(count: number, proc: (index: number) => unknown): void {
       if (proc(i++) === false) return;
     }
     while (d--) {
-      if (proc(i++) === false) return;
-      if (proc(i++) === false) return;
-      if (proc(i++) === false) return;
-      if (proc(i++) === false) return;
-      if (proc(i++) === false) return;
-      if (proc(i++) === false) return;
-      if (proc(i++) === false) return;
-      if (proc(i++) === false) return;
+      switch (false) {
+        case proc(i++):
+        case proc(i++):
+        case proc(i++):
+        case proc(i++):
+        case proc(i++):
+        case proc(i++):
+        case proc(i++):
+        case proc(i++):
+          return;
+      }
     }
   }
   else {
@@ -56,14 +59,17 @@ export function duffbk(count: number, proc: (index: number) => unknown): void {
       if (proc(--i) === false) return;
     }
     while (d--) {
-      if (proc(--i) === false) return;
-      if (proc(--i) === false) return;
-      if (proc(--i) === false) return;
-      if (proc(--i) === false) return;
-      if (proc(--i) === false) return;
-      if (proc(--i) === false) return;
-      if (proc(--i) === false) return;
-      if (proc(--i) === false) return;
+      switch (false) {
+        case proc(--i):
+        case proc(--i):
+        case proc(--i):
+        case proc(--i):
+        case proc(--i):
+        case proc(--i):
+        case proc(--i):
+        case proc(--i):
+          return;
+      }
     }
   }
 }
@@ -86,6 +92,8 @@ export function duffEach<T>(array: ArrayLike<T>, proc: (value: T, index: number,
   }
 }
 
+// ベンチマークの10,000以上で急激な速度低下が見られるがNodeListなどでの
+// 実際の使用では速度低下は見られない
 export function duffReduce<T, U>(array: ArrayLike<T>, proc: (prev: U, value: T, index: number, array: ArrayLike<T>) => U, initial: U): U {
   let count = array.length;
   let i = 0, m = count % 8, d = (count - m) / 8;
