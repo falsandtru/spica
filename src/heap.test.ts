@@ -7,7 +7,7 @@ describe('Unit: lib/heap', () => {
     }
 
     it('insert/extract', () => {
-      const heap = new Heap<number>((a, b) => b - a);
+      const heap = new Heap<number>();
 
       assert(heap.extract() === undefined);
 
@@ -65,7 +65,7 @@ describe('Unit: lib/heap', () => {
     });
 
     it('replace', () => {
-      const heap = new Heap<number>((a, b) => b - a);
+      const heap = new Heap<number>();
 
       assert(heap.replace(0, 0) === undefined);
       assert(heap.length === 1);
@@ -109,7 +109,7 @@ describe('Unit: lib/heap', () => {
     });
 
     it('stable', () => {
-      const heap = new Heap<number>((a, b) => b - a, true);
+      const heap = new Heap<number>(undefined, true);
 
       assert.deepStrictEqual(heap.insert(1, 1), [1, 1, 0]);
       assert.deepStrictEqual(inspect(heap), [

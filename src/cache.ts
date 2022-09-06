@@ -3,7 +3,7 @@ import { min, round, ceil } from './alias';
 import { now } from './clock';
 import { IterableDict } from './dict';
 import { List } from './invlist';
-import { Heap } from './heap';
+import { MultiHeap } from './heap';
 import { extend } from './assign';
 
 // Dual Window Cache
@@ -86,7 +86,7 @@ interface Index<K, V> {
   value: V;
   size: number;
   expiry: number;
-  enode?: Heap.Node<List.Node<Index<K, V>>>;
+  enode?: MultiHeap.Node<List.Node<Index<K, V>>, number>;
   region: 'LRU' | 'LFU';
 }
 
@@ -157,7 +157,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     LRU: new List<Index<K, V>>(),
     LFU: new List<Index<K, V>>(),
   } as const;
-  private readonly expiries = new Heap<List.Node<Index<K, V>>>((a, b) => Heap.cmp(a.value.expiry, b.value.expiry));
+  private readonly expiries = new MultiHeap<List.Node<Index<K, V>>, number>(MultiHeap.min);
   private readonly earlyExpiring: boolean;
   private readonly disposer?: (value: V, key: K) => void;
   public get length(): number {
@@ -263,8 +263,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       index.expiry = expiry;
       if (this.earlyExpiring && expiry !== Infinity) {
         index.enode
-          ? this.expiries.update(index.enode)
-          : index.enode = this.expiries.insert(node);
+          ? this.expiries.update(index.enode, expiry)
+          : index.enode = this.expiries.insert(node, expiry);
         assert(this.expiries.length <= this.length);
       }
       else if (index.enode) {
@@ -290,7 +290,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       region: 'LRU',
     }));
     if (this.earlyExpiring && expiry !== Infinity) {
-      LRU.head!.value.enode = this.expiries.insert(LRU.head!);
+      LRU.head!.value.enode = this.expiries.insert(LRU.head!, expiry);
       assert(this.expiries.length <= this.length);
     }
     return false;
