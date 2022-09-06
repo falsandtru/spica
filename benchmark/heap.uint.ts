@@ -10,9 +10,9 @@ describe('Benchmark:', function () {
     for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`Heap uint insert/extract ${length.toLocaleString('en')}`, function (done) {
         const heap = new Heap<number>();
-        for (let i = 0; i < length; ++i) heap.insert(i, 1);
+        for (let i = 0; i < length; ++i) heap.insert(1, i);
         let i = 0;
-        benchmark(`Heap uint insert/extract ${length.toLocaleString('en')}`, () => heap.extract() && heap.insert(i++ % length, 1), done);
+        benchmark(`Heap uint insert/extract ${length.toLocaleString('en')}`, () => heap.extract() && heap.insert(i = ++i % length, 1), done);
       });
     }
 

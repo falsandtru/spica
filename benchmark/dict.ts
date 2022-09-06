@@ -17,7 +17,7 @@ describe('Benchmark:', function () {
         const dict = new Map();
         let i = 0;
         benchmark(`Map set ${length.toLocaleString('en')}`, () => {
-          dict.set(++i % length, undefined);
+          dict.set(i = ++i % length, undefined);
         }, done);
       });
 
@@ -25,7 +25,7 @@ describe('Benchmark:', function () {
         const dict = new IxList(new Map());
         let i = 0;
         benchmark(`IxList set ${length.toLocaleString('en')}`, () => {
-          dict.put(++i % length, undefined);
+          dict.put(i = ++i % length, undefined);
         }, done);
       });
     }
@@ -35,7 +35,7 @@ describe('Benchmark:', function () {
         const dict = new Map();
         let i = 0;
         benchmark(`Map has/get ${length.toLocaleString('en')}`, () => {
-          dict.has(++i % length)
+          dict.has(i = ++i % length)
             ? dict.get(i % length)
             : dict.set(i % length, undefined);
         }, done);
@@ -45,7 +45,7 @@ describe('Benchmark:', function () {
         const dict = new IxList(new Map());
         let i = 0;
         benchmark(`IxList has/get ${length.toLocaleString('en')}`, () => {
-          dict.has(++i % length)
+          dict.has(i = ++i % length)
             ? dict.get(i % length)
             : dict.put(i % length, undefined);
         }, done);

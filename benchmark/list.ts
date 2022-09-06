@@ -68,7 +68,7 @@ describe('Benchmark:', function () {
         const list = new IxList(length, new Map());
         for (let i = 0; i < length; ++i) list.push(0);
         let i = 0;
-        benchmark(`IxList  put ${length.toLocaleString('en')}`, () => list.put(++i % length), done);
+        benchmark(`IxList  put ${length.toLocaleString('en')}`, () => list.put(i = ++i % length), done);
       });
     }
 
