@@ -8,7 +8,7 @@ describe('Benchmark:', function () {
       benchmark('Heap new', () => new Heap(), done);
     });
 
-    it('MultiHeap new', function (done) {
+    it.skip('MultiHeap new', function (done) {
       benchmark('MultiHeap new', () => new MultiHeap(), done);
     });
 
@@ -25,7 +25,7 @@ describe('Benchmark:', function () {
           heap.extract() && heap.insert(1, i = i++ % length), done);
       });
 
-      it(`MultiHeap insert/extract ${length.toLocaleString('en')}`, function (done) {
+      it.skip(`MultiHeap insert/extract ${length.toLocaleString('en')}`, function (done) {
         const heap = new MultiHeap<number>(MultiHeap.min);
         for (let i = 0; i < length; ++i) heap.insert(1, i);
         let i = 0;

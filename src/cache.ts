@@ -3,7 +3,7 @@ import { min, round, ceil } from './alias';
 import { now } from './clock';
 import { IterableDict } from './dict';
 import { List } from './invlist';
-import { MultiHeap } from './heap';
+import { Heap } from './heap';
 import { extend } from './assign';
 
 // Dual Window Cache
@@ -86,7 +86,7 @@ interface Index<K, V> {
   value: V;
   size: number;
   expiry: number;
-  enode?: MultiHeap.Node<List.Node<Index<K, V>>, number>;
+  enode?: Heap.Node<List.Node<Index<K, V>>, number>;
   region: 'LRU' | 'LFU';
 }
 
@@ -95,7 +95,6 @@ export namespace Cache {
     readonly capacity?: number;
     readonly age?: number;
     readonly earlyExpiring?: boolean;
-    readonly round?: number;
     readonly disposer?: (value: V, key: K) => void;
     readonly capture?: {
       readonly delete?: boolean;
@@ -131,7 +130,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.block = settings.block!;
     this.limit = settings.limit!;
     this.earlyExpiring = settings.earlyExpiring!;
-    this.round = this.earlyExpiring && settings.round || 0;
     this.disposer = settings.disposer!;
     this.stats = new Stats(this.window, settings.resolution!, settings.offset!);
   }
@@ -139,7 +137,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     capacity: 0,
     age: Infinity,
     earlyExpiring: false,
-    round: 100,
     capture: {
       delete: true,
       clear: true,
@@ -160,9 +157,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     LRU: new List<Index<K, V>>(),
     LFU: new List<Index<K, V>>(),
   } as const;
-  private readonly expiries = new MultiHeap<List.Node<Index<K, V>>, number>(MultiHeap.min);
+  private readonly expiries = new Heap<List.Node<Index<K, V>>, number>(Heap.min);
   private readonly earlyExpiring: boolean;
-  private readonly round: number;
   private readonly disposer?: (value: V, key: K) => void;
   public get length(): number {
     //assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
@@ -254,9 +250,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
 
     const expiry = age === Infinity
       ? Infinity
-      : this.round
-        ? ceil((now() + age) / this.round) * this.round
-        : now() + age;
+      : now() + age;
     const node = this.memory.get(key);
     if (node && this.ensure(size, node)) {
       assert(this.memory.has(key));

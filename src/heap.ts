@@ -85,6 +85,7 @@ export class Heap<T, O = T> {
 
 type MultiNode<T, O> = readonly [order: O, node: List.Node<T>, node: Heap.Node<readonly [List<T>, O], O>];
 
+// 1e6要素で落ちるため実用不可
 export namespace MultiHeap {
   export type Node<T, O = T> = Heap.Node<T, O>;
 }
