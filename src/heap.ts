@@ -4,8 +4,6 @@ import { memoize } from './memoize';
 
 // Max heap
 
-const undefined = void 0;
-
 type Node<T, O> = [order: O, value: T, index: number];
 
 let size = 16;
@@ -28,7 +26,7 @@ export class Heap<T, O = T> {
     return this.$length;
   }
   public isEmpty(): boolean {
-    return this.$length === 0;
+    return this.array[0] !== void 0;
   }
   public peek(): T | undefined {
     return this.array[0]?.[1];
@@ -64,7 +62,7 @@ export class Heap<T, O = T> {
     if (array[index] !== node) throw new Error('Invalid node');
     swap(array, index, --this.$length);
     // @ts-expect-error
-    array[this.$length] = undefined;
+    array[this.$length] = void 0;
     index < this.$length && sort(this.cmp, array, index, this.$length, this.stable);
     return node[1];
   }
@@ -108,7 +106,7 @@ export class MultiHeap<T, O = T> {
     return this.$length;
   }
   public isEmpty(): boolean {
-    return this.$length === 0;
+    return this.heap.isEmpty();
   }
   public peek(): T | undefined {
     return this.heap.peek()?.[0].head!.value;

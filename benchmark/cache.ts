@@ -104,6 +104,9 @@ describe('Benchmark:', function () {
     }
 
     for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
+      // このベンチマークは同期処理であるため同一の期限をまとめられているが
+      // 実際はほぼすべて分散しNodeJSなど期限をオブジェクトプロパティのソート機能で
+      // 管理する実装は極めて低速となり使い物にならない。
       it(`LRU simulation ${length.toLocaleString('en')} expire`, function (done) {
         const capacity = length;
         const cache = new LRUCache<number, number>({ max: capacity, ttl: 1, ttlAutopurge: true });
