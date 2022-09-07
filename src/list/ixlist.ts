@@ -167,12 +167,10 @@ export class List<K, V = undefined> {
     node.value = value;
     return node.index;
   }
-  public find(key: K, index = this.CURSOR): InternalNode<K, V> | undefined {
-    let node: InternalNode<K, V> | undefined;
-    node = this.node(index);
+  public find(key: K, index = this.CURSOR): List.Node<K, V> | undefined {
+    let node = this.node(index);
     if (node && equal(node.key, key)) return this.CURSOR = index, node;
     if (!this.index) throw new Error(`Spica: IxList: Need the index but not given.`);
-    if (node ? this.length === 1 : this.length === 0) return;
     node = this.node(index = this.index.get(key) ?? -1);
     assert(!node || equal(node.key, key));
     if (node) return this.CURSOR = index, node;

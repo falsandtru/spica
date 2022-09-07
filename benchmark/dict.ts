@@ -13,6 +13,26 @@ describe('Benchmark:', function () {
     });
 
     for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
+      it(`Map get ${length.toLocaleString('en')}`, function (done) {
+        const dict = new Map();
+        for (let i = 0; i < length; ++i) dict.set(i, undefined);
+        let i = 0;
+        benchmark(`Map get ${length.toLocaleString('en')}`, () => {
+          dict.get(i = ++i % length);
+        }, done);
+      });
+
+      it(`IxList get ${length.toLocaleString('en')}`, function (done) {
+        const dict = new IxList(new Map());
+        for (let i = 0; i < length; ++i) dict.add(i, undefined);
+        let i = 0;
+        benchmark(`IxList get ${length.toLocaleString('en')}`, () => {
+          dict.find(i = ++i % length);
+        }, done);
+      });
+    }
+
+    for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`Map set ${length.toLocaleString('en')}`, function (done) {
         const dict = new Map();
         let i = 0;
@@ -26,6 +46,26 @@ describe('Benchmark:', function () {
         let i = 0;
         benchmark(`IxList set ${length.toLocaleString('en')}`, () => {
           dict.put(i = ++i % length, undefined);
+        }, done);
+      });
+    }
+
+    for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
+      it(`Map get/set ${length.toLocaleString('en')}`, function (done) {
+        const dict = new Map();
+        let i = 0;
+        benchmark(`Map get/set ${length.toLocaleString('en')}`, () => {
+          dict.get(i = ++i % length);
+          dict.set(i, undefined);
+        }, done);
+      });
+
+      it(`IxList get/set ${length.toLocaleString('en')}`, function (done) {
+        const dict = new IxList(new Map());
+        let i = 0;
+        benchmark(`IxList get/set ${length.toLocaleString('en')}`, () => {
+          dict.get(i = ++i % length);
+          dict.put(i, undefined);
         }, done);
       });
     }
