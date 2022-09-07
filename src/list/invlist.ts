@@ -59,7 +59,7 @@ export class List<T> {
     return this.last?.delete();
   }
   public insert(node: List.Node<T>, before: List.Node<T> | undefined = this.head): List.Node<T> {
-    if (node.list === this) return node.move(before), node;
+    if (node.list === this) return node.moveTo(before), node;
     node.delete();
     ++this[LENGTH];
     this.head ??= node;
@@ -119,13 +119,12 @@ class Node<T> {
   public insertAfter(value: T): Node<T> {
     return new Node(this.list, value, this.next, this);
   }
-  public move(before: Node<T> | undefined): boolean {
+  public moveTo(before: Node<T> | undefined): boolean {
     if (!before) return false;
     if (this === before) return false;
     if (before.list !== this.list) return before.list.insert(this, before), true;
     const a1 = this;
     const b1 = before;
-    if (!b1) return false;
     if (a1.next === b1) return false;
     const b0 = b1.prev;
     const a0 = a1.prev;
@@ -139,11 +138,11 @@ class Node<T> {
     return true;
   }
   public moveToHead(): void {
-    this.move(this.list.head);
+    this.moveTo(this.list.head);
     this.list.head = this;
   }
   public moveToLast(): void {
-    this.move(this.list.head);
+    this.moveTo(this.list.head);
   }
   public swap(node: Node<T>): boolean {
     const node1 = this;
@@ -151,8 +150,8 @@ class Node<T> {
     if (node1 === node2) return false;
     const node3 = node2.next;
     if (node1.list !== node2.list) throw new Error(`Spica: InvList: Cannot swap nodes across lists.`);
-    node2.move(node1);
-    node1.move(node3);
+    node2.moveTo(node1);
+    node1.moveTo(node3);
     switch (this.list.head) {
       case node1:
         this.list.head = node2;
