@@ -12,7 +12,8 @@ describe('Benchmark:', function () {
         const heap = new Heap<number>(Heap.min);
         for (let i = 0; i < length; ++i) heap.insert(1, i);
         let i = 0;
-        benchmark(`Heap insert/extract ${length.toLocaleString('en')}`, () => heap.extract() && heap.insert(1, i++ % length), done);
+        benchmark(`Heap insert/extract ${length.toLocaleString('en')}`, () =>
+          heap.extract() && heap.insert(1, i++ % length), done);
       });
     }
 

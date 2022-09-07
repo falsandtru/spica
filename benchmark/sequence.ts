@@ -3,94 +3,60 @@ import { Sequence } from '../src/sequence';
 
 describe('Benchmark:', function () {
   describe('Sequence', function () {
-    function array(n: number) {
-      return Array(n).fill(0).map((_, i) => i);
+    for (const length of [1, 1e1, 1e2, 1e3]) {
+      it(`Sequence take arr  ${length.toLocaleString('en')}`, function (done) {
+        const arr = Array(length).fill(0);
+        benchmark(`Sequence take arr  ${length.toLocaleString('en')}`, () =>
+          arr.slice(0, length), done);
+      });
+
+      it(`Sequence take iter ${length.toLocaleString('en')}`, function (done) {
+        const seq = Sequence.from(Array(length));
+        benchmark(`Sequence take iter ${length.toLocaleString('en')}`, () =>
+          seq.extract(), done);
+      });
+
+      it(`Sequence take seq  ${length.toLocaleString('en')}`, function (done) {
+        const seq = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1)).take(length);
+        benchmark(`Sequence take seq  ${length.toLocaleString('en')}`, () =>
+          seq.extract(), done);
+      });
+
+      it(`Sequence take mem  ${length.toLocaleString('en')}`, function (done) {
+        const seq = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1)).take(length).memoize();
+        seq.extract();
+        benchmark(`Sequence take mem  ${length.toLocaleString('en')}`, () =>
+          seq.extract(), done);
+      });
     }
 
-    function take(n: number) {
-      return Promise.resolve()
-        .then(() => new Promise(resolve => arrTake(n, resolve)))
-        .then(() => new Promise(resolve => iterTake(n, resolve)))
-        .then(() => new Promise(resolve => seqTake(n, resolve)))
-        .then(() => new Promise(resolve => memTake(n, resolve)));
-
-      function arrTake(n: number, done: (_: unknown) => void) {
-        const arr = array(n);
-        benchmark(`Sequence take arr  ${n}`, () => arr.slice(0, n), done);
-      }
-      function iterTake(n: number, done: (_: unknown) => void) {
-        const seq = Sequence.from(array(n));
-        benchmark(`Sequence take iter ${n}`, (_: unknown) => seq.extract(), done);
-      }
-      function seqTake(n: number, done: (_: unknown) => void) {
-        const seq = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1)).take(n);
-        benchmark(`Sequence take seq  ${n}`, () => seq.extract(), done);
-      }
-      function memTake(n: number, done: (_: unknown) => void) {
-        const seq = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1)).take(n).memoize();
-        benchmark(`Sequence take mem  ${n}`, () => seq.extract(), done);
-      }
-    }
-
-    it('take 1', function (done) {
-      take(1).then(() => done());
-    });
-
-    it('take 10', function (done) {
-      take(10).then(() => done());
-    });
-
-    it('take 100', function (done) {
-      take(100).then(() => done());
-    });
-
-    it.skip('take 1000', function (done) {
-      take(1000).then(() => done());
-    });
-
-    function mapfilter(n: number) {
-      return Promise.resolve()
-        .then(() => new Promise(resolve => arrMapFilter(n, resolve)))
-        .then(() => new Promise(resolve => iterMapFilter(n, resolve)))
-        .then(() => new Promise(resolve => seqMapFilter(n, resolve)));
-
-      function arrMapFilter(n: number, done: (_: unknown) => void) {
-        const arr = array(n);
+    for (const length of [1, 1e1, 1e2, 1e3]) {
+      it(`Sequence map filter arr  ${length.toLocaleString('en')}`, function (done) {
+        const arr = Array(length).fill(0);
         const f = <T>(n: T) => n;
         const g = () => true;
-        benchmark(`Sequence map filter arr  ${n}`, () => arr.map(f).filter(g).slice(0, n), done);
-      }
-      function iterMapFilter(n: number, done: (_: unknown) => void) {
-        const seq = Sequence.from(array(n))
+        benchmark(`Sequence map filter arr  ${length.toLocaleString('en')}`, () =>
+          arr.slice(0, length).map(f).filter(g), done);
+      });
+
+      it(`Sequence map filter iter ${length.toLocaleString('en')}`, function (done) {
+        const seq = Sequence.from(Array(length))
           .map(n => n)
           .filter(() => true)
-          .take(n);
-        benchmark(`Sequence map filter iter ${n}`, () => seq.extract(), done);
-      }
-      function seqMapFilter(n: number, done: (_: unknown) => void) {
+          .take(length);
+        benchmark(`Sequence map filter iter ${length.toLocaleString('en')}`, () =>
+          seq.extract(), done);
+      });
+
+      it(`Sequence map filter seq  ${length.toLocaleString('en')}`, function (done) {
         const seq = new Sequence<number, number>((n = 0, cons) => cons(n, n + 1))
           .map(n => n)
           .filter(() => true)
-          .take(n);
-        benchmark(`Sequence map filter seq  ${n}`, () => seq.extract(), done);
-      }
+          .take(length);
+        benchmark(`Sequence map filter seq  ${length.toLocaleString('en')}`, () =>
+          seq.extract(), done);
+      });
     }
-
-    it('map filter 1', function (done) {
-      mapfilter(1).then(() => done());
-    });
-
-    it('map filter 10', function (done) {
-      mapfilter(10).then(() => done());
-    });
-
-    it('map filter 100', function (done) {
-      mapfilter(100).then(() => done());
-    });
-
-    it.skip('map filter 1000', function (done) {
-      mapfilter(1000).then(() => done());
-    });
 
   });
 
