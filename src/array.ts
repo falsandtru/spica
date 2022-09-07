@@ -12,7 +12,7 @@ export function unshift<a>(as: Iterable<a> | ArrayLike<a>, bs: a[]): a[];
 export function unshift<a>(as: Iterable<a> | ArrayLike<a>, bs: a[]): a[] {
   if ('length' in as) {
     if (Symbol.iterator in as) return bs.unshift(...as as a[]), bs;
-    for (let i = as.length - 1; i >= 0; --i) {
+    for (let i = as.length; i--;) {
       bs.unshift(as[i]);
     }
   }
