@@ -83,24 +83,27 @@ export class Heap<T, O = T> {
   }
 }
 
-type MultiNode<T, O> = readonly [order: O, node: List.Node<T>, node: Heap.Node<readonly [List<T>, O], O>];
+type MultiNode<T, O> = readonly [order: O, node: List.Node<T>, node: Heap.Node<List<T>, O>];
 
 // 1e6要素で落ちるため実用不可
 export namespace MultiHeap {
   export type Node<T, O = T> = Heap.Node<T, O>;
 }
 export class MultiHeap<T, O = T> {
+  private static readonly order = Symbol('order');
   public static readonly max = Heap.max;
   public static readonly min = Heap.min;
   constructor(
     private readonly cmp: (a: O, b: O) => number = MultiHeap.max,
+    private clean = true,
   ) {
   }
-  private readonly heap = new Heap<readonly [List<T>, O], O>(this.cmp);
-  private readonly dict = new Map<O, readonly [List<T>, Heap.Node<readonly [List<T>, O], O>]>();
-  private readonly list = memoize<O, readonly [List<T>, Heap.Node<readonly [List<T>, O], O>]>(order => {
+  private readonly heap = new Heap<List<T>, O>(this.cmp);
+  private readonly dict = new Map<O, readonly [List<T>, Heap.Node<List<T>, O>]>();
+  private readonly list = memoize<O, readonly [List<T>, Heap.Node<List<T>, O>]>(order => {
     const list = new List<T>();
-    return [list, this.heap.insert([list, order], order)];
+    list[MultiHeap.order] = order;
+    return [list, this.heap.insert(list, order)];
   }, this.dict);
   private $length = 0;
   public get length(): number {
@@ -122,11 +125,11 @@ export class MultiHeap<T, O = T> {
   public extract(): T | undefined {
     if (this.$length === 0) return;
     --this.$length;
-    const { 0: list, 1: order } = this.heap.peek()!;
+    const list = this.heap.peek()!;
     const value = list.shift();
     if (list.length === 0) {
       this.heap.extract();
-      this.dict.delete(order);
+      this.clean && this.dict.delete(list[MultiHeap.order]);
     }
     return value;
   }
@@ -136,7 +139,7 @@ export class MultiHeap<T, O = T> {
     const { 0: order, 1: lnode, 2: hnode } = node;
     if (lnode.list.length === 1) {
       this.heap.delete(hnode);
-      this.dict.delete(order);
+      this.clean && this.dict.delete(order);
     }
     return lnode.delete();
   }
