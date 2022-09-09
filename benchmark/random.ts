@@ -93,4 +93,3 @@ describe('Benchmark:', function () {
   });
 
 });
-

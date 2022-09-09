@@ -23,8 +23,9 @@ const gen = Function('rnd16', 'HEX', [
 ].join(''));
 
 const buffer = new Uint16Array(512);
+assert(buffer.length % 4 === 0);
 const digit = 16;
-const mask = 0b1111;
+const mask = digit - 1;
 let index = buffer.length;
 let offset = digit;
 
