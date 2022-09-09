@@ -107,6 +107,7 @@ class FixedQueue<T> {
 }
 
 export class PriorityQueue<T, P = number> {
+  private static readonly priority = Symbol('priority');
   public static readonly max = Heap.max;
   public static readonly min = Heap.min;
   constructor(
@@ -115,11 +116,12 @@ export class PriorityQueue<T, P = number> {
   ) {
     this.heap = new Heap(cmp);
   }
-  private readonly heap: Heap<readonly [Queue<T>, P], P>;
+  private readonly heap: Heap<Queue<T>, P>;
   private readonly dict = new Map<P, Queue<T>>();
   private readonly queue = memoize<P, Queue<T>>(priority => {
     const queue = new Queue<T>();
-    this.heap.insert([queue, priority], priority);
+    queue[PriorityQueue.priority] = priority;
+    this.heap.insert(queue, priority);
     return queue;
   }, this.dict);
   private $length = 0;
@@ -139,11 +141,11 @@ export class PriorityQueue<T, P = number> {
   public pop(): T | undefined {
     if (this.$length === 0) return;
     --this.$length;
-    const { 0: queue, 1: priority } = this.heap.peek()!;
+    const queue = this.heap.peek()!;
     const value = queue.pop();
     if (queue.isEmpty()) {
       this.heap.extract();
-      this.clean && this.dict.delete(priority);
+      this.clean && this.dict.delete(queue[PriorityQueue.priority]);
     }
     return value;
   }
