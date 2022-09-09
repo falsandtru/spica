@@ -111,6 +111,7 @@ export class PriorityQueue<T, P = number> {
   public static readonly min = Heap.min;
   constructor(
     cmp: (a: P, b: P) => number = PriorityQueue.max,
+    private clean = true,
   ) {
     this.heap = new Heap(cmp);
   }
@@ -142,7 +143,7 @@ export class PriorityQueue<T, P = number> {
     const value = queue.pop();
     if (queue.isEmpty()) {
       this.heap.extract();
-      this.dict.delete(priority);
+      this.clean && this.dict.delete(priority);
     }
     return value;
   }
