@@ -106,19 +106,19 @@ class FixedQueue<T> {
   }
 }
 
-export class PriorityQueue<T, O = T> {
+export class PriorityQueue<T, P = number> {
   public static readonly max = Heap.max;
   public static readonly min = Heap.min;
   constructor(
-    cmp: (a: O, b: O) => number = PriorityQueue.max,
+    cmp: (a: P, b: P) => number = PriorityQueue.max,
   ) {
     this.heap = new Heap(cmp);
   }
-  private readonly heap: Heap<readonly [Queue<T>, O], O>;
-  private readonly dict = new Map<O, Queue<T>>();
-  private readonly queue = memoize<O, Queue<T>>(order => {
+  private readonly heap: Heap<readonly [Queue<T>, P], P>;
+  private readonly dict = new Map<P, Queue<T>>();
+  private readonly queue = memoize<P, Queue<T>>(priority => {
     const queue = new Queue<T>();
-    this.heap.insert([queue, order], order);
+    this.heap.insert([queue, priority], priority);
     return queue;
   }, this.dict);
   private $length = 0;
@@ -131,20 +131,18 @@ export class PriorityQueue<T, O = T> {
   public peek(): T | undefined {
     return this.heap.peek()?.[0].peek();
   }
-  public insert(this: Heap<T, T>, value: T): void;
-  public insert(value: T, order: O): void;
-  public insert(value: T, order: O = value as any): void {
+  public push(value: T, priority: P): void {
     ++this.$length;
-    this.queue(order).push(value);
+    this.queue(priority).push(value);
   }
-  public extract(): T | undefined {
+  public pop(): T | undefined {
     if (this.$length === 0) return;
     --this.$length;
-    const { 0: queue, 1: order } = this.heap.peek()!;
+    const { 0: queue, 1: priority } = this.heap.peek()!;
     const value = queue.pop();
     if (queue.isEmpty()) {
       this.heap.extract();
-      this.dict.delete(order);
+      this.dict.delete(priority);
     }
     return value;
   }
@@ -152,5 +150,11 @@ export class PriorityQueue<T, O = T> {
     this.heap.clear();
     this.dict.clear();
     this.$length = 0;
+  }
+  public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
+    while (!this.isEmpty()) {
+      yield this.pop()!;
+    }
+    return;
   }
 }

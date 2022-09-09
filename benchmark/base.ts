@@ -1,7 +1,7 @@
 import { benchmark } from './benchmark';
 import { Ring } from '../src/ring';
 import { Stack } from '../src/stack';
-import { Queue } from '../src/queue';
+import { Queue, PriorityQueue } from '../src/queue';
 
 describe('Benchmark:', function () {
   describe('base', function () {
@@ -15,6 +15,10 @@ describe('Benchmark:', function () {
 
     it('Queue new', function (done) {
       benchmark('Queue new', () => new Queue(), done);
+    });
+
+    it('PQueue new', function (done) {
+      benchmark('PQueue new', () => new PriorityQueue(), done);
     });
 
     for (const length of [1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
@@ -53,6 +57,12 @@ describe('Benchmark:', function () {
         for (let i = 0; i < length; ++i) data.push(0);
         benchmark(`Queue ${length.toLocaleString('en')}`, () => (data.pop(), data.push(0)), done);
       });
+
+      it(`PQueue ${length.toLocaleString('en')}`, function (done) {
+        const data = new PriorityQueue();
+        for (let i = 0; i < length; ++i) data.push(0, 0);
+        benchmark(`PQueue ${length.toLocaleString('en')}`, () => (data.pop(), data.push(0, 0)), done);
+      });
     }
 
     for (const length of [1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
@@ -71,13 +81,19 @@ describe('Benchmark:', function () {
       it(`Stack index ${length.toLocaleString('en')}`, function (done) {
         const data = new Stack();
         for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Stack index ${length.toLocaleString('en')}`, () => data.peek(-1), done);
+        benchmark(`Stack index ${length.toLocaleString('en')}`, () => data.peek(), done);
       });
 
       it(`Queue index ${length.toLocaleString('en')}`, function (done) {
         const data = new Queue();
         for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Queue index ${length.toLocaleString('en')}`, () => data.peek(-1), done);
+        benchmark(`Queue index ${length.toLocaleString('en')}`, () => data.peek(), done);
+      });
+
+      it(`PQueue index ${length.toLocaleString('en')}`, function (done) {
+        const data = new PriorityQueue();
+        for (let i = 0; i < length; ++i) data.push(0, 0);
+        benchmark(`PQueue index ${length.toLocaleString('en')}`, () => data.peek(), done);
       });
     }
 
