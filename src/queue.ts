@@ -106,7 +106,7 @@ class FixedQueue<T> {
   }
 }
 
-export class PriorityQueue<T, P = number> {
+export class PriorityQueue<T, P = T> {
   private static readonly priority = Symbol('priority');
   public static readonly max = Heap.max;
   public static readonly min = Heap.min;
