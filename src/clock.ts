@@ -1,6 +1,5 @@
 import { Date } from './global';
 import { Queue } from './queue';
-import { duff } from './duff';
 import { causeAsyncException } from './exception';
 
 let mem: number | undefined;
@@ -28,7 +27,7 @@ export function tick(cb: Callback): void {
 }
 
 function run(): void {
-  duff(queue.length, () => {
+  for (let count = queue.length; count--;) {
     try {
       // @ts-expect-error
       (0, queue.pop()!)();
@@ -36,5 +35,5 @@ function run(): void {
     catch (reason) {
       causeAsyncException(reason);
     }
-  });
+  }
 }
