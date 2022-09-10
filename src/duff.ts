@@ -1,3 +1,4 @@
+// 100,000以上でforより大幅に低速となり実用不可
 export function duff(count: number, proc: (index: number) => void): void {
   if (count > 0) {
     let i = 0, m = count & 7, d = (count - m) / 8;
@@ -33,6 +34,7 @@ export function duff(count: number, proc: (index: number) => void): void {
   }
 }
 
+// 100,000以上でforより大幅に低速となり実用不可
 export function duffbk(count: number, proc: (index: number) => unknown): void {
   if (count > 0) {
     let i = 0, m = count & 7, d = (count - m) / 8;
@@ -92,7 +94,7 @@ export function duffEach<T>(array: ArrayLike<T>, proc: (value: T, index: number,
   }
 }
 
-// ベンチマークの10,000以上で急激な速度低下が見られるがNodeListなどでの
+// ベンチマークの10,000以上で急激な速度低下が見られる場合があるがNodeListなどでの
 // 実際の使用では速度低下は見られない
 export function duffReduce<T, U>(array: ArrayLike<T>, proc: (prev: U, value: T, index: number, array: ArrayLike<T>) => U, initial: U): U {
   let count = array.length;
