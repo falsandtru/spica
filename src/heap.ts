@@ -33,7 +33,11 @@ export class Heap<T, O = T> {
   }
   public insert(this: Heap<T, T>, value: T): Heap.Node<T, O>;
   public insert(value: T, order: O): Heap.Node<T, O>;
-  public insert(value: T, order: O = value as any): Heap.Node<T, O> {
+  public insert(value: T, order?: O): Heap.Node<T, O> {
+    if (arguments.length < 2) {
+      order = value as any;
+    }
+    assert([order = order!]);
     const array = this.array;
     const node = array[this.$length] = [order, value, this.$length++];
     upHeapify(this.cmp, array, this.$length);
@@ -41,7 +45,11 @@ export class Heap<T, O = T> {
   }
   public replace(this: Heap<T, T>, value: T): T | undefined;
   public replace(value: T, order: O): T | undefined;
-  public replace(value: T, order: O = value as any): T | undefined {
+  public replace(value: T, order?: O): T | undefined {
+    if (arguments.length < 2) {
+      order = value as any;
+    }
+    assert([order = order!]);
     if (this.$length === 0) return void this.insert(value, order);
     const array = this.array;
     const replaced = array[0][1];
@@ -117,7 +125,11 @@ export class MultiHeap<T, O = T> {
   }
   public insert(this: Heap<T, T>, value: T): MultiHeap.Node<T, O>;
   public insert(value: T, order: O): MultiHeap.Node<T, O>;
-  public insert(value: T, order: O = value as any): MultiHeap.Node<T, O> {
+  public insert(value: T, order?: O): MultiHeap.Node<T, O> {
+    if (arguments.length < 2) {
+      order = value as any;
+    }
+    assert([order = order!]);
     ++this.$length;
     const { 0: list, 1: node } = this.list(order);
     return [order, list.push(value), node];
