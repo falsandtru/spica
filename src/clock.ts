@@ -2,17 +2,17 @@ import { Date, Promise } from './global';
 import { Queue } from './queue';
 import { causeAsyncException } from './exception';
 
-let mem: number | undefined;
+let time: number | undefined;
 let count = 0;
-export function now(nocache = false): number {
-  if (mem === void 0) {
-    tick(() => mem = void 0);
+export function now(nocache?: boolean): number {
+  if (time === void 0) {
+    tick(() => time = void 0);
   }
   else if (!nocache && count++ !== 20) {
-    return mem;
+    return time;
   }
   count = 1;
-  return mem = Date.now();
+  return time = Date.now();
 }
 
 export const clock: Promise<undefined> = Promise.resolve(void 0);
