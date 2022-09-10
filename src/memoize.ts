@@ -1,7 +1,6 @@
 import { Map } from './global';
 import { isArray } from './alias';
 import { Dict } from './dict';
-import { equal } from './compare';
 
 const undefined = void 0;
 
@@ -27,7 +26,7 @@ export function memoize<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (..
     },
     get(key) {
       assert(memory = memory as z[]);
-      assert(0 <= <any>key);
+      assert(0 <= key as any);
       return memory[key as any as number];
     },
     set(key, value) {
@@ -40,12 +39,68 @@ export function memoize<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (..
     },
   });
   let nullish = false;
-  return (...as) => {
+  return function (this: unknown, ...as) {
     assert(memory = memory as Dict<b, z>);
-    const b = identify(...as);
+    // Inlining
+    let b: b;
+    switch (as.length) {
+      case 0:
+        // @ts-ignore
+        b = identify.call(this);
+        break;
+      case 1:
+        // @ts-ignore
+        b = identify.call(this, as[0]);
+        break;
+      case 2:
+        // @ts-ignore
+        b = identify.call(this, as[0], as[1]);
+        break;
+      case 3:
+        // @ts-ignore
+        b = identify.call(this, as[0], as[1], as[2]);
+        break;
+      case 4:
+        // @ts-ignore
+        b = identify.call(this, as[0], as[1], as[2], as[3]);
+        break;
+      case 5:
+        // @ts-ignore
+        b = identify.call(this, as[0], as[1], as[2], as[3], as[4]);
+        break;
+      default:
+        b = identify.apply(this, as);
+    }
     let z = memory.get(b);
     if (z !== undefined || nullish && memory.has(b)) return z!;
-    z = f(...as);
+    switch (as.length) {
+      case 0:
+        // @ts-ignore
+        z = f.call(this);
+        break;
+      case 1:
+        // @ts-ignore
+        z = f.call(this, as[0]);
+        break;
+      case 2:
+        // @ts-ignore
+        z = f.call(this, as[0], as[1]);
+        break;
+      case 3:
+        // @ts-ignore
+        z = f.call(this, as[0], as[1], as[2]);
+        break;
+      case 4:
+        // @ts-ignore
+        z = f.call(this, as[0], as[1], as[2], as[3]);
+        break;
+      case 5:
+        // @ts-ignore
+        z = f.call(this, as[0], as[1], as[2], as[3], as[4]);
+        break;
+      default:
+        z = f.apply(this, as);
+    }
     nullish ||= z === undefined;
     memory.set(b, z);
     return z;
@@ -59,13 +114,69 @@ export function reduce<a, z, b = a>(f: (a: a) => z, identify?: (a: a) => b): typ
 export function reduce<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...as: as) => z): typeof f;
 export function reduce<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...as: as) => z, identify?: (...as: as) => b): typeof f;
 export function reduce<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...as: as) => z, identify: (...as: as) => b = (...as) => as[0] as b): typeof f {
-  let key: b = [] as any;
-  let val: z = [] as any;
-  return (...as) => {
-    const b = identify(...as);
-    if (!equal(key, b)) {
+  let key: b = {} as b;
+  let val: z;
+  return function (this: unknown, ...as) {
+    // Inlining
+    let b: b;
+    switch (as.length) {
+      case 0:
+        // @ts-ignore
+        b = identify.call(this);
+        break;
+      case 1:
+        // @ts-ignore
+        b = identify.call(this, as[0]);
+        break;
+      case 2:
+        // @ts-ignore
+        b = identify.call(this, as[0], as[1]);
+        break;
+      case 3:
+        // @ts-ignore
+        b = identify.call(this, as[0], as[1], as[2]);
+        break;
+      case 4:
+        // @ts-ignore
+        b = identify.call(this, as[0], as[1], as[2], as[3]);
+        break;
+      case 5:
+        // @ts-ignore
+        b = identify.call(this, as[0], as[1], as[2], as[3], as[4]);
+        break;
+      default:
+        b = identify.apply(this, as);
+    }
+    if (key === key ? key !== b : b === b) {
       key = b;
-      val = f(...as);
+      switch (as.length) {
+        case 0:
+          // @ts-ignore
+          val = f.call(this);
+          break;
+        case 1:
+          // @ts-ignore
+          val = f.call(this, as[0]);
+          break;
+        case 2:
+          // @ts-ignore
+          val = f.call(this, as[0], as[1]);
+          break;
+        case 3:
+          // @ts-ignore
+          val = f.call(this, as[0], as[1], as[2]);
+          break;
+        case 4:
+          // @ts-ignore
+          val = f.call(this, as[0], as[1], as[2], as[3]);
+          break;
+        case 5:
+          // @ts-ignore
+          val = f.call(this, as[0], as[1], as[2], as[3], as[4]);
+          break;
+        default:
+          val = f.apply(this, as);
+      }
     }
     return val;
   };
