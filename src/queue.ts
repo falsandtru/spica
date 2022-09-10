@@ -132,7 +132,7 @@ export class PriorityQueue<T, P = T> {
     return this.$length === 0;
   }
   public peek(): T | undefined {
-    return this.heap.peek()?.[0].peek();
+    return this.heap.peek()?.peek();
   }
   public push(value: T, priority: P): void {
     ++this.$length;

@@ -127,7 +127,7 @@ export class MultiHeap<T, O = T> {
     return this.heap.isEmpty();
   }
   public peek(): T | undefined {
-    return this.heap.peek()?.[0].head!.value;
+    return this.heap.peek()?.head!.value;
   }
   public insert(this: Heap<T, T>, value: T): MultiHeap.Node<T, O>;
   public insert(value: T, order: O): MultiHeap.Node<T, O>;
