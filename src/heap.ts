@@ -151,6 +151,7 @@ export class MultiHeap<T, O = T> {
   }
   public delete(node: MultiHeap.Node<T, O>): T;
   public delete(node: MultiNode<T, O>): T {
+    if (!node[1].list) throw new Error('Invalid node');
     --this.$length;
     const { 0: order, 1: lnode, 2: hnode } = node;
     if (lnode.list.length === 1) {
@@ -162,6 +163,7 @@ export class MultiHeap<T, O = T> {
   public update(this: MultiHeap<T, T>, node: MultiHeap.Node<T, O>): MultiHeap.Node<T, O>;
   public update(node: MultiHeap.Node<T, O>, order: O, value?: T): MultiHeap.Node<T, O>;
   public update(node: MultiNode<T, O>, order?: O, value?: T): MultiHeap.Node<T, O> {
+    if (!node[1].list) throw new Error('Invalid node');
     if (arguments.length < 2) {
       order = node[0];
     }
