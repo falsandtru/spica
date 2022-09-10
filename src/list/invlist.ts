@@ -1,7 +1,5 @@
 // Circular Inverse List
 
-// 1-2x faster than yallist.
-
 const undefined = void 0;
 
 const LENGTH = Symbol('length');
