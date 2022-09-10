@@ -30,25 +30,25 @@ describe('Benchmark:', function () {
     it('0 put/iterate', function (done) {
       const ch = new Channel();
       const iter = ch[Symbol.asyncIterator]();
-      benchmark('Channel 0 put/iterate', done => (ch.put(), iter.next().then(done)), done, { defer: true, async: true });
+      benchmark('Channel 0 put/iterate', done => (ch.put(), iter.next().then(done)), done, { defer: true });
     });
 
     it('1 put/iterate', function (done) {
       const ch = new Channel(1);
       const iter = ch[Symbol.asyncIterator]();
-      benchmark('Channel 1 put/iterate', done => (ch.put(), iter.next().then(done)), done, { defer: true, async: true });
+      benchmark('Channel 1 put/iterate', done => (ch.put(), iter.next().then(done)), done, { defer: true });
     });
 
     it('0 iterate/put', function (done) {
       const ch = new Channel();
       const iter = ch[Symbol.asyncIterator]();
-      benchmark('Channel 0 iterate/put', done => (iter.next(), ch.put().then(done)), done, { defer: true, async: true });
+      benchmark('Channel 0 iterate/put', done => (iter.next(), ch.put().then(done)), done, { defer: true });
     });
 
     it('1 iterate/put', function (done) {
       const ch = new Channel(1);
       const iter = ch[Symbol.asyncIterator]();
-      benchmark('Channel 1 iterate/put', done => (iter.next(), ch.put().then(done)), done, { defer: true, async: true });
+      benchmark('Channel 1 iterate/put', done => (iter.next(), ch.put().then(done)), done, { defer: true });
     });
 
   });

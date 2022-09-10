@@ -20,5 +20,5 @@ export function benchmark(name: string, proc: (done: () => void) => unknown, don
       console.log(String(event.target));
     })
     .on('complete', () => done())
-    .run({ 'async': true });
+    .run({ async: true });
 }

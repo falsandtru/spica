@@ -18,7 +18,7 @@ describe('Benchmark:', function () {
     it('call', function (done) {
       const sv = new class extends Supervisor<string, number> { }();
       sv.register('', n => [n, void 0], void 0);
-      benchmark('Supervisor call', done => sv.call('', 0, done), done, { defer: true, async: true });
+      benchmark('Supervisor call', done => sv.call('', 0, done), done, { defer: true });
     });
 
   });

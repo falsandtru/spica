@@ -10,7 +10,7 @@ describe('Benchmark:', function () {
       const iter = async function* () {
         while (true) yield;
       }()[Symbol.asyncIterator]();
-      benchmark('Asyncgenerator iterate', done => void iter.next().then(done), done, { defer: true, async: true });
+      benchmark('Asyncgenerator iterate', done => void iter.next().then(done), done, { defer: true });
     });
 
   });
@@ -21,14 +21,14 @@ describe('Benchmark:', function () {
     });
 
     it('run', function (done) {
-      benchmark('Coroutine run', done => void new Coroutine(async function* () { }, { capacity: 0, delay: false }).then(done), done, { defer: true, async: true });
+      benchmark('Coroutine run', done => void new Coroutine(async function* () { }, { capacity: 0, delay: false }).then(done), done, { defer: true });
     });
 
     it('ask', function (done) {
       const port = new Coroutine(async function* () {
         while (true) yield;
       }, { capacity: 0, delay: false })[Coroutine.port];
-      benchmark('Coroutine ask', done => void port.ask(0).then(done), done, { defer: true, async: true });
+      benchmark('Coroutine ask', done => void port.ask(0).then(done), done, { defer: true });
     });
 
   });

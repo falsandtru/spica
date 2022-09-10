@@ -43,20 +43,20 @@ describe('Benchmark:', function () {
     });
 
     it('run', function (done) {
-      benchmark('Promise  run', done => void new Promise(resolve => clock.then(resolve)).then(done), done, { defer: true, async: true });
+      benchmark('Promise  run', done => void new Promise(resolve => clock.then(resolve)).then(done), done, { defer: true });
     });
 
     it('run', function (done) {
-      benchmark('APromise run', done => void new AtomicPromise(resolve => clock.then(resolve)).then(done), done, { defer: true, async: true });
+      benchmark('APromise run', done => void new AtomicPromise(resolve => clock.then(resolve)).then(done), done, { defer: true });
     });
 
     it('run', function (done) {
-      benchmark('Bluebird run', done => void new Bluebird(resolve => clock.then(resolve)).then(done), done, { defer: true, async: true });
+      benchmark('Bluebird run', done => void new Bluebird(resolve => clock.then(resolve)).then(done), done, { defer: true });
     });
 
     it('then', function (done) {
       const p = Promise.resolve();
-      benchmark('Promise  then', done => void p.then(done), done, { defer: true, async: true });
+      benchmark('Promise  then', done => void p.then(done), done, { defer: true });
     });
 
     it('then', function (done) {
@@ -66,12 +66,12 @@ describe('Benchmark:', function () {
 
     it('then', function (done) {
       const p = Bluebird.resolve();
-      benchmark('Bluebird then', done => void p.then(done), done, { defer: true, async: true });
+      benchmark('Bluebird then', done => void p.then(done), done, { defer: true });
     });
 
     it('chain 10', function (done) {
       const p = Promise.resolve();
-      benchmark('Promise  chain 10', done => void chain(p, 9).then(done), done, { defer: true, async: true });
+      benchmark('Promise  chain 10', done => void chain(p, 9).then(done), done, { defer: true });
     });
 
     it('chain 10', function (done) {
@@ -81,12 +81,12 @@ describe('Benchmark:', function () {
 
     it('chain 10', function (done) {
       const p = Bluebird.resolve();
-      benchmark('Bluebird chain 10', done => void chain(p, 9).then(done), done, { defer: true, async: true });
+      benchmark('Bluebird chain 10', done => void chain(p, 9).then(done), done, { defer: true });
     });
 
     it('chain 100', function (done) {
       const p = Promise.resolve();
-      benchmark('Promise  chain 100', done => void chain(p, 99).then(done), done, { defer: true, async: true });
+      benchmark('Promise  chain 100', done => void chain(p, 99).then(done), done, { defer: true });
     });
 
     it('chain 100', function (done) {
@@ -96,7 +96,7 @@ describe('Benchmark:', function () {
 
     it('chain 100', function (done) {
       const p = Bluebird.resolve();
-      benchmark('Bluebird chain 100', done => void chain(p, 99).then(done), done, { defer: true, async: true });
+      benchmark('Bluebird chain 100', done => void chain(p, 99).then(done), done, { defer: true });
     });
 
     it('all 2', function (done) {
@@ -104,7 +104,7 @@ describe('Benchmark:', function () {
         Promise.resolve(),
         Promise.resolve(),
       ];
-      benchmark('Promise  all 2', done => void Promise.all(ps).then(done), done, { defer: true, async: true });
+      benchmark('Promise  all 2', done => void Promise.all(ps).then(done), done, { defer: true });
     });
 
     it('all 2', function (done) {
@@ -120,7 +120,7 @@ describe('Benchmark:', function () {
         Bluebird.resolve(),
         Bluebird.resolve(),
       ];
-      benchmark('Bluebird all 2', done => void Bluebird.all(ps).then(done), done, { defer: true, async: true });
+      benchmark('Bluebird all 2', done => void Bluebird.all(ps).then(done), done, { defer: true });
     });
 
     it('all 3', function (done) {
@@ -129,7 +129,7 @@ describe('Benchmark:', function () {
         Promise.resolve(),
         Promise.resolve(),
       ];
-      benchmark('Promise  all 3', done => void Promise.all(ps).then(done), done, { defer: true, async: true });
+      benchmark('Promise  all 3', done => void Promise.all(ps).then(done), done, { defer: true });
     });
 
     it('all 3', function (done) {
@@ -147,7 +147,7 @@ describe('Benchmark:', function () {
         Bluebird.resolve(),
         Bluebird.resolve(),
       ];
-      benchmark('Bluebird all 3', done => void Bluebird.all(ps).then(done), done, { defer: true, async: true });
+      benchmark('Bluebird all 3', done => void Bluebird.all(ps).then(done), done, { defer: true });
     });
 
     it('race 2', function (done) {
@@ -155,7 +155,7 @@ describe('Benchmark:', function () {
         new Promise(() => 0),
         Promise.resolve(),
       ];
-      benchmark('Promise  race 2', done => void Promise.race(ps).then(done), done, { defer: true, async: true });
+      benchmark('Promise  race 2', done => void Promise.race(ps).then(done), done, { defer: true });
     });
 
     it('race 2', function (done) {
@@ -171,7 +171,7 @@ describe('Benchmark:', function () {
         new Bluebird(() => 0),
         Bluebird.resolve(),
       ];
-      benchmark('Bluebird race 2', done => void Bluebird.race(ps).then(done), done, { defer: true, async: true });
+      benchmark('Bluebird race 2', done => void Bluebird.race(ps).then(done), done, { defer: true });
     });
 
     it('race 3', function (done) {
@@ -180,7 +180,7 @@ describe('Benchmark:', function () {
         Promise.resolve(),
         new Promise(() => 0),
       ];
-      benchmark('Promise  race 3', done => void Promise.race(ps).then(done), done, { defer: true, async: true });
+      benchmark('Promise  race 3', done => void Promise.race(ps).then(done), done, { defer: true });
     });
 
     it('race 3', function (done) {
@@ -198,7 +198,7 @@ describe('Benchmark:', function () {
         Bluebird.resolve(),
         new Bluebird(() => 0),
       ];
-      benchmark('Bluebird race 3', done => void Bluebird.race(ps).then(done), done, { defer: true, async: true });
+      benchmark('Bluebird race 3', done => void Bluebird.race(ps).then(done), done, { defer: true });
     });
 
   });
