@@ -36,11 +36,15 @@ export function unique(rnd: (len: number) => string, len: number, mem?: Set<stri
   return () => {
     assert(mem = mem!);
     while (true) {
-      for (let i = 0; i < limit; ++i) {
-        const r = rnd(len);
-        if (mem.has(r)) continue;
-        mem.add(r);
-        return r;
+      try {
+        for (let i = 0; i < limit; ++i) {
+          const r = rnd(len);
+          if (mem.has(r)) continue;
+          mem.add(r);
+          return r;
+        }
+      }
+      catch {
       }
       clear && mem.clear();
       ++len;
