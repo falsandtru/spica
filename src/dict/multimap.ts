@@ -1,6 +1,6 @@
 import { Map } from '../global';
 import { IterableDict } from '../dict';
-import { indexOf, splice } from '../array';
+import { Ring } from '../ring';
 
 interface Dict<K, V> extends IterableDict<K, V> {
   clear(): void;
@@ -9,48 +9,39 @@ interface Dict<K, V> extends IterableDict<K, V> {
 export class MultiMap<K, V> implements IterableDict<K, V> {
   constructor(
     entries: Iterable<[K, V]> = [],
-    private memory: Dict<K, V[]> = new Map(),
+    private readonly memory: Dict<K, Ring<V>> = new Map(),
   ) {
     for (const [k, v] of entries) {
       this.set(k, v);
     }
   }
   public get(key: K): V | undefined {
-    return this.memory.get(key)?.[0];
+    return this.memory.get(key)?.at(0);
+  }
+  public getAll(key: K): Ring<V> | undefined {
+    return this.memory.get(key);
   }
   public set(key: K, val: V): this {
-    this.memory.get(key)?.push(val) ?? this.memory.set(key, [val]);
+    let vs = this.memory.get(key);
+    if (vs) return vs.push(val), this;
+    vs = new Ring();
+    vs.push(val);
+    this.memory.set(key, vs);
     return this;
   }
   public has(key: K, value?: V): boolean {
     const vs = this.memory.get(key);
-    if (!vs || vs.length === 0) return false;
+    if (!vs?.length) return false;
     if (arguments.length < 2) return true;
-    switch (value) {
-      case vs[0]:
-      case vs[vs.length - 1]:
-        return true;
-      default:
-        return indexOf(vs, value) > -1;
-    }
+    return vs.includes(value!);
   }
   public delete(key: K, value?: V): boolean {
     if (arguments.length < 2) return this.memory.delete(key);
     const vs = this.memory.get(key);
-    if (!vs || vs.length === 0) return false;
-    switch (value) {
-      case vs[0]:
-        vs.shift();
-        break;
-      case vs[vs.length - 1]:
-        vs.pop();
-        break;
-      default:
-        const i = indexOf(vs, value);
-        if (i === -1) return false;
-        splice(vs, i, 1);
-    }
-    vs.length === 0 && this.memory.delete(key);
+    if (!vs?.length) return false;
+    const i = vs.indexOf(value!);
+    if (i === -1) return false;
+    vs.splice(i, 1);
     return true;
   }
   public clear(): void {
@@ -59,22 +50,25 @@ export class MultiMap<K, V> implements IterableDict<K, V> {
   public take(key: K): V | undefined;
   public take(key: K, count: number): V[];
   public take(key: K, count?: number): V | undefined | V[] {
-    const vs = this.memory.get(key) ?? [];
-    return count === void 0
-      ? splice(vs, 0, 1)[0]
-      : splice(vs, 0, count);
+    const vs = this.memory.get(key);
+    if (count === void 0) return vs?.shift();
+    const acc: V[] = [];
+    while (vs?.length && count--) {
+      acc.push(vs.shift()!);
+    }
+    return acc;
   }
-  public ref(key: K): V[] {
+  public ref(key: K): Ring<V> {
     let vs = this.memory.get(key);
     if (vs) return vs;
-    vs = [];
+    vs = new Ring();
     this.memory.set(key, vs);
     return vs;
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
     for (const [k, vs] of this.memory) {
       for (let i = 0; i < vs.length; ++i) {
-        yield [k, vs[i]];
+        yield [k, vs.at(i)!];
       }
     }
     return;

@@ -1,15 +1,19 @@
 import { Array } from './global';
 import { max, min } from './alias';
-import { splice } from './array';
+import { indexOf, splice } from './array';
 
 const undefined = void 0;
 
-const space = Object.freeze(Array<undefined>(100));
+type empty = typeof empty;
+const empty = Symbol('empty');
+const unempty = <T>(value: T | empty): T | undefined =>
+  value === empty ? undefined : value;
+const space = Object.freeze(Array<empty>(100).fill(empty));
 let size = 16;
 assert([size = 0]);
 
 export class Ring<T> {
-  private array: (T | undefined)[] = Array(size);
+  private array: (T | empty)[] = Array(size);
   private head = 0;
   private tail = 0;
   private $length = 0;
@@ -21,13 +25,13 @@ export class Ring<T> {
     const array = this.array;
     if (index >= 0) {
       if (index >= this.$length) return;
-      return array[(this.head - 1 + index) % array.length];
+      return unempty(array[(this.head - 1 + index) % array.length]);
     }
     else {
       if (-index > this.$length) return;
       return this.tail + index >= 0
-        ? array[this.tail + index]
-        : array[array.length + this.tail + index];
+        ? unempty(array[this.tail + index])
+        : unempty(array[array.length + this.tail + index]);
     }
   }
   public replace(index: number, value: T, replacer?: (oldValue: T, newValue: T) => T): T {
@@ -42,7 +46,7 @@ export class Ring<T> {
         ? this.tail + index
         : array.length + this.tail + index;
     }
-    const val = array[index]!;
+    const val = unempty(array[index])!;
     array[index] = replacer
       ? replacer(val, value)
       : value;
@@ -76,8 +80,8 @@ export class Ring<T> {
     if (this.$length === 0) return;
     const array = this.array;
     const i = this.tail - 1;
-    const value = array[i];
-    array[i] = undefined;
+    const value = unempty(array[i]);
+    array[i] = empty;
     --this.$length === 0
       ? this.head = this.tail = 0
       : this.tail = this.tail === 1
@@ -89,8 +93,8 @@ export class Ring<T> {
     if (this.$length === 0) return;
     const array = this.array;
     const i = this.head - 1;
-    const value = array[i];
-    array[i] = undefined;
+    const value = unempty(array[i]);
+    array[i] = empty;
     --this.$length === 0
       ? this.head = this.tail = 0
       : this.head = this.head === array.length
@@ -153,6 +157,24 @@ export class Ring<T> {
   public clear(): void {
     this.array = Array(size);
     this.$length = this.head = this.tail = 0;
+  }
+  public includes(value: T): boolean {
+    return this.array.includes(value);
+  }
+  private relational(index: number): number {
+    if (index === -1) return -1;
+    return index + 1 >= this.head
+      ? index + 1 - this.head
+      : this.array.length - this.head + index;
+  }
+  public indexOf(value: T): number {
+    return this.relational(indexOf(this.array, value));
+  }
+  public findIndex(f: (value: T) => unknown): number {
+    return this.relational(this.array.findIndex(value => value !== empty && f(value)));
+  }
+  public find(f: (value: T) => unknown): T | undefined {
+    return unempty(this.array.find(value => value !== empty && f(value)));
   }
   public toArray(): T[] {
     return this.head <= this.tail
