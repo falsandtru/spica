@@ -8,10 +8,10 @@ export function now(nocache = false): number {
   if (mem === void 0) {
     tick(() => mem = void 0);
   }
-  else if (!nocache && ++count !== 100) {
+  else if (!nocache && count++ !== 20) {
     return mem;
   }
-  count = 0;
+  count = 1;
   return mem = Date.now();
 }
 
