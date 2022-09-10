@@ -2,8 +2,9 @@ import { Array } from './global';
 import { max, min } from './alias';
 import { splice } from './array';
 
-const space = Object.freeze(Array<undefined>(100));
+const undefined = void 0;
 
+const space = Object.freeze(Array<undefined>(100));
 let size = 16;
 assert([size = 0]);
 
@@ -73,7 +74,7 @@ export class Ring<T> {
     const array = this.array;
     const i = this.tail - 1;
     const value = array[i];
-    array[i] = void 0;
+    array[i] = undefined;
     --this.length === 0
       ? this.head = this.tail = 0
       : this.tail = this.tail === 1
@@ -86,7 +87,7 @@ export class Ring<T> {
     const array = this.array;
     const i = this.head - 1;
     const value = array[i];
-    array[i] = void 0;
+    array[i] = undefined;
     --this.length === 0
       ? this.head = this.tail = 0
       : this.head = this.head === array.length

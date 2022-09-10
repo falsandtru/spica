@@ -6,6 +6,7 @@ import { equal } from '../compare';
 // Circular Indexed List
 
 const undefined = void 0;
+
 const BORDER = 1_000_000_000;
 
 interface Index<K, V> extends Dict<K, V> {

@@ -2,11 +2,13 @@ import { Date, Promise } from './global';
 import { Queue } from './queue';
 import { causeAsyncException } from './exception';
 
+const undefined = void 0;
+
 let time: number | undefined;
 let count = 0;
 export function now(nocache?: boolean): number {
-  if (time === void 0) {
-    tick(() => time = void 0);
+  if (time === undefined) {
+    tick(() => time = undefined);
   }
   else if (!nocache && count++ !== 20) {
     return time;
@@ -15,7 +17,7 @@ export function now(nocache?: boolean): number {
   return time = Date.now();
 }
 
-export const clock: Promise<undefined> = Promise.resolve(void 0);
+export const clock: Promise<undefined> = Promise.resolve(undefined);
 
 type Callback = () => void;
 

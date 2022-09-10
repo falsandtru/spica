@@ -3,6 +3,8 @@ import { isArray } from './alias';
 import { Dict } from './dict';
 import { equal } from './compare';
 
+const undefined = void 0;
+
 export function memoize<f extends (...as: [unknown, ...unknown[]]) => unknown, b = Parameters<f>[0]>(f: f, memory?: Dict<b, ReturnType<f>>): f;
 export function memoize<f extends (...as: [number, ...unknown[]]) => unknown, b extends number = Parameters<f>[0]>(f: f, memory: ReturnType<f>[]): f;
 export function memoize<f extends (...as: [unknown, ...unknown[]]) => unknown, b = Parameters<f>[0]>(f: f, identify?: (...as: Parameters<f>) => b, memory?: Dict<b, ReturnType<f>>): f;
@@ -16,12 +18,12 @@ export function memoize<as extends [number, ...unknown[]], z, b extends number =
 export function memoize<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...as: as) => z, identify?: (...as: as) => b, memory?: Dict<b, z>): typeof f;
 export function memoize<as extends [unknown, ...unknown[]], z, b extends number = number>(f: (...as: as) => z, identify: (...as: as) => b, memory: z[]): typeof f;
 export function memoize<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...as: as) => z, identify: Dict<b, z> | z[] | ((...as: as) => b) = (...as) => as[0] as b, memory?: Dict<b, z> | z[]): typeof f {
-  if (typeof identify === 'object') return memoize(f, void 0, identify as Dict<b, z>);
-  if (memory === void 0) return memoize(f, identify, new Map());
+  if (typeof identify === 'object') return memoize(f, undefined, identify as Dict<b, z>);
+  if (memory === undefined) return memoize(f, identify, new Map());
   if (isArray(memory)) return memoize<as, z, b>(f, identify, {
     has(key) {
       assert(memory = memory as z[]);
-      return memory[key as any as number] !== void 0;
+      return memory[key as any as number] !== undefined;
     },
     get(key) {
       assert(memory = memory as z[]);
@@ -42,9 +44,9 @@ export function memoize<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (..
     assert(memory = memory as Dict<b, z>);
     const b = identify(...as);
     let z = memory.get(b);
-    if (z !== void 0 || nullish && memory.has(b)) return z!;
+    if (z !== undefined || nullish && memory.has(b)) return z!;
     z = f(...as);
-    nullish ||= z === void 0;
+    nullish ||= z === undefined;
     memory.set(b, z);
     return z;
   };

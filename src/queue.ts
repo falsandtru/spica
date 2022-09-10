@@ -2,6 +2,8 @@ import { Array } from './global';
 import { Heap } from './heap';
 import { memoize } from './memoize';
 
+const undefined = void 0;
+
 const size = 2048;
 const initsize = 16;
 
@@ -100,7 +102,7 @@ class FixedQueue<T> {
   public pop(): T | undefined {
     if (this.isEmpty()) return;
     const value = this.array[this.head];
-    this.array[this.head] = void 0;
+    this.array[this.head] = undefined;
     this.head = this.head + 1 & this.mask;
     return value;
   }
