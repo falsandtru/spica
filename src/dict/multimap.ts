@@ -8,7 +8,7 @@ interface Dict<K, V> extends IterableDict<K, V> {
 
 export class MultiMap<K, V> implements IterableDict<K, V> {
   constructor(
-    entries: Iterable<[K, V]> = [],
+    entries: Iterable<readonly [K, V]> = [],
     private readonly memory: Dict<K, Ring<V>> = new Map(),
   ) {
     for (const { 0: k, 1: v } of entries) {

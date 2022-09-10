@@ -3,9 +3,9 @@ import { Dict } from '../dict';
 
 export class AttrMap<C, K, V> {
   constructor(
-    entries: Iterable<[C, K, V]> = [],
-    private readonly KeyMap: new <K, V>(entries?: Iterable<[K, V]> | null) => Dict<K, V> = WeakMap,
-    private readonly ValueMap: new <K, V>(entries?: Iterable<[K, V]> | null) => Dict<K, V> = Map
+    entries: Iterable<readonly [C, K, V]> = [],
+    private readonly KeyMap: new <K, V>(entries?: Iterable<readonly [K, V]> | null) => Dict<K, V> = WeakMap,
+    private readonly ValueMap: new <K, V>(entries?: Iterable<readonly [K, V]> | null) => Dict<K, V> = Map
   ) {
     for (const { 0: c, 1: k, 2: v } of entries) {
       this.set(c, k, v);

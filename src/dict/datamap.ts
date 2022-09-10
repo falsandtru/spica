@@ -5,7 +5,7 @@ import { memoize } from '../memoize';
 
 export class DataMap<K, V> implements IterableDict<K, V> {
   constructor(
-    entries: Iterable<[K, V]> = [],
+    entries: Iterable<readonly [K, V]> = [],
     private readonly indentify: (key: K) => unknown = stringify,
   ) {
     for (const { 0: k, 1: v } of entries) {

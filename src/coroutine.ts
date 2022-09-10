@@ -237,7 +237,7 @@ class Internal<T, R, S> {
   }, this.opts);
   public isAlive = true;
   public reception = 0;
-  public readonly sendBuffer?: Channel<[S, Reply<R, T>]> =
+  public readonly sendBuffer?: Channel<readonly [S, Reply<R, T>]> =
     this.settings.capacity >= 0
       ? new Channel(this.settings.capacity)
       : void 0;
