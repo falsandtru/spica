@@ -1,5 +1,5 @@
 import { Observation, ListenerItem } from './observer';
-import { tick } from './clock';
+import { promise } from './clock';
 
 describe('Unit: lib/observer', function () {
   describe('Observation', function () {
@@ -286,7 +286,7 @@ describe('Unit: lib/observer', function () {
       ob.on([''], throwError);
       ob.on([''], throwError);
       ob.on([''], throwError);
-      ob.emit([''], undefined, () => void assert(cnt === 1 && ++cnt) || tick(() => void assert(cnt === 2 && ++cnt)));
+      ob.emit([''], undefined, () => void assert(cnt === 1 && ++cnt) || promise(() => void assert(cnt === 2 && ++cnt)));
       assert(cnt === 3);
     });
 

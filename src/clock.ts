@@ -1,4 +1,4 @@
-import { Date } from './global';
+import { Date, Promise } from './global';
 import { Queue } from './queue';
 import { causeAsyncException } from './exception';
 
@@ -18,6 +18,11 @@ export function now(nocache = false): number {
 export const clock: Promise<undefined> = Promise.resolve(void 0);
 
 type Callback = () => void;
+
+export function promise(cb: Callback): void {
+  Promise.resolve().then(cb);
+}
+
 const queue = new Queue<Callback>();
 const scheduler = Promise.resolve();
 

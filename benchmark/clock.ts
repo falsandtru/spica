@@ -1,9 +1,19 @@
+import { Promise } from '../src/global';
 import { benchmark } from './benchmark';
 import { tick } from '../src/clock';
 
 describe('Benchmark:', function () {
   describe('Clock', function () {
     for (const length of [1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
+      it(`resolve ${length.toLocaleString('en')}`, function (done) {
+        benchmark(`Clock resolve ${length.toLocaleString('en')}`, done => {
+          for (let i = 0; i < length; ++i) {
+            Promise.resolve().then(() => 0);
+          }
+          Promise.resolve().then(done);
+        }, done, { defer: true });
+      });
+
       it(`then ${length.toLocaleString('en')}`, function (done) {
         const p = Promise.resolve();
         benchmark(`Clock then ${length.toLocaleString('en')}`, done => {
