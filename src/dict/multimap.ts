@@ -11,7 +11,7 @@ export class MultiMap<K, V> implements IterableDict<K, V> {
     entries: Iterable<[K, V]> = [],
     private readonly memory: Dict<K, Ring<V>> = new Map(),
   ) {
-    for (const [k, v] of entries) {
+    for (const { 0: k, 1: v } of entries) {
       this.set(k, v);
     }
   }
@@ -66,7 +66,7 @@ export class MultiMap<K, V> implements IterableDict<K, V> {
     return vs;
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
-    for (const [k, vs] of this.memory) {
+    for (const { 0: k, 1: vs } of this.memory) {
       for (let i = 0; i < vs.length; ++i) {
         yield [k, vs.at(i)!];
       }

@@ -7,7 +7,7 @@ export class AttrMap<C, K, V> {
     private readonly KeyMap: new <K, V>(entries?: Iterable<[K, V]> | null) => Dict<K, V> = WeakMap,
     private readonly ValueMap: new <K, V>(entries?: Iterable<[K, V]> | null) => Dict<K, V> = Map
   ) {
-    for (const [c, k, v] of entries) {
+    for (const { 0: c, 1: k, 2: v } of entries) {
       this.set(c, k, v);
     }
   }

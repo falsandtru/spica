@@ -352,7 +352,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (!this.disposer || !this.settings.capture!.clear) return void this.memory.clear();
     const memory = this.memory;
     this.memory = new Map();
-    for (const [key, { value: { value } }] of memory) {
+    for (const { 0: key, 1: { value: { value } } } of memory) {
       this.disposer(value, key);
     }
   }
@@ -364,7 +364,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.ensure(0);
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
-    for (const [key, { value: { value } }] of this.memory) {
+    for (const { 0: key, 1: { value: { value } } } of this.memory) {
       yield [key, value];
     }
     return;

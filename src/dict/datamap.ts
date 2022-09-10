@@ -8,7 +8,7 @@ export class DataMap<K, V> implements IterableDict<K, V> {
     entries: Iterable<[K, V]> = [],
     private readonly indentify: (key: K) => unknown = stringify,
   ) {
-    for (const [k, v] of entries) {
+    for (const { 0: k, 1: v } of entries) {
       this.set(k, v);
     }
   }
