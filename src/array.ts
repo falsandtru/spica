@@ -13,6 +13,7 @@ export function unshift<as extends readonly unknown[], b>(as: as, bs: b[]): [...
 export function unshift<a>(as: Iterable<a> | ArrayLike<a>, bs: a[]): a[];
 export function unshift<a>(as: Iterable<a> | ArrayLike<a>, bs: a[]): a[] {
   if ('length' in as) {
+    if (as.length === 1) return bs.unshift(as[0]), bs;
     if (Symbol.iterator in as) return bs.unshift(...as as a[]), bs;
     for (let i = as.length; i--;) {
       bs.unshift(as[i]);
@@ -38,6 +39,7 @@ export function push<a, bs extends readonly unknown[]>(as: a[], bs: bs): [...a[]
 export function push<a>(as: a[], bs: Iterable<a> | ArrayLike<a>): a[];
 export function push<a>(as: a[], bs: Iterable<a> | ArrayLike<a>): a[] {
   if ('length' in bs) {
+    if (bs.length === 1) return as.push(bs[0]), as;
     if (Symbol.iterator in bs && bs.length > 50) return as.push(...bs as a[]), as;
     for (let i = 0, len = bs.length; i < len; ++i) {
       as.push(bs[i]);
