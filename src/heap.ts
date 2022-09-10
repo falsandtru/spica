@@ -108,7 +108,7 @@ export class MultiHeap<T, O = T> {
   public static readonly min = Heap.min;
   constructor(
     private readonly cmp: (a: O, b: O) => number = MultiHeap.max,
-    private clean = true,
+    private readonly clean = true,
   ) {
   }
   private readonly heap = new Heap<List<T>, O>(this.cmp);
