@@ -492,7 +492,7 @@ function rate(
   let total = 0;
   let hits = 0;
   let ratio = 100;
-  for (let i = 0, len = hits1.length; i < len; ++i) {
+  for (let len = hits1.length, i = 0; i < len; ++i) {
     const subtotal = hits1[i] + hits2[i];
     if (subtotal === 0) continue;
     offset = i + 1 === len ? 0 : offset;

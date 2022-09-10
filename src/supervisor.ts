@@ -323,7 +323,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     if (!this.available) return;
     assert(!this.scheduled);
     const since = Date.now();
-    for (let i = 0, len = this.messages.length; this.available && i < len; ++i) {
+    for (let len = this.messages.length, i = 0; this.available && i < len; ++i) {
       if (this.settings.resource - (Date.now() - since) <= 0) return void this.schedule();
       const [names, param, callback, expiry, timer] = this.messages.at(i)!;
       let result: AtomicPromise<R> | undefined;

@@ -41,7 +41,7 @@ export function push<a>(as: a[], bs: Iterable<a> | ArrayLike<a>): a[] {
   if ('length' in bs) {
     if (bs.length === 1) return as.push(bs[0]), as;
     if (Symbol.iterator in bs && bs.length > 50) return as.push(...bs as a[]), as;
-    for (let i = 0, len = bs.length; i < len; ++i) {
+    for (let len = bs.length, i = 0; i < len; ++i) {
       as.push(bs[i]);
     }
   }
