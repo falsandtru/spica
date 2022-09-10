@@ -34,14 +34,15 @@ export function unique(rnd: (len: number) => string, len: number, mem?: Set<stri
   mem ??= new Set();
   let limit = 5;
   return () => {
+    assert(mem = mem!);
     while (true) {
       for (let i = 0; i < limit; ++i) {
         const r = rnd(len);
-        if (mem!.has(r)) continue;
-        mem!.add(r);
+        if (mem.has(r)) continue;
+        mem.add(r);
         return r;
       }
-      clear && mem!.clear();
+      clear && mem.clear();
       ++len;
       limit = len < 3 ? limit : 3;
     }
