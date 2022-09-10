@@ -87,7 +87,7 @@ export function cothrottle<T>(
   scheduler: () => PromiseLike<unknown>,
 ): () => AsyncGenerator<Awaited<T>> {
   return async function* () {
-    let start = Date.now();
+    let start = now();
     for await (const value of routine()) {
       if (resource - (now() - start) > 0) {
         yield value;

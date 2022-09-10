@@ -58,8 +58,9 @@ describe('Unit: lib/throttle', () => {
 
   describe('cothrottle', () => {
     it('', async () => {
-      const since = Date.now();
+      let since = Date.now();
       for await (const count of cothrottle(async function* (count = 0) {
+        since = Date.now();
         await wait(100);
         yield ++count;
       }, 200, () => wait(150))()) {
@@ -68,13 +69,13 @@ describe('Unit: lib/throttle', () => {
             assert(Date.now() - since >= 100);
             continue;
           case 2:
-            assert(Date.now() - since >= 200);
+            assert(Date.now() - since >= 100);
             continue;
           case 3:
-            assert(Date.now() - since >= 450);
+            assert(Date.now() - since >= 350);
             continue;
           case 4:
-            assert(Date.now() - since >= 550);
+            assert(Date.now() - since >= 100);
             return;
         }
       }
