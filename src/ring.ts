@@ -12,16 +12,19 @@ export class Ring<T> {
   private array: (T | undefined)[] = Array(size);
   private head = 0;
   private tail = 0;
-  public length = 0;
+  private $length = 0;
+  public get length(): number {
+    return this.$length;
+  }
   public at(index: number): T | undefined {
     // Inline the code for optimization.
     const array = this.array;
     if (index >= 0) {
-      if (index >= this.length) return;
+      if (index >= this.$length) return;
       return array[(this.head - 1 + index) % array.length];
     }
     else {
-      if (-index > this.length) return;
+      if (-index > this.$length) return;
       return this.tail + index >= 0
         ? array[this.tail + index]
         : array[array.length + this.tail + index];
@@ -30,11 +33,11 @@ export class Ring<T> {
   public replace(index: number, value: T, replacer?: (oldValue: T, newValue: T) => T): T {
     const array = this.array;
     if (index >= 0) {
-      if (index >= this.length) throw new RangeError('Invalid index');
+      if (index >= this.$length) throw new RangeError('Invalid index');
       index = (this.head - 1 + index) % array.length;
     }
     else {
-      if (-index > this.length) throw new RangeError('Invalid index');
+      if (-index > this.$length) throw new RangeError('Invalid index');
       index = this.tail + index >= 0
         ? this.tail + index
         : array.length + this.tail + index;
@@ -50,32 +53,32 @@ export class Ring<T> {
     let { head, tail } = this;
     tail = this.tail = next(head, tail, array.length);
     head = this.head ||= tail;
-    if (head === tail && this.length !== 0) {
+    if (head === tail && this.$length !== 0) {
       splice(array, tail - 1, 0, ...space);
       head = this.head += space.length;
     }
     array[tail - 1] = value;
-    ++this.length;
+    ++this.$length;
   }
   public unshift(value: T): void {
     const array = this.array;
     let { head, tail } = this;
     head = this.head = prev(head, tail, array.length);
     tail = this.tail ||= head;
-    if (head === tail && this.length !== 0) {
+    if (head === tail && this.$length !== 0) {
       splice(array, head, 0, ...space);
       head = this.head += space.length;
     }
     array[head - 1] = value;
-    ++this.length;
+    ++this.$length;
   }
   public pop(): T | undefined {
-    if (this.length === 0) return;
+    if (this.$length === 0) return;
     const array = this.array;
     const i = this.tail - 1;
     const value = array[i];
     array[i] = undefined;
-    --this.length === 0
+    --this.$length === 0
       ? this.head = this.tail = 0
       : this.tail = this.tail === 1
         ? array.length
@@ -83,12 +86,12 @@ export class Ring<T> {
     return value;
   }
   public shift(): T | undefined {
-    if (this.length === 0) return;
+    if (this.$length === 0) return;
     const array = this.array;
     const i = this.head - 1;
     const value = array[i];
     array[i] = undefined;
-    --this.length === 0
+    --this.$length === 0
       ? this.head = this.tail = 0
       : this.head = this.head === array.length
         ? 1
@@ -98,7 +101,7 @@ export class Ring<T> {
   private excess = 0;
   public splice(index: number, count: number, ...values: T[]): T[] {
     const array = this.array;
-    if (this.excess > 100 && array.length - this.length > 200) {
+    if (this.excess > 100 && array.length - this.$length > 200) {
       splice(array, 0, 100 - splice(array, this.tail, 100).length);
       this.excess -= 100;
     }
@@ -106,21 +109,21 @@ export class Ring<T> {
       this.excess = array.length;
     }
     index = index < 0
-      ? max(0, this.length + index)
-      : index <= this.length
+      ? max(0, this.$length + index)
+      : index <= this.$length
         ? index
-        : this.length;
-    count = min(max(count, 0), this.length - index);
+        : this.$length;
+    count = min(max(count, 0), this.$length - index);
     if (values.length === 0) {
       if (count === 0) return [];
       switch (index) {
         case 0:
           if (count === 1) return [this.shift()!];
           break;
-        case this.length - 1:
+        case this.$length - 1:
           if (count === 1) return [this.pop()!];
           break;
-        case this.length:
+        case this.$length:
           return [];
       }
     }
@@ -129,7 +132,7 @@ export class Ring<T> {
       ? index % array.length
       : index;
     this.excess += values.length - count;
-    this.length += values.length - count;
+    this.$length += values.length - count;
     // |--H>*>T--|
     if (this.head <= this.tail) {
       this.tail += values.length - count;
@@ -149,12 +152,18 @@ export class Ring<T> {
   }
   public clear(): void {
     this.array = Array(size);
-    this.length = this.head = this.tail = 0;
+    this.$length = this.head = this.tail = 0;
   }
   public toArray(): T[] {
     return this.head <= this.tail
       ? this.array.slice((this.head || 1) - 1, this.tail) as T[]
       : this.array.slice((this.head || 1) - 1).concat(this.array.slice(0, this.tail)) as T[];
+  }
+  public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
+    for (let i = 0; i < this.$length; ++i) {
+      yield this.at(i)!;
+    }
+    return;
   }
 }
 
