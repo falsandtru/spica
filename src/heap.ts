@@ -76,7 +76,11 @@ export class Heap<T, O = T> {
   }
   public update(this: Heap<T, T>, node: Heap.Node<T, O>): void;
   public update(node: Heap.Node<T, O>, order: O, value?: T): void;
-  public update(node: Node<T, O>, order: O = node[0] as any, value?: T): void {
+  public update(node: Node<T, O>, order?: O, value?: T): void {
+    if (arguments.length < 2) {
+      order = node[0];
+    }
+    assert([order = order!]);
     const array = this.array;
     if (array[node[2]] !== node) throw new Error('Invalid node');
     if (arguments.length > 2) {
@@ -157,13 +161,17 @@ export class MultiHeap<T, O = T> {
   }
   public update(this: MultiHeap<T, T>, node: MultiHeap.Node<T, O>): MultiHeap.Node<T, O>;
   public update(node: MultiHeap.Node<T, O>, order: O, value?: T): MultiHeap.Node<T, O>;
-  public update(node: MultiNode<T, O>, order: O = node[0] as any, value?: T): MultiHeap.Node<T, O> {
-    value = arguments.length > 2
-      ? node[1].value = value!
-      : node[1].value;
+  public update(node: MultiNode<T, O>, order?: O, value?: T): MultiHeap.Node<T, O> {
+    if (arguments.length < 2) {
+      order = node[0];
+    }
+    assert([order = order!]);
+    if (arguments.length > 2) {
+      node[1].value = value!;
+    }
     if (this.cmp(node[0], order) === 0) return node;
     this.delete(node);
-    return this.insert(value, order);
+    return this.insert(node[1].value, order);
   }
   public clear(): void {
     this.heap.clear();
