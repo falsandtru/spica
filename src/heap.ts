@@ -95,7 +95,7 @@ export class Heap<T, O = T> {
   }
 }
 
-type MultiNode<T, O> = readonly [order: O, node: List.Node<T>, node: Heap.Node<List<T>, O>];
+type MultiNode<T, O> = readonly [order: O, node: List.Node<T>];
 
 // 1e6要素で落ちるため実用不可
 export namespace MultiHeap {
@@ -103,6 +103,7 @@ export namespace MultiHeap {
 }
 export class MultiHeap<T, O = T> {
   private static readonly order = Symbol('order');
+  private static readonly heap = Symbol('heap');
   public static readonly max = Heap.max;
   public static readonly min = Heap.min;
   constructor(
@@ -111,11 +112,12 @@ export class MultiHeap<T, O = T> {
   ) {
   }
   private readonly heap = new Heap<List<T>, O>(this.cmp);
-  private readonly dict = new Map<O, readonly [List<T>, Heap.Node<List<T>, O>]>();
-  private readonly list = memoize<O, readonly [List<T>, Heap.Node<List<T>, O>]>(order => {
+  private readonly dict = new Map<O, List<T>>();
+  private readonly list = memoize<O, List<T>>(order => {
     const list = new List<T>();
     list[MultiHeap.order] = order;
-    return [list, this.heap.insert(list, order)];
+    list[MultiHeap.heap] = this.heap.insert(list, order);
+    return list;
   }, this.dict);
   private $length = 0;
   public get length(): number {
@@ -129,14 +131,14 @@ export class MultiHeap<T, O = T> {
   }
   public insert(this: Heap<T, T>, value: T): MultiHeap.Node<T, O>;
   public insert(value: T, order: O): MultiHeap.Node<T, O>;
-  public insert(value: T, order?: O): MultiHeap.Node<T, O> {
+  public insert(value: T, order?: O): MultiNode<T, O> {
     if (arguments.length < 2) {
       order = value as any;
     }
     assert([order = order!]);
     ++this.$length;
-    const { 0: list, 1: node } = this.list(order);
-    return [order, list.push(value), node];
+    const list = this.list(order);
+    return [order, list.push(value)];
   }
   public extract(): T | undefined {
     if (this.$length === 0) return;
@@ -152,10 +154,10 @@ export class MultiHeap<T, O = T> {
   public delete(node: MultiHeap.Node<T, O>): T;
   public delete(node: MultiNode<T, O>): T {
     if (!node[1].list) throw new Error('Invalid node');
+    const { 0: order, 1: lnode } = node;
     --this.$length;
-    const { 0: order, 1: lnode, 2: hnode } = node;
     if (lnode.list.length === 1) {
-      this.heap.delete(hnode);
+      this.heap.delete(lnode[MultiHeap.heap]);
       this.clean && this.dict.delete(order);
     }
     return lnode.delete();
