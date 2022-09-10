@@ -1,6 +1,7 @@
 import { Map } from './global';
 import { isArray } from './alias';
 import { Dict } from './dict';
+import { equal } from './compare';
 
 const undefined = void 0;
 
@@ -39,68 +40,12 @@ export function memoize<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (..
     },
   });
   let nullish = false;
-  return function (this: unknown, ...as) {
+  return (...as) => {
     assert(memory = memory as Dict<b, z>);
-    // Inlining
-    let b: b;
-    switch (as.length) {
-      case 0:
-        // @ts-ignore
-        b = identify.call(this);
-        break;
-      case 1:
-        // @ts-ignore
-        b = identify.call(this, as[0]);
-        break;
-      case 2:
-        // @ts-ignore
-        b = identify.call(this, as[0], as[1]);
-        break;
-      case 3:
-        // @ts-ignore
-        b = identify.call(this, as[0], as[1], as[2]);
-        break;
-      case 4:
-        // @ts-ignore
-        b = identify.call(this, as[0], as[1], as[2], as[3]);
-        break;
-      case 5:
-        // @ts-ignore
-        b = identify.call(this, as[0], as[1], as[2], as[3], as[4]);
-        break;
-      default:
-        b = identify.apply(this, as);
-    }
+    const b = identify(...as);
     let z = memory.get(b);
     if (z !== undefined || nullish && memory.has(b)) return z!;
-    switch (as.length) {
-      case 0:
-        // @ts-ignore
-        z = f.call(this);
-        break;
-      case 1:
-        // @ts-ignore
-        z = f.call(this, as[0]);
-        break;
-      case 2:
-        // @ts-ignore
-        z = f.call(this, as[0], as[1]);
-        break;
-      case 3:
-        // @ts-ignore
-        z = f.call(this, as[0], as[1], as[2]);
-        break;
-      case 4:
-        // @ts-ignore
-        z = f.call(this, as[0], as[1], as[2], as[3]);
-        break;
-      case 5:
-        // @ts-ignore
-        z = f.call(this, as[0], as[1], as[2], as[3], as[4]);
-        break;
-      default:
-        z = f.apply(this, as);
-    }
+    z = f(...as);
     nullish ||= z === undefined;
     memory.set(b, z);
     return z;
@@ -116,67 +61,11 @@ export function reduce<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...
 export function reduce<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...as: as) => z, identify: (...as: as) => b = (...as) => as[0] as b): typeof f {
   let key: b = {} as b;
   let val: z;
-  return function (this: unknown, ...as) {
-    // Inlining
-    let b: b;
-    switch (as.length) {
-      case 0:
-        // @ts-ignore
-        b = identify.call(this);
-        break;
-      case 1:
-        // @ts-ignore
-        b = identify.call(this, as[0]);
-        break;
-      case 2:
-        // @ts-ignore
-        b = identify.call(this, as[0], as[1]);
-        break;
-      case 3:
-        // @ts-ignore
-        b = identify.call(this, as[0], as[1], as[2]);
-        break;
-      case 4:
-        // @ts-ignore
-        b = identify.call(this, as[0], as[1], as[2], as[3]);
-        break;
-      case 5:
-        // @ts-ignore
-        b = identify.call(this, as[0], as[1], as[2], as[3], as[4]);
-        break;
-      default:
-        b = identify.apply(this, as);
-    }
-    if (key === key ? key !== b : b === b) {
+  return (...as) => {
+    const b = identify(...as);
+    if (!equal(key, b)) {
       key = b;
-      switch (as.length) {
-        case 0:
-          // @ts-ignore
-          val = f.call(this);
-          break;
-        case 1:
-          // @ts-ignore
-          val = f.call(this, as[0]);
-          break;
-        case 2:
-          // @ts-ignore
-          val = f.call(this, as[0], as[1]);
-          break;
-        case 3:
-          // @ts-ignore
-          val = f.call(this, as[0], as[1], as[2]);
-          break;
-        case 4:
-          // @ts-ignore
-          val = f.call(this, as[0], as[1], as[2], as[3]);
-          break;
-        case 5:
-          // @ts-ignore
-          val = f.call(this, as[0], as[1], as[2], as[3], as[4]);
-          break;
-        default:
-          val = f.apply(this, as);
-      }
+      val = f(...as);
     }
     return val;
   };
