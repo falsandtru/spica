@@ -67,12 +67,12 @@ export function unique(rnd: (len: number) => string, len: number): () => string 
 function cons(size: number): () => number {
   const len = radixes.findIndex(radix => radix >= size) as 1;
   assert(len > 0);
-  return () => {
-    while (true) {
-      const r = random(len)
-      assert(r < radixes[len]);
-      if (r < size) return r;
-    }
+  return function rnd(): number {
+    const r = random(len);
+    assert(r < radixes[len]);
+    return r < size
+      ? r
+      : rnd();
   };
 }
 
