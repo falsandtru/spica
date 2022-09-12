@@ -80,5 +80,6 @@ jobs:
         with:
           node-version: '16'
       - run: |
+          npx envinfo -yes
           npm install
           xvfb-run --auto-servernum npm run bench
