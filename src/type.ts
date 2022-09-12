@@ -257,25 +257,25 @@ export function type(value: unknown): string {
   }
 }
 
-export function isType(value: unknown, type: 'undefined'): value is undefined;
-export function isType(value: unknown, type: 'null'): value is null;
-export function isType(value: unknown, type: 'boolean'): value is boolean;
-export function isType(value: unknown, type: 'number'): value is number;
-export function isType(value: unknown, type: 'bigint'): value is bigint;
-export function isType(value: unknown, type: 'string'): value is string;
-export function isType(value: unknown, type: 'symbol'): value is symbol;
-export function isType(value: unknown, type: 'function'): value is Function;
-export function isType(value: unknown, type: 'object'): value is object;
-export function isType(value: unknown[], type: 'array'): value is unknown[];
-export function isType(value: unknown, type: 'array'): value is readonly unknown[];
-export function isType(value: unknown, type: string): boolean {
+export function is(type: 'undefined', value: unknown): value is undefined;
+export function is(type: 'null', value: unknown): value is null;
+export function is(type: 'boolean', value: unknown): value is boolean;
+export function is(type: 'number', value: unknown): value is number;
+export function is(type: 'bigint', value: unknown): value is bigint;
+export function is(type: 'string', value: unknown): value is string;
+export function is(type: 'symbol', value: unknown): value is symbol;
+export function is(type: 'function', value: unknown): value is Function;
+export function is(type: 'object', value: unknown): value is object;
+export function is(type: 'array', value: unknown[]): value is unknown[];
+export function is(type: 'array', value: unknown): value is readonly unknown[];
+export function is(type: string, value: unknown): boolean {
   switch (type) {
-    case 'object':
-      return value !== null && typeof value === type;
-    case 'array':
-      return isArray(value);
     case 'null':
       return value === null;
+    case 'array':
+      return isArray(value);
+    case 'object':
+      return value !== null && typeof value === type;
     default:
       return typeof value === type;
   }
