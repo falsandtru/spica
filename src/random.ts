@@ -38,25 +38,25 @@ export function unique(rnd: (len: number) => string, len: number, mem?: Set<stri
   let prefix = '';
   return function random(): string {
     assert(mem = mem!);
-    try {
-      for (let i = 0; i < retry; ++i) {
-        const r = rnd(len);
-        if (mem.has(r)) continue;
+    for (let i = 0; i < retry; ++i) {
+      const r = rnd(len);
+      if (mem.has(r)) continue;
+      try {
         mem.add(r);
-        return prefix + r;
       }
-    }
-    catch (reason) {
-      if (!clear) throw reason;
-      prefixes ??= new Set();
-      for (let i = 0; i < 2; ++i) {
-        prefix = rnd(prefix.length + (i + 1) / 2 | 0 || 1);
-        if (prefixes.has(prefix)) continue;
-        prefixes.add(prefix);
-        mem.clear();
-        break;
+      catch (reason) {
+        if (!clear) throw reason;
+        prefixes ??= new Set();
+        for (let i = 0; i < 2; ++i) {
+          prefix = rnd(prefix.length + (i + 1) / 2 | 0 || 1);
+          if (prefixes.has(prefix)) continue;
+          prefixes.add(prefix);
+          mem.clear();
+          break;
+        }
+        return random();
       }
-      return random();
+      return prefix + r;
     }
     clear && mem.clear();
     ++len;
