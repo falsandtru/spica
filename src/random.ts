@@ -30,8 +30,9 @@ export const rnd0_ = conv(rnd64, dict0_);
 export const rndAP = conv(rnd16, dictAz);
 export const rndAf = conv(rnd32, dictAz);
 
-export function unique(rnd: (len: number) => string, len: number): () => string {
-  let mem = new Set<string>();
+export function unique(rnd: (len: number) => string, len = 1, mem?: Set<string>): () => string {
+  const independence = !mem;
+  mem ??= new Set();
   const trials = 3;
   let prefixes: Set<string>;
   let prefix = '';
@@ -45,21 +46,25 @@ export function unique(rnd: (len: number) => string, len: number): () => string 
       }
       catch (reason) {
         // ベンチマーク程度でもSetがパンクする場合がある。
+        if (!independence) throw reason;
         prefixes ??= new Set();
+        prefix ||= '?';
+        assert(prefix.length > 0);
         for (let i = 0; i < trials; ++i) {
-          // 最終試行で必ず成功
-          prefix = rnd(prefix.length + (i + 1) / trials | 0 || 1);
+          prefix = rnd(prefix.length);
           if (prefixes.has(prefix)) continue;
           prefixes.add(prefix);
-          mem = new Set();
-          break;
+          mem.clear();
+          return random();
         }
+        prefixes = new Set();
+        prefix += '?';
         return random();
       }
       return prefix + r;
     }
-    mem = new Set();
     ++len;
+    independence && mem.clear();
     return random();
   };
 }
