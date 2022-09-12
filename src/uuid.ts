@@ -1,24 +1,27 @@
 import { crypto } from './global';
 
-export function uuid(): string {
-  // version 4
-  return gen(rnd16, HEX);
-}
+// Version 4
 
-assert(eval('(function () {return this})()') === undefined);
-const gen = eval([
-  '(rnd16, HEX) =>',
-  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/./g, c => {
+const format = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
+
+export function uuid(): string {
+  let acc = '';
+  for (let i = 0; i < format.length; ++i) {
+    const c = format[i];
     switch (c) {
       case 'x':
-        return `+ HEX[rnd16()]`;
+        acc += HEX[rnd16()];
+        continue
       case 'y':
-        return `+ HEX[rnd16() & 0x03 | 0x08]`;
+        acc += HEX[rnd16() & 0x03 | 0x08];
+        continue
       default:
-        return `+ '${c}'`;
+        acc += c;
+        continue
     }
-  }).slice(1),
-].join(''));
+  }
+  return acc;
+}
 
 const HEX = [...Array(16)].map((_, i) => i.toString(16));
 
