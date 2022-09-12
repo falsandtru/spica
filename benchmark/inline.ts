@@ -2,38 +2,34 @@ import { benchmark } from './benchmark';
 
 describe('Benchmark:', function () {
   describe('Inline', function () {
-    function inline(len: number) {
-      return Function('arr', [
-        '"use strict";',
-        'return 0',
-        ...[...Array(len)].map((_, i) => `+ arr[${i}]`),
-      ].join(''));
-    }
-
     for (const length of [1, 1e1, 1e2]) {
+      const arr = Array(length).fill(1);
+
       it(`for ${length.toLocaleString('en')}`, function (done) {
         benchmark(`for ${length.toLocaleString('en')}`, () => {
-          const arr = Array(length).fill(1);
-          for (let i = 0; i < 1; ++i) arr[i];
+          let acc = 0;
+          for (let i = 0; i < 1; ++i) {
+            acc += arr[i];
+          }
+          acc;
         }, done);
       });
 
-      it(`argument ${length.toLocaleString('en')}`, function (done) {
-        const arr = Array(length).fill(1);
-        const sum = inline(arr.length)
-        benchmark(`Inline argument ${length.toLocaleString('en')}`, () => sum(arr), done);
+      it(`Function ${length.toLocaleString('en')}`, function (done) {
+        const sum = Function('arr', [
+          '"use strict";',
+          'return ',
+          arr.reduce((acc, _, i) => acc + `+ arr[${i}]`, '').slice(1),
+        ].join(''));
+        benchmark(`Inline Function ${length.toLocaleString('en')}`, () => sum(arr), done);
       });
 
-      it(`reference ${length.toLocaleString('en')}`, function (done) {
-        const arr = Array(length).fill(1);
+      it(`eval ${length.toLocaleString('en')}`, function (done) {
         const sum = eval([
-          '() => {',
-          '"use strict";',
-          'return 0',
-          ...arr.map((_, i) => `+ arr[${i}]`),
-          '}',
+          '() =>',
+          arr.reduce((acc, _, i) => acc + `+ arr[${i}]`, '').slice(1),
         ].join(''));
-        benchmark(`Inline reference ${length.toLocaleString('en')}`, () => sum(), done);
+        benchmark(`Inline eval ${length.toLocaleString('en')}`, () => sum(), done);
       });
     }
   });
