@@ -235,18 +235,26 @@ export type DeepMutable<T, E = never> =
 const ObjectPrototype = Object.prototype;
 const ArrayPrototype = Array.prototype;
 export function type(value: unknown): string {
-  if (value === void 0) return 'undefined';
-  if (value === null) return 'null';
   const type = typeof value;
-  if (type === 'object') {
-    if ((value as object)[Symbol.toStringTag]) return (value as object)[Symbol.toStringTag];
-    const proto = ObjectGetPrototypeOf(value);
-    if (proto === ObjectPrototype) return 'Object';
-    if (proto === ArrayPrototype) return 'Array';
-    return toString(value).slice(8, -1);
+  switch (type) {
+    case 'function':
+      return 'Function';
+    case 'object':
+      if (value === null) return 'null';
+      assert(value = value as object);
+      const tag = (value as object)[Symbol.toStringTag];
+      if (tag) return tag;
+      switch (ObjectGetPrototypeOf(value)) {
+        case ArrayPrototype:
+          return 'Array';
+        case ObjectPrototype:
+          return 'Object';
+        default:
+          return toString(value).slice(8, -1);
+      }
+    default:
+      return type;
   }
-  if (type === 'function') return 'Function';
-  return type;
 }
 
 export function isType(value: unknown, type: 'undefined'): value is undefined;
@@ -261,15 +269,23 @@ export function isType(value: unknown, type: 'object'): value is object;
 export function isType(value: unknown[], type: 'Array'): value is unknown[];
 export function isType(value: unknown, type: 'Array'): value is readonly unknown[];
 export function isType(value: unknown, name: string): boolean {
-  if (name === 'object') return value !== null && typeof value === name;
-  if (name === 'function') return typeof value === name;
-  return type(value) === name;
+  switch (name) {
+    case 'object':
+      return value !== null && typeof value === name;
+    case 'function':
+      return typeof value === name;
+    default:
+      return type(value) === name;
+  }
 }
 
 export function isPrimitive(value: unknown): value is undefined | null | boolean | number | bigint | string | symbol {
-  const type = typeof value;
-  return type === 'object'
-      || type === 'function'
-    ? value === null
-    : true;
+  switch (typeof value) {
+    case 'function':
+      return false;
+    case 'object':
+      return value === null;
+    default:
+      return true;
+  }
 }
