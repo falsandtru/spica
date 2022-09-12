@@ -31,12 +31,12 @@ export const rndAf = conv(rnd32, dictAz);
 
 export function unique(rnd: (len: number) => string, len: number): () => string {
   let mem = new Set<string>();
-  let retry = 5;
+  const trials = 3;
   let prefixes: Set<string>;
   let prefix = '';
   return function random(): string {
     assert(mem = mem!);
-    for (let i = 0; i < retry; ++i) {
+    for (let i = 0; i < trials; ++i) {
       const r = rnd(len);
       if (mem.has(r)) continue;
       try {
@@ -45,25 +45,20 @@ export function unique(rnd: (len: number) => string, len: number): () => string 
       catch (reason) {
         // ベンチマーク程度でもSetがパンクする場合がある。
         prefixes ??= new Set();
-        for (let i = 0; i < 2; ++i) {
-          prefix = rnd(prefix.length + (i + 1) / 2 | 0 || 1);
+        for (let i = 0; i < trials; ++i) {
+          // 最終試行で必ず成功
+          prefix = rnd(prefix.length + (i + 1) / trials | 0 || 1);
           if (prefixes.has(prefix)) continue;
           prefixes.add(prefix);
           mem = new Set();
           break;
         }
-        if (mem.size !== 0) throw reason;
         return random();
       }
       return prefix + r;
     }
     mem = new Set();
     ++len;
-    retry = len < 3
-      ? retry
-      : len < 5
-        ? 3
-        : 2;
     return random();
   };
 }
