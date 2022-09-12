@@ -674,7 +674,7 @@ describe('Unit: lib/type', () => {
       assert(isType(null, 'null'));
       assert(isType(() => 0, 'function'));
       assert(isType({}, 'object'));
-      assert(isType([], 'Array'));
+      assert(isType([], 'array'));
     });
 
   });

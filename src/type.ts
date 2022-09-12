@@ -1,5 +1,5 @@
 import { Symbol } from './global';
-import { toString, ObjectGetPrototypeOf } from './alias';
+import { isArray, toString, ObjectGetPrototypeOf } from './alias';
 
 type Falsy = undefined | false | 0 | '' | null | void;
 type Unique = typeof Unique;
@@ -242,7 +242,7 @@ export function type(value: unknown): string {
     case 'object':
       if (value === null) return 'null';
       assert(value = value as object);
-      const tag = (value as object)[Symbol.toStringTag];
+      const tag: string = (value as object)[Symbol.toStringTag];
       if (tag) return tag;
       switch (ObjectGetPrototypeOf(value)) {
         case ArrayPrototype:
@@ -266,16 +266,18 @@ export function isType(value: unknown, type: 'string'): value is string;
 export function isType(value: unknown, type: 'symbol'): value is symbol;
 export function isType(value: unknown, type: 'function'): value is Function;
 export function isType(value: unknown, type: 'object'): value is object;
-export function isType(value: unknown[], type: 'Array'): value is unknown[];
-export function isType(value: unknown, type: 'Array'): value is readonly unknown[];
-export function isType(value: unknown, name: string): boolean {
-  switch (name) {
+export function isType(value: unknown[], type: 'array'): value is unknown[];
+export function isType(value: unknown, type: 'array'): value is readonly unknown[];
+export function isType(value: unknown, type: string): boolean {
+  switch (type) {
     case 'object':
-      return value !== null && typeof value === name;
-    case 'function':
-      return typeof value === name;
+      return value !== null && typeof value === type;
+    case 'array':
+      return isArray(value);
+    case 'null':
+      return value === null;
     default:
-      return type(value) === name;
+      return typeof value === type;
   }
 }
 
