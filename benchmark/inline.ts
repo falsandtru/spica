@@ -3,7 +3,7 @@ import { benchmark } from './benchmark';
 describe('Benchmark:', function () {
   describe('Inline', function () {
     for (const length of [1, 1e1, 1e2]) {
-      const arr = Array(length).fill(1);
+      const arr = Array<number>(length).fill(1);
 
       it(`for ${length.toLocaleString('en')}`, function (done) {
         benchmark(`for ${length.toLocaleString('en')}`, () => {
