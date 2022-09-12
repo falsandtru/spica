@@ -19,29 +19,25 @@ export function memoize<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (..
 export function memoize<as extends [unknown, ...unknown[]], z, b extends number = number>(f: (...as: as) => z, identify: (...as: as) => b, memory: z[]): typeof f;
 export function memoize<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...as: as) => z, identify: Dict<b, z> | z[] | ((...as: as) => b) = (...as) => as[0] as b, memory?: Dict<b, z> | z[]): typeof f {
   if (typeof identify === 'object') return memoize(f, undefined, identify as Dict<b, z>);
-  if (memory === undefined) return memoize(f, identify, new Map());
-  if (isArray(memory)) return memoize<as, z, b>(f, identify, {
-    has(key) {
-      assert(memory = memory as z[]);
-      return memory[key as any as number] !== undefined;
-    },
-    get(key) {
-      assert(memory = memory as z[]);
-      assert(0 <= key as any);
-      return memory[key as any as number];
-    },
-    set(key, value) {
-      assert(memory = memory as z[]);
-      memory[key as any as number] = value;
-      return this;
-    },
-    delete() {
-      throw 0;
-    },
-  });
+  return isArray(memory)
+    ? memoizeArray(f, identify, memory)
+    : memoizeObject(f, identify, memory ?? new Map());
+}
+function memoizeArray<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...as: as) => z, identify: (...as: as) => b = (...as) => as[0] as b, memory: z[]): typeof f {
   let nullish = false;
   return (...as) => {
-    assert(memory = memory as Dict<b, z>);
+    const b = identify(...as) as number;
+    let z = memory[b];
+    if (z !== undefined || nullish && memory[b] !== undefined) return z!;
+    z = f(...as);
+    nullish ||= z === undefined;
+    memory[b] = z;
+    return z;
+  };
+}
+function memoizeObject<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...as: as) => z, identify: (...as: as) => b = (...as) => as[0] as b, memory: Dict<b, z>): typeof f {
+  let nullish = false;
+  return (...as) => {
     const b = identify(...as);
     let z = memory.get(b);
     if (z !== undefined || nullish && memory.has(b)) return z!;
