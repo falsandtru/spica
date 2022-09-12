@@ -1,4 +1,5 @@
 import { Set, crypto } from './global';
+import { memoize } from './memoize';
 
 const radixes = Object.freeze([...Array(7)].map((_, i) => 1 << i));
 assert.deepStrictEqual(radixes, [1, 2, 4, 8, 16, 32, 64]);
@@ -77,13 +78,13 @@ function cons(size: number): () => number {
 }
 
 function conv(rnd: () => number, dict: readonly string[]): (len?: number) => string {
-  return (len = 1) => {
-    let acc = '';
-    while (len--) {
-      acc += dict[rnd()];
-    }
-    return acc;
-  };
+  assert(rnd);
+  assert(dict);
+  const gen = memoize((len: number): () => string => eval([
+    '() =>',
+    'x'.repeat(len).replace(/./g, () => `+ dict[rnd()]`).slice(1),
+  ].join('')), []);
+  return (len = 1) => gen(len)();
 }
 
 const buffer = new Uint16Array(512);

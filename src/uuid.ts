@@ -5,11 +5,9 @@ export function uuid(): string {
   return gen(rnd16, HEX);
 }
 
-const HEX = [...Array(16)].map((_, i) => i.toString(16));
-
-const gen = Function('rnd16', 'HEX', [
-  '"use strict";',
-  'return ""',
+assert(eval('(function () {return this})()') === undefined);
+const gen = eval([
+  '(rnd16, HEX) =>',
   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/./g, c => {
     switch (c) {
       case 'x':
@@ -19,8 +17,10 @@ const gen = Function('rnd16', 'HEX', [
       default:
         return `+ '${c}'`;
     }
-  }),
+  }).slice(1),
 ].join(''));
+
+const HEX = [...Array(16)].map((_, i) => i.toString(16));
 
 const buffer = new Uint16Array(512);
 assert(buffer.length % 4 === 0);
