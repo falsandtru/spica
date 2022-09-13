@@ -23,7 +23,7 @@ export function uuid(): string {
   return acc;
 }
 
-const HEX = Object.freeze([...Array(16)].map((_, i) => i.toString(16)));
+const HEX = [...Array(16)].map((_, i) => i.toString(16)).join('');
 
 const buffer = new Uint16Array(512);
 assert(buffer.length % 4 === 0);

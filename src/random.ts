@@ -3,21 +3,21 @@ import { Set, crypto } from './global';
 const radixes = Object.freeze([...Array(7)].map((_, i) => 1 << i));
 assert.deepStrictEqual(radixes, [1, 2, 4, 8, 16, 32, 64]);
 const masks = Object.freeze(radixes.map(radix => radix - 1));
-const dict0_ = Object.freeze([
+const dict0_ = [
   ...[...Array(36)].map((_, i) => i.toString(36)),
   ...[...Array(36)].map((_, i) => i.toString(36).toUpperCase()).slice(-26),
   '-', '_',
-]);
+].join('');
 assert(dict0_.length === 64);
 // eslint-disable-next-line
-assert(dict0_.join('').match(/^0.*9a.*zA.*Z-_$/));
-const dictAz = Object.freeze([
+assert(dict0_.match(/^0.*9a.*zA.*Z-_$/));
+const dictAz = [
   ...[...Array(36)].map((_, i) => i.toString(36).toUpperCase()).slice(-26),
   ...[...Array(36)].map((_, i) => i.toString(36)).slice(-26),
-]);
+].join('');
 assert(dictAz.length === 52);
 // eslint-disable-next-line
-assert(dictAz.join('').match(/^A.*Za.*z$/));
+assert(dictAz.match(/^A.*Za.*z$/));
 
 export const rnd16 = cons(16);
 export const rnd32 = cons(32);
@@ -81,7 +81,7 @@ function cons(size: number): () => number {
   };
 }
 
-function conv(rnd: () => number, dict: readonly string[]): (len?: number) => string {
+function conv(rnd: () => number, dict: string): (len?: number) => string {
   return (len = 1) => {
     let acc = '';
     while (len--) {
