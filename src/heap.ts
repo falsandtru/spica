@@ -162,7 +162,7 @@ export class MultiHeap<T, O = T> {
     const { 0: order, 1: lnode } = node;
     --this.$length;
     if (lnode.list.length === 1) {
-      this.heap.delete(lnode[MultiHeap.heap]);
+      this.heap.delete(lnode.list[MultiHeap.heap]);
       this.clean && this.dict.delete(order);
     }
     return lnode.delete();
