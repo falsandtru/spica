@@ -1,6 +1,12 @@
 module.exports = function (config) {
   config.set({
     browsers: ['Chrome', 'Firefox'],
+    customLaunchers: {
+      Chrome_bench: {
+        base: 'Chrome',
+        flags: ['--js-flags="--expose-gc"'],
+      },
+    },
     frameworks: ['mocha', 'power-assert'],
     files: [
       { pattern: 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.js', watched: false, served: false, included: true, integrity: 'sha512-2iwCHjuj+PmdCyvb88rMOch0UcKQxVHi/gsAml1fN3eg82IDaO/cdzzeXX4iF2VzIIes7pODE1/G0ts3QBwslA==' },
