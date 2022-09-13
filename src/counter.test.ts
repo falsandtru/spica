@@ -30,6 +30,13 @@ describe('Unit: lib/counter', () => {
       }
     });
 
+    it('pad', () => {
+      const count = counter(10, '00');
+      for (let i = 1; i < 1000; ++i) {
+        assert(count() === i.toString(10).padStart(2, '0'));
+      }
+    });
+
   });
 
 });

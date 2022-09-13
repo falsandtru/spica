@@ -18,6 +18,11 @@ describe('Benchmark:', function () {
       benchmark(`counter 36`, () => count(), done);
     });
 
+    it(`pad`, function (done) {
+      const count = counter(10, '0'.repeat(16));
+      benchmark(`counter pad`, () => count(), done);
+    });
+
   });
 
 });
