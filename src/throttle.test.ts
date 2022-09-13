@@ -56,7 +56,9 @@ describe('Unit: lib/throttle', () => {
     });
   });
 
-  describe('cothrottle', () => {
+  describe('cothrottle', function () {
+    navigator.userAgent.includes('Firefox') && this.retries(1);
+
     it('', async () => {
       let since = Date.now();
       for await (const count of cothrottle(async function* (count = 0) {
