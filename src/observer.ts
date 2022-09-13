@@ -1,9 +1,10 @@
 import type { Inits, DeepImmutable, DeepRequired } from './type';
 import { Number, Map, WeakSet, Error } from './global';
 import { ObjectAssign } from './alias';
+import { Ring } from './ring';
 import { List } from './ixlist';
 import { singleton } from './function';
-import { push, splice } from './array';
+import { push } from './array';
 import { causeAsyncException } from './exception';
 
 export interface Observer<N extends readonly unknown[], D, R> {
@@ -30,9 +31,9 @@ class ListenerNode<N extends readonly unknown[], D, R> {
     public readonly index: N[number],
   ) {
   }
+  public readonly monitors = new Ring<MonitorItem<N, D>>();
+  public readonly subscribers = new Ring<SubscriberItem<N, D, R>>();
   public readonly children = new List<N[number], ListenerNode<N, D, R>>(new Map());
-  public readonly monitors: MonitorItem<N, D>[] = [];
-  public readonly subscribers: SubscriberItem<N, D, R>[] = [];
 }
 export type ListenerItem<N extends readonly unknown[], D, R> =
   | MonitorItem<N, D>
@@ -117,15 +118,15 @@ export class Observation<N extends readonly unknown[], D, R>
     if (!node) return;
     switch (typeof subscriber) {
       case 'object': {
-        const items: ListenerItem<N, D, R>[] = subscriber.type === ListenerType.Monitor
+        const items: Ring<ListenerItem<N, D, R>> = subscriber.type === ListenerType.Monitor
           ? node.monitors
           : node.subscribers;
-        if (items.length === 0 || subscriber.id < items[0].id || subscriber.id > items[items.length - 1].id) return;
-        return void splice(items, items.indexOf(subscriber), 1);
+        if (items.length === 0 || subscriber.id < items.at(0)!.id || subscriber.id > items.at(-1)!.id) return;
+        return void items.splice(items.indexOf(subscriber), 1);
       }
       case 'function': {
         const items = node.subscribers;
-        return void splice(items, items.findIndex(item => item.listener === subscriber), 1);
+        return void items.splice(items.findIndex(item => item.listener === subscriber), 1);
       }
       case 'undefined':
         return void clear(node);
@@ -155,10 +156,10 @@ export class Observation<N extends readonly unknown[], D, R>
   public refs(namespace: Readonly<N | Inits<N>>): ListenerItem<N, D, R>[] {
     const node = this.seekNode(namespace, SeekMode.Breakable);
     if (!node) return [];
-    return push<ListenerItem<N, D, R>[]>(
+    return push<Ring<ListenerItem<N, D, R>>>(
       this.refsBelow(node, ListenerType.Monitor),
       this.refsBelow(node, ListenerType.Subscriber))
-      .reduce((acc, rs) => push(acc, rs), []);
+      .reduce((acc, rs) => push(acc, rs.toArray()), []);
   }
   private drain(namespace: Readonly<N>, data: D, tracker?: (data: D, results: R[]) => void): void {
     const node = this.seekNode(namespace, SeekMode.Breakable);
@@ -167,8 +168,9 @@ export class Observation<N extends readonly unknown[], D, R>
     for (let i = 0; i < sss.length; ++i) {
       const items = sss[i];
       if (items.length === 0) continue;
-      for (let i = 0, max = items[items.length - 1].id; i < items.length && items[i].id <= max; ++i) {
-        const item = items[i];
+      for (let i = 0, max = items.at(-1)!.id; i < items.length; ++i) {
+        const item = items.at(i)!;
+        if (item.id > max) break;
         if (item.options.once) {
           this.off(item.namespace, item);
         }
@@ -180,15 +182,16 @@ export class Observation<N extends readonly unknown[], D, R>
           causeAsyncException(reason);
         }
         i = i < items.length ? i : items.length - 1;
-        for (; i >= 0 && items[i].id > item.id; --i);
+        for (; i >= 0 && items.at(i)!.id > item.id; --i);
       }
     }
     const mss = this.refsAbove(node || this.seekNode(namespace, SeekMode.Closest), ListenerType.Monitor);
     for (let i = 0; i < mss.length; ++i) {
       const items = mss[i];
       if (items.length === 0) continue;
-      for (let i = 0, max = items[items.length - 1].id; i < items.length && items[i].id <= max; ++i) {
-        const item = items[i];
+      for (let i = 0, max = items.at(-1)!.id; i < items.length; ++i) {
+        const item = items.at(i)!;
+        if (item.id > max) break;
         if (item.options.once) {
           this.off(item.namespace, item);
         }
@@ -199,7 +202,7 @@ export class Observation<N extends readonly unknown[], D, R>
           causeAsyncException(reason);
         }
         i = i < items.length ? i : items.length - 1;
-        for (; i >= 0 && items[i].id > item.id; --i);
+        for (; i >= 0 && items.at(i)!.id > item.id; --i);
       }
     }
     if (tracker) {
@@ -211,8 +214,8 @@ export class Observation<N extends readonly unknown[], D, R>
       }
     }
   }
-  private refsAbove({ parent, monitors, subscribers }: ListenerNode<N, D, R>, type: ListenerType.Monitor): MonitorItem<N, D>[][];
-  private refsAbove({ parent, monitors, subscribers }: ListenerNode<N, D, R>, type: ListenerType): ListenerItem<N, D, R>[][] {
+  private refsAbove({ parent, monitors, subscribers }: ListenerNode<N, D, R>, type: ListenerType.Monitor): Ring<MonitorItem<N, D>>[];
+  private refsAbove({ parent, monitors, subscribers }: ListenerNode<N, D, R>, type: ListenerType): Ring<ListenerItem<N, D, R>>[] {
     const acc = type === ListenerType.Monitor
       ? [monitors]
       : [subscribers];
@@ -224,12 +227,12 @@ export class Observation<N extends readonly unknown[], D, R>
     }
     return acc;
   }
-  private refsBelow(node: ListenerNode<N, D, R>, type: ListenerType.Monitor): MonitorItem<N, D>[][];
-  private refsBelow(node: ListenerNode<N, D, R>, type: ListenerType.Subscriber): SubscriberItem<N, D, R>[][];
-  private refsBelow(node: ListenerNode<N, D, R>, type: ListenerType): ListenerItem<N, D, R>[][] {
+  private refsBelow(node: ListenerNode<N, D, R>, type: ListenerType.Monitor): Ring<MonitorItem<N, D>>[];
+  private refsBelow(node: ListenerNode<N, D, R>, type: ListenerType.Subscriber): Ring<SubscriberItem<N, D, R>>[];
+  private refsBelow(node: ListenerNode<N, D, R>, type: ListenerType): Ring<ListenerItem<N, D, R>>[] {
     return this.refsBelow_(node, type, [])[0];
   }
-  private refsBelow_({ monitors, subscribers, children }: ListenerNode<N, D, R>, type: ListenerType, acc: ListenerItem<N, D, R>[][]): readonly [ListenerItem<N, D, R>[][], number] {
+  private refsBelow_({ monitors, subscribers, children }: ListenerNode<N, D, R>, type: ListenerType, acc: Ring<ListenerItem<N, D, R>>[]): readonly [Ring<ListenerItem<N, D, R>>[], number] {
     type === ListenerType.Monitor
       ? (acc as typeof monitors[]).push(monitors)
       : (acc as typeof subscribers[]).push(subscribers);
@@ -276,6 +279,6 @@ function clear<N extends readonly unknown[], D, R>({ monitors, subscribers, chil
     if (!node) break;
     --i;
   }
-  splice(subscribers, 0);
+  subscribers.clear();
   return monitors.length === 0;
 }
