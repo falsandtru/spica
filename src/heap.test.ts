@@ -173,6 +173,15 @@ describe('Unit: lib/heap', () => {
       ]);
     });
 
+    it('find', () => {
+      const heap = new Heap<number>();
+
+      heap.insert(0, 0);
+      heap.insert(0, 2);
+      heap.insert(1, 1);
+      assert.deepStrictEqual(heap.find(1), [1, 1, 2]);
+    });
+
   });
 
 });

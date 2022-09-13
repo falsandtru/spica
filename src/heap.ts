@@ -91,6 +91,9 @@ export class Heap<T, O = T> {
     if (this.cmp(node[0], node[0] = order) === 0) return;
     sort(this.cmp, array, node[2], this.$length, this.stable);
   }
+  public find(order: O): Heap.Node<T, O> | undefined {
+    return this.array.find(node => node && node[0] === order);
+  }
   public clear(): void {
     this.array = Array(size);
     this.$length = 0;
@@ -178,6 +181,9 @@ export class MultiHeap<T, O = T> {
     if (this.cmp(node[0], order) === 0) return node;
     this.delete(node);
     return this.insert(node[1].value, order);
+  }
+  public find(order: O): List<T> | undefined {
+    return this.dict.get(order);
   }
   public clear(): void {
     this.heap.clear();
