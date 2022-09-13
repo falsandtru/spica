@@ -100,11 +100,11 @@ export class Heap<T, O = T> {
   }
 }
 
-type MultiNode<T, O> = readonly [order: O, node: List.Node<T>];
+type MultiNode<T> = List.Node<T>;
 
 // 1e6要素で落ちるため実用不可
 export namespace MultiHeap {
-  export type Node<T, O = T> = Heap.Node<T, O>;
+  export type Node<T, O = T> = List.Node<T> | { _: [T, O]; };
 }
 export class MultiHeap<T, O = T> {
   private static readonly order = Symbol('order');
@@ -136,14 +136,14 @@ export class MultiHeap<T, O = T> {
   }
   public insert(this: Heap<T, T>, value: T): MultiHeap.Node<T, O>;
   public insert(value: T, order: O): MultiHeap.Node<T, O>;
-  public insert(value: T, order?: O): MultiNode<T, O> {
+  public insert(value: T, order?: O): MultiNode<T> {
     if (arguments.length < 2) {
       order = value as any;
     }
     assert([order = order!]);
     ++this.$length;
     const list = this.list(order);
-    return [order, list.push(value)];
+    return list.push(value);
   }
   public extract(): T | undefined {
     if (this.$length === 0) return;
@@ -157,30 +157,31 @@ export class MultiHeap<T, O = T> {
     return value;
   }
   public delete(node: MultiHeap.Node<T, O>): T;
-  public delete(node: MultiNode<T, O>): T {
-    if (!node[1].list) throw new Error('Invalid node');
-    const { 0: order, 1: lnode } = node;
+  public delete(node: MultiNode<T>): T {
+    const list = node.list;
+    if (!list) throw new Error('Invalid node');
     --this.$length;
-    if (lnode.list.length === 1) {
-      this.heap.delete(lnode.list[MultiHeap.heap]);
-      this.clean && this.dict.delete(order);
+    if (list.length === 1) {
+      this.heap.delete(list[MultiHeap.heap]);
+      this.clean && this.dict.delete(list[MultiHeap.order]);
     }
-    return lnode.delete();
+    return node.delete();
   }
   public update(this: MultiHeap<T, T>, node: MultiHeap.Node<T, O>): MultiHeap.Node<T, O>;
   public update(node: MultiHeap.Node<T, O>, order: O, value?: T): MultiHeap.Node<T, O>;
-  public update(node: MultiNode<T, O>, order?: O, value?: T): MultiHeap.Node<T, O> {
-    if (!node[1].list) throw new Error('Invalid node');
+  public update(node: MultiNode<T>, order?: O, value?: T): MultiHeap.Node<T, O> {
+    const list = node.list;
+    if (!list) throw new Error('Invalid node');
     if (arguments.length < 2) {
-      order = node[0];
+      order = list[MultiHeap.order];
     }
     assert([order = order!]);
     if (arguments.length > 2) {
-      node[1].value = value!;
+      node.value = value!;
     }
-    if (this.cmp(node[0], order) === 0) return node;
+    if (this.cmp(list[MultiHeap.order], order) === 0) return node;
     this.delete(node);
-    return this.insert(node[1].value, order);
+    return this.insert(node.value, order);
   }
   public find(order: O): List<T> | undefined {
     return this.dict.get(order);
