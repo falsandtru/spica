@@ -2,16 +2,14 @@
 
 const undefined = void 0;
 
-const LENGTH = Symbol('length');
-
 type NodeType<T> = Node<T>;
 export namespace List {
   export type Node<T> = NodeType<T>;
 }
 export class List<T> {
-  public [LENGTH] = 0;
+  public $length = 0;
   public get length(): number {
-    return this[LENGTH];
+    return this.$length;
   }
   public head: List.Node<T> | undefined = undefined;
   public get tail(): List.Node<T> | undefined {
@@ -22,7 +20,7 @@ export class List<T> {
   }
   public clear(): void {
     this.head = undefined;
-    this[LENGTH] = 0;
+    this.$length = 0;
   }
   public unshift(value: T): List.Node<T> {
     return this.head = this.push(value);
@@ -59,7 +57,7 @@ export class List<T> {
   public insert(node: List.Node<T>, before: List.Node<T> | undefined = this.head): List.Node<T> {
     if (node.list === this) return node.moveTo(before), node;
     node.delete();
-    ++this[LENGTH];
+    ++this.$length;
     this.head ??= node;
     // @ts-expect-error
     node.list = this;
@@ -109,7 +107,7 @@ class Node<T> {
     public next: Node<T>,
     public prev: Node<T>,
   ) {
-    ++list[LENGTH];
+    ++list.$length;
     list.head ??= this;
     next && prev
       ? next.prev = prev.next = this
@@ -117,7 +115,7 @@ class Node<T> {
   }
   public delete(): T {
     if (!this.list) return this.value;
-    --this.list[LENGTH];
+    --this.list.$length;
     const { next, prev } = this;
     if (this.list.head === this) {
       this.list.head = next === this
