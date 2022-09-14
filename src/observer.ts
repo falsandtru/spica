@@ -1,7 +1,6 @@
 import type { Inits, DeepImmutable, DeepRequired } from './type';
 import { Number, Map, WeakSet, Error } from './global';
 import { ObjectAssign } from './alias';
-import { List as IxList } from './ixlist';
 import { List } from './invlist';
 import { push } from './array';
 import { causeAsyncException } from './exception';
@@ -26,19 +25,20 @@ export type Subscriber<N extends readonly unknown[], D, R> = (data: D, namespace
 
 class ListenerNode<N extends readonly unknown[], D, R> {
   constructor(
+    public readonly name: N[number],
     public readonly parent: ListenerNode<N, D, R> | undefined,
-    public readonly index: N[number],
   ) {
   }
   public readonly monitors = new List<MonitorItem<N, D>>();
   public readonly subscribers = new List<SubscriberItem<N, D, R>>();
-  public readonly children = new IxList<N[number], ListenerNode<N, D, R>>(new Map());
+  public readonly index = new Map<N[number], ListenerNode<N, D, R>>();
+  public readonly children = new List<ListenerNode<N, D, R>>();
   public clear(): boolean {
-    const { monitors, subscribers, children } = this;
-    for (let node = children.last, i = children.length; node && i--;) {
+    const { monitors, subscribers, index, children } = this;
+    for (let node = children.head, i = children.length; node && i--;) {
       node = node.value.clear()
-        ? children.node(children.del(node.index)!.prev)
-        : children.node(node.prev);
+        ? [node.next, void index.delete(node.value.name), void node.delete()][0]!
+        : node.next;
     }
     subscribers.clear();
     return monitors.length === 0;
@@ -223,17 +223,17 @@ export class Observation<N extends readonly unknown[], D, R>
   private refsBelow(node: ListenerNode<N, D, R>, type: ListenerType): List<ListenerItem<N, D, R>>[] {
     return this.refsBelow_(node, type, [])[0];
   }
-  private refsBelow_({ monitors, subscribers, children }: ListenerNode<N, D, R>, type: ListenerType, acc: List<ListenerItem<N, D, R>>[]): readonly [List<ListenerItem<N, D, R>>[], number] {
+  private refsBelow_({ monitors, subscribers, index, children }: ListenerNode<N, D, R>, type: ListenerType, acc: List<ListenerItem<N, D, R>>[]): readonly [List<ListenerItem<N, D, R>>[], number] {
     type === ListenerType.Monitor
       ? (acc as typeof monitors[]).push(monitors)
       : (acc as typeof subscribers[]).push(subscribers);
     let count = 0;
-    for (let node = children.last, i = children.length; node && i--;) {
+    for (let node = children.head, i = children.length; node && i--;) {
       const cnt = this.refsBelow_(node.value, type, acc)[1];
       count += cnt;
       node = cnt === 0 && this.settings.cleanup
-        ? children.node(children.del(node.index)!.prev)
-        : children.node(node.prev);
+        ? [node.next, void index.delete(node.value.name), void node.delete()][0]!
+        : node.next;
     }
     return [acc, monitors.length + subscribers.length + count];
   }
@@ -243,8 +243,8 @@ export class Observation<N extends readonly unknown[], D, R>
     let node = this.node;
     for (let i = 0; i < namespace.length; ++i) {
       const name = namespace[i];
-      const { children } = node;
-      let child = children.find(name)?.value;
+      const { index, children } = node;
+      let child = index.get(name);
       if (!child) {
         switch (mode) {
           case SeekMode.Breakable:
@@ -252,8 +252,9 @@ export class Observation<N extends readonly unknown[], D, R>
           case SeekMode.Closest:
             return node;
         }
-        child = new ListenerNode(node, name);
-        children.add(name, child);
+        child = new ListenerNode(name, node);
+        index.set(name, child);
+        children.push(child);
       }
       node = child;
     }
