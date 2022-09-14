@@ -3,7 +3,6 @@ import { Number, Map, WeakSet, Error } from './global';
 import { ObjectAssign } from './alias';
 import { List as IxList } from './ixlist';
 import { List } from './invlist';
-import { singleton } from './function';
 import { push } from './array';
 import { causeAsyncException } from './exception';
 
@@ -80,7 +79,6 @@ export interface ObservationOptions {
 export class Observation<N extends readonly unknown[], D, R>
   implements Observer<N, D, R>, Publisher<N, D, R> {
   constructor(opts: ObservationOptions = {}) {
-    assert([this.id = 0]);
     ObjectAssign(this.settings, opts);
   }
   private id = Number.MIN_SAFE_INTEGER;
@@ -101,7 +99,7 @@ export class Observation<N extends readonly unknown[], D, R>
       listener: monitor,
       options,
     });
-    return singleton(() => void this.off(namespace, node));
+    return () => void node.delete();
   }
   public on(namespace: Readonly<N>, subscriber: Subscriber<N, D, R>, options: ObserverOptions = {}): () => void {
     if (typeof subscriber !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${subscriber}`);
@@ -115,26 +113,19 @@ export class Observation<N extends readonly unknown[], D, R>
       listener: subscriber,
       options,
     });
-    return singleton(() => void this.off(namespace, node));
+    return () => void node.delete();
   }
   public once(namespace: Readonly<N>, subscriber: Subscriber<N, D, R>): () => void {
     return this.on(namespace, subscriber, { once: true });
   }
-  public off(namespace: Readonly<N>, subscriber?: Subscriber<N, D, R>): void;
-  public off(namespace: Readonly<N | Inits<N>>, node?: List.Node<ListenerItem<N, D, R>>): void;
-  public off(namespace: Readonly<N | Inits<N>>, subscriber?: Subscriber<N, D, R> | List.Node<ListenerItem<N, D, R>>): void {
-    switch (typeof subscriber) {
-      case 'object':
-        return void subscriber.delete();
-      case 'function':
-        return void this.seekNode(namespace, SeekMode.Breakable)
-          ?.subscribers
-          ?.find(item => item.listener === subscriber)
-          ?.delete();
-      case 'undefined':
-        return void this.seekNode(namespace, SeekMode.Breakable)
-          ?.clear();
-    }
+  public off(namespace: Readonly<N>, subscriber?: Subscriber<N, D, R>): void {
+    return subscriber
+      ? void this.seekNode(namespace, SeekMode.Breakable)
+        ?.subscribers
+        ?.find(item => item.listener === subscriber)
+        ?.delete()
+      : void this.seekNode(namespace, SeekMode.Breakable)
+        ?.clear();
   }
   public emit(namespace: Readonly<N>, data: D, tracker?: (data: D, results: R[]) => void): void
   public emit(this: Publisher<N, void, R>, namespace: Readonly<N>, data?: D, tracker?: (data: D, results: R[]) => void): void
@@ -175,9 +166,7 @@ export class Observation<N extends readonly unknown[], D, R>
       for (let max = items.last!.value.id, head = items.head, node = head; node;) {
         const item = node.value;
         if (item.id > max) break;
-        if (item.options.once) {
-          this.off(item.namespace, node);
-        }
+        item.options.once && node.delete();
         try {
           const result = item.listener(data, namespace);
           tracker && results.push(result);
@@ -196,9 +185,7 @@ export class Observation<N extends readonly unknown[], D, R>
       for (let max = items.last!.value.id, head = items.head, node = head; node;) {
         const item = node.value;
         if (item.id > max) break;
-        if (item.options.once) {
-          this.off(item.namespace, node);
-        }
+        item.options.once && node.delete();
         try {
           item.listener(data, namespace);
         }
