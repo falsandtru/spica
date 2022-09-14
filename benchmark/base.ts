@@ -1,10 +1,15 @@
 import { benchmark } from './benchmark';
+import { Index } from '../src/index';
 import { Ring } from '../src/ring';
 import { Stack } from '../src/stack';
 import { Queue, PriorityQueue } from '../src/queue';
 
 describe('Benchmark:', function () {
   describe('base', function () {
+    it('Index  new', function (done) {
+      benchmark('Index new', () => new Index(), done);
+    });
+
     it('Ring  new', function (done) {
       benchmark('Ring  new', () => new Ring(), done);
     });
@@ -22,6 +27,13 @@ describe('Benchmark:', function () {
     });
 
     for (const length of [1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
+      it(`Index       ${length.toLocaleString('en')}`, function (done) {
+        const data = new Index;
+        for (let i = 0; i < length; ++i) data.pop();
+        for (let i = 0; i < length; ++i) data.push(0);
+        benchmark(`Index       ${length.toLocaleString('en')}`, () => (data.pop(), data.push(0)), done);
+      });
+
       it(`Array first ${length.toLocaleString('en')}`, function (done) {
         const data: unknown[] = [];
         for (let i = 0; i < length; ++i) data.push(0);

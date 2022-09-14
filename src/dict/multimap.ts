@@ -15,6 +15,9 @@ export class MultiMap<K, V> implements IterableDict<K, V> {
       this.set(k, v);
     }
   }
+  public get size(): number {
+    return this.memory.size;
+  }
   public get(key: K): V | undefined {
     return this.memory.get(key)?.at(0);
   }

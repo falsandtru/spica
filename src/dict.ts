@@ -6,5 +6,6 @@ export interface Dict<K, V> {
 }
 
 export interface IterableDict<K, V> extends Dict<K, V> {
+  readonly size: number;
   [Symbol.iterator](): Iterator<[K, V], undefined, undefined>;
 }

@@ -1,6 +1,6 @@
 import { Infinity, Array } from '../global';
 import { Dict } from '../dict';
-import { Stack } from '../stack';
+import { Index as Ix } from '../index';
 import { equal } from '../compare';
 
 // Circular Indexed List
@@ -43,7 +43,7 @@ export class List<K, V = undefined> {
   public readonly capacity: number;
   private readonly index?: Index<K>;
   private nodes: InternalNode<K, V>[] = Array(16);
-  private readonly stack = new Stack<number>();
+  private readonly ix = new Ix();
   public HEAD = 0;
   private CURSOR = 0;
   private $length = 0;
@@ -80,7 +80,7 @@ export class List<K, V = undefined> {
   }
   public clear(): void {
     this.nodes = Array(16);
-    this.stack.clear();
+    this.ix.clear();
     this.index?.clear();
     this.HEAD = 0;
     this.CURSOR = 0;
@@ -94,9 +94,7 @@ export class List<K, V = undefined> {
     //assert(this.length === 0 ? !head : head);
     if (!head) {
       assert(this.length === 0);
-      const index = this.HEAD = this.CURSOR = this.stack.isEmpty()
-        ? this.$length
-        : this.stack.pop()!;
+      const index = this.HEAD = this.CURSOR = this.ix.pop();
       assert(!nodes[index]);
       ++this.$length;
       this.index?.set(key, index);
@@ -114,9 +112,7 @@ export class List<K, V = undefined> {
     //assert(head);
     if (this.$length !== this.capacity) {
       assert(this.length < this.capacity);
-      const index = this.HEAD = this.CURSOR = this.stack.isEmpty()
-        ? this.$length
-        : this.stack.pop()!;
+      const index = this.HEAD = this.CURSOR = this.ix.pop();
       //assert(!nodes[index]);
       ++this.$length;
       this.index?.set(key, index);
@@ -136,7 +132,7 @@ export class List<K, V = undefined> {
     }
     else {
       assert(this.length === this.capacity);
-      assert(this.stack.isEmpty());
+      assert(this.ix.length === this.capacity);
       const node = nodes[head.prev]!;
       const index = this.HEAD = this.CURSOR = node.index;
       //assert(nodes[index]);
@@ -184,7 +180,7 @@ export class List<K, V = undefined> {
     //assert(this.length !== 2 || node !== node.prev && node.prev === node.next);
     //assert(this.length < 3 || node !== node.prev && node.prev !== node.next);
     --this.$length;
-    this.stack.push(node.index);
+    this.ix.push(node.index);
     this.index?.delete(node.key, node.index);
     const nodes = this.nodes;
     nodes[node.prev]!.next = node.next;

@@ -13,6 +13,9 @@ export class DataMap<K, V> implements IterableDict<K, V> {
     }
   }
   private readonly memory = new Map<unknown, [K, V]>();
+  public get size(): number {
+    return this.memory.size;
+  }
   public get(key: K): V | undefined {
     return this.memory.get(this.indentify(key))?.[1];
   }
@@ -28,9 +31,6 @@ export class DataMap<K, V> implements IterableDict<K, V> {
   }
   public clear(): void {
     return this.memory.clear();
-  }
-  public get size(): number {
-    return this.memory.size;
   }
   public [Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
     return this.memory.values();
