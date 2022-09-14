@@ -68,11 +68,36 @@ export class List<T> {
     next.prev = prev.next = node;
     return node;
   }
+  public find(f: (value: T) => unknown): List.Node<T> | undefined {
+    for (let head = this.head, node = head; node;) {
+      if (f(node.value)) return node;
+      node = node.next;
+      if (node === head) break;
+    }
+  }
+  public toNodes(): List.Node<T>[] {
+    const acc = [];
+    for (let head = this.head, node = head; node;) {
+      acc.push(node);
+      node = node.next;
+      if (node === head) break;
+    }
+    return acc;
+  }
+  public toArray(): T[] {
+    const acc = [];
+    for (let head = this.head, node = head; node;) {
+      acc.push(node.value);
+      node = node.next;
+      if (node === head) break;
+    }
+    return acc;
+  }
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
-    for (let node = this.head; node;) {
+    for (let head = this.head, node = head; node;) {
       yield node.value;
       node = node.next;
-      if (node === this.head) return;
+      if (node === head) return;
     }
   }
 }

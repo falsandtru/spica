@@ -1,8 +1,8 @@
 import type { Inits, DeepImmutable, DeepRequired } from './type';
 import { Number, Map, WeakSet, Error } from './global';
 import { ObjectAssign } from './alias';
-import { Ring } from './ring';
-import { List } from './ixlist';
+import { List as IxList } from './ixlist';
+import { List } from './invlist';
 import { singleton } from './function';
 import { push } from './array';
 import { causeAsyncException } from './exception';
@@ -31,9 +31,19 @@ class ListenerNode<N extends readonly unknown[], D, R> {
     public readonly index: N[number],
   ) {
   }
-  public readonly monitors = new Ring<MonitorItem<N, D>>();
-  public readonly subscribers = new Ring<SubscriberItem<N, D, R>>();
-  public readonly children = new List<N[number], ListenerNode<N, D, R>>(new Map());
+  public readonly monitors = new List<MonitorItem<N, D>>();
+  public readonly subscribers = new List<SubscriberItem<N, D, R>>();
+  public readonly children = new IxList<N[number], ListenerNode<N, D, R>>(new Map());
+  public clear(): boolean {
+    const { monitors, subscribers, children } = this;
+    for (let node = children.last, i = children.length; node && i--;) {
+      node = node.value.clear()
+        ? children.node(children.del(node.index)!.prev)
+        : children.node(node.prev);
+    }
+    subscribers.clear();
+    return monitors.length === 0;
+  }
 }
 export type ListenerItem<N extends readonly unknown[], D, R> =
   | MonitorItem<N, D>
@@ -70,9 +80,10 @@ export interface ObservationOptions {
 export class Observation<N extends readonly unknown[], D, R>
   implements Observer<N, D, R>, Publisher<N, D, R> {
   constructor(opts: ObservationOptions = {}) {
+    assert([this.id = 0]);
     ObjectAssign(this.settings, opts);
   }
-  private id = 0;
+  private id = Number.MIN_SAFE_INTEGER;
   private readonly node: ListenerNode<N, D, R> = new ListenerNode(void 0, void 0);
   private readonly settings: DeepImmutable<DeepRequired<ObservationOptions>> = {
     limit: 10,
@@ -83,53 +94,46 @@ export class Observation<N extends readonly unknown[], D, R>
     const { monitors } = this.seekNode(namespace, SeekMode.Extensible);
     if (monitors.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
     if (this.id === Number.MAX_SAFE_INTEGER) throw new Error(`Spica: Observation: Max listener ID reached max safe integer.`);
-    const item: MonitorItem<N, D> = {
+    const node = monitors.push({
       id: ++this.id,
       type: ListenerType.Monitor,
       namespace,
       listener: monitor,
       options,
-    };
-    monitors.push(item);
-    return singleton(() => void this.off(namespace, item));
+    });
+    return singleton(() => void this.off(namespace, node));
   }
   public on(namespace: Readonly<N>, subscriber: Subscriber<N, D, R>, options: ObserverOptions = {}): () => void {
     if (typeof subscriber !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${subscriber}`);
     const { subscribers } = this.seekNode(namespace, SeekMode.Extensible);
     if (subscribers.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
     if (this.id === Number.MAX_SAFE_INTEGER) throw new Error(`Spica: Observation: Max listener ID reached max safe integer.`);
-    const item: SubscriberItem<N, D, R> = {
+    const node = subscribers.push({
       id: ++this.id,
       type: ListenerType.Subscriber,
       namespace,
       listener: subscriber,
       options,
-    };
-    subscribers.push(item);
-    return singleton(() => void this.off(namespace, item));
+    });
+    return singleton(() => void this.off(namespace, node));
   }
   public once(namespace: Readonly<N>, subscriber: Subscriber<N, D, R>): () => void {
     return this.on(namespace, subscriber, { once: true });
   }
   public off(namespace: Readonly<N>, subscriber?: Subscriber<N, D, R>): void;
-  public off(namespace: Readonly<N | Inits<N>>, item?: ListenerItem<N, D, R>): void;
-  public off(namespace: Readonly<N | Inits<N>>, subscriber?: Subscriber<N, D, R> | ListenerItem<N, D, R>): void {
-    const node = this.seekNode(namespace, SeekMode.Breakable);
-    if (!node) return;
+  public off(namespace: Readonly<N | Inits<N>>, node?: List.Node<ListenerItem<N, D, R>>): void;
+  public off(namespace: Readonly<N | Inits<N>>, subscriber?: Subscriber<N, D, R> | List.Node<ListenerItem<N, D, R>>): void {
     switch (typeof subscriber) {
-      case 'object': {
-        const items: Ring<ListenerItem<N, D, R>> = subscriber.type === ListenerType.Monitor
-          ? node.monitors
-          : node.subscribers;
-        if (items.length === 0 || subscriber.id < items.at(0)!.id || subscriber.id > items.at(-1)!.id) return;
-        return void items.splice(items.indexOf(subscriber), 1);
-      }
-      case 'function': {
-        const items = node.subscribers;
-        return void items.splice(items.findIndex(item => item.listener === subscriber), 1);
-      }
+      case 'object':
+        return void subscriber.delete();
+      case 'function':
+        return void this.seekNode(namespace, SeekMode.Breakable)
+          ?.subscribers
+          ?.find(item => item.listener === subscriber)
+          ?.delete();
       case 'undefined':
-        return void clear(node);
+        return void this.seekNode(namespace, SeekMode.Breakable)
+          ?.clear();
     }
   }
   public emit(namespace: Readonly<N>, data: D, tracker?: (data: D, results: R[]) => void): void
@@ -156,10 +160,10 @@ export class Observation<N extends readonly unknown[], D, R>
   public refs(namespace: Readonly<N | Inits<N>>): ListenerItem<N, D, R>[] {
     const node = this.seekNode(namespace, SeekMode.Breakable);
     if (!node) return [];
-    return push<Ring<ListenerItem<N, D, R>>>(
+    return push<List<ListenerItem<N, D, R>>>(
       this.refsBelow(node, ListenerType.Monitor),
       this.refsBelow(node, ListenerType.Subscriber))
-      .reduce((acc, rs) => push(acc, rs.toArray()), []);
+      .reduce((acc, listeners) => push(acc, listeners.toArray()), []);
   }
   private drain(namespace: Readonly<N>, data: D, tracker?: (data: D, results: R[]) => void): void {
     const node = this.seekNode(namespace, SeekMode.Breakable);
@@ -168,11 +172,11 @@ export class Observation<N extends readonly unknown[], D, R>
     for (let i = 0; i < sss.length; ++i) {
       const items = sss[i];
       if (items.length === 0) continue;
-      for (let i = 0, max = items.at(-1)!.id; i < items.length; ++i) {
-        const item = items.at(i)!;
+      for (let max = items.last!.value.id, head = items.head, node = head; node;) {
+        const item = node.value;
         if (item.id > max) break;
         if (item.options.once) {
-          this.off(item.namespace, item);
+          this.off(item.namespace, node);
         }
         try {
           const result = item.listener(data, namespace);
@@ -181,19 +185,19 @@ export class Observation<N extends readonly unknown[], D, R>
         catch (reason) {
           causeAsyncException(reason);
         }
-        i = i < items.length ? i : items.length - 1;
-        for (; i >= 0 && items.at(i)!.id > item.id; --i);
+        node = node.next;
+        if (node === head) break;
       }
     }
     const mss = this.refsAbove(node || this.seekNode(namespace, SeekMode.Closest), ListenerType.Monitor);
     for (let i = 0; i < mss.length; ++i) {
       const items = mss[i];
       if (items.length === 0) continue;
-      for (let i = 0, max = items.at(-1)!.id; i < items.length; ++i) {
-        const item = items.at(i)!;
+      for (let max = items.last!.value.id, head = items.head, node = head; node;) {
+        const item = node.value;
         if (item.id > max) break;
         if (item.options.once) {
-          this.off(item.namespace, item);
+          this.off(item.namespace, node);
         }
         try {
           item.listener(data, namespace);
@@ -201,8 +205,8 @@ export class Observation<N extends readonly unknown[], D, R>
         catch (reason) {
           causeAsyncException(reason);
         }
-        i = i < items.length ? i : items.length - 1;
-        for (; i >= 0 && items.at(i)!.id > item.id; --i);
+        node = node.next;
+        if (node === head) break;
       }
     }
     if (tracker) {
@@ -214,8 +218,8 @@ export class Observation<N extends readonly unknown[], D, R>
       }
     }
   }
-  private refsAbove({ parent, monitors, subscribers }: ListenerNode<N, D, R>, type: ListenerType.Monitor): Ring<MonitorItem<N, D>>[];
-  private refsAbove({ parent, monitors, subscribers }: ListenerNode<N, D, R>, type: ListenerType): Ring<ListenerItem<N, D, R>>[] {
+  private refsAbove({ parent, monitors, subscribers }: ListenerNode<N, D, R>, type: ListenerType.Monitor): List<MonitorItem<N, D>>[];
+  private refsAbove({ parent, monitors, subscribers }: ListenerNode<N, D, R>, type: ListenerType): List<ListenerItem<N, D, R>>[] {
     const acc = type === ListenerType.Monitor
       ? [monitors]
       : [subscribers];
@@ -227,24 +231,22 @@ export class Observation<N extends readonly unknown[], D, R>
     }
     return acc;
   }
-  private refsBelow(node: ListenerNode<N, D, R>, type: ListenerType.Monitor): Ring<MonitorItem<N, D>>[];
-  private refsBelow(node: ListenerNode<N, D, R>, type: ListenerType.Subscriber): Ring<SubscriberItem<N, D, R>>[];
-  private refsBelow(node: ListenerNode<N, D, R>, type: ListenerType): Ring<ListenerItem<N, D, R>>[] {
+  private refsBelow(node: ListenerNode<N, D, R>, type: ListenerType.Monitor): List<MonitorItem<N, D>>[];
+  private refsBelow(node: ListenerNode<N, D, R>, type: ListenerType.Subscriber): List<SubscriberItem<N, D, R>>[];
+  private refsBelow(node: ListenerNode<N, D, R>, type: ListenerType): List<ListenerItem<N, D, R>>[] {
     return this.refsBelow_(node, type, [])[0];
   }
-  private refsBelow_({ monitors, subscribers, children }: ListenerNode<N, D, R>, type: ListenerType, acc: Ring<ListenerItem<N, D, R>>[]): readonly [Ring<ListenerItem<N, D, R>>[], number] {
+  private refsBelow_({ monitors, subscribers, children }: ListenerNode<N, D, R>, type: ListenerType, acc: List<ListenerItem<N, D, R>>[]): readonly [List<ListenerItem<N, D, R>>[], number] {
     type === ListenerType.Monitor
       ? (acc as typeof monitors[]).push(monitors)
       : (acc as typeof subscribers[]).push(subscribers);
     let count = 0;
-    for (let node = children.last, i = 0; node && i < children.length; (node = children.node(node.prev)) && ++i) {
+    for (let node = children.last, i = children.length; node && i--;) {
       const cnt = this.refsBelow_(node.value, type, acc)[1];
       count += cnt;
-      if (cnt === 0 && this.settings.cleanup) {
-        node = children.node(children.del(node.index)!.next);
-        if (!node) break;
-        --i;
-      }
+      node = cnt === 0 && this.settings.cleanup
+        ? children.node(children.del(node.index)!.prev)
+        : children.node(node.prev);
     }
     return [acc, monitors.length + subscribers.length + count];
   }
@@ -270,15 +272,4 @@ export class Observation<N extends readonly unknown[], D, R>
     }
     return node;
   }
-}
-
-function clear<N extends readonly unknown[], D, R>({ monitors, subscribers, children }: ListenerNode<N, D, R>): boolean {
-  for (let node = children.last, i = 0; node && i < children.length; (node = children.node(node.prev)) && ++i) {
-    if (!clear(node.value)) continue;
-    node = children.node(children.del(node.index)!.next);
-    if (!node) break;
-    --i;
-  }
-  subscribers.clear();
-  return monitors.length === 0;
 }
