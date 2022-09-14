@@ -7,10 +7,8 @@ import { equal } from '../compare';
 
 const undefined = void 0;
 
-const BORDER = 1_000_000_000;
-
-interface Index<K, V> extends Dict<K, V> {
-  delete(key: K, value?: V): boolean;
+interface Index<K> extends Dict<K, number> {
+  delete(key: K, value?: number): boolean;
   clear(): void;
 }
 
@@ -32,26 +30,25 @@ export namespace List {
   }
 }
 export class List<K, V = undefined> {
-  constructor(capacity?: number, index?: Index<K, number>);
-  constructor(index: Index<K, number>);
-  constructor(capacity: number | Index<K, number> = Infinity, index?: Index<K, number>) {
+  constructor(capacity?: number, index?: Index<K>);
+  constructor(index: Index<K>);
+  constructor(capacity: number | Index<K> = Infinity, index?: Index<K>) {
     if (typeof capacity === 'object') {
       index = capacity;
       capacity = Infinity;
     }
     this.capacity = capacity;
     this.index = index!;
-    this.nodes = this.capacity <= BORDER ? Array(this.capacity) : {};
   }
   public readonly capacity: number;
-  private readonly index?: Index<K, number>;
-  private nodes: Record<number, InternalNode<K, V>>;
-  private readonly heap = new Stack<number>();
+  private readonly index?: Index<K>;
+  private nodes: InternalNode<K, V>[] = Array(16);
+  private readonly stack = new Stack<number>();
   public HEAD = 0;
   private CURSOR = 0;
-  private LENGTH = 0;
+  private $length = 0;
   public get length() {
-    return this.LENGTH;
+    return this.$length;
   }
   public get head(): List.Node<K, V> | undefined {
     return this.nodes[this.HEAD];
@@ -82,29 +79,26 @@ export class List<K, V = undefined> {
     return this.HEAD = this.last?.index ?? this.HEAD;
   }
   public clear(): void {
-    this.nodes = this.capacity <= BORDER ? Array(this.capacity) : {};
-    this.heap.clear();
+    this.nodes = Array(16);
+    this.stack.clear();
     this.index?.clear();
     this.HEAD = 0;
     this.CURSOR = 0;
-    this.LENGTH = 0;
+    this.$length = 0;
   }
   public add(key: K, value: V): number;
   public add(this: List<K, undefined>, key: K, value?: V): number;
   public add(key: K, value: V): number {
-    if (this.LENGTH === BORDER && 'length' in this.nodes) {
-      this.nodes = { ...this.nodes };
-    }
     const nodes = this.nodes;
     const head = nodes[this.HEAD];
     //assert(this.length === 0 ? !head : head);
     if (!head) {
       assert(this.length === 0);
-      const index = this.HEAD = this.CURSOR = this.heap.isEmpty()
-        ? this.length
-        : this.heap.pop()!;
+      const index = this.HEAD = this.CURSOR = this.stack.isEmpty()
+        ? this.$length
+        : this.stack.pop()!;
       assert(!nodes[index]);
-      ++this.LENGTH;
+      ++this.$length;
       this.index?.set(key, index);
       nodes[index] = {
         index,
@@ -118,13 +112,13 @@ export class List<K, V = undefined> {
       return index;
     }
     //assert(head);
-    if (this.length !== this.capacity) {
+    if (this.$length !== this.capacity) {
       assert(this.length < this.capacity);
-      const index = this.HEAD = this.CURSOR = this.heap.isEmpty()
-        ? this.length
-        : this.heap.pop()!;
+      const index = this.HEAD = this.CURSOR = this.stack.isEmpty()
+        ? this.$length
+        : this.stack.pop()!;
       //assert(!nodes[index]);
-      ++this.LENGTH;
+      ++this.$length;
       this.index?.set(key, index);
       nodes[index] = {
         index,
@@ -142,7 +136,7 @@ export class List<K, V = undefined> {
     }
     else {
       assert(this.length === this.capacity);
-      assert(this.heap.isEmpty());
+      assert(this.stack.isEmpty());
       const node = nodes[head.prev]!;
       const index = this.HEAD = this.CURSOR = node.index;
       //assert(nodes[index]);
@@ -162,17 +156,17 @@ export class List<K, V = undefined> {
   public put(key: K, value: V, index?: number): number;
   public put(this: List<K, undefined>, key: K, value?: V, index?: number): number;
   public put(key: K, value: V, index?: number): number {
-    const node = this.find(key, index);
+    const node = this.search(key, index);
     if (!node) return this.add(key, value);
     assert(this.CURSOR === node.index);
     node.value = value;
     return node.index;
   }
-  public find(key: K, index = this.CURSOR): List.Node<K, V> | undefined {
+  public search(key: K, index = this.CURSOR): List.Node<K, V> | undefined {
     let node = this.node(index);
     if (node && equal(node.key, key)) return this.CURSOR = index, node;
     if (!this.index) throw new Error(`Spica: IxList: Need the index but not given.`);
-    node = this.node(index = this.index.get(key) ?? -1);
+    node = this.node(index = this.index.get(key) ?? this.nodes.length);
     assert(!node || equal(node.key, key));
     if (node) return this.CURSOR = index, node;
   }
@@ -189,8 +183,8 @@ export class List<K, V = undefined> {
     //assert(this.length !== 1 || node === node.prev && node.prev === node.next);
     //assert(this.length !== 2 || node !== node.prev && node.prev === node.next);
     //assert(this.length < 3 || node !== node.prev && node.prev !== node.next);
-    --this.LENGTH;
-    this.heap.push(node.index);
+    --this.$length;
+    this.stack.push(node.index);
     this.index?.delete(node.key, node.index);
     const nodes = this.nodes;
     nodes[node.prev]!.next = node.next;
@@ -209,15 +203,13 @@ export class List<K, V = undefined> {
     return node;
   }
   public delete(key: K, index?: number): List.Node<K, V> | undefined {
-    return this.del(this.find(key, index)?.index ?? -1);
+    return this.del(this.search(key, index)?.index ?? this.nodes.length);
   }
   public insert(key: K, value: V, before: number): number {
     const head = this.HEAD;
     this.HEAD = before;
     const index = this.add(key, value);
-    if (this.length !== 1) {
-      this.HEAD = head;
-    }
+    this.HEAD = head;
     return index;
   }
   public unshift(key: K, value: V): number;
@@ -228,7 +220,7 @@ export class List<K, V = undefined> {
   public unshiftRotationally(key: K, value: V): number;
   public unshiftRotationally(this: List<K, undefined>, key: K, value?: V): number;
   public unshiftRotationally(key: K, value: V): number {
-    if (this.length === 0) return this.unshift(key, value);
+    if (this.$length === 0) return this.unshift(key, value);
     const node: InternalNode<K, V> = this.last!;
     if (this.index && !equal(node.key, key)) {
       this.index.delete(node.key, node.index);
@@ -240,10 +232,6 @@ export class List<K, V = undefined> {
     node.value = value;
     return node.index;
   }
-  public shift(): List.Node<K, V> | undefined {
-    const node = this.head;
-    return node && this.del(node.index);
-  }
   public push(key: K, value: V): number;
   public push(this: List<K, undefined>, key: K, value?: V): number;
   public push(key: K, value: V): number {
@@ -252,7 +240,7 @@ export class List<K, V = undefined> {
   public pushRotationally(key: K, value: V): number;
   public pushRotationally(this: List<K, undefined>, key: K, value?: V): number;
   public pushRotationally(key: K, value: V): number {
-    if (this.length === 0) return this.push(key, value);
+    if (this.$length === 0) return this.push(key, value);
     const node: InternalNode<K, V> = this.head!;
     if (this.index && !equal(node.key, key)) {
       this.index.delete(node.key, node.index);
@@ -263,6 +251,10 @@ export class List<K, V = undefined> {
     node.key = key;
     node.value = value;
     return node.index;
+  }
+  public shift(): List.Node<K, V> | undefined {
+    const node = this.head;
+    return node && this.del(node.index);
   }
   public pop(): List.Node<K, V> | undefined {
     const node = this.last;

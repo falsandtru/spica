@@ -41,7 +41,7 @@ describe('Benchmark:', function () {
         for (let i = 0; i < length; ++i) dict.add(i, void 0);
         let i = 0;
         benchmark(`IxList get ${length.toLocaleString('en')}`, () => {
-          dict.find(i = ++i % length);
+          dict.search(i = ++i % length);
         }, done);
       });
     }
