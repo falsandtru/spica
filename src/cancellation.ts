@@ -26,8 +26,8 @@ const internal = Symbol.for('spica/cancellation::internal');
 
 export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, AtomicPromise<L> {
   public readonly [Symbol.toStringTag]: string = 'Cancellation';
-  constructor(cancellees: Iterable<Cancellee<L>> = []) {
-    for (const cancellee of cancellees) {
+  constructor(cancellees?: Iterable<Cancellee<L>>) {
+    if (cancellees) for (const cancellee of cancellees) {
       cancellee.register(this.cancel);
     }
   }

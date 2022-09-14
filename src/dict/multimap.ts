@@ -2,19 +2,15 @@ import { Map } from '../global';
 import { IterableDict } from '../dict';
 import { Ring } from '../ring';
 
-interface Dict<K, V> extends IterableDict<K, V> {
-  clear(): void;
-}
-
 export class MultiMap<K, V> implements IterableDict<K, V> {
   constructor(
-    entries: Iterable<readonly [K, V]> = [],
-    private readonly memory: Dict<K, Ring<V>> = new Map(),
+    entries?: Iterable<readonly [K, V]>,
   ) {
-    for (const { 0: k, 1: v } of entries) {
+    if (entries) for (const { 0: k, 1: v } of entries) {
       this.set(k, v);
     }
   }
+  private memory = new Map<K, Ring<V>>();
   public get size(): number {
     return this.memory.size;
   }
@@ -24,11 +20,11 @@ export class MultiMap<K, V> implements IterableDict<K, V> {
   public getAll(key: K): Ring<V> | undefined {
     return this.memory.get(key);
   }
-  public set(key: K, val: V): this {
+  public set(key: K, value: V): this {
     let vs = this.memory.get(key);
-    if (vs) return vs.push(val), this;
+    if (vs) return vs.push(value), this;
     vs = new Ring();
-    vs.push(val);
+    vs.push(value);
     this.memory.set(key, vs);
     return this;
   }
@@ -48,7 +44,7 @@ export class MultiMap<K, V> implements IterableDict<K, V> {
     return true;
   }
   public clear(): void {
-    this.memory.clear();
+    this.memory = new Map();
   }
   public take(key: K): V | undefined;
   public take(key: K, count: number): V[];

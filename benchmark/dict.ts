@@ -77,7 +77,7 @@ describe('Benchmark:', function () {
         }, done);
       });
 
-      it(`MultiMap set ${length.toLocaleString('en')}`, function (done) {
+      it.skip(`MultiMap set ${length.toLocaleString('en')}`, function (done) {
         const dict = new MultiMap();
         let i = 0;
         benchmark(`MultiMap set ${length.toLocaleString('en')}`, () => {
@@ -117,7 +117,7 @@ describe('Benchmark:', function () {
         const dict = new MultiMap();
         let i = 0;
         benchmark(`MultiMap get/set ${length.toLocaleString('en')}`, () => {
-          dict.get(i = ++i % length);
+          dict.take(i = ++i % length);
           dict.set(i, {});
         }, done);
       });
@@ -158,7 +158,7 @@ describe('Benchmark:', function () {
         let i = 0;
         benchmark(`MultiMap has/get ${length.toLocaleString('en')}`, () => {
           dict.has(i = ++i % length)
-            ? dict.get(i % length)
+            ? dict.take(i % length)
             : dict.set(i % length, {});
         }, done);
       });

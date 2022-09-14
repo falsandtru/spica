@@ -91,7 +91,24 @@ export function splice<a>(as: a[], index: number, count?: number, ...values: a[]
     case as.length:
       return push(as, values), [];
   }
-  return arguments.length > 2
-    ? as.splice(index, count!, ...values)
-    : as.splice(index);
+  switch (values.length) {
+    case 0:
+      return count !== undefined || arguments.length > 1
+        ? as.splice(index, count!)
+        : as.splice(index);
+    case 1:
+      return as.splice(index, count!, values[0]);
+    case 2:
+      return as.splice(index, count!, values[0], values[1]);
+    case 3:
+      return as.splice(index, count!, values[0], values[1], values[2]);
+    case 4:
+      return as.splice(index, count!, values[0], values[1], values[2], values[3]);
+    case 5:
+      return as.splice(index, count!, values[0], values[1], values[2], values[3], values[4]);
+    default:
+      return count !== undefined || arguments.length > 1
+        ? as.splice(index, count!, ...values)
+        : as.splice(index);
+  }
 }

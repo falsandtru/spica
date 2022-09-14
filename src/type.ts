@@ -281,7 +281,9 @@ export function is(type: string, value: unknown): boolean {
   }
 }
 
-export function isPrimitive(value: unknown): value is undefined | null | boolean | number | bigint | string | symbol {
+export type Primitive = undefined | null | boolean | number | bigint | string | symbol;
+
+export function isPrimitive(value: unknown): value is Primitive {
   switch (typeof value) {
     case 'function':
       return false;

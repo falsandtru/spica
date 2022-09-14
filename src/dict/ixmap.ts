@@ -3,6 +3,13 @@ import { IterableDict } from '../dict';
 import { Index } from '../index';
 
 export class IxMap<K, V> implements IterableDict<K, V> {
+  constructor(
+    entries?: Iterable<readonly [K, V]>,
+  ) {
+    if (entries) for (const { 0: k, 1: v } of entries) {
+      this.set(k, v);
+    }
+  }
   private readonly index = new Index();
   private indexes = new Map<K, number>();
   private values: V[] = Array(16);
@@ -37,8 +44,9 @@ export class IxMap<K, V> implements IterableDict<K, V> {
     this.values = Array(16);
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
-    for (const { 0: key, 1: i } of this.indexes) {
-      yield [key, this.values[i]];
+    const { indexes, values } = this;
+    for (const { 0: key, 1: index } of indexes) {
+      yield [key, values[index]];
     }
     return;
   }

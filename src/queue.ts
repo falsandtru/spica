@@ -1,6 +1,7 @@
-import { Array } from './global';
+import { Array, Map } from './global';
 import { Heap } from './heap';
 import { memoize } from './memoize';
+import { IterableDict } from './dict';
 
 const undefined = void 0;
 
@@ -133,19 +134,23 @@ export class PriorityQueue<T, P = T> {
   public isEmpty(): boolean {
     return this.$length === 0;
   }
-  public peek(): T | undefined {
-    return this.heap.peek()?.peek();
+  public peek(priority?: P): T | undefined {
+    return arguments.length === 0
+      ? this.heap.peek()?.peek()
+      : this.dict.get(priority!)?.peek();
   }
-  public push(value: T, priority: P): void {
+  public push(priority: P, value: T): void {
     ++this.$length;
     this.queue(priority).push(value);
   }
-  public pop(): T | undefined {
+  public pop(priority?: P): T | undefined {
     if (this.$length === 0) return;
     --this.$length;
-    const queue = this.heap.peek()!;
-    const value = queue.pop();
-    if (queue.isEmpty()) {
+    const queue = arguments.length === 0
+      ? this.heap.peek()
+      : this.dict.get(priority!);
+    const value = queue?.pop();
+    if (queue?.isEmpty()) {
       this.heap.extract();
       this.clean && this.dict.delete(queue[PriorityQueue.priority]);
     }
@@ -159,6 +164,81 @@ export class PriorityQueue<T, P = T> {
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
     while (!this.isEmpty()) {
       yield this.pop()!;
+    }
+    return;
+  }
+}
+
+export class MultiQueue<K, V> implements IterableDict<K, V> {
+  constructor(
+    entries?: Iterable<readonly [K, V]>,
+  ) {
+    if (entries) for (const { 0: k, 1: v } of entries) {
+      this.set(k, v);
+    }
+  }
+  private dict = new Map<K, Queue<V>>();
+  public get length(): number {
+    return this.dict.size;
+  }
+  public isEmpty(): boolean {
+    return this.dict.size === 0;
+  }
+  public peek(key: K): V | undefined {
+    return this.dict.get(key)?.peek();
+  }
+  public push(key: K, value: V): void {
+    let vs = this.dict.get(key);
+    if (vs) return void vs.push(value);
+    vs = new Queue();
+    vs.push(value);
+    this.dict.set(key, vs);
+  }
+  public pop(key: K): V | undefined {
+    return this.dict.get(key)?.pop();
+  }
+  public clear(): void {
+    this.dict = new Map();
+  }
+  public take(key: K): V | undefined;
+  public take(key: K, count: number): V[];
+  public take(key: K, count?: number): V | undefined | V[] {
+    if (count === void 0) return this.pop(key);
+    const vs = this.dict.get(key);
+    const acc: V[] = [];
+    while (vs && !vs.isEmpty() && count--) {
+      acc.push(vs.pop()!);
+    }
+    return acc;
+  }
+  public ref(key: K): Queue<V> {
+    let vs = this.dict.get(key);
+    if (vs) return vs;
+    vs = new Queue();
+    this.dict.set(key, vs);
+    return vs;
+  }
+  public get size(): number {
+    return this.length;
+  }
+  public get(key: K): V | undefined {
+    return this.peek(key);
+  }
+  public set(key: K, value: V): this {
+    this.push(key, value);
+    return this;
+  }
+  public has(key: K): boolean {
+    return this.dict.has(key);
+  }
+  public delete(key: K): boolean {
+    return this.dict.delete(key);
+  }
+  public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
+    for (const { 0: k, 1: vs } of this.dict) {
+      while (!vs.isEmpty()) {
+        yield [k, vs.pop()!];
+      }
     }
     return;
   }

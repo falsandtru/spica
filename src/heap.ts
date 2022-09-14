@@ -1,4 +1,4 @@
-import { Array } from './global';
+import { Array, Map } from './global';
 import { List } from './invlist';
 import { memoize } from './memoize';
 
@@ -142,8 +142,7 @@ export class MultiHeap<T, O = T> {
     }
     assert([order = order!]);
     ++this.$length;
-    const list = this.list(order);
-    return list.push(value);
+    return this.list(order).push(value);
   }
   public extract(): T | undefined {
     if (this.$length === 0) return;

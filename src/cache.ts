@@ -67,7 +67,8 @@ lru-cacheの最適化分析
 
 ## Map値の数値化
 
-Mapは値が数値の場合2倍高速化される。
+Mapは値が数値の場合setが2倍高速化される。
+getは変わらないため読み取り主体の場合効果が低い。
 
 ## インデクスアクセス化
 
@@ -78,6 +79,8 @@ DWCはこの最適化を行っても状態数の多さに比例して増加し�
 最適化されないと思われる。
 しかしであればこの最適化は自身が他のオブジェクトのプロパティとして使用された場合二段アクセスになり
 最適化が適用されないのではないかという疑問が生じる。
+また単に値がオブジェクトの場合要素数により2倍からほぼ等倍まで速度低下しほぼ無効化される。
+計算処理のオーバーヘッド以外DWCとほぼ速度差はないと思われる。
 
 */
 
@@ -129,6 +132,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (this.window * 1000 >= this.capacity === false) throw new Error(`Spica: Cache: Window must be 0.1% of capacity or more.`);
     this.block = settings.block!;
     this.limit = settings.limit!;
+    this.age = settings.age!;
     this.earlyExpiring = settings.earlyExpiring!;
     this.disposer = settings.disposer!;
     this.stats = new Stats(this.window, settings.resolution!, settings.offset!);
@@ -157,6 +161,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     LRU: new List<Index<K, V>>(),
     LFU: new List<Index<K, V>>(),
   } as const;
+  private readonly age: number;
   private readonly expiries = new Heap<List.Node<Index<K, V>>, number>(Heap.min);
   private readonly earlyExpiring: boolean;
   private readonly disposer?: (value: V, key: K) => void;
@@ -174,7 +179,10 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     assert(node.list);
     this.overlap -= +(index.region === 'LFU' && node.list === this.indexes.LRU);
     assert(this.overlap >= 0);
-    index.enode && this.expiries.delete(index.enode);
+    if (index.enode) {
+      this.expiries.delete(index.enode);
+      index.enode = void 0;
+    }
     node.delete();
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size - 1);
     this.memory.delete(index.key);
@@ -242,15 +250,18 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
   public put(key: K, value: V, opts?: { size?: number; age?: number; }): boolean;
   public put(this: Cache<K, undefined>, key: K, value?: V, opts?: { size?: number; age?: number; }): boolean;
-  public put(key: K, value: V, { size = 1, age = this.settings.age! }: { size?: number; age?: number; } = {}): boolean {
+  public put(key: K, value: V, { size = 1, age = this.age }: { size?: number; age?: number; } = {}): boolean {
     if (size < 1 || this.capacity < size || age <= 0) {
       this.disposer?.(value, key);
       return false;
     }
 
-    const expiry = age === Infinity
-      ? Infinity
-      : now() + age;
+    if (age === Infinity) {
+      age = 0;
+    }
+    const expiry = age
+      ? now() + age
+      : Infinity;
     const node = this.memory.get(key);
     if (node && this.ensure(size, node)) {
       assert(this.memory.has(key));
@@ -261,7 +272,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       assert(0 < this.size && this.size <= this.capacity);
       index.size = size;
       index.expiry = expiry;
-      if (this.earlyExpiring && expiry !== Infinity) {
+      if (this.earlyExpiring && age) {
         index.enode
           ? this.expiries.update(index.enode, expiry)
           : index.enode = this.expiries.insert(node, expiry);
@@ -289,7 +300,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       expiry,
       region: 'LRU',
     }));
-    if (this.earlyExpiring && expiry !== Infinity) {
+    if (this.earlyExpiring && age) {
       LRU.head!.value.enode = this.expiries.insert(LRU.head!, expiry);
       assert(this.expiries.length <= this.length);
     }

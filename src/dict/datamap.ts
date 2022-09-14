@@ -5,10 +5,10 @@ import { memoize } from '../memoize';
 
 export class DataMap<K, V> implements IterableDict<K, V> {
   constructor(
-    entries: Iterable<readonly [K, V]> = [],
+    entries?: Iterable<readonly [K, V]>,
     private readonly indentify: (key: K) => unknown = stringify,
   ) {
-    for (const { 0: k, 1: v } of entries) {
+    if (entries) for (const { 0: k, 1: v } of entries) {
       this.set(k, v);
     }
   }
@@ -19,8 +19,8 @@ export class DataMap<K, V> implements IterableDict<K, V> {
   public get(key: K): V | undefined {
     return this.memory.get(this.indentify(key))?.[1];
   }
-  public set(key: K, val: V): this {
-    this.memory.set(this.indentify(key), [key, val]);
+  public set(key: K, value: V): this {
+    this.memory.set(this.indentify(key), [key, value]);
     return this;
   }
   public has(key: K): boolean {

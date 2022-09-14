@@ -2,7 +2,8 @@ import { benchmark } from './benchmark';
 import { Index } from '../src/index';
 import { Ring } from '../src/ring';
 import { Stack } from '../src/stack';
-import { Queue, PriorityQueue } from '../src/queue';
+import { Queue, PriorityQueue, MultiQueue } from '../src/queue';
+import { Heap, MultiHeap } from '../src/heap';
 
 describe('Benchmark:', function () {
   describe('base', function () {
@@ -20,6 +21,18 @@ describe('Benchmark:', function () {
 
     it('Queue new', function (done) {
       benchmark('Queue new', () => new Queue(), done);
+    });
+
+    it('Heap  new', function (done) {
+      benchmark('Heap  new', () => new Heap(), done);
+    });
+
+    it('MQueue new', function (done) {
+      benchmark('MQueue new', () => new MultiQueue(), done);
+    });
+
+    it.skip('MultiHeap new', function (done) {
+      benchmark('MultiHeap new', () => new MultiHeap(), done);
     });
 
     it('PQueue new', function (done) {
@@ -70,10 +83,40 @@ describe('Benchmark:', function () {
         benchmark(`Queue ${length.toLocaleString('en')}`, () => (data.pop(), data.push(0)), done);
       });
 
+      it(`Heap  ${length.toLocaleString('en')}`, function (done) {
+        const heap = new Heap<number>(Heap.min);
+        for (let i = 0; i < length; ++i) heap.insert(1, i);
+        let i = 0;
+        benchmark(`Heap  ${length.toLocaleString('en')}`, () =>
+          heap.extract() && heap.insert(1, i = i++ % length), done);
+      });
+
+      it(`MQueue ${length.toLocaleString('en')}`, function (done) {
+        const data = new MultiQueue();
+        for (let i = 0; i < length; ++i) data.push(i % length, i % length);
+        let i = 0;
+        benchmark(`MQueue ${length.toLocaleString('en')}`, () => {
+          data.pop(i);
+          data.push(i, i);
+          i = ++i % length;
+        }, done);
+      });
+
+      it.skip(`MultiHeap ${length.toLocaleString('en')}`, function (done) {
+        const heap = new MultiHeap<number>(MultiHeap.min);
+        for (let i = 0; i < length; ++i) heap.insert(1, i);
+        let i = 0;
+        benchmark(`MultiHeap ${length.toLocaleString('en')}`, () =>
+          heap.extract() && heap.insert(1, i = i++ % length), done);
+      });
+
       it(`PQueue ${length.toLocaleString('en')}`, function (done) {
         const data = new PriorityQueue();
-        for (let i = 0; i < length; ++i) data.push(0, 0);
-        benchmark(`PQueue ${length.toLocaleString('en')}`, () => (data.pop(), data.push(0, 0)), done);
+        for (let i = 0; i < length; ++i) data.push(i % 10, i % 10);
+        benchmark(`PQueue ${length.toLocaleString('en')}`, () => {
+          const i = data.pop();
+          data.push(i, i);
+        }, done);
       });
     }
 
@@ -90,22 +133,36 @@ describe('Benchmark:', function () {
         benchmark(`Ring  index ${length.toLocaleString('en')}`, () => data.at(-1), done);
       });
 
-      it(`Stack index ${length.toLocaleString('en')}`, function (done) {
+      it(`Stack peek  ${length.toLocaleString('en')}`, function (done) {
         const data = new Stack();
         for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Stack index ${length.toLocaleString('en')}`, () => data.peek(), done);
+        benchmark(`Stack peek  ${length.toLocaleString('en')}`, () => data.peek(), done);
       });
 
-      it(`Queue index ${length.toLocaleString('en')}`, function (done) {
+      it(`Queue peek  ${length.toLocaleString('en')}`, function (done) {
         const data = new Queue();
         for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Queue index ${length.toLocaleString('en')}`, () => data.peek(), done);
+        benchmark(`Queue peek  ${length.toLocaleString('en')}`, () => data.peek(), done);
       });
 
-      it(`PQueue index ${length.toLocaleString('en')}`, function (done) {
+      it(`Heap  peek  ${length.toLocaleString('en')}`, function (done) {
+        const heap = new Heap<number>(Heap.min);
+        for (let i = 0; i < length; ++i) heap.insert(1, i);
+        benchmark(`Heap  peek  ${length.toLocaleString('en')}`, () =>
+          heap.peek(), done);
+      });
+
+      it.skip(`MultiHeap peek ${length.toLocaleString('en')}`, function (done) {
+        const heap = new MultiHeap<number>(MultiHeap.min);
+        for (let i = 0; i < length; ++i) heap.insert(1, i);
+        benchmark(`MultiHeap peek ${length.toLocaleString('en')}`, () =>
+          heap.peek(), done);
+      });
+
+      it(`PQueue peek ${length.toLocaleString('en')}`, function (done) {
         const data = new PriorityQueue();
-        for (let i = 0; i < length; ++i) data.push(0, 0);
-        benchmark(`PQueue index ${length.toLocaleString('en')}`, () => data.peek(), done);
+        for (let i = 0; i < length; ++i) data.push(i, i);
+        benchmark(`PQueue peek ${length.toLocaleString('en')}`, () => data.peek(), done);
       });
     }
 

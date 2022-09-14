@@ -1,6 +1,6 @@
 import type { Structural, DeepImmutable, DeepRequired } from './type';
-import { Array, Object, Promise, Error } from './global';
-import { ObjectAssign } from './alias';
+import { Object, Promise, Error } from './global';
+import { isArray, ObjectAssign } from './alias';
 import { promise } from './clock';
 import { AtomicPromise, isPromiseLike } from './promise';
 import { Future, AtomicFuture } from './future';
@@ -120,7 +120,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     assert(core.settings.capacity < 0 ? core.recvBuffer instanceof BroadcastChannel : core.recvBuffer instanceof Channel);
     res(core.result.then(({ value }) => value));
     if (core.settings.trigger !== void 0) {
-      for (const prop of Array<string | symbol>().concat(core.settings.trigger)) {
+      for (const prop of isArray(core.settings.trigger) ? core.settings.trigger : [core.settings.trigger]) {
         if (prop in this && this.hasOwnProperty(prop)) continue;
         if (prop in this) {
           Object.defineProperty(this, prop, {

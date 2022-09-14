@@ -25,7 +25,7 @@ export type Subscriber<N extends readonly unknown[], D, R> = (data: D, namespace
 class ListenerNode<N extends readonly unknown[], D, R> {
   constructor(
     public readonly name: N[number],
-    public readonly parent: ListenerNode<N, D, R> | undefined,
+    public readonly parent?: ListenerNode<N, D, R>,
   ) {
   }
   public readonly monitors = new List<MonitorItem<N, D>>();
@@ -34,13 +34,19 @@ class ListenerNode<N extends readonly unknown[], D, R> {
   public readonly children = new List<ListenerNode<N, D, R>>();
   public clear(): boolean {
     const { monitors, subscribers, index, children } = this;
-    for (let node = children.head, i = children.length; node && i--;) {
-      node = node.value.clear()
-        ? [node.next, void index.delete(node.value.name), void node.delete()][0]!
-        : node.next;
+    for (let child = children.head, i = children.length; child && i--;) {
+      if (child.value.clear()) {
+        const next = child.next;
+        index.delete(child.value.name);
+        child = next;
+      }
+      else {
+        child = child.next;
+      }
     }
     subscribers.clear();
-    return monitors.length === 0;
+    return monitors.length === 0
+        && children.length === 0;
   }
 }
 export type ListenerItem<N extends readonly unknown[], D, R> =
@@ -72,19 +78,16 @@ const enum SeekMode {
 
 export interface ObservationOptions {
   readonly limit?: number;
-  readonly cleanup?: boolean;
 }
 
 export class Observation<N extends readonly unknown[], D, R>
   implements Observer<N, D, R>, Publisher<N, D, R> {
-  constructor({ limit, cleanup }: ObservationOptions = {}) {
-    this.limit = limit ?? 10;
-    this.cleanup = cleanup ?? false;
+  constructor(opts?: ObservationOptions) {
+    this.limit = opts?.limit ?? 10;
   }
   private id = Number.MIN_SAFE_INTEGER;
-  private readonly node: ListenerNode<N, D, R> = new ListenerNode(void 0, void 0);
+  private readonly node = new ListenerNode<N, D, R>(void 0);
   private readonly limit: number;
-  private readonly cleanup: boolean;
   public monitor(namespace: Readonly<N | Inits<N>>, monitor: Monitor<N, D>, options: ObserverOptions = {}): () => void {
     if (typeof monitor !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${monitor}`);
     const { monitors } = this.seekNode(namespace, SeekMode.Extensible);
@@ -227,12 +230,18 @@ export class Observation<N extends readonly unknown[], D, R>
       ? (acc as typeof monitors[]).push(monitors)
       : (acc as typeof subscribers[]).push(subscribers);
     let count = 0;
-    for (let node = children.head, i = children.length; node && i--;) {
-      const cnt = this.refsBelow_(node.value, type, acc)[1];
+    for (let child = children.head, i = children.length; child && i--;) {
+      const cnt = this.refsBelow_(child.value, type, acc)[1];
       count += cnt;
-      node = cnt === 0 && this.cleanup
-        ? [node.next, void index.delete(node.value.name), void node.delete()][0]!
-        : node.next;
+      if (cnt === 0) {
+        const next = child.next;
+        index.delete(child.value.name);
+        child.delete();
+        child = next;
+      }
+      else {
+        child = child.next;
+      }
     }
     return [acc, monitors.length + subscribers.length + count];
   }

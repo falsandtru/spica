@@ -11,9 +11,9 @@ describe('Benchmark:', function () {
       }
     }
 
-    for (const length of [1, 1e1, 1e2]) {
+    for (const length of [1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(length.toLocaleString('en'), function (done) {
-        benchmark(`Generator ${length.toLocaleString('en')}`, () => f(g(1)), done);
+        benchmark(`Generator ${length.toLocaleString('en')}`, () => f(g(length)), done);
       });
     }
   });

@@ -1,5 +1,5 @@
 import { setTimeout, clearTimeout } from './global';
-import { singleton } from './function';
+import { singleton, noop } from './function';
 
 export const setTimer = template(1);
 export const setRepeatTimer = template(Infinity);
@@ -24,4 +24,18 @@ export function wait(ms: number): Promise<undefined> {
   return ms === 0
     ? Promise.resolve(void 0)
     : new Promise<undefined>(resolve => void setTimeout(resolve, ms));
+}
+
+export function captureTimers<as extends unknown[] = []>(callback?: (...as: as) => void): (...as: as) => void {
+  const start = setTimeout(noop) as any;
+  clearTimeout(start);
+  if (typeof start !== 'number') throw new Error('Timer ID is not a number');
+  return singleton((...as) => {
+    const end = setTimeout(noop) as unknown as number;
+    clearTimeout(end);
+    for (let i = start; i < end; ++i) {
+      clearTimeout(i);
+    }
+    callback?.(...as);
+  });
 }
