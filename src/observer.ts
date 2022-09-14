@@ -1,6 +1,5 @@
-import type { Inits, DeepImmutable, DeepRequired } from './type';
+import type { Inits } from './type';
 import { Number, Map, WeakSet, Error } from './global';
-import { ObjectAssign } from './alias';
 import { List } from './invlist';
 import { push } from './array';
 import { causeAsyncException } from './exception';
@@ -78,19 +77,18 @@ export interface ObservationOptions {
 
 export class Observation<N extends readonly unknown[], D, R>
   implements Observer<N, D, R>, Publisher<N, D, R> {
-  constructor(opts: ObservationOptions = {}) {
-    ObjectAssign(this.settings, opts);
+  constructor({ limit, cleanup }: ObservationOptions = {}) {
+    this.limit = limit ?? 10;
+    this.cleanup = cleanup ?? false;
   }
   private id = Number.MIN_SAFE_INTEGER;
   private readonly node: ListenerNode<N, D, R> = new ListenerNode(void 0, void 0);
-  private readonly settings: DeepImmutable<DeepRequired<ObservationOptions>> = {
-    limit: 10,
-    cleanup: false,
-  };
+  private readonly limit: number;
+  private readonly cleanup: boolean;
   public monitor(namespace: Readonly<N | Inits<N>>, monitor: Monitor<N, D>, options: ObserverOptions = {}): () => void {
     if (typeof monitor !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${monitor}`);
     const { monitors } = this.seekNode(namespace, SeekMode.Extensible);
-    if (monitors.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
+    if (monitors.length === this.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
     if (this.id === Number.MAX_SAFE_INTEGER) throw new Error(`Spica: Observation: Max listener ID reached max safe integer.`);
     const node = monitors.push({
       id: ++this.id,
@@ -104,7 +102,7 @@ export class Observation<N extends readonly unknown[], D, R>
   public on(namespace: Readonly<N>, subscriber: Subscriber<N, D, R>, options: ObserverOptions = {}): () => void {
     if (typeof subscriber !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${subscriber}`);
     const { subscribers } = this.seekNode(namespace, SeekMode.Extensible);
-    if (subscribers.length === this.settings.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
+    if (subscribers.length === this.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
     if (this.id === Number.MAX_SAFE_INTEGER) throw new Error(`Spica: Observation: Max listener ID reached max safe integer.`);
     const node = subscribers.push({
       id: ++this.id,
@@ -140,8 +138,9 @@ export class Observation<N extends readonly unknown[], D, R>
     assert(results);
     return results;
   }
-  private relaies = new WeakSet<Observer<N, D, unknown>>();
+  private relaies!: WeakSet<Observer<N, D, unknown>>;
   public relay(source: Observer<N, D, unknown>): () => void {
+    this.relaies ??= new WeakSet();
     assert(!this.relaies.has(source));
     if (this.relaies.has(source)) throw new Error(`Spica: Observation: Relay source is already registered.`);
     this.relaies.add(source);
@@ -231,7 +230,7 @@ export class Observation<N extends readonly unknown[], D, R>
     for (let node = children.head, i = children.length; node && i--;) {
       const cnt = this.refsBelow_(node.value, type, acc)[1];
       count += cnt;
-      node = cnt === 0 && this.settings.cleanup
+      node = cnt === 0 && this.cleanup
         ? [node.next, void index.delete(node.value.name), void node.delete()][0]!
         : node.next;
     }
