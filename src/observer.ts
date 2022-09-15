@@ -33,18 +33,24 @@ class ListenerNode<N extends readonly unknown[], D, R> {
   public readonly subscribers = new List<SubscriberItem<N, D, R>>();
   public readonly index = new Map<N[number], ListenerNode<N, D, R>>();
   public readonly children = new List<ListenerNode<N, D, R>>();
-  public clear(): boolean {
+  public clear(disposable = false): boolean {
     const { monitors, subscribers, index, children } = this;
+    const stack = [];
     for (let child = children.head, i = children.length; child && i--;) {
-      if (child.value.clear()) {
+      if (child.value.clear(true)) {
         const next = child.next;
-        index.delete(child.value.name);
+        disposable
+          ? stack.push(child.value.name)
+          : index.delete(child.value.name);
         child.delete();
         child = next;
       }
       else {
         child = child.next;
       }
+    }
+    if (children.length) while (stack.length) {
+      index.delete(stack.pop());
     }
     subscribers.clear();
     return monitors.length === 0
