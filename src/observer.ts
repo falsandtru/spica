@@ -7,7 +7,8 @@ import { causeAsyncException } from './exception';
 export interface Observer<N extends readonly unknown[], D, R> {
   monitor(namespace: Readonly<N | Inits<N>>, listener: Monitor<N, D>, options?: ObserverOptions): () => void;
   on(namespace: Readonly<N>, listener: Subscriber<N, D, R>, options?: ObserverOptions): () => void;
-  off(namespace: Readonly<N>, listener?: Subscriber<N, D, R>): void;
+  off(namespace: Readonly<N>, listener: Subscriber<N, D, R>): void;
+  off(namespace: Readonly<N | Inits<N>>): void;
   once(namespace: Readonly<N>, listener: Subscriber<N, D, R>): () => void;
 }
 export interface ObserverOptions {
@@ -38,6 +39,7 @@ class ListenerNode<N extends readonly unknown[], D, R> {
       if (child.value.clear()) {
         const next = child.next;
         index.delete(child.value.name);
+        child.delete();
         child = next;
       }
       else {
@@ -56,7 +58,7 @@ interface MonitorItem<N extends readonly unknown[], D> {
   readonly id: number;
   readonly type: ListenerType.Monitor;
   readonly namespace: Readonly<N | Inits<N>>;
-  readonly listener: Monitor<N | Inits<N>, D>;
+  readonly listener: Monitor<N, D>;
   readonly options: ObserverOptions;
 }
 interface SubscriberItem<N extends readonly unknown[], D, R> {
@@ -119,7 +121,9 @@ export class Observation<N extends readonly unknown[], D, R>
   public once(namespace: Readonly<N>, subscriber: Subscriber<N, D, R>): () => void {
     return this.on(namespace, subscriber, { once: true });
   }
-  public off(namespace: Readonly<N>, subscriber?: Subscriber<N, D, R>): void {
+  public off(namespace: Readonly<N>, subscriber: Subscriber<N, D, R>): void;
+  public off(namespace: Readonly<N | Inits<N>>): void;
+  public off(namespace: Readonly<N | Inits<N>>, subscriber?: Subscriber<N, D, R>): void {
     return subscriber
       ? void this.seekNode(namespace, SeekMode.Breakable)
         ?.subscribers
