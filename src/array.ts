@@ -93,7 +93,7 @@ export function splice<a>(as: a[], index: number, count?: number, ...values: a[]
   }
   switch (values.length) {
     case 0:
-      return count !== undefined || arguments.length > 1
+      return arguments.length > 2
         ? as.splice(index, count!)
         : as.splice(index);
     case 1:
@@ -107,8 +107,6 @@ export function splice<a>(as: a[], index: number, count?: number, ...values: a[]
     case 5:
       return as.splice(index, count!, values[0], values[1], values[2], values[3], values[4]);
     default:
-      return count !== undefined || arguments.length > 1
-        ? as.splice(index, count!, ...values)
-        : as.splice(index);
+      return as.splice(index, count!, ...values);
   }
 }

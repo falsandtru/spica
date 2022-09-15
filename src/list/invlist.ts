@@ -104,8 +104,8 @@ class Node<T> {
   constructor(
     public readonly list: List<T>,
     public value: T,
-    public next: Node<T>,
-    public prev: Node<T>,
+    public next: List.Node<T>,
+    public prev: List.Node<T>,
   ) {
     ++list.$length;
     list.head ??= this;
@@ -113,12 +113,16 @@ class Node<T> {
       ? next.prev = prev.next = this
       : this.next = this.prev = this;
   }
+  public get alive(): boolean {
+    return this.list !== undefined;
+  }
   public delete(): T {
-    if (!this.list) return this.value;
-    --this.list.$length;
+    const list = this.list;
+    if (!list) return this.value;
+    --list.$length;
     const { next, prev } = this;
-    if (this.list.head === this) {
-      this.list.head = next === this
+    if (list.head === this) {
+      list.head = next === this
         ? undefined
         : next;
     }
@@ -134,13 +138,13 @@ class Node<T> {
     this.next = this.prev = undefined;
     return this.value;
   }
-  public insertBefore(value: T): Node<T> {
+  public insertBefore(value: T): List.Node<T> {
     return new Node(this.list, value, this, this.prev);
   }
-  public insertAfter(value: T): Node<T> {
+  public insertAfter(value: T): List.Node<T> {
     return new Node(this.list, value, this.next, this);
   }
-  public moveTo(before: Node<T> | undefined): boolean {
+  public moveTo(before: List.Node<T> | undefined): boolean {
     if (!before) return false;
     if (this === before) return false;
     if (before.list !== this.list) return before.list.insert(this, before), true;
@@ -165,7 +169,7 @@ class Node<T> {
   public moveToLast(): void {
     this.moveTo(this.list.head);
   }
-  public swap(node: Node<T>): boolean {
+  public swap(node: List.Node<T>): boolean {
     const node1 = this;
     const node2 = node;
     if (node1 === node2) return false;

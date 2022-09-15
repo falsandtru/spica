@@ -256,7 +256,7 @@ describe('Unit: lib/observer', function () {
       const ob = new Observation<string[], number, void>();
       const f = () => 1;
       ob.on([], f);
-      ob.on([], () => {
+      ob.once([], () => {
         ob.off([], f);
         ob.off([], g);
         ob.off(['']);
