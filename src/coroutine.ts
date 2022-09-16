@@ -1,7 +1,7 @@
 import type { Structural, DeepImmutable, DeepRequired } from './type';
 import { Object, Promise, Error } from './global';
 import { isArray, ObjectAssign } from './alias';
-import { promise } from './clock';
+import { clock } from './clock';
 import { AtomicPromise, isPromiseLike } from './promise';
 import { Future, AtomicFuture } from './future';
 import { Channel } from './channel';
@@ -161,7 +161,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     }
     if (this[internal].settings.run) {
       this[internal].settings.delay
-        ? promise(this[init])
+        ? clock.now(this[init])
         : this[init]();
     }
   }

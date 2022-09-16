@@ -1,5 +1,5 @@
 import { Observation, ListenerItem } from './observer';
-import { promise } from './clock';
+import { suppressAsyncException } from './exception';
 
 describe('Unit: lib/observer', function () {
   describe('Observation', function () {
@@ -276,7 +276,7 @@ describe('Unit: lib/observer', function () {
       assert.deepStrictEqual(ob.reflect([], 0), [1]);
     });
 
-    it.skip('recovery', function () {
+    it('recovery', suppressAsyncException(function (done) {
       let cnt = 0;
       const ob = new Observation<string[], void, void>();
       ob.on([''], throwError);
@@ -286,9 +286,10 @@ describe('Unit: lib/observer', function () {
       ob.on([''], throwError);
       ob.on([''], throwError);
       ob.on([''], throwError);
-      ob.emit([''], undefined, () => void assert(cnt === 1 && ++cnt) || promise(() => void assert(cnt === 2 && ++cnt)));
-      assert(cnt === 3);
-    });
+      ob.emit([''], undefined, () => void assert(cnt === 1 && ++cnt));
+      assert(cnt === 2);
+      done();
+    }));
 
     it('on namespace', function () {
       let cnt = 0;

@@ -8,7 +8,7 @@ let time: number | undefined;
 let count = 0;
 export function now(nocache?: boolean): number {
   if (time === undefined) {
-    tick(() => time = undefined);
+    clock.now(() => time = undefined);
   }
   else if (!nocache && count++ !== 20) {
     return time;
@@ -17,29 +17,42 @@ export function now(nocache?: boolean): number {
   return time = Date.now();
 }
 
-export const clock: Promise<undefined> = Promise.resolve(undefined);
+const tick = Promise.resolve(undefined);
+export const clock = new class Clock extends Promise<undefined> {
+  constructor() {
+    super(resolve => resolve(undefined));
+    // Promise subclass is slow.
+    const clock = Promise.resolve(undefined) as Clock;
+    clock.next = this.next;
+    clock.now = this.now;
+    return clock;
+  }
+  public next(callback: () => void): void {
+    scheduled || schedule();
+    tick.then(callback);
+  }
+  public now(callback: () => void): void {
+    scheduled || schedule();
+    queue.push(callback);
+  }
+};
 
-type Callback = () => void;
+const queue = new Queue<() => void>();
+let scheduled = false;
 
-export function promise(cb: Callback): void {
-  clock.then(cb);
-}
-
-const queue = new Queue<Callback>();
-
-export function tick(cb: Callback): void {
-  queue.isEmpty() && promise(run);
-  queue.push(cb);
+function schedule(): void {
+  scheduled = true;
+  tick.then(run);
 }
 
 function run(): void {
-  for (let count = queue.length; count--;) {
+  for (let cb: () => void; cb = queue.pop()!;) {
     try {
-      const cb = queue.pop()!;
       cb();
     }
     catch (reason) {
       causeAsyncException(reason);
     }
   }
+  scheduled = false;
 }

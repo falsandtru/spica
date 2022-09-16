@@ -1,7 +1,7 @@
 import type { DeepImmutable, DeepRequired } from './type';
 import { global, Infinity, Symbol, Object, Set, Map, WeakSet, setTimeout, clearTimeout, Error } from './global';
 import { isFinite, ObjectAssign } from './alias';
-import { promise } from './clock';
+import { clock } from './clock';
 import { Coroutine, CoroutineInterface, isCoroutine } from './coroutine';
 import { Observation, Observer, Publisher } from './observer';
 import { AtomicPromise } from './promise';
@@ -98,7 +98,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     capacity: Infinity,
     timeout: Infinity,
     destructor: noop,
-    scheduler: promise,
+    scheduler: clock.next,
     resource: 10,
   };
   private $events?: {

@@ -1,7 +1,7 @@
 import { Supervisor } from './supervisor';
 import { Coroutine } from './coroutine';
 import { never } from './promise';
-import { promise } from './clock';
+import { clock } from './clock';
 import { wait } from './timer';
 
 describe('Unit: lib/supervisor', function () {
@@ -432,7 +432,7 @@ describe('Unit: lib/supervisor', function () {
       const sv = new class TestSupervisor extends Supervisor<string, number, number, number> { }({
       });
       sv.events.loss.on([''], ([, param]) => assert(cnt === 0 && param === 2 && ++cnt));
-      sv.register('', n => void assert(!sv.cast('', 2)) || void assert(n === 1) && void assert(cnt === 1 && ++cnt) || void promise(() => done()) || [0, 0], 0);
+      sv.register('', n => void assert(!sv.cast('', 2)) || void assert(n === 1) && void assert(cnt === 1 && ++cnt) || void clock.next(() => done()) || [0, 0], 0);
       assert(sv.cast('', 1));
     });
 

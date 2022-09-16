@@ -1,6 +1,6 @@
-import { Promise } from '../src/global';
+import { Promise, queueMicrotask } from '../src/global';
 import { benchmark } from './benchmark';
-import { tick } from '../src/clock';
+import { clock } from '../src/clock';
 
 describe('Benchmark:', function () {
   describe('Clock', function () {
@@ -24,12 +24,30 @@ describe('Benchmark:', function () {
         }, done, { defer: true });
       });
 
-      it(`tick ${length.toLocaleString('en')}`, function (done) {
-        benchmark(`Clock tick ${length.toLocaleString('en')}`, done => {
+      it(`next ${length.toLocaleString('en')}`, function (done) {
+        benchmark(`Clock next ${length.toLocaleString('en')}`, done => {
           for (let i = 0; i < length; ++i) {
-            tick(() => 0);
+            clock.next(() => 0);
           }
-          tick(done);
+          clock.next(done);
+        }, done, { defer: true });
+      });
+
+      it(`micro ${length.toLocaleString('en')}`, function (done) {
+        benchmark(`Clock micro ${length.toLocaleString('en')}`, done => {
+          for (let i = 0; i < length; ++i) {
+            queueMicrotask(() => 0);
+          }
+          queueMicrotask(done);
+        }, done, { defer: true });
+      });
+
+      it(`now ${length.toLocaleString('en')}`, function (done) {
+        benchmark(`Clock now ${length.toLocaleString('en')}`, done => {
+          for (let i = 0; i < length; ++i) {
+            clock.now(() => 0);
+          }
+          clock.now(done);
         }, done, { defer: true });
       });
     }

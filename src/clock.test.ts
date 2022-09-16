@@ -1,8 +1,9 @@
-import { clock, tick } from './clock';
+import { clock } from './clock';
+import { suppressAsyncException } from './exception';
 
 describe('Unit: lib/clock', function () {
-  describe('tick', function () {
-    it('', async function () {
+  describe('clock', function () {
+    it('sequence', async function () {
       let cnt = 0;
       assert.deepStrictEqual(
         await Promise.all([
@@ -19,14 +20,31 @@ describe('Unit: lib/clock', function () {
 
   });
 
-  describe('tick', function () {
+  describe('clock.next', function () {
+    it('this', function (done) {
+      clock.next(function (this: void) {
+        assert(this === undefined);
+        done();
+      });
+    });
+
+  });
+
+  describe('clock.now', function () {
+    it('this', function (done) {
+      clock.now(function (this: void) {
+        assert(this === undefined);
+        done();
+      });
+    });
+
     it('async', function (done) {
       let async = false;
       let cnt = 0;
       for (let i = 0; i < 10; ++i) {
-        tick(() => assert(async === true && ++cnt));
+        clock.now(() => assert(async === true && ++cnt));
       }
-      tick(() => void assert(cnt === 10 && async === true) || done());
+      clock.now(() => void assert(cnt === 10 && async === true) || done());
       async = true;
     });
 
@@ -34,37 +52,31 @@ describe('Unit: lib/clock', function () {
       const size = 1e6;
       let cnt = 0;
       for (let i = 0; i < size; ++i) {
-        tick(() => ++cnt);
+        clock.now(() => ++cnt);
       }
       let interrupt = false;
       Promise.resolve().then(() => interrupt = true);
-      tick(() => void assert(cnt === size && interrupt === false) || done());
+      clock.now(() => void assert(cnt === size && interrupt === false) || done());
     });
 
     it('recursion', function (done) {
-      tick(() => tick(done));
+      clock.now(() => clock.now(done));
     });
 
-    it('separation', function (done) {
+    it.skip('separation', function (done) {
       let cnt = 0;
-      tick(() => {
-        Promise.resolve().then(() => ++cnt);
-        tick(() => void assert(cnt === 1) || done());
+      Promise.resolve().then(() => ++cnt);
+      clock.now(() => {
+        clock.now(() => void assert(cnt === 0) || done());
       });
     });
 
-    /*
-    it.skip('recovery', function (done) {
-      for (let i = 0; i < 100; i++) {
-        Tick(throwError);
+    it('recovery', suppressAsyncException(function (done) {
+      for (let i = 0; i < 10; ++i) {
+        clock.now(() => { throw new Error() });
       }
-      Tick(done);
-
-      function throwError() {
-        throw new Error();
-      }
-    });
-    */
+      clock.now(done);
+    }));
 
   });
 
