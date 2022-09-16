@@ -17,19 +17,18 @@ export function now(nocache?: boolean): number {
   return time = Date.now();
 }
 
-const tick = Promise.resolve(undefined);
 export const clock = new class Clock extends Promise<undefined> {
   constructor() {
     super(resolve => resolve(undefined));
     // Promise subclass is slow.
-    const clock = Promise.resolve(undefined) as Clock;
+    const clock = Promise.resolve() as Clock;
     clock.next = this.next;
     clock.now = this.now;
     return clock;
   }
   public next(callback: () => void): void {
     scheduled || schedule();
-    tick.then(callback);
+    clock.then(callback);
   }
   public now(callback: () => void): void {
     scheduled || schedule();
@@ -42,7 +41,7 @@ let scheduled = false;
 
 function schedule(): void {
   scheduled = true;
-  tick.then(run);
+  clock.then(run);
 }
 
 function run(): void {
