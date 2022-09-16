@@ -1,7 +1,7 @@
 import { benchmark } from './benchmark';
+import { Math } from '../src/global';
 import { Cache } from '../src/cache';
 import LRUCache from 'lru-cache';
-import { Math } from '../src/global';
 import { captureTimers } from '../src/timer';
 
 describe('Benchmark:', function () {

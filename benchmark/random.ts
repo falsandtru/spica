@@ -1,6 +1,6 @@
 import { benchmark } from './benchmark';
-import { rnd16, rnd62, rnd0f, rnd0Z, unique } from '../src/random';
 import { crypto } from '../src/global';
+import { rnd16, rnd62, rnd0f, rnd0Z, unique } from '../src/random';
 
 describe('Benchmark:', function () {
   describe('Uint8Array', function () {
