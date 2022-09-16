@@ -34,8 +34,8 @@ describe('Unit: lib/observer', function () {
       const m2 = ob.monitor([''], id);
       assert.deepStrictEqual(ob.refs([]).map(convert), [
         [[], id, ListenerType.Monitor],
-        [[''], id, ListenerType.Monitor],
         [[], id, ListenerType.Subscriber],
+        [[''], id, ListenerType.Monitor],
         [[''], id, ListenerType.Subscriber],
       ]);
 
@@ -47,9 +47,9 @@ describe('Unit: lib/observer', function () {
       ob.on([], id);
       assert.deepStrictEqual(ob.refs([]).map(convert), [
         [[], id, ListenerType.Monitor],
+        [[], id, ListenerType.Subscriber],
+        [[], id, ListenerType.Subscriber],
         [[''], id, ListenerType.Monitor],
-        [[], id, ListenerType.Subscriber],
-        [[], id, ListenerType.Subscriber],
         [[''], id, ListenerType.Subscriber],
         [[''], id, ListenerType.Subscriber],
         [['0'], id, ListenerType.Subscriber],
