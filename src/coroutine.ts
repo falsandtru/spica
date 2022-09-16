@@ -199,7 +199,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     const port = this[Coroutine.port];
     while (core.alive) {
       const result = await port.recv();
-      if (result.done) return result.value;
+      if (result.done) return await result.value;
       yield result.value;
     }
     return await this;
@@ -305,7 +305,7 @@ class Port<T, R, S> {
       let reply: R | T | undefined;
       while (true) {
         const result = await iter.next(reply!);
-        if (result.done) return result.value;
+        if (result.done) return await result.value;
         reply = (await this.ask(result.value)).value;
       }
     })();

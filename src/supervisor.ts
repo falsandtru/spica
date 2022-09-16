@@ -59,7 +59,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
   protected static readonly standalone = new WeakSet<Supervisor.Process.Regular<unknown, unknown, unknown>>();
   constructor(opts: SupervisorOptions = {}) {
     super(async function* (this: Supervisor<N, P, R, S>) {
-      return this.state;
+      return await this.state;
     }, { delay: false });
     ObjectAssign(this.settings, opts);
     this.name = this.settings.name;
