@@ -171,10 +171,13 @@ export class Observation<N extends readonly unknown[], D, R>
     const results: R[] = [];
     for (let lists = node ? this.listenersBelow(node, ListenerType.Subscriber) : [],
              i = 0; i < lists.length; ++i) {
-      const nodes = lists[i].toNodes();
-      for (let i = 0; i < nodes.length; ++i) {
-        const node = nodes[i];
-        if (!node.alive) continue;
+      const items = lists[i];
+      if (items.length === 0) continue;
+      const recents: List.Node<SubscriberItem<N, D, R>>[] = [];
+      const max = this.id;
+      let min = Number.MIN_SAFE_INTEGER;
+      for (let node = items.head; node && min <= node.value.id && node.value.id <= max;) {
+        min = node.value.id + 1;
         const item = node.value;
         item.options.once && node.delete();
         try {
@@ -184,15 +187,21 @@ export class Observation<N extends readonly unknown[], D, R>
         catch (reason) {
           causeAsyncException(reason);
         }
+        node.alive && recents.push(node);
+        // TODO: Use Array.findLast.
+        node = node.next ?? findLast(recents, item => item.next) ?? items.head;
       }
     }
     node ??= this.seek(namespace, SeekMode.Closest);
     for (let lists = this.listenersAbove(node, ListenerType.Monitor),
              i = 0; i < lists.length; ++i) {
-      const nodes = lists[i].toNodes();
-      for (let i = 0; i < nodes.length; ++i) {
-        const node = nodes[i];
-        if (!node.alive) continue;
+      const items = lists[i];
+      if (items.length === 0) continue;
+      const recents: List.Node<MonitorItem<N, D>>[] = [];
+      const max = this.id;
+      let min = Number.MIN_SAFE_INTEGER;
+      for (let node = items.head; node && min <= node.value.id && node.value.id <= max;) {
+        min = node.value.id + 1;
         const item = node.value;
         item.options.once && node.delete();
         try {
@@ -201,6 +210,9 @@ export class Observation<N extends readonly unknown[], D, R>
         catch (reason) {
           causeAsyncException(reason);
         }
+        node.alive && recents.push(node);
+        // TODO: Use Array.findLast.
+        node = node.next ?? findLast(recents, item => item.next) ?? items.head;
       }
     }
     if (tracker) {
@@ -276,5 +288,11 @@ export class Observation<N extends readonly unknown[], D, R>
       }
     }
     return [acc, monitors.length + subscribers.length + count];
+  }
+}
+
+function findLast<T>(array: T[], f: (value: T) => unknown): T | undefined {
+  for (let i = array.length; i--;) {
+    if (f(array[i])) return array[i];
   }
 }
