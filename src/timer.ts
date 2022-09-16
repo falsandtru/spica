@@ -1,4 +1,5 @@
 import { setTimeout, clearTimeout } from './global';
+import { clock } from './clock';
 import { singleton, noop } from './function';
 
 export const setTimer = template(false);
@@ -36,6 +37,6 @@ export function captureTimers<as extends unknown[] = []>(callback?: (...as: as) 
 export function wait(ms: number): Promise<undefined> {
   assert(ms >= 0);
   return ms === 0
-    ? Promise.resolve(void 0)
+    ? clock
     : new Promise<undefined>(resolve => void setTimeout(resolve, ms));
 }

@@ -372,7 +372,7 @@ function call(
   param: unknown,
 ): void {
   assert([resolve, reject].includes(cont));
-  if (!callback) return cont(param);
+  if (!callback) return void cont(param);
   try {
     resolve(callback(param));
   }

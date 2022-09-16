@@ -1,6 +1,24 @@
-import { tick } from './clock';
+import { clock, tick } from './clock';
 
 describe('Unit: lib/clock', function () {
+  describe('tick', function () {
+    it('', async function () {
+      let cnt = 0;
+      assert.deepStrictEqual(
+        await Promise.all([
+          clock.then(() => ++cnt),
+          Promise.resolve().then(() => ++cnt),
+          clock.then(() => ++cnt),
+        ]),
+        [
+          1,
+          2,
+          3,
+        ]);
+    });
+
+  });
+
   describe('tick', function () {
     it('async', function (done) {
       let async = false;

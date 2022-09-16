@@ -22,22 +22,21 @@ export const clock: Promise<undefined> = Promise.resolve(undefined);
 type Callback = () => void;
 
 export function promise(cb: Callback): void {
-  Promise.resolve().then(cb);
+  clock.then(cb);
 }
 
 const queue = new Queue<Callback>();
-const scheduler = Promise.resolve();
 
 export function tick(cb: Callback): void {
-  queue.isEmpty() && scheduler.then(run);
+  queue.isEmpty() && promise(run);
   queue.push(cb);
 }
 
 function run(): void {
   for (let count = queue.length; count--;) {
     try {
-      // @ts-expect-error
-      (0, queue.pop()!)();
+      const cb = queue.pop()!;
+      cb();
     }
     catch (reason) {
       causeAsyncException(reason);
