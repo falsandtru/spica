@@ -13,8 +13,8 @@ export interface Canceller<L = undefined> {
   readonly close: (reason?: unknown) => void;
 }
 export interface Cancellee<L = undefined> extends Promise<L> {
-  readonly isAlive: boolean;
-  readonly isCancelled: boolean;
+  isAlive(): boolean;
+  isCancelled(): boolean;
   readonly register: (listener: Listener<L>) => () => void;
   readonly promise: <T>(val: T) => AtomicPromise<T>;
   readonly maybe: <T>(val: T) => Maybe<T>;
@@ -35,16 +35,16 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
   public get [promiseinternal](): PromiseInternal<L> {
     return this[internal].promise[promiseinternal];
   }
-  public get isAlive(): boolean {
+  public isAlive(): boolean {
     return this[internal].reason.length === 0;
   }
-  public get isCancelled(): boolean {
+  public isCancelled(): boolean {
     return this[internal].reason.length === 1;
   }
-  public get isClosed(): boolean {
+  public isClosed(): boolean {
     return this[internal].reason.length === 2;
   }
-  public get isFinished(): boolean {
+  public isFinished(): boolean {
     return this[internal].reason.length !== 0;
   }
   public get register(): (listener: Listener<L>) => () => void {
@@ -70,7 +70,7 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
   }
   public get promise(): <T>(val: T) => AtomicPromise<T> {
     return <T>(val: T): AtomicPromise<T> =>
-      this.isCancelled
+      this.isCancelled()
         ? AtomicPromise.reject(this[internal].reason[0])
         : AtomicPromise.resolve(val);
   }
@@ -78,7 +78,7 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
     return <T>(val: T): Maybe<T> =>
       Just(val)
         .bind(val =>
-          this.isCancelled
+          this.isCancelled()
             ? Nothing
             : Just(val));
   }
@@ -86,14 +86,14 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
     return <R>(val: R): Either<L, R> =>
       Right<L, R>(val)
         .bind(val =>
-          this.isCancelled
+          this.isCancelled()
             ? Left(this[internal].reason[0] as L)
             : Right(val));
   }
 }
 
 class Internal<L> {
-  public isFinished: boolean = false;
+  public finished: boolean = false;
   public reason: [] | [L] | [void, unknown] = [];
   public future?: AtomicFuture<L>;
   public get promise(): AtomicPromise<L> {
@@ -110,7 +110,7 @@ class Internal<L> {
   }
   public readonly listeners: (Listener<L> | undefined)[] = [];
   public register(listener: Listener<L>): () => void {
-    if (this.isFinished) {
+    if (this.finished) {
       this.reason.length === 1 && handler(this.reason[0]);
       return noop;
     }
@@ -133,12 +133,12 @@ class Internal<L> {
       listeners[i]?.(reason!);
     }
     this.future?.bind(reason!);
-    this.isFinished = true;
+    this.finished = true;
   }
   public close(reason?: unknown): void {
     if (this.reason.length !== 0) return;
     this.reason = [void 0, reason];
     this.future?.bind(AtomicPromise.reject(reason));
-    this.isFinished = true;
+    this.finished = true;
   }
 }

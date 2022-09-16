@@ -70,7 +70,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
   }
   private readonly state = new AtomicFuture();
   private destructor(reason: unknown): void {
-    assert(this.isAlive === true);
+    assert(this.alive === true);
     assert(this.available === true);
     this.available = false;
     this.clear(reason);
@@ -83,11 +83,11 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       this.$events?.loss.emit([name], [name, param]);
     }
     assert(this.messages.length === 0);
-    this.isAlive = false;
+    this.alive = false;
     // @ts-ignore #31251
     this.constructor.instances.delete(this);
     Object.freeze(this);
-    assert(this.isAlive === false);
+    assert(this.alive === false);
     assert(this.available === false);
     this.settings.destructor(reason);
     this.state.bind(reason === void 0 ? void 0 : AtomicPromise.reject(reason));
@@ -118,7 +118,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     };
   }
   private readonly workers = new Map<N, Worker<N, P, R, S>>();
-  private isAlive = true;
+  private alive = true;
   private available = true;
   private throwErrorIfNotAvailable(): void {
     if (!this.available) throw new Error(`Spica: Supervisor: <${this.name}>: Cannot use terminated supervisors.`);
@@ -277,7 +277,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
   }
   public kill(name: N, reason?: unknown): boolean {
     if (!this.available) return false;
-    assert(this.isAlive === true);
+    assert(this.alive === true);
     return this.workers.has(name)
       ? this.workers.get(name)!.terminate(reason)
       : false;
@@ -291,7 +291,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
   }
   public terminate(reason?: unknown): boolean {
     if (!this.available) return false;
-    assert(this.isAlive === true);
+    assert(this.alive === true);
     this.destructor(reason);
     this[Coroutine.exit](void 0);
     return true;
@@ -414,11 +414,11 @@ class Worker<N extends string, P, R, S> {
     initiated && this.init();
   }
   private destructor(reason: unknown): void {
-    assert(this.isAlive === true);
-    this.isAlive = false;
+    assert(this.alive === true);
+    this.alive = false;
     this.available = false;
     Object.freeze(this);
-    assert(this.isAlive === false);
+    assert(this.alive === false);
     assert(this.available === false);
     try {
       this.destructor_();
@@ -430,7 +430,7 @@ class Worker<N extends string, P, R, S> {
       this.exit(reason);
     }
   }
-  private isAlive = true;
+  private alive = true;
   private available = true;
   private initiated = false;
   private init(): void {
@@ -457,20 +457,20 @@ class Worker<N extends string, P, R, S> {
     if (!this.available) return;
     return new AtomicPromise<Supervisor.Process.Result<R, S>>((resolve, reject) => {
       isFinite(expiry) && setTimeout(() => void reject(new Error()), expiry - Date.now());
-      assert(this.isAlive);
+      assert(this.alive);
       assert(this.available);
       this.available = false;
       if (!this.initiated) {
         this.init();
-        if (!this.isAlive) return void reject();
+        if (!this.alive) return void reject();
       }
-      assert(this.isAlive);
+      assert(this.alive);
       assert(!this.available);
       AtomicPromise.resolve(this.process.main(param, this.state, this.terminate))
         .then(resolve, reject);
     })
       .then(([reply, state]) => {
-        if (this.isAlive) {
+        if (this.alive) {
           this.schedule();
           assert(!Object.isFrozen(this));
           this.state = state;
@@ -485,7 +485,7 @@ class Worker<N extends string, P, R, S> {
       });
   }
   public readonly terminate = (reason: unknown): boolean => {
-    if (!this.isAlive) return false;
+    if (!this.alive) return false;
     this.destructor(reason);
     return true;
   };

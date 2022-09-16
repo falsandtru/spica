@@ -13,11 +13,11 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
   private readonly buffer = new Queue<T>();
   private readonly producers = new Queue<AtomicFuture<undefined>>();
   private readonly consumers = new Queue<AtomicFuture<T>>();
-  public isAlive: boolean = true;
+  public alive: boolean = true;
   public close(finalizer?: (msgs: T[]) => void): void {
-    if (!this.isAlive) return void finalizer?.([]);
+    if (!this.alive) return void finalizer?.([]);
     const { buffer, producers, consumers } = this;
-    this.isAlive = false;
+    this.alive = false;
     while (!producers.isEmpty() || !consumers.isEmpty()) {
       producers.pop()?.bind(fail());
       consumers.pop()?.bind(fail());
@@ -30,7 +30,7 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
   public put(msg: T): AtomicPromise<undefined>;
   public put(this: Channel<undefined>, msg?: T): AtomicPromise<undefined>;
   public put(msg: T): AtomicPromise<undefined> {
-    if (!this.isAlive) return fail();
+    if (!this.alive) return fail();
     const { capacity, buffer, producers, consumers } = this;
     switch (true) {
       case buffer.length < capacity:
@@ -51,7 +51,7 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
     }
   }
   public take(): AtomicPromise<T> {
-    if (!this.isAlive) return fail();
+    if (!this.alive) return fail();
     const { buffer, producers, consumers } = this;
     switch (true) {
       case !buffer.isEmpty():
@@ -77,12 +77,12 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
   }
   public async *[Symbol.asyncIterator](): AsyncGenerator<T, undefined, undefined> {
     try {
-      while (this.isAlive) {
+      while (this.alive) {
         yield this.take();
       }
     }
     catch (reason) {
-      if (this.isAlive) throw reason;
+      if (this.alive) throw reason;
     }
     return;
   }

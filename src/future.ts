@@ -9,8 +9,10 @@ export class Future<T = undefined> implements Promise<T> {
   constructor(strict: boolean = true) {
     this.bind = (value: T) => {
       const core = this[internal];
-      if (!core.isPending && !strict) return this;
-      if (!core.isPending) throw new Error(`Spica: Future: Cannot rebind a value.`);
+      if (!core.isPending()) {
+        if (!strict) return this;
+        throw new Error(`Spica: Future: Cannot rebind a value.`);
+      }
       core.resolve(value);
       return this;
     };
@@ -40,8 +42,10 @@ export class AtomicFuture<T = undefined> implements Future<T> {
   constructor(strict: boolean = true) {
     this.bind = (value: T) => {
       const core = this[internal];
-      if (!core.isPending && !strict) return this;
-      if (!core.isPending) throw new Error(`Spica: AtomicFuture: Cannot rebind a value.`);
+      if (!core.isPending()) {
+        if (!strict) return this;
+        throw new Error(`Spica: AtomicFuture: Cannot rebind a value.`);
+      }
       core.resolve(value);
       return this;
     };

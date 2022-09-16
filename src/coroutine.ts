@@ -21,7 +21,7 @@ export interface CoroutineOptions {
 
 export interface CoroutineInterface<T = unknown, R = T, _ = unknown> extends Promise<T>, AsyncIterable<R> {
   readonly constructor: {
-    readonly isAlive: symbol;
+    readonly alive: symbol;
     readonly exit: symbol;
     readonly terminate: symbol;
     readonly port: symbol;
@@ -29,7 +29,7 @@ export interface CoroutineInterface<T = unknown, R = T, _ = unknown> extends Pro
   };
 }
 
-const isAlive = Symbol.for('spica/Coroutine.isAlive');
+const alive = Symbol.for('spica/Coroutine.alive');
 const init = Symbol.for('spica/Coroutine.init');
 const exit = Symbol.for('spica/Coroutine.exit');
 const terminate = Symbol.for('spica/Coroutine.terminate');
@@ -43,7 +43,7 @@ export interface Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromis
   constructor: typeof Coroutine;
 }
 export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T> implements Promise<T>, AsyncIterable<R>, CoroutineInterface<T, R, S> {
-  public static readonly isAlive: typeof isAlive = isAlive;
+  public static readonly alive: typeof alive = alive;
   protected static readonly init: typeof init = init;
   public static readonly exit: typeof exit = exit;
   public static readonly terminate: typeof terminate = terminate;
@@ -58,12 +58,12 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     let count = 0;
     this[init] = async () => {
       const core = this[internal];
-      if (!core.isAlive) return;
+      if (!core.alive) return;
       if (count !== 0) return;
       let reply: Reply<R, T> = noop;
       try {
         const iter = gen.call(this);
-        while (core.isAlive) {
+        while (core.alive) {
           const [[msg, rpy]] = ++count === 1
             // Don't block.
             ? [[void 0, noop]]
@@ -84,30 +84,30 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
           reply = rpy;
           assert(msg instanceof Promise === false);
           assert(msg instanceof AtomicPromise === false);
-          if (!core.isAlive) break;
+          if (!core.alive) break;
           // Block.
           // `result.value` can be a Promise value when using iterators.
           // `result.value` will never be a Promise value when using async iterators.
           const result = await iter.next(msg!);
           assert(!isPromiseLike(result.value));
-          if (!core.isAlive) break;
+          if (!core.alive) break;
           if (!result.done) {
             // Block.
-            assert(core.isAlive);
+            assert(core.alive);
             reply({ ...result });
             await core.recvBuffer.put({ ...result });
             continue;
           }
           else {
             // Don't block.
-            core.isAlive = false;
+            core.alive = false;
             reply({ ...result });
             core.recvBuffer.put({ ...result });
             core.result.bind(result);
             return;
           }
         }
-        assert(!core.isAlive);
+        assert(!core.alive);
         reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
       }
       catch (reason) {
@@ -166,26 +166,26 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     }
   }
   public readonly [internal]: Internal<T, R, S>;
-  public get [isAlive](): boolean {
-    return this[internal].isAlive;
+  public get [alive](): boolean {
+    return this[internal].alive;
   }
   public readonly [init]: () => void;
   public [exit](result: T | PromiseLike<T>): void {
-    if (!this[internal].isAlive) return;
+    if (!this[internal].alive) return;
     AtomicPromise.resolve(result)
       .then(
         result => {
           const core = this[internal];
-          if (!core.isAlive) return;
-          core.isAlive = false;
+          if (!core.alive) return;
+          core.alive = false;
           // Don't block.
           core.recvBuffer.put({ value: void 0, done: true });
           core.result.bind({ value: result });
         },
         reason => {
           const core = this[internal];
-          if (!core.isAlive) return;
-          core.isAlive = false;
+          if (!core.alive) return;
+          core.alive = false;
           // Don't block.
           core.recvBuffer.put({ value: void 0, done: true });
           core.result.bind(AtomicPromise.reject(reason));
@@ -197,7 +197,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
   public async *[Symbol.asyncIterator](): AsyncIterator<R, T, undefined> {
     const core = this[internal];
     const port = this[Coroutine.port];
-    while (core.isAlive) {
+    while (core.alive) {
       const result = await port.recv();
       if (result.done) return result.value;
       yield result.value;
@@ -235,7 +235,7 @@ class Internal<T, R, S> {
     resume: noop,
     trigger: void 0 as any,
   }, this.opts);
-  public isAlive = true;
+  public alive = true;
   public reception = 0;
   public readonly sendBuffer?: Channel<readonly [S, Reply<R, T>]> =
     this.settings.capacity >= 0
@@ -264,7 +264,7 @@ class Port<T, R, S> {
   };
   public ask(msg: S): Promise<IteratorResult<R, T>> {
     const core = this[internal].co[internal];
-    if (!core.isAlive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
+    if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
     if (core.settings.capacity < 0) return AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`));
     assert(core.sendBuffer instanceof Channel);
     core.settings.capacity >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
@@ -279,7 +279,7 @@ class Port<T, R, S> {
   }
   public recv(): Promise<IteratorResult<R, T>> {
     const core = this[internal].co[internal];
-    if (!core.isAlive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
+    if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
     ++core.reception;
     return Promise.resolve(core.recvBuffer.take())
       .then(result =>
@@ -289,7 +289,7 @@ class Port<T, R, S> {
   }
   public send(msg: S): Promise<undefined> {
     const core = this[internal].co[internal];
-    if (!core.isAlive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
+    if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
     if (core.settings.capacity < 0) return AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`));
     assert(core.sendBuffer instanceof Channel);
     core.settings.capacity >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
@@ -298,7 +298,7 @@ class Port<T, R, S> {
   }
   public connect<U>(com: (this: Coroutine<T, R, S>) => AsyncGenerator<S, U, R | T>): Promise<U> {
     const core = this[internal].co[internal];
-    if (!core.isAlive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
+    if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
     return (async () => {
       core.settings.capacity >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
       const iter = com.call(this[internal].co);
@@ -316,8 +316,8 @@ export function isCoroutine(target: unknown): target is CoroutineInterface<unkno
   return typeof target === 'object'
       && target !== null
       && typeof target.constructor === 'function'
-      && typeof target.constructor['isAlive'] === 'symbol'
-      && typeof target[target.constructor['isAlive']] === 'boolean'
+      && typeof target.constructor['alive'] === 'symbol'
+      && typeof target[target.constructor['alive']] === 'boolean'
       && typeof target.constructor['init'] === 'symbol'
       && typeof target[target.constructor['init']] === 'function'
       && typeof target.constructor['exit'] === 'symbol'
@@ -330,14 +330,14 @@ export function isCoroutine(target: unknown): target is CoroutineInterface<unkno
 
 class BroadcastChannel<T> {
   public readonly [internal] = new BroadcastChannel.Internal<T>();
-  public get isAlive(): boolean {
-    return this[internal].isAlive;
+  public get alive(): boolean {
+    return this[internal].alive;
   }
   public close(finalizer?: (msg: T[]) => void): void {
-    if (!this.isAlive) return void finalizer?.([]);
+    if (!this.alive) return void finalizer?.([]);
     const core = this[internal];
     const { consumers } = core;
-    core.isAlive = false;
+    core.alive = false;
     while (!consumers.isEmpty()) {
       consumers.pop()!.bind(BroadcastChannel.fail());
     }
@@ -346,7 +346,7 @@ class BroadcastChannel<T> {
     }
   }
   public put(msg: T): AtomicPromise<undefined> {
-    if (!this.isAlive) return BroadcastChannel.fail();
+    if (!this.alive) return BroadcastChannel.fail();
     const { consumers } = this[internal];
     while (!consumers.isEmpty()) {
       consumers.pop()!.bind(msg);
@@ -354,7 +354,7 @@ class BroadcastChannel<T> {
     return AtomicPromise.resolve();
   }
   public take(): AtomicPromise<T> {
-    if (!this.isAlive) return BroadcastChannel.fail();
+    if (!this.alive) return BroadcastChannel.fail();
     const { consumers } = this[internal];
     consumers.push(new AtomicFuture());
     return consumers.peek(-1)!.then();
@@ -363,7 +363,7 @@ class BroadcastChannel<T> {
 namespace BroadcastChannel {
   export const fail = () => AtomicPromise.reject(new Error('Spica: Channel: Closed.'));
   export class Internal<T> {
-    public isAlive: boolean = true;
+    public alive: boolean = true;
     public readonly consumers = new Queue<AtomicFuture<T>>();
   }
 }

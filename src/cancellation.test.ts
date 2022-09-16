@@ -8,9 +8,9 @@ describe('Unit: lib/cancellation', () => {
       const unregister = cancellation.register(n => {
         assert(cnt === 0 && ++cnt);
         assert(n === 0);
-        assert(cancellation.isAlive === false);
-        assert(cancellation.isCancelled === true);
-        assert(cancellation.isClosed === false);
+        assert(cancellation.isAlive() === false);
+        assert(cancellation.isCancelled() === true);
+        assert(cancellation.isClosed() === false);
         unregister();
         cancellation.register(n => {
           assert(cnt === 2 && ++cnt);
@@ -28,14 +28,14 @@ describe('Unit: lib/cancellation', () => {
       cancellation.then(reason => {
         assert(cnt === 3 && ++cnt);
         assert(reason === 0);
-        assert(cancellation.isAlive === false);
-        assert(cancellation.isCancelled === true);
-        assert(cancellation.isClosed === false);
+        assert(cancellation.isAlive() === false);
+        assert(cancellation.isCancelled() === true);
+        assert(cancellation.isClosed() === false);
         done();
       });
-      assert(cancellation.isAlive === true);
-      assert(cancellation.isCancelled === false);
-      assert(cancellation.isClosed === false);
+      assert(cancellation.isAlive() === true);
+      assert(cancellation.isCancelled() === false);
+      assert(cancellation.isClosed() === false);
       cancellation.cancel(0);
       cancellation.cancel(NaN);
     });
@@ -44,30 +44,30 @@ describe('Unit: lib/cancellation', () => {
       const cancellation = new Cancellation();
       cancellation.register(() =>
         done(false));
-      assert(cancellation.isAlive === true);
-      assert(cancellation.isCancelled === false);
-      assert(cancellation.isClosed === false);
+      assert(cancellation.isAlive() === true);
+      assert(cancellation.isCancelled() === false);
+      assert(cancellation.isClosed() === false);
       cancellation.close();
-      assert(cancellation.isAlive === false);
-      assert(cancellation.isCancelled === false);
-      assert(cancellation.isClosed === true);
+      assert(cancellation.isAlive() === false);
+      assert(cancellation.isCancelled() === false);
+      assert(cancellation.isClosed() === true);
       cancellation.close();
-      assert(cancellation.isAlive === false);
-      assert(cancellation.isCancelled === false);
-      assert(cancellation.isClosed === true);
+      assert(cancellation.isAlive() === false);
+      assert(cancellation.isCancelled() === false);
+      assert(cancellation.isClosed() === true);
       cancellation.cancel();
-      assert(cancellation.isAlive === false);
-      assert(cancellation.isCancelled === false);
-      assert(cancellation.isClosed === true);
+      assert(cancellation.isAlive() === false);
+      assert(cancellation.isCancelled() === false);
+      assert(cancellation.isClosed() === true);
       cancellation.register(() =>
         done(false));
-      assert(cancellation.isAlive === false);
-      assert(cancellation.isCancelled === false);
-      assert(cancellation.isClosed === true);
+      assert(cancellation.isAlive() === false);
+      assert(cancellation.isCancelled() === false);
+      assert(cancellation.isClosed() === true);
       cancellation.close();
-      assert(cancellation.isAlive === false);
-      assert(cancellation.isCancelled === false);
-      assert(cancellation.isClosed === true);
+      assert(cancellation.isAlive() === false);
+      assert(cancellation.isCancelled() === false);
+      assert(cancellation.isClosed() === true);
       cancellation.catch(done);
     });
 
@@ -80,15 +80,15 @@ describe('Unit: lib/cancellation', () => {
       b.register(() => assert(cnt === 1 && ++cnt));
       c.register(() => assert(cnt === 0 && ++cnt));
       b.cancel();
-      assert(a.isAlive === true);
-      assert(a.isCancelled === false);
-      assert(a.isClosed === false);
-      assert(b.isAlive === false);
-      assert(b.isCancelled === true);
-      assert(a.isClosed === false);
-      assert(c.isAlive === false);
-      assert(c.isCancelled === true);
-      assert(a.isClosed === false);
+      assert(a.isAlive() === true);
+      assert(a.isCancelled() === false);
+      assert(a.isClosed() === false);
+      assert(b.isAlive() === false);
+      assert(b.isCancelled() === true);
+      assert(a.isClosed() === false);
+      assert(c.isAlive() === false);
+      assert(c.isCancelled() === true);
+      assert(a.isClosed() === false);
       assert(cnt === 2);
       done();
     });

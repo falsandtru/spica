@@ -241,7 +241,7 @@ type RejectReaction = [(value: unknown) => void, (reason: unknown) => void, (rea
 
 export class Internal<T> {
   public status: Status<T> = { state: State.pending };
-  public get isPending(): boolean {
+  public isPending(): boolean {
     return this.status.state === State.pending;
   }
   public resolve(value: T | PromiseLike<T>): void {
