@@ -5,7 +5,7 @@ assert(dict.length === 36);
 assert(dict[0] === '0');
 assert(dict.at(-1) === 'z');
 
-export function counter(radix: number = 10, pad = ''): () => string {
+export function counter(radix: number = 10, pad: string = ''): () => string {
   assert(radix <= 36);
   let count = 0;
   let str = '';
