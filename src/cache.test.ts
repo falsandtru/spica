@@ -1,6 +1,7 @@
 import { Cache } from './cache';
 import LRUCache from 'lru-cache';
 import { wait } from './timer';
+import { xorshift } from './random';
 
 describe('Unit: lib/cache', () => {
   describe('Cache', () => {
@@ -322,17 +323,17 @@ describe('Unit: lib/cache', () => {
 
     it('rate even 100', function () {
       this.timeout(10 * 1e3);
-      this.retries(3);
 
       const capacity = 100;
       const lru = new LRUCache<number, 1>({ max: capacity });
       const dwc = new Cache<number, 1>(capacity);
 
       const repeat = capacity * 1000;
+      const random = xorshift.random(1);
       let lruhit = 0;
       let dwchit = 0;
       for (let i = 0; i < repeat; ++i) {
-        const key = Math.random() * capacity * 10 | 0;
+        const key = random() * capacity * 10 | 0;
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1) & 0;
       }
@@ -348,20 +349,20 @@ describe('Unit: lib/cache', () => {
 
     it('rate uneven 100', function () {
       this.timeout(10 * 1e3);
-      this.retries(3);
 
       const capacity = 100;
       const lru = new LRUCache<number, 1>({ max: capacity });
       const dwc = new Cache<number, 1>(capacity);
 
       const repeat = capacity * 1000;
+      const random = xorshift.random(1);
       let lruhit = 0;
       let dwchit = 0;
       for (let i = 0; i < repeat; ++i) {
-        const key = Math.random() < 0.4
+        const key = random() < 0.4
           // 静的偏りは小さなLRUでもLFUに蓄積できる
-          ? Math.random() * capacity * -1 | 0
-          : Math.random() * capacity * 10 | 0;
+          ? random() * capacity * -1 | 0
+          : random() * capacity * 10 | 0;
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1) & 0;
       }
@@ -377,19 +378,19 @@ describe('Unit: lib/cache', () => {
 
     it('rate uneven 100 transitive distribution', function () {
       this.timeout(10 * 1e3);
-      this.retries(3);
 
       const capacity = 100;
       const lru = new LRUCache<number, 1>({ max: capacity });
       const dwc = new Cache<number, 1>(capacity);
 
       const repeat = capacity * 1000;
+      const random = xorshift.random(1);
       let lruhit = 0;
       let dwchit = 0;
       for (let i = 0; i < repeat; ++i) {
-        const key = Math.random() < 0.4
-          ? Math.random() * capacity * -1 | 0
-          : Math.random() * capacity * 10 + i * capacity / 100 | 0;
+        const key = random() < 0.4
+          ? random() * capacity * -1 | 0
+          : random() * capacity * 10 + i * capacity / 100 | 0;
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1) & 0;
       }
@@ -405,22 +406,22 @@ describe('Unit: lib/cache', () => {
 
     it('rate uneven 100 transitive bias', function () {
       this.timeout(10 * 1e3);
-      this.retries(3);
 
       const capacity = 100;
       const lru = new LRUCache<number, 1>({ max: capacity });
       const dwc = new Cache<number, 1>(capacity);
 
       const repeat = capacity * 1000;
+      const random = xorshift.random(1);
       let lruhit = 0;
       let dwchit = 0;
       for (let i = 0; i < repeat; ++i) {
-        const key = Math.random() < 0.5
+        const key = random() < 0.5
           // LFUが機能するアクセスパターンの場合はLRUだけでも同等に効果的に動作し機能しない場合もLRUに縮退して同等
           // 推移的偏りはこれを迅速に捕捉し続けるLRUと保持するLFUが必要であるため偏りの2倍の容量が必要となる
-          //? Math.random() * capacity * -1 - i / 2 * capacity / 100 | 0
-          ? Math.random() * capacity / -4 - i / 2 * capacity / 400 | 0
-          : Math.random() * capacity * 10 | 0;
+          //? random() * capacity * -1 - i / 2 * capacity / 100 | 0
+          ? random() * capacity / -4 - i / 2 * capacity / 400 | 0
+          : random() * capacity * 10 | 0;
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1) & 0;
       }
@@ -436,18 +437,18 @@ describe('Unit: lib/cache', () => {
 
     it('rate uneven 100 sequential', function () {
       this.timeout(10 * 1e3);
-      this.retries(3);
 
       const capacity = 100;
       const lru = new LRUCache<number, 1>({ max: capacity });
       const dwc = new Cache<number, 1>(capacity);
 
       const repeat = capacity * 1000;
+      const random = xorshift.random(1);
       let lruhit = 0;
       let dwchit = 0;
       for (let i = 0; i < repeat; ++i) {
-        const key = Math.random() < 0.4
-          ? Math.random() * capacity * -1 | 0
+        const key = random() < 0.4
+          ? random() * capacity * -1 | 0
           // LRU破壊
           : i;
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
@@ -465,20 +466,20 @@ describe('Unit: lib/cache', () => {
 
     it('rate uneven 100 adversarial', function () {
       this.timeout(10 * 1e3);
-      this.retries(3);
 
       const capacity = 100;
       const lru = new LRUCache<number, 1>({ max: capacity });
       const dwc = new Cache<number, 1>(capacity);
 
       const repeat = capacity * 1000;
+      const random = xorshift.random(1);
       let lruhit = 0;
       let dwchit = 0;
       for (let i = 0; i < repeat; ++i) {
         const key = i % 3
           // LFU破壊
           ? i % 3 - 1 ? i - i % 3 + 48 : i - i % 3
-          : Math.random() * capacity / -6 | 0;
+          : random() * capacity / -6 | 0;
         lruhit += lru.get(key)! & +(key < 0) || +lru.set(key, 1) & 0;
         dwchit += dwc.get(key)! & +(key < 0) || +dwc.put(key, 1) & 0;
       }
@@ -494,19 +495,19 @@ describe('Unit: lib/cache', () => {
 
     it('rate uneven 1,000', function () {
       this.timeout(30 * 1e3);
-      this.retries(3);
 
       const capacity = 1000;
       const lru = new LRUCache<number, 1>({ max: capacity });
       const dwc = new Cache<number, 1>(capacity);
 
       const repeat = capacity * 1000;
+      const random = xorshift.random(1);
       let lruhit = 0;
       let dwchit = 0;
       for (let i = 0; i < repeat; ++i) {
-        const key = Math.random() < 0.4
-          ? Math.random() * capacity * -1 | 0
-          : Math.random() * capacity * 10 | 0;
+        const key = random() < 0.4
+          ? random() * capacity * -1 | 0
+          : random() * capacity * 10 | 0;
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1) & 0;
       }

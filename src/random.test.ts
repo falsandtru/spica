@@ -1,4 +1,4 @@
-import { rnd16, rnd62, rnd0Z, rnd0_, unique } from './random';
+import { rnd16, rnd62, rnd0Z, rnd0_, unique, xorshift } from './random';
 
 describe('Unit: lib/random', () => {
   describe('rnd16', () => {
@@ -44,8 +44,29 @@ describe('Unit: lib/random', () => {
 
   describe('unique', () => {
     it('', () => {
-      const gen = unique(rnd0Z, 1);
-      assert(new Set([...Array(999)].map(() => gen())).size === 999);
+      const rnd = unique(rnd0Z, 1);
+      assert(new Set([...Array(999)].map(() => rnd())).size === 999);
+    });
+
+  });
+
+  describe('xorshift', () => {
+    it('uint', () => {
+      const rnd = xorshift();
+      for (let i = 0; i < 1e5; ++i) {
+        const r = rnd();
+        assert(0 <= r && r < 2 ** 32);
+      }
+      assert(new Set([...Array(999)].map(() => rnd())).size === 999);
+    });
+
+    it('random', () => {
+      const rnd = xorshift.random();
+      for (let i = 0; i < 1e5; ++i) {
+        const r = rnd();
+        assert(0 <= r && r < 1);
+      }
+      assert(new Set([...Array(999)].map(() => rnd())).size === 999);
     });
 
   });

@@ -1,7 +1,7 @@
 import { benchmark } from './benchmark';
-import { Math } from '../src/global';
 import { Cache } from '../src/cache';
 import LRUCache from 'lru-cache';
+import { xorshift } from '../src/random';
 import { captureTimers } from '../src/timer';
 
 describe('Benchmark:', function () {
@@ -19,14 +19,16 @@ describe('Benchmark:', function () {
         const capacity = length;
         const cache = new LRUCache<number, object>({ max: capacity });
         for (let i = 0; i < capacity; ++i) cache.set(i, {});
-        benchmark(`LRUCache set ${length.toLocaleString('en')} 0%`, () => cache.set(Math.random() * -capacity - 1 | 0, {}), done);
+        const random = xorshift.random(1);
+        benchmark(`LRUCache set ${length.toLocaleString('en')} 0%`, () => cache.set(random() * -capacity - 1 | 0, {}), done);
       });
 
       it(`DWC set ${length.toLocaleString('en')} 0%`, function (done) {
         const capacity = length;
         const cache = new Cache<number, object>(capacity);
         for (let i = 0; i < capacity; ++i) cache.set(i, {});
-        benchmark(`DW-Cache set ${length.toLocaleString('en')} 0%`, () => cache.set(Math.random() * -capacity - 1 | 0, {}), done);
+        const random = xorshift.random(1);
+        benchmark(`DW-Cache set ${length.toLocaleString('en')} 0%`, () => cache.set(random() * -capacity - 1 | 0, {}), done);
       });
     }
 
@@ -35,14 +37,16 @@ describe('Benchmark:', function () {
         const capacity = length;
         const cache = new LRUCache<number, object>({ max: capacity });
         for (let i = 0; i < capacity; ++i) cache.set(i, {});
-        benchmark(`LRUCache set ${length.toLocaleString('en')} 100%`, () => cache.set(Math.random() * capacity | 0, {}), done);
+        const random = xorshift.random(1);
+        benchmark(`LRUCache set ${length.toLocaleString('en')} 100%`, () => cache.set(random() * capacity | 0, {}), done);
       });
 
       it(`DWC set ${length.toLocaleString('en')} 100%`, function (done) {
         const capacity = length;
         const cache = new Cache<number, object>(capacity);
         for (let i = 0; i < capacity; ++i) cache.set(i, {});
-        benchmark(`DW-Cache set ${length.toLocaleString('en')} 100%`, () => cache.set(Math.random() * capacity | 0, {}), done);
+        const random = xorshift.random(1);
+        benchmark(`DW-Cache set ${length.toLocaleString('en')} 100%`, () => cache.set(random() * capacity | 0, {}), done);
       });
     }
 
@@ -51,14 +55,16 @@ describe('Benchmark:', function () {
         const capacity = length;
         const cache = new LRUCache<number, object>({ max: capacity });
         for (let i = 0; i < capacity; ++i) cache.set(i, {});
-        benchmark(`LRUCache get ${length.toLocaleString('en')} 0%`, () => cache.get(Math.random() * -capacity - 1 | 0), done);
+        const random = xorshift.random(1);
+        benchmark(`LRUCache get ${length.toLocaleString('en')} 0%`, () => cache.get(random() * -capacity - 1 | 0), done);
       });
 
       it(`DWC get ${length.toLocaleString('en')} 0%`, function (done) {
         const capacity = length;
         const cache = new Cache<number, object>(capacity);
         for (let i = 0; i < capacity; ++i) cache.set(i, {});
-        benchmark(`DW-Cache get ${length.toLocaleString('en')} 0%`, () => cache.get(Math.random() * -capacity - 1 | 0), done);
+        const random = xorshift.random(1);
+        benchmark(`DW-Cache get ${length.toLocaleString('en')} 0%`, () => cache.get(random() * -capacity - 1 | 0), done);
       });
     }
 
@@ -67,14 +73,16 @@ describe('Benchmark:', function () {
         const capacity = length;
         const cache = new LRUCache<number, object>({ max: capacity });
         for (let i = 0; i < capacity; ++i) cache.set(i, {});
-        benchmark(`LRUCache get ${length.toLocaleString('en')} 100%`, () => cache.get(Math.random() * capacity | 0), done);
+        const random = xorshift.random(1);
+        benchmark(`LRUCache get ${length.toLocaleString('en')} 100%`, () => cache.get(random() * capacity | 0), done);
       });
 
       it(`DWC get ${length.toLocaleString('en')} 100%`, function (done) {
         const capacity = length;
         const cache = new Cache<number, object>(capacity);
         for (let i = 0; i < capacity; ++i) cache.set(i, {});
-        benchmark(`DW-Cache get ${length.toLocaleString('en')} 100%`, () => cache.get(Math.random() * capacity | 0), done);
+        const random = xorshift.random(1);
+        benchmark(`DW-Cache get ${length.toLocaleString('en')} 100%`, () => cache.get(random() * capacity | 0), done);
       });
     }
 
@@ -83,10 +91,11 @@ describe('Benchmark:', function () {
         const capacity = length;
         const cache = new LRUCache<number, object>({ max: capacity });
         for (let i = 0; i < capacity; ++i) cache.set(i, {});
+        const random = xorshift.random(1);
         benchmark(`LRUCache simulation ${length.toLocaleString('en')}`, () => {
-          const key = Math.random() < 0.8
-            ? Math.random() * capacity * 1 | 0
-            : Math.random() * capacity * 9 + capacity | 0;
+          const key = random() < 0.8
+            ? random() * capacity * 1 | 0
+            : random() * capacity * 9 + capacity | 0;
           cache.get(key) ?? cache.set(key, {});
         }, done);
       });
@@ -95,10 +104,11 @@ describe('Benchmark:', function () {
         const capacity = length;
         const cache = new Cache<number, object>(capacity);
         for (let i = 0; i < capacity; ++i) cache.set(i, {});
+        const random = xorshift.random(1);
         benchmark(`DW-Cache simulation ${length.toLocaleString('en')}`, () => {
-          const key = Math.random() < 0.8
-            ? Math.random() * capacity * 1 | 0
-            : Math.random() * capacity * 9 + capacity | 0;
+          const key = random() < 0.8
+            ? random() * capacity * 1 | 0
+            : random() * capacity * 9 + capacity | 0;
           cache.get(key) ?? cache.set(key, {});
         }, done);
       });
@@ -109,10 +119,11 @@ describe('Benchmark:', function () {
         const capacity = length;
         const cache = new LRUCache<number, object>({ max: capacity, ttl: 1, ttlAutopurge: true });
         for (let i = 0; i < capacity; ++i) cache.set(i, {}, { ttl: i % 1e5 });
+        const random = xorshift.random(1);
         benchmark(`LRUCache simulation ${length.toLocaleString('en')} expire`, () => {
-          const key = Math.random() < 0.8
-            ? Math.random() * capacity * 1 | 0
-            : Math.random() * capacity * 9 + capacity | 0;
+          const key = random() < 0.8
+            ? random() * capacity * 1 | 0
+            : random() * capacity * 9 + capacity | 0;
           cache.get(key) ?? cache.set(key, {}, { ttl: key % 1e5 });
         }, captureTimers(done));
       });
@@ -121,10 +132,11 @@ describe('Benchmark:', function () {
         const capacity = length;
         const cache = new Cache<number, object>(capacity, { age: 1, earlyExpiring: true });
         for (let i = 0; i < capacity; ++i) cache.set(i, {}, { age: i % 1e5 });
+        const random = xorshift.random(1);
         benchmark(`DW-Cache simulation ${length.toLocaleString('en')} expire`, () => {
-          const key = Math.random() < 0.8
-            ? Math.random() * capacity * 1 | 0
-            : Math.random() * capacity * 9 + capacity | 0;
+          const key = random() < 0.8
+            ? random() * capacity * 1 | 0
+            : random() * capacity * 9 + capacity | 0;
           cache.get(key) ?? cache.set(key, {}, { age: key % 1e5 });
         }, done);
       });

@@ -1,4 +1,4 @@
-import { Set, crypto } from './global';
+import { Math, Set, crypto } from './global';
 
 const radixes = Object.freeze([...Array(7)].map((_, i) => 1 << i));
 assert.deepStrictEqual(radixes, [1, 2, 4, 8, 16, 32, 64]);
@@ -30,7 +30,7 @@ export const rnd0_ = conv(rnd64, dict0_);
 export const rndAP = conv(rnd16, dictAz);
 export const rndAf = conv(rnd32, dictAz);
 
-export function unique(rnd: (len: number) => string, len = 1, mem?: Set<string>): () => string {
+export function unique(rnd: (len: number) => string, len: number = 1, mem?: Set<string>): () => string {
   const independence = !mem;
   mem ??= new Set();
   const trials = 3;
@@ -118,5 +118,26 @@ function random(len: 1 | 2 | 3 | 4 | 5 | 6): number {
     offset = digit;
     ++index;
     return random(len);
+  }
+}
+
+export function xorshift(seed: number = xorshift.seed()): () => number {
+  assert(seed);
+  return () => {
+    let x = seed;
+    x ^= x << 13;
+    x ^= x >> 17;
+    x ^= x << 5;
+    return seed = x >>> 0;
+  };
+}
+export namespace xorshift {
+  const size = -1 >>> 0;
+  export function seed(): number {
+    return Math.random() * size + 1 >>> 0;
+  }
+  export function random(seed?: number): () => number {
+    const rnd = xorshift(seed);
+    return () => rnd() / (size + 1);
   }
 }
