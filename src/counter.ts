@@ -7,13 +7,18 @@ assert(dict.at(-1) === 'z');
 
 export function counter(radix: number = 10, pad: string = ''): () => string {
   assert(radix <= 36);
-  let count = 0;
-  let str = '';
-  let cnt = 0;
+  let cnt0 = 0;
+  let cnt1 = 0;
+  let str1 = '';
+  let cnt2 = 0;
+  let str2 = '';
   return () => {
-    const c = `${++cnt === radix ? str = (++count).toString(radix) : str}${dict[cnt = cnt % radix]}`;
+    const digit0 = dict[cnt0 = ++cnt0 % radix];
+    const digit1 = cnt0 ? str1 : str1 = dict[cnt1 = ++cnt1 % radix];
+    const digitN = cnt0 | cnt1 ? str2 : str2 = (++cnt2).toString(radix);
+    const count = `${digitN}${digit1}${digit0}`;
     return pad
-      ? (pad + c).slice(-max(pad.length, c.length))
-      : c;
+      ? (pad + count).slice(-max(pad.length, count.length))
+      : count;
   };
 }

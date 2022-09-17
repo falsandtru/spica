@@ -5,7 +5,7 @@ describe('Unit: lib/counter', () => {
     for (const radix of [10, 16, 32, 36]) {
       it(`${radix}`, () => {
         const count = counter(radix);
-        for (let i = 1; i < 1000; ++i) {
+        for (let i = 1; i < 1e5; ++i) {
           assert(count() === i.toString(radix));
         }
       });
