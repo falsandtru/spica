@@ -20,17 +20,18 @@ function template(repeat: boolean) {
   };
 }
 
-export function captureTimers<as extends unknown[] = []>(callback?: (...as: as) => void): (...as: as) => void {
+export function captureTimers(test: (done: (err?: unknown) => void) => unknown): (done: (err?: unknown) => unknown) => void {
   const start = setTimeout(noop) as any;
   clearTimeout(start);
-  if (typeof start !== 'number') throw new Error('Timer ID is not a number');
-  return singleton((...as) => {
+  if (typeof start !== 'number') throw new Error('Timer ID must be a number');
+  return done => test(err => {
+    // Must get the ID before calling done.
     const end = setTimeout(noop) as unknown as number;
+    done(err);
     clearTimeout(end);
     for (let i = start; i < end; ++i) {
       clearTimeout(i);
     }
-    return callback?.(...as);
   });
 }
 
