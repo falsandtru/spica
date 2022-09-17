@@ -10,15 +10,12 @@
   },
   "keywords": [
     "supervisor",
-    "actor",
     "observer",
     "coroutine",
     "channel",
     "select",
     "cancellation",
     "sequence",
-    "generator",
-    "iterator",
     "maybe",
     "either",
     "monad",
@@ -29,7 +26,10 @@
     "list",
     "heap",
     "queue",
-    "stack"
+    "stack",
+    "uuid",
+    "random",
+    "counter"
   ],
   "main": "./dist/index.js",
   "files": [

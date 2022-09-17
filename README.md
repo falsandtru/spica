@@ -2,7 +2,7 @@
 
 ![CI](https://github.com/falsandtru/spica/workflows/CI/badge.svg)
 
-Supervisor, Coroutine, Channel, select, AtomicPromise, Cancellation, Cache, InvList, HList, Queue, Stack, and some utils.
+Supervisor, Coroutine, Channel, select, assemble, AtomicPromise, Cancellation, Cache, InvList, HList, Queue, Stack, and some utils.
 
 ## Install
 
@@ -32,19 +32,17 @@ $ npm i spica
 - Maybe, Just, Nothing
 - Either, Left, Right
 - Sequence
-- bundle, aggregate
+- bundle, aggregate, assemble
 - curry
 - uncurry
 - flip
 - tuple
-- tick
+- clock
 - throttle, debounce
 - uuid
-- sqid
-- assign
-- clone
-- extend
-- concat
+- random
+- counter
+- assign, clone, extend
 
 ## Browsers
 
