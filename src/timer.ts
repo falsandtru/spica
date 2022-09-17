@@ -30,7 +30,7 @@ export function captureTimers<as extends unknown[] = []>(callback?: (...as: as) 
     for (let i = start; i < end; ++i) {
       clearTimeout(i);
     }
-    callback?.(...as);
+    return callback?.(...as);
   });
 }
 
