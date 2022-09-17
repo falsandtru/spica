@@ -1,10 +1,10 @@
 import { Sequence } from '../../../sequence';
-import { sqid } from '../../../../sqid';
+import { counter } from '../../../../counter';
 
 describe('Unit: lib/monad/sequence/member/static/from', () => {
   describe('Sequence.from', () => {
     it('side effect', () => {
-      const s = Sequence.from(Sequence.random(sqid)).take(5);
+      const s = Sequence.from(Sequence.random(counter())).take(5);
       assert(s.extract().length === 5);
       assert.notDeepStrictEqual(
         s.extract(),

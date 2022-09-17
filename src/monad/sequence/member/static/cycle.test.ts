@@ -1,10 +1,10 @@
 import { Sequence } from '../../../sequence';
-import { sqid } from '../../../../sqid';
+import { counter } from '../../../../counter';
 
 describe('Unit: lib/monad/sequence/member/static/cycle', () => {
   describe('Sequence.cycle', () => {
     it('side effect', () => {
-      const s = Sequence.cycle(Sequence.random(sqid).take(2)).take(5);
+      const s = Sequence.cycle(Sequence.random(counter()).take(2)).take(5);
       assert(s.extract().length === 5);
       assert.notDeepStrictEqual(
         s.extract(),

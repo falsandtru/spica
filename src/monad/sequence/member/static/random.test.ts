@@ -1,11 +1,11 @@
 import { Sequence } from '../../../sequence';
-import { sqid } from '../../../../sqid';
+import { counter } from '../../../../counter';
 
 describe('Unit: lib/monad/sequence/member/static/random', () => {
   describe('Sequence.random', () => {
     it('validate', () => {
       assert.deepStrictEqual(
-        Sequence.random(sqid)
+        Sequence.random(counter())
           .take(5)
           .subsequences()
           .filter(ns => ns.length === 2)
