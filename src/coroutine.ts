@@ -64,7 +64,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
       try {
         const iter = gen.call(this);
         while (core.alive) {
-          const [[msg, rpy]] = ++count === 1
+          const { 0: { 0: msg, 1: rpy } } = ++count === 1
             // Don't block.
             ? [[void 0, noop]]
             // Block.
@@ -215,7 +215,7 @@ class Internal<T, R, S> {
       this.sendBuffer?.close(msgs => {
         while (msgs.length > 0) {
           // Don't block.
-          const [, reply] = msgs.shift()!;
+          const { 1: reply } = msgs.shift()!;
           try {
             reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
           }

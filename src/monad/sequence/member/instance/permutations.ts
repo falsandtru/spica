@@ -53,7 +53,7 @@ function perms<a>(ts: Sequence<a, unknown>, is: Sequence<a, unknown>): Sequence<
                 () => [ts, r],
                 yt => {
                   const y = Sequence.Thunk.value(yt);
-                  const [us, zs] = interleave_(
+                  const { 0: us, 1: zs } = interleave_(
                     as => f(Sequence.mappend(Sequence.from([y]), as)),
                     Sequence.resume(Sequence.Thunk.iterator(yt)),
                     r);

@@ -77,7 +77,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     assert(this.workers.size === 0);
     Object.freeze(this.workers);
     while (this.messages.length > 0) {
-      const [names, param, , , timer] = this.messages.shift()!;
+      const { 0: names, 1: param, 4: timer } = this.messages.shift()!;
       const name: N | undefined = names[Symbol.iterator]().next().value;
       timer && clearTimeout(timer);
       this.$events?.loss.emit([name], [name, param]);
@@ -225,7 +225,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       0,
     ]);
     while (this.messages.length > (this.available ? this.settings.capacity : 0)) {
-      const [names, param, callback, , timer] = this.messages.shift()!;
+      const { 0: names, 1: param, 2: callback, 4: timer } = this.messages.shift()!;
       timer && clearTimeout(timer);
       const name: N | undefined = names[Symbol.iterator]().next().value;
       this.$events?.loss.emit([name], [name, param]);
@@ -325,7 +325,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     const since = Date.now();
     for (let len = this.messages.length, i = 0; this.available && i < len; ++i) {
       if (this.settings.resource - (Date.now() - since) <= 0) return void this.schedule();
-      const [names, param, callback, expiry, timer] = this.messages.at(i)!;
+      const { 0: names, 1: param, 2: callback, 3: expiry, 4: timer } = this.messages.at(i)!;
       let result: AtomicPromise<R> | undefined;
       let name: N | undefined;
       for (name of typeof names === 'string' ? [names] : names) {
