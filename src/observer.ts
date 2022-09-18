@@ -29,10 +29,32 @@ class ListenerNode<N extends readonly unknown[], D, R> {
     public readonly parent?: ListenerNode<N, D, R>,
   ) {
   }
+  public mid = 0;
+  public sid = 0;
   public readonly monitors = new List<MonitorItem<N, D>>();
   public readonly subscribers = new List<SubscriberItem<N, D, R>>();
   public readonly index = new Map<N[number], ListenerNode<N, D, R>>();
   public readonly children = new List<ListenerNode<N, D, R>>();
+  public reset(listeners: List<ListenerItem<N, D, R>>): void {
+    switch (listeners) {
+      case this.monitors:
+        this.mid = 0;
+        for (let node = listeners.head, i = listeners.length; node && i--; node = node.next) {
+          // @ts-expect-error
+          node.value.id = ++this.mid;
+        }
+        return;
+      case this.subscribers:
+        this.sid = 0;
+        for (let node = listeners.head, i = listeners.length; node && i--; node = node.next) {
+          // @ts-expect-error
+          node.value.id = ++this.sid;
+        }
+        return;
+      default:
+        throw new Error('Unreachable');
+    }
+  }
   public clear(disposable = false): boolean {
     const { monitors, subscribers, index, children } = this;
     const stack = [];
@@ -93,36 +115,37 @@ export class Observation<N extends readonly unknown[], D, R>
   constructor(opts?: ObservationOptions) {
     this.limit = opts?.limit ?? 10;
   }
-  private id = Number.MIN_SAFE_INTEGER;
   private readonly node = new ListenerNode<N, D, R>(void 0);
   private readonly limit: number;
   public monitor(namespace: Readonly<N | Inits<N>>, monitor: Monitor<N, D>, options: ObserverOptions = {}): () => void {
     if (typeof monitor !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${monitor}`);
-    const { monitors } = this.seek(namespace, SeekMode.Extensible);
+    const node = this.seek(namespace, SeekMode.Extensible);
+    const monitors = node.monitors;
     if (monitors.length === this.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
-    if (this.id === Number.MAX_SAFE_INTEGER) throw new Error(`Spica: Observation: Max listener ID reached max safe integer.`);
-    const node = monitors.push({
-      id: ++this.id,
+    node.mid === Number.MAX_SAFE_INTEGER && node.reset(monitors);
+    const inode = monitors.push({
+      id: ++node.mid,
       type: ListenerType.Monitor,
       namespace,
       listener: monitor,
       options,
     });
-    return () => void node.delete();
+    return () => void inode.delete();
   }
   public on(namespace: Readonly<N>, subscriber: Subscriber<N, D, R>, options: ObserverOptions = {}): () => void {
     if (typeof subscriber !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${subscriber}`);
-    const { subscribers } = this.seek(namespace, SeekMode.Extensible);
+    const node = this.seek(namespace, SeekMode.Extensible);
+    const subscribers = node.subscribers;
     if (subscribers.length === this.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
-    if (this.id === Number.MAX_SAFE_INTEGER) throw new Error(`Spica: Observation: Max listener ID reached max safe integer.`);
-    const node = subscribers.push({
-      id: ++this.id,
+    node.sid === Number.MAX_SAFE_INTEGER && node.reset(subscribers);
+    const inode = subscribers.push({
+      id: ++node.sid,
       type: ListenerType.Subscriber,
       namespace,
       listener: subscriber,
       options,
     });
-    return () => void node.delete();
+    return () => void inode.delete();
   }
   public once(namespace: Readonly<N>, subscriber: Subscriber<N, D, R>): () => void {
     return this.on(namespace, subscriber, { once: true });
@@ -174,10 +197,10 @@ export class Observation<N extends readonly unknown[], D, R>
       const items = lists[i];
       if (items.length === 0) continue;
       const recents: List.Node<SubscriberItem<N, D, R>>[] = [];
-      const max = this.id;
-      let min = Number.MIN_SAFE_INTEGER;
-      for (let node = items.head; node && min <= node.value.id && node.value.id <= max;) {
-        min = node.value.id + 1;
+      const max = items.last!.value.id;
+      let min = 0;
+      for (let node = items.head; node && min < node.value.id && node.value.id <= max;) {
+        min = node.value.id;
         const item = node.value;
         item.options.once && node.delete();
         try {
@@ -198,10 +221,10 @@ export class Observation<N extends readonly unknown[], D, R>
       const items = lists[i];
       if (items.length === 0) continue;
       const recents: List.Node<MonitorItem<N, D>>[] = [];
-      const max = this.id;
-      let min = Number.MIN_SAFE_INTEGER;
-      for (let node = items.head; node && min <= node.value.id && node.value.id <= max;) {
-        min = node.value.id + 1;
+      const max = items.last!.value.id;
+      let min = 0;
+      for (let node = items.head; node && min < node.value.id && node.value.id <= max;) {
+        min = node.value.id;
         const item = node.value;
         item.options.once && node.delete();
         try {
