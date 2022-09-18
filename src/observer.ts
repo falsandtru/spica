@@ -269,7 +269,7 @@ export class Observation<N extends readonly unknown[], D, R>
     return node;
   }
   private listenersAbove({ parent, monitors }: ListenerNode<N, D, R>, type: ListenerType.Monitor): List<MonitorItem<N, D>>[];
-  private listenersAbove({ parent, monitors }: ListenerNode<N, D, R>): List<ListenerItem<N, D, R>>[] {
+  private listenersAbove({ parent, monitors }: ListenerNode<N, D, R>): List<MonitorItem<N, D>>[] {
     const acc = [monitors];
     while (parent) {
       acc.push(parent.monitors);
