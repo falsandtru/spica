@@ -19,7 +19,7 @@ describe('Benchmark:', function () {
 
     it(`pad`, function (done) {
       const count = counter(10, '0'.repeat(16));
-      benchmark(`counter pad`, () => count(), done);
+      benchmark(`Counter pad`, () => count(), done);
     });
 
   });
