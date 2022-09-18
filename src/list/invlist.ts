@@ -7,7 +7,7 @@ export namespace List {
   export type Node<T> = NodeType<T>;
 }
 export class List<T> {
-  public $length = 0;
+  private $length = 0;
   public get length(): number {
     return this.$length;
   }
@@ -107,7 +107,7 @@ class Node<T> {
     public next: List.Node<T>,
     public prev: List.Node<T>,
   ) {
-    ++list.$length;
+    ++list['$length'];
     list.head ??= this;
     next && prev
       ? next.prev = prev.next = this
@@ -119,7 +119,7 @@ class Node<T> {
   public delete(): T {
     const list = this.list;
     if (!list) return this.value;
-    --list.$length;
+    --list['$length'];
     const { next, prev } = this;
     if (list.head === this) {
       list.head = next === this
