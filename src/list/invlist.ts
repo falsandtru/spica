@@ -59,7 +59,6 @@ export class List<T> {
     node.delete();
     ++this.$length;
     this.head ??= node;
-    // @ts-expect-error
     node.list = this;
     const next = node.next = before ?? node;
     const prev = node.prev = next.prev ?? node;
@@ -102,7 +101,7 @@ export class List<T> {
 
 class Node<T> {
   constructor(
-    public readonly list: List<T>,
+    public list: List<T>,
     public value: T,
     public next: List.Node<T>,
     public prev: List.Node<T>,
@@ -132,10 +131,8 @@ class Node<T> {
     if (prev) {
       prev.next = next;
     }
-    // @ts-expect-error
-    this.list = undefined;
-    // @ts-expect-error
-    this.next = this.prev = undefined;
+    this.list = undefined as any;
+    this.next = this.prev = undefined as any;
     return this.value;
   }
   public insertBefore(value: T): List.Node<T> {

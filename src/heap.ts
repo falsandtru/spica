@@ -71,8 +71,7 @@ export class Heap<T, O = T> {
     const index = node[2];
     if (array[index] !== node) throw new Error('Invalid node');
     swap(array, index, --this.$length);
-    // @ts-expect-error
-    array[this.$length] = undefined;
+    array[this.$length] = undefined as any;
     index < this.$length && sort(this.cmp, array, index, this.$length, this.stable);
     return node[1];
   }

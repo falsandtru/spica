@@ -40,15 +40,13 @@ class ListenerNode<N extends readonly unknown[], D, R> {
       case this.monitors:
         this.mid = 0;
         for (let node = listeners.head, i = listeners.length; node && i--; node = node.next) {
-          // @ts-expect-error
-          node.value.id = ++this.mid;
+          (node.value.id as number) = ++this.mid;
         }
         return;
       case this.subscribers:
         this.sid = 0;
         for (let node = listeners.head, i = listeners.length; node && i--; node = node.next) {
-          // @ts-expect-error
-          node.value.id = ++this.sid;
+          (node.value.id as number) = ++this.sid;
         }
         return;
       default:

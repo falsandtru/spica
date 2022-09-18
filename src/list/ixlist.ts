@@ -191,8 +191,7 @@ export class List<K, V = undefined> {
     if (this.CURSOR === node.index) {
       this.CURSOR = node.next;
     }
-    // @ts-expect-error
-    nodes[node.index] = undefined;
+    nodes[node.index] = undefined as any;
     //assert(this.length === 0 ? !this.nodes[this.HEAD] : this.nodes[this.HEAD]);
     //assert(this.length === 0 ? !this.nodes[this.CURSOR] : this.nodes[this.CURSOR]);
     //assert(this.length > 10 || [...this].length === this.length);
