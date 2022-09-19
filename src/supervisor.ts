@@ -2,7 +2,7 @@ import type { DeepImmutable, DeepRequired } from './type';
 import { global, Infinity, Symbol, Object, Set, Map, WeakSet, setTimeout, clearTimeout, Error } from './global';
 import { isFinite, ObjectAssign } from './alias';
 import { clock } from './clock';
-import { Coroutine, CoroutineInterface, isCoroutine } from './coroutine';
+import { Coroutine, ICoroutine, isCoroutine } from './coroutine';
 import { Observation, Observer, Publisher } from './observer';
 import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future';
@@ -373,7 +373,7 @@ export namespace Supervisor {
     export type Function<P, R, S> = (param: P, state: S, kill: (reason?: unknown) => void) => Result<R, S> | PromiseLike<Result<R, S>>;
     export type GeneratorFunction<P, R, S> = (state: S, kill: (reason?: unknown) => void) => global.Generator<R, R, P>;
     export type AsyncGeneratorFunction<P, R, S> = (state: S, kill: (reason?: unknown) => void) => global.AsyncGenerator<R, R, P>;
-    export type Coroutine<P, R> = CoroutineInterface<R, R, P>;
+    export type Coroutine<P, R> = ICoroutine<R, R, P>;
     export type Result<R, S> = readonly [R, S];
   }
   export type Callback<R> = (...args: [error: undefined, reply: R] | [error: Error, reply: undefined]) => void;

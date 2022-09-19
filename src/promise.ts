@@ -29,9 +29,6 @@ interface AtomicPromiseLike<T> {
 }
 
 export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLike<T> {
-  public static get [Symbol.species]() {
-    return AtomicPromise;
-  }
   public readonly [Symbol.toStringTag]: string = 'Promise';
   public static all<T extends readonly unknown[] | []>(values: T): AtomicPromise<{ -readonly [P in keyof T]: Awaited<T[P]> }>;
   public static all<T>(values: Iterable<T | PromiseLike<T>>): AtomicPromise<Awaited<T>[]>;

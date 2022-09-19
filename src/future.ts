@@ -1,60 +1,51 @@
 import { Promise } from './global';
 import { AtomicPromise, Internal, internal } from './promise';
 
-export class Future<T = undefined> implements Promise<T> {
+export class Future<T = undefined> extends Promise<T> {
   public static get [Symbol.species]() {
     return Promise;
   }
-  public readonly [Symbol.toStringTag]: string = 'Promise';
   constructor(strict: boolean = true) {
-    this.bind = (value: T) => {
-      const core = this[internal];
-      if (!core.isPending()) {
+    let resolve!: (v: T | PromiseLike<T>) => void;
+    super(r => resolve = r);
+    let done = false;
+    this.bind = (value: T | PromiseLike<T>): Promise<T> => {
+      if (done) {
         if (!strict) return this;
-        throw new Error(`Spica: Future: Cannot rebind a value.`);
+        throw new Error(`Spica: Future: Cannot rebind the value.`);
       }
-      core.resolve(value);
+      done = true;
+      resolve(value);
       return this;
     };
   }
-  public readonly [internal]: Internal<T> = new Internal();
-  public readonly bind: {
-    (value: T | PromiseLike<T>): Promise<T>;
-    (this: Future<undefined>, value?: T | PromiseLike<T>): Promise<T>;
-  };
-  public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): Promise<TResult1 | TResult2> {
-    return new Promise((resolve, reject) =>
-      this[internal].then(resolve, reject, onfulfilled, onrejected));
-  }
-  public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): Promise<T | TResult> {
-    return this.then(void 0, onrejected);
-  }
-  public finally(onfinally?: (() => void) | undefined | null): Promise<T> {
-    return this.then(onfinally, onfinally).then(() => this);
+  public bind(value: T | PromiseLike<T>): Promise<T>;
+  public bind(this: Future<undefined>, value?: T | PromiseLike<T>): Promise<T>;
+  public bind(value: T | PromiseLike<T>): Promise<T> {
+    throw value;
   }
 }
 
-export class AtomicFuture<T = undefined> implements Future<T> {
-  public static get [Symbol.species]() {
-    return AtomicPromise;
-  }
+export class AtomicFuture<T = undefined> implements AtomicPromise<T> {
   public readonly [Symbol.toStringTag]: string = 'Promise';
   constructor(strict: boolean = true) {
-    this.bind = (value: T) => {
-      const core = this[internal];
-      if (!core.isPending()) {
+    let done = false;
+    this.bind = (value: T | PromiseLike<T>): AtomicPromise<T> => {
+      if (done) {
         if (!strict) return this;
-        throw new Error(`Spica: AtomicFuture: Cannot rebind a value.`);
+        throw new Error(`Spica: AtomicFuture: Cannot rebind the value.`);
       }
-      core.resolve(value);
+      done = true;
+      this[internal].resolve(value);
       return this;
     };
   }
-  public readonly [internal]: Internal<T> = new Internal();
-  public readonly bind: {
-    (value: T | PromiseLike<T>): AtomicPromise<T>;
-    (this: AtomicFuture<undefined>, value?: T | PromiseLike<T>): AtomicPromise<T>;
-  };
+  public readonly [internal] = new Internal<T>();
+  public bind(value: T | PromiseLike<T>): AtomicPromise<T>;
+  public bind(this: AtomicFuture<undefined>, value?: T | PromiseLike<T>): AtomicPromise<T>;
+  public bind(value: T | PromiseLike<T>): AtomicPromise<T> {
+    throw value;
+  }
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
     return new AtomicPromise((resolve, reject) =>
       this[internal].then(resolve, reject, onfulfilled, onrejected));

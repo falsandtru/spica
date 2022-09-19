@@ -2,8 +2,8 @@ import type { Structural, DeepImmutable, DeepRequired } from './type';
 import { Object, Promise, Error } from './global';
 import { isArray, ObjectAssign } from './alias';
 import { clock } from './clock';
-import { AtomicPromise, isPromiseLike } from './promise';
-import { Future, AtomicFuture } from './future';
+import { AtomicPromise, Internal as PInternal, internal as pinternal, isPromiseLike } from './promise';
+import { AtomicFuture } from './future';
 import { Channel } from './channel';
 import { wait } from './timer';
 import { noop } from './function';
@@ -19,13 +19,12 @@ export interface CoroutineOptions {
   readonly trigger?: string | symbol | ReadonlyArray<string | symbol>;
 }
 
-export interface CoroutineInterface<T = unknown, R = T, _ = unknown> extends Promise<T>, AsyncIterable<R> {
+export interface ICoroutine<T = unknown, R = T, _ = unknown> extends AtomicPromise<T>, AsyncIterable<R> {
   readonly constructor: {
     readonly alive: symbol;
     readonly exit: symbol;
     readonly terminate: symbol;
     readonly port: symbol;
-    readonly [Symbol.species]: typeof Promise;
   };
 }
 
@@ -39,10 +38,11 @@ type Reply<R, T> = (msg: IteratorResult<R, T> | PromiseLike<never>) => void;
 
 const internal = Symbol.for('spica/coroutine::internal');
 
-export interface Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>, AsyncIterable<R> {
+export interface Coroutine<T = unknown, R = T, S = unknown> {
   constructor: typeof Coroutine;
 }
-export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T> implements Promise<T>, AsyncIterable<R>, CoroutineInterface<T, R, S> {
+export class Coroutine<T = unknown, R = T, S = unknown> implements AtomicPromise<T>, AsyncIterable<R>, ICoroutine<T, R, S> {
+  public readonly [Symbol.toStringTag]: string = 'Coroutine';
   public static readonly alive: typeof alive = alive;
   protected static readonly init: typeof init = init;
   public static readonly exit: typeof exit = exit;
@@ -52,8 +52,6 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     gen: (this: Coroutine<T, R, S>) => AsyncGenerator<R, T, S>,
     opts: CoroutineOptions = {},
   ) {
-    super(resolve => res = resolve);
-    var res!: (v: T | AtomicPromise<T>) => void;
     this[internal] = new Internal(opts);
     let count = 0;
     this[init] = async () => {
@@ -118,7 +116,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
     const core = this[internal];
     assert(core.settings.capacity < 0 ? core.sendBuffer === void 0 : core.sendBuffer instanceof Channel);
     assert(core.settings.capacity < 0 ? core.recvBuffer instanceof BroadcastChannel : core.recvBuffer instanceof Channel);
-    res(core.result.then(({ value }) => value));
+    this[pinternal].resolve(core.result.then(({ value }) => value));
     if (core.settings.trigger !== void 0) {
       for (const prop of isArray(core.settings.trigger) ? core.settings.trigger : [core.settings.trigger]) {
         if (prop in this && this.hasOwnProperty(prop)) continue;
@@ -164,6 +162,17 @@ export class Coroutine<T = unknown, R = T, S = unknown> extends AtomicPromise<T>
         ? clock.now(this[init])
         : this[init]();
     }
+  }
+  public readonly [pinternal] = new PInternal<T>();
+  public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
+    return new AtomicPromise((resolve, reject) =>
+      this[pinternal].then(resolve, reject, onfulfilled, onrejected));
+  }
+  public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult> {
+    return this.then(void 0, onrejected);
+  }
+  public finally(onfinally?: (() => void) | undefined | null): AtomicPromise<T> {
+    return this.then(onfinally, onfinally).then(() => this);
   }
   public readonly [internal]: Internal<T, R, S>;
   public get [alive](): boolean {
@@ -268,7 +277,7 @@ class Port<T, R, S> {
     if (core.settings.capacity < 0) return AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`));
     assert(core.sendBuffer instanceof Channel);
     core.settings.capacity >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
-    const future = new Future<IteratorResult<R, T>>();
+    const future = new AtomicFuture<IteratorResult<R, T>>();
     core.sendBuffer!.put([msg, future.bind]);
     ++core.reception;
     return Promise.all([future, core.recvBuffer.take()])
@@ -293,7 +302,7 @@ class Port<T, R, S> {
     if (core.settings.capacity < 0) return AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`));
     assert(core.sendBuffer instanceof Channel);
     core.settings.capacity >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
-    const future = new Future<IteratorResult<R, T>>();
+    const future = new AtomicFuture<IteratorResult<R, T>>();
     return Promise.resolve(core.sendBuffer!.put([msg, future.bind]));
   }
   public connect<U>(com: (this: Coroutine<T, R, S>) => AsyncGenerator<S, U, R | T>): Promise<U> {
@@ -312,7 +321,7 @@ class Port<T, R, S> {
   }
 }
 
-export function isCoroutine(target: unknown): target is CoroutineInterface<unknown, unknown, unknown> {
+export function isCoroutine(target: unknown): target is ICoroutine<unknown, unknown, unknown> {
   return typeof target === 'object'
       && target !== null
       && typeof target.constructor === 'function'
