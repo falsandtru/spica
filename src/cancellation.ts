@@ -29,7 +29,7 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
     }
   }
   private reason: [] | [L] | [void, unknown] = [];
-  private readonly listeners: (Listener<L> | undefined)[] = [];
+  private listeners: Listener<L>[] = [];
   public readonly [internal] = new Internal<L>();
   public isAlive(): boolean {
     return this.reason.length === 0;
@@ -67,9 +67,11 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
   public cancel$(reason?: L): void {
     if (this.reason.length !== 0) return;
     this.reason = [reason!];
-    for (let { listeners } = this; listeners.length;) {
-      listeners.shift()?.(reason!);
+    for (let { listeners } = this, i = 0; i < listeners.length; ++i) {
+      listeners[i](reason!);
     }
+    this.listeners = [];
+    assert(Object.freeze(this.listeners));
     this[internal].resolve(reason!);
   }
   public get cancel(): (reason?: L) => void {
@@ -78,6 +80,8 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
   public close$(reason?: unknown): void {
     if (this.reason.length !== 0) return;
     this.reason = [void 0, reason];
+    this.listeners = [];
+    assert(Object.freeze(this.listeners));
     this[internal].resolve(AtomicPromise.reject(reason));
   }
   public get close(): (reason?: unknown) => void {
