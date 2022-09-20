@@ -49,8 +49,8 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
       reason.length === 1 && handler(reason[0]);
       return noop;
     }
-    const i = listeners.push(handler) - 1;
-    return () => listeners[i] = void 0;
+    listeners.push(handler);
+    return () => listener = noop;
 
     function handler(reason: L): void {
       try {
