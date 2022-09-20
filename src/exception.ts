@@ -6,6 +6,7 @@ const stack = new Stack<unknown[]>();
 export function causeAsyncException(reason: unknown): void {
   if (stack.isEmpty()) {
     assert(!+console.error(reason));
+    assert(eval('throw reason'));
     Promise.reject(reason);
   }
   else {
