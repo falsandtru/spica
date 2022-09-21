@@ -126,7 +126,9 @@ function random(len: 1 | 2 | 3 | 4 | 5 | 6): number {
 }
 
 export function xorshift(seed: number = xorshift.seed()): () => number {
-  assert(seed);
+  assert(seed >>> 0 === seed);
+  assert(seed > 0);
+  assert(seed < 2 ** 32);
   return () => {
     let x = seed;
     x ^= x << 13;
@@ -136,12 +138,17 @@ export function xorshift(seed: number = xorshift.seed()): () => number {
   };
 }
 export namespace xorshift {
-  const size = -1 >>> 0;
+  const max = -1 >>> 0;
+  assert(0 * max + 1 >>> 0 === 1);
+  assert(0.9 * max + 1 >>> 0 >= 0);
+  assert(0.9 * max + 1 >>> 0 <= max);
   export function seed(): number {
-    return Math.random() * size + 1 >>> 0;
+    return Math.random() * max + 1 >>> 0;
   }
+  assert(0 / (max + 1) === 0);
+  assert(max / (max + 1) < 1);
   export function random(seed?: number): () => number {
     const rnd = xorshift(seed);
-    return () => rnd() / (size + 1);
+    return () => rnd() / (max + 1);
   }
 }
