@@ -127,8 +127,8 @@ function random(len: 1 | 2 | 3 | 4 | 5 | 6): number {
 
 export function xorshift(seed: number = xorshift.seed()): () => number {
   assert(seed >>> 0 === seed);
-  assert(seed > 0);
-  assert(seed < 2 ** 32);
+  assert(seed >= 1);
+  assert(seed <= 2 ** 32 - 1);
   return () => {
     let x = seed;
     x ^= x << 13;
