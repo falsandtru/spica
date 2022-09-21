@@ -30,26 +30,30 @@ assert(buffer.length % 4 === 0);
 const digit = 16;
 const mask = digit - 1;
 let index = buffer.length;
+let rnd = 2 ** digit;
 let offset = digit;
 
 function rnd16(): number {
-  if (index === buffer.length) {
+  if (rnd === 2 ** digit) {
+    assert(index === buffer.length);
     crypto.getRandomValues(buffer);
     index = 0;
+    rnd = buffer[index];
     assert(offset === digit);
   }
   if (offset === 4) {
-    assert(offset === 4);
     offset = digit;
-    assert((buffer[index] & mask) >= 0);
-    assert((buffer[index] & mask) < 16);
-    return buffer[index++] & mask;
+    assert((rnd & mask) >= 0);
+    assert((rnd & mask) < 16);
+    const r = rnd & mask;
+    rnd = buffer[++index] ?? 2 ** digit;
+    return r;
   }
   else {
     assert(offset > 4);
     offset -= 4;
-    assert((buffer[index] >> offset & mask) >= 0);
-    assert((buffer[index] >> offset & mask) < 16);
-    return buffer[index] >> offset & mask;
+    assert((rnd >> offset & mask) >= 0);
+    assert((rnd >> offset & mask) < 16);
+    return rnd >> offset & mask;
   }
 }

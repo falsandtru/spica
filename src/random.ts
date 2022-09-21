@@ -94,29 +94,33 @@ function conv(rnd: () => number, dict: string): (len?: number) => string {
 const buffer = new Uint16Array(512);
 const digit = 16;
 let index = buffer.length;
+let rnd = 2 ** digit;
 let offset = digit;
 
 function random(len: 1 | 2 | 3 | 4 | 5 | 6): number {
   assert(0 < len && len <= 6);
-  if (index === buffer.length) {
+  if (rnd === 2 ** digit) {
+    assert(index === buffer.length);
     crypto.getRandomValues(buffer);
     index = 0;
+    rnd = buffer[index];
     assert(offset === digit);
   }
   if (offset === len) {
-    assert(offset === len);
     offset = digit;
-    return buffer[index++] & masks[len];
+    const r = rnd & masks[len];
+    rnd = buffer[++index] ?? 2 ** digit;
+    return r;
   }
   else if (offset > len) {
     assert(offset > len);
     offset -= len;
-    return buffer[index] >> offset & masks[len];
+    return rnd >> offset & masks[len];
   }
   else {
     assert(offset < len);
     offset = digit;
-    ++index;
+    rnd = buffer[++index] ?? 2 ** digit;
     return random(len);
   }
 }
