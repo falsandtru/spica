@@ -1,6 +1,6 @@
 import { benchmark } from './benchmark';
 import { crypto } from '../src/global';
-import { rnd16, rnd62, rnd0f, rnd0Z, unique } from '../src/random';
+import { rnd16, rnd62, rnd0f, rnd0Z, unique, xorshift, pcg32 } from '../src/random';
 
 describe('Benchmark:', function () {
   describe('Uint8Array', function () {
@@ -64,21 +64,15 @@ describe('Benchmark:', function () {
   });
 
   describe('rnd0Z', function () {
-    it('', function (done) {
-      benchmark('random rnd0Z', () => rnd0Z(), done);
+    it('1', function (done) {
+      benchmark('random rnd0Z 1', () => rnd0Z(), done);
     });
 
-  });
-
-  describe('rnd0Z 2', function () {
-    it('', function (done) {
+    it('2', function (done) {
       benchmark('random rnd0Z 2', () => rnd0Z(2), done);
     });
 
-  });
-
-  describe('rnd0Z 4', function () {
-    it('', function (done) {
+    it('4', function (done) {
       benchmark('random rnd0Z 4', () => rnd0Z(4), done);
     });
 
@@ -88,6 +82,22 @@ describe('Benchmark:', function () {
     it('', function (done) {
       const rnd = unique(rnd0Z, 1);
       benchmark('random unique', () => rnd(), done);
+    });
+
+  });
+
+  describe('xorshift', function () {
+    it('', function (done) {
+      const rnd = xorshift.random();
+      benchmark('random xorshift', () => rnd(), done);
+    });
+
+  });
+
+  describe('pcg32', function () {
+    it('', function (done) {
+      const rnd = pcg32.random();
+      benchmark('random pcg32', () => rnd(), done);
     });
 
   });

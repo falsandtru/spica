@@ -1,4 +1,4 @@
-import { Math, Set, crypto } from './global';
+import { Number, Math, Set, crypto } from './global';
 
 const radixes = Object.freeze([...Array(7)].map((_, i) => 1 << i));
 assert.deepStrictEqual(radixes, [1, 2, 4, 8, 16, 32, 64]);
@@ -151,4 +151,61 @@ export namespace xorshift {
     const rnd = xorshift(seed);
     return () => rnd() / (max + 1);
   }
+}
+
+// https://www.pcg-random.org/download.html
+// https://github.com/imneme/pcg-c/blob/master/include/pcg_variants.h
+export function pcg32(seed: [bigint, bigint] = pcg32.seed()): () => number {
+  return () => pcg32.next(seed);
+}
+export namespace pcg32 {
+  type Seed = [bigint, bigint];
+  const MULT = 6364136223846793005n;
+  export function random(seed?: [bigint, bigint]): () => number {
+    const rnd = pcg32(seed);
+    return () => rnd() / 2 ** 32;
+  }
+  export function seed(
+    initstate: bigint = BigInt(xorshift.seed()) << 32n | BigInt(xorshift.seed()),
+    initinc: number = xorshift.seed(),
+  ): Seed {
+    return init(initstate, initinc);
+  }
+  function init(state: bigint, inc: number): Seed {
+    const seed: Seed = [0n, BigInt(inc << 1 | 1)];
+    seed[0] = fix64(seed[0] * MULT + seed[1]);
+    seed[0] = fix64(seed[0] + state);
+    seed[0] = fix64(seed[0] * MULT + seed[1]);
+    return seed;
+  }
+  export function next(seed: Seed): number {
+    const oldstate = seed[0];
+    seed[0] = fix64(oldstate * MULT + seed[1]);
+    const xorshifted = fix32(((oldstate >> 18n) ^ oldstate) >> 27n);
+    const rot = fix32(oldstate >> 59n);
+    return Number(fix32((xorshifted >> rot) | (xorshifted << ((-rot) & 31n))));
+  }
+  export function advance(seed: Seed, delta: bigint): Seed {
+    while (delta < 0) {
+      delta = 2n ** 64n + delta;
+    }
+    delta = fix64(delta);
+    let acc_mult = 1n;
+    let acc_plus = 0n;
+    let cur_mult = MULT;
+    let cur_plus = seed[1];
+    while (delta > 0) {
+      if (delta & 1n) {
+        acc_mult = fix64(acc_mult * cur_mult);
+        acc_plus = fix64(acc_plus * cur_mult + cur_plus);
+      }
+      cur_plus = fix64((cur_mult + 1n) * cur_plus);
+      cur_mult = fix64(cur_mult * cur_mult);
+      delta /= 2n;
+    }
+    seed[0] = fix64(acc_mult * seed[0] + acc_plus);
+    return seed;
+  }
+  const fix32 = (n: bigint): bigint => n & 2n ** 32n - 1n;
+  const fix64 = (n: bigint): bigint => n & 2n ** 64n - 1n;
 }
