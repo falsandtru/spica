@@ -79,8 +79,8 @@ DWCはこの最適化を行っても状態数の多さに比例して増加し�
 最適化されないと思われる。
 しかしであればこの最適化は自身が他のオブジェクトのプロパティとして使用された場合二段アクセスになり
 最適化が適用されないのではないかという疑問が生じる。
-またキャッシュする値をオブジェクトに変えると要素数により2倍から1.5倍前後まで速度低下し実際の効果
-はほとんどないと思われる。
+またキャッシュする値がオブジェクトの場合DWCで統計処理のオーバーヘッドが生じるキャッシュヒット
+でしか大幅な速度優位がなくIxMapのベンチマーク結果から実際には逆効果と思われる。
 
 */
 
@@ -136,10 +136,10 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.age = settings.age!;
     this.earlyExpiring = settings.earlyExpiring!;
     this.disposer = settings.disposer!;
-    this.test = settings.test!;
-    this.stats = this.test
+    this.stats = opts.window || opts.resolution || opts.offset
       ? new StatsExperimental(this.window, settings.resolution!, settings.offset!)
       : new Stats(this.window);
+    this.test = settings.test!;
   }
   private readonly settings: Cache.Options<K, V> = {
     capacity: 0,
