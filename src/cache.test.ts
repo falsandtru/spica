@@ -14,7 +14,7 @@ describe('Unit: lib/cache', () => {
     }
 
     it('put/has/delete 1', () => {
-      const cache = new Cache<number, number>(1);
+      const cache = new Cache<number, number>(1, { test: true });
 
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
@@ -88,7 +88,7 @@ describe('Unit: lib/cache', () => {
       let key: number | undefined;
       let val: number | undefined;
       let cnt = 0;
-      const cache = new Cache<number, number>(2, { disposer: (v, k) => (key = k, val = v, ++cnt) });
+      const cache = new Cache<number, number>(2, { test: true, disposer: (v, k) => (key = k, val = v, ++cnt) });
 
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
@@ -178,7 +178,7 @@ describe('Unit: lib/cache', () => {
     });
 
     it('size', () => {
-      const cache = new Cache<number, number>(3);
+      const cache = new Cache<number, number>(3, { test: true });
 
       cache.put(0, 0);
       cache.put(1, 1);
@@ -258,7 +258,7 @@ describe('Unit: lib/cache', () => {
     });
 
     it('resize', () => {
-      const cache = new Cache<number>(2);
+      const cache = new Cache<number>(2, { test: true });
 
       cache.put(0);
       cache.put(1);
@@ -275,7 +275,7 @@ describe('Unit: lib/cache', () => {
     });
 
     it('age', async () => {
-      const cache = new Cache<number, number>(3);
+      const cache = new Cache<number, number>(3, { test: true });
 
       cache.put(0, 0, { age: 10 });
       assert(cache.has(0));
@@ -303,7 +303,7 @@ describe('Unit: lib/cache', () => {
     });
 
     it('age early', async () => {
-      const cache = new Cache<number, number>(3, { earlyExpiring: true });
+      const cache = new Cache<number, number>(3, { test: true, earlyExpiring: true });
 
       cache.put(0, 0, { age: 10 });
       cache.put(1, 1, { age: 5 });
@@ -318,8 +318,6 @@ describe('Unit: lib/cache', () => {
         memory: [[0, 0], [2, 2], [3, 3]],
       });
     });
-
-    if (!navigator.userAgent.includes('Chrome')) return;
 
     it('rate even 100', function () {
       this.timeout(10 * 1e3);

@@ -110,6 +110,7 @@ export namespace Cache {
     readonly block?: number;
     readonly sweep?: number;
     readonly limit?: number;
+    readonly test?: boolean;
   }
 }
 export class Cache<K, V = undefined> implements IterableDict<K, V> {
@@ -136,6 +137,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.earlyExpiring = settings.earlyExpiring!;
     this.disposer = settings.disposer!;
     this.stats = new Stats(this.window, settings.resolution!, settings.offset!);
+    this.test = settings.test!;
   }
   private readonly settings: Cache.Options<K, V> = {
     capacity: 0,
@@ -151,7 +153,9 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     block: 20,
     sweep: 10,
     limit: 950,
+    test: false,
   };
+  private readonly test: boolean;
   private window: number;
   private capacity: number;
   private overlap = 0;
@@ -327,7 +331,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.misses &&= 0;
     this.sweep &&= 0;
     // Optimization for memoize.
-    if (this.capacity > 3 && node === node.list.head) return node.value.value;
+    if (!this.test && node === node.list.head) return node.value.value;
     this.access(node);
     this.adjust();
     return node.value.value;
