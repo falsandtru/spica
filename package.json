@@ -28,6 +28,7 @@
     "queue",
     "stack",
     "uuid",
+    "pcg",
     "random",
     "counter"
   ],

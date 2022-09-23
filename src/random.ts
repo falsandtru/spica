@@ -172,7 +172,7 @@ export namespace pcg32 {
     state: bigint = BigInt(xorshift.seed()) << 32n | BigInt(xorshift.seed()),
     inc: bigint = BigInt(xorshift.seed()) << 32n | BigInt(xorshift.seed()),
   ): Seed {
-    const seed: Seed = [0n, uint64n(BigInt(inc) << 1n | 1n)];
+    const seed: Seed = [0n, uint64n(inc << 1n | 1n)];
     seed[0] = uint64n(seed[0] * MULT + seed[1]);
     seed[0] = uint64n(seed[0] + state);
     seed[0] = uint64n(seed[0] * MULT + seed[1]);
