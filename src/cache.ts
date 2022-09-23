@@ -136,8 +136,10 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.age = settings.age!;
     this.earlyExpiring = settings.earlyExpiring!;
     this.disposer = settings.disposer!;
-    this.stats = new Stats(this.window, settings.resolution!, settings.offset!);
     this.test = settings.test!;
+    this.stats = this.test
+      ? new StatsExperimental(this.window, settings.resolution!, settings.offset!)
+      : new Stats(this.window);
   }
   private readonly settings: Cache.Options<K, V> = {
     capacity: 0,
@@ -387,12 +389,13 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private misses = 0;
   private block: number;
   private sweep = 0;
-  private readonly stats: Stats;
+  private readonly stats: Stats | StatsExperimental;
   private ratio = 500;
   private readonly limit: number;
   private adjust(): void {
     const { capacity, ratio, limit, stats, indexes } = this;
     if (stats.subtotal() * 1000 % capacity || !stats.isFull()) return;
+    assert(stats.LRU.length >= 2);
     const lenR = indexes.LRU.length;
     const lenF = indexes.LFU.length;
     const lenO = this.overlap;
@@ -443,13 +446,32 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
 }
 
 class Stats {
+  public static rate(
+    window: number,
+    hits1: readonly number[],
+    hits2: readonly number[],
+    offset: number,
+  ): number {
+    assert(hits1.length === 2);
+    assert(hits1.length === hits2.length);
+    const currTotal = hits1[0] + hits2[0];
+    const prevTotal = hits1[1] + hits2[1];
+    const currHits = hits1[0];
+    const prevHits = hits1[1];
+    assert(currTotal <= window);
+    const prevRate = prevHits * 100 / prevTotal | 0;
+    const currRatio = currTotal * 100 / window - offset;
+    if (currRatio <= 0) return prevRate * 100;
+    const currRate = currHits * 100 / currTotal | 0;
+    const prevRatio = 100 - currRatio;
+    return currRate * currRatio + prevRate * prevRatio | 0;
+  }
   constructor(
-    private readonly window: number,
-    public readonly resolution: number,
-    public readonly offset: number,
+    protected readonly window: number,
   ) {
   }
-  private readonly max = ceil(this.resolution * (100 + this.offset) / 100) + 1;
+  public readonly offset: number = 0;
+  protected readonly max: number = 2;
   public LRU = [0];
   public LFU = [0];
   public get length(): number {
@@ -459,12 +481,75 @@ class Stats {
     return this.length === this.max;
   }
   public rateLRU(offset = false): number {
-    return rate(this.window, this.LRU, this.LFU, +offset && this.offset);
+    return Stats.rate(this.window, this.LRU, this.LFU, +offset & 0);
   }
   public rateLFU(offset = false): number {
-    return rate(this.window, this.LFU, this.LRU, +offset && this.offset);
+    return Stats.rate(this.window, this.LFU, this.LRU, +offset & 0);
   }
   public subtotal(): number {
+    const { LRU, LFU, window } = this;
+    const subtotal = LRU[0] + LFU[0];
+    subtotal >= window && this.slide();
+    return LRU[0] + LFU[0];
+  }
+  protected slide(): void {
+    const { LRU, LFU, max } = this;
+    if (LRU.length === max) {
+      LRU.pop();
+      LFU.pop();
+    }
+    LRU.unshift(0);
+    LFU.unshift(0);
+    assert(LRU.length === LFU.length);
+  }
+  public clear(): void {
+    this.LRU = [0];
+    this.LFU = [0];
+  }
+}
+
+class StatsExperimental extends Stats {
+  public static override rate(
+    window: number,
+    hits1: readonly number[],
+    hits2: readonly number[],
+    offset: number,
+  ): number {
+    assert(hits1.length >= 2);
+    assert(hits1.length === hits2.length);
+    let total = 0;
+    let hits = 0;
+    let ratio = 100;
+    for (let len = hits1.length, i = 0; i < len; ++i) {
+      const subtotal = hits1[i] + hits2[i];
+      if (subtotal === 0) continue;
+      offset = i + 1 === len ? 0 : offset;
+      const subratio = min(subtotal * 100 / window, ratio) - offset;
+      offset = offset && subratio < 0 ? -subratio : 0;
+      if (subratio <= 0) continue;
+      const rate = window * subratio / subtotal;
+      total += subtotal * rate;
+      hits += hits1[i] * rate;
+      ratio -= subratio;
+      if (ratio <= 0) break;
+    }
+    return hits * 10000 / total | 0;
+  }
+  constructor(
+    window: number,
+    public readonly resolution: number,
+    public override readonly offset: number,
+  ) {
+    super(window);
+  }
+  protected override readonly max = ceil(this.resolution * (100 + this.offset) / 100) + 1;
+  public override rateLRU(offset = false): number {
+    return StatsExperimental.rate(this.window, this.LRU, this.LFU, +offset && this.offset);
+  }
+  public override rateLFU(offset = false): number {
+    return StatsExperimental.rate(this.window, this.LFU, this.LRU, +offset && this.offset);
+  }
+  public override subtotal(): number {
     const { LRU, LFU, window, resolution, offset } = this;
     if (offset && LRU[0] + LFU[0] >= window * offset / 100) {
       if (this.length === 1) {
@@ -481,50 +566,17 @@ class Stats {
     subtotal >= window / resolution && this.slide();
     return LRU[0] + LFU[0];
   }
-  public slide(): void {
-    const { LRU, LFU, max } = this;
-    if (LRU.length === max) {
-      LRU.pop();
-      LFU.pop();
-    }
-    LRU.unshift(0);
-    LFU.unshift(0);
-    assert(LRU.length === LFU.length);
-  }
-  public clear(): void {
-    this.LRU = [0];
-    this.LFU = [0];
-  }
 }
 
-function rate(
-  window: number,
-  hits1: readonly number[],
-  hits2: readonly number[],
-  offset: number,
-): number {
-  assert(hits1.length === hits2.length);
-  let total = 0;
-  let hits = 0;
-  let ratio = 100;
-  for (let len = hits1.length, i = 0; i < len; ++i) {
-    const subtotal = hits1[i] + hits2[i];
-    if (subtotal === 0) continue;
-    offset = i + 1 === len ? 0 : offset;
-    const subratio = min(subtotal * 100 / window, ratio) - offset;
-    offset = offset && subratio < 0 ? -subratio : 0;
-    if (subratio <= 0) continue;
-    const rate = window * subratio / subtotal;
-    total += subtotal * rate;
-    hits += hits1[i] * rate;
-    ratio -= subratio;
-    if (ratio <= 0) break;
-  }
-  return hits * 10000 / total | 0;
-}
-assert(rate(10, [4, 0], [6, 0], 0) === 4000);
-assert(rate(10, [0, 4], [0, 6], 0) === 4000);
-assert(rate(10, [1, 4], [4, 6], 0) === 3000);
-assert(rate(10, [0, 4], [0, 6], 5) === 4000);
-assert(rate(10, [1, 2], [4, 8], 5) === 2000);
-assert(rate(10, [2, 2], [3, 8], 5) === 2900);
+assert(Stats.rate(10, [4, 0], [6, 0], 0) === 4000);
+assert(Stats.rate(10, [0, 4], [0, 6], 0) === 4000);
+assert(Stats.rate(10, [1, 4], [4, 6], 0) === 3000);
+assert(Stats.rate(10, [0, 4], [0, 6], 5) === 4000);
+assert(Stats.rate(10, [1, 2], [4, 8], 5) === 2000);
+assert(Stats.rate(10, [2, 2], [3, 8], 5) === 2900);
+assert(StatsExperimental.rate(10, [4, 0], [6, 0], 0) === 4000);
+assert(StatsExperimental.rate(10, [0, 4], [0, 6], 0) === 4000);
+assert(StatsExperimental.rate(10, [1, 4], [4, 6], 0) === 3000);
+assert(StatsExperimental.rate(10, [0, 4], [0, 6], 5) === 4000);
+assert(StatsExperimental.rate(10, [1, 2], [4, 8], 5) === 2000);
+assert(StatsExperimental.rate(10, [2, 2], [3, 8], 5) === 2900);
