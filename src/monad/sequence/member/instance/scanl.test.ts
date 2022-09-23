@@ -12,7 +12,7 @@ describe('Unit: lib/monad/sequence/member/scanl', () => {
 
     it('0', () => {
       assert.deepStrictEqual(
-        Sequence.from('abc'.split(''))
+        Sequence.from('abc')
           .scanl((a, b) => a + b, '')
           .take(0)
           .extract(),
@@ -21,7 +21,7 @@ describe('Unit: lib/monad/sequence/member/scanl', () => {
 
     it('1', () => {
       assert.deepStrictEqual(
-        Sequence.from('abc'.split(''))
+        Sequence.from('abc')
           .scanl((a, b) => a + b, '')
           .take(1)
           .extract(),
@@ -30,7 +30,7 @@ describe('Unit: lib/monad/sequence/member/scanl', () => {
 
     it('2', () => {
       assert.deepStrictEqual(
-        Sequence.from('abc'.split(''))
+        Sequence.from('abc')
           .scanl((a, b) => a + b, '')
           .take(2)
           .extract(),
@@ -39,7 +39,7 @@ describe('Unit: lib/monad/sequence/member/scanl', () => {
 
     it('3', () => {
       assert.deepStrictEqual(
-        Sequence.from('abc'.split(''))
+        Sequence.from('abc')
           .scanl((a, b) => a + b, '')
           .take(3)
           .extract(),
@@ -48,7 +48,7 @@ describe('Unit: lib/monad/sequence/member/scanl', () => {
 
     it('4', () => {
       assert.deepStrictEqual(
-        Sequence.from('abc'.split(''))
+        Sequence.from('abc')
           .scanl((a, b) => a + b, '')
           .take(4)
           .extract(),
