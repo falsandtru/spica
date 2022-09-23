@@ -1,5 +1,5 @@
 import { benchmark } from './benchmark';
-import { crypto } from '../src/global';
+import { Math, crypto } from '../src/global';
 import { rnd16, rnd62, rnd0f, rnd0Z, unique, xorshift, pcg32 } from '../src/random';
 
 describe('Benchmark:', function () {
@@ -82,6 +82,14 @@ describe('Benchmark:', function () {
     it('', function (done) {
       const rnd = unique(rnd0Z, 1);
       benchmark('random unique', () => rnd(), done);
+    });
+
+  });
+
+  describe('Math.random', function () {
+    it('', function (done) {
+      const rnd = Math.random;
+      benchmark('random Math.random', () => rnd(), done);
     });
 
   });

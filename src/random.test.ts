@@ -64,7 +64,7 @@ describe('Unit: lib/random', () => {
         assert(0 <= r && r < 2 ** 32);
       }
       console.debug('lib/random xorshift deviation low', deviation(dist) / (1e5 / dist.length), dist);
-      assert(deviation(dist) / (1e5 / dist.length) < 0.02);
+      assert(deviation(dist) / (1e5 / dist.length) < 0.03);
       console.debug('lib/random xorshift uint duplicate', 1 - new Set([...Array(1e5)].map(() => rnd())).size / 1e5);
       assert(1 - new Set([...Array(1e5)].map(() => rnd())).size / 1e5 < 0.01);
     });
@@ -82,7 +82,7 @@ describe('Unit: lib/random', () => {
         assert(0 <= r && r < 1);
       }
       console.debug('lib/random xorshift deviation high', deviation(dist) / (1e5 / dist.length), dist);
-      assert(deviation(dist) / (1e5 / dist.length) < 0.02);
+      assert(deviation(dist) / (1e5 / dist.length) < 0.03);
       console.debug('lib/random xorshift random duplicate', 1 - new Set([...Array(1e5)].map(() => rnd())).size / 1e5);
       assert(1 - new Set([...Array(1e5)].map(() => rnd())).size / 1e5 < 0.01);
     });
@@ -92,7 +92,7 @@ describe('Unit: lib/random', () => {
   describe('pcg32', () => {
     it('advance', () => {
       const state = BigInt(xorshift()());
-      const inc = xorshift()();
+      const inc = BigInt(xorshift()());
       assert(pcg32(pcg32.seed(state, inc))() === pcg32(pcg32.advance(pcg32.seed(state, inc), 0n))());
       const rnd = pcg32(pcg32.advance(pcg32.seed(state, inc), -9n));
       for (let i = 0; i < 9; ++i) {
@@ -113,7 +113,7 @@ describe('Unit: lib/random', () => {
         assert(0 <= r && r < 2 ** 32);
       }
       console.debug('lib/random pcg32 deviation low', deviation(dist) / (1e5 / dist.length), dist);
-      assert(deviation(dist) / (1e5 / dist.length) < 0.02);
+      assert(deviation(dist) / (1e5 / dist.length) < 0.03);
       console.debug('lib/random pcg32 uint duplicate', 1 - new Set([...Array(1e5)].map(() => rnd())).size / 1e5);
       assert(1 - new Set([...Array(1e5)].map(() => rnd())).size / 1e5 < 0.01);
     });
@@ -130,7 +130,7 @@ describe('Unit: lib/random', () => {
         assert(0 <= r && r < 1);
       }
       console.debug('lib/random pcg32 deviation high', deviation(dist) / (1e5 / dist.length), dist);
-      assert(deviation(dist) / (1e5 / dist.length) < 0.02);
+      assert(deviation(dist) / (1e5 / dist.length) < 0.03);
       console.debug('lib/random pcg32 random duplicate', 1 - new Set([...Array(1e5)].map(() => rnd())).size / 1e5);
       assert(1 - new Set([...Array(1e5)].map(() => rnd())).size / 1e5 < 0.01);
     });

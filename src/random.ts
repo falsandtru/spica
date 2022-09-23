@@ -166,13 +166,13 @@ export namespace pcg32 {
     return () => rnd() / 2 ** 32;
   }
   export function seed(
-    initstate: bigint = BigInt(xorshift.seed()) << 32n | BigInt(xorshift.seed()),
-    initinc: number = xorshift.seed(),
+    state: bigint = BigInt(xorshift.seed()) << 32n | BigInt(xorshift.seed()),
+    inc: bigint = BigInt(xorshift.seed()) << 32n | BigInt(xorshift.seed()),
   ): Seed {
-    return init(initstate, initinc);
+    return init(state, inc);
   }
-  function init(state: bigint, inc: number): Seed {
-    const seed: Seed = [0n, BigInt(inc << 1 | 1)];
+  function init(state: bigint, inc: bigint): Seed {
+    const seed: Seed = [0n, fix64(BigInt(inc) << 1n | 1n)];
     seed[0] = fix64(seed[0] * MULT + seed[1]);
     seed[0] = fix64(seed[0] + state);
     seed[0] = fix64(seed[0] * MULT + seed[1]);
@@ -182,7 +182,7 @@ export namespace pcg32 {
     const oldstate = seed[0];
     seed[0] = fix64(oldstate * MULT + seed[1]);
     const xorshifted = fix32(((oldstate >> 18n) ^ oldstate) >> 27n);
-    const rot = fix32(oldstate >> 59n);
+    const rot = oldstate >> 59n;
     return Number(fix32((xorshifted >> rot) | (xorshifted << ((-rot) & 31n))));
   }
   export function advance(seed: Seed, delta: bigint): Seed {

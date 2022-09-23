@@ -1,7 +1,7 @@
 import { Cache } from './cache';
 import LRUCache from 'lru-cache';
 import { wait } from './timer';
-import { xorshift } from './random';
+import { pcg32 } from './random';
 
 describe('Unit: lib/cache', () => {
   describe('Cache', () => {
@@ -329,7 +329,7 @@ describe('Unit: lib/cache', () => {
       const dwc = new Cache<number, 1>(capacity);
 
       const repeat = capacity * 1000;
-      const random = xorshift.random(1);
+      const random = pcg32.random(pcg32.seed(0n, 0n));
       let lruhit = 0;
       let dwchit = 0;
       for (let i = 0; i < repeat; ++i) {
@@ -355,7 +355,7 @@ describe('Unit: lib/cache', () => {
       const dwc = new Cache<number, 1>(capacity);
 
       const repeat = capacity * 1000;
-      const random = xorshift.random(1);
+      const random = pcg32.random(pcg32.seed(0n, 0n));
       let lruhit = 0;
       let dwchit = 0;
       for (let i = 0; i < repeat; ++i) {
@@ -384,7 +384,7 @@ describe('Unit: lib/cache', () => {
       const dwc = new Cache<number, 1>(capacity);
 
       const repeat = capacity * 1000;
-      const random = xorshift.random(1);
+      const random = pcg32.random(pcg32.seed(0n, 0n));
       let lruhit = 0;
       let dwchit = 0;
       for (let i = 0; i < repeat; ++i) {
@@ -412,7 +412,7 @@ describe('Unit: lib/cache', () => {
       const dwc = new Cache<number, 1>(capacity);
 
       const repeat = capacity * 1000;
-      const random = xorshift.random(1);
+      const random = pcg32.random(pcg32.seed(0n, 0n));
       let lruhit = 0;
       let dwchit = 0;
       for (let i = 0; i < repeat; ++i) {
@@ -443,7 +443,7 @@ describe('Unit: lib/cache', () => {
       const dwc = new Cache<number, 1>(capacity);
 
       const repeat = capacity * 1000;
-      const random = xorshift.random(1);
+      const random = pcg32.random(pcg32.seed(0n, 0n));
       let lruhit = 0;
       let dwchit = 0;
       for (let i = 0; i < repeat; ++i) {
@@ -472,7 +472,7 @@ describe('Unit: lib/cache', () => {
       const dwc = new Cache<number, 1>(capacity);
 
       const repeat = capacity * 1000;
-      const random = xorshift.random(1);
+      const random = pcg32.random(pcg32.seed(0n, 0n));
       let lruhit = 0;
       let dwchit = 0;
       for (let i = 0; i < repeat; ++i) {
@@ -501,7 +501,7 @@ describe('Unit: lib/cache', () => {
       const dwc = new Cache<number, 1>(capacity);
 
       const repeat = capacity * 1000;
-      const random = xorshift.random(1);
+      const random = pcg32.random(pcg32.seed(0n, 0n));
       let lruhit = 0;
       let dwchit = 0;
       for (let i = 0; i < repeat; ++i) {
