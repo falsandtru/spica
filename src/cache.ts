@@ -96,6 +96,7 @@ interface Index<K, V> {
 export namespace Cache {
   export interface Options<K, V = undefined> {
     readonly capacity?: number;
+    readonly window?: number;
     readonly age?: number;
     readonly earlyExpiring?: boolean;
     readonly disposer?: (value: V, key: K) => void;
@@ -104,7 +105,6 @@ export namespace Cache {
       readonly clear?: boolean;
     };
     // Mainly for experiments.
-    readonly window?: number;
     readonly resolution?: number;
     readonly offset?: number;
     readonly block?: number;
@@ -129,27 +129,27 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     });
     this.capacity = settings.capacity!;
     if (this.capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
-    this.window = settings.window || this.capacity;
+    this.window = settings.window! * this.capacity / 100 >>> 0 || this.capacity;
     if (this.window * 1000 >= this.capacity === false) throw new Error(`Spica: Cache: Window must be 0.1% of capacity or more.`);
     this.block = settings.block!;
     this.limit = settings.limit!;
     this.age = settings.age!;
     this.earlyExpiring = settings.earlyExpiring!;
     this.disposer = settings.disposer!;
-    this.stats = opts.window || opts.resolution || opts.offset
+    this.stats = opts.resolution || opts.offset
       ? new StatsExperimental(this.window, settings.resolution!, settings.offset!)
       : new Stats(this.window);
     this.test = settings.test!;
   }
   private readonly settings: Cache.Options<K, V> = {
     capacity: 0,
+    window: 100,
     age: Infinity,
     earlyExpiring: false,
     capture: {
       delete: true,
       clear: true,
     },
-    window: 0,
     resolution: 1,
     offset: 0,
     block: 20,
@@ -158,8 +158,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     test: false,
   };
   private readonly test: boolean;
-  private window: number;
   private capacity: number;
+  private window: number;
   private overlap = 0;
   private SIZE = 0;
   private memory = new Map<K, List.Node<Index<K, V>>>();
