@@ -492,7 +492,7 @@ describe('Unit: lib/cache', () => {
     });
 
     it('rate uneven 1,000', function () {
-      this.timeout(30 * 1e3);
+      this.timeout(60 * 1e3);
 
       const capacity = 1000;
       const lru = new LRUCache<number, 1>({ max: capacity });
