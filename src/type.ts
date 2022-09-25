@@ -250,7 +250,7 @@ export function type(value: unknown): string {
         case ObjectPrototype:
           return 'Object';
         default:
-          return toString(value).slice(8, -1);
+          return value?.constructor?.name || toString(value).slice(8, -1);
       }
     default:
       return type;

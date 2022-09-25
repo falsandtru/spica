@@ -12,6 +12,9 @@ import {
   Partial, DeepPartial, Required, DeepRequired, Immutable, DeepImmutable, Mutable, DeepMutable,
   type, is,
 } from './type';
+import { Cache } from './cache';
+import { AtomicPromise } from './promise';
+import { AtomicFuture } from './future';
 
 describe('Unit: lib/type', () => {
   describe('Not', () => {
@@ -664,6 +667,9 @@ describe('Unit: lib/type', () => {
       assert(type(() => 0) === 'Function');
       assert(type(new Boolean()) === 'Boolean');
       assert(type(new WeakMap()) === 'WeakMap');
+      assert(type(new Cache(1)) === 'Cache');
+      assert(type(AtomicPromise.resolve()) === 'Promise');
+      assert(type(new AtomicFuture()) === 'Promise');
     });
 
   });
