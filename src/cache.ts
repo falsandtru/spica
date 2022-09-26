@@ -401,8 +401,10 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const lenO = this.overlap;
     const leverage = (lenF + lenO) * 1000 / (lenR + lenF) | 0;
     assert(Number.isSafeInteger(leverage));
-    const rateR0 = stats.rateLRU() * leverage;
-    const rateF0 = stats.rateLFU() * (1000 - leverage);
+    const rateR = stats.rateLRU();
+    const rateF = 10000 - rateR;
+    const rateR0 = rateR * leverage;
+    const rateF0 = rateF * (1000 - leverage);
     const rateF1 = stats.offset && stats.rateLFU(true) * (1000 - leverage);
     // 操作頻度を超えてキャッシュ比率を増減させても余剰比率の消化が追いつかず無駄
     // LRUの下限設定ではLRU拡大の要否を迅速に判定できないためLFUのヒット率低下の検出で代替する
@@ -459,10 +461,10 @@ class Stats {
     const currHits = hits1[0];
     const prevHits = hits1[1];
     assert(currTotal <= window);
-    const prevRate = prevHits * 100 / prevTotal | 0;
+    const prevRate = prevHits * 100 / (prevTotal || 1);
     const currRatio = currTotal * 100 / window - offset;
-    if (currRatio <= 0) return prevRate * 100;
-    const currRate = currHits * 100 / currTotal | 0;
+    if (currRatio <= 0) return prevRate * 100 | 0;
+    const currRate = currHits * 100 / (currTotal || 1);
     const prevRatio = 100 - currRatio;
     return currRate * currRatio + prevRate * prevRatio | 0;
   }
