@@ -400,7 +400,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const lenF = indexes.LFU.length;
     const lenO = this.overlap;
     const leverage = (lenF + lenO) * 1000 / (lenR + lenF) | 0;
-    assert(Number.isSafeInteger(leverage));
     const rateR = stats.rateLRU();
     const rateF = 10000 - rateR;
     const rateR0 = rateR * leverage;

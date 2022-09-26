@@ -491,6 +491,8 @@ describe('Unit: lib/cache', () => {
       assert(dwchit / lruhit * 100 > 95);
     });
 
+    if (!navigator.userAgent.includes('Chrome')) return;
+
     it('rate uneven 1,000', function () {
       this.timeout(60 * 1e3);
 
