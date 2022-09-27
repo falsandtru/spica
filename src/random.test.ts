@@ -90,17 +90,6 @@ describe('Unit: lib/random', () => {
   });
 
   describe('pcg32', () => {
-    it('advance', () => {
-      const state = BigInt(xorshift()());
-      const inc = BigInt(xorshift()());
-      assert(pcg32(pcg32.seed(state, inc))() === pcg32(pcg32.advance(pcg32.seed(state, inc), 0n))());
-      const rnd = pcg32(pcg32.advance(pcg32.seed(state, inc), -9n));
-      for (let i = 0; i < 9; ++i) {
-        rnd();
-      }
-      assert(rnd() === pcg32(pcg32.seed(state, inc))());
-    });
-
     it('uint', () => {
       const rnd = pcg32();
       const dist = Array(16).fill(0);
@@ -133,6 +122,17 @@ describe('Unit: lib/random', () => {
       assert(deviation(dist) / (1e5 / dist.length) < 0.03);
       console.debug('lib/random pcg32 random duplicate', 1 - new Set([...Array(1e5)].map(() => rnd())).size / 1e5);
       assert(1 - new Set([...Array(1e5)].map(() => rnd())).size / 1e5 < 0.01);
+    });
+
+    it('advance', () => {
+      const state = BigInt(xorshift()());
+      const inc = BigInt(xorshift()());
+      assert(pcg32(pcg32.seed(state, inc))() === pcg32(pcg32.advance(pcg32.seed(state, inc), 0n))());
+      const rnd = pcg32(pcg32.advance(pcg32.seed(state, inc), -9n));
+      for (let i = 0; i < 9; ++i) {
+        rnd();
+      }
+      assert(rnd() === pcg32(pcg32.seed(state, inc))());
     });
 
   });
