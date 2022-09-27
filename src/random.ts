@@ -183,12 +183,9 @@ export namespace pcg32 {
     seed[0] = uint64n(oldstate * MULT + seed[1]);
     const xorshifted = uint32n(((oldstate >> 18n) ^ oldstate) >> 27n);
     const rot = oldstate >> 59n;
-    return Number(uint32n((xorshifted >> rot) | (xorshifted << ((-rot) & 31n))));
+    return Number(uint32n((xorshifted >> rot) | (xorshifted << (-rot & 31n))));
   }
   export function advance(seed: Seed, delta: bigint): Seed {
-    while (delta < 0) {
-      delta = 2n ** 64n + delta;
-    }
     delta = uint64n(delta);
     let acc_mult = 1n;
     let acc_plus = 0n;
