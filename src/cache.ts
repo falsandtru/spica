@@ -376,7 +376,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   public resize(capacity: number): void {
     if (this.capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     this.capacity = capacity;
-    this.window = this.settings.window || this.capacity;
+    this.window = this.settings.window! * this.capacity / 100 >>> 0 || this.capacity;
     if (this.window * 1000 >= this.capacity === false) throw new Error(`Spica: Cache: Window must be 0.1% of capacity or more.`);
     this.ensure(0);
   }
