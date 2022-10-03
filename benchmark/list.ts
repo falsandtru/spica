@@ -17,48 +17,55 @@ describe('Benchmark:', function () {
       benchmark('IxList  new', () => new IxList(), done);
     });
 
-    for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
+    for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7]) {
       it(`Yallist add ${length.toLocaleString('en')}`, function (done) {
+        const list = new Yallist();
+        for (let i = 0; i < length; ++i) list.push(0);
         benchmark(`Yallist add ${length.toLocaleString('en')}`, () => {
-          const list = new Yallist();
-          for (let i = 0; i < length; ++i) list.push(0);
+          list.shift();
+          list.push(0);
         }, done);
       });
 
       it(`InvList add ${length.toLocaleString('en')}`, function (done) {
+        const list = new InvList();
+        for (let i = 0; i < length; ++i) list.push(0);
         benchmark(`InvList add ${length.toLocaleString('en')}`, () => {
-          const list = new InvList();
-          for (let i = 0; i < length; ++i) list.push(0);
+          list.shift();
+          list.push(0);
         }, done);
       });
 
-      it(`InvList add ${length.toLocaleString('en')} rotationally`, function (done) {
-        benchmark(`InvList add ${length.toLocaleString('en')} rotationally`, () => {
-          const list = new InvList();
-          for (let i = 0; i < length; ++i) list.unshiftRotationally(0);
+      it(`InvList add rotationally ${length.toLocaleString('en')}`, function (done) {
+        const list = new InvList();
+        for (let i = 0; i < length; ++i) list.push(0);
+        benchmark(`InvList add rotationally ${length.toLocaleString('en')}`, () => {
+          list.pushRotationally(0);
         }, done);
       });
 
       it(`IxList  add ${length.toLocaleString('en')}`, function (done) {
-        benchmark(`IxList  add ${length.toLocaleString('en')}`, () => {
-          const list = new IxList();
-          for (let i = 0; i < length; ++i) list.push(0);
-        }, done);
-      });
-
-      it(`IxList  add ${length.toLocaleString('en')} rotationally`, function (done) {
         const list = new IxList();
         for (let i = 0; i < length; ++i) list.push(0);
-        benchmark(`IxList  add ${length.toLocaleString('en')} rotationally`, () => {
-          for (let i = 0; i < length; ++i) list.unshiftRotationally(0);
+        benchmark(`IxList  add ${length.toLocaleString('en')}`, () => {
+          list.shift();
+          list.push(0);
         }, done);
       });
 
-      it(`IxList  add ${length.toLocaleString('en')} with constraint`, function (done) {
+      it(`IxList  add rotationally ${length.toLocaleString('en')}`, function (done) {
+        const list = new IxList();
+        for (let i = 0; i < length; ++i) list.push(0);
+        benchmark(`IxList  add rotationally ${length.toLocaleString('en')}`, () => {
+          list.pushRotationally(0);
+        }, done);
+      });
+
+      it(`IxList  add with constraint ${length.toLocaleString('en')}`, function (done) {
         const list = new IxList(length);
         for (let i = 0; i < length; ++i) list.push(0);
-        benchmark(`IxList  add ${length.toLocaleString('en')} with constraint`, () => {
-          for (let i = 0; i < length; ++i) list.unshift(0);
+        benchmark(`IxList  add with constraint ${length.toLocaleString('en')}`, () => {
+          list.push(0);
         }, done);
       });
     }
