@@ -210,15 +210,17 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
           assert(target = target!);
           break;
         case LRU.length === 0:
+          assert(LFU.last);
           target = LFU.last! !== skip
             ? LFU.last!
             : LFU.last!.prev;
           break;
         // @ts-expect-error
         case LFU.length > this.capacity * this.ratio / 1000:
+          assert(LFU.last);
           target = LFU.last! !== skip
             ? LFU.last!
-            : LFU.length >= 2
+            : LFU.length !== 1
               ? LFU.last!.prev
               : skip;
           if (target !== skip) {
@@ -242,7 +244,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
           }
           target = LRU.last! !== skip
             ? LRU.last!
-            : LRU.length >= 2
+            : LRU.length !== 1
               ? LRU.last!.prev
               : LFU.last!;
       }
