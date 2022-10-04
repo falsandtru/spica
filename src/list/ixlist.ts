@@ -5,29 +5,27 @@ import { Index as Ix } from '../index';
 
 const undefined = void 0;
 
-interface InternalNode<K, V> {
+interface InternalNode<T> {
   index: number;
-  key: K;
-  value: V;
+  value: T;
   next: number;
   prev: number;
 }
 
 export namespace List {
-  export interface Node<K, V = undefined> {
+  export interface Node<T> {
     readonly index: number;
-    readonly key: K;
-    value: V;
+    value: T;
     readonly next: number;
     readonly prev: number;
   }
 }
-export class List<K, V = undefined> {
+export class List<T> {
   constructor(
     public readonly capacity: number = Infinity,
   ) {
   }
-  private nodes: InternalNode<K, V>[] = Array(16);
+  private nodes: InternalNode<T>[] = Array(16);
   private readonly ix = new Ix();
   public HEAD = 0;
   private CURSOR = 0;
@@ -35,26 +33,26 @@ export class List<K, V = undefined> {
   public get length() {
     return this.$length;
   }
-  public get head(): List.Node<K, V> | undefined {
+  public get head(): List.Node<T> | undefined {
     return this.node(this.HEAD);
   }
-  public get tail(): List.Node<K, V> | undefined {
+  public get tail(): List.Node<T> | undefined {
     const head = this.head;
     return head && this.nodes[head.next];
   }
-  public get last(): List.Node<K, V> | undefined {
+  public get last(): List.Node<T> | undefined {
     const head = this.head;
     return head && this.nodes[head.prev];
   }
-  public next(index: number): List.Node<K, V> | undefined {
+  public next(index: number): List.Node<T> | undefined {
     const node = this.node(index);
     return node && this.nodes[node.next];
   }
-  public prev(index: number): List.Node<K, V> | undefined {
+  public prev(index: number): List.Node<T> | undefined {
     const node = this.node(index);
     return node && this.nodes[node.prev];
   }
-  public node(index: number): List.Node<K, V> | undefined {
+  public node(index: number): List.Node<T> | undefined {
     const node = this.nodes[index];
     return node?.index === undefined
       ? undefined
@@ -73,11 +71,9 @@ export class List<K, V = undefined> {
     this.CURSOR = 0;
     this.$length = 0;
   }
-  public add(key: K, value: V): number;
-  public add(this: List<K, undefined>, key: K, value?: V): number;
-  public add(key: K, value: V): number {
+  public add(value: T): number {
     const nodes = this.nodes;
-    const head: InternalNode<K, V> | undefined = this.head;
+    const head: InternalNode<T> | undefined = this.head;
     //assert(this.length === 0 ? !head : head);
     if (!head) {
       assert(this.length === 0);
@@ -85,7 +81,6 @@ export class List<K, V = undefined> {
       ++this.$length;
       nodes[index] = {
         index,
-        key,
         value,
         next: index,
         prev: index,
@@ -103,7 +98,6 @@ export class List<K, V = undefined> {
       const node = nodes[index];
       if (node) {
         node.index = index;
-        node.key = key;
         node.value = value;
         node.next = head.index;
         node.prev = head.prev;
@@ -111,7 +105,6 @@ export class List<K, V = undefined> {
       else {
         nodes[index] = {
           index,
-          key,
           value,
           next: head.index,
           prev: head.prev,
@@ -130,7 +123,6 @@ export class List<K, V = undefined> {
       const node = nodes[head.prev]!;
       const index = this.HEAD = this.CURSOR = node.index;
       //assert(nodes[index]);
-      node.key = key;
       node.value = value;
       //assert(this.length !== 1 || index === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
       //assert(this.length !== 2 || index !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
@@ -139,21 +131,21 @@ export class List<K, V = undefined> {
       return index;
     }
   }
-  public get(index: number): List.Node<K, V> | undefined {
+  public get(index: number): List.Node<T> | undefined {
     return this.node(index);
   }
   public has(index: number): boolean {
     return this.node(index) !== undefined;
   }
-  public delete(index: number): List.Node<K, V> | undefined {
-    const node: InternalNode<K, V> | undefined = this.node(index);
+  public delete(index: number): List.Node<T> | undefined {
+    const node: InternalNode<T> | undefined = this.node(index);
     if (!node) return;
     assert(this.length > 0);
     //assert(this.length !== 1 || node === node.prev && node.prev === node.next);
     //assert(this.length !== 2 || node !== node.prev && node.prev === node.next);
     //assert(this.length < 3 || node !== node.prev && node.prev !== node.next);
     --this.$length;
-    const { key, value, next, prev } = node;
+    const { value, next, prev } = node;
     this.ix.push(index);
     const nodes = this.nodes;
     nodes[prev]!.next = next;
@@ -165,81 +157,66 @@ export class List<K, V = undefined> {
       this.CURSOR = next;
     }
     node.index = undefined as any;
-    node.key = undefined as any;
     node.value = undefined as any;
     //assert(this.length === 0 ? !this.nodes[this.HEAD] : this.nodes[this.HEAD]);
     //assert(this.length === 0 ? !this.nodes[this.CURSOR] : this.nodes[this.CURSOR]);
     //assert(this.length > 10 || [...this].length === this.length);
-    return { index, key, value, next, prev };
+    return { index, value, next, prev };
   }
-  public insert(key: K, value: V, before: number): number {
+  public insert(value: T, before: number): number {
     const head = this.HEAD;
     this.HEAD = before;
-    const index = this.add(key, value);
+    const index = this.add(value);
     this.HEAD = head;
     return index;
   }
-  public unshift(key: K, value: V): number;
-  public unshift(this: List<K, undefined>, key: K, value?: V): number;
-  public unshift(key: K, value: V): number {
-    return this.add(key, value);
+  public unshift(value: T): number {
+    return this.add(value);
   }
-  public unshiftRotationally(key: K, value: V): number;
-  public unshiftRotationally(this: List<K, undefined>, key: K, value?: V): number;
-  public unshiftRotationally(key: K, value: V): number {
-    if (this.$length === 0) return this.unshift(key, value);
-    const node: InternalNode<K, V> = this.last!;
+  public unshiftRotationally(value: T): number {
+    if (this.$length === 0) return this.unshift(value);
+    const node: InternalNode<T> = this.last!;
     this.HEAD = node.index;
     this.CURSOR = node.index;
-    node.key = key;
     node.value = value;
     return node.index;
   }
-  public push(key: K, value: V): number;
-  public push(this: List<K, undefined>, key: K, value?: V): number;
-  public push(key: K, value: V): number {
-    return this.insert(key, value, this.HEAD);
+  public push(value: T): number {
+    return this.insert(value, this.HEAD);
   }
-  public pushRotationally(key: K, value: V): number;
-  public pushRotationally(this: List<K, undefined>, key: K, value?: V): number;
-  public pushRotationally(key: K, value: V): number {
-    if (this.$length === 0) return this.push(key, value);
-    const node: InternalNode<K, V> = this.head!;
+  public pushRotationally(value: T): number {
+    if (this.$length === 0) return this.push(value);
+    const node: InternalNode<T> = this.head!;
     this.HEAD = node.next;
     this.CURSOR = node.index;
-    node.key = key;
     node.value = value;
     return node.index;
   }
-  public shift(): List.Node<K, V> | undefined {
+  public shift(): List.Node<T> | undefined {
     const node = this.head;
     return node && this.delete(node.index);
   }
-  public pop(): List.Node<K, V> | undefined {
+  public pop(): List.Node<T> | undefined {
     const node = this.last;
     return node && this.delete(node.index);
   }
-  public replace(index: number, key: K, value: V): List.Node<K, V> | undefined;
-  public replace(this: List<K, undefined>, index: number, key: K, value?: V): List.Node<K, V> | undefined;
-  public replace(index: number, key: K, value: V): List.Node<K, V> | undefined {
-    const node: InternalNode<K, V> | undefined = this.node(index);
+  public replace(index: number, value: T): List.Node<T> | undefined {
+    const node: InternalNode<T> | undefined = this.node(index);
     if (!node) return;
     const clone = {
       index: node.index,
-      key: node.key,
       value: node.value,
       next: node.next,
       prev: node.prev,
     };
-    node.key = key;
     node.value = value;
     return clone;
   }
   public move(index: number, before: number): boolean {
     if (index === before) return false;
-    const a1: InternalNode<K, V> | undefined = this.node(index);
+    const a1: InternalNode<T> | undefined = this.node(index);
     if (!a1) return false;
-    const b1: InternalNode<K, V> | undefined = this.node(before);
+    const b1: InternalNode<T> | undefined = this.node(before);
     if (!b1) return false;
     assert(a1 !== b1);
     if (a1.next === b1.index) return false;
@@ -292,11 +269,11 @@ export class List<K, V = undefined> {
     }
     return true;
   }
-  public *[Symbol.iterator](): Iterator<[K, V, number], undefined, undefined> {
+  public *[Symbol.iterator](): Iterator<[T, number], undefined, undefined> {
     const nodes = this.nodes;
     const head = this.head;
     for (let node = head; node;) {
-      yield [node.key, node.value, node.index];
+      yield [node.value, node.index];
       node = nodes[node.next];
       if (node === head) return;
     }
