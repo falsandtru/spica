@@ -15,57 +15,41 @@ describe('Unit: lib/ixlist', () => {
 
       assert.deepStrictEqual(inspect(list), {
         list: [],
-        head: 0,
+        head: 1,
         length: 0,
       });
 
-      assert(list.add(0) === 0);
+      assert(list.add(0) === 1);
       assert.deepStrictEqual(inspect(list), {
         list: [
           0,
         ],
-        head: 0,
+        head: 1,
         length: 1,
       });
 
-      assert(list.add(1) === 0);
+      assert(list.add(1) === 1);
       assert.deepStrictEqual(inspect(list), {
         list: [
           1,
         ],
-        head: 0,
+        head: 1,
         length: 1,
       });
 
-      assert(list.add(1) === 0);
+      assert(list.add(1) === 1);
       assert.deepStrictEqual(inspect(list), {
         list: [
           1,
         ],
-        head: 0,
+        head: 1,
         length: 1,
       });
 
-      assert.deepStrictEqual(list.delete(1), undefined);
-      assert.deepStrictEqual(inspect(list), {
-        list: [
-          1,
-        ],
-        head: 0,
-        length: 1,
-      });
-
-      assert.deepStrictEqual(list.delete(0), { index: 0, value: 1, next: 0, prev: 0 });
+      list.del(1);
       assert.deepStrictEqual(inspect(list), {
         list: [],
-        head: 0,
-        length: 0,
-      });
-
-      assert.deepStrictEqual(list.delete(0), undefined);
-      assert.deepStrictEqual(inspect(list), {
-        list: [],
-        head: 0,
+        head: 1,
         length: 0,
       });
     });
@@ -73,48 +57,48 @@ describe('Unit: lib/ixlist', () => {
     it('add/delete 2', () => {
       const list = new List<number>(2);
 
-      assert(list.add(0) === 0);
+      assert(list.add(0) === 1);
       assert.deepStrictEqual(inspect(list), {
         list: [
           0,
         ],
-        head: 0,
+        head: 1,
         length: 1,
+      });
+
+      assert(list.add(1) === 2);
+      assert.deepStrictEqual(inspect(list), {
+        list: [
+          1,
+          0,
+        ],
+        head: 2,
+        length: 2,
       });
 
       assert(list.add(1) === 1);
       assert.deepStrictEqual(inspect(list), {
         list: [
           1,
-          0,
+          1,
         ],
         head: 1,
         length: 2,
       });
 
-      assert(list.add(1) === 0);
-      assert.deepStrictEqual(inspect(list), {
-        list: [
-          1,
-          1,
-        ],
-        head: 0,
-        length: 2,
-      });
-
-      assert.deepStrictEqual(list.delete(0), { index: 0, value: 1, next: 1, prev: 1 });
+      list.del(1);
       assert.deepStrictEqual(inspect(list), {
         list: [
           1,
         ],
-        head: 1,
+        head: 2,
         length: 1,
       });
 
-      assert.deepStrictEqual(list.delete(1), { index: 1, value: 1, next: 1, prev: 1 });
+      list.del(2);
       assert.deepStrictEqual(inspect(list), {
         list: [],
-        head: 1,
+        head: 2,
         length: 0,
       });
     });
@@ -122,54 +106,54 @@ describe('Unit: lib/ixlist', () => {
     it('add/delete 3', () => {
       const list = new List<number>(3);
 
-      assert(list.add(0) === 0);
+      assert(list.add(0) === 1);
       assert.deepStrictEqual(inspect(list), {
         list: [
-          0,
-        ],
-        head: 0,
-        length: 1,
-      });
-
-      assert(list.add(1) === 1);
-      assert.deepStrictEqual(inspect(list), {
-        list: [
-          1,
           0,
         ],
         head: 1,
-        length: 2,
+        length: 1,
       });
 
-      assert(list.add(2) === 2);
+      assert(list.add(1) === 2);
       assert.deepStrictEqual(inspect(list), {
         list: [
-          2,
           1,
           0,
         ],
         head: 2,
+        length: 2,
+      });
+
+      assert(list.add(2) === 3);
+      assert.deepStrictEqual(inspect(list), {
+        list: [
+          2,
+          1,
+          0,
+        ],
+        head: 3,
         length: 3,
       });
 
-      assert(list.add(3) === 0);
+      assert(list.add(3) === 1);
       assert.deepStrictEqual(inspect(list), {
         list: [
           3,
           2,
           1,
         ],
-        head: 0,
+        head: 1,
         length: 3,
       });
 
-      assert.deepStrictEqual(list.delete(1), { index: 1, value: 1, next: 0, prev: 2 });
+      list.del(2);
       assert.deepStrictEqual(inspect(list), {
         list: [
           3,
           2,
         ],
-        head: 0,
+        head: 1,
         length: 2,
       });
     });
@@ -177,32 +161,32 @@ describe('Unit: lib/ixlist', () => {
     it('insert', () => {
       const list = new List<number>(2);
 
-      assert(list.insert(0, 0) === 0);
+      assert(list.insert(0, 1) === 1);
       assert.deepStrictEqual(inspect(list), {
         list: [
           0,
         ],
-        head: 0,
+        head: 1,
         length: 1,
       });
 
-      assert(list.insert(1, 0) === 1);
+      assert(list.insert(1, 1) === 2);
       assert.deepStrictEqual(inspect(list), {
         list: [
           0,
           1,
         ],
-        head: 0,
+        head: 1,
         length: 2,
       });
 
-      assert(list.insert(2, 0) === 1);
+      assert(list.insert(2, 1) === 2);
       assert.deepStrictEqual(inspect(list), {
         list: [
           0,
           2,
         ],
-        head: 0,
+        head: 1,
         length: 2,
       });
     });
@@ -217,17 +201,17 @@ describe('Unit: lib/ixlist', () => {
           1,
           0,
         ],
-        head: 1,
+        head: 2,
         length: 2,
       });
 
-      list.swap(0, 1);
+      list.swap(1, 2);
       assert.deepStrictEqual(inspect(list), {
         list: [
           0,
           1,
         ],
-        head: 0,
+        head: 1,
         length: 2,
       });
 
@@ -240,11 +224,11 @@ describe('Unit: lib/ixlist', () => {
           0,
           1,
         ],
-        head: 3,
+        head: 4,
         length: 4,
       });
 
-      list.swap(0, 3);
+      list.swap(1, 4);
       assert.deepStrictEqual(inspect(list), {
         list: [
           0,
@@ -252,7 +236,7 @@ describe('Unit: lib/ixlist', () => {
           3,
           1,
         ],
-        head: 0,
+        head: 1,
         length: 4,
       });
     });

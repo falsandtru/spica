@@ -1,89 +1,114 @@
-import { Infinity, Array } from '../global';
+import { Array, Uint32Array } from '../global';
+import { max, min, floor } from '../alias';
 import { Index as Ix } from '../index';
 
 // Circular Indexed List
 
 const undefined = void 0;
 
-interface InternalNode<T> {
-  index: number;
-  value: T;
-  next: number;
-  prev: number;
-}
-
 export namespace List {
   export interface Node<T> {
     readonly index: number;
-    value: T;
+    readonly value: T;
     readonly next: number;
     readonly prev: number;
   }
 }
 export class List<T> {
   constructor(
-    public readonly capacity: number = Infinity,
+    public capacity: number,
   ) {
+    if (capacity >= 2 ** 32 - 1) throw new Error(`Too large capacity`);
+    this.values = Array(this.capacity + 1);
+    this.nexts = new Uint32Array(this.capacity + 1);
+    this.prevs = new Uint32Array(this.capacity + 1);
+    this.ix.pop();
   }
-  private nodes: InternalNode<T>[] = Array(16);
+  private values: T[];
+  private nexts: Uint32Array;
+  private prevs: Uint32Array;
   private readonly ix = new Ix();
-  public HEAD = 0;
+  public HEAD = 1;
   private $length = 0;
   public get length() {
     return this.$length;
   }
-  public get head(): List.Node<T> | undefined {
-    return this.node(this.HEAD);
+  public get head(): number {
+    return this.HEAD;
   }
-  public get tail(): List.Node<T> | undefined {
-    const head = this.head;
-    return head && this.nodes[head.next];
+  public get tail(): number {
+    return this.nexts[this.HEAD];
   }
-  public get last(): List.Node<T> | undefined {
-    const head = this.head;
-    return head && this.nodes[head.prev];
+  public get last(): number {
+    return this.prevs[this.HEAD];
   }
-  public next(index: number): List.Node<T> | undefined {
-    const node = this.node(index);
-    return node && this.nodes[node.next];
+  public next(index: number): number {
+    return this.nexts[index];
   }
-  public prev(index: number): List.Node<T> | undefined {
-    const node = this.node(index);
-    return node && this.nodes[node.prev];
+  public prev(index: number): number {
+    return this.prevs[index];
   }
-  public node(index: number): List.Node<T> | undefined {
-    const node = this.nodes[index];
-    return node?.index === undefined
-      ? undefined
-      : node;
+  public index(offset: number, index = this.HEAD): number {
+    if (offset > 0) {
+      for (let map = this.nexts; offset--;) {
+        index = map[index];
+      }
+    }
+    else {
+      for (let map = this.prevs; offset++;) {
+        index = map[index];
+      }
+    }
+    return index;
   }
-  public rotateToNext(): number {
-    return this.HEAD = this.tail?.index ?? this.HEAD;
+  public node(index: number): List.Node<T> {
+    return {
+      index,
+      value: this.values[index],
+      next: this.nexts[index],
+      prev: this.prevs[index],
+    };
   }
-  public rotateToPrev(): number {
-    return this.HEAD = this.last?.index ?? this.HEAD;
+  public at(index: number): T {
+    return this.values[index];
+  }
+  public isFull() {
+    return this.$length === this.capacity;
+  }
+  public resize(capacity: number): void {
+    if (capacity >= 2 ** 32 - 1) throw new Error(`Too large capacity`);
+    if (capacity + 1 > this.nexts.length) {
+      const nexts = new Uint32Array(max(capacity + 1, min(floor(this.capacity * 1.2), 2 ** 32)));
+      nexts.set(this.nexts);
+      this.nexts = nexts;
+      const prevs = new Uint32Array(max(capacity + 1, min(floor(this.capacity * 1.2), 2 ** 32)));
+      prevs.set(this.prevs);
+      this.prevs = prevs;
+    }
+    this.capacity = capacity;
+    while (this.$length > capacity) {
+      this.del(this.last);
+    }
   }
   public clear(): void {
-    this.nodes = Array(16);
+    this.values = Array(this.capacity + 1);
+    this.nexts = new Uint32Array(this.capacity + 1);
+    this.prevs = new Uint32Array(this.capacity + 1);
     this.ix.clear();
-    this.HEAD = 0;
+    this.ix.pop();
+    this.HEAD = 1;
     this.$length = 0;
   }
   public add(value: T): number {
-    const nodes = this.nodes;
-    const head: InternalNode<T> | undefined = this.head;
+    const head = this.HEAD;
     //assert(this.length === 0 ? !head : head);
-    if (!head) {
+    if (this.$length === 0) {
       assert(this.length === 0);
       const index = this.HEAD = this.ix.pop();
       ++this.$length;
-      nodes[index] = {
-        index,
-        value,
-        next: index,
-        prev: index,
-      };
-      assert(index === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
+      this.values[index] = value;
+      this.nexts[index] = index;
+      this.prevs[index] = index;
       //assert(this.length > 10 || [...this].length === this.length);
       return index;
     }
@@ -93,22 +118,11 @@ export class List<T> {
       const index = this.HEAD = this.ix.pop();
       //assert(!nodes[index]);
       ++this.$length;
-      const node = nodes[index];
-      if (node) {
-        node.index = index;
-        node.value = value;
-        node.next = head.index;
-        node.prev = head.prev;
-      }
-      else {
-        nodes[index] = {
-          index,
-          value,
-          next: head.index,
-          prev: head.prev,
-        };
-      }
-      head.prev = nodes[head.prev]!.next = index;
+      const last = this.prevs[head];
+      this.prevs[head] = this.nexts[last] = index;
+      this.values[index] = value;
+      this.nexts[index] = head;
+      this.prevs[index] = last;
       //assert(this.length !== 1 || index === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
       //assert(this.length !== 2 || index !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
       //assert(this.length < 3 || index !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
@@ -117,11 +131,10 @@ export class List<T> {
     }
     else {
       assert(this.length === this.capacity);
-      assert(this.ix.length === this.capacity);
-      const node = nodes[head.prev]!;
-      const index = this.HEAD = node.index;
+      assert(this.ix.length - 1 === this.capacity);
+      const index = this.HEAD = this.prevs[head];
       //assert(nodes[index]);
-      node.value = value;
+      this.values[index] = value;
       //assert(this.length !== 1 || index === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
       //assert(this.length !== 2 || index !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
       //assert(this.length < 3 || index !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
@@ -129,33 +142,33 @@ export class List<T> {
       return index;
     }
   }
-  public get(index: number): List.Node<T> | undefined {
-    return this.node(index);
-  }
   public has(index: number): boolean {
-    return this.node(index) !== undefined;
+    return this.nexts[index] !== 0;
   }
-  public delete(index: number): List.Node<T> | undefined {
-    const node: InternalNode<T> | undefined = this.node(index);
-    if (!node) return;
+  public set(index: number, value: T): void {
+    this.values[index] = value;
+  }
+  public del(index: number): void {
     assert(this.length > 0);
     //assert(this.length !== 1 || node === node.prev && node.prev === node.next);
     //assert(this.length !== 2 || node !== node.prev && node.prev === node.next);
     //assert(this.length < 3 || node !== node.prev && node.prev !== node.next);
-    --this.$length;
-    const { value, next, prev } = node;
+    const next = this.nexts[index];
+    const prev = this.prevs[index];
     this.ix.push(index);
-    const nodes = this.nodes;
-    nodes[prev]!.next = next;
-    nodes[next]!.prev = prev;
+    // @ts-expect-error
+    this.values[index] = undefined;
+    this.nexts[index] = 0;
+    this.prevs[index] = 0;
+    if (--this.$length !== 0) {
+      this.nexts[prev] = next;
+      this.prevs[next] = prev;
+    }
     if (this.HEAD === index) {
       this.HEAD = next;
     }
-    node.index = undefined as any;
-    node.value = undefined as any;
     //assert(this.length === 0 ? !this.nodes[this.HEAD] : this.nodes[this.HEAD]);
     //assert(this.length > 10 || [...this].length === this.length);
-    return { index, value, next, prev };
   }
   public insert(value: T, before: number): number {
     const head = this.HEAD;
@@ -169,65 +182,51 @@ export class List<T> {
   }
   public unshiftRotationally(value: T): number {
     if (this.$length === 0) return this.unshift(value);
-    const node: InternalNode<T> = this.last!;
-    this.HEAD = node.index;
-    node.value = value;
-    return node.index;
+    const index = this.last;
+    this.values[index] = value;
+    this.HEAD = index;
+    return index;
   }
   public push(value: T): number {
     return this.insert(value, this.HEAD);
   }
   public pushRotationally(value: T): number {
     if (this.$length === 0) return this.push(value);
-    const node: InternalNode<T> = this.head!;
-    this.HEAD = node.next;
-    node.value = value;
-    return node.index;
+    const index = this.HEAD;
+    this.values[index] = value;
+    this.HEAD = this.nexts[index];
+    return index;
   }
-  public shift(): List.Node<T> | undefined {
-    const node = this.head;
-    return node && this.delete(node.index);
+  public shift(): T | undefined {
+    if (this.$length === 0) return;
+    const index = this.HEAD;
+    const value = this.values[index];
+    this.del(index);
+    return value;
   }
-  public pop(): List.Node<T> | undefined {
-    const node = this.last;
-    return node && this.delete(node.index);
-  }
-  public replace(index: number, value: T): List.Node<T> | undefined {
-    const node: InternalNode<T> | undefined = this.node(index);
-    if (!node) return;
-    const clone = {
-      index: node.index,
-      value: node.value,
-      next: node.next,
-      prev: node.prev,
-    };
-    node.value = value;
-    return clone;
+  public pop(): T | undefined {
+    if (this.$length === 0) return;
+    const index = this.last;
+    const value = this.values[index];
+    this.del(index);
+    return value;
   }
   public move(index: number, before: number): boolean {
     if (index === before) return false;
-    const a1: InternalNode<T> | undefined = this.node(index);
-    if (!a1) return false;
-    const b1: InternalNode<T> | undefined = this.node(before);
-    if (!b1) return false;
+    const a1 = index;
+    const b1 = before;
     assert(a1 !== b1);
-    if (a1.next === b1.index) return false;
-    const nodes = this.nodes;
-    const b0 = nodes[b1.prev]!;
-    const a0 = nodes[a1.prev]!;
-    const a2 = nodes[a1.next]!;
-    b0.next = a1.index;
-    a1.next = b1.index;
-    b1.prev = a1.index;
-    a1.prev = b0.index;
-    a0.next = a2.index;
-    a2.prev = a0.index;
-    assert(b0.next === a1.index);
-    assert(a1.next === b1.index);
-    assert(b1.prev === a1.index);
-    assert(a1.prev === b0.index);
-    assert(a0.next === a2.index);
-    assert(a2.prev === a0.index);
+    const { nexts, prevs } = this;
+    const a2 = nexts[a1];
+    if (a2 === b1) return false;
+    const b0 = prevs[b1];
+    const a0 = prevs[a1];
+    nexts[b0] = a1;
+    nexts[a1] = b1;
+    prevs[b1] = a1;
+    prevs[a1] = b0;
+    nexts[a0] = a2;
+    prevs[a2] = a0;
     assert(this.length > 10 || [...this].length === this.length);
     return true;
   }
@@ -238,36 +237,32 @@ export class List<T> {
   public moveToLast(index: number): void {
     this.move(index, this.HEAD);
     this.HEAD = index === this.HEAD
-      ? this.head!.next
+      ? this.tail
       : this.HEAD;
   }
   public swap(index1: number, index2: number): boolean {
     if (index1 === index2) return false;
-    const node1 = this.node(index1);
-    if (!node1) return false;
-    const node2 = this.node(index2);
-    if (!node2) return false;
-    const nodes = this.nodes;
-    const node3 = nodes[node2.next]!;
-    this.move(node2.index, node1.index);
-    this.move(node1.index, node3.index);
+    const index3 = this.nexts[index2];
+    if (index3 === 0) throw new Error(`Invalid index`);
+    this.move(index2, index1);
+    this.move(index1, index3);
     switch (this.HEAD) {
-      case node1.index:
-        this.HEAD = node2.index;
+      case index1:
+        this.HEAD = index2;
         break;
-      case node2.index:
-        this.HEAD = node1.index;
+      case index2:
+        this.HEAD = index1;
         break;
     }
     return true;
   }
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
-    const nodes = this.nodes;
-    const head = this.head;
-    for (let node = head; node;) {
-      yield node.value;
-      node = nodes[node.next];
-      if (node === head) return;
+    if (this.$length === 0) return;
+    const head = this.HEAD;
+    for (let index = head; index;) {
+      yield this.values[index];
+      index = this.nexts[index] || head;
+      if (index === head) return;
     }
   }
 }

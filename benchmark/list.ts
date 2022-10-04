@@ -14,7 +14,7 @@ describe('Benchmark:', function () {
     });
 
     it('IxList  new', function (done) {
-      benchmark('IxList  new', () => new IxList(), done);
+      benchmark('IxList  new', () => new IxList(1), done);
     });
 
     for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7]) {
@@ -45,7 +45,7 @@ describe('Benchmark:', function () {
       });
 
       it(`IxList  add ${length.toLocaleString('en')}`, function (done) {
-        const list = new IxList();
+        const list = new IxList(length);
         for (let i = 0; i < length; ++i) list.push(0);
         benchmark(`IxList  add ${length.toLocaleString('en')}`, () => {
           list.shift();
@@ -54,7 +54,7 @@ describe('Benchmark:', function () {
       });
 
       it(`IxList  add rotationally ${length.toLocaleString('en')}`, function (done) {
-        const list = new IxList();
+        const list = new IxList(length);
         for (let i = 0; i < length; ++i) list.push(0);
         benchmark(`IxList  add rotationally ${length.toLocaleString('en')}`, () => {
           list.pushRotationally(0);
@@ -88,10 +88,10 @@ describe('Benchmark:', function () {
       });
 
       it(`IxList  move ${length.toLocaleString('en')}`, function (done) {
-        const list = new IxList();
+        const list = new IxList(length);
         for (let i = 0; i < length; ++i) list.push(0);
         benchmark(`IxList  move ${length.toLocaleString('en')}`, () => {
-          list.moveToHead(list.last!.prev);
+          list.moveToHead(list.prev(list.last));
         }, done);
       });
     }

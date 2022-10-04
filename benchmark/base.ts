@@ -1,6 +1,7 @@
 import { benchmark } from './benchmark';
 import { Index } from '../src/index';
 import { Ring } from '../src/ring';
+import { List as IxList } from '../src/ixlist';
 import { Stack } from '../src/stack';
 import { Queue, PriorityQueue, MultiQueue } from '../src/queue';
 import { Heap, MultiHeap } from '../src/heap';
@@ -8,23 +9,27 @@ import { Heap, MultiHeap } from '../src/heap';
 describe('Benchmark:', function () {
   describe('base', function () {
     it('Index  new', function (done) {
-      benchmark('Index new', () => new Index(), done);
+      benchmark('Index  new', () => new Index(), done);
     });
 
-    it('Ring  new', function (done) {
-      benchmark('Ring  new', () => new Ring(), done);
+    it('Ring   new', function (done) {
+      benchmark('Ring   new', () => new Ring(), done);
     });
 
-    it('Stack new', function (done) {
-      benchmark('Stack new', () => new Stack(), done);
+    it('IxList new', function (done) {
+      benchmark('IxList new', () => new IxList(1), done);
     });
 
-    it('Queue new', function (done) {
-      benchmark('Queue new', () => new Queue(), done);
+    it('Stack  new', function (done) {
+      benchmark('Stack  new', () => new Stack(), done);
     });
 
-    it('Heap  new', function (done) {
-      benchmark('Heap  new', () => new Heap(), done);
+    it('Queue  new', function (done) {
+      benchmark('Queue  new', () => new Queue(), done);
+    });
+
+    it('Heap   new', function (done) {
+      benchmark('Heap   new', () => new Heap(), done);
     });
 
     it('MQueue new', function (done) {
@@ -40,35 +45,41 @@ describe('Benchmark:', function () {
     });
 
     for (const length of [1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
-      it(`Index       ${length.toLocaleString('en')}`, function (done) {
+      it(`Index        ${length.toLocaleString('en')}`, function (done) {
         const data = new Index;
         for (let i = 0; i < length; ++i) data.pop();
         for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Index       ${length.toLocaleString('en')}`, () => (data.pop(), data.push(0)), done);
+        benchmark(`Index        ${length.toLocaleString('en')}`, () => (data.pop(), data.push(0)), done);
       });
 
-      it(`Array first ${length.toLocaleString('en')}`, function (done) {
+      it(`Array  first ${length.toLocaleString('en')}`, function (done) {
         const data: unknown[] = [];
         for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Array first ${length.toLocaleString('en')}`, () => (data.shift(), data.unshift(0)), done);
+        benchmark(`Array  first ${length.toLocaleString('en')}`, () => (data.shift(), data.unshift(0)), done);
       });
 
-      it(`Array stack ${length.toLocaleString('en')}`, function (done) {
+      it(`Array  stack ${length.toLocaleString('en')}`, function (done) {
         const data: unknown[] = [];
         for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Array stack ${length.toLocaleString('en')}`, () => (data.pop(), data.push(0)), done);
+        benchmark(`Array  stack ${length.toLocaleString('en')}`, () => (data.pop(), data.push(0)), done);
       });
 
-      it(`Array queue ${length.toLocaleString('en')}`, function (done) {
+      it(`Array  queue ${length.toLocaleString('en')}`, function (done) {
         const data: unknown[] = [];
         for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Array queue ${length.toLocaleString('en')}`, () => (data.shift(), data.push(0)), done);
+        benchmark(`Array  queue ${length.toLocaleString('en')}`, () => (data.shift(), data.push(0)), done);
       });
 
-      it(`Ring  queue ${length.toLocaleString('en')}`, function (done) {
+      it(`Ring   queue ${length.toLocaleString('en')}`, function (done) {
         const data = new Ring();
         for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Ring  queue ${length.toLocaleString('en')}`, () => (data.shift(), data.push(0)), done);
+        benchmark(`Ring   queue ${length.toLocaleString('en')}`, () => (data.shift(), data.push(0)), done);
+      });
+
+      it(`IxList queue ${length.toLocaleString('en')}`, function (done) {
+        const data = new IxList(length);
+        for (let i = 0; i < length; ++i) data.push(0);
+        benchmark(`IxList queue ${length.toLocaleString('en')}`, () => (data.shift(), data.push(0)), done);
       });
 
       it(`Stack ${length.toLocaleString('en')}`, function (done) {
@@ -121,34 +132,40 @@ describe('Benchmark:', function () {
     }
 
     for (const length of [1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
-      it(`Array index ${length.toLocaleString('en')}`, function (done) {
+      it(`Array  index ${length.toLocaleString('en')}`, function (done) {
         const data = Array();
         for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Array index ${length.toLocaleString('en')}`, () => data[length - 1], done);
+        benchmark(`Array  index ${length.toLocaleString('en')}`, () => data[length - 1], done);
       });
 
-      it(`Ring  index ${length.toLocaleString('en')}`, function (done) {
+      it(`Ring   index ${length.toLocaleString('en')}`, function (done) {
         const data = new Ring();
         for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Ring  index ${length.toLocaleString('en')}`, () => data.at(-1), done);
+        benchmark(`Ring   index ${length.toLocaleString('en')}`, () => data.at(-1), done);
       });
 
-      it(`Stack peek  ${length.toLocaleString('en')}`, function (done) {
+      it(`IxList index ${length.toLocaleString('en')}`, function (done) {
+        const data = new IxList(length);
+        for (let i = 0; i < length; ++i) data.push(0);
+        benchmark(`IxList index ${length.toLocaleString('en')}`, () => data.at(-1), done);
+      });
+
+      it(`Stack  peek  ${length.toLocaleString('en')}`, function (done) {
         const data = new Stack();
         for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Stack peek  ${length.toLocaleString('en')}`, () => data.peek(), done);
+        benchmark(`Stack  peek  ${length.toLocaleString('en')}`, () => data.peek(), done);
       });
 
-      it(`Queue peek  ${length.toLocaleString('en')}`, function (done) {
+      it(`Queue  peek  ${length.toLocaleString('en')}`, function (done) {
         const data = new Queue();
         for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Queue peek  ${length.toLocaleString('en')}`, () => data.peek(), done);
+        benchmark(`Queue  peek  ${length.toLocaleString('en')}`, () => data.peek(), done);
       });
 
-      it(`Heap  peek  ${length.toLocaleString('en')}`, function (done) {
+      it(`Heap   peek  ${length.toLocaleString('en')}`, function (done) {
         const heap = new Heap<number>(Heap.min);
         for (let i = 0; i < length; ++i) heap.insert(1, i);
-        benchmark(`Heap  peek  ${length.toLocaleString('en')}`, () =>
+        benchmark(`Heap   peek  ${length.toLocaleString('en')}`, () =>
           heap.peek(), done);
       });
 
@@ -167,16 +184,22 @@ describe('Benchmark:', function () {
     }
 
     for (const length of [1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
-      it(`Array set ${length.toLocaleString('en')}`, function (done) {
+      it(`Array  set ${length.toLocaleString('en')}`, function (done) {
         const data = Array();
         for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Array set ${length.toLocaleString('en')}`, () => data[length - 1] = 0, done);
+        benchmark(`Array  set ${length.toLocaleString('en')}`, () => data[length - 1] = 0, done);
       });
 
-      it(`Ring  set ${length.toLocaleString('en')}`, function (done) {
+      it(`Ring   set ${length.toLocaleString('en')}`, function (done) {
         const data = new Ring();
         for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Ring  set ${length.toLocaleString('en')}`, () => data.replace(-1, 0), done);
+        benchmark(`Ring   set ${length.toLocaleString('en')}`, () => data.replace(-1, 0), done);
+      });
+
+      it(`IxList set ${length.toLocaleString('en')}`, function (done) {
+        const data = new IxList(length);
+        for (let i = 0; i < length; ++i) data.push(0);
+        benchmark(`IxList set ${length.toLocaleString('en')}`, () => data.set(length, 0), done);
       });
     }
   });
