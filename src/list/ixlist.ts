@@ -28,7 +28,6 @@ export class List<T> {
   private nodes: InternalNode<T>[] = Array(16);
   private readonly ix = new Ix();
   public HEAD = 0;
-  private CURSOR = 0;
   private $length = 0;
   public get length() {
     return this.$length;
@@ -68,7 +67,6 @@ export class List<T> {
     this.nodes = Array(16);
     this.ix.clear();
     this.HEAD = 0;
-    this.CURSOR = 0;
     this.$length = 0;
   }
   public add(value: T): number {
@@ -77,7 +75,7 @@ export class List<T> {
     //assert(this.length === 0 ? !head : head);
     if (!head) {
       assert(this.length === 0);
-      const index = this.HEAD = this.CURSOR = this.ix.pop();
+      const index = this.HEAD = this.ix.pop();
       ++this.$length;
       nodes[index] = {
         index,
@@ -92,7 +90,7 @@ export class List<T> {
     //assert(head);
     if (this.$length !== this.capacity) {
       assert(this.length < this.capacity);
-      const index = this.HEAD = this.CURSOR = this.ix.pop();
+      const index = this.HEAD = this.ix.pop();
       //assert(!nodes[index]);
       ++this.$length;
       const node = nodes[index];
@@ -121,7 +119,7 @@ export class List<T> {
       assert(this.length === this.capacity);
       assert(this.ix.length === this.capacity);
       const node = nodes[head.prev]!;
-      const index = this.HEAD = this.CURSOR = node.index;
+      const index = this.HEAD = node.index;
       //assert(nodes[index]);
       node.value = value;
       //assert(this.length !== 1 || index === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
@@ -153,13 +151,9 @@ export class List<T> {
     if (this.HEAD === index) {
       this.HEAD = next;
     }
-    if (this.CURSOR === index) {
-      this.CURSOR = next;
-    }
     node.index = undefined as any;
     node.value = undefined as any;
     //assert(this.length === 0 ? !this.nodes[this.HEAD] : this.nodes[this.HEAD]);
-    //assert(this.length === 0 ? !this.nodes[this.CURSOR] : this.nodes[this.CURSOR]);
     //assert(this.length > 10 || [...this].length === this.length);
     return { index, value, next, prev };
   }
@@ -177,7 +171,6 @@ export class List<T> {
     if (this.$length === 0) return this.unshift(value);
     const node: InternalNode<T> = this.last!;
     this.HEAD = node.index;
-    this.CURSOR = node.index;
     node.value = value;
     return node.index;
   }
@@ -188,7 +181,6 @@ export class List<T> {
     if (this.$length === 0) return this.push(value);
     const node: InternalNode<T> = this.head!;
     this.HEAD = node.next;
-    this.CURSOR = node.index;
     node.value = value;
     return node.index;
   }
@@ -269,11 +261,11 @@ export class List<T> {
     }
     return true;
   }
-  public *[Symbol.iterator](): Iterator<[T, number], undefined, undefined> {
+  public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
     const nodes = this.nodes;
     const head = this.head;
     for (let node = head; node;) {
-      yield [node.value, node.index];
+      yield node.value;
       node = nodes[node.next];
       if (node === head) return;
     }
