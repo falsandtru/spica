@@ -193,7 +193,7 @@ describe('Benchmark:', function () {
       it(`Ring   set ${length.toLocaleString('en')}`, function (done) {
         const data = new Ring();
         for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Ring   set ${length.toLocaleString('en')}`, () => data.replace(-1, 0), done);
+        benchmark(`Ring   set ${length.toLocaleString('en')}`, () => data.set(-1, 0), done);
       });
 
       it(`IxList set ${length.toLocaleString('en')}`, function (done) {

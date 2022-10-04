@@ -178,20 +178,20 @@ describe('Unit: lib/ring', () => {
         [103, 3, 5, [-3, -4, 5, ...Array(99), -1, -2]]);
     });
 
-    it('replace', () => {
+    it('set', () => {
       const ring = new Ring<number>();
       ring.push(1); ring.push(2); ring.push(3);
       assert.deepStrictEqual(unempties(ring['array']), [1, 2, 3]);
-      assert(ring.replace(0, -1) === 1);
+      assert(ring.set(0, -1) === 1);
       assert.deepStrictEqual(unempties(ring['array']), [-1, 2, 3]);
-      assert(ring.replace(-1, -3) === 3);
+      assert(ring.set(-1, -3) === 3);
       assert.deepStrictEqual(unempties(ring['array']), [-1, 2, -3]);
-      assert(ring.replace(-3, 1) === -1);
+      assert(ring.set(-3, 1) === -1);
       assert.deepStrictEqual(unempties(ring['array']), [1, 2, -3]);
-      assert(ring.replace(1, -1, (o, n) => o / n) === 2);
+      assert(ring.set(1, -1, (o, n) => o / n) === 2);
       assert.deepStrictEqual(unempties(ring['array']), [1, -2, -3]);
-      assert.throws(() => ring.replace(3, 0));
-      assert.throws(() => ring.replace(-4, 0));
+      assert.throws(() => ring.set(3, 0));
+      assert.throws(() => ring.set(-4, 0));
     });
 
   });
