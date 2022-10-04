@@ -99,6 +99,76 @@ export class Heap<T, O = T> {
   }
 }
 
+function sort<T, O>(
+  cmp: (a: O, b: O) => number,
+  array: Node<T, O>[],
+  index: number,
+  length: number,
+  stable: boolean,
+): boolean {
+  return upHeapify(cmp, array, index + 1)
+    || downHeapify(cmp, array, index + 1, length, stable);
+}
+
+function upHeapify<T, O>(
+  cmp: (a: O, b: O) => number,
+  array: Node<T, O>[],
+  index: number,
+): boolean {
+  const order = array[index - 1][0];
+  let changed = false;
+  while (index > 1) {
+    const parent = index / 2 | 0;
+    if (cmp(array[parent - 1][0], order) <= 0) break;
+    swap(array, index - 1, parent - 1);
+    index = parent;
+    changed ||= true;
+  }
+  return changed;
+}
+
+function downHeapify<T, O>(
+  cmp: (a: O, b: O) => number,
+  array: Node<T, O>[],
+  index: number,
+  length: number,
+  stable: boolean,
+): boolean {
+  let changed = false;
+  while (index < length) {
+    const left = index * 2;
+    const right = index * 2 + 1;
+    let min = index;
+    if (left <= length &&
+        (stable
+          ? cmp(array[left - 1][0], array[min - 1][0]) <= 0
+          : cmp(array[left - 1][0], array[min - 1][0]) < 0)) {
+      min = left;
+    }
+    if (right <= length &&
+        (stable
+          ? cmp(array[right - 1][0], array[min - 1][0]) <= 0
+          : cmp(array[right - 1][0], array[min - 1][0]) < 0)) {
+      min = right;
+    }
+    if (min === index) break;
+    swap(array, index - 1, min - 1);
+    index = min;
+    changed ||= true;
+  }
+  return changed;
+}
+
+function swap<T, O>(array: Node<T, O>[], index1: number, index2: number): void {
+  if (index1 === index2) return;
+  const node1 = array[index1];
+  const node2 = array[index2];
+  node1[2] = index2;
+  node2[2] = index1;
+  array[index1] = node2;
+  array[index2] = node1;
+}
+
 type MultiNode<T> = List.Node<T>;
 
 // 1e6要素で落ちるため実用不可
@@ -189,74 +259,4 @@ export class MultiHeap<T, O = T> {
     this.dict.clear();
     this.$length = 0;
   }
-}
-
-function sort<T, O>(
-  cmp: (a: O, b: O) => number,
-  array: Node<T, O>[],
-  index: number,
-  length: number,
-  stable: boolean,
-): boolean {
-  return upHeapify(cmp, array, index + 1)
-    || downHeapify(cmp, array, index + 1, length, stable);
-}
-
-function upHeapify<T, O>(
-  cmp: (a: O, b: O) => number,
-  array: Node<T, O>[],
-  index: number,
-): boolean {
-  const order = array[index - 1][0];
-  let changed = false;
-  while (index > 1) {
-    const parent = index / 2 | 0;
-    if (cmp(array[parent - 1][0], order) <= 0) break;
-    swap(array, index - 1, parent - 1);
-    index = parent;
-    changed ||= true;
-  }
-  return changed;
-}
-
-function downHeapify<T, O>(
-  cmp: (a: O, b: O) => number,
-  array: Node<T, O>[],
-  index: number,
-  length: number,
-  stable: boolean,
-): boolean {
-  let changed = false;
-  while (index < length) {
-    const left = index * 2;
-    const right = index * 2 + 1;
-    let min = index;
-    if (left <= length &&
-        (stable
-          ? cmp(array[left - 1][0], array[min - 1][0]) <= 0
-          : cmp(array[left - 1][0], array[min - 1][0]) < 0)) {
-      min = left;
-    }
-    if (right <= length &&
-        (stable
-          ? cmp(array[right - 1][0], array[min - 1][0]) <= 0
-          : cmp(array[right - 1][0], array[min - 1][0]) < 0)) {
-      min = right;
-    }
-    if (min === index) break;
-    swap(array, index - 1, min - 1);
-    index = min;
-    changed ||= true;
-  }
-  return changed;
-}
-
-function swap<T, O>(array: Node<T, O>[], index1: number, index2: number): void {
-  if (index1 === index2) return;
-  const node1 = array[index1];
-  const node2 = array[index2];
-  node1[2] = index2;
-  node2[2] = index1;
-  array[index1] = node2;
-  array[index2] = node1;
 }
