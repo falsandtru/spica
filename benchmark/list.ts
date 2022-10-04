@@ -71,15 +71,6 @@ describe('Benchmark:', function () {
     }
 
     for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
-      it(`IxList  put ${length.toLocaleString('en')}`, function (done) {
-        const list = new IxList(length, new Map());
-        for (let i = 0; i < length; ++i) list.push(0);
-        let i = 0;
-        benchmark(`IxList  put ${length.toLocaleString('en')}`, () => list.put(i = ++i % length), done);
-      });
-    }
-
-    for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`Yallist move ${length.toLocaleString('en')}`, function (done) {
         const list = new Yallist();
         for (let i = 0; i < length; ++i) list.push(0);

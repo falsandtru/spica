@@ -1,16 +1,9 @@
 import { Infinity, Array } from '../global';
-import { Dict } from '../dict';
 import { Index as Ix } from '../index';
-import { equal } from '../compare';
 
 // Circular Indexed List
 
 const undefined = void 0;
-
-interface Index<K> extends Dict<K, number> {
-  delete(key: K, value?: number): boolean;
-  clear(): void;
-}
 
 interface InternalNode<K, V> {
   index: number;
@@ -30,18 +23,10 @@ export namespace List {
   }
 }
 export class List<K, V = undefined> {
-  constructor(capacity?: number, index?: Index<K>);
-  constructor(index: Index<K>);
-  constructor(capacity: number | Index<K> = Infinity, index?: Index<K>) {
-    if (typeof capacity === 'object') {
-      index = capacity;
-      capacity = Infinity;
-    }
-    this.capacity = capacity;
-    this.index = index!;
+  constructor(
+    public readonly capacity: number = Infinity,
+  ) {
   }
-  public readonly capacity: number;
-  private readonly index?: Index<K>;
   private nodes: InternalNode<K, V>[] = Array(16);
   private readonly ix = new Ix();
   public HEAD = 0;
@@ -84,7 +69,6 @@ export class List<K, V = undefined> {
   public clear(): void {
     this.nodes = Array(16);
     this.ix.clear();
-    this.index?.clear();
     this.HEAD = 0;
     this.CURSOR = 0;
     this.$length = 0;
@@ -99,7 +83,6 @@ export class List<K, V = undefined> {
       assert(this.length === 0);
       const index = this.HEAD = this.CURSOR = this.ix.pop();
       ++this.$length;
-      this.index?.set(key, index);
       nodes[index] = {
         index,
         key,
@@ -117,7 +100,6 @@ export class List<K, V = undefined> {
       const index = this.HEAD = this.CURSOR = this.ix.pop();
       //assert(!nodes[index]);
       ++this.$length;
-      this.index?.set(key, index);
       const node = nodes[index];
       if (node) {
         node.index = index;
@@ -148,10 +130,6 @@ export class List<K, V = undefined> {
       const node = nodes[head.prev]!;
       const index = this.HEAD = this.CURSOR = node.index;
       //assert(nodes[index]);
-      if (this.index && !equal(node.key, key)) {
-        this.index.delete(node.key, index);
-        this.index.set(key, index);
-      }
       node.key = key;
       node.value = value;
       //assert(this.length !== 1 || index === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
@@ -161,30 +139,13 @@ export class List<K, V = undefined> {
       return index;
     }
   }
-  public put(key: K, value: V, index?: number): number;
-  public put(this: List<K, undefined>, key: K, value?: V, index?: number): number;
-  public put(key: K, value: V, index?: number): number {
-    const node = this.search(key, index);
-    if (!node) return this.add(key, value);
-    assert(this.CURSOR === node.index);
-    node.value = value;
-    return node.index;
-  }
-  public search(key: K, index = this.CURSOR): List.Node<K, V> | undefined {
-    let node = this.node(index);
-    if (node && equal(node.key, key)) return this.CURSOR = index, node;
-    if (!this.index) throw new Error(`Spica: IxList: Need the index but not given.`);
-    node = this.node(index = this.index.get(key) ?? this.nodes.length);
-    assert(!node || equal(node.key, key));
-    if (node) return this.CURSOR = index, node;
-  }
   public get(index: number): List.Node<K, V> | undefined {
     return this.node(index);
   }
   public has(index: number): boolean {
     return this.node(index) !== undefined;
   }
-  public del(index: number): List.Node<K, V> | undefined {
+  public delete(index: number): List.Node<K, V> | undefined {
     const node: InternalNode<K, V> | undefined = this.node(index);
     if (!node) return;
     assert(this.length > 0);
@@ -194,7 +155,6 @@ export class List<K, V = undefined> {
     --this.$length;
     const { key, value, next, prev } = node;
     this.ix.push(index);
-    this.index?.delete(key, index);
     const nodes = this.nodes;
     nodes[prev]!.next = next;
     nodes[next]!.prev = prev;
@@ -211,9 +171,6 @@ export class List<K, V = undefined> {
     //assert(this.length === 0 ? !this.nodes[this.CURSOR] : this.nodes[this.CURSOR]);
     //assert(this.length > 10 || [...this].length === this.length);
     return { index, key, value, next, prev };
-  }
-  public delete(key: K, index?: number): List.Node<K, V> | undefined {
-    return this.del(this.search(key, index)?.index ?? this.nodes.length);
   }
   public insert(key: K, value: V, before: number): number {
     const head = this.HEAD;
@@ -232,10 +189,6 @@ export class List<K, V = undefined> {
   public unshiftRotationally(key: K, value: V): number {
     if (this.$length === 0) return this.unshift(key, value);
     const node: InternalNode<K, V> = this.last!;
-    if (this.index && !equal(node.key, key)) {
-      this.index.delete(node.key, node.index);
-      this.index.set(key, node.index);
-    }
     this.HEAD = node.index;
     this.CURSOR = node.index;
     node.key = key;
@@ -252,10 +205,6 @@ export class List<K, V = undefined> {
   public pushRotationally(key: K, value: V): number {
     if (this.$length === 0) return this.push(key, value);
     const node: InternalNode<K, V> = this.head!;
-    if (this.index && !equal(node.key, key)) {
-      this.index.delete(node.key, node.index);
-      this.index.set(key, node.index);
-    }
     this.HEAD = node.next;
     this.CURSOR = node.index;
     node.key = key;
@@ -264,21 +213,17 @@ export class List<K, V = undefined> {
   }
   public shift(): List.Node<K, V> | undefined {
     const node = this.head;
-    return node && this.del(node.index);
+    return node && this.delete(node.index);
   }
   public pop(): List.Node<K, V> | undefined {
     const node = this.last;
-    return node && this.del(node.index);
+    return node && this.delete(node.index);
   }
   public replace(index: number, key: K, value: V): List.Node<K, V> | undefined;
   public replace(this: List<K, undefined>, index: number, key: K, value?: V): List.Node<K, V> | undefined;
   public replace(index: number, key: K, value: V): List.Node<K, V> | undefined {
     const node: InternalNode<K, V> | undefined = this.node(index);
     if (!node) return;
-    if (this.index && !equal(node.key, key)) {
-      this.index.delete(node.key, index);
-      this.index.set(key, index);
-    }
     const clone = {
       index: node.index,
       key: node.key,
