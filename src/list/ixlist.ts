@@ -13,7 +13,7 @@ interface Index<K> extends Dict<K, number> {
 }
 
 interface InternalNode<K, V> {
-  readonly index: number;
+  index: number;
   key: K;
   value: V;
   next: number;
@@ -51,7 +51,7 @@ export class List<K, V = undefined> {
     return this.$length;
   }
   public get head(): List.Node<K, V> | undefined {
-    return this.nodes[this.HEAD];
+    return this.node(this.HEAD);
   }
   public get tail(): List.Node<K, V> | undefined {
     const head = this.head;
@@ -70,7 +70,10 @@ export class List<K, V = undefined> {
     return node && this.nodes[node.prev];
   }
   public node(index: number): List.Node<K, V> | undefined {
-    return this.nodes[index];
+    const node = this.nodes[index];
+    return node?.index === undefined
+      ? undefined
+      : node;
   }
   public rotateToNext(): number {
     return this.HEAD = this.tail?.index ?? this.HEAD;
@@ -90,12 +93,11 @@ export class List<K, V = undefined> {
   public add(this: List<K, undefined>, key: K, value?: V): number;
   public add(key: K, value: V): number {
     const nodes = this.nodes;
-    const head = nodes[this.HEAD];
+    const head: InternalNode<K, V> | undefined = this.head;
     //assert(this.length === 0 ? !head : head);
     if (!head) {
       assert(this.length === 0);
       const index = this.HEAD = this.CURSOR = this.ix.pop();
-      assert(!nodes[index]);
       ++this.$length;
       this.index?.set(key, index);
       nodes[index] = {
@@ -116,13 +118,23 @@ export class List<K, V = undefined> {
       //assert(!nodes[index]);
       ++this.$length;
       this.index?.set(key, index);
-      nodes[index] = {
-        index,
-        key,
-        value,
-        next: head.index,
-        prev: head.prev,
-      };
+      const node = nodes[index];
+      if (node) {
+        node.index = index;
+        node.key = key;
+        node.value = value;
+        node.next = head.index;
+        node.prev = head.prev;
+      }
+      else {
+        nodes[index] = {
+          index,
+          key,
+          value,
+          next: head.index,
+          prev: head.prev,
+        };
+      }
       head.prev = nodes[head.prev]!.next = index;
       //assert(this.length !== 1 || index === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
       //assert(this.length !== 2 || index !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
@@ -173,29 +185,32 @@ export class List<K, V = undefined> {
     return this.node(index) !== undefined;
   }
   public del(index: number): List.Node<K, V> | undefined {
-    const node = this.node(index);
+    const node: InternalNode<K, V> | undefined = this.node(index);
     if (!node) return;
     assert(this.length > 0);
     //assert(this.length !== 1 || node === node.prev && node.prev === node.next);
     //assert(this.length !== 2 || node !== node.prev && node.prev === node.next);
     //assert(this.length < 3 || node !== node.prev && node.prev !== node.next);
     --this.$length;
-    this.ix.push(node.index);
-    this.index?.delete(node.key, node.index);
+    const { key, value, next, prev } = node;
+    this.ix.push(index);
+    this.index?.delete(key, index);
     const nodes = this.nodes;
-    nodes[node.prev]!.next = node.next;
-    nodes[node.next]!.prev = node.prev;
-    if (this.HEAD === node.index) {
-      this.HEAD = node.next;
+    nodes[prev]!.next = next;
+    nodes[next]!.prev = prev;
+    if (this.HEAD === index) {
+      this.HEAD = next;
     }
-    if (this.CURSOR === node.index) {
-      this.CURSOR = node.next;
+    if (this.CURSOR === index) {
+      this.CURSOR = next;
     }
-    nodes[node.index] = undefined as any;
+    node.index = undefined as any;
+    node.key = undefined as any;
+    node.value = undefined as any;
     //assert(this.length === 0 ? !this.nodes[this.HEAD] : this.nodes[this.HEAD]);
     //assert(this.length === 0 ? !this.nodes[this.CURSOR] : this.nodes[this.CURSOR]);
     //assert(this.length > 10 || [...this].length === this.length);
-    return node;
+    return { index, key, value, next, prev };
   }
   public delete(key: K, index?: number): List.Node<K, V> | undefined {
     return this.del(this.search(key, index)?.index ?? this.nodes.length);
@@ -334,10 +349,11 @@ export class List<K, V = undefined> {
   }
   public *[Symbol.iterator](): Iterator<[K, V, number], undefined, undefined> {
     const nodes = this.nodes;
-    for (let node = nodes[this.HEAD]; node;) {
+    const head = this.head;
+    for (let node = head; node;) {
       yield [node.key, node.value, node.index];
       node = nodes[node.next];
-      if (node?.index === this.HEAD) return;
+      if (node === head) return;
     }
   }
 }

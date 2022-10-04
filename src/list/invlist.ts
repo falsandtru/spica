@@ -91,7 +91,8 @@ export class List<T> {
     return acc;
   }
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
-    for (let head = this.head, node = head; node;) {
+    const head = this.head;
+    for (let node = head; node;) {
       yield node.value;
       node = node.next;
       if (node === head) return;
