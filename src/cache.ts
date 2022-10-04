@@ -394,6 +394,28 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     }
     return;
   }
+  private access(node: List.Node<Index<K, V>>): boolean {
+    return this.accessLFU(node)
+        || this.accessLRU(node);
+  }
+  private accessLRU(node: List.Node<Index<K, V>>): boolean {
+    assert(node.list === this.indexes.LRU);
+    const index = node.value;
+    ++this.stats[index.region][0];
+    this.overlap -= +(index.region === 'LFU');
+    assert(this.overlap >= 0);
+    index.region = 'LFU';
+    assert(this.indexes.LFU.length < this.capacity);
+    this.indexes.LFU.unshiftNode(node);
+    return true;
+  }
+  private accessLFU(node: List.Node<Index<K, V>>): boolean {
+    if (node.list !== this.indexes.LFU) return false;
+    const index = node.value;
+    ++this.stats[index.region][0];
+    node.moveToHead();
+    return true;
+  }
   private misses = 0;
   private threshold: number;
   private sweep = 0;
@@ -429,28 +451,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         ++this.ratio;
       }
     }
-  }
-  private access(node: List.Node<Index<K, V>>): boolean {
-    return this.accessLFU(node)
-        || this.accessLRU(node);
-  }
-  private accessLRU(node: List.Node<Index<K, V>>): boolean {
-    assert(node.list === this.indexes.LRU);
-    const index = node.value;
-    ++this.stats[index.region][0];
-    this.overlap -= +(index.region === 'LFU');
-    assert(this.overlap >= 0);
-    index.region = 'LFU';
-    assert(this.indexes.LFU.length < this.capacity);
-    this.indexes.LFU.unshiftNode(node);
-    return true;
-  }
-  private accessLFU(node: List.Node<Index<K, V>>): boolean {
-    if (node.list !== this.indexes.LFU) return false;
-    const index = node.value;
-    ++this.stats[index.region][0];
-    node.moveToHead();
-    return true;
   }
 }
 
