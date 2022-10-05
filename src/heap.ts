@@ -226,7 +226,8 @@ class List<T, O> {
   }
   public push(value: T, order: O): number {
     this.isFull() && this.extend();
-    const pos = this.indexes[this.$length] = this.$length++;
+    const pos = this.$length++;
+    this.indexes[pos] = pos;
     this.positions[pos] = pos;
     this.values[pos] = value;
     this.orders[pos] = order;
