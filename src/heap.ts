@@ -1,5 +1,5 @@
 import { Array, Uint32Array, Map } from './global';
-import { max, min } from './alias';
+import { min } from './alias';
 import { Index } from './index';
 import { List as InvList } from './invlist';
 import { memoize } from './memoize';
@@ -212,17 +212,17 @@ class List<T, O> {
   private isFull(): boolean {
     return this.$length === this.capacity;
   }
-  private resize(capacity: number): void {
-    if (capacity >= 2 ** 32) throw new Error(`Too large capacity`);
-    if (capacity > this.indexes.length) {
-      const indexes = new Uint32Array(max(capacity, min(this.capacity * 2, 2 ** 32 - 1)));
-      indexes.set(this.indexes);
-      this.indexes = indexes;
-      if (this.positions) {
-        const positions = new Uint32Array(max(capacity, min(this.capacity * 2, 2 ** 32 - 1)));
-        positions.set(this.positions);
-        this.positions = positions;
-      }
+  private extend(): void {
+    if (this.capacity === 2 ** 32) throw new Error(`Too large capacity`);
+    const capacity = min(this.capacity * 2, 2 ** 32);
+    assert(capacity > this.indexes.length);
+    const indexes = new Uint32Array(capacity);
+    indexes.set(this.indexes);
+    this.indexes = indexes;
+    if (this.positions) {
+      const positions = new Uint32Array(capacity);
+      positions.set(this.positions);
+      this.positions = positions;
     }
     this.capacity = capacity;
   }
@@ -241,7 +241,7 @@ class List<T, O> {
     this.orders[index] = order;
   }
   public push(value: T, order: O): number {
-    this.isFull() && this.resize(this.length * 2 % 2 ** 32);
+    this.isFull() && this.extend();
     const index = this.indexes[this.$length++] = this.ix.pop();
     if (this.positions) {
       this.positions[index] = this.$length - 1;

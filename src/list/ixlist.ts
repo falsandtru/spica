@@ -58,12 +58,13 @@ export class List<T> {
     return index;
   }
   public resize(capacity: number): void {
-    if (capacity >= 2 ** 32) throw new Error(`Too large capacity`);
+    if (capacity > 2 ** 32) throw new Error(`Too large capacity`);
     if (capacity > this.nexts.length) {
-      const nexts = new Uint32Array(max(capacity, min(this.capacity * 2, 2 ** 32 - 1)));
+      const size = max(capacity, min(this.capacity * 2, 2 ** 32));
+      const nexts = new Uint32Array(size);
       nexts.set(this.nexts);
       this.nexts = nexts;
-      const prevs = new Uint32Array(max(capacity, min(this.capacity * 2, 2 ** 32 - 1)));
+      const prevs = new Uint32Array(size);
       prevs.set(this.prevs);
       this.prevs = prevs;
     }
@@ -108,7 +109,7 @@ export class List<T> {
       return index;
     }
     else {
-      this.resize(this.capacity * 2 % 2 ** 32);
+      this.resize(max(min(this.capacity * 2, 2 ** 32), this.capacity + 1));
       return this.add(value);
     }
   }
