@@ -18,17 +18,16 @@ export class List<T> {
   constructor(
     public capacity: number,
   ) {
-    if (capacity >= 2 ** 32 - 1) throw new Error(`Too large capacity`);
-    this.values = Array(this.capacity + 1);
-    this.nexts = new Uint32Array(this.capacity + 1);
-    this.prevs = new Uint32Array(this.capacity + 1);
-    this.ix.pop();
+    if (capacity >= 2 ** 32) throw new Error(`Too large capacity`);
+    this.values = Array(this.capacity);
+    this.nexts = new Uint32Array(this.capacity);
+    this.prevs = new Uint32Array(this.capacity);
   }
   private values: T[];
   private nexts: Uint32Array;
   private prevs: Uint32Array;
   private readonly ix = new Ix();
-  public HEAD = 1;
+  public HEAD = 0;
   private $length = 0;
   public get length() {
     return this.$length;
@@ -76,12 +75,12 @@ export class List<T> {
     return this.$length === this.capacity;
   }
   public resize(capacity: number): void {
-    if (capacity >= 2 ** 32 - 1) throw new Error(`Too large capacity`);
-    if (capacity + 1 > this.nexts.length) {
-      const nexts = new Uint32Array(max(capacity + 1, min(floor(this.capacity * 1.2), 2 ** 32)));
+    if (capacity >= 2 ** 32) throw new Error(`Too large capacity`);
+    if (capacity > this.nexts.length) {
+      const nexts = new Uint32Array(max(capacity, min(floor(this.capacity * 2), 2 ** 32)));
       nexts.set(this.nexts);
       this.nexts = nexts;
-      const prevs = new Uint32Array(max(capacity + 1, min(floor(this.capacity * 1.2), 2 ** 32)));
+      const prevs = new Uint32Array(max(capacity, min(floor(this.capacity * 2), 2 ** 32)));
       prevs.set(this.prevs);
       this.prevs = prevs;
     }
@@ -91,12 +90,11 @@ export class List<T> {
     }
   }
   public clear(): void {
-    this.values = Array(this.capacity + 1);
-    this.nexts = new Uint32Array(this.capacity + 1);
-    this.prevs = new Uint32Array(this.capacity + 1);
+    this.values = Array(this.capacity);
+    this.nexts = new Uint32Array(this.capacity);
+    this.prevs = new Uint32Array(this.capacity);
     this.ix.clear();
-    this.ix.pop();
-    this.HEAD = 1;
+    this.HEAD = 0;
     this.$length = 0;
   }
   public add(value: T): number {
@@ -131,7 +129,7 @@ export class List<T> {
     }
     else {
       assert(this.length === this.capacity);
-      assert(this.ix.length - 1 === this.capacity);
+      assert(this.ix.length === this.capacity);
       const index = this.HEAD = this.prevs[head];
       //assert(nodes[index]);
       this.values[index] = value;
@@ -141,9 +139,6 @@ export class List<T> {
       //assert(this.length > 10 || [...this].length === this.length);
       return index;
     }
-  }
-  public has(index: number): boolean {
-    return this.nexts[index] !== 0;
   }
   public set(index: number, value: T): void {
     this.values[index] = value;
@@ -243,7 +238,6 @@ export class List<T> {
   public swap(index1: number, index2: number): boolean {
     if (index1 === index2) return false;
     const index3 = this.nexts[index2];
-    if (index3 === 0) throw new Error(`Invalid index`);
     this.move(index2, index1);
     this.move(index1, index3);
     switch (this.HEAD) {
@@ -257,12 +251,10 @@ export class List<T> {
     return true;
   }
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
-    if (this.$length === 0) return;
-    const head = this.HEAD;
-    for (let index = head; index;) {
+    for (let index = this.HEAD, i = 0; i < this.$length; ++i) {
       yield this.values[index];
-      index = this.nexts[index] || head;
-      if (index === head) return;
+      index = this.nexts[index];
     }
+    return;
   }
 }
