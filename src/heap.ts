@@ -213,7 +213,7 @@ class List<T, O> {
   public clear(): void {
     this.ix.clear();
     this.indexes = new Uint32Array(this.capacity);
-    this.positions = new Uint32Array(this.capacity);
+    this.positions &&= new Uint32Array(this.capacity);
     this.orders = Array(this.capacity);
     this.values = Array(this.capacity);
     this.$length = 0;
