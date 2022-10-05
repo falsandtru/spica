@@ -173,10 +173,10 @@ function swap<T, O>(array: List<T, O>, index1: number, index2: number): void {
 
 class List<T, O> {
   private capacity = 4;
-  private indexes = new Uint32Array(this.capacity);
-  private positions = new Uint32Array(this.capacity);
   private orders: O[] = Array(this.capacity);
   private values: T[] = Array(this.capacity);
+  private indexes = new Uint32Array(this.capacity);
+  private positions = new Uint32Array(this.capacity);
   private $length = 0;
   public get length() {
     return this.$length;
@@ -203,6 +203,8 @@ class List<T, O> {
     if (this.capacity === 2 ** 32) throw new Error(`Too large capacity`);
     const capacity = min(this.capacity * 2, 2 ** 32);
     assert(capacity > this.indexes.length);
+    this.orders.length = capacity;
+    this.values.length = capacity;
     const indexes = new Uint32Array(capacity);
     indexes.set(this.indexes);
     this.indexes = indexes;
@@ -212,8 +214,6 @@ class List<T, O> {
     this.capacity = capacity;
   }
   public clear(): void {
-    this.indexes = new Uint32Array(this.capacity);
-    this.positions = new Uint32Array(this.capacity);
     this.orders = Array(this.capacity);
     this.values = Array(this.capacity);
     this.$length = 0;

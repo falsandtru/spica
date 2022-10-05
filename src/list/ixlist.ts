@@ -63,6 +63,7 @@ export class List<T> {
     if (capacity > 2 ** 32) throw new Error(`Too large capacity`);
     if (capacity > this.nexts.length) {
       const size = max(capacity, min(this.capacity * 2, 2 ** 32));
+      this.values.length = size;
       const nexts = new Uint32Array(size);
       nexts.set(this.nexts);
       this.nexts = nexts;
