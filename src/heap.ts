@@ -145,17 +145,17 @@ function downHeapify<T, O>(
     const left = index * 2;
     const right = index * 2 + 1;
     let min = index;
-    if (left <= length &&
-        (stable
-          ? cmp(array.order(array.index(left - 1)), array.order(array.index(min - 1))) <= 0
-          : cmp(array.order(array.index(left - 1)), array.order(array.index(min - 1))) < 0)) {
-      min = left;
+    if (left <= length) {
+      const result = cmp(array.order(array.index(left - 1)), array.order(array.index(min - 1)));
+      if (stable ? result <= 0 : result < 0) {
+        min = left;
+      }
     }
-    if (right <= length &&
-        (stable
-          ? cmp(array.order(array.index(right - 1)), array.order(array.index(min - 1))) <= 0
-          : cmp(array.order(array.index(right - 1)), array.order(array.index(min - 1))) < 0)) {
-      min = right;
+    if (right <= length) {
+      const result = cmp(array.order(array.index(right - 1)), array.order(array.index(min - 1)));
+      if (stable ? result <= 0 : result < 0) {
+        min = right;
+      }
     }
     if (min === index) break;
     swap(array, index - 1, min - 1);
