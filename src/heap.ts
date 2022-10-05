@@ -1,19 +1,13 @@
-import { Array, Map } from './global';
-import { List } from './invlist';
+import { Array, Uint32Array, Map } from './global';
+import { max, min, floor } from './alias';
+import { Index } from './index';
+import { List as InvList } from './invlist';
 import { memoize } from './memoize';
 
 const undefined = void 0;
 
 // Max heap
 
-type Node<T, O> = [order: O, value: T, index: number];
-
-let size = 16;
-assert([size = 0]);
-
-export namespace Heap {
-  export type Node<T, O = T> = readonly unknown[] | { _: [T, O]; };
-}
 export class Heap<T, O = T> {
   public static readonly max = <O>(a: O, b: O): number => a > b ? -1 : a < b ? 1 : 0;
   public static readonly min = <O>(a: O, b: O): number => a > b ? 1 : a < b ? -1 : 0;
@@ -22,28 +16,27 @@ export class Heap<T, O = T> {
     private readonly stable = false,
   ) {
   }
-  private array: Node<T, O>[] = Array(size);
-  private $length = 0;
+  private readonly array = new List<T, O>(16);
   public get length(): number {
-    return this.$length;
+    return this.array.length;
   }
   public isEmpty(): boolean {
-    return this.array[0] !== undefined;
+    return this.array.length === 0;
   }
   public peek(): T | undefined {
-    return this.array[0]?.[1];
+    return this.array.value(this.array.index(0));
   }
-  public insert(this: Heap<T, T>, value: T): Heap.Node<T, O>;
-  public insert(value: T, order: O): Heap.Node<T, O>;
-  public insert(value: T, order?: O): Heap.Node<T, O> {
+  public insert(this: Heap<T, T>, value: T): number;
+  public insert(value: T, order: O): number;
+  public insert(value: T, order?: O): number {
     if (arguments.length < 2) {
       order = value as any;
     }
     assert([order = order!]);
-    const array = this.array;
-    const node = array[this.$length] = [order, value, this.$length++];
-    upHeapify(this.cmp, array, this.$length);
-    return node;
+    this.array.isFull() && this.array.resize(this.length * 2 % 2 ** 32);
+    const index = this.array.push(value, order);
+    upHeapify(this.cmp, this.array, this.length);
+    return index;
   }
   public replace(this: Heap<T, T>, value: T): T | undefined;
   public replace(value: T, order: O): T | undefined;
@@ -52,56 +45,52 @@ export class Heap<T, O = T> {
       order = value as any;
     }
     assert([order = order!]);
-    if (this.$length === 0) return void this.insert(value, order);
-    const array = this.array;
-    const replaced = array[0][1];
-    array[0] = [order, value, 0];
-    downHeapify(this.cmp, array, 1, this.$length, this.stable);
+    if (this.length === 0) return void this.insert(value, order);
+    const replaced = this.peek();
+    const index = this.array.index(0);
+    this.array.setValue(index, value);
+    this.array.setOrder(index, order);
+    downHeapify(this.cmp, this.array, 1, this.length, this.stable);
     return replaced;
   }
   public extract(): T | undefined {
-    if (this.$length === 0) return;
-    const node = this.array[0];
-    this.delete(node);
-    return node[1];
+    if (this.length === 0) return;
+    const value = this.peek();
+    this.del(0);
+    return value;
   }
-  public delete(node: Heap.Node<T, O>): T;
-  public delete(node: Node<T, O>): T {
-    const array = this.array;
-    const index = node[2];
-    if (array[index] !== node) throw new Error('Invalid node');
-    swap(array, index, --this.$length);
-    array[this.$length] = undefined as any;
-    index < this.$length && sort(this.cmp, array, index, this.$length, this.stable);
-    return node[1];
+  private del(index: number): void {
+    swap(this.array, index, this.length - 1);
+    this.array.pop();
+    index < this.length && sort(this.cmp, this.array, index, this.length, this.stable);
   }
-  public update(this: Heap<T, T>, node: Heap.Node<T, O>): void;
-  public update(node: Heap.Node<T, O>, order: O, value?: T): void;
-  public update(node: Node<T, O>, order?: O, value?: T): void {
-    if (arguments.length < 2) {
-      order = node[0];
-    }
+  public delete(index: number): T {
+    const value = this.array.value(index);
+    this.del(this.array.position(index));
+    return value;
+  }
+  public update(index: number, order: O, value?: T): void;
+  public update(index: number, order: O, value?: T): void {
+    const ord = this.array.order(index);
     assert([order = order!]);
-    const array = this.array;
-    if (array[node[2]] !== node) throw new Error('Invalid node');
-    if (arguments.length > 2) {
-      node[1] = value!;
+    if (arguments.length < 3) {
+      this.array.setOrder(index, order);
     }
-    if (this.cmp(node[0], node[0] = order) === 0) return;
-    sort(this.cmp, array, node[2], this.$length, this.stable);
-  }
-  public find(order: O): Heap.Node<T, O> | undefined {
-    return this.array.find(node => node && node[0] === order);
+    else {
+      this.array.setOrder(index, order);
+      this.array.setValue(index, value!);
+    }
+    if (this.cmp(ord, order) === 0) return;
+    sort(this.cmp, this.array, index, this.length, this.stable);
   }
   public clear(): void {
-    this.array = Array(size);
-    this.$length = 0;
+    this.array.clear();
   }
 }
 
 function sort<T, O>(
   cmp: (a: O, b: O) => number,
-  array: Node<T, O>[],
+  array: List<T, O>,
   index: number,
   length: number,
   stable: boolean,
@@ -112,14 +101,14 @@ function sort<T, O>(
 
 function upHeapify<T, O>(
   cmp: (a: O, b: O) => number,
-  array: Node<T, O>[],
+  array: List<T, O>,
   index: number,
 ): boolean {
-  const order = array[index - 1][0];
+  const order = array.order(array.index(index - 1));
   let changed = false;
   while (index > 1) {
     const parent = index / 2 | 0;
-    if (cmp(array[parent - 1][0], order) <= 0) break;
+    if (cmp(array.order(array.index(parent - 1)), order) <= 0) break;
     swap(array, index - 1, parent - 1);
     index = parent;
     changed ||= true;
@@ -129,7 +118,7 @@ function upHeapify<T, O>(
 
 function downHeapify<T, O>(
   cmp: (a: O, b: O) => number,
-  array: Node<T, O>[],
+  array: List<T, O>,
   index: number,
   length: number,
   stable: boolean,
@@ -141,14 +130,14 @@ function downHeapify<T, O>(
     let min = index;
     if (left <= length &&
         (stable
-          ? cmp(array[left - 1][0], array[min - 1][0]) <= 0
-          : cmp(array[left - 1][0], array[min - 1][0]) < 0)) {
+          ? cmp(array.order(array.index(left - 1)), array.order(array.index(min - 1))) <= 0
+          : cmp(array.order(array.index(left - 1)), array.order(array.index(min - 1))) < 0)) {
       min = left;
     }
     if (right <= length &&
         (stable
-          ? cmp(array[right - 1][0], array[min - 1][0]) <= 0
-          : cmp(array[right - 1][0], array[min - 1][0]) < 0)) {
+          ? cmp(array.order(array.index(right - 1)), array.order(array.index(min - 1))) <= 0
+          : cmp(array.order(array.index(right - 1)), array.order(array.index(min - 1))) < 0)) {
       min = right;
     }
     if (min === index) break;
@@ -159,21 +148,111 @@ function downHeapify<T, O>(
   return changed;
 }
 
-function swap<T, O>(array: Node<T, O>[], index1: number, index2: number): void {
-  if (index1 === index2) return;
-  const node1 = array[index1];
-  const node2 = array[index2];
-  node1[2] = index2;
-  node2[2] = index1;
-  array[index1] = node2;
-  array[index2] = node1;
+function swap<T, O>(array: List<T, O>, index1: number, index2: number): void {
+  array.swap(index1, index2);
 }
 
-type MultiNode<T> = List.Node<T>;
+class List<T, O> {
+  constructor(
+    public capacity: number,
+  ) {
+    if (capacity >= 2 ** 32) throw new Error(`Too large capacity`);
+    this.indexes = new Uint32Array(this.capacity);
+    this.positions = new Uint32Array(this.capacity);
+    this.orders = Array(this.capacity);
+    this.values = Array(this.capacity);
+  }
+  private ix = new Index();
+  private indexes: Uint32Array;
+  private positions: Uint32Array;
+  private orders: O[];
+  private values: T[];
+  private $length = 0;
+  public get length() {
+    return this.$length;
+  }
+  public index(pos: number): number {
+    return this.indexes[pos];
+  }
+  public position(index: number): number {
+    return this.positions[index];
+  }
+  public order(index: number): O {
+    return this.orders[index];
+  }
+  public value(index: number): T {
+    return this.values[index];
+  }
+  public isFull() {
+    return this.$length === this.capacity;
+  }
+  public resize(capacity: number): void {
+    if (capacity >= 2 ** 32) throw new Error(`Too large capacity`);
+    if (capacity > this.indexes.length) {
+      const indexes = new Uint32Array(max(capacity, min(floor(this.capacity * 2), 2 ** 32)));
+      indexes.set(this.indexes);
+      this.indexes = indexes;
+      const positions = new Uint32Array(max(capacity, min(floor(this.capacity * 2), 2 ** 32)));
+      positions.set(this.positions);
+      this.positions = positions;
+    }
+    this.capacity = capacity;
+  }
+  public clear(): void {
+    this.ix.clear();
+    this.indexes = new Uint32Array(this.capacity);
+    this.positions = new Uint32Array(this.capacity);
+    this.orders = Array(this.capacity);
+    this.values = Array(this.capacity);
+    this.$length = 0;
+  }
+  public setValue(index: number, value: T): void {
+    this.values[index] = value;
+  }
+  public setOrder(index: number, order: O): void {
+    this.orders[index] = order;
+  }
+  public push(value: T, order: O): number {
+    const index = this.indexes[this.$length] = this.ix.pop();
+    this.positions[index] = this.$length++;
+    this.values[index] = value;
+    this.orders[index] = order;
+    return index;
+  }
+  public pop(): void {
+    if (this.$length === 0) return;
+    const index = this.indexes[--this.$length];
+    this.ix.push(index);
+    this.values[index] = undefined as any;
+    this.orders[index] = undefined as any;
+  }
+  public swap(pos1: number, pos2: number): boolean {
+    if (pos1 === pos2) return false;
+    const { indexes, positions } = this;
+    const idx1 = indexes[pos1];
+    const idx2 = indexes[pos2];
+    indexes[pos1] = idx2;
+    indexes[pos2] = idx1;
+    assert(positions[idx1] === pos1);
+    assert(positions[idx2] === pos2);
+    positions[idx1] = pos2;
+    positions[idx2] = pos1;
+    return true;
+  }
+  public *[Symbol.iterator](): Iterator<[O, T, number], undefined, undefined> {
+    if (this.$length === 0) return;
+    for (let i = 0; i < this.$length; ++i) {
+      const index = this.indexes[i];
+      yield [this.orders[index], this.values[index], i];
+    }
+  }
+}
+
+type MultiNode<T> = InvList.Node<T>;
 
 // 1e6要素で落ちるため実用不可
 export namespace MultiHeap {
-  export type Node<T, O = T> = List.Node<T> | { _: [T, O]; };
+  export type Node<T, O = T> = InvList.Node<T> | { _: [T, O]; };
 }
 export class MultiHeap<T, O = T> {
   private static readonly order = Symbol('order');
@@ -185,10 +264,10 @@ export class MultiHeap<T, O = T> {
     private readonly clean = true,
   ) {
   }
-  private readonly heap = new Heap<List<T>, O>(this.cmp);
-  private readonly dict = new Map<O, List<T>>();
-  private readonly list = memoize<O, List<T>>(order => {
-    const list = new List<T>();
+  private readonly heap = new Heap<InvList<T>, O>(this.cmp);
+  private readonly dict = new Map<O, InvList<T>>();
+  private readonly list = memoize<O, InvList<T>>(order => {
+    const list = new InvList<T>();
     list[MultiHeap.order] = order;
     list[MultiHeap.heap] = this.heap.insert(list, order);
     return list;
@@ -251,7 +330,7 @@ export class MultiHeap<T, O = T> {
     this.delete(node);
     return this.insert(node.value, order);
   }
-  public find(order: O): List<T> | undefined {
+  public find(order: O): InvList<T> | undefined {
     return this.dict.get(order);
   }
   public clear(): void {

@@ -95,7 +95,7 @@ interface Index<K, V> {
   value: V;
   size: number;
   expiry: number;
-  enode?: Heap.Node<List.Node<Index<K, V>>, number>;
+  eid: number;
   region: 'LRU' | 'LFU';
 }
 
@@ -191,9 +191,9 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     assert(node.list);
     this.overlap -= +(index.region === 'LFU' && node.list === this.indexes.LRU);
     assert(this.overlap >= 0);
-    if (index.enode) {
-      this.expiries.delete(index.enode);
-      index.enode = void 0;
+    if (index.eid !== -1) {
+      this.expiries.delete(index.eid);
+      index.eid = -1;
     }
     node.delete();
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size - 1);
@@ -287,14 +287,14 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       index.size = size;
       index.expiry = expiry;
       if (this.earlyExpiring && age) {
-        index.enode
-          ? this.expiries.update(index.enode, expiry)
-          : index.enode = this.expiries.insert(node, expiry);
+        index.eid !== -1
+          ? this.expiries.update(index.eid, expiry)
+          : index.eid = this.expiries.insert(node, expiry);
         assert(this.expiries.length <= this.length);
       }
-      else if (index.enode) {
-        this.expiries.delete(index.enode);
-        index.enode = void 0;
+      else if (index.eid !== -1) {
+        this.expiries.delete(index.eid);
+        index.eid = -1;
       }
       node.value.value = value;
       this.disposer?.(val, key);
@@ -312,10 +312,11 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       value,
       size,
       expiry,
+      eid: -1,
       region: 'LRU',
     }));
     if (this.earlyExpiring && age) {
-      LRU.head!.value.enode = this.expiries.insert(LRU.head!, expiry);
+      LRU.head!.value.eid = this.expiries.insert(LRU.head!, expiry);
       assert(this.expiries.length <= this.length);
     }
     return false;
