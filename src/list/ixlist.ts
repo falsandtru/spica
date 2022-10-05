@@ -74,8 +74,6 @@ export class List<T> {
   }
   public clear(): void {
     this.values = Array(this.capacity);
-    this.nexts = new Uint32Array(this.capacity);
-    this.prevs = new Uint32Array(this.capacity);
     this.ix.clear();
     this.HEAD = 0;
     this.$length = 0;
@@ -121,8 +119,6 @@ export class List<T> {
     this.ix.push(index);
     // @ts-expect-error
     this.values[index] = undefined;
-    this.nexts[index] = 0;
-    this.prevs[index] = 0;
     if (--this.$length !== 0) {
       this.nexts[prev] = next;
       this.prevs[next] = prev;
