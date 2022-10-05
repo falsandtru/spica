@@ -10,7 +10,6 @@ const undefined = void 0;
 export namespace Heap {
   export interface Options {
     stable?: boolean;
-    extension?: boolean;
   }
 }
 export class Heap<T, O = T> {
@@ -21,7 +20,7 @@ export class Heap<T, O = T> {
     options?: Heap.Options,
   ) {
     this.stable = options?.stable ?? false;
-    this.array = new List(options?.extension ?? false);
+    this.array = new List();
   }
   private readonly stable: boolean;
   private readonly array: List<T, O>;
@@ -173,21 +172,10 @@ function swap<T, O>(array: List<T, O>, index1: number, index2: number): void {
 }
 
 class List<T, O> {
-  constructor(
-    extension: boolean,
-  ) {
-    this.indexes = new Uint32Array(this.capacity);
-    if (extension) {
-      this.positions = new Uint32Array(this.capacity);
-    }
-    this.orders = Array(this.capacity);
-    this.values = Array(this.capacity);
-  }
-  private capacity = 4;
-  private indexes: Uint32Array;
-  private positions?: Uint32Array;
-  private orders: O[];
-  private values: T[];
+  private capacity = 2;
+  private indexes = new Uint32Array(this.capacity * 2);
+  private orders: O[] = Array(this.capacity);
+  private values: T[] = Array(this.capacity);
   private $length = 0;
   public get length() {
     return this.$length;
@@ -196,7 +184,7 @@ class List<T, O> {
     return this.indexes[pos];
   }
   public position(index: number): number {
-    return this.positions![index];
+    return this.indexes[index + this.capacity];
   }
   public ord(pos: number): O {
     return this.orders[this.indexes[pos]];
@@ -213,20 +201,17 @@ class List<T, O> {
   private extend(): void {
     if (this.capacity === 2 ** 32) throw new Error(`Too large capacity`);
     const capacity = min(this.capacity * 2, 2 ** 32);
-    assert(capacity > this.indexes.length);
-    const indexes = new Uint32Array(capacity);
-    indexes.set(this.indexes);
+    assert(capacity > this.indexes.length / 2);
+    const indexes = new Uint32Array(capacity * 2);
+    indexes.set(this.indexes, 0);
+    indexes.set(this.indexes.subarray(this.capacity), capacity);
     this.indexes = indexes;
-    if (this.positions) {
-      const positions = new Uint32Array(capacity);
-      positions.set(this.positions);
-      this.positions = positions;
-    }
+    this.orders.length = capacity;
+    this.values.length = capacity;
     this.capacity = capacity;
   }
   public clear(): void {
-    this.indexes = new Uint32Array(this.capacity);
-    this.positions &&= new Uint32Array(this.capacity);
+    this.indexes = new Uint32Array(this.capacity * 2);
     this.orders = Array(this.capacity);
     this.values = Array(this.capacity);
     this.$length = 0;
@@ -239,33 +224,29 @@ class List<T, O> {
   }
   public push(value: T, order: O): number {
     this.isFull() && this.extend();
-    const index = this.indexes[this.$length] = this.$length++;
-    if (this.positions) {
-      this.positions[index] = index;
-    }
-    this.values[index] = value;
-    this.orders[index] = order;
-    return index;
+    const pos = this.indexes[this.$length] = this.$length++;
+    this.indexes[pos + this.capacity] = pos;
+    this.values[pos] = value;
+    this.orders[pos] = order;
+    return pos;
   }
   public pop(): void {
     if (this.$length === 0) return;
-    const index = this.indexes[--this.$length];
-    this.values[index] = undefined as any;
-    this.orders[index] = undefined as any;
+    const pos = this.indexes[--this.$length];
+    this.values[pos] = undefined as any;
+    this.orders[pos] = undefined as any;
   }
   public swap(pos1: number, pos2: number): boolean {
     if (pos1 === pos2) return false;
-    const { indexes, positions } = this;
+    const { indexes } = this;
     const idx1 = indexes[pos1];
     const idx2 = indexes[pos2];
     indexes[pos1] = idx2;
     indexes[pos2] = idx1;
-    if (positions) {
-      assert(positions[idx1] === pos1);
-      assert(positions[idx2] === pos2);
-      positions[idx1] = pos2;
-      positions[idx2] = pos1;
-    }
+    assert(indexes[idx1 + this.capacity] === pos1);
+    assert(indexes[idx2 + this.capacity] === pos2);
+    indexes[idx1 + this.capacity] = pos2;
+    indexes[idx2 + this.capacity] = pos1;
     return true;
   }
   public *[Symbol.iterator](): Iterator<[O, T, number], undefined, undefined> {
@@ -283,7 +264,6 @@ type MultiNode<T> = InvList.Node<T>;
 export namespace MultiHeap {
   export type Node<T, O = T> = InvList.Node<T> | { _: [T, O]; };
   export interface Options {
-    extension?: boolean;
     clean?: boolean;
   }
 }
@@ -297,7 +277,7 @@ export class MultiHeap<T, O = T> {
     options?: MultiHeap.Options,
   ) {
     this.clean = options?.clean ?? true;
-    this.heap = new Heap(this.cmp, options);
+    this.heap = new Heap(this.cmp);
   }
   private readonly clean: boolean;
   private readonly heap: Heap<InvList<T>, O>;

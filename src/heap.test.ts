@@ -109,7 +109,7 @@ describe('Unit: lib/heap', () => {
     });
 
     it('delete', () => {
-      const heap = new Heap<number>(undefined, { extension: true });
+      const heap = new Heap<number>(undefined);
 
       assert(heap.extract() === undefined);
 
