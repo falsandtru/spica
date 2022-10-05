@@ -17,7 +17,7 @@ describe('Benchmark:', function () {
     });
 
     it('IxList new', function (done) {
-      benchmark('IxList new', () => new IxList(1), done);
+      benchmark('IxList new', () => new IxList(), done);
     });
 
     it('Stack  new', function (done) {

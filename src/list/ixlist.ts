@@ -16,9 +16,11 @@ export namespace List {
 }
 export class List<T> {
   constructor(
-    public capacity: number,
+    public capacity: number = 0,
+    private readonly auto: boolean = capacity === 0,
   ) {
     if (capacity >= 2 ** 32) throw new Error(`Too large capacity`);
+    this.capacity ||= 4;
     this.values = Array(this.capacity);
     this.nexts = new Uint32Array(this.capacity);
     this.prevs = new Uint32Array(this.capacity);
@@ -71,9 +73,6 @@ export class List<T> {
   public at(index: number): T {
     return this.values[index];
   }
-  public isFull() {
-    return this.$length === this.capacity;
-  }
   public resize(capacity: number): void {
     if (capacity >= 2 ** 32) throw new Error(`Too large capacity`);
     if (capacity > this.nexts.length) {
@@ -119,12 +118,16 @@ export class List<T> {
       this.prevs[index] = last;
       return index;
     }
-    else {
+    else if (!this.auto) {
       assert(this.length === this.capacity);
       assert(this.ix.length === this.capacity);
       const index = this.HEAD = this.prevs[head];
       this.values[index] = value;
       return index;
+    }
+    else {
+      this.resize(this.capacity * 2 % 2 ** 32);
+      return this.add(value);
     }
   }
   public set(index: number, value: T): void {
