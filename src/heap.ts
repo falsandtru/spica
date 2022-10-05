@@ -67,10 +67,10 @@ export class Heap<T, O = T> {
     this.del(0);
     return value;
   }
-  private del(index: number): void {
-    swap(this.array, index, this.length - 1);
+  private del(pos: number): void {
+    swap(this.array, pos, this.length - 1);
     this.array.pop();
-    sort(this.cmp, this.array, index, this.length, this.stable);
+    sort(this.cmp, this.array, pos + 1, this.length, this.stable);
   }
   public delete(index: number): T {
     const value = this.array.value(index);
@@ -89,7 +89,7 @@ export class Heap<T, O = T> {
       this.array.setValue(index, value!);
     }
     if (this.cmp(ord, order) === 0) return;
-    sort(this.cmp, this.array, index, this.length, this.stable);
+    sort(this.cmp, this.array, this.array.position(index) + 1, this.length, this.stable);
   }
   public clear(): void {
     this.array.clear();
@@ -103,16 +103,17 @@ function sort<T, O>(
   length: number,
   stable: boolean,
 ): boolean {
+  assert(index);
   if (length === 0) return false;
   switch (index) {
-    case 0:
+    case 1:
       return false
-        || downHeapify(cmp, array, index + 1, length, stable);
-    case length - 1:
-      return upHeapify(cmp, array, index + 1);
+        || downHeapify(cmp, array, index, length, stable);
+    case length:
+      return upHeapify(cmp, array, index);
     default:
-      return upHeapify(cmp, array, index + 1)
-        || downHeapify(cmp, array, index + 1, length, stable);
+      return upHeapify(cmp, array, index)
+        || downHeapify(cmp, array, index, length, stable);
   }
 }
 
@@ -121,6 +122,7 @@ function upHeapify<T, O>(
   array: List<T, O>,
   index: number,
 ): boolean {
+  assert(index);
   const order = array.ord(index - 1);
   let changed = false;
   while (index > 1) {
@@ -140,6 +142,7 @@ function downHeapify<T, O>(
   length: number,
   stable: boolean,
 ): boolean {
+  assert(index);
   let changed = false;
   while (index < length) {
     const left = index * 2;
