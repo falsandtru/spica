@@ -82,31 +82,31 @@ describe('Benchmark:', function () {
         benchmark(`IxList queue ${length.toLocaleString('en')}`, () => (data.shift(), data.push(0)), done);
       });
 
-      it(`Stack ${length.toLocaleString('en')}`, function (done) {
+      it(`Stack        ${length.toLocaleString('en')}`, function (done) {
         const data = new Stack();
         for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Stack ${length.toLocaleString('en')}`, () => (data.pop(), data.push(0)), done);
+        benchmark(`Stack        ${length.toLocaleString('en')}`, () => (data.pop(), data.push(0)), done);
       });
 
-      it(`Queue ${length.toLocaleString('en')}`, function (done) {
+      it(`Queue        ${length.toLocaleString('en')}`, function (done) {
         const data = new Queue();
         for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Queue ${length.toLocaleString('en')}`, () => (data.pop(), data.push(0)), done);
+        benchmark(`Queue        ${length.toLocaleString('en')}`, () => (data.pop(), data.push(0)), done);
       });
 
-      it(`Heap  ${length.toLocaleString('en')}`, function (done) {
+      it(`Heap         ${length.toLocaleString('en')}`, function (done) {
         const heap = new Heap<number>(Heap.min);
         for (let i = 0; i < length; ++i) heap.insert(1, i);
         let i = 0;
-        benchmark(`Heap  ${length.toLocaleString('en')}`, () =>
+        benchmark(`Heap         ${length.toLocaleString('en')}`, () =>
           heap.extract() && heap.insert(1, i = i++ % length), done);
       });
 
-      it(`MQueue ${length.toLocaleString('en')}`, function (done) {
+      it(`MQueue       ${length.toLocaleString('en')}`, function (done) {
         const data = new MultiQueue();
         for (let i = 0; i < length; ++i) data.push(i % length, i % length);
         let i = 0;
-        benchmark(`MQueue ${length.toLocaleString('en')}`, () => {
+        benchmark(`MQueue       ${length.toLocaleString('en')}`, () => {
           data.pop(i);
           data.push(i, i);
           i = ++i % length;
@@ -121,10 +121,10 @@ describe('Benchmark:', function () {
           heap.extract() && heap.insert(1, i = i++ % length), done);
       });
 
-      it(`PQueue ${length.toLocaleString('en')}`, function (done) {
+      it(`PQueue       ${length.toLocaleString('en')}`, function (done) {
         const data = new PriorityQueue();
         for (let i = 0; i < length; ++i) data.push(i % 10, i % 10);
-        benchmark(`PQueue ${length.toLocaleString('en')}`, () => {
+        benchmark(`PQueue       ${length.toLocaleString('en')}`, () => {
           const i = data.pop();
           data.push(i, i);
         }, done);
