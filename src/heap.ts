@@ -22,7 +22,7 @@ export class Heap<T, O = T> {
     options?: Heap.Options,
   ) {
     this.stable = options?.stable ?? false;
-    this.array = new List(16, options?.deletion ?? false);
+    this.array = new List(options?.deletion ?? false);
   }
   private readonly stable: boolean;
   private readonly array: List<T, O>;
@@ -42,7 +42,6 @@ export class Heap<T, O = T> {
       order = value as any;
     }
     assert([order = order!]);
-    this.array.isFull() && this.array.resize(this.length * 2 % 2 ** 32);
     const index = this.array.push(value, order);
     upHeapify(this.cmp, this.array, this.length);
     return index;
@@ -163,10 +162,8 @@ function swap<T, O>(array: List<T, O>, index1: number, index2: number): void {
 
 class List<T, O> {
   constructor(
-    public capacity: number,
     deletion: boolean,
   ) {
-    if (capacity >= 2 ** 32) throw new Error(`Too large capacity`);
     this.indexes = new Uint32Array(this.capacity);
     if (deletion) {
       this.positions = new Uint32Array(this.capacity);
@@ -174,6 +171,7 @@ class List<T, O> {
     this.orders = Array(this.capacity);
     this.values = Array(this.capacity);
   }
+  private capacity = 4;
   private ix = new Index();
   private indexes: Uint32Array;
   private positions?: Uint32Array;
@@ -195,10 +193,10 @@ class List<T, O> {
   public value(index: number): T {
     return this.values[index];
   }
-  public isFull() {
+  private isFull() {
     return this.$length === this.capacity;
   }
-  public resize(capacity: number): void {
+  private resize(capacity: number): void {
     if (capacity >= 2 ** 32) throw new Error(`Too large capacity`);
     if (capacity > this.indexes.length) {
       const indexes = new Uint32Array(max(capacity, min(this.capacity * 2, 2 ** 32 - 1)));
@@ -227,6 +225,7 @@ class List<T, O> {
     this.orders[index] = order;
   }
   public push(value: T, order: O): number {
+    this.isFull() && this.resize(this.length * 2 % 2 ** 32);
     const index = this.indexes[this.$length++] = this.ix.pop();
     if (this.positions) {
       this.positions[index] = this.$length - 1;
