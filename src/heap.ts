@@ -1,6 +1,5 @@
 import { Array, Uint32Array, Map } from './global';
 import { min } from './alias';
-import { Index } from './index';
 import { List as InvList } from './invlist';
 import { memoize } from './memoize';
 
@@ -185,7 +184,6 @@ class List<T, O> {
     this.values = Array(this.capacity);
   }
   private capacity = 4;
-  private ix = new Index();
   private indexes: Uint32Array;
   private positions?: Uint32Array;
   private orders: O[];
@@ -227,7 +225,6 @@ class List<T, O> {
     this.capacity = capacity;
   }
   public clear(): void {
-    this.ix.clear();
     this.indexes = new Uint32Array(this.capacity);
     this.positions &&= new Uint32Array(this.capacity);
     this.orders = Array(this.capacity);
@@ -242,9 +239,9 @@ class List<T, O> {
   }
   public push(value: T, order: O): number {
     this.isFull() && this.extend();
-    const index = this.indexes[this.$length++] = this.ix.pop();
+    const index = this.indexes[this.$length] = this.$length++;
     if (this.positions) {
-      this.positions[index] = this.$length - 1;
+      this.positions[index] = index;
     }
     this.values[index] = value;
     this.orders[index] = order;
@@ -253,7 +250,6 @@ class List<T, O> {
   public pop(): void {
     if (this.$length === 0) return;
     const index = this.indexes[--this.$length];
-    this.ix.push(index);
     this.values[index] = undefined as any;
     this.orders[index] = undefined as any;
   }
