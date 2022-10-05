@@ -21,7 +21,7 @@ export class List<T> {
   private nexts: Uint32Array;
   private prevs: Uint32Array;
   private readonly ix = new Index();
-  public HEAD = 0;
+  private HEAD = 0;
   private $length = 0;
   public get length() {
     return this.$length;
@@ -123,7 +123,7 @@ export class List<T> {
       this.nexts[prev] = next;
       this.prevs[next] = prev;
     }
-    if (this.HEAD === index) {
+    if (index === this.HEAD) {
       this.HEAD = next;
     }
   }

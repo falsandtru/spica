@@ -5,7 +5,7 @@ describe('Unit: lib/ixlist', () => {
     function inspect<T>(list: List<T>) {
       return {
         list: [...list],
-        head: list.HEAD,
+        head: list.head,
         length: list.length,
       };
     }
