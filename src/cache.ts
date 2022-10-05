@@ -140,7 +140,9 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.threshold = settings.threshold!;
     this.limit = 1000 - settings.entrance!;
     this.age = settings.age!;
-    this.earlyExpiring = settings.earlyExpiring!;
+    if (settings.earlyExpiring) {
+      this.expiries = new Heap(Heap.min);
+    }
     this.disposer = settings.disposer!;
     this.stats = opts.resolution || opts.offset
       ? new StatsExperimental(this.window, settings.resolution!, settings.offset!)
@@ -174,8 +176,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     LFU: new List<Index<K, V>>(),
   } as const;
   private readonly age: number;
-  private readonly expiries = new Heap<List.Node<Index<K, V>>, number>(Heap.min);
-  private readonly earlyExpiring: boolean;
+  private readonly expiries?: Heap<List.Node<Index<K, V>>, number>;
   private readonly disposer?: (value: V, key: K) => void;
   public get length(): number {
     //assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
@@ -192,7 +193,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.overlap -= +(index.region === 'LFU' && node.list === this.indexes.LRU);
     assert(this.overlap >= 0);
     if (index.eid !== -1) {
-      this.expiries.delete(index.eid);
+      this.expiries!.delete(index.eid);
       index.eid = -1;
     }
     node.delete();
@@ -210,7 +211,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       assert(this.length >= 1 + +!!skip);
       let target: List.Node<Index<K, V>>;
       switch (true) {
-        case (target = this.expiries.peek()!)
+        case (target = this.expiries?.peek()!)
           && target !== skip
           && target.value.expiry < now():
           assert(target = target!);
@@ -286,14 +287,14 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       assert(0 < this.size && this.size <= this.capacity);
       index.size = size;
       index.expiry = expiry;
-      if (this.earlyExpiring && age) {
+      if (this.expiries && age) {
         index.eid !== -1
           ? this.expiries.update(index.eid, expiry)
           : index.eid = this.expiries.insert(node, expiry);
         assert(this.expiries.length <= this.length);
       }
       else if (index.eid !== -1) {
-        this.expiries.delete(index.eid);
+        this.expiries!.delete(index.eid);
         index.eid = -1;
       }
       node.value.value = value;
@@ -315,7 +316,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       eid: -1,
       region: 'LRU',
     }));
-    if (this.earlyExpiring && age) {
+    if (this.expiries && age) {
       LRU.head!.value.eid = this.expiries.insert(LRU.head!, expiry);
       assert(this.expiries.length <= this.length);
     }
@@ -374,7 +375,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.stats.clear();
     this.indexes.LRU.clear();
     this.indexes.LFU.clear();
-    this.expiries.clear();
+    this.expiries?.clear();
     if (!this.disposer || !this.settings.capture!.clear) return void this.memory.clear();
     const memory = this.memory;
     this.memory = new Map();
