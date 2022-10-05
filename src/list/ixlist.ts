@@ -6,14 +6,6 @@ import { Index as Ix } from '../index';
 
 const undefined = void 0;
 
-export namespace List {
-  export interface Node<T> {
-    readonly index: number;
-    readonly value: T;
-    readonly next: number;
-    readonly prev: number;
-  }
-}
 export class List<T> {
   constructor(
     public capacity: number = 0,
@@ -49,6 +41,9 @@ export class List<T> {
   public prev(index: number): number {
     return this.prevs[index];
   }
+  public at(index: number): T {
+    return this.values[index];
+  }
   public index(offset: number, index = this.HEAD): number {
     if (offset > 0) {
       for (let map = this.nexts; offset--;) {
@@ -61,17 +56,6 @@ export class List<T> {
       }
     }
     return index;
-  }
-  public node(index: number): List.Node<T> {
-    return {
-      index,
-      value: this.values[index],
-      next: this.nexts[index],
-      prev: this.prevs[index],
-    };
-  }
-  public at(index: number): T {
-    return this.values[index];
   }
   public resize(capacity: number): void {
     if (capacity >= 2 ** 32) throw new Error(`Too large capacity`);
@@ -130,9 +114,6 @@ export class List<T> {
       return this.add(value);
     }
   }
-  public set(index: number, value: T): void {
-    this.values[index] = value;
-  }
   public del(index: number): void {
     assert(this.length > 0);
     const next = this.nexts[index];
@@ -149,6 +130,9 @@ export class List<T> {
     if (this.HEAD === index) {
       this.HEAD = next;
     }
+  }
+  public set(index: number, value: T): void {
+    this.values[index] = value;
   }
   public insert(value: T, before: number): number {
     const head = this.HEAD;
