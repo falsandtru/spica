@@ -121,11 +121,11 @@ function upHeapify<T, O>(
   array: List<T, O>,
   index: number,
 ): boolean {
-  const order = array.order(array.index(index - 1));
+  const order = array.ord(index - 1);
   let changed = false;
   while (index > 1) {
     const parent = index / 2 | 0;
-    if (cmp(array.order(array.index(parent - 1)), order) <= 0) break;
+    if (cmp(array.ord(parent - 1), order) <= 0) break;
     swap(array, index - 1, parent - 1);
     index = parent;
     changed ||= true;
@@ -146,13 +146,13 @@ function downHeapify<T, O>(
     const right = index * 2 + 1;
     let min = index;
     if (left <= length) {
-      const result = cmp(array.order(array.index(left - 1)), array.order(array.index(min - 1)));
+      const result = cmp(array.ord(left - 1), array.ord(min - 1));
       if (stable ? result <= 0 : result < 0) {
         min = left;
       }
     }
     if (right <= length) {
-      const result = cmp(array.order(array.index(right - 1)), array.order(array.index(min - 1)));
+      const result = cmp(array.ord(right - 1), array.ord(min - 1));
       if (stable ? result <= 0 : result < 0) {
         min = right;
       }
@@ -195,6 +195,9 @@ class List<T, O> {
   }
   public position(index: number): number {
     return this.positions![index];
+  }
+  public ord(pos: number): O {
+    return this.orders[this.indexes[pos]];
   }
   public order(index: number): O {
     return this.orders[index];
