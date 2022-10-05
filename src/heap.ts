@@ -11,7 +11,7 @@ const undefined = void 0;
 export namespace Heap {
   export interface Options {
     stable?: boolean;
-    deletion?: boolean;
+    extension?: boolean;
   }
 }
 export class Heap<T, O = T> {
@@ -22,7 +22,7 @@ export class Heap<T, O = T> {
     options?: Heap.Options,
   ) {
     this.stable = options?.stable ?? false;
-    this.array = new List(options?.deletion ?? false);
+    this.array = new List(options?.extension ?? false);
   }
   private readonly stable: boolean;
   private readonly array: List<T, O>;
@@ -174,10 +174,10 @@ function swap<T, O>(array: List<T, O>, index1: number, index2: number): void {
 
 class List<T, O> {
   constructor(
-    deletion: boolean,
+    extension: boolean,
   ) {
     this.indexes = new Uint32Array(this.capacity);
-    if (deletion) {
+    if (extension) {
       this.positions = new Uint32Array(this.capacity);
     }
     this.orders = Array(this.capacity);
@@ -286,7 +286,7 @@ type MultiNode<T> = InvList.Node<T>;
 export namespace MultiHeap {
   export type Node<T, O = T> = InvList.Node<T> | { _: [T, O]; };
   export interface Options {
-    deletion?: boolean;
+    extension?: boolean;
     clean?: boolean;
   }
 }
