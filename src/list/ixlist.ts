@@ -1,6 +1,6 @@
 import { Array, Uint32Array } from '../global';
 import { max, min } from '../alias';
-import { Index as Ix } from '../index';
+import { Index } from '../index';
 
 // Circular Indexed List
 
@@ -20,7 +20,7 @@ export class List<T> {
   private values: T[];
   private nexts: Uint32Array;
   private prevs: Uint32Array;
-  private readonly ix = new Ix();
+  private readonly ix = new Index();
   public HEAD = 0;
   private $length = 0;
   public get length() {
