@@ -70,7 +70,7 @@ export class Heap<T, O = T> {
   private del(index: number): void {
     swap(this.array, index, this.length - 1);
     this.array.pop();
-    index < this.length && sort(this.cmp, this.array, index, this.length, this.stable);
+    sort(this.cmp, this.array, index, this.length, this.stable);
   }
   public delete(index: number): T {
     const value = this.array.value(index);
@@ -103,8 +103,17 @@ function sort<T, O>(
   length: number,
   stable: boolean,
 ): boolean {
-  return upHeapify(cmp, array, index + 1)
-    || downHeapify(cmp, array, index + 1, length, stable);
+  if (length === 0) return false;
+  switch (index) {
+    case 0:
+      return false
+        || downHeapify(cmp, array, index + 1, length, stable);
+    case length - 1:
+      return upHeapify(cmp, array, index + 1);
+    default:
+      return upHeapify(cmp, array, index + 1)
+        || downHeapify(cmp, array, index + 1, length, stable);
+  }
 }
 
 function upHeapify<T, O>(
