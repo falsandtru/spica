@@ -174,7 +174,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     LFU: new List<Index<K, V>>(),
   } as const;
   private readonly age: number;
-  private readonly expiries = new Heap<List.Node<Index<K, V>>, number>(Heap.min);
+  private readonly expiries = new Heap<List.Node<Index<K, V>>, number>(Heap.min, { deletion: true });
   private readonly earlyExpiring: boolean;
   private readonly disposer?: (value: V, key: K) => void;
   public get length(): number {

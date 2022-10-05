@@ -1,5 +1,5 @@
 import { Array, Uint32Array } from '../global';
-import { max, min, floor } from '../alias';
+import { max, min } from '../alias';
 import { Index as Ix } from '../index';
 
 // Circular Indexed List
@@ -77,10 +77,10 @@ export class List<T> {
   public resize(capacity: number): void {
     if (capacity >= 2 ** 32) throw new Error(`Too large capacity`);
     if (capacity > this.nexts.length) {
-      const nexts = new Uint32Array(max(capacity, min(floor(this.capacity * 2), 2 ** 32)));
+      const nexts = new Uint32Array(max(capacity, min(this.capacity * 2, 2 ** 32 - 1)));
       nexts.set(this.nexts);
       this.nexts = nexts;
-      const prevs = new Uint32Array(max(capacity, min(floor(this.capacity * 2), 2 ** 32)));
+      const prevs = new Uint32Array(max(capacity, min(this.capacity * 2, 2 ** 32 - 1)));
       prevs.set(this.prevs);
       this.prevs = prevs;
     }

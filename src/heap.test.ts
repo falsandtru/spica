@@ -109,7 +109,7 @@ describe('Unit: lib/heap', () => {
     });
 
     it('delete', () => {
-      const heap = new Heap<number>();
+      const heap = new Heap<number>(undefined, { deletion: true });
 
       assert(heap.extract() === undefined);
 
@@ -130,7 +130,7 @@ describe('Unit: lib/heap', () => {
     });
 
     it('stable', () => {
-      const heap = new Heap<number>(undefined, true);
+      const heap = new Heap<number>(undefined, { stable: true });
 
       assert.deepStrictEqual(heap.insert(1, 1), 0);
       assert.deepStrictEqual(inspect(heap), [

@@ -1,5 +1,5 @@
 import { Array, Uint32Array, Map } from './global';
-import { max, min, floor } from './alias';
+import { max, min } from './alias';
 import { Index } from './index';
 import { List as InvList } from './invlist';
 import { memoize } from './memoize';
@@ -8,15 +8,24 @@ const undefined = void 0;
 
 // Max heap
 
+export namespace Heap {
+  export interface Options {
+    stable?: boolean;
+    deletion?: boolean;
+  }
+}
 export class Heap<T, O = T> {
   public static readonly max = <O>(a: O, b: O): number => a > b ? -1 : a < b ? 1 : 0;
   public static readonly min = <O>(a: O, b: O): number => a > b ? 1 : a < b ? -1 : 0;
   constructor(
     private readonly cmp: (a: O, b: O) => number = Heap.max,
-    private readonly stable = false,
+    options?: Heap.Options,
   ) {
+    this.stable = options?.stable ?? false;
+    this.array = new List(16, options?.deletion ?? false);
   }
-  private readonly array = new List<T, O>(16);
+  private readonly stable: boolean;
+  private readonly array: List<T, O>;
   public get length(): number {
     return this.array.length;
   }
@@ -155,16 +164,19 @@ function swap<T, O>(array: List<T, O>, index1: number, index2: number): void {
 class List<T, O> {
   constructor(
     public capacity: number,
+    deletion: boolean,
   ) {
     if (capacity >= 2 ** 32) throw new Error(`Too large capacity`);
     this.indexes = new Uint32Array(this.capacity);
-    this.positions = new Uint32Array(this.capacity);
+    if (deletion) {
+      this.positions = new Uint32Array(this.capacity);
+    }
     this.orders = Array(this.capacity);
     this.values = Array(this.capacity);
   }
   private ix = new Index();
   private indexes: Uint32Array;
-  private positions: Uint32Array;
+  private positions?: Uint32Array;
   private orders: O[];
   private values: T[];
   private $length = 0;
@@ -175,7 +187,7 @@ class List<T, O> {
     return this.indexes[pos];
   }
   public position(index: number): number {
-    return this.positions[index];
+    return this.positions![index];
   }
   public order(index: number): O {
     return this.orders[index];
@@ -189,12 +201,14 @@ class List<T, O> {
   public resize(capacity: number): void {
     if (capacity >= 2 ** 32) throw new Error(`Too large capacity`);
     if (capacity > this.indexes.length) {
-      const indexes = new Uint32Array(max(capacity, min(floor(this.capacity * 2), 2 ** 32)));
+      const indexes = new Uint32Array(max(capacity, min(this.capacity * 2, 2 ** 32 - 1)));
       indexes.set(this.indexes);
       this.indexes = indexes;
-      const positions = new Uint32Array(max(capacity, min(floor(this.capacity * 2), 2 ** 32)));
-      positions.set(this.positions);
-      this.positions = positions;
+      if (this.positions) {
+        const positions = new Uint32Array(max(capacity, min(this.capacity * 2, 2 ** 32 - 1)));
+        positions.set(this.positions);
+        this.positions = positions;
+      }
     }
     this.capacity = capacity;
   }
@@ -213,8 +227,10 @@ class List<T, O> {
     this.orders[index] = order;
   }
   public push(value: T, order: O): number {
-    const index = this.indexes[this.$length] = this.ix.pop();
-    this.positions[index] = this.$length++;
+    const index = this.indexes[this.$length++] = this.ix.pop();
+    if (this.positions) {
+      this.positions[index] = this.$length - 1;
+    }
     this.values[index] = value;
     this.orders[index] = order;
     return index;
@@ -233,10 +249,12 @@ class List<T, O> {
     const idx2 = indexes[pos2];
     indexes[pos1] = idx2;
     indexes[pos2] = idx1;
-    assert(positions[idx1] === pos1);
-    assert(positions[idx2] === pos2);
-    positions[idx1] = pos2;
-    positions[idx2] = pos1;
+    if (positions) {
+      assert(positions[idx1] === pos1);
+      assert(positions[idx2] === pos2);
+      positions[idx1] = pos2;
+      positions[idx2] = pos1;
+    }
     return true;
   }
   public *[Symbol.iterator](): Iterator<[O, T, number], undefined, undefined> {
@@ -253,6 +271,10 @@ type MultiNode<T> = InvList.Node<T>;
 // 1e6要素で落ちるため実用不可
 export namespace MultiHeap {
   export type Node<T, O = T> = InvList.Node<T> | { _: [T, O]; };
+  export interface Options {
+    deletion?: boolean;
+    clean?: boolean;
+  }
 }
 export class MultiHeap<T, O = T> {
   private static readonly order = Symbol('order');
@@ -261,10 +283,13 @@ export class MultiHeap<T, O = T> {
   public static readonly min = Heap.min;
   constructor(
     private readonly cmp: (a: O, b: O) => number = MultiHeap.max,
-    private readonly clean = true,
+    options?: MultiHeap.Options,
   ) {
+    this.clean = options?.clean ?? true;
+    this.heap = new Heap(this.cmp, options);
   }
-  private readonly heap = new Heap<InvList<T>, O>(this.cmp);
+  private readonly clean: boolean;
+  private readonly heap: Heap<InvList<T>, O>;
   private readonly dict = new Map<O, InvList<T>>();
   private readonly list = memoize<O, InvList<T>>(order => {
     const list = new InvList<T>();
