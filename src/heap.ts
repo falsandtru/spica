@@ -68,7 +68,7 @@ export class Heap<T, O = T> {
     return value;
   }
   private del(pos: number): void {
-    swap(this.array, pos, this.length - 1);
+    swap(this.array, pos + 1, this.length);
     this.array.pop();
     sort(this.cmp, this.array, pos + 1, this.length, this.stable);
   }
@@ -128,7 +128,7 @@ function upHeapify<T, O>(
   while (index > 1) {
     const parent = index / 2 | 0;
     if (cmp(array.ord(parent - 1), order) <= 0) break;
-    swap(array, index - 1, parent - 1);
+    swap(array, index, parent);
     index = parent;
     changed ||= true;
   }
@@ -161,7 +161,7 @@ function downHeapify<T, O>(
       }
     }
     if (min === index) break;
-    swap(array, index - 1, min - 1);
+    swap(array, index, min);
     index = min;
     changed ||= true;
   }
@@ -169,7 +169,8 @@ function downHeapify<T, O>(
 }
 
 function swap<T, O>(array: List<T, O>, index1: number, index2: number): void {
-  array.swap(index1, index2);
+  assert(index1 && index2);
+  array.swap(index1 - 1, index2 - 1);
 }
 
 class List<T, O> {
