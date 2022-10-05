@@ -172,8 +172,9 @@ function swap<T, O>(array: List<T, O>, index1: number, index2: number): void {
 }
 
 class List<T, O> {
-  private capacity = 2;
-  private indexes = new Uint32Array(this.capacity * 2);
+  private capacity = 4;
+  private indexes = new Uint32Array(this.capacity);
+  private positions = new Uint32Array(this.capacity);
   private orders: O[] = Array(this.capacity);
   private values: T[] = Array(this.capacity);
   private $length = 0;
@@ -184,7 +185,7 @@ class List<T, O> {
     return this.indexes[pos];
   }
   public position(index: number): number {
-    return this.indexes[index + this.capacity];
+    return this.positions[index];
   }
   public ord(pos: number): O {
     return this.orders[this.indexes[pos]];
@@ -201,17 +202,18 @@ class List<T, O> {
   private extend(): void {
     if (this.capacity === 2 ** 32) throw new Error(`Too large capacity`);
     const capacity = min(this.capacity * 2, 2 ** 32);
-    assert(capacity > this.indexes.length / 2);
-    const indexes = new Uint32Array(capacity * 2);
-    indexes.set(this.indexes, 0);
-    indexes.set(this.indexes.subarray(this.capacity), capacity);
+    assert(capacity > this.indexes.length);
+    const indexes = new Uint32Array(capacity);
+    indexes.set(this.indexes);
     this.indexes = indexes;
-    this.orders.length = capacity;
-    this.values.length = capacity;
+    const positions = new Uint32Array(capacity);
+    positions.set(this.positions);
+    this.positions = positions;
     this.capacity = capacity;
   }
   public clear(): void {
-    this.indexes = new Uint32Array(this.capacity * 2);
+    this.indexes = new Uint32Array(this.capacity);
+    this.positions = new Uint32Array(this.capacity);
     this.orders = Array(this.capacity);
     this.values = Array(this.capacity);
     this.$length = 0;
@@ -225,7 +227,7 @@ class List<T, O> {
   public push(value: T, order: O): number {
     this.isFull() && this.extend();
     const pos = this.indexes[this.$length] = this.$length++;
-    this.indexes[pos + this.capacity] = pos;
+    this.positions[pos] = pos;
     this.values[pos] = value;
     this.orders[pos] = order;
     return pos;
@@ -238,15 +240,15 @@ class List<T, O> {
   }
   public swap(pos1: number, pos2: number): boolean {
     if (pos1 === pos2) return false;
-    const { indexes } = this;
+    const { indexes, positions } = this;
     const idx1 = indexes[pos1];
     const idx2 = indexes[pos2];
     indexes[pos1] = idx2;
     indexes[pos2] = idx1;
-    assert(indexes[idx1 + this.capacity] === pos1);
-    assert(indexes[idx2 + this.capacity] === pos2);
-    indexes[idx1 + this.capacity] = pos2;
-    indexes[idx2 + this.capacity] = pos1;
+    assert(positions[idx1] === pos1);
+    assert(positions[idx2] === pos2);
+    positions[idx1] = pos2;
+    positions[idx2] = pos1;
     return true;
   }
   public *[Symbol.iterator](): Iterator<[O, T, number], undefined, undefined> {
