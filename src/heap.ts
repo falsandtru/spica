@@ -208,7 +208,7 @@ class List<T, O> {
   public value(index: number): T {
     return this.values[index];
   }
-  private isFull() {
+  private isFull(): boolean {
     return this.$length === this.capacity;
   }
   private resize(capacity: number): void {
