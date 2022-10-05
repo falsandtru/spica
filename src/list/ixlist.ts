@@ -99,7 +99,6 @@ export class List<T> {
   }
   public add(value: T): number {
     const head = this.HEAD;
-    //assert(this.length === 0 ? !head : head);
     if (this.$length === 0) {
       assert(this.length === 0);
       const index = this.HEAD = this.ix.pop();
@@ -107,36 +106,24 @@ export class List<T> {
       this.values[index] = value;
       this.nexts[index] = index;
       this.prevs[index] = index;
-      //assert(this.length > 10 || [...this].length === this.length);
       return index;
     }
-    //assert(head);
     if (this.$length !== this.capacity) {
       assert(this.length < this.capacity);
       const index = this.HEAD = this.ix.pop();
-      //assert(!nodes[index]);
       ++this.$length;
       const last = this.prevs[head];
       this.prevs[head] = this.nexts[last] = index;
       this.values[index] = value;
       this.nexts[index] = head;
       this.prevs[index] = last;
-      //assert(this.length !== 1 || index === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
-      //assert(this.length !== 2 || index !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
-      //assert(this.length < 3 || index !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
-      //assert(this.length > 10 || [...this].length === this.length);
       return index;
     }
     else {
       assert(this.length === this.capacity);
       assert(this.ix.length === this.capacity);
       const index = this.HEAD = this.prevs[head];
-      //assert(nodes[index]);
       this.values[index] = value;
-      //assert(this.length !== 1 || index === this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
-      //assert(this.length !== 2 || index !== this.nodes[index]!.prev && this.nodes[index]!.prev === this.nodes[index]!.next);
-      //assert(this.length < 3 || index !== this.nodes[index]!.prev && this.nodes[index]!.prev !== this.nodes[index]!.next);
-      //assert(this.length > 10 || [...this].length === this.length);
       return index;
     }
   }
@@ -145,9 +132,6 @@ export class List<T> {
   }
   public del(index: number): void {
     assert(this.length > 0);
-    //assert(this.length !== 1 || node === node.prev && node.prev === node.next);
-    //assert(this.length !== 2 || node !== node.prev && node.prev === node.next);
-    //assert(this.length < 3 || node !== node.prev && node.prev !== node.next);
     const next = this.nexts[index];
     const prev = this.prevs[index];
     this.ix.push(index);
@@ -162,8 +146,6 @@ export class List<T> {
     if (this.HEAD === index) {
       this.HEAD = next;
     }
-    //assert(this.length === 0 ? !this.nodes[this.HEAD] : this.nodes[this.HEAD]);
-    //assert(this.length > 10 || [...this].length === this.length);
   }
   public insert(value: T, before: number): number {
     const head = this.HEAD;
