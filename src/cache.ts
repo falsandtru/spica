@@ -179,7 +179,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private readonly expiries?: Heap<List.Node<Entry<K, V>>, number>;
   private readonly disposer?: (value: V, key: K) => void;
   public get length(): number {
-    //assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     return this.indexes.LRU.length + this.indexes.LFU.length;
   }
   public get size(): number {
@@ -365,8 +364,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     return entry.value;
   }
   public has(key: K): boolean {
-    //assert(this.memory.has(key) === (this.indexes.LFU.has(key) || this.indexes.LRU.has(key)));
-    //assert(this.memory.size === this.indexes.LFU.length + this.indexes.LRU.length);
     const node = this.memory.get(key);
     if (!node) return false;
     const entry = node.value;
