@@ -296,7 +296,9 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       this.disposer?.(val, key);
       return true;
     }
-    this.ensure(size);
+    else {
+      this.ensure(size);
+    }
     assert(!this.memory.has(key));
 
     const { LRU } = this.indexes;
@@ -311,6 +313,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       eid: -1,
       region: 'LRU',
     }));
+    assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     if (this.expiries && age) {
       LRU.head!.value.eid = this.expiries.insert(LRU.head!, expiry);
       assert(this.expiries.length <= this.length);
