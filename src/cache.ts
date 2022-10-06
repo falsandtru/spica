@@ -392,25 +392,20 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     return;
   }
   private access(node: List.Node<Entry<K, V>>): boolean {
-    return this.accessLFU(node)
-        || this.accessLRU(node);
-  }
-  private accessLRU(node: List.Node<Entry<K, V>>): boolean {
-    assert(node.list === this.indexes.LRU);
     const entry = node.value;
-    ++this.stats[entry.region][0];
-    this.overlap -= +(entry.region === 'LFU');
-    assert(this.overlap >= 0);
-    entry.region = 'LFU';
-    assert(this.indexes.LFU.length < this.capacity);
-    this.indexes.LFU.unshiftNode(node);
-    return true;
-  }
-  private accessLFU(node: List.Node<Entry<K, V>>): boolean {
-    if (node.list !== this.indexes.LFU) return false;
-    const entry = node.value;
-    ++this.stats[entry.region][0];
-    node.moveToHead();
+    const { LRU, LFU } = this.indexes;
+    if (node.list === LRU) {
+      ++this.stats[entry.region][0];
+      this.overlap -= +(entry.region === 'LFU');
+      assert(this.overlap >= 0);
+      entry.region = 'LFU';
+      assert(this.indexes.LFU.length < this.capacity);
+      LFU.unshiftNode(node);
+    }
+    else {
+      ++this.stats[entry.region][0];
+      node.moveToHead();
+    }
     return true;
   }
   private misses = 0;
