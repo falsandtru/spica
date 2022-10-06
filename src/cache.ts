@@ -203,7 +203,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.SIZE -= entry.size;
     callback && this.disposer?.(node.value.value, entry.key);
   }
-  private ensure(margin: number, skip?: List.Node<Entry<K, V>>): boolean {
+  private ensure(margin: number, skip?: List.Node<Entry<K, V>>): List.Node<Entry<K, V>> | undefined {
     let size = skip?.value.size ?? 0;
     assert(margin - size <= this.capacity);
     const { LRU, LFU } = this.indexes;
@@ -256,7 +256,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       skip = skip?.list && skip;
       size = skip?.value.size ?? 0;
     }
-    return !!skip?.list;
+    assert(!skip || skip.list);
+    return skip;
   }
   public put(key: K, value: V, opts?: { size?: number; age?: number; }): boolean;
   public put(this: Cache<K, undefined>, key: K, value?: V, opts?: { size?: number; age?: number; }): boolean;
@@ -266,16 +267,17 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       return false;
     }
 
+    const { LRU } = this.indexes;
     if (age === Infinity) {
       age = 0;
     }
     const expiry = age
       ? now() + age
       : Infinity;
-    const node = this.memory.get(key);
-    if (node && this.ensure(size, node)) {
-      assert(this.memory.has(key));
+    const node = this.ensure(size, this.memory.get(key));
+    if (node) {
       assert(node.list);
+      assert(this.memory.has(key));
       const val = node.value.value;
       const entry = node.value;
       this.SIZE += size - entry.size;
@@ -296,12 +298,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       this.disposer?.(val, key);
       return true;
     }
-    else {
-      this.ensure(size);
-    }
     assert(!this.memory.has(key));
 
-    const { LRU } = this.indexes;
     assert(LRU.length !== this.capacity);
     this.SIZE += size;
     assert(0 < this.size && this.size <= this.capacity);
