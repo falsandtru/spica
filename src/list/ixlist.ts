@@ -1,5 +1,5 @@
 import { Array, Uint32Array } from '../global';
-import { max, min } from '../alias';
+import { max, min, isArray } from '../alias';
 import { Index } from '../index';
 
 // Circular Indexed List
@@ -9,14 +9,19 @@ const undefined = void 0;
 export class List<T> {
   constructor(
     public capacity: number = 0,
-    private readonly auto: boolean = capacity === 0,
+    private readonly Container: ArrayConstructor | Uint32ArrayConstructor = Array,
   ) {
+    if (capacity <= 0) {
+      capacity = -capacity;
+      this.auto = true;
+    }
     if (capacity >= 2 ** 32) throw new Error(`Too large capacity`);
     this.capacity ||= 4;
-    this.values = Array(this.capacity);
+    this.values = new this.Container(this.capacity) as T[];
     this.nexts = new Uint32Array(this.capacity);
     this.prevs = new Uint32Array(this.capacity);
   }
+  private readonly auto: boolean = false;
   private values: T[];
   private nexts: Uint32Array;
   private prevs: Uint32Array;
@@ -66,7 +71,14 @@ export class List<T> {
     if (capacity > 2 ** 32) throw new Error(`Too large capacity`);
     if (capacity > this.nexts.length) {
       const size = max(capacity, min(this.capacity * 2, 2 ** 32));
-      this.values.length = size;
+      if (isArray(this.values)) {
+        this.values.length = size;
+      }
+      else {
+        const values = new this.Container(size) as Uint32Array;
+        values.set(this.values);
+        this.values = values as any;
+      }
       const nexts = new Uint32Array(size);
       nexts.set(this.nexts);
       this.nexts = nexts;
@@ -80,7 +92,7 @@ export class List<T> {
     }
   }
   public clear(): void {
-    this.values = Array(this.capacity);
+    this.values = new this.Container(this.capacity) as T[];
     this.ix.clear();
     this.HEAD = 0;
     this.$length = 0;
