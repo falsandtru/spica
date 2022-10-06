@@ -138,7 +138,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.window = settings.window! * this.capacity / 100 >>> 0 || this.capacity;
     if (this.window * 1000 >= this.capacity === false) throw new Error(`Spica: Cache: Window must be 0.1% of capacity or more.`);
     this.threshold = settings.threshold!;
-    this.limit = 1000 - settings.entrance!;
+    this.limit = 1000 - settings.entrance! * 10;
     this.age = settings.age!;
     if (settings.earlyExpiring) {
       this.expiries = new Heap(Heap.min);
@@ -160,7 +160,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     },
     resolution: 1,
     offset: 0,
-    entrance: 50,
+    entrance: 5,
     threshold: 20,
     sweep: 10,
     test: false,
