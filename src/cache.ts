@@ -209,21 +209,29 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const { LRU, LFU } = this.indexes;
     while (this.size + margin - size > this.capacity) {
       assert(this.length >= 1 + +!!skip);
-      let target: List.Node<Index<K, V>>;
-      switch (true) {
-        case (target = this.expiries?.peek()!)
-          && target !== skip
-          && target.value.expiry < now():
-          assert(target = target!);
-          break;
-        case LRU.length === 0:
-          assert(LFU.last);
-          target = LFU.last! !== skip
-            ? LFU.last!
-            : LFU.last!.prev;
-          break;
-        // @ts-expect-error
-        case LFU.length > this.capacity * this.ratio / 1000:
+      let target = this.expiries?.peek();
+      if (target && target !== skip && target.value.expiry < now()) {
+      }
+      else if (LRU.length === 0) {
+        assert(LFU.last);
+        target = LFU.last! !== skip
+          ? LFU.last!
+          : LFU.last!.prev;
+      }
+      else {
+        assert(LRU.last);
+        if (this.misses * 100 > LRU.length * this.threshold) {
+          this.sweep ||= LRU.length * this.settings.sweep! / 100 + 1 >>> 0;
+          if (this.sweep > 0) {
+            LRU.head = LRU.head!.next.next;
+            --this.sweep;
+            this.sweep ||= -round(LRU.length * this.settings.sweep! / 100 * 99 / 100);
+          }
+          else {
+            ++this.sweep;
+          }
+        }
+        else if (LFU.length > this.capacity * this.ratio / 1000) {
           assert(LFU.last);
           target = LFU.last! !== skip
             ? LFU.last!
@@ -235,25 +243,12 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
             ++this.overlap;
             assert(this.overlap <= LRU.length);
           }
-          // fallthrough
-        default:
-          assert(LRU.last);
-          if (this.misses * 100 > LRU.length * this.threshold) {
-            this.sweep ||= LRU.length * this.settings.sweep! / 100 + 1 >>> 0;
-            if (this.sweep > 0) {
-              LRU.head = LRU.head!.next.next;
-              --this.sweep;
-              this.sweep ||= -round(LRU.length * this.settings.sweep! / 100 * 99 / 100);
-            }
-            else {
-              ++this.sweep;
-            }
-          }
-          target = LRU.last! !== skip
-            ? LRU.last!
-            : LRU.length !== 1
-              ? LRU.last!.prev
-              : LFU.last!;
+        }
+        target = LRU.last! !== skip
+          ? LRU.last!
+          : LRU.length !== 1
+            ? LRU.last!.prev
+            : LFU.last!;
       }
       assert(target !== skip);
       assert(this.memory.has(target.value.key));
