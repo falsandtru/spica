@@ -55,7 +55,7 @@ export class List<T> {
     return this.last?.delete();
   }
   public insert(node: List.Node<T>, before: List.Node<T> | undefined = this.head): List.Node<T> {
-    if (node.list === this) return node.moveTo(before), node;
+    if (node.list === this) return node.move(before), node;
     node.delete();
     ++this.$length;
     this.head ??= node;
@@ -142,7 +142,7 @@ class Node<T> {
   public insertAfter(value: T): List.Node<T> {
     return new Node(this.list, value, this.next, this);
   }
-  public moveTo(before: List.Node<T> | undefined): boolean {
+  public move(before: List.Node<T> | undefined): boolean {
     if (!before) return false;
     if (this === before) return false;
     if (before.list !== this.list) return before.list.insert(this, before), true;
@@ -161,11 +161,11 @@ class Node<T> {
     return true;
   }
   public moveToHead(): void {
-    this.moveTo(this.list.head);
+    this.move(this.list.head);
     this.list.head = this;
   }
   public moveToLast(): void {
-    this.moveTo(this.list.head);
+    this.move(this.list.head);
   }
   public swap(node: List.Node<T>): boolean {
     const node1 = this;
@@ -173,8 +173,8 @@ class Node<T> {
     if (node1 === node2) return false;
     const node3 = node2.next;
     if (node1.list !== node2.list) throw new Error(`Spica: InvList: Cannot swap nodes across lists.`);
-    node2.moveTo(node1);
-    node1.moveTo(node3);
+    node2.move(node1);
+    node1.move(node3);
     switch (this.list.head) {
       case node1:
         this.list.head = node2;
