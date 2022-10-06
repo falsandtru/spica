@@ -202,7 +202,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.SIZE -= entry.size;
     callback && this.disposer?.(node.value.value, entry.key);
   }
-  private ensure(margin: number, skip?: List.Node<Entry<K, V>>, order = false): List.Node<Entry<K, V>> | undefined {
+  private ensure(margin: number, skip?: List.Node<Entry<K, V>>, capture = false): List.Node<Entry<K, V>> | undefined {
     let size = skip?.value.size ?? 0;
     assert(margin - size <= this.capacity);
     const { LRU, LFU } = this.indexes;
@@ -249,7 +249,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
           : LRU.length !== 1
             ? LRU.last!.prev
             : void 0;
-        if (order && !skip && victim) {
+        if (capture && !skip && victim) {
           assert(victim === LRU.last);
           skip = victim;
           size = skip?.value.size ?? 0;
@@ -281,11 +281,10 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const expiry = age
       ? now() + age
       : Infinity;
-    let victim = this.memory.get(key);
-    const match = !!victim;
-    victim = this.ensure(size, victim, true);
-    if (victim) {
-      const node = victim;
+    let node = this.memory.get(key);
+    const match = !!node;
+    node = this.ensure(size, node, true);
+    if (node) {
       assert(node.list);
       const entry = node.value;
       const key$ = entry.key;
