@@ -91,7 +91,7 @@ DWCはこの最適化を行っても状態数の多さに比例して増加し�
 */
 
 interface Entry<K, V> {
-  readonly key: K;
+  key: K;
   value: V;
   size: number;
   expiry: number;
@@ -202,18 +202,18 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.SIZE -= entry.size;
     callback && this.disposer?.(node.value.value, entry.key);
   }
-  private ensure(margin: number, skip?: List.Node<Entry<K, V>>): List.Node<Entry<K, V>> | undefined {
+  private ensure(margin: number, skip?: List.Node<Entry<K, V>>, order = false): List.Node<Entry<K, V>> | undefined {
     let size = skip?.value.size ?? 0;
     assert(margin - size <= this.capacity);
     const { LRU, LFU } = this.indexes;
     while (this.size + margin - size > this.capacity) {
       assert(this.length >= 1 + +!!skip);
-      let target = this.expiries?.peek();
-      if (target && target !== skip && target.value.expiry < now()) {
+      let victim = this.expiries?.peek();
+      if (victim && victim !== skip && victim.value.expiry < now()) {
       }
       else if (LRU.length === 0) {
         assert(LFU.last);
-        target = LFU.last! !== skip
+        victim = LFU.last! !== skip
           ? LFU.last!
           : LFU.last!.prev;
       }
@@ -232,26 +232,34 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         }
         else if (LFU.length > this.capacity * this.ratio / 1000) {
           assert(LFU.last);
-          target = LFU.last! !== skip
+          victim = LFU.last! !== skip
             ? LFU.last!
             : LFU.length !== 1
               ? LFU.last!.prev
-              : skip;
-          if (target !== skip) {
-            LRU.unshiftNode(target);
+              : void 0;
+          if (victim) {
+            assert(victim !== skip);
+            LRU.unshiftNode(victim);
             ++this.overlap;
             assert(this.overlap <= LRU.length);
           }
         }
-        target = LRU.last! !== skip
+        victim = LRU.last! !== skip
           ? LRU.last!
           : LRU.length !== 1
             ? LRU.last!.prev
-            : LFU.last!;
+            : void 0;
+        if (order && !skip && victim) {
+          assert(victim === LRU.last);
+          skip = victim;
+          size = skip?.value.size ?? 0;
+          continue;
+        }
+        victim ??= LFU.last!;
       }
-      assert(target !== skip);
-      assert(this.memory.has(target.value.key));
-      this.evict(target, true);
+      assert(victim !== skip);
+      assert(this.memory.has(victim.value.key));
+      this.evict(victim, true);
       skip = skip?.list && skip;
       size = skip?.value.size ?? 0;
     }
@@ -273,12 +281,26 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const expiry = age
       ? now() + age
       : Infinity;
-    const node = this.ensure(size, this.memory.get(key));
-    if (node) {
+    let victim = this.memory.get(key);
+    const match = !!victim;
+    victim = this.ensure(size, victim, true);
+    if (victim) {
+      const node = victim;
       assert(node.list);
-      assert(this.memory.has(key));
-      const val = node.value.value;
       const entry = node.value;
+      const key$ = entry.key;
+      const value$ = entry.value;
+      if (!match) {
+        assert(node === LRU.last);
+        this.overlap -= +(entry.region === 'LFU');
+        this.memory.delete(key$);
+        this.memory.set(key, node);
+        entry.key = key;
+        entry.region = 'LRU';
+        LRU.head = node;
+      }
+      assert(this.memory.has(key));
+      entry.value = value;
       this.SIZE += size - entry.size;
       assert(0 < this.size && this.size <= this.capacity);
       entry.size = size;
@@ -293,9 +315,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         this.expiries!.delete(entry.eid);
         entry.eid = -1;
       }
-      node.value.value = value;
-      this.disposer?.(val, key);
-      return true;
+      this.disposer?.(value$, key$);
+      return match;
     }
     assert(!this.memory.has(key));
 
