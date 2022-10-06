@@ -188,7 +188,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private evict(node: List.Node<Entry<K, V>>, callback: boolean): void {
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     const entry = node.value;
-    callback &&= !!this.disposer;
     assert(node.list);
     this.overlap -= +(entry.region === 'LFU' && node.list === this.indexes.LRU);
     assert(this.overlap >= 0);
