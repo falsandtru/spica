@@ -90,7 +90,7 @@ DWCはこの最適化を行っても状態数の多さに比例して増加し�
 
 */
 
-interface Index<K, V> {
+interface Entry<K, V> {
   readonly key: K;
   value: V;
   size: number;
@@ -170,13 +170,13 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private window: number;
   private overlap = 0;
   private SIZE = 0;
-  private memory = new Map<K, List.Node<Index<K, V>>>();
+  private memory = new Map<K, List.Node<Entry<K, V>>>();
   private readonly indexes = {
-    LRU: new List<Index<K, V>>(),
-    LFU: new List<Index<K, V>>(),
+    LRU: new List<Entry<K, V>>(),
+    LFU: new List<Entry<K, V>>(),
   } as const;
   private readonly age: number;
-  private readonly expiries?: Heap<List.Node<Index<K, V>>, number>;
+  private readonly expiries?: Heap<List.Node<Entry<K, V>>, number>;
   private readonly disposer?: (value: V, key: K) => void;
   public get length(): number {
     //assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
@@ -185,25 +185,25 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   public get size(): number {
     return this.SIZE;
   }
-  private evict(node: List.Node<Index<K, V>>, callback: boolean): void {
+  private evict(node: List.Node<Entry<K, V>>, callback: boolean): void {
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
-    const index = node.value;
+    const entry = node.value;
     callback &&= !!this.disposer;
     assert(node.list);
-    this.overlap -= +(index.region === 'LFU' && node.list === this.indexes.LRU);
+    this.overlap -= +(entry.region === 'LFU' && node.list === this.indexes.LRU);
     assert(this.overlap >= 0);
-    if (index.eid !== -1) {
-      this.expiries!.delete(index.eid);
-      index.eid = -1;
+    if (entry.eid !== -1) {
+      this.expiries!.delete(entry.eid);
+      entry.eid = -1;
     }
     node.delete();
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size - 1);
-    this.memory.delete(index.key);
+    this.memory.delete(entry.key);
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
-    this.SIZE -= index.size;
-    callback && this.disposer?.(node.value.value, index.key);
+    this.SIZE -= entry.size;
+    callback && this.disposer?.(node.value.value, entry.key);
   }
-  private ensure(margin: number, skip?: List.Node<Index<K, V>>): boolean {
+  private ensure(margin: number, skip?: List.Node<Entry<K, V>>): boolean {
     let size = skip?.value.size ?? 0;
     assert(margin - size <= this.capacity);
     const { LRU, LFU } = this.indexes;
@@ -277,20 +277,20 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       assert(this.memory.has(key));
       assert(node.list);
       const val = node.value.value;
-      const index = node.value;
-      this.SIZE += size - index.size;
+      const entry = node.value;
+      this.SIZE += size - entry.size;
       assert(0 < this.size && this.size <= this.capacity);
-      index.size = size;
-      index.expiry = expiry;
+      entry.size = size;
+      entry.expiry = expiry;
       if (this.expiries && age) {
-        index.eid !== -1
-          ? this.expiries.update(index.eid, expiry)
-          : index.eid = this.expiries.insert(node, expiry);
+        entry.eid !== -1
+          ? this.expiries.update(entry.eid, expiry)
+          : entry.eid = this.expiries.insert(node, expiry);
         assert(this.expiries.length <= this.length);
       }
-      else if (index.eid !== -1) {
-        this.expiries!.delete(index.eid);
-        index.eid = -1;
+      else if (entry.eid !== -1) {
+        this.expiries!.delete(entry.eid);
+        entry.eid = -1;
       }
       node.value.value = value;
       this.disposer?.(val, key);
@@ -391,25 +391,25 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     }
     return;
   }
-  private access(node: List.Node<Index<K, V>>): boolean {
+  private access(node: List.Node<Entry<K, V>>): boolean {
     return this.accessLFU(node)
         || this.accessLRU(node);
   }
-  private accessLRU(node: List.Node<Index<K, V>>): boolean {
+  private accessLRU(node: List.Node<Entry<K, V>>): boolean {
     assert(node.list === this.indexes.LRU);
-    const index = node.value;
-    ++this.stats[index.region][0];
-    this.overlap -= +(index.region === 'LFU');
+    const entry = node.value;
+    ++this.stats[entry.region][0];
+    this.overlap -= +(entry.region === 'LFU');
     assert(this.overlap >= 0);
-    index.region = 'LFU';
+    entry.region = 'LFU';
     assert(this.indexes.LFU.length < this.capacity);
     this.indexes.LFU.unshiftNode(node);
     return true;
   }
-  private accessLFU(node: List.Node<Index<K, V>>): boolean {
+  private accessLFU(node: List.Node<Entry<K, V>>): boolean {
     if (node.list !== this.indexes.LFU) return false;
-    const index = node.value;
-    ++this.stats[index.region][0];
+    const entry = node.value;
+    ++this.stats[entry.region][0];
     node.moveToHead();
     return true;
   }
