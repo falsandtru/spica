@@ -349,7 +349,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       ++this.misses;
       return;
     }
-    const expiry = node.value.expiry;
+    const entry = node.value;
+    const expiry = entry.expiry;
     if (expiry !== Infinity && expiry < now()) {
       ++this.misses;
       this.evict(node, true);
@@ -358,17 +359,18 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.misses &&= 0;
     this.sweep &&= 0;
     // Optimization for memoize.
-    if (!this.test && node === node.list.head) return node.value.value;
+    if (!this.test && node === node.list.head) return entry.value;
     this.access(node);
     this.adjust();
-    return node.value.value;
+    return entry.value;
   }
   public has(key: K): boolean {
     //assert(this.memory.has(key) === (this.indexes.LFU.has(key) || this.indexes.LRU.has(key)));
     //assert(this.memory.size === this.indexes.LFU.length + this.indexes.LRU.length);
     const node = this.memory.get(key);
     if (!node) return false;
-    const expiry = node.value.expiry;
+    const entry = node.value;
+    const expiry = entry.expiry;
     if (expiry !== Infinity && expiry < now()) {
       this.evict(node, true);
       return false;
