@@ -26,6 +26,9 @@ export class List<T> {
   public get length() {
     return this.$length;
   }
+  public set head(index: number) {
+    this.HEAD = index;
+  }
   public get head(): number {
     return this.HEAD;
   }
