@@ -5,15 +5,16 @@ describe('Unit: lib/cofetch', () => {
   describe('cofetch', () => {
     it('basic', async () => {
       const co = cofetch('');
-      const types = new Set<string>();
+      const types = [];
       for await (const ev of co) {
         assert(ev instanceof ProgressEvent);
         assert(['loadstart', 'progress', 'loadend'].includes(ev.type));
-        types.add(ev.type);
+        types.push(ev.type);
         if (ev.type !== 'loadend') continue;
         for await (const _ of co) throw 1;
       }
-      assert.deepStrictEqual([...types], ['loadstart', 'progress', 'loadend']);
+      assert.deepStrictEqual([types[0], types.at(-1)], ['loadstart', 'loadend']);
+      assert.deepStrictEqual(types.slice(1, -1), Array(types.length - 2).fill('progress'));
       assert(await co instanceof XMLHttpRequest);
     });
 
