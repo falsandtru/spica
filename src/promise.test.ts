@@ -14,6 +14,7 @@ describe('Unit: lib/promise', () => {
       assert(await AtomicPromise.resolve(0) === 0);
       assert(await AtomicPromise.resolve(AtomicPromise.resolve(0)) === 0);
       assert(await AtomicPromise.resolve(AtomicPromise.resolve(AtomicPromise.resolve(0))) === 0);
+      assert(await AtomicPromise.resolve(AtomicPromise.resolve(Promise.resolve(0))) === 0);
       assert(await AtomicPromise.resolve(Promise.resolve(0)) === 0);
     });
 

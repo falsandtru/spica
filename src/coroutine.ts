@@ -165,8 +165,9 @@ export class Coroutine<T = unknown, R = T, S = unknown> implements AtomicPromise
   }
   public readonly [pinternal] = new PInternal<T>();
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
-    return new AtomicPromise((resolve, reject) =>
-      this[pinternal].then(resolve, reject, onfulfilled, onrejected));
+    const p = new AtomicPromise<TResult1 | TResult2>(noop);
+    this[pinternal].then(p[pinternal], onfulfilled, onrejected);
+    return p;
   }
   public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult> {
     return this.then(void 0, onrejected);

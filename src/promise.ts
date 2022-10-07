@@ -203,14 +203,19 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
   public static resolve(): AtomicPromise<undefined>;
   public static resolve<T>(value: T | PromiseLike<T>): AtomicPromise<T>;
   public static resolve<T>(value?: T | PromiseLike<T>): AtomicPromise<T> {
-    return new AtomicPromise<T>(resolve => resolve(value!));
+    const p = new AtomicPromise<T>(noop);
+    p[internal].resolve(value!);
+    return p;
   }
   public static reject<T = never>(reason?: unknown): AtomicPromise<T> {
-    return new AtomicPromise<T>((_, reject) => reject(reason));
+    const p = new AtomicPromise<T>(noop);
+    p[internal].reject(reason);
+    return p;
   }
   constructor(
     executor: (resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: unknown) => void) => void,
   ) {
+    if (executor === noop) return;
     try {
       executor(
         value => void this[internal].resolve(value),
@@ -222,8 +227,9 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
   }
   public readonly [internal]: Internal<T> = new Internal();
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
-    return new AtomicPromise((resolve, reject) =>
-      this[internal].then(resolve, reject, onfulfilled, onrejected));
+    const p = new AtomicPromise<TResult1 | TResult2>(noop);
+    this[internal].then(p[internal], onfulfilled, onrejected);
+    return p;
   }
   public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult> {
     return this.then(void 0, onrejected);
@@ -233,8 +239,8 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
   }
 }
 
-type FulfillReaction = [(value: unknown) => void, (reason: unknown) => void, (value: unknown) => void, ((param: unknown) => unknown) | undefined | null];
-type RejectReaction = [(value: unknown) => void, (reason: unknown) => void, (reason: unknown) => void, ((param: unknown) => unknown) | undefined | null];
+type FulfillReaction = [Internal<unknown>, true, ((param: unknown) => unknown) | undefined | null];
+type RejectReaction = [Internal<unknown>, false, ((param: unknown) => unknown) | undefined | null];
 
 export class Internal<T> {
   public status: Status<T> = { state: State.pending };
@@ -251,17 +257,7 @@ export class Internal<T> {
       return this.resume();
     }
     if (isAtomicPromiseLike(value)) {
-      const core: Internal<T> = value[internal];
-      switch (core.status.state) {
-        case State.fulfilled:
-        case State.rejected:
-          this.status = core.status;
-          return this.resume();
-        default:
-          return core.then(
-            () => (this.status = core.status, this.resume()),
-            () => (this.status = core.status, this.resume()));
-      }
+      return value[internal].then(this);
     }
     this.status = {
       state: State.resolved,
@@ -296,30 +292,28 @@ export class Internal<T> {
   public fulfillReactions: FulfillReaction[] = [];
   public rejectReactions: RejectReaction[] = [];
   public then<TResult1, TResult2>(
-    resolve: (value: TResult1 | TResult2 | PromiseLike<TResult1 | TResult2>) => void,
-    reject: (reason: unknown) => void,
+    internal: Internal<TResult1 | TResult2>,
     onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null,
     onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null,
   ): void {
+    assert(internal);
     const { status, fulfillReactions, rejectReactions } = this;
     switch (status.state) {
       case State.fulfilled:
         if (fulfillReactions.length !== 0) break;
-        return call(resolve, reject, resolve, onfulfilled, status.value);
+        return call(internal, true, onfulfilled, status.value);
       case State.rejected:
         if (rejectReactions.length !== 0) break;
-        return call(resolve, reject, reject, onrejected, status.reason);
+        return call(internal, false, onrejected, status.reason);
     }
     fulfillReactions.push([
-      resolve,
-      reject,
-      resolve,
+      internal,
+      true,
       onfulfilled,
     ]);
     rejectReactions.push([
-      resolve,
-      reject,
-      reject,
+      internal,
+      false,
       onrejected,
     ]);
   }
@@ -356,30 +350,27 @@ function react(reactions: (FulfillReaction | RejectReaction)[], param: unknown):
       reaction[0],
       reaction[1],
       reaction[2],
-      reaction[3],
       param);
   }
 }
 
 function call(
-  resolve: (value: unknown) => void,
-  reject: (reason: unknown) => void,
-  cont: (value: unknown) => void,
-  callback: ((param: unknown) => unknown) | undefined | null,
+  internal: Internal<unknown>,
+  state: boolean,
+  procedure: ((param: unknown) => unknown) | undefined | null,
   param: unknown,
 ): void {
-  assert([resolve, reject].includes(cont));
-  if (!callback) return void cont(param);
+  if (!procedure) return state ? internal.resolve(param) : internal.reject(param);
   try {
-    resolve(callback(param));
+    internal.resolve(procedure(param));
   }
   catch (reason) {
-    reject(reason);
+    internal.reject(reason);
   }
 }
 
 export function isPromiseLike(value: any): value is PromiseLike<any> {
-  return value !== null && typeof value === 'object'
+  return value != null && typeof value === 'object'
       && typeof value.then === 'function';
 }
 

@@ -85,8 +85,9 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
     return reason => this.close$(reason);
   }
   public then<TResult1 = L, TResult2 = never>(onfulfilled?: ((value: L) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
-    return new AtomicPromise((resolve, reject) =>
-      this[internal].then(resolve, reject, onfulfilled, onrejected));
+    const p = new AtomicPromise<TResult1 | TResult2>(noop);
+    this[internal].then(p[internal], onfulfilled, onrejected);
+    return p;
   }
   public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<L | TResult> {
     return this.then(void 0, onrejected);

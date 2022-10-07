@@ -11,13 +11,6 @@ describe('Benchmark:', function () {
     longStackTraces: false,
   });
 
-  function chain(p: Promise<unknown>, n: number) {
-    for (let i = 0; i < n; ++i) {
-      p = p.then(n => n);
-    }
-    return p;
-  }
-
   describe('Promise', function () {
     it('Promise  resolve', function (done) {
       benchmark('Promise  resolve', () => void Promise.resolve(), done);
@@ -94,56 +87,6 @@ describe('Benchmark:', function () {
     it('AFuture  then', function (done) {
       const p = new AtomicFuture().bind();
       benchmark('AFuture  then', () => void p.then(noop), done);
-    });
-
-    it('Promise  chain 10', function (done) {
-      const p = Promise.resolve();
-      benchmark('Promise  chain 10', done => void chain(p, 9).then(done), done, { defer: true });
-    });
-
-    it('Bluebird chain 10', function (done) {
-      const p = Bluebird.resolve();
-      benchmark('Bluebird chain 10', done => void chain(p, 9).then(done), done, { defer: true });
-    });
-
-    it('APromise chain 10', function (done) {
-      const p = AtomicPromise.resolve();
-      benchmark('APromise chain 10', () => void chain(p, 10), done);
-    });
-
-    it('Future   chain 10', function (done) {
-      const p = new Future().bind();
-      benchmark('Future   chain 10', () => void chain(p, 10), done);
-    });
-
-    it('AFuture  chain 10', function (done) {
-      const p = new AtomicFuture().bind();
-      benchmark('AFuture  chain 10', () => void chain(p, 10), done);
-    });
-
-    it('Promise  chain 100', function (done) {
-      const p = Promise.resolve();
-      benchmark('Promise  chain 100', done => void chain(p, 99).then(done), done, { defer: true });
-    });
-
-    it('Bluebird chain 100', function (done) {
-      const p = Bluebird.resolve();
-      benchmark('Bluebird chain 100', done => void chain(p, 99).then(done), done, { defer: true });
-    });
-
-    it('APromise chain 100', function (done) {
-      const p = AtomicPromise.resolve();
-      benchmark('APromise chain 100', () => void chain(p, 100), done);
-    });
-
-    it('Future   chain 100', function (done) {
-      const p = new Future().bind();
-      benchmark('Future   chain 100', () => void chain(p, 100), done);
-    });
-
-    it('AFuture  chain 100', function (done) {
-      const p = new AtomicFuture().bind();
-      benchmark('AFuture  chain 100', () => void chain(p, 100), done);
     });
 
     it('Promise  all 2', function (done) {

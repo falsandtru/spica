@@ -1,5 +1,6 @@
 import { Promise } from './global';
 import { AtomicPromise, Internal, internal } from './promise';
+import { noop } from './function';
 
 export class Future<T = undefined> extends Promise<T> {
   public static get [Symbol.species]() {
@@ -47,8 +48,9 @@ export class AtomicFuture<T = undefined> implements AtomicPromise<T> {
     throw value;
   }
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
-    return new AtomicPromise((resolve, reject) =>
-      this[internal].then(resolve, reject, onfulfilled, onrejected));
+    const p = new AtomicPromise<TResult1 | TResult2>(noop);
+    this[internal].then(p[internal], onfulfilled, onrejected);
+    return p;
   }
   public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult> {
     return this.then(void 0, onrejected);
