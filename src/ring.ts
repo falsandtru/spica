@@ -1,8 +1,5 @@
-import { Array } from './global';
 import { max, min } from './alias';
 import { indexOf, splice } from './array';
-
-const undefined = void 0;
 
 type empty = typeof empty;
 const empty = Symbol('empty');

@@ -1,5 +1,4 @@
 import { benchmark } from './benchmark';
-import { Math, crypto } from '../src/global';
 import { rnd16, rnd62, rnd0f, rnd0Z, unique, xorshift, pcg32 } from '../src/random';
 
 describe('Benchmark:', function () {

@@ -1,4 +1,3 @@
-import { global, location } from './global';
 import { URL, StandardURL, standardize } from './url';
 
 describe('Unit: lib/url', () => {
@@ -17,31 +16,31 @@ describe('Unit: lib/url', () => {
       // @ts-expect-error
       assert.throws(() => new URL(''));
       assert(new URL('', location.href).href === location.href);
-      assert(new URL('', location.href).href === new global.URL('', location.href).href);
+      assert(new URL('', location.href).href === new globalThis.URL('', location.href).href);
       assert(new URL(' ', location.href).href === location.href);
-      assert(new URL(' ', location.href).href === new global.URL(' ', location.href).href);
+      assert(new URL(' ', location.href).href === new globalThis.URL(' ', location.href).href);
 
       assert.throws(() => new URL('http:' as URL.Origin<string>));
-      assert.throws(() => new global.URL('http:'));
-      assert(new URL('http:', location.href).href === new global.URL('http:', location.href).href);
+      assert.throws(() => new globalThis.URL('http:'));
+      assert(new URL('http:', location.href).href === new globalThis.URL('http:', location.href).href);
       assert.throws(() => new URL('http:/' as URL.Origin<string>));
-      assert.throws(() => new global.URL('http:/'));
-      assert(new URL('http:/', location.href).href === new global.URL('http:/', location.href).href);
+      assert.throws(() => new globalThis.URL('http:/'));
+      assert(new URL('http:/', location.href).href === new globalThis.URL('http:/', location.href).href);
       assert.throws(() => new URL('http://'));
-      assert.throws(() => new global.URL('http://'));
+      assert.throws(() => new globalThis.URL('http://'));
       assert.throws(() => new URL('http://', location.href));
-      assert.throws(() => new global.URL('http://', location.href));
+      assert.throws(() => new globalThis.URL('http://', location.href));
     });
 
     it('origin', () => {
       assert(new URL(origin).origin === origin);
       assert(new URL(origin + ':80' as any).origin === origin + ':80');
       assert(new URL(origin + ':443' as any).origin === origin + '');
-      assert(new URL('blob:').origin === new global.URL('blob:').origin);
-      assert(new URL('http://[::]').origin === new global.URL('http://[::]').origin);
-      assert(new URL('http://[::1]').origin === new global.URL('http://[::1]').origin);
-      assert(new URL('http://[::ffff:0:0]').origin === new global.URL('http://[::ffff:0:0]').origin);
-      assert(new URL('http://name:pass@domain').origin === new global.URL('http://name:pass@domain').origin);
+      assert(new URL('blob:').origin === new globalThis.URL('blob:').origin);
+      assert(new URL('http://[::]').origin === new globalThis.URL('http://[::]').origin);
+      assert(new URL('http://[::1]').origin === new globalThis.URL('http://[::1]').origin);
+      assert(new URL('http://[::ffff:0:0]').origin === new globalThis.URL('http://[::ffff:0:0]').origin);
+      assert(new URL('http://name:pass@domain').origin === new globalThis.URL('http://name:pass@domain').origin);
     });
 
     it('scheme', () => {

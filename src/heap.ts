@@ -1,9 +1,6 @@
-import { Array, Uint32Array, Map } from './global';
 import { min } from './alias';
 import { List as InvList } from './invlist';
 import { memoize } from './memoize';
-
-const undefined = void 0;
 
 // Max heap
 

@@ -1,4 +1,3 @@
-import { Array } from './global';
 import type { Narrow, Intersect } from './type';
 import { singleton } from './function';
 

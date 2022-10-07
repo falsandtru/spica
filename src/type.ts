@@ -1,4 +1,3 @@
-import { Symbol } from './global';
 import { isArray, toString, ObjectGetPrototypeOf } from './alias';
 
 type Falsy = undefined | false | 0 | '' | null | void;

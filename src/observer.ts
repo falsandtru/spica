@@ -1,5 +1,4 @@
 import type { Inits } from './type';
-import { Number, Map, WeakSet, Error } from './global';
 import { List } from './invlist';
 import { push } from './array';
 import { causeAsyncException } from './exception';
@@ -113,7 +112,7 @@ export class Observation<N extends readonly unknown[], D, R>
   constructor(opts?: ObservationOptions) {
     this.limit = opts?.limit ?? 10;
   }
-  private readonly node = new ListenerNode<N, D, R>(void 0);
+  private readonly node = new ListenerNode<N, D, R>(undefined);
   private readonly limit: number;
   public monitor(namespace: Readonly<N | Inits<N>>, monitor: Monitor<N, D>, options: ObserverOptions = {}): () => void {
     if (typeof monitor !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${monitor}`);

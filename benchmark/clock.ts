@@ -1,5 +1,4 @@
 import { benchmark } from './benchmark';
-import { Promise, queueMicrotask } from '../src/global';
 import { clock } from '../src/clock';
 
 describe('Benchmark:', function () {

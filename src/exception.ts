@@ -1,4 +1,3 @@
-import { Promise } from './global';
 import { Stack } from './stack';
 
 const stack = new Stack<unknown[]>();

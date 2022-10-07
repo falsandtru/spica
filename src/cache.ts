@@ -1,4 +1,3 @@
-import { Infinity, Map } from './global';
 import { min, round, ceil } from './alias';
 import { now } from './clock';
 import { IterableDict } from './dict';
@@ -236,7 +235,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
             ? LFU.last!
             : LFU.length !== 1
               ? LFU.last!.prev
-              : void 0;
+              : undefined;
           if (victim) {
             assert(victim !== skip);
             LRU.unshiftNode(victim);
@@ -248,7 +247,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
           ? LRU.last!
           : LRU.length !== 1
             ? LRU.last!.prev
-            : void 0;
+            : undefined;
         if (capture && !skip && victim) {
           assert(victim === LRU.last);
           skip = victim;

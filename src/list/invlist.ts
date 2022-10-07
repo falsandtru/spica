@@ -1,7 +1,5 @@
 // Circular Inverse List
 
-const undefined = void 0;
-
 type NodeType<T> = Node<T>;
 export namespace List {
   export type Node<T> = NodeType<T>;

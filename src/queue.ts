@@ -1,9 +1,6 @@
-import { Array, Map } from './global';
 import { Heap } from './heap';
 import { memoize } from './memoize';
 import { IterableDict } from './dict';
-
-const undefined = void 0;
 
 const size = 2048;
 const initsize = 16;
@@ -203,7 +200,7 @@ export class MultiQueue<K, V> implements IterableDict<K, V> {
   public take(key: K): V | undefined;
   public take(key: K, count: number): V[];
   public take(key: K, count?: number): V | undefined | V[] {
-    if (count === void 0) return this.pop(key);
+    if (count === undefined) return this.pop(key);
     const vs = this.dict.get(key);
     const acc: V[] = [];
     while (vs && !vs.isEmpty() && count--) {

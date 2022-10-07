@@ -1,4 +1,3 @@
-import { Promise } from './global';
 import { AtomicPromise, Internal, internal } from './promise';
 
 const state = Symbol('spica/future::state');

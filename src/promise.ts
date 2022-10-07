@@ -1,4 +1,3 @@
-import { Array } from './global';
 import { isArray } from './alias';
 import { noop } from './function';
 
@@ -228,7 +227,7 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
     return p;
   }
   public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult> {
-    return this.then(void 0, onrejected);
+    return this.then(undefined, onrejected);
   }
   public finally(onfinally?: (() => void) | undefined | null): AtomicPromise<T> {
     return this.then(onfinally, onfinally).then(() => this);

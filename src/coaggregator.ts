@@ -1,4 +1,3 @@
-import { Array, Error } from './global';
 import { Coroutine, CoroutineOptions } from './coroutine';
 import { AtomicPromise, never } from './promise';
 import { select } from './select';

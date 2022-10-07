@@ -1,4 +1,3 @@
-import { Array, Map } from '../global';
 import { IterableDict } from '../dict';
 import { Index } from '../index';
 
@@ -35,7 +34,7 @@ export class IxMap<K, V> implements IterableDict<K, V> {
     index ??= this.indexes.get(key) ?? -1;
     if (index === -1) return false;
     this.index.push(index);
-    this.values[index] = void 0 as V;
+    this.values[index] = undefined as V;
     return this.indexes.delete(key);
   }
   public clear(): void {

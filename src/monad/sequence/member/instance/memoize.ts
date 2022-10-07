@@ -1,4 +1,3 @@
-import { Map } from '../../../../global';
 import { Sequence } from '../../core';
 import { compose } from '../../../../helper/compose';
 import { memoize } from '../../../../memoize';

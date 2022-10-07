@@ -1,5 +1,4 @@
 import type { Structural, DeepImmutable, DeepRequired } from './type';
-import { Object, Promise, Error } from './global';
 import { isArray, ObjectAssign } from './alias';
 import { clock } from './clock';
 import { AtomicPromise, Internal as PInternal, internal as pinternal, isPromiseLike } from './promise';
@@ -64,19 +63,19 @@ export class Coroutine<T = unknown, R = T, S = unknown> implements AtomicPromise
         while (core.alive) {
           const { 0: { 0: msg, 1: rpy } } = ++count === 1
             // Don't block.
-            ? [[void 0, noop]]
+            ? [[undefined, noop]]
             // Block.
             : await Promise.all([
                 // Don't block.
                 core.settings.capacity < 0
-                  ? [void 0, noop] as const
+                  ? [undefined, noop] as const
                   : core.sendBuffer!.take() as unknown as [S, Reply<R, T>],
                 // Don't block.
                 Promise.all([
                   core.settings.resume(),
                   core.settings.interval > 0
                     ? wait(core.settings.interval)
-                    : void 0,
+                    : undefined,
                 ]),
               ]);
           reply = rpy;
@@ -114,10 +113,10 @@ export class Coroutine<T = unknown, R = T, S = unknown> implements AtomicPromise
       }
     };
     const core = this[internal];
-    assert(core.settings.capacity < 0 ? core.sendBuffer === void 0 : core.sendBuffer instanceof Channel);
+    assert(core.settings.capacity < 0 ? core.sendBuffer === undefined : core.sendBuffer instanceof Channel);
     assert(core.settings.capacity < 0 ? core.recvBuffer instanceof BroadcastChannel : core.recvBuffer instanceof Channel);
     this[pinternal].resolve(core.result.then(({ value }) => value));
-    if (core.settings.trigger !== void 0) {
+    if (core.settings.trigger !== undefined) {
       for (const prop of isArray(core.settings.trigger) ? core.settings.trigger : [core.settings.trigger]) {
         if (prop in this && this.hasOwnProperty(prop)) continue;
         if (prop in this) {
@@ -178,7 +177,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> implements AtomicPromise
           if (!core.alive) return;
           core.alive = false;
           // Don't block.
-          core.recvBuffer.put({ value: void 0, done: true });
+          core.recvBuffer.put({ value: undefined, done: true });
           core.result.bind({ value: result });
         },
         reason => {
@@ -186,7 +185,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> implements AtomicPromise
           if (!core.alive) return;
           core.alive = false;
           // Don't block.
-          core.recvBuffer.put({ value: void 0, done: true });
+          core.recvBuffer.put({ value: undefined, done: true });
           core.result.bind(AtomicPromise.reject(reason));
         });
   }
@@ -235,14 +234,14 @@ class Internal<T, R, S> {
     capacity: -1,
     interval: 0,
     resume: noop,
-    trigger: void 0 as any,
+    trigger: undefined as any,
   }, this.opts);
   public alive = true;
   public reception = 0;
   public readonly sendBuffer?: Channel<readonly [S, Reply<R, T>]> =
     this.settings.capacity >= 0
       ? new Channel(this.settings.capacity)
-      : void 0;
+      : undefined;
   public readonly recvBuffer: Channel<IteratorResult<R, T | undefined>> | BroadcastChannel<IteratorResult<R, T | undefined>> =
     this.settings.capacity >= 0
       // Block the iteration until an yielded value is consumed.

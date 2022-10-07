@@ -1,9 +1,6 @@
-import { Map } from './global';
 import { isArray } from './alias';
 import { Dict } from './dict';
 import { equal } from './compare';
-
-const undefined = void 0;
 
 export function memoize<f extends (...as: [unknown, ...unknown[]]) => unknown, b = Parameters<f>[0]>(f: f, memory?: Dict<b, ReturnType<f>>): f;
 export function memoize<f extends (...as: [number, ...unknown[]]) => unknown, b extends number = Parameters<f>[0]>(f: f, memory: ReturnType<f>[]): f;

@@ -1,5 +1,5 @@
+import './global';
 import type { DeepImmutable, DeepRequired } from './type';
-import { global, Infinity, Symbol, Object, Set, Map, WeakSet, setTimeout, clearTimeout, Error } from './global';
 import { isFinite, ObjectAssign } from './alias';
 import { clock } from './clock';
 import { Coroutine, ICoroutine, isCoroutine } from './coroutine';
@@ -90,7 +90,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     assert(this.alive === false);
     assert(this.available === false);
     this.settings.destructor(reason);
-    this.state.bind(reason === void 0 ? void 0 : AtomicPromise.reject(reason));
+    this.state.bind(reason === undefined ? undefined : AtomicPromise.reject(reason));
   }
   public readonly name: string;
   private readonly settings: DeepImmutable<DeepRequired<SupervisorOptions>> = {
@@ -230,7 +230,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       const name: N | undefined = names[Symbol.iterator]().next().value;
       this.$events?.loss.emit([name], [name, param]);
       try {
-        callback(new Error(`Spica: Supervisor: <${this.name}>: Message overflowed.`), void 0);
+        callback(new Error(`Spica: Supervisor: <${this.name}>: Message overflowed.`), undefined);
       }
       catch (reason) {
         causeAsyncException(reason);
@@ -254,12 +254,12 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       if (result = this.workers.get(name)?.call([param, expire])) break;
     }
     if (result) return result;
-    const n = typeof name === 'string' ? name : void 0;
+    const n = typeof name === 'string' ? name : undefined;
     this.$events?.loss.emit([n], [n, param]);
   }
   public refs(name?: N): [N, Supervisor.Process.Regular<P, R, S>, S, (reason?: unknown) => boolean][] {
     assert(this.available || this.workers.size === 0);
-    return name === void 0
+    return name === undefined
       ? [...this.workers.values()].map(convert)
       : this.workers.has(name)
         ? [convert(this.workers.get(name)!)]
@@ -293,7 +293,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     if (!this.available) return false;
     assert(this.alive === true);
     this.destructor(reason);
-    this[Coroutine.exit](void 0);
+    this[Coroutine.exit](undefined);
     return true;
   }
   public override [Coroutine.terminate](reason?: unknown): void {
@@ -314,8 +314,8 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       this.scheduled = false;
       this.deliver();
     });
-    this.settings.scheduler.call(void 0, p.bind);
-    this.settings.scheduler === global.requestAnimationFrame && setTimeout(p.bind, 1000);
+    this.settings.scheduler.call(undefined, p.bind);
+    this.settings.scheduler === requestAnimationFrame && setTimeout(p.bind, 1000);
   }
   // Bug: Karma and TypeScript
   private readonly messages = new Ring<[Iterable<N>, P, Supervisor.Callback<R>, number, ReturnType<typeof setTimeout> | 0]>();
@@ -341,14 +341,14 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       if (result) {
         result.then(
           reply =>
-            void callback(void 0, reply),
+            void callback(undefined, reply),
           () =>
-            void callback(new Error(`Spica: Supervisor: <${this.name}>: Process failed.`), void 0));
+            void callback(new Error(`Spica: Supervisor: <${this.name}>: Process failed.`), undefined));
       }
       else {
         this.$events?.loss.emit([name], [name, param]);
         try {
-          callback(new Error(`Spica: Supervisor: <${this.name}>: Message expired.`), void 0);
+          callback(new Error(`Spica: Supervisor: <${this.name}>: Message expired.`), undefined);
         }
         catch (reason) {
           causeAsyncException(reason);

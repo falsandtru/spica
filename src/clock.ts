@@ -1,8 +1,5 @@
-import { Date, Promise } from './global';
 import { Queue } from './queue';
 import { causeAsyncException } from './exception';
-
-const undefined = void 0;
 
 let time: number | undefined;
 let count = 0;

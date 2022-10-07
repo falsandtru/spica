@@ -1,5 +1,3 @@
-import { crypto } from './global';
-
 // Version 4
 
 const format = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';

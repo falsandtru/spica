@@ -1,4 +1,3 @@
-import { Object } from './global';
 import { Sequence } from './sequence';
 import { fix } from './function';
 import { memoize } from './memoize';

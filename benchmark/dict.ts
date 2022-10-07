@@ -1,5 +1,4 @@
 import { benchmark } from './benchmark';
-import { Map } from '../src/global';
 import { IxMap } from '../src/ixmap';
 import { MultiMap } from '../src/multimap';
 

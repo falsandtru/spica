@@ -31,7 +31,7 @@ describe('Unit: lib/promise', () => {
     it('then', async () => {
       assert(AtomicPromise.resolve().then() instanceof AtomicPromise);
       assert(AtomicPromise.resolve().then(() => Promise.resolve()) instanceof AtomicPromise);
-      assert(await AtomicPromise.resolve().then(function (this: unknown) { assert(this === void 0); return true; }));
+      assert(await AtomicPromise.resolve().then(function (this: unknown) { assert(this === undefined); return true; }));
       assert(await AtomicPromise.resolve(0) === 0);
       assert(await AtomicPromise.resolve(0).then(n => ++n) === 1);
       assert(await AtomicPromise.resolve(0).then(n => AtomicPromise.resolve(++n)) === 1);

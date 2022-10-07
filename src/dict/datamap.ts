@@ -1,4 +1,3 @@
-import { Map } from '../global';
 import { IterableDict } from '../dict';
 import { type } from '../type';
 import { memoize } from '../memoize';

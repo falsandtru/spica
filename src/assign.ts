@@ -1,4 +1,3 @@
-import { Object } from './global';
 import { hasOwnProperty, ObjectCreate } from './alias';
 import { type, isPrimitive } from './type';
 import { push } from './array';

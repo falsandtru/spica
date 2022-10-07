@@ -1,4 +1,3 @@
-import { setTimeout, clearTimeout } from './global';
 import { List } from './invlist';
 import { clock } from './clock';
 import { singleton, noop } from './function';

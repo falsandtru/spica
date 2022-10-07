@@ -1,5 +1,4 @@
 import { benchmark } from './benchmark';
-import { Promise } from '../src/global';
 import Bluebird from 'bluebird';
 import { AtomicPromise } from '../src/promise';
 import { AtomicFuture, Future } from '../src/future';
@@ -25,7 +24,7 @@ describe('Benchmark:', function () {
     });
 
     it('Promise  new', function (done) {
-      benchmark('Promise  new', () => void new Promise(resolve => resolve(void 0)), done);
+      benchmark('Promise  new', () => void new Promise(resolve => resolve(undefined)), done);
     });
 
     it('Bluebird new', function (done) {
@@ -33,7 +32,7 @@ describe('Benchmark:', function () {
     });
 
     it('APromise new', function (done) {
-      benchmark('APromise new', () => void new AtomicPromise(resolve => resolve(void 0)), done);
+      benchmark('APromise new', () => void new AtomicPromise(resolve => resolve(undefined)), done);
     });
 
     it('Future   new', function (done) {
@@ -70,7 +69,7 @@ describe('Benchmark:', function () {
     });
 
     it('Promise  run', function (done) {
-      benchmark('Promise  run', done => void new Promise(resolve => resolve(void 0)).then(done), done, { defer: true });
+      benchmark('Promise  run', done => void new Promise(resolve => resolve(undefined)).then(done), done, { defer: true });
     });
 
     it('Bluebird run', function (done) {
@@ -78,15 +77,15 @@ describe('Benchmark:', function () {
     });
 
     it('APromise run', function (done) {
-      benchmark('APromise run', () => void new AtomicPromise(resolve => resolve(void 0)).then(noop), done);
+      benchmark('APromise run', () => void new AtomicPromise(resolve => resolve(undefined)).then(noop), done);
     });
 
     it('Future   run', function (done) {
-      benchmark('Future   run', done => void new Future().bind(void 0).then(done), done, { defer: true });
+      benchmark('Future   run', done => void new Future().bind(undefined).then(done), done, { defer: true });
     });
 
     it('AFuture  run', function (done) {
-      benchmark('AFuture  run', () => void new AtomicFuture().bind(void 0).then(noop), done);
+      benchmark('AFuture  run', () => void new AtomicFuture().bind(undefined).then(noop), done);
     });
 
     it('Promise  run promise', function (done) {

@@ -1,4 +1,3 @@
-import { URLSearchParams } from './global';
 import { AbsoluteURL, ReadonlyURL } from './url/format';
 
 export { StandardURL, standardize } from './url/format';

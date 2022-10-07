@@ -4,7 +4,7 @@ import { type } from '../src/type';
 describe('Benchmark:', function () {
   describe('type', function () {
     it('undefined', function (done) {
-      benchmark('type undefined', () => type(void 0), done);
+      benchmark('type undefined', () => type(undefined), done);
     });
 
     it('number', function (done) {
@@ -12,7 +12,6 @@ describe('Benchmark:', function () {
     });
 
     it('function', function (done) {
-      const { Function } = global;
       benchmark('type function', () => type(Function), done);
     });
 

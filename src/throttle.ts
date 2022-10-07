@@ -1,4 +1,3 @@
-import { setTimeout } from './global';
 import { now } from './clock';
 import { causeAsyncException } from './exception';
 

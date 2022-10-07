@@ -77,7 +77,7 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
   }
   public close$(reason?: unknown): void {
     if (this.reason.length !== 0) return;
-    this.reason = [void 0, reason];
+    this.reason = [undefined, reason];
     this.listeners = [];
     assert(Object.freeze(this.listeners));
     this[internal].resolve(AtomicPromise.reject(reason));

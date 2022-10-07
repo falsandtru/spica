@@ -1,5 +1,3 @@
-import { Symbol, Object, Set, Promise } from './global';
-
 interface AsyncIterable<T = unknown, U = any, S = unknown> {
   [Symbol.asyncIterator](): AsyncIterator<T, U, S>;
 }

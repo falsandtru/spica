@@ -1,6 +1,6 @@
 import './global.type.ts';
 
-const global: { undefined: undefined } & typeof globalThis = void 0
+const global: { undefined: undefined } & typeof globalThis = undefined
   || typeof globalThis !== 'undefined' && globalThis
   // @ts-ignore
   || typeof self !== 'undefined' && self

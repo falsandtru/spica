@@ -1,7 +1,3 @@
-import { Symbol } from './global';
-
-const undefined = void 0;
-
 export function indexOf<a>(as: readonly a[], a: a): number {
   if (as.length === 0) return -1;
   return a === a

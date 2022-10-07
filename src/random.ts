@@ -1,5 +1,3 @@
-import { Number, Math, Set, crypto } from './global';
-
 const radixes = Object.freeze([...Array(7)].map((_, i) => 1 << i));
 assert.deepStrictEqual(radixes, [1, 2, 4, 8, 16, 32, 64]);
 const masks = Object.freeze(radixes.map(radix => radix - 1));

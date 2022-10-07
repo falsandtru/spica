@@ -1,5 +1,5 @@
+import '../global';
 import type { Mutable } from '../type';
-import { global, encodeURI, encodeURIComponent, URLSearchParams } from '../global';
 import { memoize } from '../memoize';
 import { Cache } from '../cache';
 
@@ -92,7 +92,7 @@ export class ReadonlyURL<T extends string = string> implements Readonly<global.U
     switch (source.slice(0, source.lastIndexOf('://', 9) + 1).toLowerCase()) {
       case 'http:':
       case 'https:':
-        base = void 0;
+        base = undefined;
         break;
       default:
         switch (base?.slice(0, base.lastIndexOf('://', 9) + 1).toLowerCase()) {

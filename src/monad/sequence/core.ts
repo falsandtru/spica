@@ -116,7 +116,7 @@ export namespace Sequence {
   }
   export type Iterator<a> = () => Thunk<a>;
   export namespace Iterator {
-    export const done: Sequence.Iterator<never> = () => <Sequence.Thunk<never>>[void 0, done, -1];
+    export const done: Sequence.Iterator<never> = () => <Sequence.Thunk<never>>[undefined, done, -1];
     export function when<a, b>(
       thunk: Thunk<a>,
       caseDone: (thunk: Thunk<a>) => b,

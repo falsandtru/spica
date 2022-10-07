@@ -1,4 +1,3 @@
-import { Map } from '../global';
 import { IterableDict } from '../dict';
 import { Ring } from '../ring';
 
@@ -50,7 +49,7 @@ export class MultiMap<K, V> implements IterableDict<K, V> {
   public take(key: K, count: number): V[];
   public take(key: K, count?: number): V | undefined | V[] {
     const vs = this.memory.get(key);
-    if (count === void 0) return vs?.shift();
+    if (count === undefined) return vs?.shift();
     const acc: V[] = [];
     while (vs?.length && count--) {
       acc.push(vs.shift()!);

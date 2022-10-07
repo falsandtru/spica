@@ -1,4 +1,3 @@
-import { Object, location } from './global';
 import { Coroutine } from './coroutine';
 import { Colistener } from './colistener';
 import { Cancellation } from './cancellation';
@@ -59,7 +58,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
         yield ev;
         if (ev.type === 'loadend') break;
       }
-      assert(state! !== void 0);
+      assert(state! !== undefined);
       switch (state!) {
         case 'load':
           if (opts.cache) {

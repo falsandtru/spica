@@ -6,10 +6,10 @@ describe('Benchmark:', function () {
 
   describe('URL', function () {
     describe('native', function () {
-      const url = new global.URL('', origin);
+      const url = new globalThis.URL('', origin);
 
       it('new', function (done) {
-        benchmark('URL native new', () => new global.URL('', origin), done);
+        benchmark('URL native new', () => new globalThis.URL('', origin), done);
       });
 
       it('href', function (done) {

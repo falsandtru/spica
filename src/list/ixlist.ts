@@ -1,10 +1,7 @@
-import { Array, Uint32Array } from '../global';
 import { max, min, isArray } from '../alias';
 import { Index } from '../index';
 
 // Circular Indexed List
-
-const undefined = void 0;
 
 export class List<T> {
   constructor(
