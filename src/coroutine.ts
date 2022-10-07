@@ -38,7 +38,7 @@ type Reply<R, T> = (msg: IteratorResult<R, T> | PromiseLike<never>) => void;
 
 const internal = Symbol.for('spica/coroutine::internal');
 
-export interface Coroutine<T = unknown, R = T, S = unknown> {
+export interface Coroutine<T, R, S> extends AtomicPromise<T> {
   constructor: typeof Coroutine;
 }
 export class Coroutine<T = unknown, R = T, S = unknown> implements AtomicPromise<T>, AsyncIterable<R>, ICoroutine<T, R, S> {
@@ -164,17 +164,6 @@ export class Coroutine<T = unknown, R = T, S = unknown> implements AtomicPromise
     }
   }
   public readonly [pinternal] = new PInternal<T>();
-  public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
-    const p = new AtomicPromise<TResult1 | TResult2>(noop);
-    this[pinternal].then(p[pinternal], onfulfilled, onrejected);
-    return p;
-  }
-  public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<T | TResult> {
-    return this.then(void 0, onrejected);
-  }
-  public finally(onfinally?: (() => void) | undefined | null): AtomicPromise<T> {
-    return this.then(onfinally, onfinally).then(() => this);
-  }
   public readonly [internal]: Internal<T, R, S>;
   public get [alive](): boolean {
     return this[internal].alive;
@@ -216,6 +205,9 @@ export class Coroutine<T = unknown, R = T, S = unknown> implements AtomicPromise
   }
   public readonly [port]: Structural<Port<T, R, S>> = new Port(this);
 }
+Coroutine.prototype.then = AtomicPromise.prototype.then;
+Coroutine.prototype.catch = AtomicPromise.prototype.catch;
+Coroutine.prototype.finally = AtomicPromise.prototype.finally;
 
 class Internal<T, R, S> {
   constructor(

@@ -21,6 +21,7 @@ export interface Cancellee<L = undefined> extends Promise<L> {
 }
 type Listener<L> = (reason: L) => void;
 
+export interface Cancellation<L> extends AtomicPromise<L> { }
 export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, AtomicPromise<L> {
   public readonly [Symbol.toStringTag]: string = 'Cancellation';
   constructor(cancellees?: Iterable<Cancellee<L>>) {
@@ -84,17 +85,6 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
   public get close(): (reason?: unknown) => void {
     return reason => this.close$(reason);
   }
-  public then<TResult1 = L, TResult2 = never>(onfulfilled?: ((value: L) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
-    const p = new AtomicPromise<TResult1 | TResult2>(noop);
-    this[internal].then(p[internal], onfulfilled, onrejected);
-    return p;
-  }
-  public catch<TResult = never>(onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | undefined | null): AtomicPromise<L | TResult> {
-    return this.then(void 0, onrejected);
-  }
-  public finally(onfinally?: (() => void) | undefined | null): AtomicPromise<L> {
-    return this.then(onfinally, onfinally).then(() => this);
-  }
   public get promise(): <T>(value: T) => AtomicPromise<T> {
     return value =>
       this.isCancelled()
@@ -118,3 +108,6 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
             : Right(value));
   }
 }
+Cancellation.prototype.then = AtomicPromise.prototype.then;
+Cancellation.prototype.catch = AtomicPromise.prototype.catch;
+Cancellation.prototype.finally = AtomicPromise.prototype.finally;
