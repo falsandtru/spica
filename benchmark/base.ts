@@ -44,7 +44,7 @@ describe('Benchmark:', function () {
       benchmark('PQueue new', () => new PriorityQueue(), done);
     });
 
-    for (const length of [1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
+    for (const length of [1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7]) {
       it(`Index        ${length.toLocaleString('en')}`, function (done) {
         const data = new Index;
         for (let i = 0; i < length; ++i) data.pop();

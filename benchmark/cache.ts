@@ -86,7 +86,7 @@ describe('Benchmark:', function () {
       });
     }
 
-    for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
+    for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7]) {
       it(`LRU simulation ${length.toLocaleString('en')}`, function (done) {
         const capacity = length;
         const cache = new LRUCache<number, object>({ max: capacity });
