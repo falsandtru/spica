@@ -244,7 +244,7 @@ export class Internal<T> {
     return this.status.state === State.pending;
   }
   public resolve(value: T | PromiseLike<T>): void {
-    if (this.status.state !== State.pending) return;
+    if (!this.isPending()) return;
     if (!isPromiseLike(value)) {
       this.status = {
         state: State.fulfilled,
@@ -278,7 +278,7 @@ export class Internal<T> {
       });
   }
   public reject(reason: unknown): void {
-    if (this.status.state !== State.pending) return;
+    if (!this.isPending()) return;
     this.status = {
       state: State.rejected,
       reason,
