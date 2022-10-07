@@ -15,6 +15,10 @@ export class Future<T = undefined> extends Promise<T> {
       resolve,
     };
   }
+  private readonly [state]: {
+    pending: boolean,
+    resolve: (value: T | PromiseLike<T>) => void,
+  };
   private bind$(value: T | PromiseLike<T>): Promise<T>;
   private bind$(this: Future<undefined>, value?: T | PromiseLike<T>): Promise<T>;
   private bind$(value: T | PromiseLike<T>): Promise<T> {
