@@ -11,7 +11,7 @@ describe('Unit: lib/cancellation', () => {
         assert(cancellation.isAlive() === false);
         assert(cancellation.isCancelled() === true);
         assert(cancellation.isClosed() === false);
-        unregister();
+        assert(unregister() === undefined);
         cancellation.register(n => {
           assert(cnt === 2 && ++cnt);
           assert(n === 0);

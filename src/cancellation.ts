@@ -40,9 +40,6 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
   public isClosed(): boolean {
     return this.reason.length === 2;
   }
-  public isFinished(): boolean {
-    return this.reason.length !== 0;
-  }
   public register$(listener: Listener<L>): () => void {
     const { listeners, reason } = this;
     if (reason.length !== 0 && listeners.length === 0) {
@@ -50,7 +47,7 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
       return noop;
     }
     listeners.push(handler);
-    return () => listener = noop;
+    return () => void (listener = noop);
 
     function handler(reason: L): void {
       try {
