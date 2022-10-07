@@ -203,14 +203,10 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
   public static resolve(): AtomicPromise<undefined>;
   public static resolve<T>(value: T | PromiseLike<T>): AtomicPromise<T>;
   public static resolve<T>(value?: T | PromiseLike<T>): AtomicPromise<T> {
-    const p = new AtomicPromise<T>(noop);
-    p[internal].resolve(value!);
-    return p;
+    return new AtomicPromise<T>(resolve => resolve(value!));
   }
   public static reject<T = never>(reason?: unknown): AtomicPromise<T> {
-    const p = new AtomicPromise<T>(noop);
-    p[internal].reject(reason);
-    return p;
+    return new AtomicPromise<T>((_, reject) => reject(reason));
   }
   constructor(
     executor: (resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: unknown) => void) => void,
