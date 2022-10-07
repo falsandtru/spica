@@ -8,7 +8,7 @@ describe('Benchmark:', function () {
       it(`for ${length.toLocaleString('en')}`, function (done) {
         benchmark(`for ${length.toLocaleString('en')}`, () => {
           let acc = 0;
-          for (let i = 0; i < 1; ++i) {
+          for (let i = 0; i < length; ++i) {
             acc += arr[i];
           }
           acc;
