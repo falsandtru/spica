@@ -44,26 +44,6 @@ describe('Benchmark:', function () {
       benchmark('AFuture  new', () => void new AtomicFuture().bind(), done);
     });
 
-    it('Promise  run', function (done) {
-      benchmark('Promise  run', done => void new Promise(resolve => resolve(clock)).then(done), done, { defer: true });
-    });
-
-    it('Bluebird run', function (done) {
-      benchmark('Bluebird run', done => void new Bluebird(resolve => resolve(clock)).then(done), done, { defer: true });
-    });
-
-    it('APromise run', function (done) {
-      benchmark('APromise run', done => void new AtomicPromise(resolve => resolve(clock)).then(done), done, { defer: true });
-    });
-
-    it('Future   run', function (done) {
-      benchmark('Future   run', done => void new Future().bind(clock).then(done), done, { defer: true });
-    });
-
-    it('AFuture  run', function (done) {
-      benchmark('AFuture  run', done => void new AtomicFuture().bind(clock).then(done), done, { defer: true });
-    });
-
     it('Promise  then', function (done) {
       const p = Promise.resolve();
       benchmark('Promise  then', () => void p.then(noop), done);
@@ -87,6 +67,46 @@ describe('Benchmark:', function () {
     it('AFuture  then', function (done) {
       const p = new AtomicFuture().bind();
       benchmark('AFuture  then', () => void p.then(noop), done);
+    });
+
+    it('Promise  run', function (done) {
+      benchmark('Promise  run', done => void new Promise(resolve => resolve(void 0)).then(done), done, { defer: true });
+    });
+
+    it('Bluebird run', function (done) {
+      benchmark('Bluebird run', done => void new Bluebird(resolve => resolve()).then(done), done, { defer: true });
+    });
+
+    it('APromise run', function (done) {
+      benchmark('APromise run', () => void new AtomicPromise(resolve => resolve(void 0)).then(noop), done);
+    });
+
+    it('Future   run', function (done) {
+      benchmark('Future   run', done => void new Future().bind(void 0).then(done), done, { defer: true });
+    });
+
+    it('AFuture  run', function (done) {
+      benchmark('AFuture  run', () => void new AtomicFuture().bind(void 0).then(noop), done);
+    });
+
+    it('Promise  run promise', function (done) {
+      benchmark('Promise  run promise', done => void new Promise(resolve => resolve(clock)).then(done), done, { defer: true });
+    });
+
+    it('Bluebird run promise', function (done) {
+      benchmark('Bluebird run promise', done => void new Bluebird(resolve => resolve(clock)).then(done), done, { defer: true });
+    });
+
+    it('APromise run promise', function (done) {
+      benchmark('APromise run promise', done => void new AtomicPromise(resolve => resolve(clock)).then(done), done, { defer: true });
+    });
+
+    it('Future   run promise', function (done) {
+      benchmark('Future   run promise', done => void new Future().bind(clock).then(done), done, { defer: true });
+    });
+
+    it('AFuture  run promise', function (done) {
+      benchmark('AFuture  run promise', done => void new AtomicFuture().bind(clock).then(done), done, { defer: true });
     });
 
     it('Promise  all 2', function (done) {

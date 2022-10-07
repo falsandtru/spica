@@ -11,6 +11,7 @@ export function benchmark(name: string, proc: (done: () => void) => unknown, don
   new Benchmark.Suite()
     .add({
       minSamples: 60,
+      async: true,
       ...options,
       name,
       fn: (d: any) => proc(() => d.resolve()),
@@ -19,5 +20,5 @@ export function benchmark(name: string, proc: (done: () => void) => unknown, don
       console.log(String(event.target));
     })
     .on('complete', () => done())
-    .run({ async: true });
+    .run();
 }
