@@ -2,50 +2,55 @@ import { Promise } from './global';
 import { AtomicPromise, Internal, internal } from './promise';
 import { noop } from './function';
 
+const state = Symbol('spica/future::state');
+
 export class Future<T = undefined> extends Promise<T> {
   public static get [Symbol.species]() {
     return Promise;
   }
-  constructor(strict: boolean = true) {
+  constructor(private readonly strict: boolean = true) {
     let resolve!: (v: T | PromiseLike<T>) => void;
     super(r => resolve = r);
-    let done = false;
-    this.bind = (value: T | PromiseLike<T>): Promise<T> => {
-      if (done) {
-        if (!strict) return this;
-        throw new Error(`Spica: Future: Cannot rebind the value.`);
-      }
-      done = true;
-      resolve(value);
-      return this;
+    this[state] = {
+      pending: true,
+      resolve,
     };
   }
-  public bind(value: T | PromiseLike<T>): Promise<T>;
-  public bind(this: Future<undefined>, value?: T | PromiseLike<T>): Promise<T>;
-  public bind(value: T | PromiseLike<T>): Promise<T> {
-    throw value;
+  private bind$(value: T | PromiseLike<T>): Promise<T>;
+  private bind$(this: Future<undefined>, value?: T | PromiseLike<T>): Promise<T>;
+  private bind$(value: T | PromiseLike<T>): Promise<T> {
+    if (this[state].pending) {
+      this[state].pending = false;
+      this[state].resolve(value);
+    }
+    else if (this.strict) {
+      throw new Error(`Spica: Future: Cannot rebind the value.`);
+    }
+    return this;
+  }
+  public get bind(): Future<T>['bind$'] {
+    return value => this.bind$(value!);
   }
 }
 
 export class AtomicFuture<T = undefined> implements AtomicPromise<T> {
   public readonly [Symbol.toStringTag]: string = 'Promise';
-  constructor(strict: boolean = true) {
-    let done = false;
-    this.bind = (value: T | PromiseLike<T>): AtomicPromise<T> => {
-      if (done) {
-        if (!strict) return this;
-        throw new Error(`Spica: AtomicFuture: Cannot rebind the value.`);
-      }
-      done = true;
-      this[internal].resolve(value);
-      return this;
-    };
+  constructor(private readonly strict: boolean = true) {
   }
   public readonly [internal] = new Internal<T>();
-  public bind(value: T | PromiseLike<T>): AtomicPromise<T>;
-  public bind(this: AtomicFuture<undefined>, value?: T | PromiseLike<T>): AtomicPromise<T>;
-  public bind(value: T | PromiseLike<T>): AtomicPromise<T> {
-    throw value;
+  private bind$(value: T | PromiseLike<T>): AtomicPromise<T>;
+  private bind$(this: AtomicFuture<undefined>, value?: T | PromiseLike<T>): AtomicPromise<T>;
+  private bind$(value: T | PromiseLike<T>): AtomicPromise<T> {
+    if (this[internal].isPending()) {
+      this[internal].resolve(value);
+    }
+    else if (this.strict) {
+      throw new Error(`Spica: AtomicFuture: Cannot rebind the value.`);
+    }
+    return this;
+  }
+  public get bind(): AtomicFuture<T>['bind$'] {
+    return value => this.bind$(value!);
   }
   public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null): AtomicPromise<TResult1 | TResult2> {
     const p = new AtomicPromise<TResult1 | TResult2>(noop);
