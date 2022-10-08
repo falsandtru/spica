@@ -209,7 +209,7 @@ export class Observation<N extends readonly unknown[], D, R>
           causeAsyncException(reason);
         }
         node.alive && recents.push(node);
-        node = node.next ?? prev?.next ?? findLast(recents, item => item.next) ?? items.head;
+        node = node.next ?? prev?.next ?? rollback(recents, item => item.next) ?? items.head;
         prev = node?.prev;
       }
     }
@@ -233,7 +233,7 @@ export class Observation<N extends readonly unknown[], D, R>
           causeAsyncException(reason);
         }
         node.alive && recents.push(node);
-        node = node.next ?? prev?.next ?? findLast(recents, item => item.next) ?? items.head;
+        node = node.next ?? prev?.next ?? rollback(recents, item => item.next) ?? items.head;
         prev = node?.prev;
       }
     }
@@ -313,9 +313,9 @@ export class Observation<N extends readonly unknown[], D, R>
   }
 }
 
-function findLast<T>(array: T[], f: (value: T) => unknown): T | undefined {
+function rollback<T>(array: T[], matcher: (value: T) => unknown): T | undefined {
   for (let i = array.length; i--;) {
-    if (f(array[i])) return array[i];
+    if (matcher(array[i])) return array[i];
     array.pop();
   }
 }
