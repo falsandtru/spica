@@ -188,7 +188,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     const entry = node.value;
     assert(node.list);
-    this.overlap -= +(entry.region === 'LFU' && node.list === this.indexes.LRU);
+    entry.region === 'LFU' && node.list === this.indexes.LRU && --this.overlap;
     assert(this.overlap >= 0);
     if (entry.eid !== -1) {
       this.expiries!.delete(entry.eid);
@@ -238,6 +238,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
               : undefined;
           if (victim) {
             assert(victim !== skip);
+            assert(victim.value.region === 'LFU');
             LRU.unshiftNode(victim);
             ++this.overlap;
             assert(this.overlap <= LRU.length);
@@ -290,7 +291,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       const value$ = entry.value;
       if (!match) {
         assert(node === LRU.last);
-        this.overlap -= +(entry.region === 'LFU');
+        entry.region === 'LFU' && --this.overlap;
+        assert(this.overlap >= 0);
         this.memory.delete(key$);
         this.memory.set(key, node);
         entry.key = key;
@@ -411,22 +413,26 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     }
     return;
   }
-  private access(node: List.Node<Entry<K, V>>): boolean {
+  private access(node: List.Node<Entry<K, V>>): void {
     const entry = node.value;
+    const { region } = entry;
     const { LRU, LFU } = this.indexes;
     if (node.list === LRU) {
-      ++this.stats[entry.region][0];
-      this.overlap -= +(entry.region === 'LFU');
-      assert(this.overlap >= 0);
-      entry.region = 'LFU';
+      ++this.stats[region][0];
+      if (region === 'LFU') {
+        --this.overlap;
+        assert(this.overlap >= 0);
+      }
+      else {
+        entry.region = 'LFU';
+      }
       assert(this.indexes.LFU.length < this.capacity);
       LFU.unshiftNode(node);
     }
     else {
-      ++this.stats[entry.region][0];
+      ++this.stats[region][0];
       node.moveToHead();
     }
-    return true;
   }
   private misses = 0;
   private threshold: number;
