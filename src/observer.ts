@@ -196,6 +196,7 @@ export class Observation<N extends readonly unknown[], D, R>
       const recents: List.Node<SubscriberItem<N, D, R>>[] = [];
       const max = items.last!.value.id;
       let min = 0;
+      let prev: typeof recents[0] | undefined;
       for (let node = items.head; node && min < node.value.id && node.value.id <= max;) {
         min = node.value.id;
         const item = node.value;
@@ -208,8 +209,8 @@ export class Observation<N extends readonly unknown[], D, R>
           causeAsyncException(reason);
         }
         node.alive && recents.push(node);
-        // TODO: Use Array.findLast.
-        node = node.next ?? findLast(recents, item => item.next) ?? items.head;
+        node = node.next ?? prev?.next ?? findLast(recents, item => item.next) ?? items.head;
+        prev = node?.prev;
       }
     }
     node ??= this.seek(namespace, SeekMode.Closest);
@@ -220,6 +221,7 @@ export class Observation<N extends readonly unknown[], D, R>
       const recents: List.Node<MonitorItem<N, D>>[] = [];
       const max = items.last!.value.id;
       let min = 0;
+      let prev: typeof recents[0] | undefined;
       for (let node = items.head; node && min < node.value.id && node.value.id <= max;) {
         min = node.value.id;
         const item = node.value;
@@ -231,8 +233,8 @@ export class Observation<N extends readonly unknown[], D, R>
           causeAsyncException(reason);
         }
         node.alive && recents.push(node);
-        // TODO: Use Array.findLast.
-        node = node.next ?? findLast(recents, item => item.next) ?? items.head;
+        node = node.next ?? prev?.next ?? findLast(recents, item => item.next) ?? items.head;
+        prev = node?.prev;
       }
     }
     if (tracker) {
