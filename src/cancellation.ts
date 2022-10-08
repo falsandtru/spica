@@ -29,22 +29,22 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
       cancellee.register(this.cancel);
     }
   }
-  private reason: [] | [L] | [void, unknown] = [];
+  private state: [] | [L] | [void, unknown] = [];
   private listeners: Listener<L>[] = [];
   public readonly [internal] = new Internal<L>();
   public isAlive(): boolean {
-    return this.reason.length === 0;
+    return this.state.length === 0;
   }
   public isCancelled(): boolean {
-    return this.reason.length === 1;
+    return this.state.length === 1;
   }
   public isClosed(): boolean {
-    return this.reason.length === 2;
+    return this.state.length === 2;
   }
   public register$(listener: Listener<L>): () => void {
-    const { listeners, reason } = this;
-    if (reason.length !== 0 && listeners.length === 0) {
-      reason.length === 1 && handler(reason[0]);
+    const { listeners, state } = this;
+    if (!this.isAlive() && listeners.length === 0) {
+      state.length === 1 && handler(state[0]);
       return noop;
     }
     listeners.push(handler);
@@ -63,8 +63,8 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
     return listener => this.register$(listener);
   }
   public cancel$(reason?: L): void {
-    if (this.reason.length !== 0) return;
-    this.reason = [reason!];
+    if (!this.isAlive()) return;
+    this.state = [reason!];
     for (let { listeners } = this, i = 0; i < listeners.length; ++i) {
       listeners[i](reason!);
     }
@@ -76,8 +76,8 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
     return reason => this.cancel$(reason);
   }
   public close$(reason?: unknown): void {
-    if (this.reason.length !== 0) return;
-    this.reason = [undefined, reason];
+    if (!this.isAlive()) return;
+    this.state = [undefined, reason];
     this.listeners = [];
     assert(Object.freeze(this.listeners));
     this[internal].resolve(AtomicPromise.reject(reason));
@@ -88,7 +88,7 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
   public get promise(): <T>(value: T) => AtomicPromise<T> {
     return value =>
       this.isCancelled()
-        ? AtomicPromise.reject(this.reason[0])
+        ? AtomicPromise.reject(this.state[0])
         : AtomicPromise.resolve(value);
   }
   public get maybe(): <T>(value: T) => Maybe<T> {
@@ -104,7 +104,7 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
       Right<L, typeof value>(value)
         .bind(value =>
           this.isCancelled()
-            ? Left(this.reason[0] as L)
+            ? Left(this.state[0] as L)
             : Right(value));
   }
 }
