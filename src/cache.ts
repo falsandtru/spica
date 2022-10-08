@@ -283,7 +283,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     let node = this.memory.get(key);
     const match = !!node;
     node = this.ensure(size, node, true);
-    if (node) {
+    if (node !== undefined) {
       assert(node.list);
       const entry = node.value;
       const key$ = entry.key;
@@ -344,7 +344,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
   public get(key: K): V | undefined {
     const node = this.memory.get(key);
-    if (!node) {
+    if (node === undefined) {
       ++this.misses;
       return;
     }
@@ -365,7 +365,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
   public has(key: K): boolean {
     const node = this.memory.get(key);
-    if (!node) return false;
+    if (node === undefined) return false;
     const entry = node.value;
     const expiry = entry.expiry;
     if (expiry !== Infinity && expiry < now()) {
@@ -376,7 +376,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
   public delete(key: K): boolean {
     const node = this.memory.get(key);
-    if (!node) return false;
+    if (node === undefined) return false;
     this.evict(node, this.settings.capture!.delete === true);
     return true;
   }
