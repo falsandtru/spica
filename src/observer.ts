@@ -1,3 +1,4 @@
+import { MAX_SAFE_INTEGER } from './alias';
 import { Inits } from './type';
 import { List } from './invlist';
 import { push } from './array';
@@ -119,7 +120,7 @@ export class Observation<N extends readonly unknown[], D, R>
     const node = this.seek(namespace, SeekMode.Extensible);
     const monitors = node.monitors;
     if (monitors.length === this.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
-    node.mid === Number.MAX_SAFE_INTEGER && node.reset(monitors);
+    node.mid === MAX_SAFE_INTEGER && node.reset(monitors);
     const inode = monitors.push({
       id: ++node.mid,
       type: ListenerType.Monitor,
@@ -134,7 +135,7 @@ export class Observation<N extends readonly unknown[], D, R>
     const node = this.seek(namespace, SeekMode.Extensible);
     const subscribers = node.subscribers;
     if (subscribers.length === this.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
-    node.sid === Number.MAX_SAFE_INTEGER && node.reset(subscribers);
+    node.sid === MAX_SAFE_INTEGER && node.reset(subscribers);
     const inode = subscribers.push({
       id: ++node.sid,
       type: ListenerType.Subscriber,

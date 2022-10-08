@@ -1,5 +1,8 @@
 export const {
-  NaN,
+  MAX_SAFE_INTEGER,
+  MAX_VALUE,
+  MIN_SAFE_INTEGER,
+  MIN_VALUE,
   isFinite,
   isInteger,
   isNaN,
