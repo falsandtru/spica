@@ -1,5 +1,5 @@
 import './global';
-import type { DeepImmutable, DeepRequired } from './type';
+import { DeepImmutable, DeepRequired } from './type';
 import { isFinite, ObjectAssign } from './alias';
 import { clock } from './clock';
 import { Coroutine, ICoroutine, isCoroutine } from './coroutine';

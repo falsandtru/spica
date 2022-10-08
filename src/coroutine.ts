@@ -1,4 +1,4 @@
-import type { Structural, DeepImmutable, DeepRequired } from './type';
+import { Structural, DeepImmutable, DeepRequired } from './type';
 import { isArray, ObjectAssign } from './alias';
 import { clock } from './clock';
 import { AtomicPromise, Internal as PInternal, internal as pinternal, isPromiseLike } from './promise';

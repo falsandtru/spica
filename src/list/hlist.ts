@@ -1,4 +1,4 @@
-import type { Tail, Reverse } from '../type';
+import { Tail, Reverse } from '../type';
 import { unshift } from '../array';
 
 export type HList<as extends [] | [unknown, ...unknown[]]> =

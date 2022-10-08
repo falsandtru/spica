@@ -1,5 +1,5 @@
 import '../global';
-import type { Mutable } from '../type';
+import { Mutable } from '../type';
 import { memoize } from '../memoize';
 import { Cache } from '../cache';
 

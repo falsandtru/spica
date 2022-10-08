@@ -1,4 +1,4 @@
-import type { Inits } from './type';
+import { Inits } from './type';
 import { List } from './invlist';
 import { push } from './array';
 import { causeAsyncException } from './exception';

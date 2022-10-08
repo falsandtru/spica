@@ -1,4 +1,4 @@
-import type { Narrow, Intersect } from './type';
+import { Narrow, Intersect } from './type';
 import { singleton } from './function';
 
 type Function = (...args: unknown[]) => unknown;
