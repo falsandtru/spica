@@ -24,7 +24,8 @@ export class List<T> {
     return this.head = this.push(value);
   }
   public push(value: T): List.Node<T> {
-    return new Node(this, value, this.head!, this.head?.prev!);
+    const head = this.head!;
+    return new Node(this, value, head, head?.prev);
   }
   public unshiftNode(node: List.Node<T>): List.Node<T> {
     return this.head = this.pushNode(node);
@@ -34,14 +35,14 @@ export class List<T> {
   }
   public unshiftRotationally(value: T): List.Node<T> {
     const node = this.last;
-    if (!node) return this.unshift(value);
+    if (node === undefined) return this.unshift(value);
     node.value = value;
     this.head = node;
     return node;
   }
   public pushRotationally(value: T): List.Node<T> {
     const node = this.head;
-    if (!node) return this.push(value);
+    if (node === undefined) return this.push(value);
     node.value = value;
     this.head = node.next;
     return node;
@@ -55,8 +56,9 @@ export class List<T> {
   public insert(node: List.Node<T>, before: List.Node<T> | undefined = this.head): List.Node<T> {
     if (node.list === this) return node.move(before), node;
     node.delete();
-    ++this.$length;
-    this.head ??= node;
+    if (this.$length++ === 0) {
+      this.head = node;
+    }
     node.list = this;
     const next = node.next = before ?? node;
     const prev = node.prev = next.prev ?? node;
@@ -105,33 +107,33 @@ class Node<T> {
     public next: List.Node<T>,
     public prev: List.Node<T>,
   ) {
-    ++list['$length'];
     list.head ??= this;
-    next && prev
-      ? next.prev = prev.next = this
-      : this.next = this.prev = this;
+    if (list['$length']++ === 0) {
+      this.next = this.prev = this;
+    }
+    else {
+      next.prev = prev.next = this;
+    }
   }
   public get alive(): boolean {
     return this.list !== undefined;
   }
   public delete(): T {
     const list = this.list;
-    if (!list) return this.value;
-    --list['$length'];
+    if (list === undefined) return this.value;
     const { next, prev } = this;
-    if (list.head === this) {
-      list.head = next === this
-        ? undefined
-        : next;
+    if (--list['$length'] === 0) {
+      list.head = undefined;
     }
-    if (next) {
+    else {
       next.prev = prev;
-    }
-    if (prev) {
       prev.next = next;
+      if (this === list.head) {
+        list.head = next;
+      }
     }
-    this.list = undefined as any;
     this.next = this.prev = undefined as any;
+    this.list = undefined as any;
     return this.value;
   }
   public insertBefore(value: T): List.Node<T> {
@@ -141,7 +143,7 @@ class Node<T> {
     return new Node(this.list, value, this.next, this);
   }
   public move(before: List.Node<T> | undefined): boolean {
-    if (!before) return false;
+    if (before === undefined) return false;
     if (this === before) return false;
     if (before.list !== this.list) return before.list.insert(this, before), true;
     const a1 = this;
