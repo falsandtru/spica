@@ -86,7 +86,17 @@ describe('Benchmark:', function () {
       });
     }
 
-    for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7]) {
+    // 1e7はシミュだけ実行するとLRU単体でもGitHub Actionsの次の環境とエラーで落ちる。
+    // ベンチ全体を実行したときはなぜか落ちない。
+    //
+    // Error: Uncaught RangeError: Map maximum size exceeded (dist/index.js:16418)
+    //
+    // System:
+    //   OS: Linux 5.15 Ubuntu 20.04.5 LTS (Focal Fossa)
+    //   CPU: (2) x64 Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz
+    //   Memory: 5.88 GB / 6.78 GB
+    //
+    for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`LRU simulation ${length.toLocaleString('en')}`, function (done) {
         const capacity = length;
         const cache = new LRUCache<number, object>({ max: capacity });
