@@ -1,6 +1,7 @@
 const radixes = Object.freeze([...Array(7)].map((_, i) => 1 << i));
 assert.deepStrictEqual(radixes, [1, 2, 4, 8, 16, 32, 64]);
 const masks = Object.freeze(radixes.map(radix => radix - 1));
+
 const dict0_ = [
   ...[...Array(36)].map((_, i) => i.toString(36)),
   ...[...Array(36)].map((_, i) => i.toString(36).toUpperCase()).slice(-26),
@@ -91,36 +92,29 @@ function conv(rnd: () => number, dict: string): (len?: number) => string {
 
 const buffer = new Uint16Array(512);
 const digit = 16;
-let index = buffer.length;
-let rnd = 2 ** digit;
-let offset = digit;
+let index = 0;
+let buf = 0;
+let offset = 0;
 
 function random(len: 1 | 2 | 3 | 4 | 5 | 6): number {
-  assert(0 < len && len <= 6);
-  if (rnd === 2 ** digit) {
-    assert(index === buffer.length);
-    crypto.getRandomValues(buffer);
-    index = 0;
-    rnd = buffer[index];
-    assert(offset === digit);
+  assert(1 <= len && len <= 6);
+  assert(offset < digit);
+  if (offset < len) {
+    if (index === 0) {
+      crypto.getRandomValues(buffer);
+      index = buffer.length - 1;
+      buf = buffer[index];
+      offset = digit;
+    }
+    else {
+      buf = buf << digit | buffer[--index];
+      offset += digit;
+      assert(1 << offset > 0);
+    }
   }
-  if (offset === len) {
-    offset = digit;
-    const r = rnd & masks[len];
-    rnd = buffer[++index] ?? 2 ** digit;
-    return r;
-  }
-  else if (offset > len) {
-    assert(offset > len);
-    offset -= len;
-    return rnd >> offset & masks[len];
-  }
-  else {
-    assert(offset < len);
-    offset = digit;
-    rnd = buffer[++index] ?? 2 ** digit;
-    return random(len);
-  }
+  assert(offset >= len);
+  offset -= len;
+  return buf >> offset & masks[len];
 }
 
 export function xorshift(seed: number = xorshift.seed()): () => number {
