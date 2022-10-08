@@ -314,5 +314,6 @@ export class Observation<N extends readonly unknown[], D, R>
 function findLast<T>(array: T[], f: (value: T) => unknown): T | undefined {
   for (let i = array.length; i--;) {
     if (f(array[i])) return array[i];
+    array.pop();
   }
 }
