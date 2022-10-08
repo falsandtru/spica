@@ -77,12 +77,13 @@ export function splice<a>(as: a[], index: number, count?: number, ...values: a[]
   if (count === 0 && values.length === 0) return [];
   if (count === 1 && values.length === 1) return [[as[index], as[index] = values[0]][0]];
   switch (index) {
+    case as.length - 1:
+      if (as.length === 0) return push(as, values), [];
+      if (count! >= 1) return [[as.pop()!], push(as, values)][0];
+      break;
     case 0:
       if (count === 0) return unshift(values, as), [];
       if (count === 1) return [[as.shift()!], unshift(values, as)][0];
-      break;
-    case as.length - 1:
-      if (count === 1) return [[as.pop()!], push(as, values)][0];
       break;
     case as.length:
       return push(as, values), [];
