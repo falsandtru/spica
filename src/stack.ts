@@ -7,7 +7,6 @@ export class Stack<T> {
     return this.length === 0;
   }
   public peek(index: 0 | -1 = 0): T | undefined {
-    if (this.isEmpty()) return;
     return index === 0
       ? this.array[this.array.length - 1]
       : this.array[0];
