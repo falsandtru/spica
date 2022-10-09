@@ -4,18 +4,21 @@ export class Stack<T> {
     return this.array.length;
   }
   public isEmpty(): boolean {
-    return this.length === 0;
+    return this.array.length === 0;
   }
   public peek(index: 0 | -1 = 0): T | undefined {
+    const { array } = this;
     return index === 0
-      ? this.array[this.array.length - 1]
-      : this.array[0];
+      ? array[(array.length || 1) - 1]
+      : array[0];
   }
   public push(value: T): void {
     this.array.push(value);
   }
   public pop(): T | undefined {
-    return this.array.pop();
+    const { array } = this;
+    if (array.length === 0) return;
+    return array.pop();
   }
   public clear(): void {
     this.array = [];

@@ -131,7 +131,7 @@ describe('Benchmark:', function () {
       });
     }
 
-    for (const length of [1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
+    for (const length of [0, 1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`Array  index ${length.toLocaleString('en')}`, function (done) {
         const data = Array();
         for (let i = 0; i < length; ++i) data.push(0);

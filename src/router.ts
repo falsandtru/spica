@@ -74,18 +74,18 @@ export namespace router {
             // Prohibit unimplemented patterns.
             if (1) throw new Error(`Spica: Router: Invalid pattern: ${pattern}`);
             if (len - buffer.length === nonsyms[inonsyms] && ++inonsyms) break;
-            stack[stack.length - 1] !== '[' && stack.push(token) && nonsyms.push(len - buffer.length);
+            stack[(stack.length || 1) - 1] !== '[' && stack.push(token) && nonsyms.push(len - buffer.length);
             buffer += token;
             continue;
           case ']':
           case ')':
-            stack[stack.length - 1] === mirror[token] && stack.pop() && nonsyms.pop();
+            stack[(stack.length || 1) - 1] === mirror[token] && stack.pop() && nonsyms.pop();
             buffer += token;
             continue;
           case '{':
             if (len - buffer.length === nonsyms[inonsyms] && ++inonsyms) break;
             stack.length === 0 && flush();
-            stack[stack.length - 1] !== '[' && stack.push(token) && nonsyms.push(len - buffer.length);
+            stack[(stack.length || 1) - 1] !== '[' && stack.push(token) && nonsyms.push(len - buffer.length);
             buffer += token;
             continue;
           case '}':
@@ -129,12 +129,12 @@ export namespace router {
           case '(':
           case '{':
             buffer += token;
-            stack[stack.length - 1] !== '[' && stack.push(token);
+            stack[(stack.length || 1) - 1] !== '[' && stack.push(token);
             continue;
           case ']':
           case ')':
           case '}':
-            stack[stack.length - 1] === mirror[token] && stack.pop();
+            stack[(stack.length || 1) - 1] === mirror[token] && stack.pop();
             buffer += token;
             continue;
         }
@@ -237,13 +237,13 @@ export namespace router {
           case '(':
           case '{':
             buffer += token;
-            stack[stack.length - 1] !== '[' && stack.push(token);
+            stack[(stack.length || 1) - 1] !== '[' && stack.push(token);
             continue;
           case ']':
           case ')':
           case '}':
             if (token === '}' && stack[0] === '{') throw new Error(`Spica: Router: Invalid pattern: ${pattern}`);
-            stack[stack.length - 1] === mirror[token] && stack.pop();
+            stack[(stack.length || 1) - 1] === mirror[token] && stack.pop();
             buffer += token;
             continue;
         }
