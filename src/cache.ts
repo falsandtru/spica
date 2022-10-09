@@ -253,7 +253,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         if (capture && !skip && victim) {
           assert(victim === LRU.last);
           skip = victim;
-          size = skip?.value.size ?? 0;
+          size = skip.value.size;
           continue;
         }
         victim ??= LFU.last!;
