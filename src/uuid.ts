@@ -19,7 +19,8 @@ export function uuid(): string {
 assert(eval('(function () {return this})()') === undefined);
 const gen = ((i, offset) => eval([
   '() => {',
-  ...[...Array(32 / 4)].map((_, i) => `const buf${i} = buffer[index + ${i}];`),
+  ...[...Array(32 / 4)].map((_, i) =>
+    `const buf${i} = buffer[index + ${i}];`),
   'return',
   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/./g, c => {
     assert(i < 32);
