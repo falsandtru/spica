@@ -1,4 +1,4 @@
-import { hasOwnProperty, ObjectCreate } from './alias';
+import { ObjectCreate } from './alias';
 import { type, isPrimitive } from './type';
 import { push } from './array';
 
@@ -87,9 +87,8 @@ export const inherit = template((prop, target, source) => {
     case 'Object':
       switch (type(target[prop])) {
         case 'Object':
-          return hasOwnProperty(target, prop)
-            ? inherit(target[prop], source[prop])
-            : target[prop] = inherit(ObjectCreate(target[prop]), source[prop]);
+          assert(target.hasOwnProperty(prop));
+          return inherit(target[prop], source[prop]);
         default:
           return target[prop] = ObjectCreate(source[prop]);
       }
