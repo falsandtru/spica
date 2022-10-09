@@ -3,6 +3,7 @@ export const {
   MAX_VALUE,
   MIN_SAFE_INTEGER,
   MIN_VALUE,
+  EPSILON,
   isFinite,
   isInteger,
   isNaN,
@@ -12,6 +13,7 @@ export const {
 } = Number;
 
 export const {
+  PI,
   abs,
   ceil,
   floor,
