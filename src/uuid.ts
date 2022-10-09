@@ -1,10 +1,15 @@
 // UUID Version 4
 
-const buffer = new Uint16Array(32 / 4 * 64);
+// 32: Closest power of 2 from the number of random values in an UUID.
+// 4: Number of bits required to represent a hex number.
+// 8: Number of 16 bit values required to create a UUID.
+
+const digit = 16;
+const unit = 32 / (digit / 4) as 8;
+const buffer = new Uint16Array(unit * 64);
 assert(buffer.length === 512);
-assert(buffer.length / (32 / 4) >> 0 === buffer.length / (32 / 4));
 const HEX = [...Array(16)].map((_, i) => i.toString(16)).join('');
-assert(HEX);
+assert(HEX.length === 16);
 let index = 0;
 
 export function uuid(): string {
@@ -12,20 +17,20 @@ export function uuid(): string {
     crypto.getRandomValues(buffer);
     index = buffer.length;
   }
-  index -= 32 / 4;
+  index -= unit;
   return gen();
 }
 
 assert(eval('(function () {return this})()') === undefined);
 const gen = ((i, offset) => eval([
   '() => {',
-  ...[...Array(32 / 4)].map((_, i) =>
+  ...[...Array(unit)].map((_, i) =>
     `const buf${i} = buffer[index + ${i}];`),
   'return',
   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/./g, c => {
     assert(i < 32);
     assert(offset >= 0);
-    offset ||= 16;
+    offset ||= digit;
     switch (c) {
       case 'x':
         return `+ HEX[buf${i++ >> 2} >> ${offset -= 4} & 15]`;
