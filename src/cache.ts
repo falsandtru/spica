@@ -283,7 +283,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       ? now() + age
       : Infinity;
     let node = this.memory.get(key);
-    const match = !!node;
+    const match = node !== undefined;
     node = this.ensure(size, node, true);
     if (node !== undefined) {
       assert(node.list);

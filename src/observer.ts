@@ -183,7 +183,7 @@ export class Observation<N extends readonly unknown[], D, R>
   }
   public refs(namespace: Readonly<N | Inits<N>>): ListenerItem<N, D, R>[] {
     const node = this.seek(namespace, SeekMode.Breakable);
-    if (!node) return [];
+    if (node === undefined) return [];
     return this.listenersBelow(node)
       .reduce((acc, listeners) => push(acc, listeners.toArray()), []);
   }
@@ -255,7 +255,7 @@ export class Observation<N extends readonly unknown[], D, R>
       const name = namespace[i];
       const { index, children } = node;
       let child = index.get(name);
-      if (!child) {
+      if (child === undefined) {
         switch (mode) {
           case SeekMode.Breakable:
             return;

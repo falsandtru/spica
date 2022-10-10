@@ -45,7 +45,7 @@ export class Maybe<a> extends MonadPlus<a> {
   public extract<b>(nothing: () => b): a | b
   public extract<b>(nothing: () => b, just: (a: a) => b): b
   public extract<b>(nothing?: () => b, just?: (a: a) => b): a | b {
-    return !just
+    return just === undefined
       ? this.evaluate().extract(nothing!)
       : this.fmap(just).extract(nothing!);
   }
@@ -58,7 +58,7 @@ export class Maybe<a> extends MonadPlus<a> {
       const r = m.extract(
         noop,
         a => [a]);
-      if (!r) return m;
+      if (r === undefined) return m;
       val = r[0];
     }
   }
@@ -103,7 +103,7 @@ export class Just<a> extends Maybe<a> {
   public override extract<b>(transform: () => b): a
   public override extract<b>(nothing: () => b, just: (a: a) => b): b
   public override extract<b>(_?: () => b, just?: (a: a) => b): a | b {
-    return !just
+    return just === undefined
       ? this.value
       : just(this.value);
   }
@@ -122,7 +122,7 @@ export class Nothing extends Maybe<never> {
   public override extract<b>(transform: () => b): b
   public override extract<b>(nothing: () => b, just: (a: never) => b): b
   public override extract<b>(nothing?: () => b): b {
-    if (!nothing) throw new Error(`Spica: Maybe: Nothig value is extracted.`);
+    if (nothing === undefined) throw new Error(`Spica: Maybe: Nothig value is extracted.`);
     return nothing();
   }
 }

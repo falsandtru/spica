@@ -40,7 +40,7 @@ export class Either<a, b> extends Monad<b> {
   public extract<c>(left: (a: a) => c): b | c
   public extract<c>(left: (a: a) => c, right: (b: b) => c): c
   public extract<c>(left?: (a: a) => c, right?: (b: b) => c): b | c {
-    return !right
+    return right === undefined
       ? this.evaluate().extract(left!)
       : this.fmap(right).extract(left!);
   }
@@ -55,7 +55,7 @@ export class Either<a, b> extends Monad<b> {
       const r = m.extract(
         noop,
         a => [a]);
-      if (!r) return m;
+      if (r === undefined) return m;
       val = r[0];
     }
   }
@@ -99,7 +99,7 @@ export class Left<a> extends Either<a, never> {
   public override extract<c>(transform: (a: a) => c): c
   public override extract<c>(left: (a: a) => c, right: (b: never) => c): c
   public override extract<c>(left?: (a: a) => c): c {
-    if (!left) throw this.value;
+    if (left === undefined) throw this.value;
     return left(this.value);
   }
 }
@@ -118,7 +118,7 @@ export class Right<b> extends Either<never, b> {
   public override extract<c>(transform: (a: never) => c): b
   public override extract<c>(left: (a: never) => c, right: (b: b) => c): c
   public override extract<c>(_?: (a: never) => c, right?: (b: b) => c): b | c {
-    return !right
+    return right === undefined
       ? this.value
       : right(this.value);
   }

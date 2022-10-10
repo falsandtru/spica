@@ -355,7 +355,7 @@ function call(
   procedure: ((param: unknown) => unknown) | undefined | null,
   param: unknown,
 ): void {
-  if (!procedure) return state ? internal.resolve(param) : internal.reject(param);
+  if (procedure == null) return state ? internal.resolve(param) : internal.reject(param);
   try {
     internal.resolve(procedure(param));
   }
