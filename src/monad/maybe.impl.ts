@@ -51,15 +51,11 @@ export class Maybe<a> extends MonadPlus<a> {
   }
   public static do<a>(block: () => Iterator<Maybe<a>, Maybe<a>, a>): Maybe<a> {
     const iter = block();
-    let val: a | undefined;
+    let value: a | undefined;
     while (true) {
-      const { value: m, done } = iter.next(val!);
+      const { value: m, done } = iter.next(value!);
       if (done) return m;
-      const r = m.extract(
-        noop,
-        a => [a]);
-      if (r === undefined) return m;
-      val = r[0];
+      if (m.extract(noop, a => [value = a]) === undefined) return m;
     }
   }
 }
