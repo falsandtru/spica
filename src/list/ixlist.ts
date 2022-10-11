@@ -133,8 +133,7 @@ export class List<T> {
     const next = this.nexts[index];
     const prev = this.prevs[index];
     this.ix.push(index);
-    // @ts-expect-error
-    this.values[index] = undefined;
+    this.values[index] = undefined as any;
     if (--this.$length !== 0) {
       this.nexts[prev] = next;
       this.prevs[next] = prev;

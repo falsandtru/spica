@@ -63,9 +63,7 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
     }, { delay: false });
     ObjectAssign(this.settings, opts);
     this.name = this.settings.name;
-    // FIXME: Remove the next type assertion after #37383 is fixed.
-    if (this.constructor === Supervisor as any) throw new Error(`Spica: Supervisor: <${this.name}>: Cannot instantiate abstract classes.`);
-    // @ts-ignore #31251
+    if (this.constructor === Supervisor) throw new Error(`Spica: Supervisor: <${this.name}>: Cannot instantiate abstract classes.`);
     this.constructor.instances.add(this);
   }
   private readonly state = new AtomicFuture();
