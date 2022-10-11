@@ -31,10 +31,9 @@ S3での逆効果のみ確認につきオプション化。
 LRU/CLOCK:
 性能が低い。
 
-CAR/CLOCK-Pro/CDW(CLOCK+DWC):
+CAR/CDW(CLOCK+DWC)/CLOCK-Pro:
 最悪計算量がO(n)であるため汎用的でない。
-CLOCKで高速化されるLFU操作の時間占有率がプロファイル上低く高速化が見込めない。
-CDWはCARの近似アルゴリズムとしては有効だが当該用途ではCLOCK-Proのほうが優れていると思われる。
+基本性能はCAR/CDWよりCLOCK-Proのほうが高いと思われる。
 ただしCLOCK-ProはLoopなど複数の耐性が低いという欠点があるため耐性を要する状況での性能と堅牢性では
 全般的に耐性を持つCDWのほうが優れている可能性がある。
 
