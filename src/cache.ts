@@ -212,7 +212,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     while (this.size + margin - size > this.capacity) {
       assert(this.length >= 1 + +!!skip);
       let victim = this.expiries?.peek();
-      if (victim && victim !== skip && victim.value.expiry < now()) {
+      if (victim !== undefined && victim !== skip && victim.value.expiry < now()) {
       }
       else if (LRU.length === 0) {
         assert(LFU.last);
