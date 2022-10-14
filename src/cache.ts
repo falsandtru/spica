@@ -119,7 +119,7 @@ export namespace Cache {
     readonly offset?: number;
     readonly entrance?: number;
     readonly threshold?: number;
-    readonly sweeper?: {
+    readonly sweep?: {
       interval: number;
       shift: number;
     };
@@ -155,7 +155,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.stats = opts.resolution || opts.offset
       ? new StatsExperimental(this.window, settings.resolution!, settings.offset!)
       : new Stats(this.window);
-    this.sweeper = new Sweeper(this.indexes.LRU, settings.sweeper!.interval, settings.sweeper!.shift);
+    this.sweeper = new Sweeper(this.indexes.LRU, settings.sweep!.interval, settings.sweep!.shift);
     this.test = settings.test!;
   }
   private readonly settings: Cache.Options<K, V> = {
@@ -171,7 +171,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     offset: 0,
     entrance: 5,
     threshold: 20,
-    sweeper: {
+    sweep: {
       interval: 10,
       shift: 1,
     },
