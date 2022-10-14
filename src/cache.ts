@@ -1,4 +1,4 @@
-import { min, round, ceil } from './alias';
+import { min, ceil } from './alias';
 import { now } from './clock';
 import { IterableDict } from './dict';
 import { List } from './invlist';
@@ -119,7 +119,10 @@ export namespace Cache {
     readonly offset?: number;
     readonly entrance?: number;
     readonly threshold?: number;
-    readonly sweep?: number;
+    readonly sweeper?: {
+      interval: number;
+      shift: number;
+    };
     readonly test?: boolean;
   }
 }
@@ -152,6 +155,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.stats = opts.resolution || opts.offset
       ? new StatsExperimental(this.window, settings.resolution!, settings.offset!)
       : new Stats(this.window);
+    this.sweeper = new Sweeper(this.indexes.LRU, settings.sweeper!.interval, settings.sweeper!.shift);
     this.test = settings.test!;
   }
   private readonly settings: Cache.Options<K, V> = {
@@ -167,7 +171,10 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     offset: 0,
     entrance: 5,
     threshold: 20,
-    sweep: 10,
+    sweeper: {
+      interval: 10,
+      shift: 1,
+    },
     test: false,
   };
   private readonly test: boolean;
@@ -208,6 +215,9 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.SIZE -= entry.size;
     callback && this.disposer?.(node.value.value, entry.key);
   }
+  private misses = 0;
+  private threshold: number;
+  private sweeper: Sweeper;
   private ensure(margin: number, skip?: List.Node<Entry<K, V>>, capture = false): List.Node<Entry<K, V>> | undefined {
     let size = skip?.value.size ?? 0;
     assert(margin - size <= this.capacity || !capture);
@@ -226,15 +236,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       else {
         assert(LRU.last);
         if (this.misses > LRU.length * this.threshold / 100) {
-          this.sweep ||= round(LRU.length * this.settings.sweep! / 100) || 1;
-          if (this.sweep > 0) {
-            LRU.head = LRU.head!.next.next;
-            --this.sweep;
-            this.sweep ||= -round(LRU.length * this.settings.sweep! / 100) || -1;
-          }
-          else {
-            ++this.sweep;
-          }
+          this.sweeper.sweep();
         }
         else if (LFU.length > this.capacity * this.ratio / 1000) {
           assert(LFU.last);
@@ -366,7 +368,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       return;
     }
     this.misses &&= 0;
-    this.sweep &&= 0;
+    this.sweeper.clear();
     // Optimization for memoize.
     if (!this.test && node === node.list.head) return entry.value;
     this.access(node);
@@ -392,7 +394,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
   public clear(): void {
     this.misses = 0;
-    this.sweep = 0;
+    this.sweeper.clear();
     this.overlap = 0;
     this.SIZE = 0;
     this.ratio = 500;
@@ -443,9 +445,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       node.moveToHead();
     }
   }
-  private misses = 0;
-  private threshold: number;
-  private sweep = 0;
   private readonly stats: Stats | StatsExperimental;
   private ratio = 500;
   private readonly limit: number;
@@ -616,3 +615,50 @@ assert(StatsExperimental.rate(10, [1, 4], [4, 6], 0) === 3000);
 assert(StatsExperimental.rate(10, [0, 4], [0, 6], 5) === 4000);
 assert(StatsExperimental.rate(10, [1, 2], [4, 8], 5) === 2000);
 assert(StatsExperimental.rate(10, [2, 2], [3, 8], 5) === 2900);
+
+class Sweeper {
+  constructor(
+    private readonly target: List<unknown>,
+    private readonly interval: number,
+    private readonly shift: number,
+  ) {
+  }
+  private direction = true;
+  private back = 0;
+  private forward = 0;
+  public sweep(): void {
+    const { target } = this;
+    if (this.direction) {
+      if (this.back < 1) {
+        this.back += target.length * this.interval / 100;
+      }
+    }
+    else {
+      if (this.forward < 1) {
+        this.forward += target.length * this.interval / 100 * (100 - this.shift) / 100;
+      }
+    }
+    assert(this.back > 0 || this.forward > 0);
+    if (this.back >= 1) {
+      assert(this.direction === true);
+      if (--this.back < 1) {
+        this.direction = false;
+      }
+      target.head = target.head!.next.next;
+    }
+    else if (this.forward >= 1) {
+      assert(this.direction === false);
+      if (--this.forward < 1) {
+        this.direction = true;
+      }
+    }
+    else {
+      target.head = target.head!.next;
+    }
+  }
+  public clear(): void {
+    this.direction ||= true;
+    this.back &&= 0;
+    this.forward &&= 0;
+  }
+}
