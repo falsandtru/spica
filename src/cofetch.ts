@@ -15,7 +15,7 @@ export interface CofetchOptions {
   cache?: Dict<string, XMLHttpRequest>;
 }
 
-const memory = new WeakMap<XMLHttpRequest, { expiry: number; }>();
+const memory = new WeakMap<XMLHttpRequest, { expiration: number; }>();
 
 export function cofetch(url: string, options?: CofetchOptions): Cofetch {
   return new Cofetch(url, options);
@@ -45,7 +45,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
         }
         if (['GET', 'PUT'].includes(opts.method!) &&
             opts.cache && opts.cache.has(key) && memory.has(opts.cache.get(key)!) &&
-            Date.now() > memory.get(opts.cache.get(key)!)!.expiry) {
+            Date.now() > memory.get(opts.cache.get(key)!)!.expiration) {
           opts.headers!.set('If-None-Match', opts.cache.get(key)!.getResponseHeader('ETag')!);
         }
         fetch(xhr, url, opts);
@@ -75,7 +75,7 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
                       : []);
                   if (xhr.getResponseHeader('ETag') && !cc.has('no-store')) {
                     memory.set(xhr, {
-                      expiry: cc.has('max-age') && !cc.has('no-cache')
+                      expiration: cc.has('max-age') && !cc.has('no-cache')
                         ? Date.now() + +cc.get('max-age')! * 1000 || 0
                         : 0,
                     });
