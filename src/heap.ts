@@ -28,32 +28,35 @@ export class Heap<T, O = T> {
     return this.array.length === 0;
   }
   public peek(): T | undefined {
-    return this.array.value(this.array.index(0));
+    const array = this.array;
+    return array.value(array.index(0));
   }
   public insert(this: Heap<T, T>, value: T): number;
   public insert(value: T, order: O): number;
   public insert(value: T, order?: O): number {
+    const array = this.array;
     if (arguments.length < 2) {
       order = value as any;
     }
     assert([order = order!]);
-    const index = this.array.push(value, order);
-    upHeapify(this.cmp, this.array, this.length);
+    const index = array.push(value, order);
+    upHeapify(this.cmp, array, this.length);
     return index;
   }
   public replace(this: Heap<T, T>, value: T): T | undefined;
   public replace(value: T, order: O): T | undefined;
   public replace(value: T, order?: O): T | undefined {
+    const array = this.array;
     if (arguments.length < 2) {
       order = value as any;
     }
     assert([order = order!]);
     if (this.length === 0) return void this.insert(value, order);
     const replaced = this.peek();
-    const index = this.array.index(0);
-    this.array.setValue(index, value);
-    this.array.setOrder(index, order);
-    downHeapify(this.cmp, this.array, 1, this.length, this.stable);
+    const index = array.index(0);
+    array.setValue(index, value);
+    array.setOrder(index, order);
+    downHeapify(this.cmp, array, 1, this.length, this.stable);
     return replaced;
   }
   public extract(): T | undefined {
@@ -63,24 +66,27 @@ export class Heap<T, O = T> {
     return value;
   }
   private del(pos: number): void {
-    swap(this.array, pos + 1, this.length);
-    this.array.pop();
-    sort(this.cmp, this.array, pos + 1, this.length, this.stable);
+    const array = this.array;
+    swap(array, pos + 1, this.length);
+    array.pop();
+    sort(this.cmp, array, pos + 1, this.length, this.stable);
   }
   public delete(index: number): T {
-    const value = this.array.value(index);
-    this.del(this.array.position(index));
+    const array = this.array;
+    const value = array.value(index);
+    this.del(array.position(index));
     return value;
   }
   public update(index: number, order: O, value?: T): void {
-    const ord = this.array.order(index);
+    const array = this.array;
+    const ord = array.order(index);
     assert([order = order!]);
-    this.array.setOrder(index, order);
+    array.setOrder(index, order);
     if (arguments.length >= 3) {
-      this.array.setValue(index, value!);
+      array.setValue(index, value!);
     }
     if (this.cmp(ord, order) === 0) return;
-    sort(this.cmp, this.array, this.array.position(index) + 1, this.length, this.stable);
+    sort(this.cmp, array, array.position(index) + 1, this.length, this.stable);
   }
   public clear(): void {
     this.array.clear();
