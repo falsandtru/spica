@@ -187,6 +187,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     LRU: new List<Entry<K, V>>(),
     LFU: new List<Entry<K, V>>(),
   } as const;
+  private expiration = false;
   private readonly age: number;
   private readonly expirations?: Heap<List.Node<Entry<K, V>>, number>;
   private readonly disposer?: (value: V, key: K) => void;
@@ -284,9 +285,9 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     }
 
     const { LRU } = this.indexes;
-    if (age === Infinity) {
-      age = 0;
-    }
+    age === Infinity
+      ? age = 0
+      : this.expiration ||= true;
     const expiration = age
       ? now() + age
       : Infinity;
@@ -361,8 +362,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       return;
     }
     const entry = node.value;
-    const expiration = entry.expiration;
-    if (expiration !== Infinity && expiration < now()) {
+    if (this.expiration && entry.expiration !== Infinity && entry.expiration < now()) {
       ++this.misses;
       this.evict(node, true);
       return;
@@ -379,8 +379,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const node = this.memory.get(key);
     if (node === undefined) return false;
     const entry = node.value;
-    const expiration = entry.expiration;
-    if (expiration !== Infinity && expiration < now()) {
+    if (this.expiration && entry.expiration !== Infinity && entry.expiration < now()) {
       this.evict(node, true);
       return false;
     }
@@ -401,6 +400,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.stats.clear();
     this.indexes.LRU.clear();
     this.indexes.LFU.clear();
+    this.expiration = false;
     this.expirations?.clear();
     if (!this.disposer || !this.settings.capture!.clear) return void this.memory.clear();
     const memory = this.memory;
