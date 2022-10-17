@@ -176,10 +176,10 @@ describe('Benchmark:', function () {
           heap.peek(), done);
       });
 
-      it(`PQueue peek ${length.toLocaleString('en')}`, function (done) {
+      it(`PQueue peek  ${length.toLocaleString('en')}`, function (done) {
         const data = new PriorityQueue();
         for (let i = 0; i < length; ++i) data.push(i, i);
-        benchmark(`PQueue peek ${length.toLocaleString('en')}`, () => data.peek(), done);
+        benchmark(`PQueue peek  ${length.toLocaleString('en')}`, () => data.peek(), done);
       });
     }
 
