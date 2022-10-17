@@ -450,7 +450,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private readonly limit: number;
   private adjust(): void {
     const { capacity, ratio, limit, stats, indexes } = this;
-    if (stats.subtotal() * 1000 % capacity || !stats.isFull()) return;
+    if (stats.subtotal() * 1000 % capacity !== 0 || !stats.isFull()) return;
     assert(stats.LRU.length >= 2);
     const lenR = indexes.LRU.length;
     const lenF = indexes.LFU.length;
