@@ -369,10 +369,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     }
     this.misses &&= 0;
     this.sweeper.clear();
-    // Optimization for memoize.
-    if (!this.test && node === node.list.head) return entry.value;
     this.access(node);
-    this.adjust();
     return entry.value;
   }
   public has(key: K): boolean {
@@ -429,6 +426,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const { region } = entry;
     const { LRU, LFU } = this.indexes;
     if (node.list === LRU) {
+      // For memoize.
+      if (!this.test && node === LRU.head) return;
       ++this.stats[region][0];
       if (region === 'LFU') {
         --this.overlap;
@@ -441,9 +440,12 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       LFU.unshiftNode(node);
     }
     else {
+      // For memoize.
+      if (!this.test && node === LFU.head) return;
       ++this.stats[region][0];
       node.moveToHead();
     }
+    this.adjust();
   }
   private readonly stats: Stats | StatsExperimental;
   private ratio = 500;
