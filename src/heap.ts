@@ -72,15 +72,11 @@ export class Heap<T, O = T> {
     this.del(this.array.position(index));
     return value;
   }
-  public update(index: number, order: O, value?: T): void;
   public update(index: number, order: O, value?: T): void {
     const ord = this.array.order(index);
     assert([order = order!]);
-    if (arguments.length < 3) {
-      this.array.setOrder(index, order);
-    }
-    else {
-      this.array.setOrder(index, order);
+    this.array.setOrder(index, order);
+    if (arguments.length >= 3) {
       this.array.setValue(index, value!);
     }
     if (this.cmp(ord, order) === 0) return;
