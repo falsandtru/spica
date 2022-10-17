@@ -99,7 +99,7 @@ interface Entry<K, V> {
   value: V;
   size: number;
   expiration: number;
-  eid: number;
+  enode?: Heap.Node<List.Node<Entry<K, V>>, number>;
   region: 'LRU' | 'LFU';
 }
 
@@ -204,9 +204,9 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     assert(node.list);
     entry.region === 'LFU' && node.list === this.indexes.LRU && --this.overlap;
     assert(this.overlap >= 0);
-    if (entry.eid !== -1) {
-      this.expirations!.delete(entry.eid);
-      entry.eid = -1;
+    if (entry.enode !== undefined) {
+      this.expirations!.delete(entry.enode);
+      entry.enode = undefined;
     }
     node.delete();
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size - 1);
@@ -316,14 +316,14 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       entry.size = size;
       entry.expiration = expiration;
       if (this.expirations && age) {
-        entry.eid !== -1
-          ? this.expirations.update(entry.eid, expiration)
-          : entry.eid = this.expirations.insert(node, expiration);
+        entry.enode !== undefined
+          ? this.expirations.update(entry.enode, expiration)
+          : entry.enode = this.expirations.insert(node, expiration);
         assert(this.expirations.length <= this.length);
       }
-      else if (entry.eid !== -1) {
-        this.expirations!.delete(entry.eid);
-        entry.eid = -1;
+      else if (entry.enode !== undefined) {
+        this.expirations!.delete(entry.enode);
+        entry.enode = undefined;
       }
       this.disposer?.(value$, key$);
       return match;
@@ -338,13 +338,12 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       value,
       size,
       expiration,
-      eid: -1,
       region: 'LRU',
     }));
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     assert(this.memory.size <= this.capacity);
     if (this.expirations && age) {
-      LRU.head!.value.eid = this.expirations.insert(LRU.head!, expiration);
+      LRU.head!.value.enode = this.expirations.insert(LRU.head!, expiration);
       assert(this.expirations.length <= this.length);
     }
     return false;
