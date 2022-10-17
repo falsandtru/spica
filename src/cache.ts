@@ -489,15 +489,15 @@ class Stats {
   ): number {
     assert(hits1.length === 2);
     assert(hits1.length === hits2.length);
-    const currTotal = hits1[0] + hits2[0];
-    const prevTotal = hits1[1] + hits2[1];
     const currHits = hits1[0];
     const prevHits = hits1[1];
+    const currTotal = currHits + hits2[0];
+    const prevTotal = prevHits + hits2[1];
     assert(currTotal <= window);
-    const prevRate = prevHits * 100 / (prevTotal || 1);
+    const prevRate = prevHits && prevHits * 100 / prevTotal;
     const currRatio = currTotal * 100 / window - offset;
     if (currRatio <= 0) return prevRate * 100 | 0;
-    const currRate = currHits * 100 / (currTotal || 1);
+    const currRate = currHits && currHits * 100 / currTotal;
     const prevRatio = 100 - currRatio;
     return currRate * currRatio + prevRate * prevRatio | 0;
   }
@@ -525,16 +525,21 @@ class Stats {
     const { LRU, LFU, window } = this;
     const subtotal = LRU[0] + LFU[0];
     subtotal >= window && this.slide();
-    return LRU[0] + LFU[0];
+    return subtotal;
   }
   protected slide(): void {
     const { LRU, LFU, max } = this;
     if (LRU.length === max) {
-      LRU.pop();
-      LFU.pop();
+      assert(max === 2);
+      LRU[1] = LRU[0];
+      LFU[1] = LFU[0];
+      LRU[0] = 0;
+      LFU[0] = 0;
     }
-    LRU.unshift(0);
-    LFU.unshift(0);
+    else {
+      LRU.unshift(0);
+      LFU.unshift(0);
+    }
     assert(LRU.length === LFU.length);
   }
   public clear(): void {
@@ -600,6 +605,16 @@ class StatsExperimental extends Stats {
     const subtotal = LRU[offset && 1] + LFU[offset && 1] || 0;
     subtotal >= window / resolution && this.slide();
     return LRU[0] + LFU[0];
+  }
+  protected override slide(): void {
+    const { LRU, LFU, max } = this;
+    if (LRU.length === max) {
+      LRU.pop();
+      LFU.pop();
+    }
+    LRU.unshift(0);
+    LFU.unshift(0);
+    assert(LRU.length === LFU.length);
   }
 }
 
