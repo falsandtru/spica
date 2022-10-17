@@ -245,7 +245,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
             : LFU.length !== 1
               ? LFU.last!.prev
               : undefined;
-          if (victim) {
+          if (victim !== undefined) {
             assert(victim !== skip);
             assert(victim.value.region === 'LFU');
             LRU.unshiftNode(victim);
@@ -258,7 +258,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
           : LRU.length !== 1
             ? LRU.last!.prev
             : undefined;
-        if (capture && !skip && victim) {
+        if (capture && skip === undefined && victim !== undefined) {
           assert(victim === LRU.last);
           skip = victim;
           size = skip.value.size;
