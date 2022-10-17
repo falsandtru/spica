@@ -1,4 +1,5 @@
 import { min } from './alias';
+import { Index } from './index';
 import { List as InvList } from './invlist';
 import { memoize } from './memoize';
 
@@ -171,6 +172,7 @@ function swap<T, O>(array: List<T, O>, index1: number, index2: number): void {
 }
 
 class List<T, O> {
+  private readonly ix = new Index();
   private capacity = 4;
   private orders: O[] = Array(this.capacity);
   private values: T[] = Array(this.capacity);
@@ -213,6 +215,7 @@ class List<T, O> {
     this.capacity = capacity;
   }
   public clear(): void {
+    this.ix.clear();
     this.orders = Array(this.capacity);
     this.values = Array(this.capacity);
     this.$length = 0;
@@ -226,17 +229,19 @@ class List<T, O> {
   public push(value: T, order: O): number {
     this.isFull() && this.extend();
     const pos = this.$length++;
-    this.indexes[pos] = pos;
-    this.positions[pos] = pos;
-    this.values[pos] = value;
-    this.orders[pos] = order;
-    return pos;
+    const index = this.ix.pop();
+    this.indexes[pos] = index;
+    this.positions[index] = pos;
+    this.values[index] = value;
+    this.orders[index] = order;
+    return index;
   }
   public pop(): void {
     if (this.$length === 0) return;
-    const pos = this.indexes[--this.$length];
-    this.values[pos] = undefined as any;
-    this.orders[pos] = undefined as any;
+    const index = this.indexes[--this.$length];
+    this.values[index] = undefined as any;
+    this.orders[index] = undefined as any;
+    this.ix.push(index);
   }
   public swap(pos1: number, pos2: number): boolean {
     if (pos1 === pos2) return false;
