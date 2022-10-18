@@ -33,9 +33,7 @@ LRU/CLOCK:
 
 CAR/CDW(CLOCK+DWC)/CLOCK-Pro:
 最悪計算量がO(n)であるため汎用的でない。
-基本性能はCAR/CDWよりCLOCK-Proのほうが高いと思われる。
-ただしCLOCK-ProはLoopなど複数の耐性が低いという欠点があるため耐性を要する状況での性能と堅牢性では
-全般的に耐性を持つCDWのほうが優れている可能性がある。
+CLOCK-ProはCAR同様合計2倍の履歴を持つ。
 
 ARC:
 キャッシュサイズの2倍のキーを保持する。
