@@ -368,7 +368,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     }
     this.misses &&= 0;
     this.sweeper.clear();
-    this.access(node);
+    this.update(node);
     return entry.value;
   }
   public has(key: K): boolean {
@@ -420,7 +420,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     }
     return;
   }
-  private access(node: List.Node<Entry<K, V>>): void {
+  private update(node: List.Node<Entry<K, V>>): void {
     const entry = node.value;
     const { region } = entry;
     const { LRU, LFU } = this.indexes;
@@ -444,12 +444,12 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       ++this.stats[region][0];
       node.moveToHead();
     }
-    this.adjust();
+    this.coordinate();
   }
   private readonly stats: Stats | StatsExperimental;
   private ratio = 500;
   private readonly limit: number;
-  private adjust(): void {
+  private coordinate(): void {
     const { capacity, ratio, limit, stats, indexes } = this;
     if (stats.subtotal() * 1000 % capacity !== 0 || !stats.isFull()) return;
     assert(stats.LRU.length >= 2);
