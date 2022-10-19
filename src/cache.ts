@@ -641,7 +641,7 @@ class Sweeper {
   }
   private direction = true;
   private back = 0;
-  private forward = 0;
+  private advance = 0;
   public sweep(): void {
     const { target } = this;
     if (this.direction) {
@@ -650,11 +650,11 @@ class Sweeper {
       }
     }
     else {
-      if (this.forward < 1) {
-        this.forward += target.length * this.interval / 100 * (100 - this.shift) / 100;
+      if (this.advance < 1) {
+        this.advance += target.length * this.interval / 100 * (100 - this.shift) / 100;
       }
     }
-    assert(this.back > 0 || this.forward > 0);
+    assert(this.back > 0 || this.advance > 0);
     if (this.back >= 1) {
       assert(this.direction === true);
       if (--this.back < 1) {
@@ -662,9 +662,9 @@ class Sweeper {
       }
       target.head = target.head!.next.next;
     }
-    else if (this.forward >= 1) {
+    else if (this.advance >= 1) {
       assert(this.direction === false);
-      if (--this.forward < 1) {
+      if (--this.advance < 1) {
         this.direction = true;
       }
     }
@@ -675,6 +675,6 @@ class Sweeper {
   public clear(): void {
     this.direction ||= true;
     this.back &&= 0;
-    this.forward &&= 0;
+    this.advance &&= 0;
   }
 }
