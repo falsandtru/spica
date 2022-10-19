@@ -639,6 +639,7 @@ class Sweeper {
     private readonly shift: number,
   ) {
   }
+  private initial = true;
   private direction = true;
   private back = 0;
   private advance = 0;
@@ -651,6 +652,7 @@ class Sweeper {
     }
     else {
       if (this.advance < 1) {
+        assert(!this.initial);
         this.advance += target.length * this.interval / 100 * (100 - this.shift) / 100;
       }
     }
@@ -660,9 +662,16 @@ class Sweeper {
       if (--this.back < 1) {
         this.direction = false;
       }
-      target.head = target.head!.next.next;
+      if (this.initial) {
+        this.initial = false;
+        target.head = target.head!.next;
+      }
+      else {
+        target.head = target.head!.next.next;
+      }
     }
     else if (this.advance >= 1) {
+      assert(!this.initial);
       assert(this.direction === false);
       if (--this.advance < 1) {
         this.direction = true;
@@ -673,8 +682,10 @@ class Sweeper {
     }
   }
   public clear(): void {
-    this.direction ||= true;
-    this.back &&= 0;
-    this.advance &&= 0;
+    if (this.initial && this.back === 0) return;
+    this.initial = true;
+    this.direction = true;
+    this.back = 0;
+    this.advance = 0;
   }
 }
