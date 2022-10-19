@@ -239,15 +239,15 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         }
         else if (LFU.length > this.capacity * this.ratio / 1000) {
           assert(LFU.last);
-          victim = LFU.last! !== skip
+          const node = LFU.last! !== skip
             ? LFU.last!
             : LFU.length !== 1
               ? LFU.last!.prev
               : undefined;
-          if (victim !== undefined) {
-            assert(victim !== skip);
-            assert(victim.value.region === 'LFU');
-            LRU.unshiftNode(victim);
+          if (node !== undefined) {
+            assert(node !== skip);
+            assert(node.value.region === 'LFU');
+            LRU.unshiftNode(node);
             ++this.overlap;
             assert(this.overlap <= LRU.length);
           }
