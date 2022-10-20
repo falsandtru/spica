@@ -337,6 +337,8 @@ describe('Unit: lib/cache', () => {
       assert(!cache.has(498));
     });
 
+    if (!navigator.userAgent.includes('Chrome')) return;
+
     it('ratio even 100', function () {
       this.timeout(10 * 1e3);
 
@@ -508,8 +510,6 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
       assert(dwchit / lruhit * 100 >>> 0 === 99);
     });
-
-    if (!navigator.userAgent.includes('Chrome')) return;
 
     it('ratio uneven 1,000', function () {
       this.timeout(60 * 1e3);
