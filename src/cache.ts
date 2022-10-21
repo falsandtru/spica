@@ -168,6 +168,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     resolution: 1,
     offset: 0,
     entrance: 5,
+    // 15のほうがベンチマークの全体的なスコアが上がるが低容量でのループ耐性が上がる代わりに
+    // それ以外の性能が下がっているため実用的には20のほうがよいと思われる。
     threshold: 20,
     sweep: {
       interval: 10,
