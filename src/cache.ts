@@ -479,6 +479,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
 }
 
+// Sliding Window
 class Stats {
   public static rate(
     window: number,
@@ -632,6 +633,7 @@ assert(StatsExperimental.rate(10, [0, 4], [0, 6], 5) === 4000);
 assert(StatsExperimental.rate(10, [1, 2], [4, 8], 5) === 2000);
 assert(StatsExperimental.rate(10, [2, 2], [3, 8], 5) === 2900);
 
+// Transitive Wide MRU with Round Replacement
 class Sweeper {
   constructor(
     private readonly target: List<unknown>,
