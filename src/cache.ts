@@ -145,16 +145,16 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (this.window * 1000 >= capacity === false) throw new Error(`Spica: Cache: Window must be 0.1% or more of capacity.`);
     this.ratio = this.limit = 1000 - settings.entrance! * 10;
     this.unit = 1000 / capacity | 0 || 1;
-    this.threshold = settings.threshold!;
     this.age = settings.age!;
     if (settings.earlyExpiring) {
       this.expirations = new Heap(Heap.min);
     }
-    this.disposer = settings.disposer!;
     this.stats = opts.resolution || opts.offset
       ? new StatsExperimental(this.window, settings.resolution!, settings.offset!)
       : new Stats(this.window);
+    this.threshold = settings.threshold!;
     this.sweeper = new Sweeper(this.indexes.LRU, settings.sweep!.interval!, settings.sweep!.shift!);
+    this.disposer = settings.disposer!;
     this.test = settings.test!;
   }
   private readonly settings: Cache.Options<K, V> = {
@@ -181,23 +181,23 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private readonly test: boolean;
   private capacity: number;
   private window: number;
-  private overlap = 0;
-  private SIZE = 0;
   private memory = new Map<K, List.Node<Entry<K, V>>>();
   private readonly indexes = {
     LRU: new List<Entry<K, V>>(),
     LFU: new List<Entry<K, V>>(),
   } as const;
+  private overlap = 0;
   private expiration = false;
   private readonly age: number;
   private readonly expirations?: Heap<List.Node<Entry<K, V>>, number>;
-  private readonly disposer?: (value: V, key: K) => void;
   public get length(): number {
     return this.indexes.LRU.length + this.indexes.LFU.length;
   }
+  private $size = 0;
   public get size(): number {
-    return this.SIZE;
+    return this.$size;
   }
+  private readonly disposer?: (value: V, key: K) => void;
   private evict(node: List.Node<Entry<K, V>>, callback: boolean): void {
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     assert(this.memory.size <= this.capacity);
@@ -214,7 +214,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.memory.delete(entry.key);
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     assert(this.memory.size <= this.capacity);
-    this.SIZE -= entry.size;
+    this.$size -= entry.size;
     callback && this.disposer?.(node.value.value, entry.key);
   }
   private misses = 0;
@@ -312,7 +312,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       }
       assert(this.memory.has(key));
       entry.value = value;
-      this.SIZE += size - entry.size;
+      this.$size += size - entry.size;
       assert(0 < this.size && this.size <= this.capacity);
       entry.size = size;
       entry.expiration = expiration;
@@ -332,7 +332,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     assert(!this.memory.has(key));
 
     assert(LRU.length !== this.capacity);
-    this.SIZE += size;
+    this.$size += size;
     assert(0 < this.size && this.size <= this.capacity);
     this.memory.set(key, LRU.unshift({
       key,
@@ -389,16 +389,16 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     return true;
   }
   public clear(): void {
-    this.misses = 0;
-    this.sweeper.clear();
-    this.overlap = 0;
-    this.SIZE = 0;
+    this.$size = 0;
     this.ratio = this.limit;
-    this.stats.clear();
     this.indexes.LRU.clear();
     this.indexes.LFU.clear();
+    this.overlap = 0;
     this.expiration = false;
     this.expirations?.clear();
+    this.stats.clear();
+    this.misses = 0;
+    this.sweeper.clear();
     if (!this.disposer || !this.settings.capture!.clear) return void this.memory.clear();
     const memory = this.memory;
     this.memory = new Map();
