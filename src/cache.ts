@@ -455,7 +455,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private readonly limit: number;
   private coordinate(): void {
     const { capacity, ratio, limit, stats, indexes } = this;
-    if (stats.subtotal() * 1000 % capacity !== 0 || !stats.available) return;
+    if (stats.subtotal() * 1000 % capacity !== 0 || !stats.isFull()) return;
     assert(stats.LRU.length >= 2);
     const lenR = indexes.LRU.length;
     const lenF = indexes.LFU.length;
@@ -511,13 +511,15 @@ class Stats {
     protected window: number,
   ) {
   }
-  public available = false;
   public readonly offset: number = 0;
   protected readonly max: number = 2;
   public LRU = [0];
   public LFU = [0];
   public get length(): number {
     return this.LRU.length;
+  }
+  public isFull(): boolean {
+    return this.length === this.max;
   }
   public rateLRU(offset = false): number {
     return Stats.rate(this.window, this.LRU, this.LFU, +offset & 0);
@@ -535,7 +537,6 @@ class Stats {
     const { LRU, LFU, max } = this;
     if (LRU.length === max) {
       assert(max === 2);
-      assert(this.available);
       LRU[1] = LRU[0];
       LFU[1] = LFU[0];
       LRU[0] = 0;
@@ -544,13 +545,10 @@ class Stats {
     else {
       LRU.unshift(0);
       LFU.unshift(0);
-      assert(!this.available);
-      this.available = true;
     }
     assert(LRU.length === LFU.length);
   }
   public clear(): void {
-    this.available = false;
     this.LRU = [0];
     this.LFU = [0];
   }
