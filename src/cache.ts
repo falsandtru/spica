@@ -143,6 +143,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     this.window = settings.window! * capacity / 100 >>> 0;
     if (this.window * 1000 >= capacity === false) throw new Error(`Spica: Cache: Window must be 0.1% or more of capacity.`);
+    this.unit = 1000 / capacity | 0 || 1;
     this.threshold = settings.threshold!;
     this.limit = 1000 - settings.entrance! * 10;
     this.age = settings.age!;
@@ -413,6 +414,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.ensure(this.capacity - capacity);
     this.capacity = capacity;
     this.window = window;
+    this.unit = 1000 / capacity | 0 || 1;
     this.stats.resize(window);
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
@@ -449,6 +451,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
   private readonly stats: Stats | StatsExperimental;
   private ratio = 500;
+  private unit: number;
   private readonly limit: number;
   private coordinate(): void {
     const { capacity, ratio, limit, stats, indexes } = this;
@@ -469,14 +472,14 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       //rateR0 <= rateF0 && rateF0 * 100 < rateF1 * (100 - stats.offset) && console.debug(0);
       if (lenR >= capacity * (1000 - ratio) / 1000) {
         //ratio % 100 || ratio === 1000 || console.debug('-', ratio, LRU, LFU);
-        --this.ratio;
+        this.ratio -= this.unit;
       }
     }
     else
     if (ratio < limit && rateF0 > rateR0) {
       if (lenF >= capacity * ratio / 1000) {
         //ratio % 100 || ratio === 0 || console.debug('+', ratio, LRU, LFU);
-        ++this.ratio;
+        this.ratio += this.unit;
       }
     }
   }
