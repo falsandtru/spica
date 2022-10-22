@@ -1,4 +1,4 @@
-import { min, ceil } from './alias';
+import { max, min, ceil } from './alias';
 import { now } from './clock';
 import { IterableDict } from './dict';
 import { List } from './invlist';
@@ -143,8 +143,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     this.window = settings.window! * capacity / 100 >>> 0;
     if (this.window * 1000 >= capacity === false) throw new Error(`Spica: Cache: Window must be 0.1% or more of capacity.`);
-    this.ratio = this.limit = 1000 - settings.entrance! * 10;
     this.unit = 1000 / capacity | 0 || 1;
+    this.limit = 1000 - settings.entrance! * 10;
     this.age = settings.age!;
     if (settings.earlyExpiring) {
       this.expirations = new Heap(Heap.min);
@@ -240,7 +240,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         if (this.misses > LRU.length * this.threshold / 100) {
           this.sweeper.sweep();
         }
-        else if (LFU.length > this.capacity * this.ratio / 1000) {
+        else if (this.ratio !== undefined && LFU.length > this.capacity * this.ratio / 1000) {
           assert(LFU.last);
           const node = LFU.last! !== skip
             ? LFU.last!
@@ -390,7 +390,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
   public clear(): void {
     this.$size = 0;
-    this.ratio = this.limit;
+    this.ratio = undefined;
     this.indexes.LRU.clear();
     this.indexes.LFU.clear();
     this.overlap = 0;
@@ -451,13 +451,14 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.coordinate();
   }
   private readonly stats: Stats | StatsExperimental;
-  private ratio: number;
+  private ratio?: number;
   private unit: number;
   private readonly limit: number;
   private coordinate(): void {
-    const { capacity, ratio, limit, stats, indexes } = this;
+    const { capacity, stats, indexes } = this;
     if (stats.subtotal() * 1000 % capacity !== 0 || !stats.isFull()) return;
     assert(stats.LRU.length >= 2);
+    this.ratio ??= min(indexes.LFU.length / capacity * 1000 | 0, this.limit);
     const lenR = indexes.LRU.length;
     const lenF = indexes.LFU.length;
     const lenO = this.overlap;
@@ -469,18 +470,18 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const rateF1 = stats.offset && stats.rateLFU(true) * (1000 - leverage);
     // 操作頻度を超えてキャッシュ比率を増減させても余剰比率の消化が追いつかず無駄
     // LRUの下限設定ではLRU拡大の要否を迅速に判定できないためLFUのヒット率低下の検出で代替する
-    if (ratio > 0 && (rateR0 > rateF0 || stats.offset && rateF0 * 100 < rateF1 * (100 - stats.offset))) {
+    if (this.ratio > 0 && (rateR0 > rateF0 || stats.offset && rateF0 * 100 < rateF1 * (100 - stats.offset))) {
       //rateR0 <= rateF0 && rateF0 * 100 < rateF1 * (100 - stats.offset) && console.debug(0);
-      if (lenR >= capacity * (1000 - ratio) / 1000) {
-        //ratio % 100 || ratio === 1000 || console.debug('-', ratio, LRU, LFU);
-        this.ratio -= this.unit;
+      if (lenR >= capacity * (1000 - this.ratio) / 1000) {
+        //this.ratio % 100 || this.ratio === 1000 || console.debug('-', this.ratio, LRU, LFU);
+        this.ratio = max(this.ratio - this.unit, 0);
       }
     }
     else
-    if (ratio < limit && rateF0 > rateR0) {
-      if (lenF >= capacity * ratio / 1000) {
-        //ratio % 100 || ratio === 0 || console.debug('+', ratio, LRU, LFU);
-        this.ratio += this.unit;
+    if (this.ratio < this.limit && rateF0 > rateR0) {
+      if (lenF >= capacity * this.ratio / 1000) {
+        //this.ratio % 100 || this.ratio === 0 || console.debug('+', this.ratio, LRU, LFU);
+        this.ratio = min(this.ratio + this.unit, this.limit);
       }
     }
   }
