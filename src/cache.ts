@@ -413,6 +413,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.ensure(this.capacity - capacity);
     this.capacity = capacity;
     this.window = window;
+    this.stats.resize(window);
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
     for (const { 0: key, 1: { value: { value } } } of this.memory) {
@@ -504,7 +505,7 @@ class Stats {
     return currRate * currRatio + prevRate * prevRatio | 0;
   }
   constructor(
-    protected readonly window: number,
+    protected window: number,
   ) {
   }
   public available = false;
@@ -549,6 +550,9 @@ class Stats {
     this.available = false;
     this.LRU = [0];
     this.LFU = [0];
+  }
+  public resize(window: number): void {
+    this.window = window;
   }
 }
 
