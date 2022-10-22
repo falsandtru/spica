@@ -240,7 +240,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         if (this.misses > LRU.length * this.threshold / 100) {
           this.sweeper.sweep();
         }
-        else if (this.ratio !== undefined && LFU.length > this.capacity * this.ratio / 1000) {
+        else if (LFU.length > this.capacity * (this.ratio ?? this.limit) / 1000) {
           assert(LFU.last);
           const node = LFU.last! !== skip
             ? LFU.last!
