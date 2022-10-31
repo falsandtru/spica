@@ -41,7 +41,7 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
   public isClosed(): boolean {
     return this.state.length === 2;
   }
-  public register$(listener: Listener<L>): () => void {
+  private register$(listener: Listener<L>): () => void {
     const { listeners, state } = this;
     if (!this.isAlive() && listeners.length === 0) {
       state.length === 1 && handler(state[0]);
@@ -62,7 +62,7 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
   public get register(): (listener: Listener<L>) => () => void {
     return listener => this.register$(listener);
   }
-  public cancel$(reason?: L): void {
+  private cancel$(reason?: L): void {
     if (!this.isAlive()) return;
     this.state = [reason!];
     for (let { listeners } = this, i = 0; i < listeners.length; ++i) {
