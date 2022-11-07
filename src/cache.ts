@@ -237,7 +237,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       }
       else {
         assert(LRU.last);
-        if (this.misses > LRU.length * this.threshold / 100) {
+        if (this.misses > LRU.length * this.threshold / 100 && !this.test) {
           this.sweeper.sweep();
         }
         else if (LFU.length > this.capacity * (this.ratio ?? this.limit) / 1000) {
@@ -294,6 +294,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       : Infinity;
     let node = this.memory.get(key);
     const match = node !== undefined;
+    !match && ++this.misses;
     node = this.ensure(size, node, true);
     if (node !== undefined) {
       assert(node.list);
@@ -308,7 +309,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         this.memory.set(key, node);
         entry.key = key;
         entry.region = 'LRU';
-        LRU.head = node;
       }
       assert(this.memory.has(key));
       entry.value = value;
@@ -326,6 +326,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         this.expirations!.delete(entry.enode);
         entry.enode = undefined;
       }
+      node.moveToHead();
       this.disposer?.(value$, key$);
       return match;
     }
@@ -357,18 +358,12 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
   public get(key: K): V | undefined {
     const node = this.memory.get(key);
-    if (node === undefined) {
-      ++this.misses;
-      return;
-    }
+    if (node === undefined) return;
     const entry = node.value;
     if (this.expiration && entry.expiration !== Infinity && entry.expiration < now()) {
-      ++this.misses;
       this.evict(node, true);
       return;
     }
-    this.misses &&= 0;
-    this.sweeper.clear();
     this.update(node);
     return entry.value;
   }
@@ -428,9 +423,11 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const entry = node.value;
     const { region } = entry;
     const { LRU, LFU } = this.indexes;
+    this.misses &&= 0;
+    this.sweeper.clear();
     if (node.list === LRU) {
       // For memoize.
-      if (!this.test && node === LRU.head) return;
+      if (node === LRU.head && !this.test) return;
       ++this.stats[region][0];
       if (region === 'LFU') {
         --this.overlap;
@@ -444,7 +441,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     }
     else {
       // For memoize.
-      if (!this.test && node === LFU.head) return;
+      if (node === LFU.head && !this.test) return;
       ++this.stats[region][0];
       node.moveToHead();
     }
