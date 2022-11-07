@@ -201,7 +201,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private readonly disposer?: (value: V, key: K) => void;
   private evict(node: List.Node<Entry<K, V>>, callback: boolean): void {
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
-    assert(this.memory.size <= this.capacity);
+    //assert(this.memory.size <= this.capacity);
     const entry = node.value;
     assert(node.list);
     entry.region === 'LFU' && node.list === this.indexes.LRU && --this.overlap;
@@ -214,7 +214,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size - 1);
     this.memory.delete(entry.key);
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
-    assert(this.memory.size <= this.capacity);
+    //assert(this.memory.size <= this.capacity);
     this.$size -= entry.size;
     callback && this.disposer?.(node.value.value, entry.key);
   }
@@ -407,11 +407,11 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     const window = this.settings.window! * capacity / 100 >>> 0;
     if (window * 1000 >= capacity === false) throw new Error(`Spica: Cache: Window must be 0.1% or more of capacity.`);
-    this.ensure(this.capacity - capacity);
     this.capacity = capacity;
     this.window = window;
     this.unit = 1000 / capacity | 0 || 1;
     this.stats.resize(window);
+    this.ensure(0);
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
     for (const { 0: key, 1: { value: { value } } } of this.memory) {
