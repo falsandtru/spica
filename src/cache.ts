@@ -191,7 +191,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private readonly age: number;
   private readonly expirations?: Heap<List.Node<Entry<K, V>>, number>;
   public get length(): number {
-    return this.indexes.LRU.length + this.indexes.LFU.length;
+    const { LRU, LFU } = this.indexes;
+    return LRU.length + LFU.length;
   }
   private $size = 0;
   public get size(): number {
@@ -409,7 +410,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.ensure(this.capacity - capacity);
     this.capacity = capacity;
     this.window = window;
-    this.ratio = this.limit;
     this.unit = 1000 / capacity | 0 || 1;
     this.stats.resize(window);
   }
