@@ -7,11 +7,11 @@ import { captureTimers } from '../src/timer';
 describe('Benchmark:', function () {
   describe('Cache', function () {
     it('LRU new', function (done) {
-      benchmark('LRUCache new', () => new LRUCache({ max: 1000 }), done);
+      benchmark('LRUCache new', () => new LRUCache({ max: 10000 }), done);
     });
 
     it('DWC new', function (done) {
-      benchmark('DW-Cache new', () => new Cache(1000), done);
+      benchmark('DW-Cache new', () => new Cache(10000), done);
     });
 
     for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
