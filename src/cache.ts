@@ -117,8 +117,9 @@ export namespace Cache {
     readonly resolution?: number;
     readonly offset?: number;
     readonly entrance?: number;
-    readonly threshold?: number;
     readonly sweep?: {
+      readonly threshold?: number;
+      readonly window?: number;
       readonly interval?: number;
       readonly shift?: number;
     };
@@ -154,8 +155,13 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.stats = opts.resolution || opts.offset
       ? new StatsExperimental(this.window, settings.resolution!, settings.offset!)
       : new Stats(this.window);
-    this.threshold = settings.threshold!;
-    this.sweeper = new Sweeper(this.indexes.LRU, settings.sweep!.interval!, settings.sweep!.shift!);
+    this.sweeper = new Sweeper(
+      this.indexes.LRU,
+      settings.sweep!.threshold!,
+      capacity,
+      capacity * settings.sweep!.window! / 100 | 0,
+      settings.sweep!.interval!,
+      settings.sweep!.shift!);
     this.disposer = settings.disposer!;
     this.test = settings.test!;
   }
@@ -171,11 +177,10 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     resolution: 1,
     offset: 0,
     entrance: 5,
-    // 15のほうがベンチマークの全体的なスコアが上がるが低容量でのループ耐性が上がる代わりに
-    // それ以外の性能が下がっているため実用的には20のほうがよいと思われる。
-    threshold: 20,
     sweep: {
-      interval: 10,
+      threshold: 1,
+      window: 5,
+      interval: 4,
       shift: 1,
     },
     test: false,
@@ -221,8 +226,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.$size -= entry.size;
     callback && this.disposer?.(node.value.value, entry.key);
   }
-  private misses = 0;
-  private threshold: number;
   private sweeper: Sweeper;
   private ensure(margin: number, skip?: List.Node<Entry<K, V>>, capture = false): List.Node<Entry<K, V>> | undefined {
     let size = skip?.value.size ?? 0;
@@ -241,7 +244,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       }
       else {
         assert(LRU.last);
-        if (this.misses > LRU.length * this.threshold / 100 && !this.test) {
+        if (this.sweeper.isAvailable() && !this.test) {
           this.sweeper.sweep();
         }
         else if (LFU.length > this.capacity * (this.ratio ?? this.limit) / 1000) {
@@ -298,7 +301,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       : Infinity;
     let node = this.memory.get(key);
     const match = node !== undefined;
-    !match && ++this.misses;
+    !match && this.sweeper.miss();
     node = this.ensure(size, node, true);
     if (node !== undefined) {
       assert(node.list);
@@ -396,7 +399,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.expiration = false;
     this.expirations?.clear();
     this.stats.clear();
-    this.misses = 0;
     this.sweeper.clear();
     if (!this.disposer || !this.settings.capture!.clear) return void this.memory.clear();
     const memory = this.memory;
@@ -415,6 +417,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.unit = 1000 / capacity | 0 || 1;
     this.resource = resource;
     this.stats.resize(window);
+    this.sweeper.resize(capacity, capacity * this.settings.sweep!.window! / 100 | 0);
     this.ensure(0);
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
@@ -427,8 +430,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const entry = node.value;
     const { region } = entry;
     const { LRU, LFU } = this.indexes;
-    this.misses &&= 0;
-    this.sweeper.clear();
+    this.sweeper.hit();
     if (node.list === LRU) {
       // For memoize.
       if (node === LRU.head && !this.test) return;
@@ -647,25 +649,55 @@ assert(StatsExperimental.rate(10, [2, 2], [3, 8], 5) === 2900);
 class Sweeper {
   constructor(
     private readonly target: List<unknown>,
+    private readonly threshold: number,
+    private capacity: number,
+    private window: number,
     private readonly interval: number,
     private readonly shift: number,
   ) {
+    assert(window >>> 0 === window);
   }
-  private initial = true;
+  public resize(capacity: number, window: number): void {
+    this.capacity = capacity;
+    assert(window >>> 0 === window);
+    this.window = window;
+  }
+  private hits: [number, number] = [0, 0];
+  private misses: [number, number] = [0, 0];
+  private slide(): void {
+    this.hits = [0, this.hits[0]];
+    this.misses = [0, this.misses[0]];
+  }
+  public hit(): void {
+    if (this.window === 0) return;
+    ++this.hits[0] + this.misses[0] === this.window && this.slide();
+    this.active && !this.isAvailable() && this.clear();
+  }
+  public miss(): void {
+    if (this.window === 0) return;
+    this.hits[0] + ++this.misses[0] === this.window && this.slide();
+  }
+  public isAvailable(): boolean {
+    if (this.window === 0) return false;
+    return Stats.rate(this.window, this.hits, this.misses, 0) / 100 < this.threshold;
+  }
+  private active = false;
   private direction = true;
+  private initial = true;
   private back = 0;
   private advance = 0;
   public sweep(): void {
+    this.active ||= true;
     const { target } = this;
     if (this.direction) {
       if (this.back < 1) {
-        this.back += target.length * this.interval / 100;
+        this.back += this.capacity * this.interval / 100;
       }
     }
     else {
       if (this.advance < 1) {
         assert(!this.initial);
-        this.advance += target.length * this.interval / 100 * (100 - this.shift) / 100;
+        this.advance += this.capacity * this.interval / 100 * (100 - this.shift) / 100;
       }
     }
     assert(this.back > 0 || this.advance > 0);
@@ -683,8 +715,8 @@ class Sweeper {
       }
     }
     else if (this.advance >= 1) {
-      assert(!this.initial);
       assert(this.direction === false);
+      assert(!this.initial);
       if (--this.advance < 1) {
         this.direction = true;
       }
@@ -694,9 +726,10 @@ class Sweeper {
     }
   }
   public clear(): void {
-    if (this.initial && this.back === 0) return;
-    this.initial = true;
+    if (!this.active) return;
+    this.active = false;
     this.direction = true;
+    this.initial = true;
     this.back = 0;
     this.advance = 0;
   }
