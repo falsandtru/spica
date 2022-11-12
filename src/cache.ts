@@ -492,16 +492,16 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
 class Stats {
   public static rate(
     window: number,
-    hits1: readonly number[],
-    hits2: readonly number[],
+    targets: readonly number[],
+    remains: readonly number[],
     offset: number,
   ): number {
-    assert(hits1.length === 2);
-    assert(hits1.length === hits2.length);
-    const currHits = hits1[0];
-    const prevHits = hits1[1];
-    const currTotal = currHits + hits2[0];
-    const prevTotal = prevHits + hits2[1];
+    assert(targets.length === 2);
+    assert(targets.length === remains.length);
+    const currHits = targets[0];
+    const prevHits = targets[1];
+    const currTotal = currHits + remains[0];
+    const prevTotal = prevHits + remains[1];
     assert(currTotal <= window);
     const prevRate = prevHits && prevHits * 100 / prevTotal;
     const currRatio = currTotal * 100 / window - offset;
@@ -563,17 +563,17 @@ class Stats {
 class StatsExperimental extends Stats {
   public static override rate(
     window: number,
-    hits1: readonly number[],
-    hits2: readonly number[],
+    targets: readonly number[],
+    remains: readonly number[],
     offset: number,
   ): number {
-    assert(hits1.length >= 2);
-    assert(hits1.length === hits2.length);
+    assert(targets.length >= 2);
+    assert(targets.length === remains.length);
     let total = 0;
     let hits = 0;
     let ratio = 100;
-    for (let len = hits1.length, i = 0; i < len; ++i) {
-      const subtotal = hits1[i] + hits2[i];
+    for (let len = targets.length, i = 0; i < len; ++i) {
+      const subtotal = targets[i] + remains[i];
       if (subtotal === 0) continue;
       offset = i + 1 === len ? 0 : offset;
       const subratio = min(subtotal * 100 / window, ratio) - offset;
@@ -581,7 +581,7 @@ class StatsExperimental extends Stats {
       if (subratio <= 0) continue;
       const rate = window * subratio / subtotal;
       total += subtotal * rate;
-      hits += hits1[i] * rate;
+      hits += targets[i] * rate;
       ratio -= subratio;
       if (ratio <= 0) break;
     }
