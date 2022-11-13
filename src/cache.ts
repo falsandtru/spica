@@ -703,7 +703,7 @@ class Sweeper {
       [this.currHits, this.prevHits],
       [this.currMisses, this.prevMisses],
       0);
-    return rate / 100 < this.threshold;
+    return rate < this.threshold * 100;
   }
   private active = false;
   private direction = true;
