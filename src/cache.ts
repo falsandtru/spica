@@ -434,12 +434,13 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (node.list === LRU) {
       // For memoize.
       if (node === LRU.head && !this.test) return;
-      ++this.stats[region][0];
       if (region === 'LFU') {
+        this.stats.hitLFU();
         --this.overlap;
         assert(this.overlap >= 0);
       }
       else {
+        this.stats.hitLRU();
         entry.region = 'LFU';
       }
       assert(this.indexes.LFU.length < this.capacity);
@@ -448,7 +449,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     else {
       // For memoize.
       if (node === LFU.head && !this.test) return;
-      ++this.stats[region][0];
+      this.stats.hitLFU();
       node.moveToHead();
     }
     this.coordinate();
@@ -460,7 +461,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private coordinate(): void {
     const { capacity, stats, indexes } = this;
     if (stats.subtotal() * 1000 % capacity !== 0 || !stats.isFull()) return;
-    assert(stats.LRU.length >= 2);
     this.ratio ??= min(indexes.LFU.length / capacity * 1000 | 0, this.limit);
     const lenR = indexes.LRU.length;
     const lenF = indexes.LFU.length;
@@ -517,45 +517,50 @@ class Stats {
   ) {
   }
   public readonly offset: number = 0;
-  protected readonly max: number = 2;
-  public LRU = [0];
-  public LFU = [0];
-  public get length(): number {
-    return this.LRU.length;
-  }
+  private currLRUHits = 0;
+  private prevLRUHits = 0;
+  private currLFUHits = 0;
+  private prevLFUHits = 0;
   public isFull(): boolean {
-    return this.length === this.max;
+    return this.prevLRUHits !== 0
+        || this.prevLFUHits !== 0;
+  }
+  public hitLRU(): void {
+    ++this.currLRUHits;
+  }
+  public hitLFU(): void {
+    ++this.currLFUHits;
   }
   public rateLRU(offset = false): number {
-    return Stats.rate(this.window, this.LRU, this.LFU, +offset & 0);
+    return Stats.rate(
+      this.window,
+      [this.currLRUHits, this.prevLRUHits],
+      [this.currLFUHits, this.prevLFUHits],
+      +offset & 0);
   }
   public rateLFU(offset = false): number {
-    return Stats.rate(this.window, this.LFU, this.LRU, +offset & 0);
+    return Stats.rate(
+      this.window,
+      [this.currLFUHits, this.prevLFUHits],
+      [this.currLRUHits, this.prevLRUHits],
+      +offset & 0);
   }
   public subtotal(): number {
-    const { LRU, LFU, window } = this;
-    const subtotal = LRU[0] + LFU[0];
-    subtotal >= window && this.slide();
+    const subtotal = this.currLRUHits + this.currLFUHits;
+    subtotal >= this.window && this.slide();
     return subtotal;
   }
   protected slide(): void {
-    const { LRU, LFU, max } = this;
-    if (LRU.length === max) {
-      assert(max === 2);
-      LRU[1] = LRU[0];
-      LFU[1] = LFU[0];
-      LRU[0] = 0;
-      LFU[0] = 0;
-    }
-    else {
-      LRU.unshift(0);
-      LFU.unshift(0);
-    }
-    assert(LRU.length === LFU.length);
+    this.prevLRUHits = this.currLRUHits;
+    this.prevLFUHits = this.currLFUHits;
+    this.currLRUHits = 0;
+    this.currLFUHits = 0;
   }
   public clear(): void {
-    this.LRU = [0];
-    this.LFU = [0];
+    this.currLRUHits = 0;
+    this.currLFUHits = 0;
+    this.prevLRUHits = 0;
+    this.prevLFUHits = 0;
   }
   public resize(window: number): void {
     this.window = window;
@@ -596,7 +601,21 @@ class StatsExperimental extends Stats {
   ) {
     super(window);
   }
-  protected override readonly max = ceil(this.resolution * (100 + this.offset) / 100) + 1;
+  private readonly max = ceil(this.resolution * (100 + this.offset) / 100) + 1;
+  private LRU = [0];
+  private LFU = [0];
+  public get length(): number {
+    return this.LRU.length;
+  }
+  public override isFull(): boolean {
+    return this.length === this.max;
+  }
+  public override hitLRU(): void {
+    ++this.LRU[0];
+  }
+  public override hitLFU(): void {
+    ++this.LFU[0];
+  }
   public override rateLRU(offset = false): number {
     return StatsExperimental.rate(this.window, this.LRU, this.LFU, +offset && this.offset);
   }
@@ -630,6 +649,10 @@ class StatsExperimental extends Stats {
     LFU.unshift(0);
     assert(LRU.length === LFU.length);
   }
+  public override clear(): void {
+    this.LRU = [0];
+    this.LFU = [0];
+  }
 }
 
 assert(Stats.rate(10, [4, 0], [6, 0], 0) === 4000);
@@ -657,29 +680,30 @@ class Sweeper {
   ) {
     assert(window >>> 0 === window);
   }
-  public resize(capacity: number, window: number): void {
-    this.capacity = capacity;
-    assert(window >>> 0 === window);
-    this.window = window;
-  }
-  private hits: [number, number] = [0, 0];
-  private misses: [number, number] = [0, 0];
+  private currHits = 0;
+  private currMisses = 0;
+  private prevHits = 0;
+  private prevMisses = 0;
   private slide(): void {
-    this.hits = [0, this.hits[0]];
-    this.misses = [0, this.misses[0]];
+    this.prevHits = this.currHits;
+    this.prevMisses = this.currMisses;
+    this.currHits = 0;
+    this.currMisses = 0;
   }
   public hit(): void {
-    if (this.window === 0) return;
-    ++this.hits[0] + this.misses[0] === this.window && this.slide();
+    ++this.currHits + this.currMisses === this.window && this.slide();
     this.active && !this.isAvailable() && this.clear();
   }
   public miss(): void {
-    if (this.window === 0) return;
-    this.hits[0] + ++this.misses[0] === this.window && this.slide();
+    this.currHits + ++this.currMisses === this.window && this.slide();
   }
   public isAvailable(): boolean {
-    if (this.window === 0) return false;
-    return Stats.rate(this.window, this.hits, this.misses, 0) / 100 < this.threshold;
+    const rate = Stats.rate(
+      this.window,
+      [this.currHits, this.prevHits],
+      [this.currMisses, this.prevMisses],
+      0);
+    return rate / 100 < this.threshold;
   }
   private active = false;
   private direction = true;
@@ -732,5 +756,10 @@ class Sweeper {
     this.initial = true;
     this.back = 0;
     this.advance = 0;
+  }
+  public resize(capacity: number, window: number): void {
+    this.capacity = capacity;
+    assert(window >>> 0 === window);
+    this.window = window;
   }
 }
