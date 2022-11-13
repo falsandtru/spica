@@ -747,6 +747,7 @@ class Sweeper {
       }
     }
     else {
+      this.direction = !this.direction;
       target.head = target.head!.next;
     }
   }
