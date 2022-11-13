@@ -120,7 +120,7 @@ export namespace Cache {
     readonly sweep?: {
       readonly threshold?: number;
       readonly window?: number;
-      readonly interval?: number;
+      readonly range?: number;
       readonly shift?: number;
     };
     readonly test?: boolean;
@@ -159,8 +159,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       this.indexes.LRU,
       settings.sweep!.threshold!,
       capacity,
-      capacity * settings.sweep!.window! / 100 | 0 || 1,
-      settings.sweep!.interval!,
+      settings.sweep!.window!,
+      settings.sweep!.range!,
       settings.sweep!.shift!);
     this.disposer = settings.disposer!;
     this.test = settings.test!;
@@ -180,7 +180,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     sweep: {
       threshold: 1,
       window: 5,
-      interval: 4,
+      range: 4,
       shift: 1,
     },
     test: false,
@@ -417,7 +417,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.unit = 1000 / capacity | 0 || 1;
     this.resource = resource;
     this.stats.resize(window);
-    this.sweeper.resize(capacity, capacity * this.settings.sweep!.window! / 100 | 0 || 1);
+    this.sweeper.resize(capacity, this.settings.sweep!.window!, this.settings.sweep!.range!);
     this.ensure(0);
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
@@ -673,12 +673,13 @@ class Sweeper {
   constructor(
     private readonly target: List<unknown>,
     private readonly threshold: number,
-    private capacity: number,
+    capacity: number,
     private window: number,
-    private readonly interval: number,
+    private range: number,
     private readonly shift: number,
   ) {
-    assert(window >>> 0 === window);
+    this.window = capacity * window / 100 | 0 || 1;
+    this.range = capacity * range / 100;
   }
   private currHits = 0;
   private currMisses = 0;
@@ -715,13 +716,13 @@ class Sweeper {
     const { target } = this;
     if (this.direction) {
       if (this.back < 1) {
-        this.back += this.capacity * this.interval / 100;
+        this.back += this.range;
       }
     }
     else {
       if (this.advance < 1) {
         assert(!this.initial);
-        this.advance += this.capacity * this.interval / 100 * (100 - this.shift) / 100;
+        this.advance += this.range * (100 - this.shift) / 100;
       }
     }
     assert(this.back > 0 || this.advance > 0);
@@ -757,9 +758,8 @@ class Sweeper {
     this.back = 0;
     this.advance = 0;
   }
-  public resize(capacity: number, window: number): void {
-    this.capacity = capacity;
-    assert(window >>> 0 === window);
-    this.window = window;
+  public resize(capacity: number, window: number, range: number): void {
+    this.window = capacity * window / 100 | 0 || 1;
+    this.range = capacity * range / 100;
   }
 }
