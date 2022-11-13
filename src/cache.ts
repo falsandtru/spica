@@ -159,7 +159,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       this.indexes.LRU,
       settings.sweep!.threshold!,
       capacity,
-      capacity * settings.sweep!.window! / 100 | 0,
+      capacity * settings.sweep!.window! / 100 | 0 || 1,
       settings.sweep!.interval!,
       settings.sweep!.shift!);
     this.disposer = settings.disposer!;
@@ -417,7 +417,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.unit = 1000 / capacity | 0 || 1;
     this.resource = resource;
     this.stats.resize(window);
-    this.sweeper.resize(capacity, capacity * this.settings.sweep!.window! / 100 | 0);
+    this.sweeper.resize(capacity, capacity * this.settings.sweep!.window! / 100 | 0 || 1);
     this.ensure(0);
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
