@@ -668,7 +668,7 @@ assert(StatsExperimental.rate(10, [0, 4], [0, 6], 5) === 4000);
 assert(StatsExperimental.rate(10, [1, 2], [4, 8], 5) === 2000);
 assert(StatsExperimental.rate(10, [2, 2], [3, 8], 5) === 2900);
 
-// Transitive Wide MRU with Round Replacement
+// Transitive Wide MRU with Cyclic Replacement
 class Sweeper {
   constructor(
     private readonly target: List<unknown>,
