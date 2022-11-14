@@ -1,4 +1,4 @@
-import { max, min, ceil } from './alias';
+import { max, min, ceil, round } from './alias';
 import { now } from './clock';
 import { IterableDict } from './dict';
 import { List } from './invlist';
@@ -678,7 +678,7 @@ class Sweeper {
     private range: number,
     private readonly shift: number,
   ) {
-    this.window = capacity * window / 100 | 0 || 1;
+    this.window = round(capacity * window / 100) || 1;
     this.range = capacity * range / 100;
   }
   private currHits = 0;
@@ -760,7 +760,7 @@ class Sweeper {
     this.advance = 0;
   }
   public resize(capacity: number, window: number, range: number): void {
-    this.window = capacity * window / 100 | 0 || 1;
+    this.window = round(capacity * window / 100) || 1;
     this.range = capacity * range / 100;
   }
 }
