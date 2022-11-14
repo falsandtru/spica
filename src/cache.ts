@@ -178,7 +178,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     offset: 0,
     entrance: 5,
     sweep: {
-      threshold: 1,
+      threshold: 10,
       window: 2,
       range: 1,
       shift: 2,
