@@ -436,7 +436,7 @@ describe('Unit: lib/cache', () => {
       for (let i = 0; i < repeat; ++i) {
         const key = random() < 0.5
           // LFUが機能するアクセスパターンの場合はLRUだけでも同等に効果的に動作し機能しない場合もLRUに縮退して同等
-          // 推移的偏りはこれを迅速に捕捉し続けるLRUと保持するLFUが必要であるため偏りの2倍の容量が必要となる
+          // 推移的偏りはこれを迅速に捕捉し続けるLRUと保持するLFUが必要であるため偏りの2倍の履歴が必要となる
           //? random() * capacity * -1 - i / 2 * capacity / 100 | 0
           ? random() * capacity / -4 - i / 2 * capacity / 400 | 0
           : random() * capacity * 10 | 0;
@@ -465,6 +465,7 @@ describe('Unit: lib/cache', () => {
       let lruhit = 0;
       let dwchit = 0;
       for (let i = 0; i < repeat; ++i) {
+        // スキャン耐性が逆効果となる一度限りのアクセス
         const key = random() * capacity + (i / capacity | 0) * capacity | 0;
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1) & 0;
@@ -522,8 +523,8 @@ describe('Unit: lib/cache', () => {
       for (let i = 0; i < repeat; ++i) {
         const key = i % 3
           // LFU破壊
-          ? i % 3 - 1 ? i - i % 3 + 48 : i - i % 3
-          : random() * capacity / -6 | 0;
+          ? i % 3 - 1 ? i - i % 3 + 6 : i - i % 3
+          : random() * capacity / -1 | 0;
         lruhit += lru.get(key)! & +(key < 0) || +lru.set(key, 1) & 0;
         dwchit += dwc.get(key)! & +(key < 0) || +dwc.put(key, 1) & 0;
       }
@@ -534,7 +535,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC hit ratio', dwchit * 100 / repeat);
       console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['indexes'].LFU.length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
-      assert(dwchit / lruhit * 100 >>> 0 === 99);
+      assert(dwchit / lruhit * 100 >>> 0 === 96);
     });
 
     it('ratio uneven 1,000', function () {
