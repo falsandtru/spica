@@ -692,11 +692,11 @@ class Sweeper {
     this.currMisses = 0;
   }
   public hit(): void {
-    ++this.currHits + this.currMisses === this.window && this.slide();
+    ++this.currHits + this.currMisses >= this.window && this.slide();
     this.active && !this.isAvailable() && this.reset();
   }
   public miss(): void {
-    this.currHits + ++this.currMisses === this.window && this.slide();
+    this.currHits + ++this.currMisses >= this.window && this.slide();
   }
   public isAvailable(): boolean {
     const rate = Stats.rate(
