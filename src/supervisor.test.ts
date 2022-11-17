@@ -143,7 +143,7 @@ describe('Unit: lib/supervisor', function () {
               assert(param === 0 && ++cnt);
               break;
             default:
-              assert(cnt === NaN);
+              assert(false);
           }
         });
       sv.events.exit
