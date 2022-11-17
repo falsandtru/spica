@@ -494,8 +494,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
 class Stats {
   public static rate(
     window: number,
-    targets: readonly number[],
-    remains: readonly number[],
+    targets: readonly [number, number],
+    remains: readonly [number, number],
     offset: number,
   ): number {
     assert(targets.length === 2);
