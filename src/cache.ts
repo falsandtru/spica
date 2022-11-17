@@ -693,6 +693,7 @@ class Sweeper {
     private range: number,
     private readonly shift: number,
   ) {
+    this.threshold *= 100;
     this.window = round(capacity * window / 100) || 1;
     this.range = capacity * range / 100;
   }
@@ -719,7 +720,7 @@ class Sweeper {
       [this.currHits, this.prevHits],
       [this.currMisses, this.prevMisses],
       0);
-    return rate < this.threshold * 100;
+    return rate < this.threshold;
   }
   private active = false;
   private direction = true;
