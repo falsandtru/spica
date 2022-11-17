@@ -460,7 +460,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private readonly limit: number;
   private coordinate(): void {
     const { capacity, stats, indexes } = this;
-    if (stats.subtotal() * 1000 % capacity !== 0 || !stats.isFull()) return;
+    if (stats.subtotal() * 1000 % capacity !== 0 || !stats.isReady()) return;
     this.ratio ??= min(indexes.LFU.length / capacity * 1000 | 0, this.limit);
     const lenR = indexes.LRU.length;
     const lenF = indexes.LFU.length;
@@ -521,7 +521,7 @@ class Stats {
   private prevLRUHits = 0;
   private currLFUHits = 0;
   private prevLFUHits = 0;
-  public isFull(): boolean {
+  public isReady(): boolean {
     return this.prevLRUHits !== 0
         || this.prevLFUHits !== 0;
   }
@@ -607,7 +607,7 @@ class StatsExperimental extends Stats {
   public get length(): number {
     return this.LRU.length;
   }
-  public override isFull(): boolean {
+  public override isReady(): boolean {
     return this.length === this.max;
   }
   public override hitLRU(): void {
