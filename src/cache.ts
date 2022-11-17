@@ -693,7 +693,7 @@ class Sweeper {
   }
   public hit(): void {
     ++this.currHits + this.currMisses === this.window && this.slide();
-    this.active && !this.isAvailable() && this.clear();
+    this.active && !this.isAvailable() && this.reset();
   }
   public miss(): void {
     this.currHits + ++this.currMisses === this.window && this.slide();
@@ -751,13 +751,19 @@ class Sweeper {
       target.head = target.head!.next;
     }
   }
-  public clear(): void {
+  private reset(): void {
     if (!this.active) return;
     this.active = false;
     this.direction = true;
     this.initial = true;
     this.back = 0;
     this.advance = 0;
+  }
+  public clear(): void {
+    this.active = true;
+    this.reset();
+    this.slide();
+    this.slide();
   }
   public resize(capacity: number, window: number, range: number): void {
     this.window = round(capacity * window / 100) || 1;
