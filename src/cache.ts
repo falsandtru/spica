@@ -526,10 +526,10 @@ class Stats {
         || this.prevLFUHits !== 0;
   }
   public hitLRU(): void {
-    ++this.currLRUHits;
+    ++this.currLRUHits + this.currLFUHits === this.window && this.slide();
   }
   public hitLFU(): void {
-    ++this.currLFUHits;
+    this.currLRUHits + ++this.currLFUHits === this.window && this.slide();
   }
   public rateLRU(offset = false): number {
     return Stats.rate(
@@ -546,9 +546,7 @@ class Stats {
       +offset & 0);
   }
   public subtotal(): number {
-    const subtotal = this.currLRUHits + this.currLFUHits;
-    subtotal >= this.window && this.slide();
-    return subtotal;
+    return this.currLRUHits + this.currLFUHits;
   }
   protected slide(): void {
     this.prevLRUHits = this.currLRUHits;
@@ -564,6 +562,7 @@ class Stats {
   }
   public resize(window: number): void {
     this.window = window;
+    this.currLRUHits + this.currLFUHits >= this.window && this.slide();
   }
 }
 
@@ -611,10 +610,16 @@ class StatsExperimental extends Stats {
     return this.length === this.max;
   }
   public override hitLRU(): void {
-    ++this.LRU[0];
+    const { LRU, LFU, window, resolution, offset } = this;
+    ++LRU[0];
+    const subtotal = LRU[offset && 1] + LFU[offset && 1] || 0;
+    subtotal >= window / resolution && this.slide();
   }
   public override hitLFU(): void {
-    ++this.LFU[0];
+    const { LRU, LFU, window, resolution, offset } = this;
+    ++LFU[0];
+    const subtotal = LRU[offset && 1] + LFU[offset && 1] || 0;
+    subtotal >= window / resolution && this.slide();
   }
   public override rateLRU(offset = false): number {
     return StatsExperimental.rate(this.window, this.LRU, this.LFU, +offset && this.offset);
@@ -623,7 +628,7 @@ class StatsExperimental extends Stats {
     return StatsExperimental.rate(this.window, this.LFU, this.LRU, +offset && this.offset);
   }
   public override subtotal(): number {
-    const { LRU, LFU, window, resolution, offset } = this;
+    const { LRU, LFU, window, offset } = this;
     if (offset && LRU[0] + LFU[0] >= window * offset / 100) {
       if (this.length === 1) {
         this.slide();
@@ -635,8 +640,6 @@ class StatsExperimental extends Stats {
         LFU[0] = 0;
       }
     }
-    const subtotal = LRU[offset && 1] + LFU[offset && 1] || 0;
-    subtotal >= window / resolution && this.slide();
     return LRU[0] + LFU[0];
   }
   protected override slide(): void {
@@ -652,6 +655,12 @@ class StatsExperimental extends Stats {
   public override clear(): void {
     this.LRU = [0];
     this.LFU = [0];
+  }
+  public override resize(window: number): void {
+    this.window = window;
+    const { LRU, LFU, resolution, offset } = this;
+    const subtotal = LRU[offset && 1] + LFU[offset && 1] || 0;
+    subtotal >= window / resolution && this.slide();
   }
 }
 
@@ -692,11 +701,11 @@ class Sweeper {
     this.currMisses = 0;
   }
   public hit(): void {
-    ++this.currHits + this.currMisses >= this.window && this.slide();
+    ++this.currHits + this.currMisses === this.window && this.slide();
     this.active && !this.isAvailable() && this.reset();
   }
   public miss(): void {
-    this.currHits + ++this.currMisses >= this.window && this.slide();
+    this.currHits + ++this.currMisses === this.window && this.slide();
   }
   public isAvailable(): boolean {
     const rate = Stats.rate(
@@ -768,5 +777,6 @@ class Sweeper {
   public resize(capacity: number, window: number, range: number): void {
     this.window = round(capacity * window / 100) || 1;
     this.range = capacity * range / 100;
+    this.currHits + this.currMisses >= this.window && this.slide();
   }
 }
