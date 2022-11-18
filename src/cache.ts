@@ -187,7 +187,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       threshold: 10,
       window: 5,
       range: 4,
-      shift: 2,
+      shift: 1,
     },
     test: false,
   };
@@ -251,7 +251,9 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       else {
         assert(LRU.last);
         if (this.sweeper.isAvailable() && !this.test) {
-          this.sweeper.sweep();
+          if (this.sweeper.sweep() && (this.ratio ?? 0) > 0) {
+            this.ratio! = max(this.ratio! - this.unit * this.settings.sweep!.window! * 2 / 2, 0);
+          }
         }
         else if (LFU.length > this.capacity * (this.ratio ?? this.limit) / 1000) {
           assert(LFU.last);
@@ -727,12 +729,14 @@ class Sweeper {
   private initial = true;
   private back = 0;
   private advance = 0;
-  public sweep(): void {
+  public sweep(): boolean {
+    let lap = false;
     this.active ||= true;
     const { target } = this;
     if (this.direction) {
       if (this.back < 1) {
         this.back += this.range;
+        lap = !this.initial && this.back >= 1;
       }
     }
     else {
@@ -766,6 +770,7 @@ class Sweeper {
       this.direction = !this.direction;
       target.head = target.head!.next;
     }
+    return lap;
   }
   private reset(): void {
     if (!this.active) return;
