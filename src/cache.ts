@@ -146,11 +146,11 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const settings = extend(this.settings, opts, {
       capacity,
     });
+    if (settings.window! >= 0.1 === false) throw new Error(`Spica: Cache: Window must be 0.1% or more of capacity.`);
     this.capacity = capacity = settings.capacity!;
     if (capacity >>> 0 !== capacity) throw new Error(`Spica: Cache: Capacity must be integer.`);
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     this.window = settings.window! * capacity / 100 >>> 0;
-    if (this.window * 1000 >= capacity === false) throw new Error(`Spica: Cache: Window must be 0.1% or more of capacity.`);
     this.unit = 1000 / capacity | 0 || 1;
     this.limit = 1000 - settings.entrance! * 10;
     this.resource = settings.resource! ?? capacity;
@@ -417,7 +417,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (capacity >>> 0 !== capacity) throw new Error(`Spica: Cache: Capacity must be integer.`);
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     const window = this.settings.window! * capacity / 100 >>> 0;
-    if (window * 1000 >= capacity === false) throw new Error(`Spica: Cache: Window must be 0.1% or more of capacity.`);
     this.capacity = capacity;
     this.window = window;
     this.unit = 1000 / capacity | 0 || 1;
