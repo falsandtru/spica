@@ -252,7 +252,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         assert(LRU.last);
         if (this.sweeper.isAvailable() && !this.test) {
           if (this.sweeper.sweep() && (this.ratio ?? 0) > 0) {
-            this.ratio! = max(this.ratio! - this.unit * this.settings.sweep!.window! * 2 / 2, 0);
+            const delta = this.indexes.LRU.length - this.capacity * this.settings.sweep!.window! / 100;
+            this.ratio! = max(this.ratio! - max(delta * 5 / this.capacity * 10, 0), 0);
           }
         }
         else if (LFU.length > this.capacity * (this.ratio ?? this.limit) / 1000) {
