@@ -253,7 +253,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         if (this.sweeper.isAvailable() && !this.test) {
           this.sweeper.sweep();
         }
-        else if (LFU.length > this.capacity * (this.ratio ?? this.limit) / 1000) {
+        else if (LFU.length * 1000 > this.capacity * (this.ratio ?? this.limit)) {
           assert(LFU.last);
           const node = LFU.last! !== skip
             ? LFU.last!
@@ -466,7 +466,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private coordinate(): void {
     const { capacity, stats, indexes } = this;
     if (stats.subtotal() * 1000 % capacity !== 0 || !stats.isReady()) return;
-    this.ratio ??= min(indexes.LFU.length / capacity * 1000 | 0, this.limit);
+    this.ratio ??= min(indexes.LFU.length * 1000 / capacity | 0, this.limit);
     const lenR = indexes.LRU.length;
     const lenF = indexes.LFU.length;
     const lenO = this.overlap;
