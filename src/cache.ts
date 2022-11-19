@@ -479,7 +479,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const rateF1 = stats.offset && stats.rateLFU(true) * (1000 - leverage);
     // 操作頻度を超えてキャッシュ比率を増減させても余剰比率の消化が追いつかず無駄
     // LRUの下限設定ではLRU拡大の要否を迅速に判定できないためLFUのヒット率低下の検出で代替する
-    if (this.ratio > 0 && (rateR0 > rateF0 || stats.offset && rateF0 * 100 < rateF1 * (100 - stats.offset))) {
+    if (this.ratio > 0 && (rateR0 > rateF0 || stats.offset !== 0 && rateF0 * 100 < rateF1 * (100 - stats.offset))) {
       //rateR0 <= rateF0 && rateF0 * 100 < rateF1 * (100 - stats.offset) && console.debug(0);
       if (lenR >= capacity * (1000 - this.ratio) / 1000) {
         //this.ratio % 100 || this.ratio === 1000 || console.debug('-', this.ratio, LRU, LFU);
