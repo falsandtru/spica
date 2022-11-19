@@ -97,6 +97,8 @@ DWCはこの最適化を行っても状態数の多さに比例して増加し�
 
 */
 
+const RESOLUTION = 1000;
+
 interface Entry<K, V> {
   key: K;
   value: V;
@@ -151,8 +153,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (capacity >>> 0 !== capacity) throw new Error(`Spica: Cache: Capacity must be integer.`);
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     this.window = settings.window! * capacity / 100 >>> 0;
-    this.unit = 1000 / capacity | 0 || 1;
-    this.limit = 1000 - settings.entrance! * 10;
+    this.unit = RESOLUTION / capacity | 0 || 1;
+    this.limit = RESOLUTION - settings.entrance! * RESOLUTION / 100;
     this.resource = settings.resource! ?? capacity;
     this.age = settings.age!;
     if (settings.earlyExpiring) {
@@ -253,7 +255,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         if (this.sweeper.isAvailable() && !this.test) {
           this.sweeper.sweep();
         }
-        else if (LFU.length * 1000 > this.capacity * (this.ratio ?? this.limit)) {
+        else if (LFU.length * RESOLUTION > this.capacity * (this.ratio ?? this.limit)) {
           assert(LFU.last);
           const node = LFU.last! !== skip
             ? LFU.last!
@@ -419,7 +421,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const window = this.settings.window! * capacity / 100 >>> 0;
     this.capacity = capacity;
     this.window = window;
-    this.unit = 1000 / capacity | 0 || 1;
+    this.unit = RESOLUTION / capacity | 0 || 1;
     this.resource = resource;
     this.stats.resize(window);
     this.sweeper.resize(capacity, this.settings.sweep!.window!, this.settings.sweep!.range!);
@@ -465,8 +467,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private readonly limit: number;
   private coordinate(): void {
     const { capacity, stats, indexes } = this;
-    if (stats.subtotal() * 1000 % capacity !== 0 || !stats.isReady()) return;
-    this.ratio ??= min(indexes.LFU.length * 1000 / capacity | 0, this.limit);
+    if (stats.subtotal() * RESOLUTION % capacity !== 0 || !stats.isReady()) return;
+    this.ratio ??= min(indexes.LFU.length * RESOLUTION / capacity | 0, this.limit);
     const lenR = indexes.LRU.length;
     const lenF = indexes.LFU.length;
     const lenO = this.overlap;
@@ -480,14 +482,14 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     // LRUの下限設定ではLRU拡大の要否を迅速に判定できないためLFUのヒット率低下の検出で代替する
     if (this.ratio > 0 && (rateR0 > rateF0 || stats.offset !== 0 && rateF0 * 100 < rateF1 * (100 - stats.offset))) {
       //rateR0 <= rateF0 && rateF0 * 100 < rateF1 * (100 - stats.offset) && console.debug(0);
-      if (lenR >= capacity * (1000 - this.ratio) / 1000) {
-        //this.ratio % 100 || this.ratio === 1000 || console.debug('-', this.ratio, LRU, LFU);
+      if (lenR * RESOLUTION >= capacity * (RESOLUTION - this.ratio)) {
+        //this.ratio % 100 || this.ratio === RESOLUTION || console.debug('-', this.ratio, LRU, LFU);
         this.ratio = max(this.ratio - this.unit, 0);
       }
     }
     else
     if (this.ratio < this.limit && rateF0 > rateR0) {
-      if (lenF >= capacity * this.ratio / 1000) {
+      if (lenF * RESOLUTION >= capacity * this.ratio) {
         //this.ratio % 100 || this.ratio === 0 || console.debug('+', this.ratio, LRU, LFU);
         this.ratio = min(this.ratio + this.unit, this.limit);
       }
