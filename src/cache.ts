@@ -22,6 +22,12 @@ S3での逆効果のみ確認につきオプション化。
 
 サイクリックスウィープ：
 大効果につき採用。
+LRU汚染対策。
+
+加重エージング：
+LFU解放とLRU拡大による高参照間隔アクセス対応に必要。
+リストによる実装ではランダムメモリアクセスを追加するためオーバーヘッドが大きい。
+LFU汚染対策。
 
 */
 
@@ -106,6 +112,7 @@ interface Entry<K, V> {
   expiration: number;
   enode?: Heap.Node<List.Node<Entry<K, V>>, number>;
   region: 'LRU' | 'LFU';
+  age: number;
 }
 
 export namespace Cache {
@@ -131,6 +138,10 @@ export namespace Cache {
       readonly range?: number;
       readonly shift?: number;
     };
+    readonly life?: {
+      readonly LRU: number;
+      readonly LFU: number;
+    };
     readonly test?: boolean;
   }
 }
@@ -144,6 +155,14 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (typeof capacity === 'object') {
       opts = capacity;
       capacity = opts.capacity ?? 0;
+    }
+    if (opts.test) {
+      // @ts-expect-error
+      this.settings.sweep!.threshold = 0;
+      // @ts-expect-error
+      this.settings.life!.LRU = 16;
+      // @ts-expect-error
+      this.settings.life!.LFU = 16;
     }
     const settings = extend(this.settings, opts, {
       capacity,
@@ -170,6 +189,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       settings.sweep!.window!,
       settings.sweep!.range!,
       settings.sweep!.shift!);
+    this.life = settings.life!;
     this.disposer = settings.disposer!;
     this.test = settings.test!;
   }
@@ -190,6 +210,10 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       window: 5,
       range: 4,
       shift: 2,
+    },
+    life: {
+      LRU: 1,
+      LFU: 4,
     },
     test: false,
   };
@@ -214,10 +238,33 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   public get size(): number {
     return this.$size;
   }
+  private life: {
+    readonly LRU: number;
+    readonly LFU: number;
+  };
+  private hand?: List.Node<Entry<K, V>>;
+  private escapeHand(node: List.Node<Entry<K, V>>): void {
+    if (node !== this.hand) return;
+    this.hand = node.prev === node
+      ? undefined
+      : node.prev;
+  }
+  private advanceHand(): void {
+    const node = this.hand ??= this.indexes.LFU.last;
+    if (node === undefined) return;
+    assert(node.list === this.indexes.LFU);
+    this.escapeHand(node);
+    assert(node.value.age >>> 0 === node.value.age);
+    if (--node.value.age !== 0) return;
+    assert(node !== this.hand);
+    this.indexes.LRU.unshiftNode(node);
+    ++this.overlap;
+  }
   private readonly disposer?: (value: V, key: K) => void;
   private evict(node: List.Node<Entry<K, V>>, callback: boolean): void {
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     //assert(this.memory.size <= this.capacity);
+    this.escapeHand(node);
     const entry = node.value;
     assert(node.list);
     entry.region === 'LFU' && node.list === this.indexes.LRU && --this.overlap;
@@ -252,7 +299,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       }
       else {
         assert(LRU.last);
-        if (this.sweeper.isAvailable() && !this.test) {
+        if (this.sweeper.isAvailable()) {
           this.sweeper.sweep();
         }
         else if (LFU.length * RESOLUTION > this.capacity * (this.ratio ?? this.limit)) {
@@ -265,6 +312,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
           if (node !== undefined) {
             assert(node !== skip);
             assert(node.value.region === 'LFU');
+            this.escapeHand(node);
+            assert(node !== this.hand);
             LRU.unshiftNode(node);
             ++this.overlap;
             assert(this.overlap <= LRU.length);
@@ -300,7 +349,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       return false;
     }
 
-    const { LRU } = this.indexes;
+    this.advanceHand();
+    const { LRU, LFU } = this.indexes;
     age === Infinity
       ? age = 0
       : this.expiration ||= true;
@@ -341,7 +391,14 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         this.expirations!.delete(entry.enode);
         entry.enode = undefined;
       }
+      this.escapeHand(node);
+      assert(node !== this.hand);
       node.moveToHead();
+      if (node.list === LFU) {
+        assert(LFU.length > 0);
+        entry.age = (this.capacity - LFU.length + 1) * this.life.LFU;
+        assert(entry.age > 0);
+      }
       this.disposer?.(value$, key$);
       return match;
     }
@@ -356,6 +413,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       size,
       expiration,
       region: 'LRU',
+      age: 0,
     }));
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     assert(this.memory.size <= this.capacity);
@@ -437,28 +495,39 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const entry = node.value;
     const { region } = entry;
     const { LRU, LFU } = this.indexes;
+    let life = 0;
     this.sweeper.hit();
     if (node.list === LRU) {
       // For memoize.
       if (node === LRU.head && !this.test) return;
       if (region === 'LFU') {
+        life = this.life.LFU;
         this.stats.hitLFU();
         --this.overlap;
         assert(this.overlap >= 0);
       }
       else {
+        life = this.life.LRU;
         this.stats.hitLRU();
         entry.region = 'LFU';
       }
       assert(this.indexes.LFU.length < this.capacity);
+      assert(node !== this.hand);
       LFU.unshiftNode(node);
     }
     else {
       // For memoize.
       if (node === LFU.head && !this.test) return;
+      life = this.life.LFU;
       this.stats.hitLFU();
+      this.escapeHand(node);
+      assert(node !== this.hand);
       node.moveToHead();
     }
+    assert(LFU.length > 0);
+    entry.age = (this.capacity - LFU.length + 1) * life;
+    assert(entry.age > 0);
+    this.advanceHand();
     this.coordinate();
   }
   private readonly stats: Stats | StatsExperimental;
