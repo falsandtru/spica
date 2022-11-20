@@ -189,10 +189,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       settings.sweep!.window!,
       settings.sweep!.range!,
       settings.sweep!.shift!);
-    this.ager = new Ager(capacity, this.indexes.LFU, node => {
-      this.indexes.LRU.unshiftNode(node);
-      ++this.overlap;
-    });
+    this.ager = new Ager(capacity, this.indexes.LFU);
     this.life = settings.life!;
     this.disposer = settings.disposer!;
     this.test = settings.test!;
@@ -250,7 +247,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private evict(node: List.Node<Entry<K, V>>, callback: boolean): void {
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     //assert(this.memory.size <= this.capacity);
-    this.ager.escape(node);
+    this.ager.free(node);
     const entry = node.value;
     assert(node.list);
     entry.region === 'LFU' && node.list === this.indexes.LRU && --this.overlap;
@@ -299,7 +296,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
           if (node !== undefined) {
             assert(node !== skip);
             assert(node.value.region === 'LFU');
-            this.ager.escape(node);
+            this.ager.free(node);
             LRU.unshiftNode(node);
             ++this.overlap;
             assert(this.overlap <= LRU.length);
@@ -335,7 +332,13 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       return false;
     }
 
-    this.ager.advance();
+    {
+      const node = this.ager.advance();
+      if (node !== undefined) {
+        this.indexes.LRU.unshiftNode(node);
+        ++this.overlap;
+      }
+    }
     const { LRU, LFU } = this.indexes;
     const expiration = age === Infinity
       ? Infinity
@@ -375,7 +378,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         this.expirations!.delete(entry.enode);
         entry.enode = undefined;
       }
-      this.ager.escape(node);
+      this.ager.skip(node);
       node.moveToHead();
       if (node.list === LFU) {
         assert(LFU.length > 0);
@@ -504,7 +507,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       if (node === LFU.head && !this.test) return;
       life = this.life.LFU;
       this.stats.hitLFU();
-      this.ager.escape(node);
+      this.ager.skip(node);
       node.moveToHead();
     }
     assert(LFU.length > 0);
@@ -847,14 +850,13 @@ class Ager<K, V> {
   constructor(
     private capacity: number,
     private readonly target: List<Entry<K, V>>,
-    private readonly disposer: (node: List.Node<Entry<K, V>>) => void,
   ) {
   }
   public age(rate: number): number {
     return min((max(this.capacity - this.target.length, 0) + 1) * rate, 1 << 8 - 1);
   }
   private hand?: List.Node<Entry<K, V>>;
-  public escape(node: List.Node<Entry<K, V>>): void {
+  public free(node: List.Node<Entry<K, V>>): void {
     if (node !== this.hand) return;
     assert(node.list === this.target);
     this.hand = node.prev === node
@@ -862,16 +864,26 @@ class Ager<K, V> {
       : node.prev;
     assert(this.hand !== node);
   }
-  public advance(): void {
+  public skip(node: List.Node<Entry<K, V>>): void {
+    if (node !== this.hand) return;
+    assert(node.list === this.target);
+    this.hand = node.prev;
+  }
+  public advance(): List.Node<Entry<K, V>> | undefined {
     const node = this.hand ??= this.target.last;
     if (node === undefined) return;
     assert(node.list === this.target);
-    this.escape(node);
     assert(node.value.age > 0);
     assert(node.value.age >>> 0 === node.value.age);
-    if (--node.value.age !== 0) return;
-    assert(this.hand !== node);
-    this.disposer(node);
+    if (--node.value.age !== 0) {
+      this.skip(node);
+      return;
+    }
+    else {
+      this.free(node);
+      assert(this.hand !== node);
+      return node;
+    }
   }
   public clear(): void {
     this.hand = undefined;
