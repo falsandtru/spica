@@ -189,6 +189,10 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       settings.sweep!.window!,
       settings.sweep!.range!,
       settings.sweep!.shift!);
+    this.ager = new Ager(capacity, this.indexes.LFU, node => {
+      this.indexes.LRU.unshiftNode(node);
+      ++this.overlap;
+    });
     this.life = settings.life!;
     this.disposer = settings.disposer!;
     this.test = settings.test!;
@@ -242,29 +246,11 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     readonly LRU: number;
     readonly LFU: number;
   };
-  private hand?: List.Node<Entry<K, V>>;
-  private escapeHand(node: List.Node<Entry<K, V>>): void {
-    if (node !== this.hand) return;
-    this.hand = node.prev === node
-      ? undefined
-      : node.prev;
-  }
-  private advanceHand(): void {
-    const node = this.hand ??= this.indexes.LFU.last;
-    if (node === undefined) return;
-    assert(node.list === this.indexes.LFU);
-    this.escapeHand(node);
-    assert(node.value.age >>> 0 === node.value.age);
-    if (--node.value.age !== 0) return;
-    assert(node !== this.hand);
-    this.indexes.LRU.unshiftNode(node);
-    ++this.overlap;
-  }
   private readonly disposer?: (value: V, key: K) => void;
   private evict(node: List.Node<Entry<K, V>>, callback: boolean): void {
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     //assert(this.memory.size <= this.capacity);
-    this.escapeHand(node);
+    this.ager.escape(node);
     const entry = node.value;
     assert(node.list);
     entry.region === 'LFU' && node.list === this.indexes.LRU && --this.overlap;
@@ -282,6 +268,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     callback && this.disposer?.(node.value.value, entry.key);
   }
   private sweeper: Sweeper;
+  private ager: Ager<K, V>;
   private ensure(margin: number, skip?: List.Node<Entry<K, V>>, capture = false): List.Node<Entry<K, V>> | undefined {
     let size = skip?.value.size ?? 0;
     assert(margin - size <= this.resource || !capture);
@@ -312,8 +299,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
           if (node !== undefined) {
             assert(node !== skip);
             assert(node.value.region === 'LFU');
-            this.escapeHand(node);
-            assert(node !== this.hand);
+            this.ager.escape(node);
             LRU.unshiftNode(node);
             ++this.overlap;
             assert(this.overlap <= LRU.length);
@@ -349,7 +335,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       return false;
     }
 
-    this.advanceHand();
+    this.ager.advance();
     const { LRU, LFU } = this.indexes;
     age === Infinity
       ? age = 0
@@ -391,12 +377,11 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         this.expirations!.delete(entry.enode);
         entry.enode = undefined;
       }
-      this.escapeHand(node);
-      assert(node !== this.hand);
+      this.ager.escape(node);
       node.moveToHead();
       if (node.list === LFU) {
         assert(LFU.length > 0);
-        entry.age = (this.capacity - LFU.length + 1) * this.life.LFU;
+        entry.age = this.ager.age() * this.life.LFU;
         assert(entry.age > 0);
       }
       this.disposer?.(value$, key$);
@@ -466,7 +451,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.expirations?.clear();
     this.stats.clear();
     this.sweeper.clear();
-    this.hand = undefined;
+    this.ager.clear();
     if (!this.disposer || !this.settings.capture!.clear) return void this.memory.clear();
     const memory = this.memory;
     this.memory = new Map();
@@ -484,6 +469,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.resource = resource;
     this.stats.resize(window);
     this.sweeper.resize(capacity, this.settings.sweep!.window!, this.settings.sweep!.range!);
+    this.ager.resize(capacity);
     this.ensure(0);
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
@@ -513,7 +499,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         entry.region = 'LFU';
       }
       assert(this.indexes.LFU.length < this.capacity);
-      assert(node !== this.hand);
       LFU.unshiftNode(node);
     }
     else {
@@ -521,14 +506,13 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       if (node === LFU.head && !this.test) return;
       life = this.life.LFU;
       this.stats.hitLFU();
-      this.escapeHand(node);
-      assert(node !== this.hand);
+      this.ager.escape(node);
       node.moveToHead();
     }
     assert(LFU.length > 0);
-    entry.age = (this.capacity - LFU.length + 1) * life;
+    entry.age = this.ager.age() * life;
     assert(entry.age > 0);
-    this.advanceHand();
+    this.ager.advance();
     this.coordinate();
   }
   private readonly stats: Stats | StatsExperimental;
@@ -859,5 +843,43 @@ class Sweeper {
     this.window = round(capacity * window / 100) || 1;
     this.range = capacity * range / 100;
     this.currHits + this.currMisses >= this.window && this.slide();
+  }
+}
+
+class Ager<K, V> {
+  constructor(
+    private capacity: number,
+    private readonly target: List<Entry<K, V>>,
+    private readonly disposer: (node: List.Node<Entry<K, V>>) => void,
+  ) {
+  }
+  public age(): number {
+    return max(this.capacity - this.target.length, 0) + 1;
+  }
+  private hand?: List.Node<Entry<K, V>>;
+  public escape(node: List.Node<Entry<K, V>>): void {
+    if (node !== this.hand) return;
+    assert(node.list === this.target);
+    this.hand = node.prev === node
+      ? undefined
+      : node.prev;
+    assert(this.hand !== node);
+  }
+  public advance(): void {
+    const node = this.hand ??= this.target.last;
+    if (node === undefined) return;
+    assert(node.list === this.target);
+    this.escape(node);
+    assert(node.value.age > 0);
+    assert(node.value.age >>> 0 === node.value.age);
+    if (--node.value.age !== 0) return;
+    assert(this.hand !== node);
+    this.disposer(node);
+  }
+  public clear(): void {
+    this.hand = undefined;
+  }
+  public resize(capacity: number): void {
+    this.capacity = capacity;
   }
 }
