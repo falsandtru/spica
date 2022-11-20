@@ -24,7 +24,7 @@ S3での逆効果のみ確認につきオプション化。
 大効果につき採用。
 LRU汚染対策。
 
-加重エージング：
+ギャップウェイテッドエージング：
 LFU解放とLRU拡大による高参照間隔アクセス対応に必要。
 リストによる実装ではランダムメモリアクセスを追加するためオーバーヘッドが大きい。
 LFU汚染対策。
@@ -846,6 +846,7 @@ class Sweeper {
   }
 }
 
+// Gap-weighted Aging
 class Clock<K, V> {
   constructor(
     private capacity: number,
@@ -853,7 +854,7 @@ class Clock<K, V> {
   ) {
   }
   public age(rate: number): number {
-    return min((max(this.capacity - this.target.length, 0) + 1) * rate, 1 << 8 - 1);
+    return min((max(this.capacity - this.target.length, 0) + 1) * rate, (1 << 8) - 1);
   }
   private hand?: List.Node<Entry<K, V>>;
   public free(node: List.Node<Entry<K, V>>): void {
