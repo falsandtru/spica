@@ -217,7 +217,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     },
     life: {
       LRU: 1,
-      LFU: 4,
+      LFU: 2,
     },
     test: false,
   };
@@ -512,7 +512,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     assert(LFU.length > 0);
     entry.age = this.ager.age() * life;
     assert(entry.age > 0);
-    this.ager.advance();
     this.coordinate();
   }
   private readonly stats: Stats | StatsExperimental;
