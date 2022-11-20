@@ -189,7 +189,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       settings.sweep!.window!,
       settings.sweep!.range!,
       settings.sweep!.shift!);
-    this.ager = new Ager(capacity, this.indexes.LFU);
+    this.ager = new Clock(capacity, this.indexes.LFU);
     this.life = settings.life!;
     this.disposer = settings.disposer!;
     this.test = settings.test!;
@@ -265,7 +265,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     callback && this.disposer?.(node.value.value, entry.key);
   }
   private sweeper: Sweeper;
-  private ager: Ager<K, V>;
+  private ager: Clock<K, V>;
   private ensure(margin: number, skip?: List.Node<Entry<K, V>>, capture = false): List.Node<Entry<K, V>> | undefined {
     let size = skip?.value.size ?? 0;
     assert(margin - size <= this.resource || !capture);
@@ -846,7 +846,7 @@ class Sweeper {
   }
 }
 
-class Ager<K, V> {
+class Clock<K, V> {
   constructor(
     private capacity: number,
     private readonly target: List<Entry<K, V>>,
