@@ -117,7 +117,7 @@ interface Entry<K, V> {
 
 export namespace Cache {
   export interface Options<K, V = undefined> {
-    // Max length.
+    // Max entries.
     readonly capacity?: number;
     readonly window?: number;
     readonly resource?: number;
