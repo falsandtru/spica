@@ -466,6 +466,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.expirations?.clear();
     this.stats.clear();
     this.sweeper.clear();
+    this.hand = undefined;
     if (!this.disposer || !this.settings.capture!.clear) return void this.memory.clear();
     const memory = this.memory;
     this.memory = new Map();
