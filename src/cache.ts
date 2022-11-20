@@ -379,7 +379,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       node.moveToHead();
       if (node.list === LFU) {
         assert(LFU.length > 0);
-        entry.age = this.ager.age() * this.life.LFU;
+        entry.age = this.ager.age(this.life.LFU);
         assert(entry.age > 0);
       }
       this.disposer?.(value$, key$);
@@ -508,7 +508,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       node.moveToHead();
     }
     assert(LFU.length > 0);
-    entry.age = this.ager.age() * life;
+    entry.age = this.ager.age(life);
     assert(entry.age > 0);
     this.coordinate();
   }
@@ -850,8 +850,8 @@ class Ager<K, V> {
     private readonly disposer: (node: List.Node<Entry<K, V>>) => void,
   ) {
   }
-  public age(): number {
-    return max(this.capacity - this.target.length, 0) + 1;
+  public age(rate: number): number {
+    return min((max(this.capacity - this.target.length, 0) + 1) * rate, 1 << 8 - 1);
   }
   private hand?: List.Node<Entry<K, V>>;
   public escape(node: List.Node<Entry<K, V>>): void {
