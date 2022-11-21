@@ -385,6 +385,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         entry.age = this.ager.age(this.life.LFU);
         assert(entry.age > 0);
       }
+      assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
+      assert(this.memory.size <= this.capacity);
       this.disposer?.(value$, key$);
       return match;
     }
