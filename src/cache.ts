@@ -112,7 +112,7 @@ interface Entry<K, V> {
   expiration: number;
   enode?: Heap.Node<List.Node<Entry<K, V>>, number>;
   region: 'LRU' | 'LFU';
-  age: number;
+  life: number;
 }
 
 export namespace Cache {
@@ -382,8 +382,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       node.moveToHead();
       if (node.list === LFU) {
         assert(LFU.length > 0);
-        entry.age = this.ager.age(this.life.LFU);
-        assert(entry.age > 0);
+        entry.life = this.ager.life(this.life.LFU);
+        assert(entry.life > 0);
       }
       assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
       assert(this.memory.size <= this.capacity);
@@ -401,7 +401,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       size,
       expiration,
       region: 'LRU',
-      age: 0,
+      life: 0,
     }));
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     assert(this.memory.size <= this.capacity);
@@ -513,8 +513,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       node.moveToHead();
     }
     assert(LFU.length > 0);
-    entry.age = this.ager.age(life);
-    assert(entry.age > 0);
+    entry.life = this.ager.life(life);
+    assert(entry.life > 0);
     this.coordinate();
   }
   private readonly stats: Stats | StatsExperimental;
@@ -855,7 +855,7 @@ class Clock<T extends Entry<unknown, unknown>> {
     private readonly target: List<T>,
   ) {
   }
-  public age(rate: number): number {
+  public life(rate: number): number {
     return min((max(this.capacity - this.target.length, 0) + 1) * rate, (1 << 8) - 1);
   }
   private hand?: List.Node<T>;
@@ -877,14 +877,14 @@ class Clock<T extends Entry<unknown, unknown>> {
     if (node === undefined) return;
     assert(node.list === this.target);
     const entry = node.value;
-    const age = entry.age;
-    assert(age >= 0);
-    assert(age >>> 0 === age);
-    if (age === 0) {
+    const life = entry.life;
+    assert(life >= 0);
+    assert(life >>> 0 === life);
+    if (life === 0) {
       this.free(node);
       return node;
     }
-    entry.age = age - 1;
+    entry.life = life - 1;
     this.skip(node);
   }
   public clear(): void {
