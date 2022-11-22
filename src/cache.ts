@@ -332,13 +332,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       return false;
     }
 
-    {
-      const node = this.ager.advance();
-      if (node !== undefined) {
-        this.indexes.LRU.unshiftNode(node);
-        ++this.overlap;
-      }
-    }
     const { LRU, LFU } = this.indexes;
     const expiration = age === Infinity
       ? Infinity
@@ -346,7 +339,14 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.expiration ||= expiration !== Infinity;
     let node = this.memory.get(key);
     const match = node !== undefined;
-    !match && this.sweeper.miss();
+    if (!match) {
+      this.sweeper.miss();
+      const victim = this.ager.advance();
+      if (victim !== undefined) {
+        this.indexes.LRU.unshiftNode(victim);
+        ++this.overlap;
+      }
+    }
     node = this.ensure(size, node, true);
     if (node !== undefined) {
       assert(node.list);
