@@ -876,17 +876,16 @@ class Clock<T extends Entry<unknown, unknown>> {
     const node = this.hand ??= this.target.last;
     if (node === undefined) return;
     assert(node.list === this.target);
-    assert(node.value.age > 0);
-    assert(node.value.age >>> 0 === node.value.age);
-    if (--node.value.age !== 0) {
-      this.skip(node);
-      return;
-    }
-    else {
+    const entry = node.value;
+    const age = entry.age;
+    assert(age >= 0);
+    assert(age >>> 0 === age);
+    if (age === 0) {
       this.free(node);
-      assert(this.hand !== node);
       return node;
     }
+    entry.age = age - 1;
+    this.skip(node);
   }
   public clear(): void {
     this.hand = undefined;
