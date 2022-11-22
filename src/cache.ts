@@ -265,7 +265,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     callback && this.disposer?.(node.value.value, entry.key);
   }
   private sweeper: Sweeper;
-  private ager: Clock<K, V>;
+  private ager: Clock<Entry<K, V>>;
   private ensure(margin: number, skip?: List.Node<Entry<K, V>>, capture = false): List.Node<Entry<K, V>> | undefined {
     let size = skip?.value.size ?? 0;
     assert(margin - size <= this.resource || !capture);
@@ -849,17 +849,17 @@ class Sweeper {
 }
 
 // Gap-weighted Aging
-class Clock<K, V> {
+class Clock<T extends Entry<unknown, unknown>> {
   constructor(
     private capacity: number,
-    private readonly target: List<Entry<K, V>>,
+    private readonly target: List<T>,
   ) {
   }
   public age(rate: number): number {
     return min((max(this.capacity - this.target.length, 0) + 1) * rate, (1 << 8) - 1);
   }
-  private hand?: List.Node<Entry<K, V>>;
-  public free(node: List.Node<Entry<K, V>>): void {
+  private hand?: List.Node<T>;
+  public free(node: List.Node<T>): void {
     if (node !== this.hand) return;
     assert(node.list === this.target);
     this.hand = node.prev === node
@@ -867,12 +867,12 @@ class Clock<K, V> {
       : node.prev;
     assert(this.hand !== node);
   }
-  public skip(node: List.Node<Entry<K, V>>): void {
+  public skip(node: List.Node<T>): void {
     if (node !== this.hand) return;
     assert(node.list === this.target);
     this.hand = node.prev;
   }
-  public advance(): List.Node<Entry<K, V>> | undefined {
+  public advance(): List.Node<T> | undefined {
     const node = this.hand ??= this.target.last;
     if (node === undefined) return;
     assert(node.list === this.target);
