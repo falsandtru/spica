@@ -173,7 +173,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     this.window = settings.window! * capacity / 100 >>> 0;
     this.unit = RESOLUTION / capacity | 0 || 1;
-    this.limit = RESOLUTION - settings.entrance! * RESOLUTION / 100;
+    this.limit = RESOLUTION - settings.entrance! * RESOLUTION / 100 | 0;
     this.resource = settings.resource! ?? capacity;
     this.age = settings.age!;
     if (settings.earlyExpiring) {
