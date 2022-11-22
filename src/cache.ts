@@ -796,7 +796,6 @@ class Sweeper {
     }
     else {
       if (this.advance < 1) {
-        assert(!this.initial);
         this.advance += this.range * (100 - this.shift) / 100;
       }
     }
