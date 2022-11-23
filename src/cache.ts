@@ -24,7 +24,7 @@ S3での逆効果のみ確認につきオプション化。
 大効果につき採用。
 LRU汚染対策。
 
-ギャップウェイテッドエージング：
+エージング：
 LFU解放とLRU拡大による高参照間隔アクセス対応に必要。
 リストによる実装ではランダムメモリアクセスを追加するためオーバーヘッドが大きい。
 LFU汚染対策。
@@ -139,8 +139,7 @@ export namespace Cache {
       readonly shift?: number;
     };
     readonly life?: {
-      readonly LRU: number;
-      readonly LFU: number;
+      readonly threshold?: number;
     };
     readonly test?: boolean;
   }
@@ -159,10 +158,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (opts.test) {
       // @ts-expect-error
       this.settings.sweep!.threshold = 0;
-      // @ts-expect-error
-      this.settings.life!.LRU = 16;
-      // @ts-expect-error
-      this.settings.life!.LFU = 16;
     }
     const settings = extend(this.settings, opts, {
       capacity,
@@ -189,8 +184,10 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       settings.sweep!.window!,
       settings.sweep!.range!,
       settings.sweep!.shift!);
-    this.ager = new Clock(capacity, this.indexes.LFU);
-    this.life = settings.life!;
+    this.ager = new Clock(
+      capacity,
+      this.indexes.LFU,
+      settings.life!.threshold!);
     this.disposer = settings.disposer!;
     this.test = settings.test!;
   }
@@ -205,6 +202,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     },
     resolution: 1,
     offset: 0,
+    // Change to 5 when disabling aging.
     entrance: 1,
     sweep: {
       threshold: 10,
@@ -213,8 +211,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       shift: 2,
     },
     life: {
-      LRU: 1,
-      LFU: 2,
+      threshold: 90,
     },
     test: false,
   };
@@ -239,10 +236,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   public get size(): number {
     return this.$size;
   }
-  private life: {
-    readonly LRU: number;
-    readonly LFU: number;
-  };
   private readonly disposer?: (value: V, key: K) => void;
   private evict(node: List.Node<Entry<K, V>>, callback: boolean): void {
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
@@ -283,7 +276,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       }
       else {
         assert(LRU.last);
-        if (this.sweeper.isAvailable()) {
+        if (this.sweeper.isActive()) {
           this.sweeper.sweep();
         }
         else if (LFU.length * RESOLUTION > this.capacity * (this.ratio ?? this.limit)) {
@@ -341,10 +334,12 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const match = node !== undefined;
     if (!match) {
       this.sweeper.miss();
-      const victim = this.ager.advance();
-      if (victim !== undefined) {
-        this.indexes.LRU.unshiftNode(victim);
-        ++this.overlap;
+      if (this.ager.isActive() && this.sweeper.isActive()) {
+        const victim = this.ager.advance();
+        if (victim !== undefined) {
+          this.indexes.LRU.unshiftNode(victim);
+          ++this.overlap;
+        }
       }
     }
     node = this.ensure(size, node, true);
@@ -381,8 +376,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       this.ager.skip(node);
       node.moveToHead();
       if (node.list === LFU) {
-        assert(LFU.length > 0);
-        entry.life = this.ager.life(this.life.LFU);
+        this.ager.age(entry);
         assert(entry.life > 0);
       }
       assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
@@ -399,9 +393,9 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       key,
       value,
       size,
-      expiration,
       region: 'LRU',
       life: 0,
+      expiration,
     }));
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     assert(this.memory.size <= this.capacity);
@@ -485,19 +479,16 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const entry = node.value;
     const { region } = entry;
     const { LRU, LFU } = this.indexes;
-    let life = 0;
     this.sweeper.hit();
     if (node.list === LRU) {
       // For memoize.
       if (node === LRU.head && !this.test) return;
       if (region === 'LFU') {
-        life = this.life.LFU;
         this.stats.hitLFU();
         --this.overlap;
         assert(this.overlap >= 0);
       }
       else {
-        life = this.life.LRU;
         this.stats.hitLRU();
         entry.region = 'LFU';
       }
@@ -507,13 +498,11 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     else {
       // For memoize.
       if (node === LFU.head && !this.test) return;
-      life = this.life.LFU;
       this.stats.hitLFU();
       this.ager.skip(node);
       node.moveToHead();
     }
-    assert(LFU.length > 0);
-    entry.life = this.ager.life(life);
+    this.ager.age(entry);
     assert(entry.life > 0);
     this.coordinate();
   }
@@ -765,28 +754,32 @@ class Sweeper {
     this.currMisses = 0;
   }
   public hit(): void {
+    this.active = undefined;
     ++this.currHits + this.currMisses === this.window && this.slide();
-    this.active && !this.isAvailable() && this.reset();
+    this.processing && !this.isActive() && this.reset();
   }
   public miss(): void {
+    this.active = undefined;
     this.currHits + ++this.currMisses === this.window && this.slide();
   }
-  public isAvailable(): boolean {
+  private active?: boolean;
+  public isActive(): boolean {
+    if (this.prevHits === 0 && this.prevMisses === 0) return false;
     const rate = Stats.rate(
-      this.window,
-      [this.currHits, this.prevHits],
-      [this.currMisses, this.prevMisses],
-      0);
-    return rate < this.threshold;
+        this.window,
+        [this.currHits, this.prevHits],
+        [this.currMisses, this.prevMisses],
+        0);
+    return this.active ??= rate < this.threshold;
   }
-  private active = false;
+  private processing = false;
   private direction = true;
   private initial = true;
   private back = 0;
   private advance = 0;
   public sweep(): boolean {
     let lap = false;
-    this.active ||= true;
+    this.processing ||= true;
     const { target } = this;
     if (this.direction) {
       if (this.back < 1) {
@@ -827,15 +820,15 @@ class Sweeper {
     return lap;
   }
   private reset(): void {
-    if (!this.active) return;
-    this.active = false;
+    if (!this.processing) return;
+    this.processing = false;
     this.direction = true;
     this.initial = true;
     this.back = 0;
     this.advance = 0;
   }
   public clear(): void {
-    this.active = true;
+    this.processing = true;
     this.reset();
     this.slide();
     this.slide();
@@ -844,36 +837,54 @@ class Sweeper {
     this.window = round(capacity * window / 100) || 1;
     this.range = capacity * range / 100;
     this.currHits + this.currMisses >= this.window && this.slide();
+    this.active = undefined;
   }
 }
 
-// Gap-weighted Aging
+// Aging
 class Clock<T extends Entry<unknown, unknown>> {
   constructor(
     private capacity: number,
     private readonly target: List<T>,
+    private readonly threshold: number,
   ) {
   }
-  public life(rate: number): number {
-    return min((max(this.capacity - this.target.length, 0) + 1) * rate, (1 << 8) - 1);
+  public isActive(): boolean {
+    return this.target.length * 100 > this.capacity * this.threshold;
+  }
+  public age(entry: T): void {
+    entry.life = min(entry.life + 1, (1 << 4) - 1);
   }
   private hand?: List.Node<T>;
   public free(node: List.Node<T>): void {
     if (node !== this.hand) return;
-    assert(node.list === this.target);
-    this.hand = node.prev === node
+    if (node.list !== this.target) return;
+    this.hand = node.next === node
       ? undefined
-      : node.prev;
+      : node.next;
     assert(this.hand !== node);
   }
   public skip(node: List.Node<T>): void {
     if (node !== this.hand) return;
-    assert(node.list === this.target);
-    this.hand = node.prev;
+    if (node.list !== this.target) return;
+    this.hand = node.next;
   }
+  private counter = 0;
   public advance(): List.Node<T> | undefined {
-    const node = this.hand ??= this.target.last;
+    if (this.counter++ === this.capacity) {
+      this.hand = this.target.head;
+      this.counter = 1;
+    }
+    else if (this.counter > this.target.length) {
+      return;
+    }
+    else if (this.counter > 0 && this.hand === this.target.head) {
+      return;
+    }
+    let node = this.hand ??= this.target.head;
     if (node === undefined) return;
+    this.skip(node);
+    node = this.hand!;
     assert(node.list === this.target);
     const entry = node.value;
     const life = entry.life;
@@ -883,8 +894,7 @@ class Clock<T extends Entry<unknown, unknown>> {
       this.free(node);
       return node;
     }
-    entry.life = life - 1;
-    this.skip(node);
+    entry.life = life >>> 1;
   }
   public clear(): void {
     this.hand = undefined;
