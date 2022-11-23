@@ -138,7 +138,7 @@ export namespace Cache {
       readonly range?: number;
       readonly shift?: number;
     };
-    readonly life?: {
+    readonly aging?: {
       readonly threshold?: number;
     };
     readonly test?: boolean;
@@ -187,7 +187,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.ager = new Clock(
       capacity,
       this.indexes.LFU,
-      settings.life!.threshold!);
+      settings.aging!.threshold!);
     this.disposer = settings.disposer!;
     this.test = settings.test!;
   }
@@ -210,7 +210,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       range: 4,
       shift: 2,
     },
-    life: {
+    aging: {
       threshold: 90,
     },
     test: false,
@@ -332,14 +332,11 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.expiration ||= expiration !== Infinity;
     let node = this.memory.get(key);
     const match = node !== undefined;
-    if (!match) {
-      this.sweeper.miss();
-      if (this.ager.isActive() && this.sweeper.isActive()) {
-        const victim = this.ager.advance();
-        if (victim !== undefined) {
-          this.indexes.LRU.unshiftNode(victim);
-          ++this.overlap;
-        }
+    if (!match && this.ager.isActive() && this.sweeper.isActive()) {
+      const victim = this.ager.advance();
+      if (victim !== undefined) {
+        this.indexes.LRU.unshiftNode(victim);
+        ++this.overlap;
       }
     }
     node = this.ensure(size, node, true);
@@ -413,9 +410,13 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
   public get(key: K): V | undefined {
     const node = this.memory.get(key);
-    if (node === undefined) return;
+    if (node === undefined) {
+      this.sweeper.miss();
+      return;
+    }
     const entry = node.value;
     if (this.expiration && entry.expiration !== Infinity && entry.expiration < now()) {
+      this.sweeper.miss();
       this.evict(node, true);
       return;
     }
@@ -869,16 +870,13 @@ class Clock<T extends Entry<unknown, unknown>> {
     if (node.list !== this.target) return;
     this.hand = node.next;
   }
-  private counter = 0;
+  private count = 0;
   public advance(): List.Node<T> | undefined {
-    if (this.counter++ === this.capacity) {
-      this.hand = this.target.head;
-      this.counter = 1;
+    if (++this.count === this.capacity) {
+      this.hand = undefined;
+      this.count = 0;
     }
-    else if (this.counter > this.target.length) {
-      return;
-    }
-    else if (this.counter > 0 && this.hand === this.target.head) {
+    else if (this.count > this.target.length) {
       return;
     }
     let node = this.hand ??= this.target.head;
@@ -895,6 +893,7 @@ class Clock<T extends Entry<unknown, unknown>> {
       return node;
     }
     entry.life = life >>> 1;
+    assert(life >= 0);
   }
   public clear(): void {
     this.hand = undefined;
