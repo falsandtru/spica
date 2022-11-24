@@ -562,7 +562,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['ratio']! >= 950);
       for (let i = 0; i < trials; ++i) {
-        const key = random() < 0.8
+        const key = random() < 0.6
           ? random() * capacity * -1 | 0
           : random() * capacity * 1 | 0;
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
@@ -575,8 +575,8 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC hit ratio', dwchit * 100 / trials);
       console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['indexes'].LFU.length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
-      assert(dwchit / lruhit * 100 >>> 0 === 84);
-      assert(dwc['indexes'].LFU.length * 100 / dwc.length >>> 0 === 86);
+      assert(dwchit / lruhit * 100 >>> 0 === 92);
+      assert(dwc['indexes'].LFU.length * 100 / dwc.length >>> 0 === 76);
     });
 
     it('ratio uneven 1000 lock HIR', function () {
@@ -602,7 +602,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['ratio']! >= 950);
       for (let i = 0; i < trials; ++i) {
-        const key = random() < 0.8
+        const key = random() < 0.6
           ? -i % capacity / 2 | 0
           : random() * capacity * 1 | 0;
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
@@ -615,7 +615,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC hit ratio', dwchit * 100 / trials);
       console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['indexes'].LFU.length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
-      assert(dwchit / lruhit * 100 >>> 0 === 59);
+      assert(dwchit / lruhit * 100 >>> 0 === 79);
       assert(dwc['indexes'].LFU.length * 100 / dwc.length >>> 0 === 95);
     });
 
