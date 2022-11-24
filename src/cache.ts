@@ -873,8 +873,7 @@ class Clock<T extends Entry<unknown, unknown>> {
   private count = 0;
   public advance(): List.Node<T> | undefined {
     if (++this.count === this.capacity) {
-      this.hand = undefined;
-      this.count = 0;
+      this.clear();
     }
     else if (this.count > this.target.length) {
       return;
@@ -897,8 +896,12 @@ class Clock<T extends Entry<unknown, unknown>> {
   }
   public clear(): void {
     this.hand = undefined;
+    this.count = 0;
   }
   public resize(capacity: number): void {
     this.capacity = capacity;
+    if (this.count >= capacity) {
+      this.clear();
+    }
   }
 }
