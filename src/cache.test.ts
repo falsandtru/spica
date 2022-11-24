@@ -392,7 +392,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC hit ratio', dwchit * 100 / trials);
       console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['indexes'].LFU.length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
-      assert(dwchit / lruhit * 100 >>> 0 === 202);
+      assert(dwchit / lruhit * 100 >>> 0 === 195);
     });
 
     it('ratio uneven 100 transitive distribution', function () {
@@ -420,7 +420,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC hit ratio', dwchit * 100 / trials);
       console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['indexes'].LFU.length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
-      assert(dwchit / lruhit * 100 >>> 0 === 204);
+      assert(dwchit / lruhit * 100 >>> 0 === 199);
     });
 
     it('ratio uneven 100 transitive bias', function () {
@@ -480,7 +480,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC hit ratio', dwchit * 100 / trials);
       console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['indexes'].LFU.length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
-      assert(dwchit / lruhit * 100 >>> 0 === 274);
+      assert(dwchit / lruhit * 100 >>> 0 === 268);
     });
 
     it('ratio uneven 100 adversarial', function () {
@@ -575,8 +575,8 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC hit ratio', dwchit * 100 / trials);
       console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['indexes'].LFU.length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
-      assert(dwchit / lruhit * 100 >>> 0 === 66);
-      assert(dwc['indexes'].LFU.length * 100 / dwc.length >>> 0 === 66);
+      assert(dwchit / lruhit * 100 >>> 0 === 84);
+      assert(dwc['indexes'].LFU.length * 100 / dwc.length >>> 0 === 86);
     });
 
     it('ratio uneven 1000 lock HIR', function () {
@@ -615,8 +615,8 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC hit ratio', dwchit * 100 / trials);
       console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['indexes'].LFU.length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
-      assert(dwchit / lruhit * 100 >>> 0 === 60);
-      assert(dwc['indexes'].LFU.length * 100 / dwc.length >>> 0 === 99);
+      assert(dwchit / lruhit * 100 >>> 0 === 59);
+      assert(dwc['indexes'].LFU.length * 100 / dwc.length >>> 0 === 95);
     });
 
     it('ratio uneven 1,000', function () {
@@ -644,7 +644,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC hit ratio', dwchit * 100 / trials);
       console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['indexes'].LFU.length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
-      assert(dwchit / lruhit * 100 >>> 0 === 196);
+      assert(dwchit / lruhit * 100 >>> 0 === 197);
     });
 
   });

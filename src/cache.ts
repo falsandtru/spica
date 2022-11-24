@@ -202,8 +202,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     },
     resolution: 1,
     offset: 0,
-    // Change to 5 when disabling aging.
-    entrance: 1,
+    entrance: 5,
     sweep: {
       threshold: 10,
       window: 5,
