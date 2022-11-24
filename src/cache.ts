@@ -24,11 +24,6 @@ S3での逆効果のみ確認につきオプション化。
 LRU汚染対策。
 大効果につき採用。
 
-エージング：
-LFU汚染対策および高参照間隔アクセス対応。
-本質的な対応策でなくほとんど効果がないので無効化。
-リストによる実装ではランダムメモリアクセスを追加するためオーバーヘッドが大きい。
-
 */
 
 /*
@@ -114,7 +109,6 @@ interface Entry<K, V> {
   expiration: number;
   enode?: Heap.Node<List.Node<Entry<K, V>>, number>;
   region: 'LRU' | 'LFU';
-  life: number;
 }
 
 export namespace Cache {
@@ -146,9 +140,6 @@ export namespace Cache {
       readonly window?: number;
       readonly range?: number;
       readonly shift?: number;
-    };
-    readonly aging?: {
-      readonly threshold?: number;
     };
     readonly test?: boolean;
   }
@@ -193,10 +184,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       settings.sweep!.window!,
       settings.sweep!.range!,
       settings.sweep!.shift!);
-    this.ager = new Clock(
-      capacity,
-      this.indexes.LFU,
-      settings.aging!.threshold!);
     this.disposer = settings.disposer!;
     this.test = settings.test!;
   }
@@ -217,10 +204,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       window: 5,
       range: 4,
       shift: 2,
-    },
-    aging: {
-      // Disabled.
-      threshold: 100, // 90
     },
     test: false,
   };
@@ -249,7 +232,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private evict(node: List.Node<Entry<K, V>>, callback: boolean): void {
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
     //assert(this.memory.size <= this.capacity);
-    this.ager.free(node);
     const entry = node.value;
     assert(node.list);
     entry.region === 'LFU' && node.list === this.indexes.LRU && --this.overlap;
@@ -267,7 +249,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     callback && this.disposer?.(node.value.value, entry.key);
   }
   private sweeper: Sweeper;
-  private ager: Clock<Entry<K, V>>;
   private ensure(margin: number, skip?: List.Node<Entry<K, V>>, capture = false): List.Node<Entry<K, V>> | undefined {
     let size = skip?.value.size ?? 0;
     assert(margin - size <= this.resource || !capture);
@@ -298,7 +279,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
           if (node !== undefined) {
             assert(node !== skip);
             assert(node.value.region === 'LFU');
-            this.ager.free(node);
             LRU.unshiftNode(node);
             ++this.overlap;
             assert(this.overlap <= LRU.length);
@@ -334,20 +314,13 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       return false;
     }
 
-    const { LRU, LFU } = this.indexes;
+    const { LRU } = this.indexes;
     const expiration = age === Infinity
       ? Infinity
       : now() + age;
     this.expiration ||= expiration !== Infinity;
     let node = this.memory.get(key);
     const match = node !== undefined;
-    if (!match && this.ager.isActive() && this.sweeper.isActive()) {
-      const victim = this.ager.advance();
-      if (victim !== undefined) {
-        this.indexes.LRU.unshiftNode(victim);
-        ++this.overlap;
-      }
-    }
     node = this.ensure(size, node, true);
     if (node !== undefined) {
       assert(node.list);
@@ -379,12 +352,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         this.expirations!.delete(entry.enode);
         entry.enode = undefined;
       }
-      this.ager.skip(node);
       node.moveToHead();
-      if (node.list === LFU) {
-        this.ager.age(entry);
-        assert(entry.life > 0);
-      }
       assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
       assert(this.memory.size <= this.capacity);
       this.disposer?.(value$, key$);
@@ -400,7 +368,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       value,
       size,
       region: 'LRU',
-      life: 0,
       expiration,
     }));
     assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
@@ -458,7 +425,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.expirations?.clear();
     this.stats.clear();
     this.sweeper.clear();
-    this.ager.clear();
     if (!this.disposer || !this.settings.capture!.clear) return void this.memory.clear();
     const memory = this.memory;
     this.memory = new Map();
@@ -476,7 +442,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.resource = resource;
     this.stats.resize(window);
     this.sweeper.resize(capacity, this.settings.sweep!.window!, this.settings.sweep!.range!);
-    this.ager.resize(capacity);
     this.ensure(0);
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
@@ -509,11 +474,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       // For memoize.
       if (node === LFU.head && !this.test) return;
       this.stats.hitLFU();
-      this.ager.skip(node);
       node.moveToHead();
     }
-    this.ager.age(entry);
-    assert(entry.life > 0);
     this.coordinate();
   }
   private readonly stats: Stats | StatsExperimental;
@@ -845,69 +807,5 @@ class Sweeper {
     this.range = capacity * range / 100;
     this.currHits + this.currMisses >= this.window && this.slide();
     this.active = undefined;
-  }
-}
-
-// Aging
-class Clock<T extends Entry<unknown, unknown>> {
-  constructor(
-    private capacity: number,
-    private readonly target: List<T>,
-    private readonly threshold: number,
-  ) {
-  }
-  public isActive(): boolean {
-    return this.target.length * 100 > this.capacity * this.threshold;
-  }
-  public age(entry: T): void {
-    entry.life = min(entry.life + 1, (1 << 4) - 1);
-  }
-  private hand?: List.Node<T>;
-  public free(node: List.Node<T>): void {
-    if (node !== this.hand) return;
-    if (node.list !== this.target) return;
-    this.hand = node.next === node
-      ? undefined
-      : node.next;
-    assert(this.hand !== node);
-  }
-  public skip(node: List.Node<T>): void {
-    if (node !== this.hand) return;
-    if (node.list !== this.target) return;
-    this.hand = node.next;
-  }
-  private count = 0;
-  public advance(): List.Node<T> | undefined {
-    if (++this.count === this.capacity) {
-      this.clear();
-    }
-    else if (this.count > this.target.length) {
-      return;
-    }
-    let node = this.hand ??= this.target.head;
-    if (node === undefined) return;
-    this.skip(node);
-    node = this.hand!;
-    assert(node.list === this.target);
-    const entry = node.value;
-    const life = entry.life;
-    assert(life >= 0);
-    assert(life >>> 0 === life);
-    if (life === 0) {
-      this.free(node);
-      return node;
-    }
-    entry.life = life >>> 1;
-    assert(life >= 0);
-  }
-  public clear(): void {
-    this.hand = undefined;
-    this.count = 0;
-  }
-  public resize(capacity: number): void {
-    this.capacity = capacity;
-    if (this.count >= capacity) {
-      this.clear();
-    }
   }
 }
