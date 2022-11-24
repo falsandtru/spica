@@ -26,7 +26,7 @@ LRU汚染対策。
 
 エージング：
 LFU汚染対策および高参照間隔アクセス対応。
-原理的に効果が限定的なので無効化。
+本質的な対応策でなくほとんど効果がないので無効化。
 リストによる実装ではランダムメモリアクセスを追加するためオーバーヘッドが大きい。
 
 */
@@ -49,8 +49,9 @@ Loop耐性が欠如しておりGLIやDS1などLoop耐性を要するワークロ
 
 DWC:
 時間空間ともに定数計算量かつすべての基本的耐性を持つ。
-それゆえ履歴が必要となる高参照間隔または耐性が逆効果となる刷新を要するアクセスパターンでは
-原理的に性能低下を免れない。
+最小サンプルサイズ以上のLRUとLFUの濃度の比較をもってARCのヒット率の比較に代えている。
+このためサンプルサイズを超える参照間隔は捕捉できずLFUの濃度がLRUより高い場合サンプルサイズの
+拡大も不可能となりこの問題は定数計算量では解決不可能と思われる。
 適正サイズより大幅に小さいキャッシュサイズではおそらく統計精度の悪化により性能低下しやすい。
 
 LIRS:
@@ -67,7 +68,8 @@ TinyLFUはキーのポインタのアドレスでブルームフィルタを生�
 文字列やオブジェクトなどからアドレスを取得または代替値を高速に割り当てる方法がなく汎用的に使用できない。
 乱数を代用する方法は強引で低速だがリモートアクセスなど低速な処理では償却可能と思われる。
 オーバーヘッドが大きくメモ化など同期処理に耐える速度を要件とする用途には適さないと思われる。
-ブルームフィルタが削除操作不可であるためキャッシュを削除操作数に比例して性能が低下する。
+ブルームフィルタが削除操作不可であるため一定期間内のキャッシュの任意または有効期限超過による
+削除数に比例して性能が低下する。
 キャッシュサイズ分の挿入ごとにブルームフィルタがリセットのため全走査されるため
 キャッシュサイズに比例した大きさの遅延が入る。
 W-TinyLFUの性能は非常に高いがTinyLFUの性能は大幅に低くDWCと一長一短かより悪いうえ
@@ -118,8 +120,16 @@ interface Entry<K, V> {
 export namespace Cache {
   export interface Options<K, V = undefined> {
     // Max entries.
+    // Range: 1-
     readonly capacity?: number;
+    // Window size ratio to measure hit ratios.
+    // Range: 1-100
     readonly window?: number;
+    // Min sample size ratio to measure hit density.
+    // Range: 1-100
+    readonly sample?: number;
+    // Max costs.
+    // Range: L-
     readonly resource?: number;
     readonly age?: number;
     readonly earlyExpiring?: boolean;
@@ -131,7 +141,6 @@ export namespace Cache {
     // Mainly for experiments.
     readonly resolution?: number;
     readonly offset?: number;
-    readonly entrance?: number;
     readonly sweep?: {
       readonly threshold?: number;
       readonly window?: number;
@@ -168,7 +177,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     this.window = settings.window! * capacity / 100 >>> 0;
     this.unit = RESOLUTION / capacity | 0 || 1;
-    this.limit = RESOLUTION - settings.entrance! * RESOLUTION / 100 | 0;
+    this.limit = RESOLUTION - settings.sample! * RESOLUTION / 100 | 0;
     this.resource = settings.resource! ?? capacity;
     this.age = settings.age!;
     if (settings.earlyExpiring) {
@@ -194,6 +203,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private readonly settings: Cache.Options<K, V> = {
     capacity: 0,
     window: 100,
+    sample: 5,
     age: Infinity,
     earlyExpiring: false,
     capture: {
@@ -202,7 +212,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     },
     resolution: 1,
     offset: 0,
-    entrance: 5,
     sweep: {
       threshold: 10,
       window: 5,
@@ -521,22 +530,19 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const leverage = (lenF + lenO) * 1000 / (lenR + lenF) | 0;
     const rateR = stats.rateLRU();
     const rateF = 10000 - rateR;
-    const rateR0 = rateR * leverage;
-    const rateF0 = rateF * (1000 - leverage);
-    const rateF1 = stats.offset && stats.rateLFU(true) * (1000 - leverage);
+    const densityR = rateR * leverage;
+    const densityF = rateF * (1000 - leverage);
+    const densityFO = stats.offset && stats.rateLFU(true) * (1000 - leverage);
     // 操作頻度を超えてキャッシュ比率を増減させても余剰比率の消化が追いつかず無駄
     // LRUの下限設定ではLRU拡大の要否を迅速に判定できないためLFUのヒット率低下の検出で代替する
-    if (this.ratio > 0 && (rateR0 > rateF0 || stats.offset !== 0 && rateF0 * 100 < rateF1 * (100 - stats.offset))) {
-      //rateR0 <= rateF0 && rateF0 * 100 < rateF1 * (100 - stats.offset) && console.debug(0);
+    if (this.ratio > 0 && (densityR > densityF || stats.offset !== 0 && densityF * 100 < densityFO * (100 - stats.offset))) {
       if (lenR * RESOLUTION >= capacity * (RESOLUTION - this.ratio)) {
-        //this.ratio % 100 || this.ratio === RESOLUTION || console.debug('-', this.ratio, LRU, LFU);
         this.ratio = max(this.ratio - this.unit, 0);
       }
     }
     else
-    if (this.ratio < this.limit && rateF0 > rateR0) {
+    if (this.ratio < this.limit && densityF > densityR) {
       if (lenF * RESOLUTION >= capacity * this.ratio) {
-        //this.ratio % 100 || this.ratio === 0 || console.debug('+', this.ratio, LRU, LFU);
         this.ratio = min(this.ratio + this.unit, this.limit);
       }
     }

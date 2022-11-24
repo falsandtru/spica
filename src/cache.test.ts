@@ -562,6 +562,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['ratio']! >= 950);
       for (let i = 0; i < trials; ++i) {
+        // LRUの濃度がLFUより高ければ順当に回復する
         const key = random() < 0.6
           ? random() * capacity * -1 | 0
           : random() * capacity * 1 | 0;
@@ -602,6 +603,8 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['ratio']! >= 950);
       for (let i = 0; i < trials; ++i) {
+        // これは回復しない例だが汚染されたLFUの濃度が自然なLRUの濃度より高くなることはないため
+        // 自然な参照間隔が最小サンプルサイズ内である限り順当に回復する
         const key = random() < 0.6
           ? -i % capacity / 2 | 0
           : random() * capacity * 1 | 0;
