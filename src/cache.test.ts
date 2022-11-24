@@ -392,7 +392,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC hit ratio', dwchit * 100 / trials);
       console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['indexes'].LFU.length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
-      assert(dwchit / lruhit * 100 >>> 0 === 194);
+      assert(dwchit / lruhit * 100 >>> 0 === 193);
     });
 
     it('ratio uneven 100 transitive distribution', function () {
@@ -420,7 +420,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC hit ratio', dwchit * 100 / trials);
       console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['indexes'].LFU.length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
-      assert(dwchit / lruhit * 100 >>> 0 === 199);
+      assert(dwchit / lruhit * 100 >>> 0 === 196);
     });
 
     it('ratio uneven 100 transitive bias', function () {
@@ -451,7 +451,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC hit ratio', dwchit * 100 / trials);
       console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['indexes'].LFU.length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
-      assert(dwchit / lruhit * 100 >>> 0 === 85);
+      assert(dwchit / lruhit * 100 >>> 0 === 88);
     });
 
     it('ratio uneven 100 sequential', function () {
@@ -576,8 +576,8 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC hit ratio', dwchit * 100 / trials);
       console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['indexes'].LFU.length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
-      assert(dwchit / lruhit * 100 >>> 0 === 92);
-      assert(dwc['indexes'].LFU.length * 100 / dwc.length >>> 0 === 76);
+      assert(dwchit / lruhit * 100 >>> 0 === 93);
+      assert(dwc['indexes'].LFU.length * 100 / dwc.length >>> 0 === 32);
     });
 
     it('ratio uneven 1000 lock HIR', function () {
