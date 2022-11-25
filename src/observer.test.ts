@@ -310,7 +310,7 @@ describe('Unit: lib/observer', function () {
       ob.monitor(['', '0'], data => assert(cnt === 3 && data === 0 && ++cnt));
       ob.on(['', '0'], throwError);
       ob.on(['', '0'], data => assert(cnt === 0 && data === 0 && ++cnt));
-      ob.monitor(['', '0', '0'], data => assert(cnt === 1 && data === 0 && ++cnt));
+      ob.monitor(['', '0', '0'], throwError);
       ob.on(['', '0', '0'], data => assert(cnt === 1 && data === 0 && ++cnt));
       ob.on(['', '0', '0', '0'], data => assert(cnt === 2 && data === 0 && ++cnt));
       ob.off(['', '0'], throwError);
