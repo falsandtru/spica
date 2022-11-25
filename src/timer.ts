@@ -1,4 +1,4 @@
-import { List } from './invlist';
+import { List } from './list';
 import { clock } from './clock';
 import { singleton, noop } from './function';
 
@@ -11,12 +11,21 @@ interface GroupTimer {
   clear(): void;
 }
 
+class Node<T> {
+  constructor(
+    public value: T,
+  ) {
+  }
+  public next?: this;
+  public prev?: this;
+}
+
 export const setTimer = template(false);
 export const setRepeatTimer = template(true);
 
 function template(repeat: boolean): Timer;
-function template(repeat: boolean, cancellers: List<() => void>): GroupTimer;
-function template(repeat: boolean, cancellers?: List<() => void>): Timer | GroupTimer {
+function template(repeat: boolean, cancellers: List<Node<() => void>>): GroupTimer;
+function template(repeat: boolean, cancellers?: List<Node<() => void>>): Timer | GroupTimer {
   const timer = ((timeout, handler, unhandler?): () => void => {
     let params: [Awaited<ReturnType<typeof handler>>];
     let id = setTimeout(async function loop() {
@@ -26,10 +35,10 @@ function template(repeat: boolean, cancellers?: List<() => void>): Timer | Group
     }, timeout);
     const cancel = singleton(() => {
       clearTimeout(id);
-      node?.delete();
+      node && cancellers?.delete(node);
       params && unhandler?.(params[0]);
     });
-    const node = cancellers?.push(cancel);
+    const node = cancellers?.push(new Node(cancel));
     return cancel;
   }) as Timer & GroupTimer;
   if (!cancellers) {
@@ -38,7 +47,7 @@ function template(repeat: boolean, cancellers?: List<() => void>): Timer | Group
   else {
     timer.clear = () => {
       while (cancellers.length) {
-        cancellers.shift()!();
+        cancellers.shift()!.value();
       }
     };
   }

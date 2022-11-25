@@ -66,14 +66,13 @@ export class List<T> {
   public insert(node: List.Node<T>, before: List.Node<T> | undefined = this.head): List.Node<T> {
     if (node.list === this) return node.move(before), node;
     node.delete();
-    if (this.$length++ === 0) {
+    node.list = this;
+    if (++this.$length === 1) {
       this.head = node;
     }
-    node.list = this;
     const next = node.next = before ?? node;
     const prev = node.prev = next.prev ?? node;
-    next.prev = prev.next = node;
-    return node;
+    return next.prev = prev.next = node;
   }
   public flatMap<U>(f: (node: List.Node<T>) => ArrayLike<U>): U[] {
     const acc = [];
@@ -129,7 +128,7 @@ class Node<T> {
     public prev: List.Node<T>,
   ) {
     list.head ??= this;
-    if (list['$length']++ === 0) {
+    if (++list['$length'] === 1) {
       this.next = this.prev = this;
     }
     else {
@@ -142,19 +141,18 @@ class Node<T> {
   public delete(): T {
     const list = this.list;
     if (list === undefined) return this.value;
-    const { next, prev } = this;
     if (--list['$length'] === 0) {
       list.head = undefined;
     }
     else {
-      next.prev = prev;
-      prev.next = next;
+      const { next, prev } = this;
       if (this === list.head) {
         list.head = next;
       }
+      next.prev = prev;
+      prev.next = next;
     }
-    this.next = this.prev = undefined as any;
-    this.list = undefined as any;
+    this.list = this.next = this.prev = undefined as any;
     return this.value;
   }
   public insertBefore(value: T): List.Node<T> {
