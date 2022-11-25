@@ -53,6 +53,16 @@ export class List<T> {
   public pop(): T | undefined {
     return this.last?.delete();
   }
+  public shiftNode(): List.Node<T> | undefined {
+    const node = this.head;
+    node?.delete();
+    return node;
+  }
+  public popNode(): List.Node<T> | undefined {
+    const node = this.last;
+    node?.delete();
+    return node;
+  }
   public insert(node: List.Node<T>, before: List.Node<T> | undefined = this.head): List.Node<T> {
     if (node.list === this) return node.move(before), node;
     node.delete();
@@ -65,21 +75,32 @@ export class List<T> {
     next.prev = prev.next = node;
     return node;
   }
+  public flatMap<U>(f: (node: List.Node<T>) => ArrayLike<U>): U[] {
+    const acc = [];
+    for (let head = this.head, node = head; node;) {
+      const as = f(node);
+      switch (as.length) {
+        case 0:
+          break;
+        case 1:
+          acc.push(as[0]);
+          break;
+        default:
+          for (let len = as.length, i = 0; i < len; ++i) {
+            acc.push(as[i]);
+          }
+      }
+      node = node.next;
+      if (node === head) break;
+    }
+    return acc;
+  }
   public find(f: (value: T) => unknown): List.Node<T> | undefined {
     for (let head = this.head, node = head; node;) {
       if (f(node.value)) return node;
       node = node.next;
       if (node === head) break;
     }
-  }
-  public toNodes(): List.Node<T>[] {
-    const acc = [];
-    for (let head = this.head, node = head; node;) {
-      acc.push(node);
-      node = node.next;
-      if (node === head) break;
-    }
-    return acc;
   }
   public toArray(): T[] {
     const acc = [];
