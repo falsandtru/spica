@@ -184,14 +184,13 @@ function swap<T, O>(array: Node<T, O>[], index1: number, index2: number): void {
   node2[2] = index1;
 }
 
-class MultiNode<T> {
+class MultiNode<T> extends List.Node {
   constructor(
     public list: List<MultiNode<T>>,
     public value: T,
   ) {
+    super();
   }
-  public next?: this;
-  public prev?: this;
 }
 
 

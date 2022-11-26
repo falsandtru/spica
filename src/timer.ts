@@ -11,13 +11,12 @@ interface GroupTimer {
   clear(): void;
 }
 
-class Node<T> {
+class Node<T> extends List.Node {
   constructor(
     public value: T,
   ) {
+    super();
   }
-  public next?: this;
-  public prev?: this;
 }
 
 export const setTimer = template(false);

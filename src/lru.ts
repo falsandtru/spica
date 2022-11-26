@@ -7,8 +7,8 @@ class Node<K, V> {
     public value: V,
   ) {
   }
-  public next?: this;
-  public prev?: this;
+  public next?: this = undefined;
+  public prev?: this = undefined;
 }
 
 export class LRU<K, V> implements IterableDict<K, V> {

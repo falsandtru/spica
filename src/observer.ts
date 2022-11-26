@@ -10,8 +10,8 @@ class Node<T> {
     public value: T,
   ) {
   }
-  public next?: this;
-  public prev?: this;
+  public next?: this = undefined;
+  public prev?: this = undefined;
 }
 
 export interface Observer<N extends readonly unknown[], D, R> {

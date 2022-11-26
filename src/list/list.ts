@@ -86,8 +86,8 @@ export class List<N extends List.Node = List.Node> {
   }
 }
 export namespace List {
-  export interface Node {
-    next?: this;
-    prev?: this;
+  export class Node {
+    public next?: this = undefined;
+    public prev?: this = undefined;
   }
 }

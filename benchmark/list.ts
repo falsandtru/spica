@@ -6,8 +6,8 @@ import Yallist from 'yallist';
 
 class Node {
   constructor(public value: number) { }
-  public next?: this;
-  public prev?: this;
+  public next?: this = undefined;
+  public prev?: this = undefined;
 }
 
 describe('Benchmark:', function () {
