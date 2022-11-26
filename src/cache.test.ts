@@ -7,9 +7,9 @@ describe('Unit: lib/cache', () => {
   describe('Cache', () => {
     function inspect<K, V>(cache: Cache<K, V>) {
       return {
-        LRU: [...cache['indexes'].LRU].map(i => i.key),
-        LFU: [...cache['indexes'].LFU].map(i => i.key),
-        memory: [...cache['memory']].map(([key, { value: { value } }]) => [key, value]),
+        LRU: [...cache['LRU']].map(i => i.key),
+        LFU: [...cache['LFU']].map(i => i.key),
+        dict: [...cache['dict']].map(([key, { value: { value } }]) => [key, value]),
       };
     }
 
@@ -19,7 +19,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [],
-        memory: [],
+        dict: [],
       });
 
       assert(cache.has(0) === false);
@@ -27,7 +27,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [],
-        memory: [],
+        dict: [],
       });
 
       assert(cache.has(0) === false);
@@ -35,7 +35,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [0],
         LFU: [],
-        memory: [[0, 0]],
+        dict: [[0, 0]],
       });
 
       assert(cache.has(0) === true);
@@ -43,14 +43,14 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [0],
         LFU: [],
-        memory: [[0, 1]],
+        dict: [[0, 1]],
       });
 
       assert(cache.get(0) === 1);
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [0],
-        memory: [[0, 1]],
+        dict: [[0, 1]],
       });
 
       assert(cache.has(0) === true);
@@ -58,14 +58,14 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [0],
-        memory: [[0, 0]],
+        dict: [[0, 0]],
       });
 
       assert(cache.get(0) === 0);
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [0],
-        memory: [[0, 0]],
+        dict: [[0, 0]],
       });
 
       assert(cache.has(0) === true);
@@ -73,14 +73,14 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [],
-        memory: [],
+        dict: [],
       });
 
       assert(cache.delete(0) === false);
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [],
-        memory: [],
+        dict: [],
       });
     });
 
@@ -93,7 +93,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [],
-        memory: [],
+        dict: [],
       });
 
       assert(cache.put(0, 0) === false);
@@ -101,7 +101,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [0],
         LFU: [],
-        memory: [[0, 0]],
+        dict: [[0, 0]],
       });
 
       assert(cache.put(1, 1) === false);
@@ -109,7 +109,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [1, 0],
         LFU: [],
-        memory: [[0, 0], [1, 1]],
+        dict: [[0, 0], [1, 1]],
       });
 
       assert(cache.put(1, 1) === true);
@@ -117,7 +117,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [1, 0],
         LFU: [],
-        memory: [[0, 0], [1, 1]],
+        dict: [[0, 0], [1, 1]],
       });
 
       assert(cache.get(1) === 1);
@@ -125,7 +125,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [0],
         LFU: [1],
-        memory: [[0, 0], [1, 1]],
+        dict: [[0, 0], [1, 1]],
       });
 
       assert(cache.put(2, 2) === false);
@@ -133,7 +133,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [2],
         LFU: [1],
-        memory: [[1, 1], [2, 2]],
+        dict: [[1, 1], [2, 2]],
       });
 
       assert(cache.get(2) === 2);
@@ -141,7 +141,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [2, 1],
-        memory: [[1, 1], [2, 2]],
+        dict: [[1, 1], [2, 2]],
       });
 
       assert(cache.get(2) === 2);
@@ -149,7 +149,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [2, 1],
-        memory: [[1, 1], [2, 2]],
+        dict: [[1, 1], [2, 2]],
       });
 
       assert(cache.get(1) === 1);
@@ -157,7 +157,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [1, 2],
-        memory: [[1, 1], [2, 2]],
+        dict: [[1, 1], [2, 2]],
       });
 
       assert(cache.put(3, 3) === false);
@@ -165,15 +165,15 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [3],
         LFU: [1],
-        memory: [[1, 1], [3, 3]],
+        dict: [[1, 1], [3, 3]],
       });
 
       assert(cache.clear() === undefined);
-      assert(key === 3 && val === 3 && cnt === 5);
+      assert(key === 1 && val === 1 && cnt === 5);
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [],
-        memory: [],
+        dict: [],
       });
     });
 
@@ -188,7 +188,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [2, 1],
         LFU: [],
-        memory: [[1, 1], [2, 2]],
+        dict: [[1, 1], [2, 2]],
       });
 
       cache.put(1, 1, { size: 2 });
@@ -197,7 +197,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [1],
         LFU: [],
-        memory: [[1, 1]],
+        dict: [[1, 1]],
       });
 
       cache.put(2, 2, { size: 2 });
@@ -206,7 +206,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [2],
         LFU: [],
-        memory: [[2, 2]],
+        dict: [[2, 2]],
       });
 
       cache.put(3, 3);
@@ -215,7 +215,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [3, 2],
         LFU: [],
-        memory: [[2, 2], [3, 3]],
+        dict: [[2, 2], [3, 3]],
       });
 
       cache.get(3);
@@ -224,7 +224,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [2],
         LFU: [3],
-        memory: [[2, 2], [3, 3]],
+        dict: [[2, 2], [3, 3]],
       });
 
       cache.put(1, 1, { size: 3 });
@@ -233,7 +233,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [1],
         LFU: [],
-        memory: [[1, 1]],
+        dict: [[1, 1]],
       });
 
       cache.put(1, 1);
@@ -244,7 +244,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [1],
         LFU: [2],
-        memory: [[1, 1], [2, 2]],
+        dict: [[1, 1], [2, 2]],
       });
 
       cache.put(1, 1, { size: 3 });
@@ -253,7 +253,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [1],
         LFU: [],
-        memory: [[1, 1]],
+        dict: [[1, 1]],
       });
     });
 
@@ -286,7 +286,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [],
-        memory: [],
+        dict: [],
       });
 
       cache.put(0, 0, { age: 10 });
@@ -298,7 +298,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
         LFU: [],
-        memory: [],
+        dict: [],
       });
     });
 
@@ -315,7 +315,7 @@ describe('Unit: lib/cache', () => {
       assert.deepStrictEqual(inspect(cache), {
         LRU: [3, 2, 0],
         LFU: [],
-        memory: [[0, 0], [2, 2], [3, 3]],
+        dict: [[0, 0], [2, 2], [3, 3]],
       });
     });
 
@@ -356,12 +356,12 @@ describe('Unit: lib/cache', () => {
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1) & 0;
       }
-      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
-      assert(dwc['memory'].size <= capacity);
+      assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
+      assert(dwc['dict'].size <= capacity);
       console.debug('Cache even 100');
       console.debug('LRU hit ratio', lruhit * 100 / trials);
       console.debug('DWC hit ratio', dwchit * 100 / trials);
-      console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['indexes'].LFU.length * 100 / dwc.length | 0);
+      console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['LFU'].length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
       assert(dwchit / lruhit * 100 >>> 0 === 99);
     });
@@ -385,12 +385,12 @@ describe('Unit: lib/cache', () => {
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1) & 0;
       }
-      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
-      assert(dwc['memory'].size <= capacity);
+      assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
+      assert(dwc['dict'].size <= capacity);
       console.debug('Cache uneven 100');
       console.debug('LRU hit ratio', lruhit * 100 / trials);
       console.debug('DWC hit ratio', dwchit * 100 / trials);
-      console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['indexes'].LFU.length * 100 / dwc.length | 0);
+      console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['LFU'].length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
       assert(dwchit / lruhit * 100 >>> 0 === 193);
     });
@@ -413,12 +413,12 @@ describe('Unit: lib/cache', () => {
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1) & 0;
       }
-      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
-      assert(dwc['memory'].size <= capacity);
+      assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
+      assert(dwc['dict'].size <= capacity);
       console.debug('Cache uneven 100 transitive distribution');
       console.debug('LRU hit ratio', lruhit * 100 / trials);
       console.debug('DWC hit ratio', dwchit * 100 / trials);
-      console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['indexes'].LFU.length * 100 / dwc.length | 0);
+      console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['LFU'].length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
       assert(dwchit / lruhit * 100 >>> 0 === 196);
     });
@@ -444,12 +444,12 @@ describe('Unit: lib/cache', () => {
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1) & 0;
       }
-      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
-      assert(dwc['memory'].size <= capacity);
+      assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
+      assert(dwc['dict'].size <= capacity);
       console.debug('Cache uneven 100 transitive bias');
       console.debug('LRU hit ratio', lruhit * 100 / trials);
       console.debug('DWC hit ratio', dwchit * 100 / trials);
-      console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['indexes'].LFU.length * 100 / dwc.length | 0);
+      console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['LFU'].length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
       assert(dwchit / lruhit * 100 >>> 0 === 88);
     });
@@ -473,12 +473,12 @@ describe('Unit: lib/cache', () => {
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1) & 0;
       }
-      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
-      assert(dwc['memory'].size <= capacity);
+      assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
+      assert(dwc['dict'].size <= capacity);
       console.debug('Cache uneven 100 sequential');
       console.debug('LRU hit ratio', lruhit * 100 / trials);
       console.debug('DWC hit ratio', dwchit * 100 / trials);
-      console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['indexes'].LFU.length * 100 / dwc.length | 0);
+      console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['LFU'].length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
       assert(dwchit / lruhit * 100 >>> 0 === 268);
     });
@@ -502,12 +502,12 @@ describe('Unit: lib/cache', () => {
         lruhit += lru.get(key)! & +(key < 0) || +lru.set(key, 1) & 0;
         dwchit += dwc.get(key)! & +(key < 0) || +dwc.put(key, 1) & 0;
       }
-      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
-      assert(dwc['memory'].size <= capacity);
+      assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
+      assert(dwc['dict'].size <= capacity);
       console.debug('Cache uneven 100 adversarial');
       console.debug('LRU hit ratio', lruhit * 100 / trials);
       console.debug('DWC hit ratio', dwchit * 100 / trials);
-      console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['indexes'].LFU.length * 100 / dwc.length | 0);
+      console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['LFU'].length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
       assert(dwchit / lruhit * 100 >>> 0 === 96);
     });
@@ -529,12 +529,12 @@ describe('Unit: lib/cache', () => {
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1) & 0;
       }
-      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
-      assert(dwc['memory'].size <= capacity);
+      assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
+      assert(dwc['dict'].size <= capacity);
       console.debug('Cache uneven 1000 jump');
       console.debug('LRU hit ratio', lruhit * 100 / trials);
       console.debug('DWC hit ratio', dwchit * 100 / trials);
-      console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['indexes'].LFU.length * 100 / dwc.length | 0);
+      console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['LFU'].length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
       assert(dwchit / lruhit * 100 >>> 0 === 44);
     });
@@ -569,15 +569,15 @@ describe('Unit: lib/cache', () => {
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1) & 0;
       }
-      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
-      assert(dwc['memory'].size <= capacity);
+      assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
+      assert(dwc['dict'].size <= capacity);
       console.debug('Cache uneven 1000 lock LIR');
       console.debug('LRU hit ratio', lruhit * 100 / trials);
       console.debug('DWC hit ratio', dwchit * 100 / trials);
-      console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['indexes'].LFU.length * 100 / dwc.length | 0);
+      console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['LFU'].length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
       assert(dwchit / lruhit * 100 >>> 0 === 93);
-      assert(dwc['indexes'].LFU.length * 100 / dwc.length >>> 0 === 32);
+      assert(dwc['LFU'].length * 100 / dwc.length >>> 0 === 32);
     });
 
     it('ratio uneven 1000 lock HIR', function () {
@@ -611,15 +611,15 @@ describe('Unit: lib/cache', () => {
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1) & 0;
       }
-      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
-      assert(dwc['memory'].size <= capacity);
+      assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
+      assert(dwc['dict'].size <= capacity);
       console.debug('Cache uneven 1000 lock HIR');
       console.debug('LRU hit ratio', lruhit * 100 / trials);
       console.debug('DWC hit ratio', dwchit * 100 / trials);
-      console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['indexes'].LFU.length * 100 / dwc.length | 0);
+      console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['LFU'].length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
       assert(dwchit / lruhit * 100 >>> 0 === 79);
-      assert(dwc['indexes'].LFU.length * 100 / dwc.length >>> 0 === 95);
+      assert(dwc['LFU'].length * 100 / dwc.length >>> 0 === 95);
     });
 
     it('ratio uneven 1,000', function () {
@@ -640,12 +640,12 @@ describe('Unit: lib/cache', () => {
         lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
         dwchit += dwc.get(key) ?? +dwc.put(key, 1) & 0;
       }
-      assert(dwc['indexes'].LRU.length + dwc['indexes'].LFU.length === dwc['memory'].size);
-      assert(dwc['memory'].size <= capacity);
+      assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
+      assert(dwc['dict'].size <= capacity);
       console.debug('Cache uneven 1,000');
       console.debug('LRU hit ratio', lruhit * 100 / trials);
       console.debug('DWC hit ratio', dwchit * 100 / trials);
-      console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['indexes'].LFU.length * 100 / dwc.length | 0);
+      console.debug('DWC ratio', dwc['ratio']! / 10 | 0, dwc['LFU'].length * 100 / dwc.length | 0);
       console.debug('DWC / LRU hit ratio rate', `${dwchit / lruhit * 100 | 0}%`);
       assert(dwchit / lruhit * 100 >>> 0 === 197);
     });

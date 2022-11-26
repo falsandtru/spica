@@ -178,7 +178,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       ? new StatsExperimental(this.window, settings.resolution!, settings.offset!)
       : new Stats(this.window);
     this.sweeper = new Sweeper(
-      this.indexes.LRU,
+      this.LRU,
       settings.sweep!.threshold!,
       capacity,
       settings.sweep!.window!,
@@ -210,17 +210,15 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private readonly test: boolean;
   private capacity: number;
   private window: number;
-  private memory = new Map<K, List.Node<Entry<K, V>>>();
-  private readonly indexes = {
-    LRU: new List<Entry<K, V>>(),
-    LFU: new List<Entry<K, V>>(),
-  } as const;
+  private dict = new Map<K, List.Node<Entry<K, V>>>();
+  private LRU = new List<Entry<K, V>>();
+  private LFU = new List<Entry<K, V>>();
   private overlap = 0;
   private expiration = false;
   private readonly age: number;
   private readonly expirations?: Heap<List.Node<Entry<K, V>>, number>;
   public get length(): number {
-    const { LRU, LFU } = this.indexes;
+    const { LRU, LFU } = this;
     return LRU.length + LFU.length;
   }
   private resource: number;
@@ -230,21 +228,21 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
   private readonly disposer?: (value: V, key: K) => void;
   private evict(node: List.Node<Entry<K, V>>, callback: boolean): void {
-    assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
-    //assert(this.memory.size <= this.capacity);
+    assert(this.LRU.length + this.LFU.length === this.dict.size);
+    //assert(this.dict.size <= this.capacity);
     const entry = node.value;
     assert(node.list);
-    entry.region === 'LFU' && node.list === this.indexes.LRU && --this.overlap;
+    entry.region === 'LFU' && node.list === this.LRU && --this.overlap;
     assert(this.overlap >= 0);
     if (entry.enode !== undefined) {
       this.expirations!.delete(entry.enode);
       entry.enode = undefined;
     }
     node.delete();
-    assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size - 1);
-    this.memory.delete(entry.key);
-    assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
-    //assert(this.memory.size <= this.capacity);
+    assert(this.LRU.length + this.LFU.length === this.dict.size - 1);
+    this.dict.delete(entry.key);
+    assert(this.LRU.length + this.LFU.length === this.dict.size);
+    //assert(this.dict.size <= this.capacity);
     this.$size -= entry.size;
     callback && this.disposer?.(node.value.value, entry.key);
   }
@@ -252,7 +250,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private ensure(margin: number, skip?: List.Node<Entry<K, V>>, capture = false): List.Node<Entry<K, V>> | undefined {
     let size = skip?.value.size ?? 0;
     assert(margin - size <= this.resource || !capture);
-    const { LRU, LFU } = this.indexes;
+    const { LRU, LFU } = this;
     while (this.size + margin - size > this.resource) {
       assert(this.length >= 1 + +!!skip);
       let victim = this.expirations?.peek();
@@ -298,7 +296,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         victim ??= LFU.last!;
       }
       assert(victim !== skip);
-      assert(this.memory.has(victim.value.key));
+      assert(this.dict.has(victim.value.key));
       this.evict(victim, true);
       skip = skip?.list && skip;
       size = skip?.value.size ?? 0;
@@ -314,12 +312,12 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       return false;
     }
 
-    const { LRU } = this.indexes;
+    const { LRU } = this;
     const expiration = age === Infinity
       ? Infinity
       : now() + age;
     this.expiration ||= expiration !== Infinity;
-    let node = this.memory.get(key);
+    let node = this.dict.get(key);
     const match = node !== undefined;
     node = this.ensure(size, node, true);
     if (node !== undefined) {
@@ -331,12 +329,12 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         assert(node === LRU.last);
         entry.region === 'LFU' && --this.overlap;
         assert(this.overlap >= 0);
-        this.memory.delete(key$);
-        this.memory.set(key, node);
+        this.dict.delete(key$);
+        this.dict.set(key, node);
         entry.key = key;
         entry.region = 'LRU';
       }
-      assert(this.memory.has(key));
+      assert(this.dict.has(key));
       entry.value = value;
       this.$size += size - entry.size;
       assert(0 < this.size && this.size <= this.resource);
@@ -353,25 +351,25 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         entry.enode = undefined;
       }
       node.moveToHead();
-      assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
-      assert(this.memory.size <= this.capacity);
+      assert(this.LRU.length + this.LFU.length === this.dict.size);
+      assert(this.dict.size <= this.capacity);
       this.disposer?.(value$, key$);
       return match;
     }
-    assert(!this.memory.has(key));
+    assert(!this.dict.has(key));
 
     assert(LRU.length !== this.capacity);
     this.$size += size;
     assert(0 < this.size && this.size <= this.resource);
-    this.memory.set(key, LRU.unshift({
+    this.dict.set(key, LRU.unshift({
       key,
       value,
       size,
       region: 'LRU',
       expiration,
     }));
-    assert(this.indexes.LRU.length + this.indexes.LFU.length === this.memory.size);
-    assert(this.memory.size <= this.capacity);
+    assert(this.LRU.length + this.LFU.length === this.dict.size);
+    assert(this.dict.size <= this.capacity);
     if (this.expiration && this.expirations !== undefined && expiration !== Infinity) {
       LRU.head!.value.enode = this.expirations.insert(LRU.head!, expiration);
       assert(this.expirations.length <= this.length);
@@ -385,7 +383,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     return this;
   }
   public get(key: K): V | undefined {
-    const node = this.memory.get(key);
+    const node = this.dict.get(key);
     if (node === undefined) {
       this.sweeper.miss();
       return;
@@ -400,7 +398,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     return entry.value;
   }
   public has(key: K): boolean {
-    const node = this.memory.get(key);
+    const node = this.dict.get(key);
     if (node === undefined) return false;
     const entry = node.value;
     if (this.expiration && entry.expiration !== Infinity && entry.expiration < now()) {
@@ -410,27 +408,39 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     return true;
   }
   public delete(key: K): boolean {
-    const node = this.memory.get(key);
+    const node = this.dict.get(key);
     if (node === undefined) return false;
     this.evict(node, this.settings.capture!.delete === true);
     return true;
   }
   public clear(): void {
+    const { LRU, LFU } = this;
     this.$size = 0;
     this.ratio = undefined;
-    this.indexes.LRU.clear();
-    this.indexes.LFU.clear();
+    this.dict = new Map();
+    this.LRU = new List();
+    this.LFU = new List();
     this.overlap = 0;
     this.expiration = false;
     this.expirations?.clear();
     this.stats.clear();
     this.sweeper.clear();
-    if (!this.disposer || !this.settings.capture!.clear) return void this.memory.clear();
-    const memory = this.memory;
-    this.memory = new Map();
-    for (const { 0: key, 1: { value: { value } } } of memory) {
+    if (!this.disposer || !this.settings.capture!.clear) return;
+    for (const { key, value } of LRU) {
       this.disposer(value, key);
     }
+    for (const { key, value } of LFU) {
+      this.disposer(value, key);
+    }
+  }
+  public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
+    for (const { key, value } of this.LRU) {
+      yield [key, value];
+    }
+    for (const { key, value } of this.LFU) {
+      yield [key, value];
+    }
+    return;
   }
   public resize(capacity: number, resource: number = capacity): void {
     if (capacity >>> 0 !== capacity) throw new Error(`Spica: Cache: Capacity must be integer.`);
@@ -444,16 +454,10 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.sweeper.resize(capacity, this.settings.sweep!.window!, this.settings.sweep!.range!);
     this.ensure(0);
   }
-  public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
-    for (const { 0: key, 1: { value: { value } } } of this.memory) {
-      yield [key, value];
-    }
-    return;
-  }
   private update(node: List.Node<Entry<K, V>>): void {
     const entry = node.value;
     const { region } = entry;
-    const { LRU, LFU } = this.indexes;
+    const { LRU, LFU } = this;
     this.sweeper.hit();
     if (node.list === LRU) {
       // For memoize.
@@ -467,7 +471,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         this.stats.hitLRU();
         entry.region = 'LFU';
       }
-      assert(this.indexes.LFU.length < this.capacity);
+      assert(this.LFU.length < this.capacity);
       LFU.unshiftNode(node);
     }
     else {
@@ -483,11 +487,11 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private unit: number;
   private readonly limit: number;
   private coordinate(): void {
-    const { capacity, stats, indexes } = this;
+    const { capacity, LRU, LFU, stats } = this;
     if (stats.subtotal() * RESOLUTION % capacity !== 0 || !stats.isReady()) return;
-    this.ratio ??= min(indexes.LFU.length * RESOLUTION / capacity | 0, this.limit);
-    const lenR = indexes.LRU.length;
-    const lenF = indexes.LFU.length;
+    this.ratio ??= min(LFU.length * RESOLUTION / capacity | 0, this.limit);
+    const lenR = LRU.length;
+    const lenF = LFU.length;
     const lenO = this.overlap;
     const leverage = min((lenF + lenO * 1.5) * 1000 / (lenR + lenF) | 0, 1000);
     const rateR = stats.rateLRU();
