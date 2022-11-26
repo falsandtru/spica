@@ -320,61 +320,61 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     let node = this.dict.get(key);
     const match = node !== undefined;
     node = this.ensure(size, node, true);
-    if (node !== undefined) {
-      assert(node.list);
-      const entry = node.value;
-      const key$ = entry.key;
-      const value$ = entry.value;
-      if (!match) {
-        assert(node === LRU.last);
-        entry.region === 'LFU' && --this.overlap;
-        assert(this.overlap >= 0);
-        this.dict.delete(key$);
-        this.dict.set(key, node);
-        entry.key = key;
-        entry.region = 'LRU';
-      }
-      assert(this.dict.has(key));
-      entry.value = value;
-      this.$size += size - entry.size;
+    if (node === undefined) {
+      assert(!this.dict.has(key));
+      assert(LRU.length !== this.capacity);
+      this.$size += size;
       assert(0 < this.size && this.size <= this.resource);
-      entry.size = size;
-      entry.expiration = expiration;
-      if (this.expiration && this.expirations !== undefined && expiration !== Infinity) {
-        entry.enode !== undefined
-          ? this.expirations.update(entry.enode, expiration)
-          : entry.enode = this.expirations.insert(node, expiration);
-        assert(this.expirations.length <= this.length);
-      }
-      else if (entry.enode !== undefined) {
-        this.expirations!.delete(entry.enode);
-        entry.enode = undefined;
-      }
-      node.moveToHead();
+      this.dict.set(key, LRU.unshift({
+        key,
+        value,
+        size,
+        region: 'LRU',
+        expiration,
+      }));
       assert(this.LRU.length + this.LFU.length === this.dict.size);
       assert(this.dict.size <= this.capacity);
-      this.disposer?.(value$, key$);
-      return match;
+      if (this.expiration && this.expirations !== undefined && expiration !== Infinity) {
+        LRU.head!.value.enode = this.expirations.insert(LRU.head!, expiration);
+        assert(this.expirations.length <= this.length);
+      }
+      return false;
     }
-    assert(!this.dict.has(key));
 
-    assert(LRU.length !== this.capacity);
-    this.$size += size;
+    assert(node.list);
+    const entry = node.value;
+    const key$ = entry.key;
+    const value$ = entry.value;
+    if (!match) {
+      assert(node === LRU.last);
+      entry.region === 'LFU' && --this.overlap;
+      assert(this.overlap >= 0);
+      this.dict.delete(key$);
+      this.dict.set(key, node);
+      entry.key = key;
+      entry.region = 'LRU';
+    }
+    assert(this.dict.has(key));
+    entry.value = value;
+    this.$size += size - entry.size;
     assert(0 < this.size && this.size <= this.resource);
-    this.dict.set(key, LRU.unshift({
-      key,
-      value,
-      size,
-      region: 'LRU',
-      expiration,
-    }));
-    assert(this.LRU.length + this.LFU.length === this.dict.size);
-    assert(this.dict.size <= this.capacity);
+    entry.size = size;
+    entry.expiration = expiration;
     if (this.expiration && this.expirations !== undefined && expiration !== Infinity) {
-      LRU.head!.value.enode = this.expirations.insert(LRU.head!, expiration);
+      entry.enode !== undefined
+        ? this.expirations.update(entry.enode, expiration)
+        : entry.enode = this.expirations.insert(node, expiration);
       assert(this.expirations.length <= this.length);
     }
-    return false;
+    else if (entry.enode !== undefined) {
+      this.expirations!.delete(entry.enode);
+      entry.enode = undefined;
+    }
+    node.moveToHead();
+    assert(this.LRU.length + this.LFU.length === this.dict.size);
+    assert(this.dict.size <= this.capacity);
+    this.disposer?.(value$, key$);
+    return match;
   }
   public set(key: K, value: V, opts?: { size?: number; age?: number; }): this;
   public set(this: Cache<K, undefined>, key: K, value?: V, opts?: { size?: number; age?: number; }): this;
