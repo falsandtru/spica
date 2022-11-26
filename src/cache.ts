@@ -106,9 +106,9 @@ interface Entry<K, V> {
   key: K;
   value: V;
   size: number;
+  region: 'LRU' | 'LFU';
   expiration: number;
   enode?: Heap.Node<List.Node<Entry<K, V>>, number>;
-  region: 'LRU' | 'LFU';
 }
 
 export namespace Cache {
