@@ -167,8 +167,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (capacity >>> 0 !== capacity) throw new Error(`Spica: Cache: Capacity must be integer.`);
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     this.window = settings.window! * capacity / 100 >>> 0;
-    this.unit = RESOLUTION / capacity | 0 || 1;
-    this.limit = RESOLUTION - settings.sample! * RESOLUTION / 100 | 0;
+    this.unit = capacity / RESOLUTION | 0 || 1;
+    this.limit = capacity - capacity * settings.sample! / 100 >>> 0;
     this.resource = settings.resource! ?? capacity;
     this.age = settings.age!;
     if (settings.earlyExpiring) {
@@ -267,7 +267,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         if (this.sweeper.isActive()) {
           this.sweeper.sweep();
         }
-        else if (LFU.length * RESOLUTION > this.capacity * (this.ratio ?? this.limit)) {
+        else if (LFU.length > (this.partition ?? this.limit)) {
           assert(LFU.last);
           const node = LFU.last! !== skip
             ? LFU.last!
@@ -416,7 +416,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   public clear(): void {
     const { LRU, LFU } = this;
     this.$size = 0;
-    this.ratio = undefined;
+    this.partition = undefined;
     this.dict = new Map();
     this.LRU = new List();
     this.LFU = new List();
@@ -446,9 +446,11 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (capacity >>> 0 !== capacity) throw new Error(`Spica: Cache: Capacity must be integer.`);
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     const window = this.settings.window! * capacity / 100 >>> 0;
+    this.partition &&= this.partition / this.capacity * capacity >>> 0;
     this.capacity = capacity;
     this.window = window;
-    this.unit = RESOLUTION / capacity | 0 || 1;
+    this.unit = capacity / RESOLUTION | 0 || 1;
+    this.limit = capacity - capacity * this.settings.sample! / 100 >>> 0;
     this.resource = resource;
     this.stats.resize(window);
     this.sweeper.resize(capacity, this.settings.sweep!.window!, this.settings.sweep!.range!);
@@ -483,13 +485,13 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.coordinate();
   }
   private readonly stats: Stats | StatsExperimental;
-  private ratio?: number;
+  private partition?: number;
   private unit: number;
-  private readonly limit: number;
+  private limit: number;
   private coordinate(): void {
     const { capacity, LRU, LFU, stats } = this;
     if (stats.subtotal() * RESOLUTION % capacity !== 0 || !stats.isReady()) return;
-    this.ratio ??= min(LFU.length * RESOLUTION / capacity | 0, this.limit);
+    this.partition ??= LFU.length;
     const lenR = LRU.length;
     const lenF = LFU.length;
     const lenO = this.overlap;
@@ -501,15 +503,15 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const densityFO = stats.offset && stats.rateLFU(true) * (1000 - leverage);
     // 操作頻度を超えてキャッシュ比率を増減させても余剰比率の消化が追いつかず無駄
     // LRUの下限設定ではLRU拡大の要否を迅速に判定できないためLFUのヒット率低下の検出で代替する
-    if (this.ratio > 0 && (densityR > densityF || stats.offset !== 0 && densityF * 100 < densityFO * (100 - stats.offset))) {
-      if (lenR * RESOLUTION >= capacity * (RESOLUTION - this.ratio)) {
-        this.ratio = max(this.ratio - this.unit, 0);
+    if (this.partition > 0 && (densityR > densityF || stats.offset !== 0 && densityF * 100 < densityFO * (100 - stats.offset))) {
+      if (lenR >= this.capacity - this.partition) {
+        this.partition = max(this.partition - this.unit, 0);
       }
     }
     else
-    if (this.ratio < this.limit && densityF > densityR) {
-      if (lenF * RESOLUTION >= capacity * this.ratio) {
-        this.ratio = min(this.ratio + this.unit, this.limit);
+    if (this.partition < this.limit && densityF > densityR) {
+      if (lenF >= this.partition) {
+        this.partition = min(this.partition + this.unit, this.limit);
       }
     }
   }
