@@ -355,7 +355,9 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const expiration = age === Infinity
       ? Infinity
       : now() + age;
-    this.expiration ||= expiration !== Infinity;
+    if (!this.expiration && expiration !== Infinity) {
+      this.expiration = true;
+    }
     let node = this.dict.get(key);
     const match = node !== undefined;
     node = this.ensure(size, node, true);
@@ -433,7 +435,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       this.evict(node, true);
       return;
     }
-    this.update(node);
+    this.update(node, entry);
     return entry.value;
   }
   public has(key: K): boolean {
@@ -500,8 +502,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.sweeper.resize(capacity, this.settings.sweep!.window!, this.settings.sweep!.range!);
     this.ensure(0);
   }
-  private update(node: List.Node<Entry<K, V>>): void {
-    const entry = node.value;
+  private update(node: List.Node<Entry<K, V>>, entry: Entry<K, V>): void {
+    assert(entry === node.value);
     const { region } = entry;
     const { LRU, LFU } = this;
     this.sweeper.hit();
