@@ -168,7 +168,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     this.window = settings.window! * capacity / 100 >>> 0;
     this.unit = capacity / RESOLUTION | 0 || 1;
-    this.limit = capacity - capacity * settings.sample! / 100 >>> 0;
+    this.limit = capacity - (capacity * settings.sample! / 100 >>> 0);
+    this.partition = this.limit;
     this.resource = settings.resource! ?? capacity;
     this.age = settings.age!;
     if (settings.earlyExpiring) {
@@ -213,7 +214,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private dict = new Map<K, List.Node<Entry<K, V>>>();
   private LRU = new List<Entry<K, V>>();
   private LFU = new List<Entry<K, V>>();
-  private overlap = 0;
+  private overlapLRU = 0;
+  private overlapLFU = 0;
   private expiration = false;
   private readonly age: number;
   private readonly expirations?: Heap<List.Node<Entry<K, V>>, number>;
@@ -232,8 +234,11 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     //assert(this.dict.size <= this.capacity);
     const entry = node.value;
     assert(node.list);
-    entry.region === 'LFU' && node.list === this.LRU && --this.overlap;
-    assert(this.overlap >= 0);
+    node.list === this.LRU
+      ? entry.region === 'LFU' && --this.overlapLFU
+      : entry.region === 'LRU' && --this.overlapLRU;
+    assert(this.overlapLRU >= 0);
+    assert(this.overlapLFU >= 0);
     if (entry.enode !== undefined) {
       this.expirations!.delete(entry.enode);
       entry.enode = undefined;
@@ -246,7 +251,33 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.$size -= entry.size;
     callback && this.disposer?.(node.value.value, entry.key);
   }
-  private sweeper: Sweeper;
+  private readonly sweeper: Sweeper;
+  private overlap(node: List.Node<Entry<K, V>>): List.Node<Entry<K, V>> {
+    assert(node.list);
+    const entry = node.value;
+    if (node.list === this.LRU) {
+      if (entry.region === 'LRU') {
+        ++this.overlapLRU;
+        assert(this.overlapLRU - 1 <= this.LFU.length);
+      }
+      else {
+        --this.overlapLFU;
+        assert(this.overlapLFU >= 0);
+      }
+    }
+    else {
+      if (entry.region === 'LFU') {
+        ++this.overlapLFU;
+        assert(this.overlapLFU - 1 <= this.LRU.length);
+      }
+      else {
+        --this.overlapLRU;
+        assert(this.overlapLRU >= 0);
+      }
+    }
+    return node;
+  }
+  private acc = 0;
   private ensure(margin: number, skip?: List.Node<Entry<K, V>>, capture = false): List.Node<Entry<K, V>> | undefined {
     let size = skip?.value.size ?? 0;
     assert(margin - size <= this.resource || !capture);
@@ -264,10 +295,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       }
       else {
         assert(LRU.last);
-        if (this.sweeper.isActive()) {
-          this.sweeper.sweep();
-        }
-        else if (LFU.length > (this.partition ?? this.limit)) {
+        if (LFU.length > this.partition) {
           assert(LFU.last);
           const node = LFU.last! !== skip
             ? LFU.last!
@@ -276,11 +304,22 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
               : undefined;
           if (node !== undefined) {
             assert(node !== skip);
-            assert(node.value.region === 'LFU');
-            LRU.unshiftNode(node);
-            ++this.overlap;
-            assert(this.overlap <= LRU.length);
+            assert(node.list === LFU);
+            LRU.unshiftNode(this.overlap(node));
           }
+        }
+        if (LRU.length >= this.capacity - this.limit &&
+            this.overlapLRU * 100 / LFU.length <= 5) {
+          this.acc = min(this.acc + this.overlapLFU / LRU.length / 2, this.capacity);
+          const node = LRU.last;
+          if (this.acc >= 1 &&
+              node?.value.region === 'LRU') {
+            LFU.unshiftNode(this.overlap(node));
+            --this.acc;
+          }
+        }
+        if (this.sweeper.isActive()) {
+          this.sweeper.sweep();
         }
         victim = LRU.last! !== skip
           ? LRU.last!
@@ -347,8 +386,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const value$ = entry.value;
     if (!match) {
       assert(node === LRU.last);
-      entry.region === 'LFU' && --this.overlap;
-      assert(this.overlap >= 0);
+      entry.region === 'LFU' && --this.overlapLFU;
+      assert(this.overlapLFU >= 0);
       this.dict.delete(key$);
       this.dict.set(key, node);
       entry.key = key;
@@ -415,12 +454,16 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
   public clear(): void {
     const { LRU, LFU } = this;
+    this.acc = 0;
     this.$size = 0;
-    this.partition = undefined;
+    this.partition = this.limit;
     this.dict = new Map();
     this.LRU = new List();
     this.LFU = new List();
-    this.overlap = 0;
+    this.densityR = 0;
+    this.densityF = 0;
+    this.overlapLRU = 0;
+    this.overlapLFU = 0;
     this.expiration = false;
     this.expirations?.clear();
     this.stats.clear();
@@ -447,11 +490,11 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (capacity >>> 0 !== capacity) throw new Error(`Spica: Cache: Capacity must be integer.`);
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     const window = this.settings.window! * capacity / 100 >>> 0;
-    this.partition &&= this.partition / this.capacity * capacity >>> 0;
+    this.partition = this.partition / this.capacity * capacity >>> 0;
     this.capacity = capacity;
     this.window = window;
     this.unit = capacity / RESOLUTION | 0 || 1;
-    this.limit = capacity - capacity * this.settings.sample! / 100 >>> 0;
+    this.limit = capacity - (capacity * this.settings.sample! / 100 >>> 0);
     this.resource = resource;
     this.stats.resize(window);
     this.sweeper.resize(capacity, this.settings.sweep!.window!, this.settings.sweep!.range!);
@@ -465,14 +508,18 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (node.list === LRU) {
       // For memoize.
       if (node === LRU.head && !this.test) return;
-      if (region === 'LFU') {
-        this.stats.hitLFU();
-        --this.overlap;
-        assert(this.overlap >= 0);
-      }
-      else {
+      if (region === 'LRU') {
         this.stats.hitLRU();
         entry.region = 'LFU';
+      }
+      else {
+        const delta = LFU.length < LRU.length
+          ? LRU.length / LFU.length | 0
+          : 1;
+        this.partition = min(this.partition + delta, this.limit);
+        this.stats.hitLFU();
+        --this.overlapLFU;
+        assert(this.overlapLFU >= 0);
       }
       assert(this.LFU.length < this.capacity);
       LFU.unshiftNode(node);
@@ -480,27 +527,41 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     else {
       // For memoize.
       if (node === LFU.head && !this.test) return;
-      this.stats.hitLFU();
+      if (region === 'LFU') {
+        this.stats.hitLFU();
+      }
+      else {
+        const delta = LRU.length < LFU.length
+          ? LFU.length / LRU.length | 0
+          : 1;
+        this.partition = max(this.partition - delta, 0);
+        this.stats.hitLRU();
+        entry.region = 'LFU';
+        --this.overlapLRU;
+        assert(this.overlapLRU >= 0);
+      }
       node.moveToHead();
     }
     this.coordinate();
   }
   private readonly stats: Stats | StatsExperimental;
-  private partition?: number;
+  private partition: number;
   private unit: number;
   private limit: number;
+  protected densityR = 0;
+  protected densityF = 0;
   private coordinate(): void {
     const { capacity, LRU, LFU, stats } = this;
     if (stats.subtotal() * RESOLUTION % capacity !== 0 || !stats.isReady()) return;
-    this.partition ??= LFU.length;
     const lenR = LRU.length;
     const lenF = LFU.length;
-    const lenO = this.overlap;
-    const leverage = min((lenF + lenO * 1.5) * 1000 / (lenR + lenF) | 0, 1000);
+    const lenOR = this.overlapLRU;
+    const lenOF = this.overlapLFU;
+    const leverage = min((lenF - lenOR + lenOF) * 1000 / (lenR + lenF) | 0, 1000);
     const rateR = stats.rateLRU();
     const rateF = 10000 - rateR;
-    const densityR = rateR * leverage;
-    const densityF = rateF * (1000 - leverage);
+    const densityR = this.densityR = rateR * leverage;
+    const densityF = this.densityF = rateF * (1000 - leverage);
     const densityFO = stats.offset && stats.rateLFU(true) * (1000 - leverage);
     // 操作頻度を超えてキャッシュ比率を増減させても余剰比率の消化が追いつかず無駄
     // LRUの下限設定ではLRU拡大の要否を迅速に判定できないためLFUのヒット率低下の検出で代替する

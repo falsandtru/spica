@@ -6,6 +6,11 @@ describe('Unit: lib/lru', () => {
   describe('LRU', () => {
     if (!navigator.userAgent.includes('Chrome')) return;
 
+    class Stats {
+      lru = 0;
+      isc = 0;
+    }
+
     it('even 100', function () {
       this.timeout(10 * 1e3);
 
@@ -15,17 +20,16 @@ describe('Unit: lib/lru', () => {
 
       const trials = capacity * 1000;
       const random = pcg32.random(pcg32.seed(0n, 0n));
-      let lruhit = 0;
-      let ischit = 0;
+      const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         const key = random() * capacity * 10 | 0;
-        lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
-        ischit += isc.get(key) ?? +isc.set(key, 1) & 0;
+        stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
+        stats.isc += isc.get(key) ?? +isc.set(key, 1) & 0;
       }
       console.debug('LRU even 100');
-      console.debug('ISC hits', ischit);
-      console.debug('LRU hits', lruhit);
-      assert(lruhit === ischit);
+      console.debug('ISC hits', stats.isc);
+      console.debug('LRU hits', stats.lru);
+      assert(stats.lru === stats.isc);
     });
 
     it('uneven 100', function () {
@@ -37,19 +41,18 @@ describe('Unit: lib/lru', () => {
 
       const trials = capacity * 1000;
       const random = pcg32.random(pcg32.seed(0n, 0n));
-      let lruhit = 0;
-      let ischit = 0;
+      const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         const key = random() < 0.4
           ? random() * capacity * -1 | 0
           : random() * capacity * 10 | 0;
-        lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
-        ischit += isc.get(key) ?? +isc.set(key, 1) & 0;
+        stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
+        stats.isc += isc.get(key) ?? +isc.set(key, 1) & 0;
       }
       console.debug('LRU uneven 100');
-      console.debug('ISC hits', ischit);
-      console.debug('LRU hits', lruhit);
-      assert(lruhit === ischit);
+      console.debug('ISC hits', stats.isc);
+      console.debug('LRU hits', stats.lru);
+      assert(stats.lru === stats.isc);
     });
 
     it('uneven 1,000', function () {
@@ -61,19 +64,18 @@ describe('Unit: lib/lru', () => {
 
       const trials = capacity * 1000;
       const random = pcg32.random(pcg32.seed(0n, 0n));
-      let lruhit = 0;
-      let ischit = 0;
+      const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         const key = random() < 0.4
           ? random() * capacity * -1 | 0
           : random() * capacity * 10 | 0;
-        lruhit += lru.get(key) ?? +lru.set(key, 1) & 0;
-        ischit += isc.get(key) ?? +isc.set(key, 1) & 0;
+        stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
+        stats.isc += isc.get(key) ?? +isc.set(key, 1) & 0;
       }
       console.debug('LRU uneven 1000');
-      console.debug('ISC hits', ischit);
-      console.debug('LRU hits', lruhit);
-      assert(lruhit === ischit);
+      console.debug('ISC hits', stats.isc);
+      console.debug('LRU hits', stats.lru);
+      assert(stats.lru === stats.isc);
     });
 
   });
