@@ -425,6 +425,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.expirations?.clear();
     this.stats.clear();
     this.sweeper.clear();
+    this.sweeper.replace(this.LRU);
     if (!this.disposer || !this.settings.capture!.clear) return;
     for (const { key, value } of LRU) {
       this.disposer(value, key);
@@ -707,7 +708,7 @@ assert(StatsExperimental.rate(10, [2, 2], [3, 8], 5) === 2900);
 // Transitive Wide MRU with Cyclic Replacement
 class Sweeper {
   constructor(
-    private readonly target: List<unknown>,
+    private target: List<unknown>,
     private readonly threshold: number,
     capacity: number,
     private window: number,
@@ -803,10 +804,14 @@ class Sweeper {
     this.advance = 0;
   }
   public clear(): void {
+    this.active = undefined;
     this.processing = true;
     this.reset();
     this.slide();
     this.slide();
+  }
+  public replace(target: List<unknown>): void {
+    this.target = target;
   }
   public resize(capacity: number, window: number, range: number): void {
     this.window = round(capacity * window / 100) || 1;
