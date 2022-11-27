@@ -156,7 +156,7 @@ export class List<T> {
     return this.add(value);
   }
   public unshiftRotationally(value: T): number {
-    if (this.$length === 0) return this.unshift(value);
+    if (this.$length === 0) return this.add(value);
     const index = this.last;
     this.values[index] = value;
     this.HEAD = index;
@@ -166,7 +166,7 @@ export class List<T> {
     return this.insert(value, this.HEAD);
   }
   public pushRotationally(value: T): number {
-    if (this.$length === 0) return this.push(value);
+    if (this.$length === 0) return this.add(value);
     const index = this.HEAD;
     this.values[index] = value;
     this.HEAD = this.nexts[index];
