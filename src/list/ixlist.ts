@@ -23,22 +23,16 @@ export class List<T> {
   private nexts: Uint32Array;
   private prevs: Uint32Array;
   private readonly ix = new Index();
-  private HEAD = 0;
   private $length = 0;
   public get length() {
     return this.$length;
   }
-  public set head(index: number) {
-    this.HEAD = index;
-  }
-  public get head(): number {
-    return this.HEAD;
-  }
+  public head = 0;
   public get tail(): number {
-    return this.nexts[this.HEAD];
+    return this.nexts[this.head];
   }
   public get last(): number {
-    return this.prevs[this.HEAD];
+    return this.prevs[this.head];
   }
   public next(index: number): number {
     return this.nexts[index];
@@ -49,7 +43,7 @@ export class List<T> {
   public at(index: number): T {
     return this.values[index];
   }
-  public index(offset: number, index = this.HEAD): number {
+  public index(offset: number, index = this.head): number {
     if (offset > 0) {
       const pointers = this.nexts;
       while (offset--) {
@@ -91,14 +85,14 @@ export class List<T> {
   public clear(): void {
     this.values = new this.Container(this.capacity) as T[];
     this.ix.clear();
-    this.HEAD = 0;
+    this.head = 0;
     this.$length = 0;
   }
   public add(value: T): number {
-    const head = this.HEAD;
+    const head = this.head;
     if (this.$length === 0) {
       assert(this.length === 0);
-      const index = this.HEAD = this.ix.pop();
+      const index = this.head = this.ix.pop();
       ++this.$length;
       this.values[index] = value;
       this.nexts[index] = index;
@@ -107,7 +101,7 @@ export class List<T> {
     }
     if (this.$length !== this.capacity) {
       assert(this.length < this.capacity);
-      const index = this.HEAD = this.ix.pop();
+      const index = this.head = this.ix.pop();
       ++this.$length;
       const last = this.prevs[head];
       this.prevs[head] = this.nexts[last] = index;
@@ -119,7 +113,7 @@ export class List<T> {
     else if (!this.auto) {
       assert(this.length === this.capacity);
       assert(this.ix.length === this.capacity);
-      const index = this.HEAD = this.prevs[head];
+      const index = this.head = this.prevs[head];
       this.values[index] = value;
       return index;
     }
@@ -138,18 +132,18 @@ export class List<T> {
       this.nexts[prev] = next;
       this.prevs[next] = prev;
     }
-    if (index === this.HEAD) {
-      this.HEAD = next;
+    if (index === this.head) {
+      this.head = next;
     }
   }
   public set(index: number, value: T): void {
     this.values[index] = value;
   }
   public insert(value: T, before: number): number {
-    const head = this.HEAD;
-    this.HEAD = before;
+    const head = this.head;
+    this.head = before;
     const index = this.add(value);
-    this.HEAD = head;
+    this.head = head;
     return index;
   }
   public unshift(value: T): number {
@@ -159,22 +153,22 @@ export class List<T> {
     if (this.$length === 0) return this.add(value);
     const index = this.last;
     this.values[index] = value;
-    this.HEAD = index;
+    this.head = index;
     return index;
   }
   public push(value: T): number {
-    return this.insert(value, this.HEAD);
+    return this.insert(value, this.head);
   }
   public pushRotationally(value: T): number {
     if (this.$length === 0) return this.add(value);
-    const index = this.HEAD;
+    const index = this.head;
     this.values[index] = value;
-    this.HEAD = this.nexts[index];
+    this.head = this.nexts[index];
     return index;
   }
   public shift(): T | undefined {
     if (this.$length === 0) return;
-    const index = this.HEAD;
+    const index = this.head;
     const value = this.values[index];
     this.del(index);
     return value;
@@ -206,32 +200,32 @@ export class List<T> {
     return true;
   }
   public moveToHead(index: number): void {
-    this.move(index, this.HEAD);
-    this.HEAD = index;
+    this.move(index, this.head);
+    this.head = index;
   }
   public moveToLast(index: number): void {
-    this.move(index, this.HEAD);
-    this.HEAD = index === this.HEAD
+    this.move(index, this.head);
+    this.head = index === this.head
       ? this.tail
-      : this.HEAD;
+      : this.head;
   }
   public swap(index1: number, index2: number): boolean {
     if (index1 === index2) return false;
     const index3 = this.nexts[index2];
     this.move(index2, index1);
     this.move(index1, index3);
-    switch (this.HEAD) {
+    switch (this.head) {
       case index1:
-        this.HEAD = index2;
+        this.head = index2;
         break;
       case index2:
-        this.HEAD = index1;
+        this.head = index1;
         break;
     }
     return true;
   }
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
-    for (let index = this.HEAD, i = 0; i < this.$length; ++i) {
+    for (let index = this.head, i = 0; i < this.$length; ++i) {
       yield this.values[index];
       index = this.nexts[index];
     }
