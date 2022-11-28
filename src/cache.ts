@@ -330,24 +330,24 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
             LFU.unshift(this.overlap(entry));
             entry.partition = LFU;
             --this.acc;
-            if (LRU.length === 0) continue;
           }
         }
-        assert(LRU.last);
         if (this.sweeper.isActive()) {
           this.sweeper.sweep();
         }
-        victim = LRU.last!;
-        victim = victim !== skip
-          ? victim
-          : LRU.length !== 1
-            ? victim.prev
-            : undefined;
-        if (capture && skip === undefined && victim !== undefined) {
-          assert(victim === LRU.last);
-          skip = victim;
-          size = skip.size;
-          continue;
+        if (LRU.length !== 0) {
+          victim = LRU.last!;
+          victim = victim !== skip
+            ? victim
+            : LRU.length !== 1
+              ? victim.prev
+              : undefined;
+          if (capture && skip === undefined && victim !== undefined) {
+            assert(victim === LRU.last);
+            skip = victim;
+            size = skip.size;
+            continue;
+          }
         }
         victim ??= LFU.last!;
       }
