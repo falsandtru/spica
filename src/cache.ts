@@ -202,7 +202,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     capacity: 0,
     window: 100,
     scope: 5,
-    sample: 5,
+    sample: 2,
     age: Infinity,
     earlyExpiring: false,
     capture: {
@@ -322,8 +322,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
           }
         }
         if (LRU.length >= this.capacity - this.limit &&
-            this.overlapLRU * 100 / LFU.length <= this.sample) {
-          this.acc = min(this.acc + this.overlapLFU / LRU.length / 2, this.capacity);
+            this.overlapLRU * 100 / min(LFU.length, this.partition) <= this.sample) {
+          this.acc = min(this.acc + this.sample / 100, this.capacity);
           const entry = LRU.head!.prev!;
           if (this.acc >= 1 && entry.region === 'LRU') {
             LRU.delete(entry);
