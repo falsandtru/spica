@@ -584,26 +584,26 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private coordinate(): void {
     const { capacity, LRU, LFU, stats } = this;
     if (stats.subtotal() * RESOLUTION % capacity !== 0 || !stats.isReady()) return;
-    const lenR = LRU.length;
-    const lenF = LFU.length;
-    const lenOR = this.overlapLRU;
-    const lenOF = this.overlapLFU;
-    const leverage = min((lenF - lenOR + lenOF) * 1000 / (lenR + lenF) | 0, 1000);
-    const rateR = stats.rateLRU();
-    const rateF = 10000 - rateR;
-    const densityR = this.densityR = rateR * leverage;
-    const densityF = this.densityF = rateF * (1000 - leverage);
-    const densityFO = stats.offset && stats.rateLFU(true) * (1000 - leverage);
+    const partR = LRU.length;
+    const partF = LFU.length;
+    const overlapR = this.overlapLRU;
+    const overlapF = this.overlapLFU;
+    const leverage = min((partF - overlapR + overlapF) * 1000 / (partR + partF) | 0, 1000);
+    const ratioR = stats.ratioLRU();
+    const ratioF = 10000 - ratioR;
+    const densityR = this.densityR = ratioR * leverage;
+    const densityF = this.densityF = ratioF * (1000 - leverage);
+    const densityFO = stats.offset && stats.ratioLFU(true) * (1000 - leverage);
     // 操作頻度を超えてキャッシュ比率を増減させても余剰比率の消化が追いつかず無駄
     // LRUの下限設定ではLRU拡大の要否を迅速に判定できないためLFUのヒット率低下の検出で代替する
     if (this.partition > 0 && (densityR > densityF || stats.offset !== 0 && densityF * 100 < densityFO * (100 - stats.offset))) {
-      if (lenR >= this.capacity - this.partition) {
+      if (partR >= this.capacity - this.partition) {
         this.partition = max(this.partition - this.unit, 0);
       }
     }
     else
     if (this.partition < this.limit && densityF > densityR) {
-      if (lenF >= this.partition) {
+      if (partF >= this.partition) {
         this.partition = min(this.partition + this.unit, this.limit);
       }
     }
@@ -612,7 +612,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
 
 // Sliding Window
 class Stats {
-  public static rate(
+  public static ratio(
     window: number,
     targets: readonly [number, number],
     remains: readonly [number, number],
@@ -651,15 +651,15 @@ class Stats {
   public hitLFU(): void {
     this.currLRUHits + ++this.currLFUHits === this.window && this.slide();
   }
-  public rateLRU(offset = false): number {
-    return Stats.rate(
+  public ratioLRU(offset = false): number {
+    return Stats.ratio(
       this.window,
       [this.currLRUHits, this.prevLRUHits],
       [this.currLFUHits, this.prevLFUHits],
       +offset & 0);
   }
-  public rateLFU(offset = false): number {
-    return Stats.rate(
+  public ratioLFU(offset = false): number {
+    return Stats.ratio(
       this.window,
       [this.currLFUHits, this.prevLFUHits],
       [this.currLRUHits, this.prevLRUHits],
@@ -687,7 +687,7 @@ class Stats {
 }
 
 class StatsExperimental extends Stats {
-  public static override rate(
+  public static override ratio(
     window: number,
     targets: readonly number[],
     remains: readonly number[],
@@ -705,9 +705,9 @@ class StatsExperimental extends Stats {
       const subratio = min(subtotal * 100 / window, ratio) - offset;
       offset = offset && subratio < 0 ? -subratio : 0;
       if (subratio <= 0) continue;
-      const rate = window * subratio / subtotal;
-      total += subtotal * rate;
-      hits += targets[i] * rate;
+      const r = window * subratio / subtotal;
+      total += subtotal * r;
+      hits += targets[i] * r;
       ratio -= subratio;
       if (ratio <= 0) break;
     }
@@ -741,11 +741,11 @@ class StatsExperimental extends Stats {
     const subtotal = LRU[offset && 1] + LFU[offset && 1] || 0;
     subtotal >= window / resolution && this.slide();
   }
-  public override rateLRU(offset = false): number {
-    return StatsExperimental.rate(this.window, this.LRU, this.LFU, +offset && this.offset);
+  public override ratioLRU(offset = false): number {
+    return StatsExperimental.ratio(this.window, this.LRU, this.LFU, +offset && this.offset);
   }
-  public override rateLFU(offset = false): number {
-    return StatsExperimental.rate(this.window, this.LFU, this.LRU, +offset && this.offset);
+  public override ratioLFU(offset = false): number {
+    return StatsExperimental.ratio(this.window, this.LFU, this.LRU, +offset && this.offset);
   }
   public override subtotal(): number {
     const { LRU, LFU, window, offset } = this;
@@ -784,18 +784,18 @@ class StatsExperimental extends Stats {
   }
 }
 
-assert(Stats.rate(10, [4, 0], [6, 0], 0) === 4000);
-assert(Stats.rate(10, [0, 4], [0, 6], 0) === 4000);
-assert(Stats.rate(10, [1, 4], [4, 6], 0) === 3000);
-assert(Stats.rate(10, [0, 4], [0, 6], 5) === 4000);
-assert(Stats.rate(10, [1, 2], [4, 8], 5) === 2000);
-assert(Stats.rate(10, [2, 2], [3, 8], 5) === 2900);
-assert(StatsExperimental.rate(10, [4, 0], [6, 0], 0) === 4000);
-assert(StatsExperimental.rate(10, [0, 4], [0, 6], 0) === 4000);
-assert(StatsExperimental.rate(10, [1, 4], [4, 6], 0) === 3000);
-assert(StatsExperimental.rate(10, [0, 4], [0, 6], 5) === 4000);
-assert(StatsExperimental.rate(10, [1, 2], [4, 8], 5) === 2000);
-assert(StatsExperimental.rate(10, [2, 2], [3, 8], 5) === 2900);
+assert(Stats.ratio(10, [4, 0], [6, 0], 0) === 4000);
+assert(Stats.ratio(10, [0, 4], [0, 6], 0) === 4000);
+assert(Stats.ratio(10, [1, 4], [4, 6], 0) === 3000);
+assert(Stats.ratio(10, [0, 4], [0, 6], 5) === 4000);
+assert(Stats.ratio(10, [1, 2], [4, 8], 5) === 2000);
+assert(Stats.ratio(10, [2, 2], [3, 8], 5) === 2900);
+assert(StatsExperimental.ratio(10, [4, 0], [6, 0], 0) === 4000);
+assert(StatsExperimental.ratio(10, [0, 4], [0, 6], 0) === 4000);
+assert(StatsExperimental.ratio(10, [1, 4], [4, 6], 0) === 3000);
+assert(StatsExperimental.ratio(10, [0, 4], [0, 6], 5) === 4000);
+assert(StatsExperimental.ratio(10, [1, 2], [4, 8], 5) === 2000);
+assert(StatsExperimental.ratio(10, [2, 2], [3, 8], 5) === 2900);
 
 // Transitive Wide MRU with Cyclic Replacement
 class Sweeper {
@@ -833,12 +833,12 @@ class Sweeper {
   private active?: boolean;
   public isActive(): boolean {
     if (this.prevHits === 0 && this.prevMisses === 0) return false;
-    const rate = Stats.rate(
+    const ratio = Stats.ratio(
         this.window,
         [this.currHits, this.prevHits],
         [this.currMisses, this.prevMisses],
         0);
-    return this.active ??= rate < this.threshold;
+    return this.active ??= ratio < this.threshold;
   }
   private processing = false;
   private direction = true;
