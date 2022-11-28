@@ -125,6 +125,8 @@ export namespace Cache {
     // Window ratio to measure hit ratios.
     // Range: 1-100
     readonly window?: number;
+    // Max costs.
+    // Range: L-
     readonly resource?: number;
     readonly age?: number;
     readonly earlyExpiring?: boolean;
@@ -140,8 +142,6 @@ export namespace Cache {
     // Sample ratio of LRU in LFU.
     // Range: 0-100
     readonly sample?: number;
-    // Max costs.
-    // Range: L-
     readonly resolution?: number;
     readonly offset?: number;
     readonly sweep?: {
