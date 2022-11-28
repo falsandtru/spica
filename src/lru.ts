@@ -32,7 +32,7 @@ export class LRU<K, V> implements IterableDict<K, V> {
   }
   private replace(key: K, value: V): void {
     const { dict, list } = this;
-    const node = list.head!.prev!;
+    const node = list.last!;
     dict.delete(node.key);
     dict.set(key, node);
     list.head = node;

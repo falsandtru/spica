@@ -206,7 +206,7 @@ export class Observation<N extends readonly unknown[], D, R>
       const items = lists[i];
       if (items.length === 0) continue;
       const recents: Node<SubscriberItem<N, D, R>>[] = [];
-      const max = items.head!.prev!.value.id;
+      const max = items.last!.value.id;
       let min = 0;
       let prev: typeof recents[0] | undefined;
       for (let node = items.head; node && min < node.value.id && node.value.id <= max;) {
@@ -231,7 +231,7 @@ export class Observation<N extends readonly unknown[], D, R>
       const items = lists[i];
       if (items.length === 0) continue;
       const recents: Node<MonitorItem<N, D>>[] = [];
-      const max = items.head!.prev!.value.id;
+      const max = items.last!.value.id;
       let min = 0;
       let prev: typeof recents[0] | undefined;
       for (let node = items.head; node && min < node.value.id && node.value.id <= max;) {

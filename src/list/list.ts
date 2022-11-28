@@ -3,6 +3,12 @@
 export class List<N extends List.Node = List.Node> {
   public length = 0;
   public head?: N = undefined;
+  public get tail(): N | undefined {
+    return this.head?.next;
+  }
+  public get last(): N | undefined {
+    return this.head?.prev;
+  }
   public insert(node: N, before?: N): N {
     assert(!node.next);
     if (++this.length === 1) {

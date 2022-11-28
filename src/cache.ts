@@ -297,17 +297,17 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       if (victim !== undefined && victim !== skip && victim.expiration < now()) {
       }
       else if (LRU.length === 0) {
-        assert(LFU.head!.prev);
-        victim = LFU.head!.prev!;
+        assert(LFU.last);
+        victim = LFU.last!;
         victim = victim !== skip
           ? victim
           : victim.prev!;
       }
       else {
-        assert(LRU.head!.prev);
+        assert(LRU.last);
         if (LFU.length > this.partition) {
-          assert(LFU.head!.prev);
-          let entry = LFU.head!.prev;
+          assert(LFU.last);
+          let entry = LFU.last;
           entry = entry !== skip
             ? entry
             : LFU.length !== 1
@@ -324,7 +324,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         if (LRU.length >= this.capacity - this.limit &&
             this.overlapLRU * 100 / min(LFU.length, this.partition) <= this.sample) {
           this.acc = min(this.acc + this.sample / 100, this.capacity);
-          const entry = LRU.head!.prev!;
+          const entry = LRU.last!;
           if (this.acc >= 1 && entry.region === 'LRU') {
             LRU.delete(entry);
             LFU.unshift(this.overlap(entry));
@@ -333,23 +333,23 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
             if (LRU.length === 0) continue;
           }
         }
-        assert(LRU.head!.prev);
+        assert(LRU.last);
         if (this.sweeper.isActive()) {
           this.sweeper.sweep();
         }
-        victim = LRU.head!.prev!;
+        victim = LRU.last!;
         victim = victim !== skip
           ? victim
           : LRU.length !== 1
             ? victim.prev
             : undefined;
         if (capture && skip === undefined && victim !== undefined) {
-          assert(victim === LRU.head!.prev);
+          assert(victim === LRU.last);
           skip = victim;
           size = skip.size;
           continue;
         }
-        victim ??= LFU.head!.prev!;
+        victim ??= LFU.last!;
       }
       assert(victim !== skip);
       assert(this.dict.has(victim.key));
@@ -406,7 +406,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const key$ = entry.key;
     const value$ = entry.value;
     if (!match) {
-      assert(entry === LRU.head!.prev);
+      assert(entry === LRU.last);
       entry.region === 'LFU' && --this.overlapLFU;
       assert(this.overlapLFU >= 0);
       this.dict.delete(key$);
@@ -860,10 +860,10 @@ class Sweeper {
       }
       if (this.initial) {
         this.initial = false;
-        target.head = target.head!.next;
+        target.head = target.tail;
       }
       else {
-        target.head = target.head!.next!.next;
+        target.head = target.tail!.next;
       }
     }
     else if (this.advance >= 1) {
@@ -875,7 +875,7 @@ class Sweeper {
     }
     else {
       this.direction = !this.direction;
-      target.head = target.head!.next;
+      target.head = target.tail;
     }
     return lap;
   }
