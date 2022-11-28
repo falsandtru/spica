@@ -9,7 +9,7 @@ describe('Unit: lib/cache', () => {
       return {
         LRU: [...cache['LRU']].map(i => i.key),
         LFU: [...cache['LFU']].map(i => i.key),
-        dict: [...cache['dict']].map(([key, { value: { value } }]) => [key, value]),
+        dict: [...cache['dict']].map(([key, { value }]) => [key, value]),
       };
     }
 
