@@ -122,14 +122,9 @@ export namespace Cache {
     // Max entries.
     // Range: 1-
     readonly capacity?: number;
-    // Window size ratio to measure hit ratios.
+    // Window ratio to measure hit ratios.
     // Range: 1-100
     readonly window?: number;
-    // Min sample size ratio to measure hit density.
-    // Range: 1-100
-    readonly sample?: number;
-    // Max costs.
-    // Range: L-
     readonly resource?: number;
     readonly age?: number;
     readonly earlyExpiring?: boolean;
@@ -139,6 +134,14 @@ export namespace Cache {
       readonly clear?: boolean;
     };
     // Mainly for experiments.
+    // Min LRU ratio.
+    // Range: 1-100
+    readonly scope?: number;
+    // Sample ratio of LRU in LFU.
+    // Range: 0-100
+    readonly sample?: number;
+    // Max costs.
+    // Range: L-
     readonly resolution?: number;
     readonly offset?: number;
     readonly sweep?: {
@@ -174,8 +177,9 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     this.window = settings.window! * capacity / 100 >>> 0;
     this.unit = capacity / RESOLUTION | 0 || 1;
-    this.limit = capacity - (capacity * settings.sample! / 100 >>> 0);
+    this.limit = capacity - (capacity * settings.scope! / 100 >>> 0);
     this.partition = this.limit;
+    this.sample = settings.sample!;
     this.resource = settings.resource! ?? capacity;
     this.age = settings.age!;
     if (settings.earlyExpiring) {
@@ -197,6 +201,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private readonly settings: Cache.Options<K, V> = {
     capacity: 0,
     window: 100,
+    scope: 5,
     sample: 5,
     age: Infinity,
     earlyExpiring: false,
@@ -256,7 +261,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.$size -= entry.size;
     callback && this.disposer?.(entry.value, entry.key);
   }
-  private readonly sweeper: Sweeper;
+  private readonly sample: number;
   private overlap(entry: Entry<K, V>): Entry<K, V> {
     if (entry.partition === this.LRU) {
       if (entry.region === 'LRU') {
@@ -280,6 +285,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     }
     return entry;
   }
+  private readonly sweeper: Sweeper;
   private acc = 0;
   private ensure(margin: number, skip?: Entry<K, V>, capture = false): Entry<K, V> | undefined {
     let size = skip?.size ?? 0;
@@ -316,11 +322,10 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
           }
         }
         if (LRU.length >= this.capacity - this.limit &&
-            this.overlapLRU * 100 / LFU.length <= 5) {
+            this.overlapLRU * 100 / LFU.length <= this.sample) {
           this.acc = min(this.acc + this.overlapLFU / LRU.length / 2, this.capacity);
           const entry = LRU.head!.prev!;
-          if (this.acc >= 1 &&
-              entry.region === 'LRU') {
+          if (this.acc >= 1 && entry.region === 'LRU') {
             LRU.delete(entry);
             LFU.unshift(this.overlap(entry));
             entry.partition = LFU;
@@ -505,7 +510,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.capacity = capacity;
     this.window = window;
     this.unit = capacity / RESOLUTION | 0 || 1;
-    this.limit = capacity - (capacity * this.settings.sample! / 100 >>> 0);
+    this.limit = capacity - (capacity * this.settings.scope! / 100 >>> 0);
     this.resource = resource;
     this.stats.resize(window);
     this.sweeper.resize(capacity, this.settings.sweep!.window!, this.settings.sweep!.range!);
