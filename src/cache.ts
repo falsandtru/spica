@@ -383,18 +383,20 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       assert(LRU.length !== this.capacity);
       this.$size += size;
       assert(0 < this.size && this.size <= this.resource);
-      this.dict.set(key, LRU.unshift(new Entry(
+      entry = new Entry(
         key,
         value,
         size,
         LRU,
         'LRU',
         expiration,
-      )));
+      );
+      LRU.unshift(entry);
+      this.dict.set(key, entry);
       assert(this.LRU.length + this.LFU.length === this.dict.size);
       assert(this.dict.size <= this.capacity);
       if (this.expiration && this.expirations !== undefined && expiration !== Infinity) {
-        LRU.head!.enode = this.expirations.insert(LRU.head!, expiration);
+        entry.enode = this.expirations.insert(entry, expiration);
         assert(this.expirations.length <= this.length);
       }
       return false;
@@ -409,6 +411,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       assert(this.overlapLFU >= 0);
       this.dict.delete(key$);
       this.dict.set(key, entry);
+      assert(this.LRU.length + this.LFU.length === this.dict.size);
+      assert(this.dict.size <= this.capacity);
       entry.key = key;
       entry.region = 'LRU';
     }
@@ -431,7 +435,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     entry.partition.delete(entry);
     entry.partition.unshift(entry);
     assert(this.LRU.length + this.LFU.length === this.dict.size);
-    assert(this.dict.size <= this.capacity);
     this.disposer?.(value$, key$);
     return match;
   }
