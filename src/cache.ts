@@ -112,7 +112,7 @@ class Entry<K, V> {
     public expiration: number,
   ) {
   }
-  public enode?: Heap.Node<Entry<K, V>, number>;
+  public enode?: Heap.Node<Entry<K, V>, number> = undefined;
   public next?: this = undefined;
   public prev?: this = undefined;
 }
