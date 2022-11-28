@@ -330,8 +330,10 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
             LFU.unshift(this.overlap(entry));
             entry.partition = LFU;
             --this.acc;
+            if (LRU.length === 0) continue;
           }
         }
+        assert(LRU.head!.prev);
         if (this.sweeper.isActive()) {
           this.sweeper.sweep();
         }
@@ -832,9 +834,10 @@ class Sweeper {
   private back = 0;
   private advance = 0;
   public sweep(): boolean {
-    let lap = false;
-    this.processing ||= true;
     const { target } = this;
+    let lap = false;
+    if (target.length === 0) return lap;
+    this.processing ||= true;
     if (this.direction) {
       if (this.back < 1) {
         this.back += this.range;
