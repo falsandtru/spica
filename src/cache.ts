@@ -342,14 +342,22 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
             : LRU.length !== 1
               ? victim.prev
               : undefined;
+          assert(victim || skip === LRU.head!.prev);
           if (capture && skip === undefined && victim !== undefined) {
             assert(victim === LRU.head!.prev);
             skip = victim;
             size = skip.size;
             continue;
           }
+          victim ??= LFU.head!.prev!;
         }
-        victim ??= LFU.head!.prev!;
+        else {
+          assert(!skip || LFU.length >= 2);
+          victim = LFU.head!.prev!;
+          victim = victim !== skip
+            ? victim
+            : victim.prev!;
+        }
       }
       assert(victim !== skip);
       assert(this.dict.has(victim.key));
