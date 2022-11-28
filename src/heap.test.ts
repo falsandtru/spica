@@ -113,19 +113,32 @@ describe('Unit: lib/heap', () => {
 
       assert(heap.extract() === undefined);
 
-      const node = heap.insert(1, 1);
-      heap.insert(2, 2);
-      heap.insert(3, 3);
+      const nodes = [
+        heap.insert(1, 1),
+        heap.insert(2, 2),
+        heap.insert(3, 3),
+        heap.insert(4, 4),
+      ];
       assert.deepStrictEqual(inspect(heap), [
-        [3, 3, 1],
-        [1, 1, 2],
+        [4, 4, 1],
+        [3, 3, 2],
         [2, 2, 3],
+        [1, 1, 4],
       ]);
 
-      assert.deepStrictEqual(heap.delete(node), 1);
+      assert.deepStrictEqual(heap.delete(nodes[0]), 1);
       assert.deepStrictEqual(inspect(heap), [
-        [3, 3, 1],
+        [4, 4, 1],
+        [3, 3, 2],
+        [2, 2, 3],
+        undefined,
+      ]);
+
+      assert.deepStrictEqual(heap.delete(nodes[2]), 3);
+      assert.deepStrictEqual(inspect(heap), [
+        [4, 4, 1],
         [2, 2, 2],
+        undefined,
         undefined,
       ]);
     });
