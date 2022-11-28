@@ -2,7 +2,7 @@
 
 export class List<N extends List.Node = List.Node> {
   public length = 0;
-  public head?: N;
+  public head?: N = undefined;
   public insert(node: N, before?: N): N {
     assert(!node.next);
     if (++this.length === 1) {

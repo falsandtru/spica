@@ -1,7 +1,7 @@
 import { IterableDict } from './dict';
 import { List } from './list';
 
-class Node<K, V> {
+class Node<K, V> implements List.Node {
   constructor(
     public key: K,
     public value: V,

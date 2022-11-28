@@ -102,7 +102,7 @@ DWCはこの最適化を行っても状態数の多さに比例して増加し�
 
 const RESOLUTION = 1000;
 
-class Entry<K, V> {
+class Entry<K, V> implements List.Node {
   constructor(
     public key: K,
     public value: V,

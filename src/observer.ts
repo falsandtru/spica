@@ -5,7 +5,7 @@ import { push } from './array';
 import { singleton } from './function';
 import { causeAsyncException } from './exception';
 
-class Node<T> {
+class Node<T> implements List.Node {
   constructor(
     public value: T,
   ) {
