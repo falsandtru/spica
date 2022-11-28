@@ -197,6 +197,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       settings.sweep!.shift!);
     this.disposer = settings.disposer!;
     this.test = settings.test!;
+    assert(settings.resource === opts.resource);
   }
   private readonly settings: Cache.Options<K, V> = {
     capacity: 0,
@@ -515,7 +516,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     }
     return;
   }
-  public resize(capacity: number, resource: number = capacity): void {
+  public resize(capacity: number, resource?: number): void {
     if (capacity >>> 0 !== capacity) throw new Error(`Spica: Cache: Capacity must be integer.`);
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     const window = this.settings.window! * capacity / 100 >>> 0;
@@ -524,7 +525,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.window = window;
     this.unit = capacity / RESOLUTION | 0 || 1;
     this.limit = capacity - (capacity * this.settings.scope! / 100 >>> 0);
-    this.resource = resource;
+    this.resource = resource ?? this.settings.resource ?? capacity;
     this.stats.resize(window);
     this.sweeper.resize(capacity, this.settings.sweep!.window!, this.settings.sweep!.range!);
     this.ensure(0);
