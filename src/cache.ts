@@ -842,12 +842,14 @@ class Sweeper {
   private active?: boolean;
   public isActive(): boolean {
     if (this.prevHits === 0 && this.prevMisses === 0) return false;
-    const ratio = Stats.ratio(
-        this.window,
-        [this.currHits, this.prevHits],
-        [this.currMisses, this.prevMisses],
-        0);
-    return this.active ??= ratio < this.threshold;
+    return this.active ??= this.ratio() < this.threshold;
+  }
+  private ratio(): number {
+    return Stats.ratio(
+      this.window,
+      [this.currHits, this.prevHits],
+      [this.currMisses, this.prevMisses],
+      0);
   }
   private processing = false;
   private direction = true;
