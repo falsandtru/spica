@@ -287,7 +287,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     }
     return entry;
   }
-  private readonly sweeper: Sweeper;
+  private readonly sweeper: Sweeper<List<Entry<K, V>>>;
   private acc = 0;
   private ensure(margin: number, skip?: Entry<K, V>, capture = false): Entry<K, V> | undefined {
     let size = skip?.size ?? 0;
@@ -807,9 +807,9 @@ assert(StatsExperimental.ratio(10, [1, 2], [4, 8], 5) === 2000);
 assert(StatsExperimental.ratio(10, [2, 2], [3, 8], 5) === 2900);
 
 // Transitive Wide MRU with Cyclic Replacement
-class Sweeper {
+class Sweeper<T extends List<Entry<unknown, unknown>>> {
   constructor(
-    private target: List<Entry<unknown, unknown>>,
+    private target: T,
     private readonly threshold: number,
     capacity: number,
     private window: number,
@@ -917,7 +917,7 @@ class Sweeper {
     this.slide();
     assert(!this.isActive());
   }
-  public replace(target: List<Entry<unknown, unknown>>): void {
+  public replace(target: T): void {
     this.target = target;
   }
   public resize(capacity: number, window: number, range: number): void {
