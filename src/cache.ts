@@ -608,8 +608,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     else
     if (this.partition < this.limit && densityF > densityR) {
       if (lenF >= this.partition) {
-        const delta = ratioF > ratioR
-          ? this.unit * ratioF / ratioR | 0
+        const delta = ratioR > ratioF
+          ? this.unit * ratioR / ratioF | 0
           : this.unit;
         assert(delta >= this.unit);
         this.partition = min(this.partition + delta, this.limit);
