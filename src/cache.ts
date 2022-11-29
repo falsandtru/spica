@@ -584,11 +584,11 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private coordinate(): void {
     const { capacity, LRU, LFU, stats } = this;
     if (stats.subtotal() * RESOLUTION % capacity !== 0 || !stats.isReady()) return;
-    const partR = LRU.length;
-    const partF = LFU.length;
+    const lenR = LRU.length;
+    const lenF = LFU.length;
     const overlapR = this.overlapLRU;
     const overlapF = this.overlapLFU;
-    const leverage = min((partF - overlapR + overlapF) * 1000 / (partR + partF) | 0, 1000);
+    const leverage = min((lenF - overlapR + overlapF) * 1000 / (lenR + lenF) | 0, 1000);
     const ratioR = stats.ratioLRU();
     const ratioF = 10000 - ratioR;
     const densityR = this.densityR = ratioR * leverage;
@@ -597,13 +597,13 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     // 操作頻度を超えてキャッシュ比率を増減させても余剰比率の消化が追いつかず無駄
     // LRUの下限設定ではLRU拡大の要否を迅速に判定できないためLFUのヒット率低下の検出で代替する
     if (this.partition > 0 && (densityR > densityF || stats.offset !== 0 && densityF * 100 < densityFO * (100 - stats.offset))) {
-      if (partR >= this.capacity - this.partition) {
+      if (lenR >= this.capacity - this.partition) {
         this.partition = max(this.partition - this.unit, 0);
       }
     }
     else
     if (this.partition < this.limit && densityF > densityR) {
-      if (partF >= this.partition) {
+      if (lenF >= this.partition) {
         this.partition = min(this.partition + this.unit, this.limit);
       }
     }
