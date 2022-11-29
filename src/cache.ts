@@ -906,13 +906,16 @@ class Sweeper {
     this.initial = true;
     this.back = 0;
     this.advance = 0;
+    assert(!this.active);
   }
   public clear(): void {
     this.active = undefined;
     this.processing = true;
     this.reset();
+    assert(!this.processing);
     this.slide();
     this.slide();
+    assert(!this.isActive());
   }
   public replace(target: List<Entry<unknown, unknown>>): void {
     this.target = target;
