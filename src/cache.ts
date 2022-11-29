@@ -598,13 +598,21 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     // LRUの下限設定ではLRU拡大の要否を迅速に判定できないためLFUのヒット率低下の検出で代替する
     if (this.partition > 0 && (densityR > densityF || stats.offset !== 0 && densityF * 100 < densityFO * (100 - stats.offset))) {
       if (lenR >= this.capacity - this.partition) {
-        this.partition = max(this.partition - this.unit, 0);
+        const delta = ratioF > ratioR
+          ? this.unit * ratioF / ratioR | 0
+          : this.unit;
+        assert(delta >= this.unit);
+        this.partition = max(this.partition - delta, 0);
       }
     }
     else
     if (this.partition < this.limit && densityF > densityR) {
       if (lenF >= this.partition) {
-        this.partition = min(this.partition + this.unit, this.limit);
+        const delta = ratioF > ratioR
+          ? this.unit * ratioF / ratioR | 0
+          : this.unit;
+        assert(delta >= this.unit);
+        this.partition = min(this.partition + delta, this.limit);
       }
     }
   }
