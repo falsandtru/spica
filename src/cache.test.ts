@@ -574,7 +574,6 @@ describe('Unit: lib/cache', () => {
       assert(dwc['LFU'].length === capacity - 2);
       assert(dwc['partition'] === dwc['limit']);
       for (let i = 0; i < trials; ++i) {
-        // LRUの濃度がLFUより高ければ順当に回復する
         const key = random() < 0.5
           ? random() * capacity * -1 | 0
           : random() * capacity * 4 | 0;
@@ -620,9 +619,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['LFU'].length === capacity - 2);
       assert(dwc['partition'] === dwc['limit']);
       for (let i = 0; i < trials; ++i) {
-        // これは回復しない例だが汚染されたLFUの濃度が自然なLRUの濃度より高くなることはないため
-        // 自然な参照間隔が最小サンプルサイズ内である限り順当に回復する
-        const key = random() < 0.5
+        const key = i % 2
           ? -i % capacity / 2 | 0
           : random() * capacity * 4 | 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
@@ -640,8 +637,8 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC density', dwc['densityR'], dwc['densityF']);
       console.debug('DWC overlap', dwc['overlapLFU'] / dwc['LRU'].length * 100 | 0, dwc['overlapLRU'] / dwc['LFU'].length * 100 | 0);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 51);
-      assert(dwc['LFU'].length * 100 / capacity >>> 0 === 65);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 52);
+      assert(dwc['LFU'].length * 100 / capacity >>> 0 === 68);
     });
 
     it('ratio uneven 1,000', function () {
