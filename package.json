@@ -1,6 +1,6 @@
 {
   "name": "spica",
-  "version": "0.0.696",
+  "version": "0.0.697",
   "description": "Supervisor, Coroutine, Channel, select, AtomicPromise, Cancellation, Cache, List, Queue, Stack, and some utils.",
   "private": true,
   "homepage": "https://github.com/falsandtru/spica",
