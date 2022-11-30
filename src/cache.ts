@@ -545,6 +545,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         const delta = LFU.length < LRU.length
           ? LRU.length / LFU.length | 0
           : 1;
+        assert(delta > 0);
         this.partition = min(this.partition + delta, this.limit);
         this.stats.hitLFU();
         --this.overlapLFU;
@@ -565,6 +566,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         const delta = LRU.length < LFU.length
           ? LFU.length / LRU.length | 0
           : 1;
+        assert(delta > 0);
         this.partition = max(this.partition - delta, 0);
         this.stats.hitLRU();
         entry.region = 'LFU';
