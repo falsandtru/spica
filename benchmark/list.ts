@@ -1,5 +1,4 @@
 import { benchmark } from './benchmark';
-import { List as InvList } from '../src/invlist';
 import { List as IxList } from '../src/ixlist';
 import { List } from '../src/list';
 import Yallist from 'yallist';
@@ -18,10 +17,6 @@ describe('Benchmark:', function () {
 
     it('List    new', function (done) {
       benchmark('List    new', () => new List(), done);
-    });
-
-    it('InvList new', function (done) {
-      benchmark('InvList new', () => new InvList(), done);
     });
 
     it('IxList  new', function (done) {
@@ -44,23 +39,6 @@ describe('Benchmark:', function () {
         benchmark(`List    add ${length.toLocaleString('en')}`, () => {
           list.pop();
           list.unshift(new Node(0));
-        }, done);
-      });
-
-      it(`InvList add ${length.toLocaleString('en')}`, function (done) {
-        const list = new InvList();
-        for (let i = 0; i < length; ++i) list.unshift(0);
-        benchmark(`InvList add ${length.toLocaleString('en')}`, () => {
-          list.pop();
-          list.unshift(0);
-        }, done);
-      });
-
-      it(`InvList add rotationally ${length.toLocaleString('en')}`, function (done) {
-        const list = new InvList();
-        for (let i = 0; i < length; ++i) list.unshift(0);
-        benchmark(`InvList add rotationally ${length.toLocaleString('en')}`, () => {
-          list.unshiftRotationally(0);
         }, done);
       });
 
@@ -109,24 +87,6 @@ describe('Benchmark:', function () {
         }, done);
       });
 
-      it(`InvList access ${length.toLocaleString('en')}`, function (done) {
-        const list = new InvList<Node>();
-        for (let i = 0; i < length; ++i) list.unshift(new Node(0));
-        benchmark(`InvList access ${length.toLocaleString('en')}`, () => {
-          list.pop()?.value;
-          list.unshift(new Node(0));
-        }, done);
-      });
-
-      it(`InvList access rotationally ${length.toLocaleString('en')}`, function (done) {
-        const list = new InvList<Node>();
-        for (let i = 0; i < length; ++i) list.unshift(new Node(0));
-        benchmark(`InvList access rotationally ${length.toLocaleString('en')}`, () => {
-          list.last?.value.value;
-          list.unshiftRotationally(new Node(0));
-        }, done);
-      });
-
       it(`IxList  access ${length.toLocaleString('en')}`, function (done) {
         const list = new IxList<Node>();
         for (let i = 0; i < length; ++i) list.unshift(new Node(0));
@@ -171,14 +131,6 @@ describe('Benchmark:', function () {
           const node = list.head?.prev?.prev!;
           list.delete(node);
           list.unshift(node);
-        }, done);
-      });
-
-      it(`InvList move ${length.toLocaleString('en')}`, function (done) {
-        const list = new InvList();
-        for (let i = 0; i < length; ++i) list.unshift(0);
-        benchmark(`InvList move ${length.toLocaleString('en')}`, () => {
-          list.last!.prev.moveToHead();
         }, done);
       });
 
