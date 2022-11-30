@@ -289,19 +289,19 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
   private readonly sweeper: Sweeper<List<Entry<K, V>>>;
   private acc = 0;
-  private ensure(margin: number, skip?: Entry<K, V>, capture = false): Entry<K, V> | undefined {
-    let size = skip?.size ?? 0;
+  private ensure(margin: number, target?: Entry<K, V>, capture = false): Entry<K, V> | undefined {
+    let size = target?.size ?? 0;
     assert(margin - size <= this.resource || !capture);
     const { LRU, LFU } = this;
     while (this.size + margin - size > this.resource) {
-      assert(this.length >= 1 + +!!skip);
+      assert(this.length >= 1 + +!!target);
       let victim = this.expirations?.peek();
-      if (victim !== undefined && victim !== skip && victim.expiration < now()) {
+      if (victim !== undefined && victim !== target && victim.expiration < now()) {
       }
       else if (LRU.length === 0) {
         assert(LFU.head!.prev);
         victim = LFU.head!.prev!;
-        victim = victim !== skip
+        victim = victim !== target
           ? victim
           : victim.prev!;
       }
@@ -310,13 +310,13 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         if (LFU.length > this.partition) {
           assert(LFU.head!.prev);
           let entry = LFU.head!.prev;
-          entry = entry !== skip
+          entry = entry !== target
             ? entry
             : LFU.length !== 1
               ? entry!.prev
               : undefined;
           if (entry !== undefined) {
-            assert(entry !== skip);
+            assert(entry !== target);
             assert(entry.partition === LFU);
             LFU.delete(entry);
             LRU.unshift(this.overlap(entry));
@@ -339,36 +339,36 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         }
         if (LRU.length !== 0) {
           victim = LRU.head!.prev!;
-          victim = victim !== skip
+          victim = victim !== target
             ? victim
             : LRU.length !== 1
               ? victim.prev
               : undefined;
-          assert(victim || skip === LRU.head!.prev);
-          if (capture && skip === undefined && victim !== undefined) {
+          assert(victim || target === LRU.head!.prev);
+          if (capture && target === undefined && victim !== undefined) {
             assert(victim === LRU.head!.prev);
-            skip = victim;
-            size = skip.size;
+            target = victim;
+            size = target.size;
             continue;
           }
           victim ??= LFU.head!.prev!;
         }
         else {
-          assert(!skip || LFU.length >= 2);
+          assert(!target || LFU.length >= 2);
           victim = LFU.head!.prev!;
-          victim = victim !== skip
+          victim = victim !== target
             ? victim
             : victim.prev!;
         }
       }
-      assert(victim !== skip);
+      assert(victim !== target);
       assert(this.dict.has(victim.key));
       this.evict(victim, true);
-      skip = skip?.next && skip;
-      size = skip?.size ?? 0;
+      target = target?.next && target;
+      size = target?.size ?? 0;
     }
-    assert(!skip || skip.next);
-    return skip;
+    assert(!target || target.next);
+    return target;
   }
   public put(key: K, value: V, opts?: { size?: number; age?: number; }): boolean;
   public put(this: Cache<K, undefined>, key: K, value?: V, opts?: { size?: number; age?: number; }): boolean;
