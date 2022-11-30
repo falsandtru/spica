@@ -425,6 +425,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       assert(this.dict.size <= this.capacity);
       entry.key = key;
       entry.region = 'LRU';
+      LRU.head = entry;
     }
     assert(this.dict.has(key));
     entry.value = value;
@@ -442,8 +443,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       this.expirations!.delete(entry.enode);
       entry.enode = undefined;
     }
-    entry.partition.delete(entry);
-    entry.partition.unshift(entry);
     assert(this.LRU.length + this.LFU.length === this.dict.size);
     this.disposer?.(value$, key$);
     return match;
