@@ -399,7 +399,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC density', dwc['densityR'], dwc['densityF']);
       console.debug('DWC overlap', dwc['overlapLFU'] / dwc['LRU'].length * 100 | 0, dwc['overlapLRU'] / dwc['LFU'].length * 100 | 0);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 179);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 178);
     });
 
     it('ratio uneven 100 transitive distribution', function () {
@@ -428,7 +428,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC density', dwc['densityR'], dwc['densityF']);
       console.debug('DWC overlap', dwc['overlapLFU'] / dwc['LRU'].length * 100 | 0, dwc['overlapLRU'] / dwc['LFU'].length * 100 | 0);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 187);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 186);
     });
 
     it('ratio uneven 100 transitive bias', function () {
@@ -460,7 +460,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC density', dwc['densityR'], dwc['densityF']);
       console.debug('DWC overlap', dwc['overlapLFU'] / dwc['LRU'].length * 100 | 0, dwc['overlapLRU'] / dwc['LFU'].length * 100 | 0);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 84);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 85);
     });
 
     it('ratio uneven 100 sequential', function () {
@@ -592,8 +592,8 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC density', dwc['densityR'], dwc['densityF']);
       console.debug('DWC overlap', dwc['overlapLFU'] / dwc['LRU'].length * 100 | 0, dwc['overlapLRU'] / dwc['LFU'].length * 100 | 0);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 121);
-      assert(dwc['LFU'].length * 100 / capacity >>> 0 === 73);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 119);
+      assert(dwc['LFU'].length * 100 / capacity >>> 0 === 74);
     });
 
     it('ratio uneven 1000 lock HIR', function () {
@@ -637,8 +637,8 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC density', dwc['densityR'], dwc['densityF']);
       console.debug('DWC overlap', dwc['overlapLFU'] / dwc['LRU'].length * 100 | 0, dwc['overlapLRU'] / dwc['LFU'].length * 100 | 0);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 45);
-      assert(dwc['LFU'].length * 100 / capacity >>> 0 === 77);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 44);
+      assert(dwc['LFU'].length * 100 / capacity >>> 0 === 76);
     });
 
     it('ratio uneven 1,000', function () {
