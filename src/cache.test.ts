@@ -302,8 +302,8 @@ describe('Unit: lib/cache', () => {
       });
     });
 
-    it('age early', async () => {
-      const cache = new Cache<number, number>(3, { test: true, earlyExpiring: true });
+    it('age eager', async () => {
+      const cache = new Cache<number, number>(3, { test: true, eagerExpiration: true });
 
       cache.put(0, 0, { age: 10 });
       cache.put(1, 1, { age: 5 });

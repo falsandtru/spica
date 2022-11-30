@@ -130,7 +130,7 @@ export namespace Cache {
     // Range: L-
     readonly resource?: number;
     readonly age?: number;
-    readonly earlyExpiring?: boolean;
+    readonly eagerExpiration?: boolean;
     readonly disposer?: (value: V, key: K) => void;
     readonly capture?: {
       readonly delete?: boolean;
@@ -183,7 +183,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.sample = settings.sample!;
     this.resource = settings.resource! ?? capacity;
     this.age = settings.age!;
-    if (settings.earlyExpiring) {
+    if (settings.eagerExpiration) {
       this.expirations = new Heap(Heap.min);
     }
     this.stats = opts.resolution || opts.offset
@@ -206,7 +206,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     scope: 5,
     sample: 2,
     age: Infinity,
-    earlyExpiring: false,
+    eagerExpiration: false,
     capture: {
       delete: true,
       clear: true,

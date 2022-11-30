@@ -191,7 +191,7 @@ describe('Benchmark:', function () {
 
       it(`DWC simulation ${length.toLocaleString('en')} expire`, function (done) {
         const capacity = length;
-        const cache = new Cache<number, object>(capacity, { age: 1, earlyExpiring: true });
+        const cache = new Cache<number, object>(capacity, { age: 1, eagerExpiration: true });
         const age = (r => () => r() * 1e8 | 0)(xorshift.random(1));
         for (let i = 0; i < capacity; ++i) cache.set(i, {}, { age: age() });
         const random = xorshift.random(1);
