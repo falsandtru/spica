@@ -1,5 +1,5 @@
 import { List } from './list';
-import { clock } from './clock';
+import { clock } from './chrono';
 import { singleton, noop } from './function';
 
 interface Timer {

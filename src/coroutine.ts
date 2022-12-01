@@ -1,6 +1,6 @@
 import { Structural, DeepImmutable, DeepRequired } from './type';
 import { isArray, ObjectAssign } from './alias';
-import { clock } from './clock';
+import { clock } from './chrono';
 import { AtomicPromise, Internal as PInternal, internal as pinternal, isPromiseLike } from './promise';
 import { AtomicFuture } from './future';
 import { Channel } from './channel';

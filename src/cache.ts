@@ -1,5 +1,5 @@
 import { max, min, ceil, round } from './alias';
-import { now } from './clock';
+import { now } from './chrono';
 import { IterableDict } from './dict';
 import { List } from './list';
 import { Heap } from './heap';

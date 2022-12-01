@@ -1,7 +1,7 @@
 import { Supervisor } from './supervisor';
 import { Coroutine } from './coroutine';
 import { never } from './promise';
-import { clock } from './clock';
+import { clock } from './chrono';
 import { wait } from './timer';
 
 describe('Unit: lib/supervisor', function () {

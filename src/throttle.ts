@@ -1,4 +1,4 @@
-import { now } from './clock';
+import { now } from './chrono';
 import { causeAsyncException } from './exception';
 
 export function throttle<T, C = unknown>(

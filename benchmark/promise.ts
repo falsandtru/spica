@@ -2,7 +2,7 @@ import { benchmark } from './benchmark';
 import Bluebird from 'bluebird';
 import { AtomicPromise } from '../src/promise';
 import { AtomicFuture, Future } from '../src/future';
-import { clock } from '../src/clock';
+import { clock } from '../src/chrono';
 import { noop } from '../src/function';
 
 describe('Benchmark:', function () {

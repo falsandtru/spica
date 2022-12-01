@@ -1,7 +1,7 @@
 import './global';
 import { DeepImmutable, DeepRequired } from './type';
 import { isFinite, ObjectAssign } from './alias';
-import { clock } from './clock';
+import { clock } from './chrono';
 import { Coroutine, ICoroutine, isCoroutine } from './coroutine';
 import { Observation, Observer, Publisher } from './observer';
 import { AtomicPromise } from './promise';

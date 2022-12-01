@@ -1,8 +1,8 @@
-import { clock } from './clock';
+import { clock } from './chrono';
 import { suppressAsyncException } from './exception';
 
-describe('Unit: lib/clock', function () {
-  describe('clock', function () {
+describe('Unit: lib/chrono', function () {
+  describe('chrono', function () {
     it('sequence', async function () {
       let cnt = 0;
       assert.deepStrictEqual(
