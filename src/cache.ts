@@ -182,6 +182,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.partition = this.limit;
     this.sample = settings.sample!;
     this.resource = settings.resource! ?? capacity;
+    this.expiration = opts.age !== undefined;
     this.age = settings.age!;
     if (settings.eagerExpiration) {
       this.expirations = new Heap(Heap.min);
@@ -229,7 +230,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private LFU = new List<Entry<K, V>>();
   private overlapLRU = 0;
   private overlapLFU = 0;
-  private expiration = false;
+  private readonly expiration: boolean;
   private readonly age: number;
   private readonly expirations?: Heap<Entry<K, V>, number>;
   public get length(): number {
@@ -380,11 +381,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
 
     const { LRU } = this;
     const expiration = age === Infinity
-      ? Infinity
+      ? age
       : now() + age;
-    if (!this.expiration && expiration !== Infinity) {
-      this.expiration = true;
-    }
     let entry = this.dict.get(key);
     const match = entry !== undefined;
     entry = this.ensure(size, entry, true);
@@ -494,7 +492,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.densityF = 0;
     this.overlapLRU = 0;
     this.overlapLFU = 0;
-    this.expiration = false;
     this.expirations?.clear();
     this.stats.clear();
     this.sweeper.clear();
