@@ -60,7 +60,7 @@ describe('Unit: lib/lru', () => {
       const lru = new LRU<number, 1>(capacity);
       const isc = new LRUCache<number, 1>({ max: capacity });
 
-      const trials = capacity * 1000;
+      const trials = capacity * 100;
       const random = pcg32.random(pcg32.seed(0n, 0n));
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
