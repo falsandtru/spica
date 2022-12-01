@@ -365,7 +365,7 @@ describe('Unit: lib/cache', () => {
       console.debug('Cache even 100');
       console.debug('LRU hit ratio', stats.lru * 100 / trials);
       console.debug('DWC hit ratio', stats.dwc * 100 / trials);
-      console.debug('DWC / LRU hit ratio rate', `${stats.dwc / stats.lru * 100 | 0}%`);
+      console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC density', dwc['densityR'], dwc['densityF']);
       console.debug('DWC overlap', dwc['overlapLFU'] / dwc['LRU'].length * 100 | 0, dwc['overlapLRU'] / dwc['LFU'].length * 100 | 0);
@@ -395,7 +395,7 @@ describe('Unit: lib/cache', () => {
       console.debug('Cache uneven 100');
       console.debug('LRU hit ratio', stats.lru * 100 / trials);
       console.debug('DWC hit ratio', stats.dwc * 100 / trials);
-      console.debug('DWC / LRU hit ratio rate', `${stats.dwc / stats.lru * 100 | 0}%`);
+      console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC density', dwc['densityR'], dwc['densityF']);
       console.debug('DWC overlap', dwc['overlapLFU'] / dwc['LRU'].length * 100 | 0, dwc['overlapLRU'] / dwc['LFU'].length * 100 | 0);
@@ -424,7 +424,7 @@ describe('Unit: lib/cache', () => {
       console.debug('Cache uneven 100 transitive distribution');
       console.debug('LRU hit ratio', stats.lru * 100 / trials);
       console.debug('DWC hit ratio', stats.dwc * 100 / trials);
-      console.debug('DWC / LRU hit ratio rate', `${stats.dwc / stats.lru * 100 | 0}%`);
+      console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC density', dwc['densityR'], dwc['densityF']);
       console.debug('DWC overlap', dwc['overlapLFU'] / dwc['LRU'].length * 100 | 0, dwc['overlapLRU'] / dwc['LFU'].length * 100 | 0);
@@ -456,7 +456,7 @@ describe('Unit: lib/cache', () => {
       console.debug('Cache uneven 100 transitive bias');
       console.debug('LRU hit ratio', stats.lru * 100 / trials);
       console.debug('DWC hit ratio', stats.dwc * 100 / trials);
-      console.debug('DWC / LRU hit ratio rate', `${stats.dwc / stats.lru * 100 | 0}%`);
+      console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC density', dwc['densityR'], dwc['densityF']);
       console.debug('DWC overlap', dwc['overlapLFU'] / dwc['LRU'].length * 100 | 0, dwc['overlapLRU'] / dwc['LFU'].length * 100 | 0);
@@ -486,7 +486,7 @@ describe('Unit: lib/cache', () => {
       console.debug('Cache uneven 100 sequential');
       console.debug('LRU hit ratio', stats.lru * 100 / trials);
       console.debug('DWC hit ratio', stats.dwc * 100 / trials);
-      console.debug('DWC / LRU hit ratio rate', `${stats.dwc / stats.lru * 100 | 0}%`);
+      console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC density', dwc['densityR'], dwc['densityF']);
       console.debug('DWC overlap', dwc['overlapLFU'] / dwc['LRU'].length * 100 | 0, dwc['overlapLRU'] / dwc['LFU'].length * 100 | 0);
@@ -516,7 +516,7 @@ describe('Unit: lib/cache', () => {
       console.debug('Cache uneven 100 adversarial');
       console.debug('LRU hit ratio', stats.lru * 100 / trials);
       console.debug('DWC hit ratio', stats.dwc * 100 / trials);
-      console.debug('DWC / LRU hit ratio rate', `${stats.dwc / stats.lru * 100 | 0}%`);
+      console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC density', dwc['densityR'], dwc['densityF']);
       console.debug('DWC overlap', dwc['overlapLFU'] / dwc['LRU'].length * 100 | 0, dwc['overlapLRU'] / dwc['LFU'].length * 100 | 0);
@@ -542,7 +542,7 @@ describe('Unit: lib/cache', () => {
       console.debug('Cache uneven 100 loop');
       console.debug('LRU hit ratio', stats.lru * 100 / trials);
       console.debug('DWC hit ratio', stats.dwc * 100 / trials);
-      console.debug('DWC / LRU hit ratio rate', `${stats.dwc / stats.lru * 100 | 0}%`);
+      console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC density', dwc['densityR'], dwc['densityF']);
       console.debug('DWC overlap', dwc['overlapLFU'] / dwc['LRU'].length * 100 | 0, dwc['overlapLRU'] / dwc['LFU'].length * 100 | 0);
@@ -571,7 +571,7 @@ describe('Unit: lib/cache', () => {
       console.debug('Cache uneven 100 jump');
       console.debug('LRU hit ratio', stats.lru * 100 / trials);
       console.debug('DWC hit ratio', stats.dwc * 100 / trials);
-      console.debug('DWC / LRU hit ratio rate', `${stats.dwc / stats.lru * 100 | 0}%`);
+      console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC density', dwc['densityR'], dwc['densityF']);
       console.debug('DWC overlap', dwc['overlapLFU'] / dwc['LRU'].length * 100 | 0, dwc['overlapLRU'] / dwc['LFU'].length * 100 | 0);
@@ -612,7 +612,7 @@ describe('Unit: lib/cache', () => {
       console.debug('Cache uneven 1000 lock loop');
       console.debug('LRU hit ratio', stats.lru * 100 / capacity);
       console.debug('DWC hit ratio', stats.dwc * 100 / capacity);
-      console.debug('DWC / LRU hit ratio rate', `${stats.dwc / stats.lru * 100 | 0}%`);
+      console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC density', dwc['densityR'], dwc['densityF']);
       console.debug('DWC overlap', dwc['overlapLFU'] / dwc['LRU'].length * 100 | 0, dwc['overlapLRU'] / dwc['LFU'].length * 100 | 0);
@@ -657,7 +657,7 @@ describe('Unit: lib/cache', () => {
       console.debug('Cache uneven 1000 lock LIR');
       console.debug('LRU hit ratio', stats.lru * 100 / capacity);
       console.debug('DWC hit ratio', stats.dwc * 100 / capacity);
-      console.debug('DWC / LRU hit ratio rate', `${stats.dwc / stats.lru * 100 | 0}%`);
+      console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC density', dwc['densityR'], dwc['densityF']);
       console.debug('DWC overlap', dwc['overlapLFU'] / dwc['LRU'].length * 100 | 0, dwc['overlapLRU'] / dwc['LFU'].length * 100 | 0);
@@ -702,7 +702,7 @@ describe('Unit: lib/cache', () => {
       console.debug('Cache uneven 1000 lock HIR');
       console.debug('LRU hit ratio', stats.lru * 100 / capacity);
       console.debug('DWC hit ratio', stats.dwc * 100 / capacity);
-      console.debug('DWC / LRU hit ratio rate', `${stats.dwc / stats.lru * 100 | 0}%`);
+      console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC density', dwc['densityR'], dwc['densityF']);
       console.debug('DWC overlap', dwc['overlapLFU'] / dwc['LRU'].length * 100 | 0, dwc['overlapLRU'] / dwc['LFU'].length * 100 | 0);
@@ -732,7 +732,7 @@ describe('Unit: lib/cache', () => {
       console.debug('Cache uneven 1,000');
       console.debug('LRU hit ratio', stats.lru * 100 / trials);
       console.debug('DWC hit ratio', stats.dwc * 100 / trials);
-      console.debug('DWC / LRU hit ratio rate', `${stats.dwc / stats.lru * 100 | 0}%`);
+      console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC density', dwc['densityR'], dwc['densityF']);
       console.debug('DWC overlap', dwc['overlapLFU'] / dwc['LRU'].length * 100 | 0, dwc['overlapLRU'] / dwc['LFU'].length * 100 | 0);
