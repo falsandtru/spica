@@ -4,8 +4,6 @@ import { pcg32 } from './random';
 
 describe('Unit: lib/lru', () => {
   describe('LRU', () => {
-    if (!navigator.userAgent.includes('Chrome')) return;
-
     class Stats {
       lru = 0;
       isc = 0;
