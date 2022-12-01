@@ -107,8 +107,10 @@ function random(len: 1 | 2 | 3 | 4 | 5 | 6): number {
       offset = digit;
     }
     else {
+      assert(digit < 32);
       buf = buf << digit | buffer[--index];
       offset += digit;
+      assert(offset < 32);
       assert(1 << offset > 0);
     }
   }
