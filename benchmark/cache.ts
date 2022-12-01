@@ -1,12 +1,17 @@
 import { benchmark } from './benchmark';
-import { Cache } from '../src/cache';
+import { Clock } from '../src/clock';
 import { LRU } from '../src/lru';
+import { Cache } from '../src/cache';
 import LRUCache from 'lru-cache';
 import { xorshift } from '../src/random';
 import { captureTimers } from '../src/timer';
 
 describe('Benchmark:', function () {
   describe('Cache', function () {
+    it('Clock new', function (done) {
+      benchmark('Clock    new', () => new LRU(10000), done);
+    });
+
     it('ISC new', function (done) {
       benchmark('ISCCache new', () => new LRUCache({ max: 10000 }), done);
     });
@@ -20,6 +25,14 @@ describe('Benchmark:', function () {
     });
 
     for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
+      it(`Clock set ${length.toLocaleString('en')} 0%`, function (done) {
+        const capacity = length;
+        const cache = new Clock<number, object>(capacity);
+        for (let i = 0; i < capacity; ++i) cache.set(i, {});
+        const random = xorshift.random(1);
+        benchmark(`Clock    set ${length.toLocaleString('en')} 0%`, () => cache.set(random() * -capacity - 1 | 0, {}), done);
+      });
+
       it(`ISC set ${length.toLocaleString('en')} 0%`, function (done) {
         const capacity = length;
         const cache = new LRUCache<number, object>({ max: capacity });
@@ -46,6 +59,14 @@ describe('Benchmark:', function () {
     }
 
     for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
+      it(`Clock set ${length.toLocaleString('en')} 100%`, function (done) {
+        const capacity = length;
+        const cache = new Clock<number, object>(capacity);
+        for (let i = 0; i < capacity; ++i) cache.set(i, {});
+        const random = xorshift.random(1);
+        benchmark(`Clock    set ${length.toLocaleString('en')} 100%`, () => cache.set(random() * capacity | 0, {}), done);
+      });
+
       it(`ISC set ${length.toLocaleString('en')} 100%`, function (done) {
         const capacity = length;
         const cache = new LRUCache<number, object>({ max: capacity });
@@ -72,6 +93,14 @@ describe('Benchmark:', function () {
     }
 
     for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
+      it(`Clock get ${length.toLocaleString('en')} 0%`, function (done) {
+        const capacity = length;
+        const cache = new Clock<number, object>(capacity);
+        for (let i = 0; i < capacity; ++i) cache.set(i, {});
+        const random = xorshift.random(1);
+        benchmark(`Clock    get ${length.toLocaleString('en')} 0%`, () => cache.get(random() * -capacity - 1 | 0), done);
+      });
+
       it(`ISC get ${length.toLocaleString('en')} 0%`, function (done) {
         const capacity = length;
         const cache = new LRUCache<number, object>({ max: capacity });
@@ -98,6 +127,14 @@ describe('Benchmark:', function () {
     }
 
     for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
+      it(`Clock get ${length.toLocaleString('en')} 100%`, function (done) {
+        const capacity = length;
+        const cache = new Clock<number, object>(capacity);
+        for (let i = 0; i < capacity; ++i) cache.set(i, {});
+        const random = xorshift.random(1);
+        benchmark(`Clock    get ${length.toLocaleString('en')} 100%`, () => cache.get(random() * capacity | 0), done);
+      });
+
       it(`ISC get ${length.toLocaleString('en')} 100%`, function (done) {
         const capacity = length;
         const cache = new LRUCache<number, object>({ max: capacity });
@@ -134,6 +171,19 @@ describe('Benchmark:', function () {
     //   Memory: 5.88 GB / 6.78 GB
     //
     for (const length of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
+      it(`Clock simulation ${length.toLocaleString('en')}`, function (done) {
+        const capacity = length;
+        const cache = new Clock<number, object>(capacity);
+        for (let i = 0; i < capacity; ++i) cache.set(i, {});
+        const random = xorshift.random(1);
+        benchmark(`Clock    simulation ${length.toLocaleString('en')}`, () => {
+          const key = random() < 0.8
+            ? random() * capacity * 1 | 0
+            : random() * capacity * 9 + capacity | 0;
+          cache.get(key) ?? cache.set(key, {});
+        }, done);
+      });
+
       it(`ISC simulation ${length.toLocaleString('en')}`, function (done) {
         const capacity = length;
         const cache = new LRUCache<number, object>({ max: capacity });

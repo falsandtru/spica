@@ -21,6 +21,7 @@
     "monad",
     "arrow",
     "cache",
+    "clock",
     "list",
     "heap",
     "queue",

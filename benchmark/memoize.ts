@@ -1,5 +1,6 @@
 import { benchmark } from './benchmark';
 import { memoize, reduce } from '../src/memoize';
+import { Clock } from '../src/clock';
 import { Cache } from '../src/cache';
 
 describe('Benchmark:', function () {
@@ -18,6 +19,12 @@ describe('Benchmark:', function () {
         const f = memoize(a => a, []);
         let i = 0;
         benchmark(`memoize Array ${size.toLocaleString('en')}`, () => f(i = ++i & mask), done);
+      });
+
+      it(`Clock ${size.toLocaleString('en')}`, function (done) {
+        const f = memoize(a => a, new Clock(size));
+        let i = 0;
+        benchmark(`memoize Clock ${size.toLocaleString('en')}`, () => f(i = ++i & mask), done);
       });
 
       it(`Cache ${size.toLocaleString('en')}`, function (done) {
