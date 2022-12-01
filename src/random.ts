@@ -1,6 +1,6 @@
-const radixes = Object.freeze([...Array(7)].map((_, i) => 1 << i));
-assert.deepStrictEqual(radixes, [1, 2, 4, 8, 16, 32, 64]);
-const masks = Object.freeze(radixes.map(radix => radix - 1));
+const bases = Object.freeze([...Array(7)].map((_, i) => 1 << i));
+assert.deepStrictEqual(bases, [1, 2, 4, 8, 16, 32, 64]);
+const masks = Object.freeze(bases.map(radix => radix - 1));
 
 const dict0_ = [
   ...[...Array(36)].map((_, i) => i.toString(36)),
@@ -69,11 +69,11 @@ export function unique(rnd: (len: number) => string, len: number = 1, mem?: Set<
 }
 
 function cons(size: number): () => number {
-  const len = radixes.findIndex(radix => radix >= size) as 1;
+  const len = bases.findIndex(radix => radix >= size) as 1;
   assert(len > 0);
   return function rnd(): number {
     const r = random(len);
-    assert(r < radixes[len]);
+    assert(r < bases[len]);
     return r < size
       ? r
       : rnd();
