@@ -12,7 +12,6 @@ export class Clock<K, V> implements IterableDict<K, V> {
     private readonly capacity: number,
   ) {
     this.capacity = BASE * ceil(capacity / BASE);
-    assert((this.capacity & this.capacity - 1) === 0);
     this.refs = new Uint32Array(this.capacity >>> DIGIT);
   }
   private dict = new Map<K, number>();
@@ -43,13 +42,12 @@ export class Clock<K, V> implements IterableDict<K, V> {
     assert(this.$length === this.dict.size);
     this.keys[hand] = key;
     this.values[hand] = value;
-    this.hand = hand + 1 & this.capacity - 1;
+    this.hand = (hand + 1) % this.capacity;
   }
   public put(key: K, value: V): number {
     const index = this.dict.get(key);
     if (index !== undefined) {
       this.mark(index);
-      this.keys[index] = key;
       this.values[index] = value;
       return index;
     }
@@ -70,7 +68,7 @@ export class Clock<K, V> implements IterableDict<K, V> {
       const l = search(b, r);
       assert(l < BASE);
       assert((b & 1 << l) === 0);
-      hand = hand + l - r & capacity - 1;
+      hand = (hand + l - r) % capacity;
       this.locate(hand, key, value);
       assert(r < BASE);
       refs[i] = b >>> l << l | b & (1 << r) - 1;
@@ -105,7 +103,7 @@ export class Clock<K, V> implements IterableDict<K, V> {
     this.dict = new Map();
     this.keys = [];
     this.values = [];
-    this.refs = new Uint32Array(this.capacity);
+    this.refs = new Uint32Array(this.refs.length);
     this.hand = 0;
     this.$length = 0;
   }

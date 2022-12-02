@@ -5,14 +5,14 @@ import { pcg32 } from './random';
 describe('Unit: lib/clock', () => {
   describe('Clock', () => {
     it('get/set', function () {
-      const capacity = 128;
+      const capacity = 96;
       const clock = new Clock<number, number>(capacity - 1);
       assert(clock['capacity'] === capacity);
 
       for (let i = 0; i < capacity * 2; ++i) {
         clock.set(i, i);
       }
-      assert(clock['keys'].length === capacity);
+      assert(clock['values'].length === capacity);
       for (let i = capacity; i < capacity * 2; ++i) {
         assert(clock.get(i) === i);
       }
@@ -23,11 +23,6 @@ describe('Unit: lib/clock', () => {
         assert(clock.get(i) === i);
       }
     });
-
-    class Stats {
-      clock = 0;
-      lru = 0;
-    }
 
     it('delete', function () {
       const capacity = 32;
@@ -43,6 +38,11 @@ describe('Unit: lib/clock', () => {
       clock.set(1, 1);
       assert(clock.get(2) === 2);
     });
+
+    class Stats {
+      clock = 0;
+      lru = 0;
+    }
 
     it('even 128', function () {
       this.timeout(10 * 1e3);
@@ -64,7 +64,7 @@ describe('Unit: lib/clock', () => {
       console.debug('Clock hits', stats.clock);
       console.debug('Clock / LRU hit ratio', `${stats.clock / stats.lru * 100 | 0}%`);
       assert(stats.clock / stats.lru * 100 >>> 0 === 99);
-      assert(clock['keys'].length === capacity);
+      assert(clock['values'].length === capacity);
     });
 
     it('uneven 128', function () {
@@ -89,7 +89,7 @@ describe('Unit: lib/clock', () => {
       console.debug('Clock hits', stats.clock);
       console.debug('Clock / LRU hit ratio', `${stats.clock / stats.lru * 100 | 0}%`);
       assert(stats.clock / stats.lru * 100 >>> 0 === 104);
-      assert(clock['keys'].length === capacity);
+      assert(clock['values'].length === capacity);
     });
 
     it('uneven 1024', function () {
@@ -114,7 +114,7 @@ describe('Unit: lib/clock', () => {
       console.debug('Clock hits', stats.clock);
       console.debug('Clock / LRU hit ratio', `${stats.clock / stats.lru * 100 | 0}%`);
       assert(stats.clock / stats.lru * 100 >>> 0 === 105);
-      assert(clock['keys'].length === capacity);
+      assert(clock['values'].length === capacity);
     });
 
   });
