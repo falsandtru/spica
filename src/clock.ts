@@ -42,7 +42,9 @@ export class Clock<K, V> implements IterableDict<K, V> {
     assert(this.$length === this.dict.size);
     this.keys[hand] = key;
     this.values[hand] = value;
-    this.hand = (hand + 1) % this.capacity;
+    this.hand = ++hand === this.capacity
+      ? 0
+      : hand;
   }
   public put(key: K, value: V): number {
     const index = this.dict.get(key);
@@ -143,7 +145,9 @@ export class CLOCK<T> {
     this.$length !== this.capacity && ++this.$length;
     assert(this.$length <= this.capacity);
     this.values[hand] = value;
-    this.hand = (hand + 1) % this.capacity;
+    this.hand = ++hand === this.capacity
+      ? 0
+      : hand;
   }
   public add(value: T): number {
     const { capacity, refs } = this;
