@@ -33,9 +33,6 @@ function memoizeArray<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...a
   };
 }
 function memoizeObject<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...as: as) => z, identify: (...as: as) => b, memory: Dict<b, z>): typeof f {
-  const set = typeof memory.add === 'function'
-    ? (b: b, z: z) => memory.add!(b, z)
-    : (b: b, z: z) => memory.set(b, z);
   let nullish = false;
   return (...as) => {
     const b = identify(...as);
@@ -43,7 +40,7 @@ function memoizeObject<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...
     if (z !== undefined || nullish && memory.has(b)) return z!;
     z = f(...as);
     nullish ||= z === undefined;
-    set(b, z);
+    memory.add?.(b, z) ?? memory.set(b, z);
     return z;
   };
 }

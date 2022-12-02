@@ -19,10 +19,11 @@ export class MultiMap<K, V> implements IterableDict<K, V> {
   public getAll(key: K): Ring<V> | undefined {
     return this.memory.get(key);
   }
-  public add(key: K, value: V): void {
+  public add(key: K, value: V): boolean {
     const vs = new Ring<V>();
     vs.push(value);
     this.memory.set(key, vs);
+    return true;
   }
   public set(key: K, value: V): this {
     const vs = this.memory.get(key);

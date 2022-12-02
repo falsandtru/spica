@@ -39,7 +39,7 @@ export class LRU<K, V> implements IterableDict<K, V> {
     node.key = key;
     node.value = value;
   }
-  public add(key: K, value: V): void {
+  public add(key: K, value: V): boolean {
     const { dict, list } = this;
     if (list.length === this.capacity) {
       this.replace(key, value);
@@ -49,6 +49,7 @@ export class LRU<K, V> implements IterableDict<K, V> {
       dict.set(key, node);
       list.unshift(node);
     }
+    return true;
   }
   public set(key: K, value: V): this {
     const node = this.dict.get(key);

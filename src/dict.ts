@@ -1,5 +1,7 @@
+import type { NonNull } from './type';
+
 export interface Dict<K, V> {
-  add?(key: K, value: V): unknown;
+  add?(key: K, value: V): NonNull;
   set(key: K, value: V): this;
   get(key: K): V | undefined;
   has(key: K): boolean;

@@ -394,12 +394,12 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     assert(this.LRU.length + this.LFU.length === this.dict.size);
     this.disposer?.(value$, key$);
   }
-  public add(key: K, value: V, opts?: { size?: number; age?: number; }, entry?: Entry<K, V>): void;
-  public add(this: Cache<K, undefined>, key: K, value?: V, opts?: { size?: number; age?: number; }, entry?: Entry<K, V>): void;
-  public add(key: K, value: V, { size = 1, age = this.age }: { size?: number; age?: number; } = {}, entry?: Entry<K, V>): void {
+  public add(key: K, value: V, opts?: { size?: number; age?: number; }, entry?: Entry<K, V>): boolean;
+  public add(this: Cache<K, undefined>, key: K, value?: V, opts?: { size?: number; age?: number; }, entry?: Entry<K, V>): boolean;
+  public add(key: K, value: V, { size = 1, age = this.age }: { size?: number; age?: number; } = {}, entry?: Entry<K, V>): boolean {
     if (size < 1 || this.resource < size || age <= 0) {
       this.disposer?.(value, key);
-      return;
+      return false;
     }
 
     assert(!this.dict.has(key));
@@ -429,7 +429,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         entry.enode = this.expirations.insert(entry, expiration);
         assert(this.expirations.length <= this.length);
       }
-      return;
+      return true;
     }
 
     assert(entry === LRU.head!.prev);
@@ -442,6 +442,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     entry.region = 'LRU';
     LRU.head = entry;
     this.update(entry, key, value, size, expiration);
+    return true;
   }
   public put(key: K, value: V, opts?: { size?: number; age?: number; }): boolean;
   public put(this: Cache<K, undefined>, key: K, value?: V, opts?: { size?: number; age?: number; }): boolean;
