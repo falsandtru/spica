@@ -358,7 +358,7 @@ describe('Unit: lib/cache', () => {
       for (let i = 0; i < trials; ++i) {
         const key = random() * capacity * 10 | 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
-        stats.dwc += dwc.get(key) ?? +dwc.put(key, 1) & 0;
+        stats.dwc += dwc.get(key) ?? +dwc.add(key, 1) & 0;
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
@@ -388,7 +388,7 @@ describe('Unit: lib/cache', () => {
           ? random() * capacity * -1 | 0
           : random() * capacity * 10 | 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
-        stats.dwc += dwc.get(key) ?? +dwc.put(key, 1) & 0;
+        stats.dwc += dwc.get(key) ?? +dwc.add(key, 1) & 0;
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
@@ -417,7 +417,7 @@ describe('Unit: lib/cache', () => {
           ? random() * capacity * -1 | 0
           : random() * capacity * 10 + i * capacity / 100 | 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
-        stats.dwc += dwc.get(key) ?? +dwc.put(key, 1) & 0;
+        stats.dwc += dwc.get(key) ?? +dwc.add(key, 1) & 0;
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
@@ -449,7 +449,7 @@ describe('Unit: lib/cache', () => {
           ? random() * capacity / -4 - i / 2 * capacity / 400 | 0
           : random() * capacity * 10 | 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
-        stats.dwc += dwc.get(key) ?? +dwc.put(key, 1) & 0;
+        stats.dwc += dwc.get(key) ?? +dwc.add(key, 1) & 0;
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
@@ -479,7 +479,7 @@ describe('Unit: lib/cache', () => {
           // LRU汚染
           : i;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
-        stats.dwc += dwc.get(key) ?? +dwc.put(key, 1) & 0;
+        stats.dwc += dwc.get(key) ?? +dwc.add(key, 1) & 0;
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
@@ -509,7 +509,7 @@ describe('Unit: lib/cache', () => {
           ? i % 3 - 1 ? i - i % 3 + 6 : i - i % 3
           : random() * capacity / -1 | 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
-        stats.dwc += dwc.get(key) ?? +dwc.put(key, 1) & 0;
+        stats.dwc += dwc.get(key) ?? +dwc.add(key, 1) & 0;
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
@@ -535,7 +535,7 @@ describe('Unit: lib/cache', () => {
       for (let i = 0; i < trials; ++i) {
         const key = i % (capacity * 2);
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
-        stats.dwc += dwc.get(key) ?? +dwc.put(key, 1) & 0;
+        stats.dwc += dwc.get(key) ?? +dwc.add(key, 1) & 0;
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
@@ -564,7 +564,7 @@ describe('Unit: lib/cache', () => {
         // スキャン耐性が逆効果となる一度限りのアクセス
         const key = random() * capacity + (i / capacity | 0) * capacity | 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
-        stats.dwc += dwc.get(key) ?? +dwc.put(key, 1) & 0;
+        stats.dwc += dwc.get(key) ?? +dwc.add(key, 1) & 0;
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
@@ -602,7 +602,7 @@ describe('Unit: lib/cache', () => {
       for (let i = 0; i < trials; ++i) {
         const key = i % (capacity * 2);
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
-        stats.dwc += dwc.get(key) ?? +dwc.put(key, 1) & 0;
+        stats.dwc += dwc.get(key) ?? +dwc.add(key, 1) & 0;
         if (trials - i !== capacity) continue;
         stats.lru = 0;
         stats.dwc = 0;
@@ -647,7 +647,7 @@ describe('Unit: lib/cache', () => {
           ? random() * capacity * -1 | 0
           : random() * capacity * 4 | 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
-        stats.dwc += dwc.get(key) ?? +dwc.put(key, 1) & 0;
+        stats.dwc += dwc.get(key) ?? +dwc.add(key, 1) & 0;
         if (trials - i !== capacity) continue;
         stats.lru = 0;
         stats.dwc = 0;
@@ -692,7 +692,7 @@ describe('Unit: lib/cache', () => {
           ? -i % capacity / 2 | 0
           : random() * capacity * 2 | 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
-        stats.dwc += dwc.get(key) ?? +dwc.put(key, 1) & 0;
+        stats.dwc += dwc.get(key) ?? +dwc.add(key, 1) & 0;
         if (trials - i !== capacity) continue;
         stats.lru = 0;
         stats.dwc = 0;
@@ -725,7 +725,7 @@ describe('Unit: lib/cache', () => {
           ? random() * capacity * -1 | 0
           : random() * capacity * 10 | 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
-        stats.dwc += dwc.get(key) ?? +dwc.put(key, 1) & 0;
+        stats.dwc += dwc.get(key) ?? +dwc.add(key, 1) & 0;
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
