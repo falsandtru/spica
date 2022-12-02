@@ -462,7 +462,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       this.evict(entry, true);
       return;
     }
-    this.update(entry);
+    this.replace(entry);
     return entry.value;
   }
   public has(key: K): boolean {
@@ -527,7 +527,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.sweeper.resize(capacity, this.settings.sweep!.window!, this.settings.sweep!.range!);
     this.ensure(0);
   }
-  private update(entry: Entry<K, V>): void {
+  private replace(entry: Entry<K, V>): void {
     const { LRU, LFU } = this;
     this.sweeper.hit();
     if (entry.partition === LRU) {
