@@ -39,18 +39,21 @@ export class LRU<K, V> implements IterableDict<K, V> {
     node.key = key;
     node.value = value;
   }
-  public set(key: K, value: V): this {
+  public add(key: K, value: V): void {
     const { dict, list } = this;
-    const node = dict.get(key);
+    if (list.length === this.capacity) {
+      this.replace(key, value);
+    }
+    else {
+      const node = new Node(key, value);
+      dict.set(key, node);
+      list.unshift(node);
+    }
+  }
+  public set(key: K, value: V): this {
+    const node = this.dict.get(key);
     if (node === undefined) {
-      if (list.length === this.capacity) {
-        this.replace(key, value);
-      }
-      else {
-        const node = new Node(key, value);
-        dict.set(key, node);
-        list.unshift(node);
-      }
+      this.add(key, value);
     }
     else {
       node.value = value;

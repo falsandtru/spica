@@ -1,7 +1,8 @@
 export interface Dict<K, V> {
-  has(key: K): boolean;
-  get(key: K): V | undefined;
+  add?(key: K, value: V): unknown;
   set(key: K, value: V): this;
+  get(key: K): V | undefined;
+  has(key: K): boolean;
   delete(key: K): boolean;
 }
 

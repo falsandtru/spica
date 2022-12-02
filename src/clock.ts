@@ -46,13 +46,7 @@ export class Clock<K, V> implements IterableDict<K, V> {
       ? 0
       : hand;
   }
-  public put(key: K, value: V): number {
-    const index = this.dict.get(key);
-    if (index !== undefined) {
-      this.mark(index);
-      this.values[index] = value;
-      return index;
-    }
+  public add(key: K, value: V): number {
     const { capacity, refs } = this;
     let hand = this.hand;
     for (let i = hand >>> DIGIT, r = hand & MASK, len = refs.length; ;) {
@@ -76,6 +70,13 @@ export class Clock<K, V> implements IterableDict<K, V> {
       refs[i] = b >>> l << l | b & (1 << r) - 1;
       return hand;
     }
+  }
+  public put(key: K, value: V): number {
+    const index = this.dict.get(key);
+    if (index === undefined) return this.add(key, value);
+    this.mark(index);
+    this.values[index] = value;
+    return index;
   }
   public set(key: K, value: V): this {
     this.put(key, value);

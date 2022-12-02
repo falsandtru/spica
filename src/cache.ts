@@ -371,20 +371,42 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     assert(!target || target.next);
     return target;
   }
-  public put(key: K, value: V, opts?: { size?: number; age?: number; }): boolean;
-  public put(this: Cache<K, undefined>, key: K, value?: V, opts?: { size?: number; age?: number; }): boolean;
-  public put(key: K, value: V, { size = 1, age = this.age }: { size?: number; age?: number; } = {}): boolean {
+  private update(entry: Entry<K, V>, key: K, value: V, size: number, expiration: number): void {
+    assert(entry.next);
+    const key$ = entry.key;
+    const value$ = entry.value;
+    entry.key = key;
+    entry.value = value;
+    this.$size += size - entry.size;
+    assert(0 < this.size && this.size <= this.resource);
+    entry.size = size;
+    entry.expiration = expiration;
+    if (this.expiration && this.expirations !== undefined && expiration !== Infinity) {
+      entry.enode !== undefined
+        ? this.expirations.update(entry.enode, expiration)
+        : entry.enode = this.expirations.insert(entry, expiration);
+      assert(this.expirations.length <= this.length);
+    }
+    else if (entry.enode !== undefined) {
+      this.expirations!.delete(entry.enode);
+      entry.enode = undefined;
+    }
+    assert(this.LRU.length + this.LFU.length === this.dict.size);
+    this.disposer?.(value$, key$);
+  }
+  public add(key: K, value: V, opts?: { size?: number; age?: number; }, entry?: Entry<K, V>): void;
+  public add(this: Cache<K, undefined>, key: K, value?: V, opts?: { size?: number; age?: number; }, entry?: Entry<K, V>): void;
+  public add(key: K, value: V, { size = 1, age = this.age }: { size?: number; age?: number; } = {}, entry?: Entry<K, V>): void {
     if (size < 1 || this.resource < size || age <= 0) {
       this.disposer?.(value, key);
-      return false;
+      return;
     }
 
+    assert(!this.dict.has(key));
     const { LRU } = this;
     const expiration = age === Infinity
       ? age
       : now() + age;
-    let entry = this.dict.get(key);
-    const match = entry !== undefined;
     entry = this.ensure(size, entry, true);
     if (entry === undefined) {
       assert(!this.dict.has(key));
@@ -407,42 +429,40 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         entry.enode = this.expirations.insert(entry, expiration);
         assert(this.expirations.length <= this.length);
       }
+      return;
+    }
+
+    assert(entry === LRU.head!.prev);
+    entry.region === 'LFU' && --this.overlapLFU;
+    assert(this.overlapLFU >= 0);
+    this.dict.delete(entry.key);
+    this.dict.set(key, entry);
+    assert(this.LRU.length + this.LFU.length === this.dict.size);
+    assert(this.dict.size <= this.capacity);
+    entry.region = 'LRU';
+    LRU.head = entry;
+    this.update(entry, key, value, size, expiration);
+  }
+  public put(key: K, value: V, opts?: { size?: number; age?: number; }): boolean;
+  public put(this: Cache<K, undefined>, key: K, value?: V, opts?: { size?: number; age?: number; }): boolean;
+  public put(key: K, value: V, { size = 1, age = this.age }: { size?: number; age?: number; } = {}): boolean {
+    if (size < 1 || this.resource < size || age <= 0) {
+      this.disposer?.(value, key);
       return false;
     }
 
-    assert(entry.next);
-    const key$ = entry.key;
-    const value$ = entry.value;
-    if (!match) {
-      assert(entry === LRU.head!.prev);
-      entry.region === 'LFU' && --this.overlapLFU;
-      assert(this.overlapLFU >= 0);
-      this.dict.delete(key$);
-      this.dict.set(key, entry);
-      assert(this.LRU.length + this.LFU.length === this.dict.size);
-      assert(this.dict.size <= this.capacity);
-      entry.key = key;
-      entry.region = 'LRU';
-      LRU.head = entry;
+    let entry = this.dict.get(key);
+    const match = entry !== undefined;
+    entry = this.ensure(size, entry, true);
+    if (!match || entry === undefined) {
+      this.add(key, value, { size, age }, entry);
+      return match;
     }
-    assert(this.dict.has(key));
-    entry.value = value;
-    this.$size += size - entry.size;
-    assert(0 < this.size && this.size <= this.resource);
-    entry.size = size;
-    entry.expiration = expiration;
-    if (this.expiration && this.expirations !== undefined && expiration !== Infinity) {
-      entry.enode !== undefined
-        ? this.expirations.update(entry.enode, expiration)
-        : entry.enode = this.expirations.insert(entry, expiration);
-      assert(this.expirations.length <= this.length);
-    }
-    else if (entry.enode !== undefined) {
-      this.expirations!.delete(entry.enode);
-      entry.enode = undefined;
-    }
-    assert(this.LRU.length + this.LFU.length === this.dict.size);
-    this.disposer?.(value$, key$);
+
+    const expiration = age === Infinity
+      ? age
+      : now() + age;
+    this.update(entry, key, value, size, expiration);
     return match;
   }
   public set(key: K, value: V, opts?: { size?: number; age?: number; }): this;
