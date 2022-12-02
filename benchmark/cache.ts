@@ -9,7 +9,7 @@ import { captureTimers } from '../src/timer';
 describe('Benchmark:', function () {
   describe('Cache', function () {
     it('Clock new', function (done) {
-      benchmark('Clock    new', () => new LRU(10000), done);
+      benchmark('Clock    new', () => new Clock(10000), done);
     });
 
     it('ISC new', function (done) {
