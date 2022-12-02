@@ -178,11 +178,11 @@ export class CLOCK<T> {
   public set(index: number, value: T): void {
     this.values[index] = value;
   }
-  public get(index: number): T | undefined {
-    this.mark(index);
+  public peek(index: number): T | undefined {
     return this.values[index];
   }
-  public peek(index: number): T | undefined {
+  public get(index: number): T | undefined {
+    this.mark(index);
     return this.values[index];
   }
   public del(index: number): void {
