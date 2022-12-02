@@ -338,6 +338,26 @@ describe('Unit: lib/cache', () => {
       assert(!cache.has(289 + 1));
     });
 
+    it('verify', function () {
+      this.timeout(10 * 1e3);
+
+      const capacity = 100;
+      const cache = new Cache<number, number>(capacity);
+
+      const trials = capacity * 1000;
+      const random = pcg32.random(pcg32.seed(0n, 0n));
+      for (let i = 0; i < trials; ++i) {
+        const key = random() * capacity * 10 | 0;
+        if (cache.has(key)) {
+          assert(cache.get(key) === ~key);
+        }
+        else {
+          cache.add(key, ~key);
+        }
+      }
+      assert(cache.length === capacity);
+    });
+
     if (!navigator.userAgent.includes('Chrome')) return;
 
     class Stats {

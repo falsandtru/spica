@@ -39,6 +39,29 @@ describe('Unit: lib/clock', () => {
       assert(clock.get(2) === 2);
     });
 
+    it('verify', function () {
+      this.timeout(10 * 1e3);
+
+      const capacity = 96;
+      const clock = new Clock<number, number>(capacity);
+
+      const trials = capacity * 1000;
+      const random = pcg32.random(pcg32.seed(0n, 0n));
+      for (let i = 0; i < trials; ++i) {
+        const key = random() * capacity * 10 | 0;
+        if (clock.has(key)) {
+          assert(clock.get(key) === ~key);
+        }
+        else {
+          clock.add(key, ~key);
+        }
+        assert(clock.length <= capacity);
+        assert(clock['values'].length === clock.length);
+        assert(clock['values'].length === clock['dict'].size);
+      }
+      assert(clock.length === capacity);
+    });
+
     class Stats {
       clock = 0;
       lru = 0;
