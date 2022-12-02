@@ -508,8 +508,8 @@ describe('Unit: lib/cache', () => {
           // LFU汚染
           ? i % 3 - 1 ? i - i % 3 + 6 : i - i % 3
           : random() * capacity / -1 | 0;
-        stats.lru += lru.get(key)! & +(key < 0) || +lru.set(key, 1) & 0;
-        stats.dwc += dwc.get(key)! & +(key < 0) || +dwc.put(key, 1) & 0;
+        stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
+        stats.dwc += dwc.get(key) ?? +dwc.put(key, 1) & 0;
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
@@ -520,7 +520,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC density', dwc['densityR'], dwc['densityF']);
       console.debug('DWC overlap', dwc['overlapLFU'] / dwc['LRU'].length * 100 | 0, dwc['overlapLRU'] / dwc['LFU'].length * 100 | 0);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 83);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 95);
     });
 
     it('ratio uneven 100 loop', function () {
