@@ -180,7 +180,7 @@ describe('Benchmark:', function () {
           const key = random() < 0.8
             ? random() * capacity * 1 | 0
             : random() * capacity * 9 + capacity | 0;
-          cache.get(key) ?? cache.set(key, {});
+          cache.get(key) ?? cache.add(key, {});
         }, done);
       });
 
@@ -206,7 +206,7 @@ describe('Benchmark:', function () {
           const key = random() < 0.8
             ? random() * capacity * 1 | 0
             : random() * capacity * 9 + capacity | 0;
-          cache.get(key) ?? cache.set(key, {});
+          cache.get(key) ?? cache.add(key, {});
         }, done);
       });
 
@@ -219,7 +219,7 @@ describe('Benchmark:', function () {
           const key = random() < 0.8
             ? random() * capacity * 1 | 0
             : random() * capacity * 9 + capacity | 0;
-          cache.get(key) ?? cache.set(key, {});
+          cache.get(key) ?? cache.add(key, {});
         }, done);
       });
     }
@@ -249,7 +249,7 @@ describe('Benchmark:', function () {
           const key = random() < 0.8
             ? random() * capacity * 1 | 0
             : random() * capacity * 9 + capacity | 0;
-          cache.get(key) ?? cache.set(key, {}, { age: age() });
+          cache.get(key) ?? cache.add(key, {}, { age: age() });
         }, done);
       });
     }
