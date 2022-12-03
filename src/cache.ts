@@ -289,7 +289,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     return entry;
   }
   private readonly sweeper: Sweeper<List<Entry<K, V>>>;
-  private acc = 0;
+  private injection = 0;
   private ensure(margin: number, target?: Entry<K, V>, capture = false): Entry<K, V> | undefined {
     let size = target?.size ?? 0;
     assert(margin - size <= this.resource || !capture);
@@ -326,13 +326,13 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         }
         else if (LRU.length >= this.capacity - this.limit &&
                  this.overlapLRU * 100 / min(LFU.length, this.partition) < this.sample) {
-          this.acc = min(this.acc + this.sample / 100, this.capacity);
+          this.injection = min(this.injection + this.sample / 100, this.capacity);
           const entry = LRU.head!.prev!;
-          if (this.acc >= 1 && entry.region === 'LRU') {
+          if (this.injection >= 1 && entry.region === 'LRU') {
             LRU.delete(entry);
             LFU.unshift(this.overlap(entry));
             entry.partition = LFU;
-            --this.acc;
+            --this.injection;
           }
         }
         if (this.sweeper.isActive()) {
@@ -503,7 +503,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
   public clear(): void {
     const { LRU, LFU } = this;
-    this.acc = 0;
+    this.injection = 0;
     this.$size = 0;
     this.partition = this.limit;
     this.dict = new Map();
