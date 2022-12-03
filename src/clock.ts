@@ -1,8 +1,8 @@
-import { ceil } from './alias';
+import { ceil, log2 } from './alias';
 import { IterableDict } from './dict';
 
 const BASE = 32;
-const DIGIT = Math.log2(BASE);
+const DIGIT = log2(BASE);
 assert(DIGIT === 5);
 const MASK = BASE - 1;
 assert((BASE & MASK) === 0);

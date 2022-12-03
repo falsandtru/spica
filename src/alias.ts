@@ -25,6 +25,8 @@ export const {
   cos,
   tan,
   log,
+  log2,
+  log10,
   sqrt,
 } = Math;
 
