@@ -83,31 +83,31 @@ export class TTL<T = undefined> {
     if (this.$length === 0) return;
     const segment = this.earliest.segment;
     let cont = true;
-    const l5 = this.wheels;
-    assert(l5[COUNT] !== 0);
+    const w5 = this.wheels;
+    assert(w5[COUNT] !== 0);
     let i5 = TTL.overflow(segment);
-    for (; i5 < l5.length; ++i5) {
-      const l4 = l5[i5];
-      if (l4 === undefined) continue;
-      if (l4[COUNT] === 0) continue;
+    for (; i5 < w5.length; ++i5) {
+      const w4 = w5[i5];
+      if (w4 === undefined) continue;
+      if (w4[COUNT] === 0) continue;
       let i4 = cont ? TTL.index(segment, DIGIT4, MASK4) : 0;
-      for (; i4 < l4.length; ++i4) {
-        const l3 = l4[i4];
-        if (l3 === undefined) continue;
-        if (l3[COUNT] === 0) continue;
+      for (; i4 < w4.length; ++i4) {
+        const w3 = w4[i4];
+        if (w3 === undefined) continue;
+        if (w3[COUNT] === 0) continue;
         let i3 = cont ? TTL.index(segment, DIGIT3, MASK3) : 0;
-        for (; i3 < l3.length; ++i3) {
-          const l2 = l3[i3];
-          if (l2 === undefined) continue;
-          if (l2[COUNT] === 0) continue;
+        for (; i3 < w3.length; ++i3) {
+          const w2 = w3[i3];
+          if (w2 === undefined) continue;
+          if (w2[COUNT] === 0) continue;
           let i2 = cont ? TTL.index(segment, DIGIT2, MASK2) : 0;
-          for (; i2 < l2.length; ++i2) {
-            const l1 = l2[i2];
-            if (l1 === undefined) continue;
-            if (l1[COUNT] === 0) continue;
+          for (; i2 < w2.length; ++i2) {
+            const w1 = w2[i2];
+            if (w1 === undefined) continue;
+            if (w1[COUNT] === 0) continue;
             let i1 = cont ? TTL.index(segment, DIGIT1, MASK1) : 0;
-            for (; i1 < l1.length; ++i1) {
-              const queue = l1[i1];
+            for (; i1 < w1.length; ++i1) {
+              const queue = w1[i1];
               if (queue === undefined) continue;
               if (queue.length === 0) continue;
               this.earliest = queue;
@@ -123,60 +123,60 @@ export class TTL<T = undefined> {
     }
   }
   private queue(segment: number): Queue<T> {
-    const l5 = this.wheels;
-    const l4 = l5[TTL.overflow(segment)] ??= wheel();
-    const l3 = l4[TTL.index(segment, DIGIT4, MASK4)] ??= wheel();
-    const l2 = l3[TTL.index(segment, DIGIT3, MASK3)] ??= wheel();
-    const l1 = l2[TTL.index(segment, DIGIT2, MASK2)] ??= wheel();
-    const qu = l1[TTL.index(segment, DIGIT1, MASK1)] ??= new Queue(
+    const w5 = this.wheels;
+    const w4 = w5[TTL.overflow(segment)] ??= wheel();
+    const w3 = w4[TTL.index(segment, DIGIT4, MASK4)] ??= wheel();
+    const w2 = w3[TTL.index(segment, DIGIT3, MASK3)] ??= wheel();
+    const w1 = w2[TTL.index(segment, DIGIT2, MASK2)] ??= wheel();
+    const qu = w1[TTL.index(segment, DIGIT1, MASK1)] ??= new Queue(
       segment,
       () => {
         assert(qu.length === 0);
-        ++l1[COUNT] === 1 && ++l2[COUNT] === 1 && ++l3[COUNT] === 1 && ++l4[COUNT] === 1 && ++l5[COUNT] === 1;
-        assert(l1[COUNT] >= 0);
-        assert(l2[COUNT] >= 0);
-        assert(l3[COUNT] >= 0);
-        assert(l4[COUNT] >= 0);
-        assert(l5[COUNT] >= 0);
+        ++w1[COUNT] === 1 && ++w2[COUNT] === 1 && ++w3[COUNT] === 1 && ++w4[COUNT] === 1 && ++w5[COUNT] === 1;
+        assert(w1[COUNT] >= 0);
+        assert(w2[COUNT] >= 0);
+        assert(w3[COUNT] >= 0);
+        assert(w4[COUNT] >= 0);
+        assert(w5[COUNT] >= 0);
       },
       () => {
         assert(qu.length === 0);
-        --l1[COUNT] === 0 && --l2[COUNT] === 0 && --l3[COUNT] === 0 && --l4[COUNT] === 0 && --l5[COUNT] === 0;
-        assert(l1[COUNT] >= 0);
-        assert(l2[COUNT] >= 0);
-        assert(l3[COUNT] >= 0);
-        assert(l4[COUNT] >= 0);
-        assert(l5[COUNT] >= 0);
+        --w1[COUNT] === 0 && --w2[COUNT] === 0 && --w3[COUNT] === 0 && --w4[COUNT] === 0 && --w5[COUNT] === 0;
+        assert(w1[COUNT] >= 0);
+        assert(w2[COUNT] >= 0);
+        assert(w3[COUNT] >= 0);
+        assert(w4[COUNT] >= 0);
+        assert(w5[COUNT] >= 0);
         assert(this.earliest.segment === segment || this.earliest !== qu);
-        if (l4[COUNT] === 0) {
+        if (w4[COUNT] === 0) {
           assert(qu.length === 0);
           if (qu === this.earliest) {
             this.earliest.segment -= segment & ~0;
           }
-          return l5[TTL.overflow(segment)] = undefined as any;
+          return w5[TTL.overflow(segment)] = undefined as any;
         }
-        if (l3[COUNT] === 0) {
+        if (w3[COUNT] === 0) {
           assert(qu.length === 0);
           if (qu === this.earliest) {
             this.earliest.segment -= segment & (1 << DIGIT4) - 1;
           }
-          return l4[TTL.index(segment, DIGIT4, MASK4)] = undefined as any;
+          return w4[TTL.index(segment, DIGIT4, MASK4)] = undefined as any;
         }
-        if (l2[COUNT] === 0) {
+        if (w2[COUNT] === 0) {
           assert(qu.length === 0);
           if (qu === this.earliest) {
             this.earliest.segment -= segment & (1 << DIGIT3) - 1;
           }
-          return l3[TTL.index(segment, DIGIT3, MASK3)] = undefined as any;
+          return w3[TTL.index(segment, DIGIT3, MASK3)] = undefined as any;
         }
-        if (l1[COUNT] === 0) {
+        if (w1[COUNT] === 0) {
           assert(qu.length === 0);
           if (qu === this.earliest) {
             this.earliest.segment -= segment & (1 << DIGIT2) - 1;
           }
-          return l2[TTL.index(segment, DIGIT2, MASK2)] = undefined as any;
+          return w2[TTL.index(segment, DIGIT2, MASK2)] = undefined as any;
         }
-        //if (qu.length === 0) return l1[TTL.index(segment, DIGIT1, MASK1)] = undefined as any;
+        //if (qu.length === 0) return w1[TTL.index(segment, DIGIT1, MASK1)] = undefined as any;
       });
     return qu;
   }
