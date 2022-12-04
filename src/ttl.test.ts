@@ -4,18 +4,24 @@ import { now } from './chrono';
 describe('Unit: lib/ttl', () => {
   describe('ttl', () => {
     it('', async () => {
+      const r = 16;
       const t = now(true);
-      const ttl = new TTL();
+      const ttl = new TTL(r);
 
       assert(ttl.peek() === undefined);
       const nodes = [
-        ttl.add(t + 24),
-        ttl.add(t + 23),
+        ttl.add(t + r + r / 2),
+        ttl.add(t + r + r / 2 - 1),
         ttl.add(t + 1),
         ttl.add(t + 0),
         ttl.add(t + 1),
-        ttl.add(t + 24),
-        ttl.add(t + 128),
+        ttl.add(t + r + r / 2),
+        ttl.add(t + r * 2 ** 4),
+        ttl.add(t + r * 2 ** 8),
+        ttl.add(t + r * 2 ** 16),
+        ttl.add(t + r * 2 ** 24),
+        ttl.add(t + r * 2 ** 32),
+        ttl.add(t + r * 2 ** 32 + 1),
       ];
       assert(ttl.length === nodes.length);
       assert(ttl.peek() === nodes[2]);
@@ -35,6 +41,16 @@ describe('Unit: lib/ttl', () => {
       ttl.delete(nodes[5]);
       assert(ttl.peek() === nodes[6]);
       ttl.delete(nodes[6]);
+      assert(ttl.peek() === nodes[7]);
+      ttl.delete(nodes[7]);
+      assert(ttl.peek() === nodes[8]);
+      ttl.delete(nodes[8]);
+      assert(ttl.peek() === nodes[9]);
+      ttl.delete(nodes[9]);
+      assert(ttl.peek() === nodes[10]);
+      ttl.delete(nodes[10]);
+      assert(ttl.peek() === nodes[11]);
+      ttl.delete(nodes[11]);
       assert(ttl.peek() === undefined);
       assert(ttl.length === 0);
     });
