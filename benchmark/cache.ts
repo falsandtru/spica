@@ -228,7 +228,7 @@ describe('Benchmark:', function () {
       it(`ISC simulation ${length.toLocaleString('en')} expire`, captureTimers(function (done) {
         const capacity = length;
         const cache = new LRUCache<number, object>({ max: capacity, ttl: 1, ttlAutopurge: true });
-        const age = (r => () => r() * 1e8 | 0)(xorshift.random(1));
+        const age = (r => () => r() * 1e3 | 0)(xorshift.random(1));
         for (let i = 0; i < capacity; ++i) cache.set(i, {}, { ttl: age() });
         const random = xorshift.random(1);
         benchmark(`ISCCache simulation ${length.toLocaleString('en')} expire`, () => {
@@ -242,7 +242,7 @@ describe('Benchmark:', function () {
       it(`DWC simulation ${length.toLocaleString('en')} expire`, function (done) {
         const capacity = length;
         const cache = new Cache<number, object>(capacity, { age: 1, eagerExpiration: true });
-        const age = (r => () => r() * 1e8 | 0)(xorshift.random(1));
+        const age = (r => () => r() * 1e3 | 0)(xorshift.random(1));
         for (let i = 0; i < capacity; ++i) cache.set(i, {}, { age: age() });
         const random = xorshift.random(1);
         benchmark(`DW-Cache simulation ${length.toLocaleString('en')} expire`, () => {
