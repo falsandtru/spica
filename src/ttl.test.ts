@@ -1,9 +1,10 @@
 import { TTL } from './ttl';
+import { pcg32 } from './random';
 import { now } from './chrono';
 
 describe('Unit: lib/ttl', () => {
   describe('ttl', () => {
-    it('', async () => {
+    it('basic', async () => {
       const r = 16;
       const t = now(true);
       const ttl = new TTL(r);
@@ -52,6 +53,25 @@ describe('Unit: lib/ttl', () => {
       assert(ttl.peek() === nodes[11]);
       ttl.delete(nodes[11]);
       assert(ttl.peek() === undefined);
+      assert(ttl.length === 0);
+    });
+
+    it('verify', async () => {
+      const ttl = new TTL<number>();
+
+      const size = 1e4;
+      const random = pcg32.random(pcg32.seed(0n, 0n));
+      for (let i = 0, n = now(); i < size; ++i) {
+        const r = random() * 1e9 | 0;
+        ttl.add(n + r, r / 16 >>> 0);
+      }
+      assert(ttl.length === size);
+      for (let i = 0, s = 0; i < size; ++i) {
+        const node = ttl.peek()!;
+        assert(node.value >= s);
+        s = node.value;
+        ttl.delete(node);
+      }
       assert(ttl.length === 0);
     });
 

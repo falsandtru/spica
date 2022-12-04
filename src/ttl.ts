@@ -85,50 +85,45 @@ export class TTL<T = undefined> {
     let cont = true;
     const w5 = this.wheels;
     assert(w5[COUNT] !== 0);
-    let i5 = TTL.overflow(segment);
-    for (; i5 < w5.length; ++i5) {
-      if (!(i5 in w5)) continue;
-      const w4 = w5[i5];
+    for (let i = cont ? TTL.overflow(segment) : 0; i < w5.length; ++i) {
+      if (!(i in w5)) continue;
+      const w4 = w5[i];
       if (w4 === undefined) continue;
       if (w4[COUNT] === 0) {
-        w5[i5] = undefined as any;
+        w5[i] = undefined as any;
         this.earliest.segment = segment -= segment & ~0;
         continue;
       }
-      let i4 = cont ? TTL.index(segment, DIGIT4, MASK4) : 0;
-      for (; i4 < w4.length; ++i4) {
-        if (!(i4 in w4)) continue;
-        const w3 = w4[i4];
+      for (let i = cont ? TTL.index(segment, DIGIT4, MASK4) : 0; i < w4.length; ++i) {
+        if (!(i in w4)) continue;
+        const w3 = w4[i];
         if (w3 === undefined) continue;
         if (w3[COUNT] === 0) {
-          w4[i4] = undefined as any;
+          w4[i] = undefined as any;
           this.earliest.segment = segment -= segment & (1 << DIGIT4) - 1;
           continue;
         }
-        let i3 = cont ? TTL.index(segment, DIGIT3, MASK3) : 0;
-        for (; i3 < w3.length; ++i3) {
-          if (!(i3 in w3)) continue;
-          const w2 = w3[i3];
+        for (let i = cont ? TTL.index(segment, DIGIT3, MASK3) : 0; i < w3.length; ++i) {
+          if (!(i in w3)) continue;
+          const w2 = w3[i];
           if (w2 === undefined) continue;
           if (w2[COUNT] === 0) {
-            w3[i3] = undefined as any;
+            w3[i] = undefined as any;
             this.earliest.segment = segment -= segment & (1 << DIGIT3) - 1;
             continue;
           }
-          let i2 = cont ? TTL.index(segment, DIGIT2, MASK2) : 0;
-          for (; i2 < w2.length; ++i2) {
-            if (!(i2 in w2)) continue;
-            const w1 = w2[i2];
+          for (let i = cont ? TTL.index(segment, DIGIT2, MASK2) : 0; i < w2.length; ++i) {
+            if (!(i in w2)) continue;
+            const w1 = w2[i];
             if (w1 === undefined) continue;
             if (w1[COUNT] === 0) {
-              w2[i2] = undefined as any;
+              w2[i] = undefined as any;
               this.earliest.segment = segment -= segment & (1 << DIGIT2) - 1;
               continue;
             }
-            let i1 = cont ? TTL.index(segment, DIGIT1, MASK1) : 0;
-            for (; i1 < w1.length; ++i1) {
-              if (!(i1 in w1)) continue;
-              const queue = w1[i1];
+            for (let i = cont ? TTL.index(segment, DIGIT1, MASK1) : 0; i < w1.length; ++i) {
+              if (!(i in w1)) continue;
+              const queue = w1[i];
               if (queue === undefined) continue;
               if (queue.length === 0) continue;
               this.earliest = queue;
