@@ -67,9 +67,10 @@ export class TTL<T = undefined> {
   private seek(): void {
     assert(this.earliest.length === 0);
     let cont = true;
+    const l5 = this.wheel;
     let i5 = this.overflow;
-    for (; i5 < this.wheel.length; ++i5) {
-      const l4 = this.wheel[i5];
+    for (; i5 < l5.length; ++i5) {
+      const l4 = l5[i5];
       if (l4 === undefined) continue;
       let i4 = cont ? this.index(DIGIT4) : 0;
       for (; i4 < l4.length; ++i4) {
