@@ -2,7 +2,7 @@ import { max, min, ceil, round } from './alias';
 import { now } from './chrono';
 import { IterableDict } from './dict';
 import { List } from './list';
-import { Heap } from './heap';
+import { TTL } from './ttl';
 import { extend } from './assign';
 
 // Dual Window Cache
@@ -113,7 +113,7 @@ class Entry<K, V> implements List.Node {
     public expiration: number,
   ) {
   }
-  public enode?: Heap.Node<Entry<K, V>, number> = undefined;
+  public enode?: TTL.Node<Entry<K, V>> = undefined;
   public next?: this = undefined;
   public prev?: this = undefined;
 }
@@ -185,7 +185,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.expiration = opts.age !== undefined;
     this.age = settings.age!;
     if (settings.eagerExpiration) {
-      this.expirations = new Heap(Heap.min);
+      this.expirations = new TTL();
     }
     this.stats = opts.resolution || opts.offset
       ? new StatsExperimental(this.window, settings.resolution!, settings.offset!)
@@ -232,7 +232,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private overlapLFU = 0;
   private readonly expiration: boolean;
   private readonly age: number;
-  private readonly expirations?: Heap<Entry<K, V>, number>;
+  private readonly expirations?: TTL<Entry<K, V>>;
   public get length(): number {
     const { LRU, LFU } = this;
     return LRU.length + LFU.length;
@@ -296,7 +296,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const { LRU, LFU } = this;
     while (this.size + margin - size > this.resource) {
       assert(this.length >= 1 + +!!target);
-      let victim = this.expirations?.peek();
+      let victim = this.expirations?.peek()?.value;
       if (victim !== undefined && victim !== target && victim.expiration < now()) {
       }
       else if (LRU.length === 0) {
@@ -382,9 +382,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     entry.size = size;
     entry.expiration = expiration;
     if (this.expiration && this.expirations !== undefined && expiration !== Infinity) {
-      entry.enode !== undefined
-        ? this.expirations.update(entry.enode, expiration)
-        : entry.enode = this.expirations.insert(entry, expiration);
+      entry.enode !== undefined && this.expirations.delete(entry.enode);
+      entry.enode = this.expirations.add(expiration, entry);
       assert(this.expirations.length <= this.length);
     }
     else if (entry.enode !== undefined) {
@@ -426,7 +425,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       assert(this.LRU.length + this.LFU.length === this.dict.size);
       assert(this.dict.size <= this.capacity);
       if (this.expiration && this.expirations !== undefined && expiration !== Infinity) {
-        entry.enode = this.expirations.insert(entry, expiration);
+        entry.enode = this.expirations.add(expiration, entry);
         assert(this.expirations.length <= this.length);
       }
       return true;

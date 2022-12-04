@@ -305,10 +305,10 @@ describe('Unit: lib/cache', () => {
     it('age eager', async () => {
       const cache = new Cache<number, number>(3, { age: Infinity, eagerExpiration: true, test: true });
 
-      cache.put(0, 0, { age: 10 });
-      cache.put(1, 1, { age: 5 });
-      cache.put(2, 2, { age: 10 });
-      await wait(20);
+      cache.put(0, 0, { age: 50 });
+      cache.put(1, 1, { age: 1 });
+      cache.put(2, 2, { age: 50 });
+      await wait(100);
       assert(cache.length === 3);
       cache.put(3, 3);
       assert(cache.length === 3);
