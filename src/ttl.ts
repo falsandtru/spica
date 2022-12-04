@@ -4,12 +4,17 @@ import { now } from './chrono';
 import { noop } from './function';
 
 const DIGIT1 = 0;
-const DIGIT2 = 32 / 4;
-assert(DIGIT2 === 8);
-const DIGIT3 = DIGIT2 * 2;
-const DIGIT4 = DIGIT2 * 3;
-const MASK = (1 << DIGIT2) - 1;
+const DIGIT2 = 8;
+const DIGIT3 = 16;
+const DIGIT4 = 24;
+const DIGIT5 = 32;
+const MASK1 = (1 << DIGIT2 - DIGIT1) - 1;
+const MASK2 = (1 << DIGIT3 - DIGIT2) - 1;
+const MASK3 = (1 << DIGIT4 - DIGIT3) - 1;
+const MASK4 = (1 << DIGIT5 - DIGIT4) - 1;
 const COUNT = Symbol('count');
+const INIT = 16;
+assert(INIT <= Math.min(MASK1, MASK2, MASK3, MASK4) + 1);
 
 type Wheels<T> = Wheel<Wheel<Wheel<Wheel<Wheel<Queue<T>>>>>>;
 interface Wheel<T> {
@@ -18,7 +23,7 @@ interface Wheel<T> {
   readonly length: number;
 }
 function wheel<T>(): Wheel<T> {
-  const w: Wheel<T> = [] as any;
+  const w: Wheel<T> = Array(INIT) as any;
   w[COUNT] = 0;
   return w;
 }
@@ -37,7 +42,9 @@ class Node<T> implements List.Node {
   constructor(
     public readonly queue: Queue<T>,
     public readonly value: T,
+    private readonly expiration: number,
   ) {
+    assert([this.expiration]);
   }
   public next?: this = undefined;
   public prev?: this = undefined;
@@ -52,8 +59,8 @@ export class TTL<T = undefined> {
   private static overflow(segment: number): number {
     return segment / 2 ** 32 >>> 0;
   }
-  private static index(segment: number, digit: number): number {
-    return segment >>> digit & MASK;
+  private static index(segment: number, digit: number, mask: number): number {
+    return segment >>> digit & mask;
   }
   constructor(
     private resolution = 16,
@@ -73,31 +80,32 @@ export class TTL<T = undefined> {
   private earliest = new Queue<T>(0);
   private seek(): void {
     assert(this.earliest.length === 0);
+    if (this.$length === 0) return;
     const segment = this.earliest.segment;
     let cont = true;
     const l5 = this.wheels;
-    if (l5[COUNT] === 0) return;
+    assert(l5[COUNT] !== 0);
     let i5 = TTL.overflow(segment);
     for (; i5 < l5.length; ++i5) {
       const l4 = l5[i5];
       if (l4 === undefined) continue;
       if (l4[COUNT] === 0) continue;
-      let i4 = cont ? TTL.index(segment, DIGIT4) : 0;
+      let i4 = cont ? TTL.index(segment, DIGIT4, MASK4) : 0;
       for (; i4 < l4.length; ++i4) {
         const l3 = l4[i4];
         if (l3 === undefined) continue;
         if (l3[COUNT] === 0) continue;
-        let i3 = cont ? TTL.index(segment, DIGIT3) : 0;
+        let i3 = cont ? TTL.index(segment, DIGIT3, MASK3) : 0;
         for (; i3 < l3.length; ++i3) {
           const l2 = l3[i3];
           if (l2 === undefined) continue;
           if (l2[COUNT] === 0) continue;
-          let i2 = cont ? TTL.index(segment, DIGIT2) : 0;
+          let i2 = cont ? TTL.index(segment, DIGIT2, MASK2) : 0;
           for (; i2 < l2.length; ++i2) {
             const l1 = l2[i2];
             if (l1 === undefined) continue;
             if (l1[COUNT] === 0) continue;
-            let i1 = cont ? TTL.index(segment, DIGIT1) : 0;
+            let i1 = cont ? TTL.index(segment, DIGIT1, MASK1) : 0;
             for (; i1 < l1.length; ++i1) {
               const queue = l1[i1];
               if (queue === undefined) continue;
@@ -107,17 +115,20 @@ export class TTL<T = undefined> {
             }
             cont = false;
           }
+          cont = false;
         }
+        cont = false;
       }
+      cont = false;
     }
   }
   private queue(segment: number): Queue<T> {
     const l5 = this.wheels;
     const l4 = l5[TTL.overflow(segment)] ??= wheel();
-    const l3 = l4[TTL.index(segment, DIGIT4)] ??= wheel();
-    const l2 = l3[TTL.index(segment, DIGIT3)] ??= wheel();
-    const l1 = l2[TTL.index(segment, DIGIT2)] ??= wheel();
-    const qu = l1[TTL.index(segment, DIGIT1)] ??= new Queue(
+    const l3 = l4[TTL.index(segment, DIGIT4, MASK4)] ??= wheel();
+    const l2 = l3[TTL.index(segment, DIGIT3, MASK3)] ??= wheel();
+    const l1 = l2[TTL.index(segment, DIGIT2, MASK2)] ??= wheel();
+    const qu = l1[TTL.index(segment, DIGIT1, MASK1)] ??= new Queue(
       segment,
       () => {
         assert(qu.length === 0);
@@ -149,23 +160,23 @@ export class TTL<T = undefined> {
           if (qu === this.earliest) {
             this.earliest.segment -= segment & (1 << DIGIT4) - 1;
           }
-          return l4[TTL.index(segment, DIGIT4)] = undefined as any;
+          return l4[TTL.index(segment, DIGIT4, MASK4)] = undefined as any;
         }
         if (l2[COUNT] === 0) {
           assert(qu.length === 0);
           if (qu === this.earliest) {
             this.earliest.segment -= segment & (1 << DIGIT3) - 1;
           }
-          return l3[TTL.index(segment, DIGIT3)] = undefined as any;
+          return l3[TTL.index(segment, DIGIT3, MASK3)] = undefined as any;
         }
         if (l1[COUNT] === 0) {
           assert(qu.length === 0);
           if (qu === this.earliest) {
             this.earliest.segment -= segment & (1 << DIGIT2) - 1;
           }
-          return l2[TTL.index(segment, DIGIT2)] = undefined as any;
+          return l2[TTL.index(segment, DIGIT2, MASK2)] = undefined as any;
         }
-        //if (qu.length === 0) return l1[TTL.index(segment, DIGIT1)] = undefined as any;
+        //if (qu.length === 0) return l1[TTL.index(segment, DIGIT1, MASK1)] = undefined as any;
       });
     return qu;
   }
@@ -183,20 +194,18 @@ export class TTL<T = undefined> {
     if (queue.length === 0) {
       queue.open();
     }
-    const node = queue.push(new Node(queue, value));
-    return node;
+    return queue.push(new Node(queue, value, expiration));
   }
   public delete(node: TTL.Node<T>): void {
     const n = node as Node<T>;
     if (n.next === undefined) return;
+    --this.$length;
+    assert(this.$length >= 0);
     const queue = n.queue;
     queue.delete(n);
-    --this.$length;
     if (queue.length === 0) {
       queue.close();
-      if (queue === this.earliest) {
-        this.seek();
-      }
+      queue === this.earliest && this.seek();
     }
   }
   public clear(): void {
