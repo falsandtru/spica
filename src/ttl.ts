@@ -36,19 +36,19 @@ export class TTL<T = undefined> {
     assert(seg === seg >>> 0);
     return seg / OVERFLOW >>> 0;
   }
-  private static digit4(seg: number): number {
+  private static index4(seg: number): number {
     assert(seg === seg >>> 0);
     return seg >>> DIGIT4 & MASK;
   }
-  private static digit3(seg: number): number {
+  private static index3(seg: number): number {
     assert(seg === seg >>> 0);
     return seg >>> DIGIT3 & MASK;
   }
-  private static digit2(seg: number): number {
+  private static index2(seg: number): number {
     assert(seg === seg >>> 0);
     return seg >>> DIGIT2 & MASK;
   }
-  private static digit1(seg: number): number {
+  private static index1(seg: number): number {
     assert(seg === seg >>> 0);
     return seg & MASK;
   }
@@ -72,70 +72,70 @@ export class TTL<T = undefined> {
   private get overflow(): number {
     return this.earliest.segment / OVERFLOW >>> 0;
   }
-  private get digit4(): number {
+  private get index4(): number {
     return this.earliest.segment >>> DIGIT4 & MASK;
   }
-  private get digit3(): number {
+  private get index3(): number {
     return this.earliest.segment >>> DIGIT3 & MASK;
   }
-  private get digit2(): number {
+  private get index2(): number {
     return this.earliest.segment >>> DIGIT2 & MASK;
   }
-  private get digit1(): number {
+  private get index1(): number {
     return this.earliest.segment & MASK;
   }
   private seek(): void {
     assert(this.earliest.length === 0);
     let cont = true;
-    let d5 = this.overflow;
-    for (; d5 < this.wheel.length; ++d5) {
-      const l4 = this.wheel[d5];
+    let i5 = this.overflow;
+    for (; i5 < this.wheel.length; ++i5) {
+      const l4 = this.wheel[i5];
       if (l4 === undefined) continue;
-      let d4 = cont ? this.digit4 : 0;
-      for (; d4 < l4.length; ++d4) {
-        const l3 = l4[d4];
+      let i4 = cont ? this.index4 : 0;
+      for (; i4 < l4.length; ++i4) {
+        const l3 = l4[i4];
         if (l3 === undefined) continue;
-        let d3 = cont ? this.digit3 : 0;
-        for (; d3 < l3.length; ++d3) {
-          const l2 = l3[d3];
+        let i3 = cont ? this.index3 : 0;
+        for (; i3 < l3.length; ++i3) {
+          const l2 = l3[i3];
           if (l2 === undefined) continue;
-          let d2 = cont ? this.digit2 : 0;
-          for (; d2 < l2.length; ++d2) {
-            const l1 = l2[d2];
+          let i2 = cont ? this.index2 : 0;
+          for (; i2 < l2.length; ++i2) {
+            const l1 = l2[i2];
             if (l1 === undefined) continue;
-            let d1 = cont ? this.digit1 : 0;
-            for (; d1 < l1.length; ++d1) {
-              const queue = l1[d1];
+            let i1 = cont ? this.index1 : 0;
+            for (; i1 < l1.length; ++i1) {
+              const queue = l1[i1];
               if (queue === undefined) continue;
               if (queue.length === 0) continue;
               this.earliest = queue;
               return;
             }
             cont = false;
-            d1 = 0;
-            assert(l2[d2]?.every(q => !q?.length) ?? true);
-            l2[d2] = undefined as any;
+            i1 = 0;
+            assert(l2[i2]?.every(q => !q?.length) ?? true);
+            l2[i2] = undefined as any;
           }
-          d2 = 0;
-          assert(l3[d3]?.every(q => !q?.length) ?? true);
-          l3[d3] = undefined as any;
+          i2 = 0;
+          assert(l3[i3]?.every(q => !q?.length) ?? true);
+          l3[i3] = undefined as any;
         }
-        d3 = 0;
-        assert(l4[d4]?.every(q => !q?.length) ?? true);
-        l4[d4] = undefined as any;
+        i3 = 0;
+        assert(l4[i4]?.every(q => !q?.length) ?? true);
+        l4[i4] = undefined as any;
       }
-      d4 = 0;
-      assert(this.wheel[d5]?.every(q => !q?.length) ?? true);
-      this.wheel[d5] = undefined as any;
+      i4 = 0;
+      assert(this.wheel[i5]?.every(q => !q?.length) ?? true);
+      this.wheel[i5] = undefined as any;
     }
     this.earliest = this.queue(this.segment(now() - this.base));
   }
   private queue(seg: number): Queue<T> {
     const l4 = this.wheel[TTL.overflow(seg)] ??= [];
-    const l3 = l4[TTL.digit4(seg)] ??= [];
-    const l2 = l3[TTL.digit3(seg)] ??= [];
-    const l1 = l2[TTL.digit2(seg)] ??= [];
-    const qu = l1[TTL.digit1(seg)] ??= new Queue(seg);
+    const l3 = l4[TTL.index4(seg)] ??= [];
+    const l2 = l3[TTL.index3(seg)] ??= [];
+    const l1 = l2[TTL.index2(seg)] ??= [];
+    const qu = l1[TTL.index1(seg)] ??= new Queue(seg);
     return qu;
   }
   public peek(): TTL.Node<T> | undefined {
