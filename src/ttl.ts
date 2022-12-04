@@ -111,7 +111,8 @@ export class TTL<T = undefined> {
     this.earliest = this.queue(this.segment(now() - this.base));
   }
   private queue(seg: number): Queue<T> {
-    const l4 = this.wheel[TTL.overflow(seg)] ??= [];
+    const l5 = this.wheel;
+    const l4 = l5[TTL.overflow(seg)] ??= [];
     const l3 = l4[TTL.index(seg, DIGIT4)] ??= [];
     const l2 = l3[TTL.index(seg, DIGIT3)] ??= [];
     const l1 = l2[TTL.index(seg, DIGIT2)] ??= [];
