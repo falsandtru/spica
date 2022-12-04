@@ -108,7 +108,6 @@ export class TTL<T = undefined> {
       assert(this.wheel[i5]?.every(q => !q?.length) ?? true);
       this.wheel[i5] = undefined as any;
     }
-    this.earliest = this.queue(this.segment(now() - this.base));
   }
   private queue(seg: number): Queue<T> {
     const l5 = this.wheel;
