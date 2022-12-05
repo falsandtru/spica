@@ -1,4 +1,4 @@
-import { max, min, ceil, round } from './alias';
+import { max, min, floor, ceil, round } from './alias';
 import { now } from './chrono';
 import { IterableDict } from './dict';
 import { List } from './list';
@@ -118,6 +118,10 @@ class Entry<K, V> implements List.Node {
   public prev?: this = undefined;
 }
 
+function segment(expiration: number): number {
+  return floor(expiration / 16);
+}
+
 export namespace Cache {
   export interface Options<K, V = undefined> {
     // Max entries.
@@ -185,7 +189,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.expiration = opts.age !== undefined;
     this.age = settings.age!;
     if (settings.eagerExpiration) {
-      this.expirations = new Heap(Heap.min);
+      this.expirations = new Heap(Heap.min, { stable: false });
     }
     this.stats = opts.resolution || opts.offset
       ? new StatsExperimental(this.window, settings.resolution!, settings.offset!)
@@ -383,8 +387,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     entry.expiration = expiration;
     if (this.expiration && this.expirations !== undefined && expiration !== Infinity) {
       entry.enode !== undefined
-        ? this.expirations.update(entry.enode, expiration)
-        : entry.enode = this.expirations.insert(entry, expiration);
+        ? this.expirations.update(entry.enode, segment(expiration))
+        : entry.enode = this.expirations.insert(entry, segment(expiration));
       assert(this.expirations.length <= this.length);
     }
     else if (entry.enode !== undefined) {
@@ -426,7 +430,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       assert(this.LRU.length + this.LFU.length === this.dict.size);
       assert(this.dict.size <= this.capacity);
       if (this.expiration && this.expirations !== undefined && expiration !== Infinity) {
-        entry.enode = this.expirations.insert(entry, expiration);
+        entry.enode = this.expirations.insert(entry, segment(expiration));
         assert(this.expirations.length <= this.length);
       }
       return true;
