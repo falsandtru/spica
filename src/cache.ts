@@ -2,7 +2,7 @@ import { max, min, ceil, round } from './alias';
 import { now } from './chrono';
 import { IterableDict } from './dict';
 import { List } from './list';
-import { TTL } from './ttl';
+import { TimingWheel } from './timingwheel';
 import { extend } from './assign';
 
 // Dual Window Cache
@@ -113,7 +113,7 @@ class Entry<K, V> implements List.Node {
     public expiration: number,
   ) {
   }
-  public enode?: TTL.Node<Entry<K, V>> = undefined;
+  public enode?: TimingWheel.Node<Entry<K, V>> = undefined;
   public next?: this = undefined;
   public prev?: this = undefined;
 }
@@ -185,7 +185,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.expiration = opts.age !== undefined;
     this.age = settings.age!;
     if (settings.eagerExpiration) {
-      this.expirations = new TTL();
+      this.expirations = new TimingWheel(now());
     }
     this.stats = opts.resolution || opts.offset
       ? new StatsExperimental(this.window, settings.resolution!, settings.offset!)
@@ -232,7 +232,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private overlapLFU = 0;
   private readonly expiration: boolean;
   private readonly age: number;
-  private readonly expirations?: TTL<Entry<K, V>>;
+  private readonly expirations?: TimingWheel<Entry<K, V>>;
   public get length(): number {
     const { LRU, LFU } = this;
     return LRU.length + LFU.length;

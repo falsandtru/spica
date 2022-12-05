@@ -21,6 +21,7 @@
     "monad",
     "arrow",
     "cache",
+    "timingwheel",
     "clock",
     "list",
     "heap",

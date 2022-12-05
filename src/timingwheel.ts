@@ -1,6 +1,5 @@
 import { max, floor } from './alias';
 import { List } from './list';
-import { now } from './chrono';
 import { noop } from './function';
 
 const DIGIT1 = 0;
@@ -37,20 +36,20 @@ class Node<T> implements List.Node {
   constructor(
     public readonly queue: Queue<T>,
     public readonly value: T,
-    private readonly expiration: number,
+    private readonly time: number,
   ) {
-    assert([this.expiration]);
+    assert([this.time]);
   }
   public next?: this = undefined;
   public prev?: this = undefined;
 }
 
-export namespace TTL {
+export namespace TimingWheel {
   export interface Node<T> {
     value: T;
   }
 }
-export class TTL<T = undefined> {
+export class TimingWheel<T = undefined> {
   private static overflow(segment: number): number {
     return segment / 2 ** 32 >>> 0;
   }
@@ -58,8 +57,8 @@ export class TTL<T = undefined> {
     return segment >>> digit & mask;
   }
   constructor(
+    private readonly base = 0,
     private resolution = 16,
-    private readonly base = now(),
   ) {
     assert(this.earliest.segment >= 0);
   }
@@ -123,11 +122,11 @@ export class TTL<T = undefined> {
   }
   private queue(segment: number): Queue<T> {
     const w5 = this.wheels;
-    const w4 = w5[TTL.overflow(segment)] ??= wheel();
-    const w3 = w4[TTL.index(segment, DIGIT4, MASK4)] ??= wheel();
-    const w2 = w3[TTL.index(segment, DIGIT3, MASK3)] ??= wheel();
-    const w1 = w2[TTL.index(segment, DIGIT2, MASK2)] ??= wheel();
-    const qu = w1[TTL.index(segment, DIGIT1, MASK1)] ??= new Queue(
+    const w4 = w5[TimingWheel.overflow(segment)] ??= wheel();
+    const w3 = w4[TimingWheel.index(segment, DIGIT4, MASK4)] ??= wheel();
+    const w2 = w3[TimingWheel.index(segment, DIGIT3, MASK3)] ??= wheel();
+    const w1 = w2[TimingWheel.index(segment, DIGIT2, MASK2)] ??= wheel();
+    const qu = w1[TimingWheel.index(segment, DIGIT1, MASK1)] ??= new Queue(
       segment,
       () => {
         assert(qu.length === 0);
@@ -144,13 +143,13 @@ export class TTL<T = undefined> {
       });
     return qu;
   }
-  public peek(): TTL.Node<T> | undefined {
+  public peek(): TimingWheel.Node<T> | undefined {
     return this.earliest.head;
   }
-  public add(expiration: number, value: T): TTL.Node<T>;
-  public add(this: TTL<undefined>, expiration: number, value?: T): TTL.Node<T>;
-  public add(expiration: number, value: T): TTL.Node<T> {
-    const queue = this.queue(this.segment(expiration - this.base));
+  public add(time: number, value: T): TimingWheel.Node<T>;
+  public add(this: TimingWheel<undefined>, time: number, value?: T): TimingWheel.Node<T>;
+  public add(time: number, value: T): TimingWheel.Node<T> {
+    const queue = this.queue(this.segment(time - this.base));
     if (queue.segment < this.earliest.segment || this.earliest.length === 0) {
       this.earliest = queue;
     }
@@ -158,9 +157,9 @@ export class TTL<T = undefined> {
     if (queue.length === 0) {
       queue.open();
     }
-    return queue.push(new Node(queue, value, expiration));
+    return queue.push(new Node(queue, value, time));
   }
-  public delete(node: TTL.Node<T>): void {
+  public delete(node: TimingWheel.Node<T>): void {
     const n = node as Node<T>;
     if (n.next === undefined) return;
     --this.$length;
