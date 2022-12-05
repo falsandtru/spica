@@ -63,6 +63,7 @@ export class TTL<T = undefined> {
   }
   constructor(
     private resolution = 16,
+    private readonly base = now(),
   ) {
     assert(this.earliest.segment >= 0);
   }
@@ -74,7 +75,6 @@ export class TTL<T = undefined> {
     offset = floor(max(offset / this.resolution, 0));
     return offset + 1;
   }
-  private readonly base = now();
   private wheels: Wheels<T> = wheel();
   private earliest = new Queue<T>(0);
   private seek(): void {
