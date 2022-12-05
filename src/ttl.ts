@@ -13,18 +13,14 @@ const MASK2 = (1 << DIGIT3 - DIGIT2) - 1;
 const MASK3 = (1 << DIGIT4 - DIGIT3) - 1;
 const MASK4 = (1 << DIGIT5 - DIGIT4) - 1;
 const COUNT = Symbol('count');
-const INIT = 16;
-assert(INIT <= Math.min(MASK1, MASK2, MASK3, MASK4) + 1);
 
 type Wheels<T> = Wheel<Wheel<Wheel<Wheel<Wheel<Queue<T>>>>>>;
 interface Wheel<T> {
   [index: number]: T;
   [COUNT]: number;
-  readonly length: number;
 }
 function wheel<T>(): Wheel<T> {
-  const w: Wheel<T> = Array(INIT) as any;
-  w[COUNT] = 0;
+  const w: Wheel<T> = { [COUNT]: 0 };
   return w;
 }
 
@@ -81,60 +77,48 @@ export class TTL<T = undefined> {
     assert(this.earliest.length === 0);
     if (this.$length === 0) return;
     let segment = this.earliest.segment;
-    let cont = true;
     const w5 = this.wheels;
     assert(w5[COUNT] !== 0);
-    for (let i = cont ? TTL.overflow(segment) : 0; i < w5.length; ++i) {
-      if (!(i in w5)) continue;
+    for (const i in w5) {
       const w4 = w5[i];
-      if (w4 === undefined) continue;
       if (w4[COUNT] === 0) {
-        w5[i] = undefined as any;
+        delete w5[i];
         this.earliest.segment = segment -= segment & ~0;
         continue;
       }
-      for (let i = cont ? TTL.index(segment, DIGIT4, MASK4) : 0; i < w4.length; ++i) {
-        if (!(i in w4)) continue;
+      for (const i in w4) {
         const w3 = w4[i];
-        if (w3 === undefined) continue;
         if (w3[COUNT] === 0) {
-          w4[i] = undefined as any;
+          delete w4[i];
           this.earliest.segment = segment -= segment & (1 << DIGIT4) - 1;
           continue;
         }
-        for (let i = cont ? TTL.index(segment, DIGIT3, MASK3) : 0; i < w3.length; ++i) {
-          if (!(i in w3)) continue;
+        for (const i in w3) {
           const w2 = w3[i];
-          if (w2 === undefined) continue;
           if (w2[COUNT] === 0) {
-            w3[i] = undefined as any;
+            delete w3[i];
             this.earliest.segment = segment -= segment & (1 << DIGIT3) - 1;
             continue;
           }
-          for (let i = cont ? TTL.index(segment, DIGIT2, MASK2) : 0; i < w2.length; ++i) {
-            if (!(i in w2)) continue;
+          for (const i in w2) {
             const w1 = w2[i];
-            if (w1 === undefined) continue;
             if (w1[COUNT] === 0) {
-              w2[i] = undefined as any;
+              delete w2[i];
               this.earliest.segment = segment -= segment & (1 << DIGIT2) - 1;
               continue;
             }
-            for (let i = cont ? TTL.index(segment, DIGIT1, MASK1) : 0; i < w1.length; ++i) {
-              if (!(i in w1)) continue;
+            for (const i in w1) {
               const queue = w1[i];
-              if (queue === undefined) continue;
-              if (queue.length === 0) continue;
+              if (queue.length === 0) {
+                delete w1[i];
+                continue;
+              }
               this.earliest = queue;
               return;
             }
-            cont = false;
           }
-          cont = false;
         }
-        cont = false;
       }
-      cont = false;
     }
   }
   private queue(segment: number): Queue<T> {
