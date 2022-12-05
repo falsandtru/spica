@@ -133,7 +133,7 @@ export class PriorityQueue<T, P = T> {
   }
   public peek(priority?: P): T | undefined {
     return arguments.length === 0
-      ? this.heap.peek()?.peek()
+      ? this.heap.peek()?.value.peek()
       : this.dict.get(priority!)?.peek();
   }
   public push(priority: P, value: T): void {
@@ -144,7 +144,7 @@ export class PriorityQueue<T, P = T> {
     if (this.$length === 0) return;
     --this.$length;
     const queue = arguments.length === 0
-      ? this.heap.peek()
+      ? this.heap.peek()!.value
       : this.dict.get(priority!);
     const value = queue?.pop();
     if (queue?.isEmpty()) {
