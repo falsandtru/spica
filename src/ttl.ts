@@ -28,7 +28,6 @@ function wheel<T>(): Wheel<T> {
   return w;
 }
 
-
 class Queue<T> extends List<Node<T>> {
   constructor(
     public segment: number,
