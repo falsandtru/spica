@@ -40,8 +40,8 @@ export class List<T> {
   public prev(index: number): number {
     return this.prevs[index];
   }
-  public at(index: number): T {
-    return this.values[index];
+  public at(offset: number): T {
+    return this.values[this.index(offset)];
   }
   public index(offset: number, index = this.head): number {
     if (offset === 0) return this.nexts[index];
@@ -136,6 +136,9 @@ export class List<T> {
     if (index === this.head) {
       this.head = next;
     }
+  }
+  public get(index: number): T {
+    return this.values[index];
   }
   public set(index: number, value: T): void {
     this.values[index] = value;
