@@ -14,9 +14,6 @@ LFU論理寿命：
 LRU下限：
 小容量で大効果につき採用。
 
-LFUヒット率変化率：
-S3での逆効果のみ確認につきオプション化。
-
 統計解像度：
 効果ないが検証用に残置。
 
@@ -148,7 +145,6 @@ export namespace Cache {
     // Range: 0-100
     readonly sample?: number;
     readonly resolution?: number;
-    readonly offset?: number;
     readonly sweep?: {
       readonly threshold?: number;
       readonly window?: number;
@@ -191,8 +187,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (settings.eagerExpiration) {
       this.expirations = new Heap(Heap.min, { stable: false });
     }
-    this.stats = opts.resolution || opts.offset
-      ? new StatsExperimental(this.window, settings.resolution!, settings.offset!)
+    this.stats = opts.resolution
+      ? new StatsExperimental(this.window, settings.resolution!, 0)
       : new Stats(this.window);
     this.sweeper = new Sweeper(
       this.LRU,
@@ -217,7 +213,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       clear: true,
     },
     resolution: 1,
-    offset: 0,
     sweep: {
       threshold: 10,
       window: 5,
@@ -617,10 +612,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const ratioF = 10000 - ratioR;
     const densityR = this.densityR = ratioR * leverage;
     const densityF = this.densityF = ratioF * (1000 - leverage);
-    const densityFO = stats.offset && stats.ratioLFU(true) * (1000 - leverage);
     // 操作頻度を超えてキャッシュ比率を増減させても余剰比率の消化が追いつかず無駄
-    // LRUの下限設定ではLRU拡大の要否を迅速に判定できないためLFUのヒット率低下の検出で代替する
-    if (this.partition > 0 && (densityR > densityF || stats.offset !== 0 && densityF * 100 < densityFO * (100 - stats.offset))) {
+    if (this.partition > 0 && densityR > densityF) {
       if (lenR >= this.capacity - this.partition) {
         const delta = ratioF > ratioR
           ? this.unit * ratioF / ratioR | 0
