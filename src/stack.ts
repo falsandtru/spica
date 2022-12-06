@@ -9,7 +9,7 @@ export class Stack<T> {
   public peek(index: 0 | -1 = 0): T | undefined {
     const { array } = this;
     return index === 0
-      ? array[(array.length || 1) - 1]
+      ? array.at(-1)
       : array[0];
   }
   public push(value: T): void {
