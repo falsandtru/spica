@@ -44,15 +44,16 @@ export class List<T> {
     return this.values[index];
   }
   public index(offset: number, index = this.head): number {
+    if (offset === 0) return this.nexts[index];
     if (offset > 0) {
       const pointers = this.nexts;
-      while (offset--) {
+      while (offset-- !== 0) {
         index = pointers[index];
       }
     }
     else {
       const pointers = this.prevs;
-      while (offset++) {
+      while (offset++ !== 0) {
         index = pointers[index];
       }
     }
