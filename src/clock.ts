@@ -67,7 +67,7 @@ export class Clock<K, V> implements IterableDict<K, V> {
       hand = (hand + l - r) % capacity;
       this.locate(hand, key, value);
       assert(r < BASE);
-      refs[i] = b >>> l << l | b & (1 << r) - 1;
+      refs[i] = b >>> l << l | b << r >>> r;
       return hand;
     }
   }
@@ -171,7 +171,7 @@ export class CLOCK<T> {
       hand = (hand + l - r) % capacity;
       this.locate(hand, value);
       assert(r < BASE);
-      refs[i] = b >>> l << l | b & (1 << r) - 1;
+      refs[i] = b >>> l << l | b << r >>> r;
       return hand;
     }
   }
