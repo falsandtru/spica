@@ -132,6 +132,7 @@ export namespace Cache {
     readonly resource?: number;
     readonly age?: number;
     readonly eagerExpiration?: boolean;
+    // WARNING: Don't add any new key in disposing.
     readonly disposer?: (value: V, key: K) => void;
     readonly capture?: {
       readonly delete?: boolean;
@@ -289,6 +290,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
   private readonly sweeper: Sweeper<List<Entry<K, V>>>;
   private injection = 0;
+  // Update and deletion are reentrant but addition is not.
   private ensure(margin: number, target?: Entry<K, V>, capture = false): Entry<K, V> | undefined {
     let size = target?.size ?? 0;
     assert(margin - size <= this.resource || !capture);
@@ -393,10 +395,14 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     assert(this.LRU.length + this.LFU.length === this.dict.size);
     this.disposer?.(value$, key$);
   }
-  public add(key: K, value: V, opts?: { size?: number; age?: number; }, entry?: Entry<K, V>): boolean;
-  public add(this: Cache<K, undefined>, key: K, value?: V, opts?: { size?: number; age?: number; }, entry?: Entry<K, V>): boolean;
-  public add(key: K, value: V, { size = 1, age = this.age }: { size?: number; age?: number; } = {}, entry?: Entry<K, V>): boolean {
-    if (size < 1 || this.resource < size || age <= 0) {
+  private validate(size: number, age: number): boolean {
+    return 1 <= size && size <= this.resource
+        && 1 <= age;
+  }
+  public add(key: K, value: V, opts?: { size?: number; age?: number; }, victim?: Entry<K, V>): boolean;
+  public add(this: Cache<K, undefined>, key: K, value?: V, opts?: { size?: number; age?: number; }, victim?: Entry<K, V>): boolean;
+  public add(key: K, value: V, { size = 1, age = this.age }: { size?: number; age?: number; } = {}, victim?: Entry<K, V>): boolean {
+    if (!this.validate(size, age)) {
       this.disposer?.(value, key);
       return false;
     }
@@ -406,63 +412,65 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const expiration = age === Infinity
       ? age
       : now() + age;
-    entry = this.ensure(size, entry, true);
-    if (entry === undefined) {
-      assert(!this.dict.has(key));
-      assert(LRU.length !== this.capacity);
-      this.$size += size;
-      assert(0 < this.size && this.size <= this.resource);
-      entry = new Entry(
-        key,
-        value,
-        size,
-        LRU,
-        'LRU',
-        expiration,
-      );
-      LRU.unshift(entry);
-      this.dict.set(key, entry);
+    victim = this.ensure(size, victim, true);
+    // Note that the key will be duplicate if the key is evicted and added again in disposing.
+    if (victim !== undefined) {
+      assert(victim === LRU.head!.prev);
+      victim.region === 'LFU' && --this.overlapLFU;
+      assert(this.overlapLFU >= 0);
+      this.dict.delete(victim.key);
+      this.dict.set(key, victim);
       assert(this.LRU.length + this.LFU.length === this.dict.size);
       assert(this.dict.size <= this.capacity);
-      if (this.expiration && this.expirations !== undefined && expiration !== Infinity) {
-        entry.enode = this.expirations.insert(entry, segment(expiration));
-        assert(this.expirations.length <= this.length);
-      }
+      victim.region = 'LRU';
+      LRU.head = victim;
+      this.update(victim, key, value, size, expiration);
       return true;
     }
 
-    assert(entry === LRU.head!.prev);
-    entry.region === 'LFU' && --this.overlapLFU;
-    assert(this.overlapLFU >= 0);
-    this.dict.delete(entry.key);
+    assert(!this.dict.has(key));
+    assert(LRU.length !== this.capacity);
+    this.$size += size;
+    assert(0 < this.size && this.size <= this.resource);
+    const entry = new Entry(
+      key,
+      value,
+      size,
+      LRU,
+      'LRU',
+      expiration,
+    );
+    LRU.unshift(entry);
     this.dict.set(key, entry);
     assert(this.LRU.length + this.LFU.length === this.dict.size);
     assert(this.dict.size <= this.capacity);
-    entry.region = 'LRU';
-    LRU.head = entry;
-    this.update(entry, key, value, size, expiration);
+    if (this.expiration && this.expirations !== undefined && expiration !== Infinity) {
+      entry.enode = this.expirations.insert(entry, segment(expiration));
+      assert(this.expirations.length <= this.length);
+    }
     return true;
   }
   public put(key: K, value: V, opts?: { size?: number; age?: number; }): boolean;
   public put(this: Cache<K, undefined>, key: K, value?: V, opts?: { size?: number; age?: number; }): boolean;
   public put(key: K, value: V, { size = 1, age = this.age }: { size?: number; age?: number; } = {}): boolean {
-    if (size < 1 || this.resource < size || age <= 0) {
+    if (!this.validate(size, age)) {
       this.disposer?.(value, key);
       return false;
     }
 
-    let entry = this.dict.get(key);
+    const entry = this.dict.get(key);
     const match = entry !== undefined;
-    entry = this.ensure(size, entry, true);
-    if (!match || entry === undefined) {
-      this.add(key, value, { size, age }, entry);
+    const victim = this.ensure(size, entry, true);
+    // Note that the key of entry or victim may be changed if the new key is set in disposing.
+    if (match && entry === victim) {
+      const expiration = age === Infinity
+        ? age
+        : now() + age;
+      this.update(entry, key, value, size, expiration);
       return match;
     }
 
-    const expiration = age === Infinity
-      ? age
-      : now() + age;
-    this.update(entry, key, value, size, expiration);
+    this.add(key, value, { size, age }, victim);
     return match;
   }
   public set(key: K, value: V, opts?: { size?: number; age?: number; }): this;
