@@ -197,14 +197,25 @@ function swap<T, O>(array: Node<T, O>[], index1: number, index2: number): void {
   node2.index = index1;
 }
 
-class MultiNode<T, O> extends List.Node {
+class MList<T, O> extends List<MNode<T, O>> {
   constructor(
-    public list: List<MultiNode<T, O>>,
+    public readonly order: O,
+    heap: Heap<MList<T, O>, O>,
+  ) {
+    super();
+    this.heap = heap.insert(this, order);
+  }
+  public readonly heap: Heap.Node<MList<T, O>, O>;
+}
+class MNode<T, O> implements List.Node {
+  constructor(
+    public list: MList<T, O>,
     public order: O,
     public value: T,
   ) {
-    super();
   }
+  public next?: this = undefined;
+  public prev?: this = undefined;
 }
 
 
@@ -219,8 +230,6 @@ export namespace MultiHeap {
   }
 }
 export class MultiHeap<T, O = T> {
-  private static readonly order = Symbol('order');
-  private static readonly heap = Symbol('heap');
   public static readonly max = Heap.max;
   public static readonly min = Heap.min;
   constructor(
@@ -231,13 +240,10 @@ export class MultiHeap<T, O = T> {
     this.heap = new Heap(this.cmp);
   }
   private readonly clean: boolean;
-  private readonly heap: Heap<List<MultiNode<T, O>>, O>;
-  private readonly dict = new Map<O, List<MultiNode<T, O>>>();
-  private readonly list = memoize<O, List<MultiNode<T, O>>>(order => {
-    const list = new List<MultiNode<T, O>>();
-    list[MultiHeap.order] = order;
-    list[MultiHeap.heap] = this.heap.insert(list, order);
-    return list;
+  private readonly heap: Heap<MList<T, O>, O>;
+  private readonly dict = new Map<O, MList<T, O>>();
+  private readonly list = memoize<O, MList<T, O>>(order => {
+    return new MList<T, O>(order, this.heap);
   }, this.dict);
   private $length = 0;
   public get length(): number {
@@ -251,13 +257,13 @@ export class MultiHeap<T, O = T> {
   }
   public insert(this: MultiHeap<T, T>, value: T): MultiHeap.Node<T, O>;
   public insert(value: T, order: O): MultiHeap.Node<T, O>;
-  public insert(value: T, order?: O): MultiNode<T, O> {
+  public insert(value: T, order?: O): MNode<T, O> {
     if (arguments.length === 1) {
       order = value as any;
     }
     assert([order = order!]);
     ++this.$length;
-    const node = new MultiNode(this.list(order), order, value);
+    const node = new MNode(this.list(order), order, value);
     node.list.push(node);
     return node;
   }
@@ -268,35 +274,32 @@ export class MultiHeap<T, O = T> {
     const value = list.shift()!.value;
     if (list.length === 0) {
       this.heap.extract();
-      this.clean && this.dict.delete(list[MultiHeap.order]);
+      this.clean && this.dict.delete(list.order);
     }
     return value;
   }
   public delete(node: MultiHeap.Node<T, O>): T;
-  public delete(node: MultiNode<T, O>): T {
+  public delete(node: MNode<T, O>): T {
     if (node.next === undefined) throw new Error('Invalid node');
     const list = node.list;
     --this.$length;
     if (list.length === 1) {
-      this.heap.delete(list[MultiHeap.heap]);
-      this.clean && this.dict.delete(list[MultiHeap.order]);
+      this.heap.delete(list.heap);
+      this.clean && this.dict.delete(list.order);
     }
     return list.delete(node).value;
   }
   public update(node: MultiHeap.Node<T, O>, order: O, value?: T): MultiHeap.Node<T, O>;
-  public update(node: MultiNode<T, O>, order?: O, value?: T): MultiHeap.Node<T, O> {
+  public update(node: MNode<T, O>, order?: O, value?: T): MultiHeap.Node<T, O> {
     const list = node.list;
     if (list === undefined) throw new Error('Invalid node');
     assert([order = order!]);
     if (arguments.length >= 3) {
       node.value = value!;
     }
-    if (this.cmp(list[MultiHeap.order], order) === 0) return node;
+    if (this.cmp(list.order, order) === 0) return node;
     this.delete(node);
     return this.insert(node.value, order);
-  }
-  public find(order: O): List<MultiNode<T, O>> | undefined {
-    return this.dict.get(order);
   }
   public clear(): void {
     this.heap.clear();
