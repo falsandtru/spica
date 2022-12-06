@@ -178,6 +178,23 @@ describe('Unit: lib/clock', () => {
       assert(clock.get(2) === 2);
     });
 
+    it('verify', function () {
+      this.timeout(10 * 1e3);
+
+      const capacity = 96;
+      const clock = new CLOCK<number>(capacity);
+
+      const trials = capacity * 1000;
+      const random = pcg32.random(pcg32.seed(0n, 0n));
+      for (let i = 0; i < trials; ++i) {
+        const key = random() * capacity * 10 | 0;
+        clock.add(key);
+        assert(clock.length <= capacity);
+        assert(clock['values'].length === clock.length);
+      }
+      assert(clock.length === capacity);
+    });
+
   });
 
 });
