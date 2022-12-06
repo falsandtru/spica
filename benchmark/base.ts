@@ -135,7 +135,7 @@ describe('Benchmark:', function () {
       it(`Array  index ${length.toLocaleString('en')}`, function (done) {
         const data = Array();
         for (let i = 0; i < length; ++i) data.push(0);
-        benchmark(`Array  index ${length.toLocaleString('en')}`, () => data[length - 1], done);
+        benchmark(`Array  index ${length.toLocaleString('en')}`, () => data.at(-1), done);
       });
 
       it(`Ring   index ${length.toLocaleString('en')}`, function (done) {
