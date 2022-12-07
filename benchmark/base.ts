@@ -95,37 +95,39 @@ describe('Benchmark:', function () {
       });
 
       it(`Heap         ${length.toLocaleString('en')}`, function (done) {
-        const heap = new Heap<number>(Heap.min);
-        for (let i = 0; i < length; ++i) heap.insert(1, i);
-        let i = 0;
-        benchmark(`Heap         ${length.toLocaleString('en')}`, () =>
-          heap.extract() && heap.insert(1, i = i++ % length), done);
+        const data = new Heap<number>(Heap.min);
+        for (let i = 0; i < length; ++i) data.insert(i, i);
+        benchmark(`Heap         ${length.toLocaleString('en')}`, () => {
+          const i = data.extract()!;
+          data.insert(i, i);
+        }, done);
       });
 
       it(`MQueue       ${length.toLocaleString('en')}`, function (done) {
         const data = new MultiQueue();
-        for (let i = 0; i < length; ++i) data.push(i % length, i % length);
+        for (let i = 0; i < length; ++i) data.push(i, 0);
         let i = 0;
         benchmark(`MQueue       ${length.toLocaleString('en')}`, () => {
           data.pop(i);
-          data.push(i, i);
+          data.push(i, 0);
           i = ++i % length;
         }, done);
       });
 
-      it.skip(`MultiHeap ${length.toLocaleString('en')}`, function (done) {
-        const heap = new MultiHeap<number>(MultiHeap.min);
-        for (let i = 0; i < length; ++i) heap.insert(1, i);
-        let i = 0;
-        benchmark(`MultiHeap ${length.toLocaleString('en')}`, () =>
-          heap.extract() && heap.insert(1, i = i++ % length), done);
+      it.skip(`MultiHeap    ${length.toLocaleString('en')}`, function (done) {
+        const data = new MultiHeap<number>(MultiHeap.min);
+        for (let i = 0; i < length; ++i) data.insert(i, i);
+        benchmark(`MultiHeap    ${length.toLocaleString('en')}`, () => {
+          const i = data.extract()!;
+          data.insert(i, i);
+        }, done);
       });
 
       it(`PQueue       ${length.toLocaleString('en')}`, function (done) {
-        const data = new PriorityQueue();
+        const data = new PriorityQueue<number>();
         for (let i = 0; i < length; ++i) data.push(i % 10, i % 10);
         benchmark(`PQueue       ${length.toLocaleString('en')}`, () => {
-          const i = data.pop();
+          const i = data.pop()!;
           data.push(i, i);
         }, done);
       });
@@ -163,17 +165,17 @@ describe('Benchmark:', function () {
       });
 
       it(`Heap   peek  ${length.toLocaleString('en')}`, function (done) {
-        const heap = new Heap<number>(Heap.min);
-        for (let i = 0; i < length; ++i) heap.insert(1, i);
+        const data = new Heap<number>(Heap.min);
+        for (let i = 0; i < length; ++i) data.insert(0, i);
         benchmark(`Heap   peek  ${length.toLocaleString('en')}`, () =>
-          heap.peek(), done);
+          data.peek(), done);
       });
 
       it.skip(`MultiHeap peek ${length.toLocaleString('en')}`, function (done) {
-        const heap = new MultiHeap<number>(MultiHeap.min);
-        for (let i = 0; i < length; ++i) heap.insert(1, i);
+        const data = new MultiHeap<number>(MultiHeap.min);
+        for (let i = 0; i < length; ++i) data.insert(0, i);
         benchmark(`MultiHeap peek ${length.toLocaleString('en')}`, () =>
-          heap.peek(), done);
+          data.peek(), done);
       });
 
       it(`PQueue peek  ${length.toLocaleString('en')}`, function (done) {
