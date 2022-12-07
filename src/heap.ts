@@ -9,9 +9,6 @@ interface Node<T, O> {
   value: T;
 }
 
-let size = 16;
-assert([size = 0]);
-
 export namespace Heap {
   export interface Options {
     stable?: boolean;
@@ -31,7 +28,7 @@ export class Heap<T, O = T> {
     this.stable = options?.stable ?? false;
   }
   private readonly stable: boolean;
-  private array: Node<T, O>[] = Array(size);
+  private array: Record<number, Node<T, O>> = {};
   private $length = 0;
   public get length(): number {
     return this.$length;
@@ -107,7 +104,7 @@ export class Heap<T, O = T> {
     sort(this.cmp, array, index, this.$length, this.stable);
   }
   public clear(): void {
-    this.array = Array(size);
+    this.array = {};
     this.$length = 0;
   }
 }

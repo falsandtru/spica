@@ -4,7 +4,7 @@ import { pcg32 } from './random';
 describe('Unit: lib/heap', () => {
   describe('Heap', () => {
     function inspect<T>(heap: Heap<T>) {
-      return Array.from(heap['array']);
+      return Object.values(heap['array']);
     }
 
     it('insert/extract', () => {
