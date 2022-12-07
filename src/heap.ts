@@ -114,7 +114,7 @@ export class Heap<T, O = T> {
 
 function sort<T, O>(
   cmp: (a: O, b: O) => number,
-  array: Node<T, O>[],
+  array: Record<number, Node<T, O>>,
   index: number,
   length: number,
   stable: boolean,
@@ -135,7 +135,7 @@ function sort<T, O>(
 
 function upHeapify<T, O>(
   cmp: (a: O, b: O) => number,
-  array: Node<T, O>[],
+  array: Record<number, Node<T, O>>,
   index: number,
 ): boolean {
   assert(index);
@@ -153,7 +153,7 @@ function upHeapify<T, O>(
 
 function downHeapify<T, O>(
   cmp: (a: O, b: O) => number,
-  array: Node<T, O>[],
+  array: Record<number, Node<T, O>>,
   index: number,
   length: number,
   stable: boolean,
@@ -184,7 +184,7 @@ function downHeapify<T, O>(
   return changed;
 }
 
-function swap<T, O>(array: Node<T, O>[], index1: number, index2: number): void {
+function swap<T, O>(array: Record<number, Node<T, O>>, index1: number, index2: number): void {
   assert(index1 && index2);
   if (index1 === index2) return;
   const pos1 = index1 - 1;
