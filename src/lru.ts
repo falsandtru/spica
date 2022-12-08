@@ -24,12 +24,6 @@ export class LRU<K, V> implements IterableDict<K, V> {
   public get size(): number {
     return this.list.length;
   }
-  private evict(): void {
-    const { dict, list } = this;
-    assert(list.length > 0);
-    const node = list.pop()!;
-    dict.delete(node.key);
-  }
   private replace(key: K, value: V): void {
     const { dict, list } = this;
     const node = list.last!;
@@ -38,6 +32,13 @@ export class LRU<K, V> implements IterableDict<K, V> {
     list.head = node;
     node.key = key;
     node.value = value;
+  }
+  public evict(): [K, V] | undefined {
+    const { dict, list } = this;
+    if (list.length === 0) return;
+    const node = list.pop()!;
+    dict.delete(node.key);
+    return [node.key, node.value];
   }
   public add(key: K, value: V): boolean {
     const { dict, list } = this;
@@ -86,12 +87,6 @@ export class LRU<K, V> implements IterableDict<K, V> {
   public clear(): void {
     this.dict.clear();
     this.list.clear();
-  }
-  public resize(capacity: number): void {
-    this.capacity = capacity;
-    while (this.list.length > this.capacity) {
-      this.evict();
-    }
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
     for (const { key, value } of this.list) {

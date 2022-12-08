@@ -243,7 +243,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     return this.$size;
   }
   private readonly disposer?: (value: V, key: K) => void;
-  private evict(entry: Entry<K, V>, callback: boolean): void {
+  private evict$(entry: Entry<K, V>, callback: boolean): void {
     assert(this.LRU.length + this.LFU.length === this.dict.size);
     //assert(this.dict.size <= this.capacity);
     assert(entry.next);
@@ -365,7 +365,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       }
       assert(victim !== target);
       assert(this.dict.has(victim.key));
-      this.evict(victim, true);
+      this.evict$(victim, true);
       target = target?.next && target;
       size = target?.size ?? 0;
     }
@@ -398,6 +398,12 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private validate(size: number, age: number): boolean {
     return 1 <= size && size <= this.resource
         && 1 <= age;
+  }
+  public evict(): [K, V] | undefined {
+    const victim = this.LRU.last ?? this.LFU.last;
+    if (victim === undefined) return;
+    this.evict$(victim, true);
+    return [victim.key, victim.value];
   }
   public add(key: K, value: V, opts?: { size?: number; age?: number; }, victim?: Entry<K, V>): boolean;
   public add(this: Cache<K, undefined>, key: K, value?: V, opts?: { size?: number; age?: number; }, victim?: Entry<K, V>): boolean;
@@ -487,7 +493,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     }
     if (this.expiration && entry.expiration !== Infinity && entry.expiration < now()) {
       this.sweeper.miss();
-      this.evict(entry, true);
+      this.evict$(entry, true);
       return;
     }
     this.replace(entry);
@@ -497,7 +503,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const entry = this.dict.get(key);
     if (entry === undefined) return false;
     if (this.expiration && entry.expiration !== Infinity && entry.expiration < now()) {
-      this.evict(entry, true);
+      this.evict$(entry, true);
       return false;
     }
     return true;
@@ -505,7 +511,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   public delete(key: K): boolean {
     const entry = this.dict.get(key);
     if (entry === undefined) return false;
-    this.evict(entry, this.settings.capture!.delete === true);
+    this.evict$(entry, this.settings.capture!.delete === true);
     return true;
   }
   public clear(): void {
