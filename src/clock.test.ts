@@ -1,4 +1,4 @@
-import { Clock, CLOCK } from './clock';
+import { Clock } from './clock';
 import { LRU } from './lru';
 import { pcg32 } from './random';
 
@@ -138,61 +138,6 @@ describe('Unit: lib/clock', () => {
       console.debug('Clock / LRU hit ratio', `${stats.clock / stats.lru * 100 | 0}%`);
       assert(stats.clock / stats.lru * 100 >>> 0 === 105);
       assert(clock['values'].length === capacity);
-    });
-
-  });
-
-  describe('CLOCK', () => {
-    it('get/set', function () {
-      const capacity = 96;
-      const clock = new CLOCK<number>(capacity - 1);
-      assert(clock['capacity'] === capacity);
-
-      for (let i = 0; i < capacity * 2; ++i) {
-        clock.add(i);
-      }
-      assert(clock['values'].length === capacity);
-      for (let i = capacity; i < capacity * 2; ++i) {
-        assert(clock.get(i - capacity) === i);
-      }
-      for (let i = 0; i < capacity; ++i) {
-        clock.add(i);
-      }
-      for (let i = 0; i < capacity; ++i) {
-        assert(clock.get(i) === i);
-      }
-    });
-
-    it('delete', function () {
-      const capacity = 32;
-      const clock = new CLOCK<number>(capacity);
-
-      for (let i = 0; i < capacity; ++i) {
-        clock.set(i, i);
-      }
-      clock.del(0);
-      clock.set(0, 0);
-      assert(clock.get(1) === 1);
-      clock.del(1);
-      clock.set(1, 1);
-      assert(clock.get(2) === 2);
-    });
-
-    it('verify', function () {
-      this.timeout(10 * 1e3);
-
-      const capacity = 96;
-      const clock = new CLOCK<number>(capacity);
-
-      const trials = capacity * 1000;
-      const random = pcg32.random(pcg32.seed(0n, 0n));
-      for (let i = 0; i < trials; ++i) {
-        const key = random() * capacity * 10 | 0;
-        clock.add(key);
-        assert(clock.length <= capacity);
-        assert(clock['values'].length === clock.length);
-      }
-      assert(clock.length === capacity);
     });
 
   });
