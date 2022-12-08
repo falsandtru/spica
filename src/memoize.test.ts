@@ -17,6 +17,13 @@ describe('Unit: lib/memoize', () => {
       assert(f(0) === 1);
     });
 
+    it('Object', () => {
+      let cnt = 0;
+      const f = memoize<number, number>(key => key + ++cnt, {});
+      assert(f(0) === 1);
+      assert(f(0) === 1);
+    });
+
     it('Cache', () => {
       let cnt = 0;
       const f = memoize<number, number>(key => key + ++cnt, new Cache(9));
