@@ -23,7 +23,7 @@ export class Colistener<T, U = undefined> extends Coroutine<U, T> {
         }
         assert(queue.length > 0);
       }));
-      while (true) {
+      for (; ;) {
         await notifier;
         notifier = new AtomicFuture();
         notifiable = true;
