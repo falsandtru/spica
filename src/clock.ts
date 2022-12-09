@@ -126,18 +126,49 @@ function search(b: number, r: number): number {
   throw new Error('Unreachable');
 }
 function bsearch(b: number, r: number): number {
-  let l = 0;
-  for (let p = BASE / 2; p !== 0; p >>= 1) {
-    const d = l + p;
-    assert(0 < d && d < BASE);
-    if (d <= r || b >>> r << r << BASE - d === ~0 >>> r << r << BASE - d) {
-      l = d;
-    }
-  }
-  assert(l >= r);
-  assert(l === r && (b & 1 << r) === 0 || b >>> r << r << BASE - l === ~0 >>> r << r << BASE - l);
+  const n = ~b >>> r << r >>> 0;
+  const l = potision(0x05f66a47 * (n & -n) >>> 27);
   assert(l === search(b, r));
   return l;
+}
+//const potisions = new Uint8Array([
+//  0, 1, 2, 26, 23, 3, 15, 27, 24, 21, 19, 4, 12, 16, 28, 6, 31, 25, 22, 14, 20, 18, 11, 5, 30, 13, 17, 10, 29, 9, 8, 7,
+//]);
+function potision(n: number): number {
+  switch (n) {
+    case 0: return 0;
+    case 1: return 1;
+    case 2: return 2;
+    case 3: return 26;
+    case 4: return 23;
+    case 5: return 3;
+    case 6: return 15;
+    case 7: return 27;
+    case 8: return 24;
+    case 9: return 21;
+    case 10: return 19;
+    case 11: return 4;
+    case 12: return 12;
+    case 13: return 16;
+    case 14: return 28;
+    case 15: return 6;
+    case 16: return 31;
+    case 17: return 25;
+    case 18: return 22;
+    case 19: return 14;
+    case 20: return 20;
+    case 21: return 18;
+    case 22: return 11;
+    case 23: return 5;
+    case 24: return 30;
+    case 25: return 13;
+    case 26: return 17;
+    case 27: return 10;
+    case 28: return 29;
+    case 29: return 9;
+    case 30: return 8;
+    default: return 7;
+  }
 }
 assert(bsearch(0b0, 0) === 0);
 assert(bsearch(0b1, 0) === 1);
