@@ -120,10 +120,10 @@ export class Clock<K, V> implements IterableDict<K, V> {
 }
 
 function search(b: number, r: number): number {
-  for (let l = r; l < BASE; ++l) {
+  assert(b !== ~0);
+  for (let l = r; ; ++l) {
     if ((b & 1 << l) === 0) return l;
   }
-  throw new Error('Unreachable');
 }
 function bsearch(b: number, r: number): number {
   const n = ~b >>> r << r >>> 0;
