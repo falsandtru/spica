@@ -384,6 +384,48 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     assert(this.LRU.length + this.LFU.length === this.dict.size);
     this.disposer?.(value$, key$);
   }
+  private replace(entry: Entry<K, V>): void {
+    const { LRU, LFU } = this;
+    this.sweeper.hit();
+    if (entry.partition === LRU) {
+      // For memoize.
+      if (entry === LRU.head && !this.test) return;
+      if (entry.region === 'LRU') {
+        entry.region = 'LFU';
+      }
+      else {
+        const delta = LFU.length < LRU.length
+          ? LRU.length / LFU.length | 0
+          : 1;
+        assert(delta > 0);
+        this.partition = min(this.partition + delta, this.limit);
+        --this.overlapLFU;
+        assert(this.overlapLFU >= 0);
+      }
+      assert(this.LFU.length < this.capacity);
+      LRU.delete(entry);
+      LFU.unshift(entry);
+      entry.partition = LFU;
+    }
+    else {
+      // For memoize.
+      if (entry === LFU.head && !this.test) return;
+      if (entry.region === 'LFU') {
+      }
+      else {
+        const delta = LRU.length < LFU.length
+          ? LFU.length / LRU.length | 0
+          : 1;
+        assert(delta > 0);
+        this.partition = max(this.partition - delta, 0);
+        entry.region = 'LFU';
+        --this.overlapLRU;
+        assert(this.overlapLRU >= 0);
+      }
+      LFU.delete(entry);
+      LFU.unshift(entry);
+    }
+  }
   private validate(size: number, age: number): boolean {
     return 1 <= size && size <= this.resource
         && 1 <= age;
@@ -542,48 +584,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.resource = resource ?? this.settings.resource ?? capacity;
     this.sweeper.resize(capacity, this.settings.sweep!.window!, this.settings.sweep!.range!);
     this.ensure(0);
-  }
-  private replace(entry: Entry<K, V>): void {
-    const { LRU, LFU } = this;
-    this.sweeper.hit();
-    if (entry.partition === LRU) {
-      // For memoize.
-      if (entry === LRU.head && !this.test) return;
-      if (entry.region === 'LRU') {
-        entry.region = 'LFU';
-      }
-      else {
-        const delta = LFU.length < LRU.length
-          ? LRU.length / LFU.length | 0
-          : 1;
-        assert(delta > 0);
-        this.partition = min(this.partition + delta, this.limit);
-        --this.overlapLFU;
-        assert(this.overlapLFU >= 0);
-      }
-      assert(this.LFU.length < this.capacity);
-      LRU.delete(entry);
-      LFU.unshift(entry);
-      entry.partition = LFU;
-    }
-    else {
-      // For memoize.
-      if (entry === LFU.head && !this.test) return;
-      if (entry.region === 'LFU') {
-      }
-      else {
-        const delta = LRU.length < LFU.length
-          ? LFU.length / LRU.length | 0
-          : 1;
-        assert(delta > 0);
-        this.partition = max(this.partition - delta, 0);
-        entry.region = 'LFU';
-        --this.overlapLRU;
-        assert(this.overlapLRU >= 0);
-      }
-      LFU.delete(entry);
-      LFU.unshift(entry);
-    }
   }
 }
 
