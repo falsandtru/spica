@@ -395,7 +395,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       }
       else {
         const delta = LFU.length < LRU.length
-          ? LRU.length / LFU.length | 0
+          ? LRU.length / LFU.length | 0 || LRU.length
           : 1;
         assert(delta > 0);
         this.partition = min(this.partition + delta, this.capacity - this.scope);
@@ -414,7 +414,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       }
       else {
         const delta = LRU.length < LFU.length
-          ? LFU.length / LRU.length | 0
+          ? LFU.length / LRU.length | 0 || LFU.length
           : 1;
         assert(delta > 0);
         this.partition = max(this.partition - delta, 0);
