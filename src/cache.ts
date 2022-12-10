@@ -1,4 +1,4 @@
-import { max, min, floor, ceil, round } from './alias';
+import { max, min, floor, round } from './alias';
 import { now } from './chrono';
 import { IterableDict } from './dict';
 import { List } from './list';
@@ -98,8 +98,6 @@ DWCはこの最適化を行っても状態数の多さに比例して増加し�
 
 */
 
-const RESOLUTION = 1000;
-
 class Entry<K, V> implements List.Node {
   constructor(
     public key: K,
@@ -124,9 +122,6 @@ export namespace Cache {
     // Max entries.
     // Range: 1-
     readonly capacity?: number;
-    // Window ratio to measure hit ratios.
-    // Range: 1-100
-    readonly window?: number;
     // Max costs.
     // Range: L-
     readonly resource?: number;
@@ -173,12 +168,9 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const settings = extend(this.settings, opts, {
       capacity,
     });
-    if (settings.window! >= 0.1 === false) throw new Error(`Spica: Cache: Window must be 0.1% or more of capacity.`);
     this.capacity = capacity = settings.capacity!;
     if (capacity >>> 0 !== capacity) throw new Error(`Spica: Cache: Capacity must be integer.`);
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
-    this.window = settings.window! * capacity / 100 >>> 0;
-    this.unit = capacity / RESOLUTION | 0 || 1;
     this.limit = capacity - (capacity * settings.scope! / 100 >>> 0);
     this.partition = this.limit;
     this.sample = settings.sample!;
@@ -188,9 +180,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (settings.eagerExpiration) {
       this.expirations = new Heap(Heap.min, { stable: false });
     }
-    this.stats = opts.resolution
-      ? new StatsExperimental(this.window, settings.resolution!, 0)
-      : new Stats(this.window);
     this.sweeper = new Sweeper(
       this.LRU,
       settings.sweep!.threshold!,
@@ -204,7 +193,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
   private readonly settings: Cache.Options<K, V> = {
     capacity: 0,
-    window: 100,
     scope: 5,
     sample: 2,
     age: Infinity,
@@ -224,7 +212,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   };
   private readonly test: boolean;
   private capacity: number;
-  private window: number;
+  private partition: number;
+  private limit: number;
   private dict = new Map<K, Entry<K, V>>();
   private LRU = new List<Entry<K, V>>();
   private LFU = new List<Entry<K, V>>();
@@ -522,12 +511,9 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.dict = new Map();
     this.LRU = new List();
     this.LFU = new List();
-    this.densityR = 0;
-    this.densityF = 0;
     this.overlapLRU = 0;
     this.overlapLFU = 0;
     this.expirations?.clear();
-    this.stats.clear();
     this.sweeper.clear();
     this.sweeper.replace(this.LRU);
     if (!this.disposer || !this.settings.capture!.clear) return;
@@ -550,14 +536,10 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   public resize(capacity: number, resource?: number): void {
     if (capacity >>> 0 !== capacity) throw new Error(`Spica: Cache: Capacity must be integer.`);
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
-    const window = this.settings.window! * capacity / 100 >>> 0;
     this.partition = this.partition / this.capacity * capacity >>> 0;
     this.capacity = capacity;
-    this.window = window;
-    this.unit = capacity / RESOLUTION | 0 || 1;
     this.limit = capacity - (capacity * this.settings.scope! / 100 >>> 0);
     this.resource = resource ?? this.settings.resource ?? capacity;
-    this.stats.resize(window);
     this.sweeper.resize(capacity, this.settings.sweep!.window!, this.settings.sweep!.range!);
     this.ensure(0);
   }
@@ -568,7 +550,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       // For memoize.
       if (entry === LRU.head && !this.test) return;
       if (entry.region === 'LRU') {
-        this.stats.hitLRU();
         entry.region = 'LFU';
       }
       else {
@@ -577,7 +558,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
           : 1;
         assert(delta > 0);
         this.partition = min(this.partition + delta, this.limit);
-        this.stats.hitLFU();
         --this.overlapLFU;
         assert(this.overlapLFU >= 0);
       }
@@ -590,7 +570,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       // For memoize.
       if (entry === LFU.head && !this.test) return;
       if (entry.region === 'LFU') {
-        this.stats.hitLFU();
       }
       else {
         const delta = LRU.length < LFU.length
@@ -598,7 +577,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
           : 1;
         assert(delta > 0);
         this.partition = max(this.partition - delta, 0);
-        this.stats.hitLRU();
         entry.region = 'LFU';
         --this.overlapLRU;
         assert(this.overlapLRU >= 0);
@@ -606,235 +584,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       LFU.delete(entry);
       LFU.unshift(entry);
     }
-    this.coordinate();
-  }
-  private readonly stats: Stats | StatsExperimental;
-  private partition: number;
-  private unit: number;
-  private limit: number;
-  protected densityR = 0;
-  protected densityF = 0;
-  private coordinate(): void {
-    const { capacity, LRU, LFU, stats } = this;
-    if (stats.subtotal() * RESOLUTION % capacity !== 0 || !stats.isReady()) return;
-    const lenR = LRU.length;
-    const lenF = LFU.length;
-    const overlapR = this.overlapLRU;
-    const overlapF = this.overlapLFU;
-    const leverage = min((lenF - overlapR + overlapF) * 1000 / (lenR + lenF) | 0, 1000);
-    const ratioR = stats.ratioLRU();
-    const ratioF = 10000 - ratioR;
-    const densityR = this.densityR = ratioR * leverage;
-    const densityF = this.densityF = ratioF * (1000 - leverage);
-    // 操作頻度を超えてキャッシュ比率を増減させても余剰比率の消化が追いつかず無駄
-    if (this.partition > 0 && densityR > densityF) {
-      if (lenR >= this.capacity - this.partition) {
-        const delta = ratioF > ratioR
-          ? this.unit * ratioF / ratioR | 0
-          : this.unit;
-        assert(delta >= this.unit);
-        this.partition = max(this.partition - delta, 0);
-      }
-    }
-    else
-    if (this.partition < this.limit && densityF > densityR) {
-      if (lenF >= this.partition) {
-        const delta = ratioR > ratioF
-          ? this.unit * ratioR / ratioF | 0
-          : this.unit;
-        assert(delta >= this.unit);
-        this.partition = min(this.partition + delta, this.limit);
-      }
-    }
   }
 }
-
-// Sliding Window
-class Stats {
-  public static ratio(
-    window: number,
-    targets: readonly [number, number],
-    remains: readonly [number, number],
-    offset: number,
-  ): number {
-    assert(targets.length === 2);
-    assert(targets.length === remains.length);
-    const currHits = targets[0];
-    const prevHits = targets[1];
-    const currTotal = currHits + remains[0];
-    const prevTotal = prevHits + remains[1];
-    assert(currTotal <= window);
-    const prevRate = prevHits && prevHits * 100 / prevTotal;
-    const currRatio = currTotal * 100 / window - offset;
-    if (currRatio <= 0) return prevRate * 100 | 0;
-    const currRate = currHits && currHits * 100 / currTotal;
-    const prevRatio = 100 - currRatio;
-    return currRate * currRatio + prevRate * prevRatio | 0;
-  }
-  constructor(
-    protected window: number,
-  ) {
-  }
-  public readonly offset: number = 0;
-  private currLRUHits = 0;
-  private prevLRUHits = 0;
-  private currLFUHits = 0;
-  private prevLFUHits = 0;
-  public isReady(): boolean {
-    return this.prevLRUHits !== 0
-        || this.prevLFUHits !== 0;
-  }
-  public hitLRU(): void {
-    ++this.currLRUHits + this.currLFUHits === this.window && this.slide();
-  }
-  public hitLFU(): void {
-    this.currLRUHits + ++this.currLFUHits === this.window && this.slide();
-  }
-  public ratioLRU(offset = false): number {
-    return Stats.ratio(
-      this.window,
-      [this.currLRUHits, this.prevLRUHits],
-      [this.currLFUHits, this.prevLFUHits],
-      +offset & 0);
-  }
-  public ratioLFU(offset = false): number {
-    return Stats.ratio(
-      this.window,
-      [this.currLFUHits, this.prevLFUHits],
-      [this.currLRUHits, this.prevLRUHits],
-      +offset & 0);
-  }
-  public subtotal(): number {
-    return this.currLRUHits + this.currLFUHits;
-  }
-  protected slide(): void {
-    this.prevLRUHits = this.currLRUHits;
-    this.prevLFUHits = this.currLFUHits;
-    this.currLRUHits = 0;
-    this.currLFUHits = 0;
-  }
-  public clear(): void {
-    this.currLRUHits = 0;
-    this.currLFUHits = 0;
-    this.prevLRUHits = 0;
-    this.prevLFUHits = 0;
-  }
-  public resize(window: number): void {
-    this.window = window;
-    this.currLRUHits + this.currLFUHits >= this.window && this.slide();
-  }
-}
-
-class StatsExperimental extends Stats {
-  public static override ratio(
-    window: number,
-    targets: readonly number[],
-    remains: readonly number[],
-    offset: number,
-  ): number {
-    assert(targets.length >= 2);
-    assert(targets.length === remains.length);
-    let total = 0;
-    let hits = 0;
-    let ratio = 100;
-    for (let len = targets.length, i = 0; i < len; ++i) {
-      const subtotal = targets[i] + remains[i];
-      if (subtotal === 0) continue;
-      offset = i + 1 === len ? 0 : offset;
-      const subratio = min(subtotal * 100 / window, ratio) - offset;
-      offset = offset && subratio < 0 ? -subratio : 0;
-      if (subratio <= 0) continue;
-      const r = window * subratio / subtotal;
-      total += subtotal * r;
-      hits += targets[i] * r;
-      ratio -= subratio;
-      if (ratio <= 0) break;
-    }
-    return hits * 10000 / total | 0;
-  }
-  constructor(
-    window: number,
-    public readonly resolution: number,
-    public override readonly offset: number,
-  ) {
-    super(window);
-  }
-  private readonly max = ceil(this.resolution * (100 + this.offset) / 100) + 1;
-  private LRU = [0];
-  private LFU = [0];
-  public get length(): number {
-    return this.LRU.length;
-  }
-  public override isReady(): boolean {
-    return this.length === this.max;
-  }
-  public override hitLRU(): void {
-    const { LRU, LFU, window, resolution, offset } = this;
-    ++LRU[0];
-    const subtotal = LRU[offset && 1] + LFU[offset && 1] || 0;
-    subtotal >= window / resolution && this.slide();
-  }
-  public override hitLFU(): void {
-    const { LRU, LFU, window, resolution, offset } = this;
-    ++LFU[0];
-    const subtotal = LRU[offset && 1] + LFU[offset && 1] || 0;
-    subtotal >= window / resolution && this.slide();
-  }
-  public override ratioLRU(offset = false): number {
-    return StatsExperimental.ratio(this.window, this.LRU, this.LFU, +offset && this.offset);
-  }
-  public override ratioLFU(offset = false): number {
-    return StatsExperimental.ratio(this.window, this.LFU, this.LRU, +offset && this.offset);
-  }
-  public override subtotal(): number {
-    const { LRU, LFU, window, offset } = this;
-    if (offset && LRU[0] + LFU[0] >= window * offset / 100) {
-      if (this.length === 1) {
-        this.slide();
-      }
-      else {
-        LRU[1] += LRU[0];
-        LFU[1] += LFU[0];
-        LRU[0] = 0;
-        LFU[0] = 0;
-      }
-    }
-    return LRU[0] + LFU[0];
-  }
-  protected override slide(): void {
-    const { LRU, LFU, max } = this;
-    if (LRU.length === max) {
-      LRU.pop();
-      LFU.pop();
-    }
-    LRU.unshift(0);
-    LFU.unshift(0);
-    assert(LRU.length === LFU.length);
-  }
-  public override clear(): void {
-    this.LRU = [0];
-    this.LFU = [0];
-  }
-  public override resize(window: number): void {
-    this.window = window;
-    const { LRU, LFU, resolution, offset } = this;
-    const subtotal = LRU[offset && 1] + LFU[offset && 1] || 0;
-    subtotal >= window / resolution && this.slide();
-  }
-}
-
-assert(Stats.ratio(10, [4, 0], [6, 0], 0) === 4000);
-assert(Stats.ratio(10, [0, 4], [0, 6], 0) === 4000);
-assert(Stats.ratio(10, [1, 4], [4, 6], 0) === 3000);
-assert(Stats.ratio(10, [0, 4], [0, 6], 5) === 4000);
-assert(Stats.ratio(10, [1, 2], [4, 8], 5) === 2000);
-assert(Stats.ratio(10, [2, 2], [3, 8], 5) === 2900);
-assert(StatsExperimental.ratio(10, [4, 0], [6, 0], 0) === 4000);
-assert(StatsExperimental.ratio(10, [0, 4], [0, 6], 0) === 4000);
-assert(StatsExperimental.ratio(10, [1, 4], [4, 6], 0) === 3000);
-assert(StatsExperimental.ratio(10, [0, 4], [0, 6], 5) === 4000);
-assert(StatsExperimental.ratio(10, [1, 2], [4, 8], 5) === 2000);
-assert(StatsExperimental.ratio(10, [2, 2], [3, 8], 5) === 2900);
 
 // Transitive Wide MRU with Cyclic Replacement
 class Sweeper<T extends List<Entry<unknown, unknown>>> {
@@ -875,7 +626,7 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
     return this.active ??= this.ratio() < this.threshold;
   }
   private ratio(): number {
-    return Stats.ratio(
+    return ratio(
       this.window,
       [this.currHits, this.prevHits],
       [this.currMisses, this.prevMisses],
@@ -957,3 +708,30 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
     this.active = undefined;
   }
 }
+
+function ratio(
+  window: number,
+  targets: readonly [number, number],
+  remains: readonly [number, number],
+  offset: number,
+): number {
+  assert(targets.length === 2);
+  assert(targets.length === remains.length);
+  const currHits = targets[0];
+  const prevHits = targets[1];
+  const currTotal = currHits + remains[0];
+  const prevTotal = prevHits + remains[1];
+  assert(currTotal <= window);
+  const prevRate = prevHits && prevHits * 100 / prevTotal;
+  const currRatio = currTotal * 100 / window - offset;
+  if (currRatio <= 0) return prevRate * 100 | 0;
+  const currRate = currHits && currHits * 100 / currTotal;
+  const prevRatio = 100 - currRatio;
+  return currRate * currRatio + prevRate * prevRatio | 0;
+}
+assert(ratio(10, [4, 0], [6, 0], 0) === 4000);
+assert(ratio(10, [0, 4], [0, 6], 0) === 4000);
+assert(ratio(10, [1, 4], [4, 6], 0) === 3000);
+assert(ratio(10, [0, 4], [0, 6], 5) === 4000);
+assert(ratio(10, [1, 2], [4, 8], 5) === 2000);
+assert(ratio(10, [2, 2], [3, 8], 5) === 2900);
