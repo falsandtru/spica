@@ -610,7 +610,7 @@ describe('Unit: lib/cache', () => {
         dwc.get(key);
       }
       assert(dwc['LFU'].length === capacity - 2);
-      assert(dwc['partition'] === dwc['limit']);
+      assert(dwc['partition'] === capacity - dwc['scope']);
       for (let i = 0; i < trials; ++i) {
         const key = i % (capacity * 2);
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
@@ -652,7 +652,7 @@ describe('Unit: lib/cache', () => {
         dwc.get(key);
       }
       assert(dwc['LFU'].length === capacity - 2);
-      assert(dwc['partition'] === dwc['limit']);
+      assert(dwc['partition'] === capacity - dwc['scope']);
       for (let i = 0; i < trials; ++i) {
         const key = random() < 0.5
           ? random() * capacity * -1 | 0
@@ -696,7 +696,7 @@ describe('Unit: lib/cache', () => {
         dwc.get(key);
       }
       assert(dwc['LFU'].length === capacity - 2);
-      assert(dwc['partition'] === dwc['limit']);
+      assert(dwc['partition'] === capacity - dwc['scope']);
       for (let i = 0; i < trials; ++i) {
         const key = i % 2
           ? -i % capacity / 2 | 0
