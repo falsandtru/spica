@@ -135,7 +135,7 @@ export namespace Cache {
     };
     // Mainly for experiments.
     // Min LRU ratio.
-    // Range: 1-100
+    // Range: 0-100
     readonly window?: number;
     // Sample ratio of LRU in LFU.
     // Range: 0-100
@@ -193,7 +193,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
   private readonly settings: Cache.Options<K, V> = {
     capacity: 0,
-    window: 5,
+    window: 4,
     sample: 1,
     age: Infinity,
     eagerExpiration: false,
