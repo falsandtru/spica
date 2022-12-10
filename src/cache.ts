@@ -136,7 +136,7 @@ export namespace Cache {
     // Mainly for experiments.
     // Min LRU ratio.
     // Range: 1-100
-    readonly scope?: number;
+    readonly window?: number;
     // Sample ratio of LRU in LFU.
     // Range: 0-100
     readonly sample?: number;
@@ -171,8 +171,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.capacity = capacity = settings.capacity!;
     if (capacity >>> 0 !== capacity) throw new Error(`Spica: Cache: Capacity must be integer.`);
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
-    this.scope = capacity * settings.scope! / 100 >>> 0;
-    this.partition = capacity - this.scope;
+    this.window = capacity * settings.window! / 100 >>> 0;
+    this.partition = capacity - this.window;
     this.sample = settings.sample!;
     this.resource = settings.resource! ?? capacity;
     this.expiration = opts.age !== undefined;
@@ -193,7 +193,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
   private readonly settings: Cache.Options<K, V> = {
     capacity: 0,
-    scope: 5,
+    window: 5,
     sample: 1,
     age: Infinity,
     eagerExpiration: false,
@@ -213,7 +213,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private readonly test: boolean;
   private capacity: number;
   private partition: number;
-  private scope: number;
+  private window: number;
   private dict = new Map<K, Entry<K, V>>();
   private LRU = new List<Entry<K, V>>();
   private LFU = new List<Entry<K, V>>();
@@ -315,7 +315,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
             entry.partition = LRU;
           }
         }
-        else if (LRU.length >= this.scope &&
+        else if (LRU.length >= this.window &&
                  this.overlapLRU * 100 / min(LFU.length, this.partition) < this.sample) {
           const entry = LRU.head!.prev!;
           if (this.injection >= 1 && entry.region === 'LRU') {
@@ -398,7 +398,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
           ? LRU.length / LFU.length | 0 || LRU.length
           : 1;
         assert(delta > 0);
-        this.partition = min(this.partition + delta, this.capacity - this.scope);
+        this.partition = min(this.partition + delta, this.capacity - this.window);
         --this.overlapLFU;
         assert(this.overlapLFU >= 0);
       }
@@ -549,7 +549,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const { LRU, LFU } = this;
     this.injection = 0;
     this.$size = 0;
-    this.partition = this.capacity - this.scope;
+    this.partition = this.capacity - this.window;
     this.dict = new Map();
     this.LRU = new List();
     this.LFU = new List();
@@ -580,7 +580,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     this.partition = this.partition / this.capacity * capacity >>> 0;
     this.capacity = capacity;
-    this.scope = capacity * this.settings.scope! / 100 >>> 0;
+    this.window = capacity * this.settings.window! / 100 >>> 0;
     this.resource = resource ?? this.settings.resource ?? capacity;
     this.sweeper.resize(capacity, this.settings.sweep!.window!, this.settings.sweep!.range!);
     this.ensure(0);
