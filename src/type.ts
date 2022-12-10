@@ -1,6 +1,6 @@
 import { isArray, toString, ObjectGetPrototypeOf } from './alias';
 
-export type NonNull = boolean | number | bigint | string | symbol | object;
+export type NonNull = {};
 type Falsy = undefined | false | 0 | 0n | '' | null | void;
 type Unique = typeof Unique;
 declare const Unique: unique symbol;
