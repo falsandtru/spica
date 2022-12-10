@@ -194,7 +194,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   private readonly settings: Cache.Options<K, V> = {
     capacity: 0,
     scope: 5,
-    sample: 2,
+    sample: 1,
     age: Infinity,
     eagerExpiration: false,
     capture: {
