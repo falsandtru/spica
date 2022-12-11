@@ -79,32 +79,32 @@ describe('Benchmark:', function () {
 
   describe('unique', function () {
     it('', function (done) {
-      const rnd = unique(rnd0Z, 1);
-      benchmark('random unique', () => rnd(), done);
+      const rng = unique(rnd0Z, 1);
+      benchmark('random unique', () => rng(), done);
     });
 
   });
 
   describe('Math.random', function () {
     it('', function (done) {
-      const rnd = Math.random;
-      benchmark('random Math.random', () => rnd(), done);
+      const rng = Math.random;
+      benchmark('random Math.random', () => rng(), done);
     });
 
   });
 
   describe('xorshift', function () {
     it('', function (done) {
-      const rnd = xorshift.random();
-      benchmark('random xorshift', () => rnd(), done);
+      const rng = xorshift.random();
+      benchmark('random xorshift', () => rng(), done);
     });
 
   });
 
   describe('pcg32', function () {
     it('', function (done) {
-      const rnd = pcg32.random();
-      benchmark('random pcg32', () => rnd(), done);
+      const rng = pcg32.random();
+      benchmark('random pcg32', () => rng(), done);
     });
 
   });

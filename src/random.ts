@@ -29,7 +29,7 @@ export const rnd0_ = conv(rnd64, dict0_);
 export const rndAP = conv(rnd16, dictAz);
 export const rndAf = conv(rnd32, dictAz);
 
-export function unique(rnd: (len: number) => string, len: number = 1, mem?: Set<string>): () => string {
+export function unique(rng: (len: number) => string, len: number = 1, mem?: Set<string>): () => string {
   const independence = !mem;
   mem ??= new Set();
   const trials = 3;
@@ -38,7 +38,7 @@ export function unique(rnd: (len: number) => string, len: number = 1, mem?: Set<
   return function random(): string {
     assert(mem = mem!);
     for (let i = 0; i < trials; ++i) {
-      const r = rnd(len);
+      const r = rng(len);
       if (mem.has(r)) continue;
       try {
         mem.add(r);
@@ -50,7 +50,7 @@ export function unique(rnd: (len: number) => string, len: number = 1, mem?: Set<
         prefix ||= '?';
         assert(prefix.length > 0);
         for (let i = 0; i < trials; ++i) {
-          prefix = rnd(prefix.length);
+          prefix = rng(prefix.length);
           if (prefixes.has(prefix)) continue;
           prefixes.add(prefix);
           mem.clear();
@@ -71,20 +71,20 @@ export function unique(rnd: (len: number) => string, len: number = 1, mem?: Set<
 function cons(size: number): () => number {
   const len = bases.findIndex(radix => radix >= size) as 1;
   assert(len > 0);
-  return function rnd(): number {
+  return function rng(): number {
     const r = random(len);
     assert(r < bases[len]);
     return r < size
       ? r
-      : rnd();
+      : rng();
   };
 }
 
-function conv(rnd: () => number, dict: string): (len?: number) => string {
+function conv(rng: () => number, dict: string): (len?: number) => string {
   return (len = 1) => {
     let acc = '';
     while (len--) {
-      acc += dict[rnd()];
+      acc += dict[rng()];
     }
     return acc;
   };
@@ -142,8 +142,8 @@ export namespace xorshift {
   assert(0 / (max + 1) === 0);
   assert(max / (max + 1) < 1);
   export function random(seed?: number): () => number {
-    const rnd = xorshift(seed);
-    return () => rnd() / (max + 1);
+    const rng = xorshift(seed);
+    return () => rng() / (max + 1);
   }
 }
 
@@ -159,8 +159,8 @@ export namespace pcg32 {
   type Seed = [bigint, bigint];
   const MULT = 6364136223846793005n;
   export function random(seed?: [bigint, bigint]): () => number {
-    const rnd = pcg32(seed);
-    return () => rnd() / 2 ** 32;
+    const rng = pcg32(seed);
+    return () => rng() / 2 ** 32;
   }
   export function seed(
     state: bigint = BigInt(xorshift.seed()) << 32n | BigInt(xorshift.seed()),
