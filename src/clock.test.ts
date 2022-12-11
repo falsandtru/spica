@@ -1,6 +1,6 @@
 import { Clock } from './clock';
 import { LRU } from './lru';
-import { pcg32 } from './random';
+import { xorshift } from './random';
 
 describe('Unit: lib/clock', () => {
   describe('Clock', () => {
@@ -46,7 +46,7 @@ describe('Unit: lib/clock', () => {
       const clock = new Clock<number, number>(capacity);
 
       const trials = capacity * 1000;
-      const random = pcg32.random(pcg32.seed(0n, 0n));
+      const random = xorshift.random(1);
       for (let i = 0; i < trials; ++i) {
         const key = random() * capacity * 10 | 0;
         if (clock.has(key)) {
@@ -75,7 +75,7 @@ describe('Unit: lib/clock', () => {
       const lru = new LRU<number, 1>(capacity);
 
       const trials = capacity * 1000;
-      const random = pcg32.random(pcg32.seed(0n, 0n));
+      const random = xorshift.random(1);
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         const key = random() * capacity * 10 | 0;
@@ -98,7 +98,7 @@ describe('Unit: lib/clock', () => {
       const lru = new LRU<number, 1>(capacity);
 
       const trials = capacity * 1000;
-      const random = pcg32.random(pcg32.seed(0n, 0n));
+      const random = xorshift.random(1);
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         const key = random() < 0.4
@@ -123,7 +123,7 @@ describe('Unit: lib/clock', () => {
       const lru = new LRU<number, 1>(capacity);
 
       const trials = capacity * 100;
-      const random = pcg32.random(pcg32.seed(0n, 0n));
+      const random = xorshift.random(1);
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         const key = random() < 0.4
@@ -136,7 +136,7 @@ describe('Unit: lib/clock', () => {
       console.debug('LRU   hits', stats.lru);
       console.debug('Clock hits', stats.clock);
       console.debug('Clock / LRU hit ratio', `${stats.clock / stats.lru * 100 | 0}%`);
-      assert(stats.clock / stats.lru * 100 >>> 0 === 105);
+      assert(stats.clock / stats.lru * 100 >>> 0 === 104);
       assert(clock['values'].length === capacity);
     });
 

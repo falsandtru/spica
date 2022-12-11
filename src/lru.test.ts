@@ -1,6 +1,6 @@
 import { LRU } from './lru';
 import LRUCache from 'lru-cache';
-import { pcg32 } from './random';
+import { xorshift } from './random';
 
 describe('Unit: lib/lru', () => {
   describe('LRU', () => {
@@ -11,7 +11,7 @@ describe('Unit: lib/lru', () => {
       const cache = new LRU<number, number>(capacity);
 
       const trials = capacity * 1000;
-      const random = pcg32.random(pcg32.seed(0n, 0n));
+      const random = xorshift.random(1);
       for (let i = 0; i < trials; ++i) {
         const key = random() * capacity * 10 | 0;
         if (cache.has(key)) {
@@ -37,7 +37,7 @@ describe('Unit: lib/lru', () => {
       const isc = new LRUCache<number, 1>({ max: capacity });
 
       const trials = capacity * 1000;
-      const random = pcg32.random(pcg32.seed(0n, 0n));
+      const random = xorshift.random(1);
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         const key = random() * capacity * 10 | 0;
@@ -58,7 +58,7 @@ describe('Unit: lib/lru', () => {
       const isc = new LRUCache<number, 1>({ max: capacity });
 
       const trials = capacity * 1000;
-      const random = pcg32.random(pcg32.seed(0n, 0n));
+      const random = xorshift.random(1);
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         const key = random() < 0.4
@@ -81,7 +81,7 @@ describe('Unit: lib/lru', () => {
       const isc = new LRUCache<number, 1>({ max: capacity });
 
       const trials = capacity * 100;
-      const random = pcg32.random(pcg32.seed(0n, 0n));
+      const random = xorshift.random(1);
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         const key = random() < 0.4
