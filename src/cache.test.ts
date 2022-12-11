@@ -2,6 +2,7 @@ import { Cache } from './cache';
 import { LRU } from './lru';
 import { wait } from './timer';
 import { xorshift } from './random';
+import zipfian from 'zipfian-integer';
 
 describe('Unit: lib/cache', () => {
   describe('Cache', () => {
@@ -364,6 +365,32 @@ describe('Unit: lib/cache', () => {
       lru = 0;
       dwc = 0;
     }
+
+    it('ratio zipf 100', function () {
+      this.timeout(10 * 1e3);
+
+      const capacity = 100;
+      const lru = new LRU<number, 1>(capacity);
+      const dwc = new Cache<number, 1>(capacity);
+
+      const trials = capacity * 1000;
+      const random = zipfian(1, capacity * 1e7, 1, xorshift.random(1));
+      const stats = new Stats();
+      for (let i = 0; i < trials; ++i) {
+        const key = random();
+        stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
+        stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
+      }
+      assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
+      assert(dwc['dict'].size <= capacity);
+      console.debug('Cache zipf 100');
+      console.debug('LRU hit ratio', stats.lru * 100 / trials);
+      console.debug('DWC hit ratio', stats.dwc * 100 / trials);
+      console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
+      console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
+      console.debug('DWC overlap', dwc['overlapLFU'] / dwc['LRU'].length * 100 | 0, dwc['overlapLRU'] / dwc['LFU'].length * 100 | 0);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 167);
+    });
 
     it('ratio even 100', function () {
       this.timeout(10 * 1e3);

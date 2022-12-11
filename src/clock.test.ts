@@ -1,6 +1,7 @@
 import { Clock } from './clock';
 import { LRU } from './lru';
 import { xorshift } from './random';
+import zipfian from 'zipfian-integer';
 
 describe('Unit: lib/clock', () => {
   describe('Clock', () => {
@@ -46,7 +47,7 @@ describe('Unit: lib/clock', () => {
       const clock = new Clock<number, number>(capacity);
 
       const trials = capacity * 1000;
-      const random = xorshift.random(1);
+      const random = zipfian(1, capacity * 1e7, 1, xorshift.random(1));
       for (let i = 0; i < trials; ++i) {
         const key = random() * capacity * 10 | 0;
         if (clock.has(key)) {
@@ -90,7 +91,7 @@ describe('Unit: lib/clock', () => {
       assert(clock['values'].length === capacity);
     });
 
-    it('uneven 128', function () {
+    it('zipf 128', function () {
       this.timeout(10 * 1e3);
 
       const capacity = 128;
@@ -98,24 +99,22 @@ describe('Unit: lib/clock', () => {
       const lru = new LRU<number, 1>(capacity);
 
       const trials = capacity * 1000;
-      const random = xorshift.random(1);
+      const random = zipfian(1, capacity * 1e7, 1, xorshift.random(1));
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
-        const key = random() < 0.4
-          ? random() * capacity * -1 | 0
-          : random() * capacity * 10 | 0;
+        const key = random();
         stats.clock += clock.get(key) ?? +clock.set(key, 1) & 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
       }
-      console.debug('Clock uneven 128');
+      console.debug('Clock zipf 128');
       console.debug('LRU   hits', stats.lru);
       console.debug('Clock hits', stats.clock);
       console.debug('Clock / LRU hit ratio', `${stats.clock / stats.lru * 100 | 0}%`);
-      assert(stats.clock / stats.lru * 100 >>> 0 === 104);
+      assert(stats.clock / stats.lru * 100 >>> 0 === 105);
       assert(clock['values'].length === capacity);
     });
 
-    it('uneven 1024', function () {
+    it('zipf 1024', function () {
       this.timeout(60 * 1e3);
 
       const capacity = 1024;
@@ -123,20 +122,18 @@ describe('Unit: lib/clock', () => {
       const lru = new LRU<number, 1>(capacity);
 
       const trials = capacity * 100;
-      const random = xorshift.random(1);
+      const random = zipfian(1, capacity * 1e7, 1, xorshift.random(1));
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
-        const key = random() < 0.4
-          ? random() * capacity * -1 | 0
-          : random() * capacity * 10 | 0;
+        const key = random();
         stats.clock += clock.get(key) ?? +clock.set(key, 1) & 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
       }
-      console.debug('Clock uneven 1024');
+      console.debug('Clock zipf 1024');
       console.debug('LRU   hits', stats.lru);
       console.debug('Clock hits', stats.clock);
       console.debug('Clock / LRU hit ratio', `${stats.clock / stats.lru * 100 | 0}%`);
-      assert(stats.clock / stats.lru * 100 >>> 0 === 104);
+      assert(stats.clock / stats.lru * 100 >>> 0 === 102);
       assert(clock['values'].length === capacity);
     });
 

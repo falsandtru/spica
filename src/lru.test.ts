@@ -1,6 +1,7 @@
 import { LRU } from './lru';
 import LRUCache from 'lru-cache';
 import { xorshift } from './random';
+import zipfian from 'zipfian-integer';
 
 describe('Unit: lib/lru', () => {
   describe('LRU', () => {
@@ -50,7 +51,7 @@ describe('Unit: lib/lru', () => {
       assert(stats.lru === stats.isc);
     });
 
-    it('uneven 100', function () {
+    it('zipf 100', function () {
       this.timeout(10 * 1e3);
 
       const capacity = 100;
@@ -58,22 +59,20 @@ describe('Unit: lib/lru', () => {
       const isc = new LRUCache<number, 1>({ max: capacity });
 
       const trials = capacity * 1000;
-      const random = xorshift.random(1);
+      const random = zipfian(1, capacity * 1e7, 1, xorshift.random(1));
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
-        const key = random() < 0.4
-          ? random() * capacity * -1 | 0
-          : random() * capacity * 10 | 0;
+        const key = random();
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
         stats.isc += isc.get(key) ?? +isc.set(key, 1) & 0;
       }
-      console.debug('LRU uneven 100');
+      console.debug('LRU zipf 100');
       console.debug('ISC hits', stats.isc);
       console.debug('LRU hits', stats.lru);
       assert(stats.lru === stats.isc);
     });
 
-    it('uneven 1,000', function () {
+    it('zipf 1,000', function () {
       this.timeout(60 * 1e3);
 
       const capacity = 1000;
@@ -81,16 +80,14 @@ describe('Unit: lib/lru', () => {
       const isc = new LRUCache<number, 1>({ max: capacity });
 
       const trials = capacity * 100;
-      const random = xorshift.random(1);
+      const random = zipfian(1, capacity * 1e7, 1, xorshift.random(1));
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
-        const key = random() < 0.4
-          ? random() * capacity * -1 | 0
-          : random() * capacity * 10 | 0;
+        const key = random();
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
         stats.isc += isc.get(key) ?? +isc.set(key, 1) & 0;
       }
-      console.debug('LRU uneven 1000');
+      console.debug('LRU zipf 1000');
       console.debug('ISC hits', stats.isc);
       console.debug('LRU hits', stats.lru);
       assert(stats.lru === stats.isc);
