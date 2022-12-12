@@ -160,7 +160,7 @@ describe('Benchmark:', function () {
       });
     }
 
-    // 1e7はシミュだけ実行するとLRU単体でもGitHub Actionsの次の環境とエラーで落ちる。
+    // 1e7はシミュだけ実行するとISCが単体でもGitHub Actionsの次の環境とエラーで落ちる。
     // ベンチ全体を実行したときはなぜか落ちない。
     //
     // Error: Uncaught RangeError: Map maximum size exceeded (dist/index.js:16418)
