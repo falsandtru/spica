@@ -15,7 +15,7 @@ describe('Unit: lib/cache', () => {
     }
 
     it('put/has/delete 1', () => {
-      const cache = new Cache<number, number>(1, { test: true });
+      const cache = new Cache<number, number>(1, { sweep: { threshold: 0 } });
 
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
@@ -67,7 +67,7 @@ describe('Unit: lib/cache', () => {
       let key: number | undefined;
       let val: number | undefined;
       let cnt = 0;
-      const cache = new Cache<number, number>(3, { test: true, disposer: (v, k) => (key = k, val = v, ++cnt) });
+      const cache = new Cache<number, number>(3, { sweep: { threshold: 0 }, disposer: (v, k) => (key = k, val = v, ++cnt) });
 
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
@@ -149,7 +149,7 @@ describe('Unit: lib/cache', () => {
     });
 
     it('size', () => {
-      const cache = new Cache<number, number>(3, { test: true });
+      const cache = new Cache<number, number>(3, { sweep: { threshold: 0 } });
 
       cache.put(0, 0);
       cache.put(1, 1);
@@ -229,7 +229,7 @@ describe('Unit: lib/cache', () => {
     });
 
     it('resize', () => {
-      const cache = new Cache<number>(2, { test: true });
+      const cache = new Cache<number>(2, { sweep: { threshold: 0 } });
 
       cache.put(0);
       cache.put(1);
@@ -246,7 +246,7 @@ describe('Unit: lib/cache', () => {
     });
 
     it('age', async () => {
-      const cache = new Cache<number, number>(3, { age: Infinity, test: true });
+      const cache = new Cache<number, number>(3, { age: Infinity, sweep: { threshold: 0 } });
 
       cache.put(0, 0, { age: 10 });
       assert(cache.has(0));
@@ -274,7 +274,7 @@ describe('Unit: lib/cache', () => {
     });
 
     it('age eager', async () => {
-      const cache = new Cache<number, number>(3, { age: Infinity, eagerExpiration: true, test: true });
+      const cache = new Cache<number, number>(3, { age: Infinity, eagerExpiration: true, sweep: { threshold: 0 } });
 
       cache.put(0, 0, { age: 50 });
       cache.put(1, 1, { age: 1 });

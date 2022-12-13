@@ -147,7 +147,6 @@ export namespace Cache {
       readonly range?: number;
       readonly shift?: number;
     };
-    readonly test?: boolean;
   }
 }
 export class Cache<K, V = undefined> implements IterableDict<K, V> {
@@ -160,10 +159,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     if (typeof capacity === 'object') {
       opts = capacity;
       capacity = opts.capacity ?? 0;
-    }
-    if (opts.test) {
-      // @ts-expect-error
-      this.settings.sweep!.threshold = 0;
     }
     const settings = extend(this.settings, opts, {
       capacity,
@@ -207,7 +202,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       range: 3,
       shift: 2,
     },
-    test: false,
   };
   private capacity: number;
   private partition: number;
