@@ -2,10 +2,10 @@ import { benchmark } from './benchmark';
 
 describe('Benchmark:', function () {
   describe('unshift', function () {
-    for (const length of [1, 1e1, 1e2, 1e3]) {
-      it(`for ${length.toLocaleString('en')}`, function (done) {
-        const as = Array(length).fill(1);
-        benchmark(`Array unshift for    ${length.toLocaleString('en')}`, () => {
+    for (const size of [1, 1e1, 1e2, 1e3]) {
+      it(`for ${size.toLocaleString('en')}`, function (done) {
+        const as = Array(size).fill(1);
+        benchmark(`Array unshift for    ${size.toLocaleString('en')}`, () => {
           const acc = [];
           for (let i = as.length; i-- !== 0;) {
             acc.unshift(as[i]);
@@ -13,9 +13,9 @@ describe('Benchmark:', function () {
         }, done);
       });
 
-      it(`for-of ${length.toLocaleString('en')}`, function (done) {
-        const as = Array(length).fill(1);
-        benchmark(`Array unshift for-of ${length.toLocaleString('en')}`, () => {
+      it(`for-of ${size.toLocaleString('en')}`, function (done) {
+        const as = Array(size).fill(1);
+        benchmark(`Array unshift for-of ${size.toLocaleString('en')}`, () => {
           const acc = [];
           for (const a of as) {
             acc.unshift(a);
@@ -23,9 +23,9 @@ describe('Benchmark:', function () {
         }, done);
       });
 
-      it(`spread ${length.toLocaleString('en')}`, function (done) {
-        const as = Array(length).fill(1);
-        benchmark(`Array unshift spread ${length.toLocaleString('en')}`, () => {
+      it(`spread ${size.toLocaleString('en')}`, function (done) {
+        const as = Array(size).fill(1);
+        benchmark(`Array unshift spread ${size.toLocaleString('en')}`, () => {
           const acc = [];
           acc.unshift(...as);
         }, done);
@@ -34,10 +34,10 @@ describe('Benchmark:', function () {
   });
 
   describe('push', function () {
-    for (const length of [1, 1e1, 1e2, 1e3]) {
-      it(`for ${length.toLocaleString('en')}`, function (done) {
-        const as = Array(length).fill(1);
-        benchmark(`Array push for    ${length.toLocaleString('en')}`, () => {
+    for (const size of [1, 1e1, 1e2, 1e3]) {
+      it(`for ${size.toLocaleString('en')}`, function (done) {
+        const as = Array(size).fill(1);
+        benchmark(`Array push for    ${size.toLocaleString('en')}`, () => {
           const acc = [];
           for (let i = 0; i < as.length; ++i) {
             acc.push(as[i]);
@@ -45,9 +45,9 @@ describe('Benchmark:', function () {
         }, done);
       });
 
-      it(`for-of ${length.toLocaleString('en')}`, function (done) {
-        const as = Array(length).fill(1);
-        benchmark(`Array push for-of ${length.toLocaleString('en')}`, () => {
+      it(`for-of ${size.toLocaleString('en')}`, function (done) {
+        const as = Array(size).fill(1);
+        benchmark(`Array push for-of ${size.toLocaleString('en')}`, () => {
           const acc = [];
           for (const a of as) {
             acc.push(a);
@@ -55,9 +55,9 @@ describe('Benchmark:', function () {
         }, done);
       });
 
-      it(`spread ${length.toLocaleString('en')}`, function (done) {
-        const as = Array(length).fill(1);
-        benchmark(`Array push spread ${length.toLocaleString('en')}`, () => {
+      it(`spread ${size.toLocaleString('en')}`, function (done) {
+        const as = Array(size).fill(1);
+        benchmark(`Array push spread ${size.toLocaleString('en')}`, () => {
           const acc = [];
           acc.push(...as);
         }, done);

@@ -2,34 +2,34 @@ import { benchmark } from './benchmark';
 
 describe('Benchmark:', function () {
   describe('Inline', function () {
-    for (const length of [1, 1e1, 1e2]) {
-      const arr = Array<number>(length).fill(1);
+    for (const size of [1, 1e1, 1e2]) {
+      const arr = Array<number>(size).fill(1);
 
-      it(`for ${length.toLocaleString('en')}`, function (done) {
-        benchmark(`for ${length.toLocaleString('en')}`, () => {
+      it(`for ${size.toLocaleString('en')}`, function (done) {
+        benchmark(`for ${size.toLocaleString('en')}`, () => {
           let acc = 0;
-          for (let i = 0; i < length; ++i) {
+          for (let i = 0; i < size; ++i) {
             acc += arr[i];
           }
           acc;
         }, done);
       });
 
-      it(`Function ${length.toLocaleString('en')}`, function (done) {
+      it(`Function ${size.toLocaleString('en')}`, function (done) {
         const sum = Function('arr', [
           '"use strict";',
           'return ',
           arr.reduce((acc, _, i) => acc + `+ arr[${i}]`, '').slice(1),
         ].join(''));
-        benchmark(`Inline Function ${length.toLocaleString('en')}`, () => sum(arr), done);
+        benchmark(`Inline Function ${size.toLocaleString('en')}`, () => sum(arr), done);
       });
 
-      it(`eval ${length.toLocaleString('en')}`, function (done) {
+      it(`eval ${size.toLocaleString('en')}`, function (done) {
         const sum = eval([
           '() =>',
           arr.reduce((acc, _, i) => acc + `+ arr[${i}]`, '').slice(1),
         ].join(''));
-        benchmark(`Inline eval ${length.toLocaleString('en')}`, () => sum(), done);
+        benchmark(`Inline eval ${size.toLocaleString('en')}`, () => sum(), done);
       });
     }
   });
