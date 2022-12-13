@@ -720,9 +720,41 @@ function ratio(
   const prevRatio = 100 - currRatio;
   return currRate * currRatio + prevRate * prevRatio | 0;
 }
+function ratio2(
+  window: number,
+  targets: readonly number[],
+  remains: readonly number[],
+  offset: number,
+): number {
+  assert(targets.length >= 2);
+  assert(targets.length === remains.length);
+  let total = 0;
+  let hits = 0;
+  let ratio = 100;
+  for (let len = targets.length, i = 0; i < len; ++i) {
+    const subtotal = targets[i] + remains[i];
+    if (subtotal === 0) continue;
+    offset = i + 1 === len ? 0 : offset;
+    const subratio = min(subtotal * 100 / window, ratio) - offset;
+    offset = offset && subratio < 0 ? -subratio : 0;
+    if (subratio <= 0) continue;
+    const r = window * subratio / subtotal;
+    total += subtotal * r;
+    hits += targets[i] * r;
+    ratio -= subratio;
+    if (ratio <= 0) break;
+  }
+  return hits * 10000 / total | 0;
+}
 assert(ratio(10, [4, 0], [6, 0], 0) === 4000);
 assert(ratio(10, [0, 4], [0, 6], 0) === 4000);
 assert(ratio(10, [1, 4], [4, 6], 0) === 3000);
 assert(ratio(10, [0, 4], [0, 6], 5) === 4000);
 assert(ratio(10, [1, 2], [4, 8], 5) === 2000);
 assert(ratio(10, [2, 2], [3, 8], 5) === 2900);
+assert(ratio2(10, [4, 0], [6, 0], 0) === 4000);
+assert(ratio2(10, [0, 4], [0, 6], 0) === 4000);
+assert(ratio2(10, [1, 4], [4, 6], 0) === 3000);
+assert(ratio2(10, [0, 4], [0, 6], 5) === 4000);
+assert(ratio2(10, [1, 2], [4, 8], 5) === 2000);
+assert(ratio2(10, [2, 2], [3, 8], 5) === 2900);
