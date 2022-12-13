@@ -286,7 +286,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     const { LRU, LFU } = this;
     while (this.size + margin - size > this.resource) {
       assert(this.length >= 1 + +!!target);
-      this.injection = min(this.injection + this.sample / 100, 1);
+      this.injection = min(this.injection + this.sample, 100);
       let victim = this.expirations?.peek()?.value;
       if (victim !== undefined && victim !== target && victim.expiration < now()) {
       }
@@ -318,7 +318,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         else if (LRU.length >= this.window &&
                  this.overlapLRU * 100 / min(LFU.length, this.partition) < this.sample) {
           const entry = LRU.head!.prev!;
-          if (this.injection >= 1 && entry.region === 'LRU') {
+          assert(this.injection <= 100);
+          if (this.injection === 100 && entry.region === 'LRU') {
             LRU.delete(entry);
             LFU.unshift(this.overlap(entry));
             entry.partition = LFU;
