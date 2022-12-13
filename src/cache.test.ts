@@ -47,28 +47,6 @@ describe('Unit: lib/cache', () => {
         dict: [[0, 1]],
       });
 
-      assert(cache.get(0) === 1);
-      assert.deepStrictEqual(inspect(cache), {
-        LRU: [],
-        LFU: [0],
-        dict: [[0, 1]],
-      });
-
-      assert(cache.has(0) === true);
-      assert(cache.put(0, 0) === true);
-      assert.deepStrictEqual(inspect(cache), {
-        LRU: [],
-        LFU: [0],
-        dict: [[0, 0]],
-      });
-
-      assert(cache.get(0) === 0);
-      assert.deepStrictEqual(inspect(cache), {
-        LRU: [],
-        LFU: [0],
-        dict: [[0, 0]],
-      });
-
       assert(cache.has(0) === true);
       assert(cache.delete(0) === true);
       assert.deepStrictEqual(inspect(cache), {
@@ -85,11 +63,11 @@ describe('Unit: lib/cache', () => {
       });
     });
 
-    it('put/has/delete 2', () => {
+    it('put/has/delete 3', () => {
       let key: number | undefined;
       let val: number | undefined;
       let cnt = 0;
-      const cache = new Cache<number, number>(2, { test: true, disposer: (v, k) => (key = k, val = v, ++cnt) });
+      const cache = new Cache<number, number>(3, { test: true, disposer: (v, k) => (key = k, val = v, ++cnt) });
 
       assert.deepStrictEqual(inspect(cache), {
         LRU: [],
@@ -121,52 +99,44 @@ describe('Unit: lib/cache', () => {
         dict: [[0, 0], [1, 1]],
       });
 
-      assert(cache.get(1) === 1);
+      assert(cache.get(0) === 0);
       assert(key === 1 && val === 1 && cnt === 1);
       assert.deepStrictEqual(inspect(cache), {
-        LRU: [0],
-        LFU: [1],
+        LRU: [1],
+        LFU: [0],
         dict: [[0, 0], [1, 1]],
       });
 
       assert(cache.put(2, 2) === false);
-      assert(key === 0 && val === 0 && cnt === 2);
+      assert(key === 1 && val === 1 && cnt === 1);
       assert.deepStrictEqual(inspect(cache), {
-        LRU: [2],
-        LFU: [1],
-        dict: [[1, 1], [2, 2]],
-      });
-
-      assert(cache.get(2) === 2);
-      assert(key === 0 && val === 0 && cnt === 2);
-      assert.deepStrictEqual(inspect(cache), {
-        LRU: [],
-        LFU: [2, 1],
-        dict: [[1, 1], [2, 2]],
-      });
-
-      assert(cache.get(2) === 2);
-      assert(key === 0 && val === 0 && cnt === 2);
-      assert.deepStrictEqual(inspect(cache), {
-        LRU: [],
-        LFU: [2, 1],
-        dict: [[1, 1], [2, 2]],
+        LRU: [2, 1],
+        LFU: [0],
+        dict: [[0, 0], [1, 1], [2, 2]],
       });
 
       assert(cache.get(1) === 1);
-      assert(key === 0 && val === 0 && cnt === 2);
+      assert(key === 1 && val === 1 && cnt === 1);
       assert.deepStrictEqual(inspect(cache), {
-        LRU: [],
-        LFU: [1, 2],
-        dict: [[1, 1], [2, 2]],
+        LRU: [2],
+        LFU: [1, 0],
+        dict: [[0, 0], [1, 1], [2, 2]],
+      });
+
+      assert(cache.get(0) === 0);
+      assert(key === 1 && val === 1 && cnt === 1);
+      assert.deepStrictEqual(inspect(cache), {
+        LRU: [2],
+        LFU: [0, 1],
+        dict: [[0, 0], [1, 1], [2, 2]],
       });
 
       assert(cache.put(3, 3) === false);
-      assert(key === 2 && val === 2 && cnt === 3);
+      assert(key === 2 && val === 2 && cnt === 2);
       assert.deepStrictEqual(inspect(cache), {
         LRU: [3],
-        LFU: [1],
-        dict: [[1, 1], [3, 3]],
+        LFU: [0, 1],
+        dict: [[0, 0], [1, 1], [3, 3]],
       });
 
       assert(cache.clear() === undefined);
@@ -219,12 +189,12 @@ describe('Unit: lib/cache', () => {
         dict: [[2, 2], [3, 3]],
       });
 
-      cache.get(3);
+      cache.get(2);
       assert(cache.length === 2);
       assert(cache.size === 3);
       assert.deepStrictEqual(inspect(cache), {
-        LRU: [2],
-        LFU: [3],
+        LRU: [3],
+        LFU: [2],
         dict: [[2, 2], [3, 3]],
       });
 
@@ -237,24 +207,24 @@ describe('Unit: lib/cache', () => {
         dict: [[1, 1]],
       });
 
-      cache.put(1, 1);
-      cache.put(2, 2, { size: 2 });
-      cache.get(2);
+      cache.put(1, 1, { size: 2 });
+      cache.put(2, 2);
+      cache.get(1);
       assert(cache.length === 2);
       assert(cache.size === 3);
       assert.deepStrictEqual(inspect(cache), {
-        LRU: [1],
-        LFU: [2],
+        LRU: [2],
+        LFU: [1],
         dict: [[1, 1], [2, 2]],
       });
 
-      cache.put(1, 1, { size: 3 });
+      cache.put(2, 2, { size: 3 });
       assert(cache.length === 1);
       assert(cache.size === 3);
       assert.deepStrictEqual(inspect(cache), {
-        LRU: [1],
+        LRU: [2],
         LFU: [],
-        dict: [[1, 1]],
+        dict: [[2, 2]],
       });
     });
 

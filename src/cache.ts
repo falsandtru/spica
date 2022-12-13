@@ -188,7 +188,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       settings.sweep!.range!,
       settings.sweep!.shift!);
     this.disposer = settings.disposer!;
-    this.test = settings.test!;
     assert(settings.resource === opts.resource);
   }
   private readonly settings: Cache.Options<K, V> = {
@@ -210,7 +209,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     },
     test: false,
   };
-  private readonly test: boolean;
   private capacity: number;
   private partition: number;
   private window: number;
@@ -390,7 +388,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     this.sweeper.hit();
     if (entry.partition === LRU) {
       // For memoize.
-      if (entry === LRU.head && !this.test) return;
+      if (entry === LRU.head) return;
       if (entry.region === 'LRU') {
         entry.region = 'LFU';
       }
@@ -410,7 +408,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     }
     else {
       // For memoize.
-      if (entry === LFU.head && !this.test) return;
+      if (entry === LFU.head) return;
       if (entry.region === 'LFU') {
       }
       else {
