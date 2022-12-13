@@ -307,8 +307,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
             entry.partition = LRU;
           }
         }
-        else if (LRU.length >= this.window &&
-                 this.overlapLRU * 100 / min(LFU.length, this.partition) < this.sample) {
+        if (LRU.length >= this.window &&
+            this.overlapLRU * 100 / min(LFU.length, this.partition) < this.sample) {
           const entry = LRU.head!.prev!;
           assert(this.injection <= 100);
           if (this.injection === 100 && entry.region === 'LRU') {
