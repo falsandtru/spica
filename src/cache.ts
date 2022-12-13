@@ -140,7 +140,6 @@ export namespace Cache {
     // Sample ratio of LRU in LFU.
     // Range: 0-100
     readonly sample?: number;
-    readonly resolution?: number;
     readonly sweep?: {
       readonly threshold?: number;
       readonly window?: number;
@@ -195,7 +194,6 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       delete: true,
       clear: true,
     },
-    resolution: 1,
     sweep: {
       threshold: 10,
       window: 4,
