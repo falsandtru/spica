@@ -141,6 +141,7 @@ export namespace Cache {
     // Range: 0-100
     readonly sample?: number;
     readonly sweep?: {
+      // Setting 20 is usually better with standard (non-skewed) workloads.
       readonly threshold?: number;
       readonly window?: number;
       readonly range?: number;
@@ -186,7 +187,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
   }
   private readonly settings: Cache.Options<K, V> = {
     capacity: 0,
-    window: 4,
+    window: 2,
     sample: 1,
     age: Infinity,
     eagerExpiration: false,
@@ -196,8 +197,8 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
     },
     sweep: {
       threshold: 10,
-      window: 4,
-      range: 3,
+      window: 2,
+      range: 1,
       shift: 2,
     },
   };
