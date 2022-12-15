@@ -306,11 +306,12 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
             entry.partition = LRU;
           }
         }
-        if (LRU.length >= this.window &&
+        assert(this.injection <= 100);
+        if (this.injection === 100 &&
+            LRU.length >= this.window &&
             this.overlapLRU * 100 / min(LFU.length, this.partition) < this.sample) {
           const entry = LRU.head!.prev!;
-          assert(this.injection <= 100);
-          if (this.injection === 100 && entry.region === 'LRU') {
+          if (entry.region === 'LRU') {
             LRU.delete(entry);
             LFU.unshift(this.overlap(entry));
             entry.partition = LFU;
