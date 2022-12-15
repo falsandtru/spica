@@ -387,7 +387,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
         entry.region = 'LFU';
       }
       else {
-        const delta = LRU.length > LFU.length
+        const delta = LRU.length > LFU.length && LRU.length >= this.capacity - this.partition
           ? LRU.length / LFU.length | 0 || LRU.length
           : 1;
         assert(delta > 0);
@@ -406,7 +406,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       if (entry.region === 'LFU') {
       }
       else {
-        const delta = LFU.length > LRU.length
+        const delta = LFU.length > LRU.length && LFU.length >= this.partition
           ? LFU.length / LRU.length | 0 || LFU.length
           : 1;
         assert(delta > 0);
