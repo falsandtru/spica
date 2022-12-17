@@ -388,7 +388,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       }
       else {
         const delta = LRU.length > LFU.length && LRU.length >= this.capacity - this.partition
-          ? LRU.length / LFU.length | 0 || LRU.length
+          ? LRU.length / (LFU.length || 1) * (this.overlapLRU || 1) / this.overlapLFU | 0 || 1
           : 1;
         assert(delta > 0);
         this.partition = min(this.partition + delta, this.capacity - this.window);
@@ -407,7 +407,7 @@ export class Cache<K, V = undefined> implements IterableDict<K, V> {
       }
       else {
         const delta = LFU.length > LRU.length && LFU.length >= this.partition
-          ? LFU.length / LRU.length | 0 || LFU.length
+          ? LFU.length / (LRU.length || 1) * (this.overlapLFU || 1) / this.overlapLRU | 0 || 1
           : 1;
         assert(delta > 0);
         this.partition = max(this.partition - delta, 0);
