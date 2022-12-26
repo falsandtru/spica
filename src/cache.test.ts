@@ -229,7 +229,7 @@ describe('Unit: lib/cache', () => {
     });
 
     it('resize', () => {
-      const cache = new Cache<number>(2, { sweep: { threshold: 0 } });
+      const cache = new Cache<number, undefined>(2, { sweep: { threshold: 0 } });
 
       cache.put(0);
       cache.put(1);

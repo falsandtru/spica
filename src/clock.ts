@@ -7,7 +7,7 @@ assert(DIGIT === 5);
 const MASK = BASE - 1;
 assert((BASE & MASK) === 0);
 
-export class Clock<K, V = undefined> implements IterableDict<K, V> {
+export class Clock<K, V> implements IterableDict<K, V> {
   constructor(
     private readonly capacity: number,
   ) {

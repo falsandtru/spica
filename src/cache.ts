@@ -149,7 +149,7 @@ export namespace Cache {
     };
   }
 }
-export class Cache<K, V = undefined> implements IterableDict<K, V> {
+export class Cache<K, V> implements IterableDict<K, V> {
   constructor(capacity: number, opts?: Cache.Options<K, V>);
   constructor(opts: Cache.Options<K, V>);
   constructor(
