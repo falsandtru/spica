@@ -99,12 +99,22 @@ export class Clock<K, V> implements IterableDict<K, V> {
   public delete(key: K): boolean {
     const index = this.dict.get(key);
     if (index === undefined) return false;
-    this.dict.delete(key);
-    this.keys[index] = undefined;
-    this.values[index] = empty;
-    this.unmark(index);
+    // 末尾と削除対象を交換して削除する。
+    // 次の挿入の前に次の削除が行われると交換できないが稀なため対処しない。
+    const { hand, dict, keys, values, refs } = this;
+    dict.delete(key);
     --this.$length;
     assert(this.$length === this.dict.size);
+    const k = keys[index] = keys[hand];
+    const v = values[index] = values[hand];
+    keys[hand] = undefined;
+    values[hand] = empty;
+    this.unmark(index);
+    if (index === hand || v === empty) return true;
+    assert(this.dict.has(k!));
+    dict.set(k!, index);
+    refs[index >>> DIGIT] |= refs[hand >>> DIGIT] & 1 << (hand & MASK);
+    this.unmark(hand);
     return true;
   }
   public clear(): void {
