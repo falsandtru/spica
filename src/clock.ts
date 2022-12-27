@@ -74,7 +74,6 @@ export class Clock<K, V> implements IterableDict<K, V> {
   public put(key: K, value: V): number {
     const index = this.dict.get(key);
     if (index === undefined) return this.add(key, value);
-    this.mark(index);
     this.values[index] = value;
     return index;
   }
