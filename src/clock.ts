@@ -38,16 +38,17 @@ export class Clock<K, V> implements IterableDict<K, V> {
   }
   private initial: 1 | 0 = 1;
   private locate(hand: number, key: K, value: V): void {
-    this.$length === this.capacity || this.initial === 0 && this.values[hand] !== empty
-      ? this.dict.delete(this.keys[hand]!)
+    const { capacity, dict, keys, values } = this;
+    this.$length === capacity || this.initial === 0 && values[hand] !== empty
+      ? dict.delete(keys[hand]!)
       : ++this.$length;
     assert(!this.dict.has(key));
-    this.dict.set(key, hand);
+    dict.set(key, hand);
     assert(this.dict.size <= this.capacity);
     assert(this.$length === this.dict.size);
-    this.keys[hand] = key;
-    this.values[hand] = value;
-    this.hand = ++hand === this.capacity
+    keys[hand] = key;
+    values[hand] = value;
+    this.hand = ++hand === capacity
       ? this.initial = 0
       : hand;
   }
