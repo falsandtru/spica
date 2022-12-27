@@ -38,6 +38,12 @@ describe('Unit: lib/clock', () => {
       assert(clock.delete(1) === true);
       clock.set(1, 1);
       assert(clock.get(2) === 2);
+      assert(clock.delete(2) === true);
+      clock.set(2, 2);
+      assert(clock.delete(31) === true);
+      clock.set(32, 32);
+      assert(clock.get(3) === undefined);
+      assert(clock.length === 31);
     });
 
     it('verify', function () {

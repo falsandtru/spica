@@ -7,7 +7,11 @@ assert(DIGIT === 5);
 const MASK = BASE - 1;
 assert((BASE & MASK) === 0);
 
+type empty = typeof empty;
+const empty = Symbol('empty');
+
 export class Clock<K, V> implements IterableDict<K, V> {
+  // Capacity is rounded up to multiples of 32.
   constructor(
     private readonly capacity: number,
   ) {
@@ -16,7 +20,7 @@ export class Clock<K, V> implements IterableDict<K, V> {
   }
   private dict = new Map<K, number>();
   private keys: (K | undefined)[] = [];
-  private values: (V | undefined)[] = [];
+  private values: (V | undefined | empty)[] = [];
   private refs: Uint32Array;
   private hand = 0;
   private $length = 0;
@@ -32,8 +36,9 @@ export class Clock<K, V> implements IterableDict<K, V> {
   private unmark(index: number): void {
     this.refs[index >>> DIGIT] &= ~(1 << (index & MASK));
   }
+  private initial: 1 | 0 = 1;
   private locate(hand: number, key: K, value: V): void {
-    this.$length === this.capacity
+    this.$length === this.capacity || this.initial === 0 && this.values[hand] !== empty
       ? this.dict.delete(this.keys[hand]!)
       : ++this.$length;
     assert(!this.dict.has(key));
@@ -43,7 +48,7 @@ export class Clock<K, V> implements IterableDict<K, V> {
     this.keys[hand] = key;
     this.values[hand] = value;
     this.hand = ++hand === this.capacity
-      ? 0
+      ? this.initial = 0
       : hand;
   }
   public add(key: K, value: V): number {
@@ -85,7 +90,7 @@ export class Clock<K, V> implements IterableDict<K, V> {
     const index = this.dict.get(key);
     if (index === undefined) return;
     this.mark(index);
-    return this.values[index];
+    return this.values[index] as V;
   }
   public has(key: K): boolean {
     return this.dict.has(key);
@@ -95,7 +100,7 @@ export class Clock<K, V> implements IterableDict<K, V> {
     if (index === undefined) return false;
     this.dict.delete(key);
     this.keys[index] = undefined;
-    this.values[index] = undefined;
+    this.values[index] = empty;
     this.unmark(index);
     --this.$length;
     assert(this.$length === this.dict.size);
@@ -112,7 +117,7 @@ export class Clock<K, V> implements IterableDict<K, V> {
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
     const { keys, values } = this;
     for (const index of this.dict.values()) {
-      yield [keys[index]!, values[index]!];
+      yield [keys[index]!, values[index]! as V];
     }
     return;
   }
