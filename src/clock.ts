@@ -113,7 +113,9 @@ export class Clock<K, V> implements IterableDict<K, V> {
     if (index === hand || v === empty) return true;
     assert(this.dict.has(k!));
     dict.set(k!, index);
-    refs[index >>> DIGIT] |= refs[hand >>> DIGIT] & 1 << (hand & MASK);
+    refs[index >>> DIGIT] |= (refs[hand >>> DIGIT] & 1 << (hand & MASK)) === 0
+      ? 0
+      : 1 << (index & MASK);
     this.unmark(hand);
     return true;
   }
