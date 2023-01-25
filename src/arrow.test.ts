@@ -67,6 +67,12 @@ describe('Unit: lib/arrow', function () {
           () => () => 1,
         ))()(),
         undefined);
+      assert.deepStrictEqual(
+        assemble(
+          () => () => 0,
+          (_: number) => (_?: Error) => 1,
+        )(0)(new Error()),
+        undefined);
     });
 
   });

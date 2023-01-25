@@ -24,31 +24,31 @@ export function aggregate<fs extends ((a?: unknown) => unknown)[]>(...fs: fs): (
   };
 }
 
-export function assemble<fs extends ((this: undefined, a?: undefined) => () => void)[]>(...fs: fs): (a?: Intersect<Narrow<ParamNs<fs, 0, undefined>>>) => () => undefined;
-export function assemble<fs extends ((a?: undefined) => () => void)[]>(...fs: fs): (this: Context<fs>, a?: Intersect<Narrow<ParamNs<fs, 0, undefined>>>) => () => undefined;
-export function assemble<fs extends ((this: undefined, a?: unknown) => () => void)[]>(...fs: fs): (a: Intersect<Narrow<ParamNs<fs, 0, undefined>>>) => () => undefined;
-export function assemble<fs extends ((a?: unknown) => () => void)[]>(...fs: fs): (this: Context<fs>, a: Intersect<Narrow<ParamNs<fs, 0, undefined>>>) => () => undefined;
-export function assemble<fs extends ((a?: unknown) => () => void)[]>(...fs: fs): (this: Context<fs>, a: Intersect<Narrow<ParamNs<fs, 0, undefined>>>) => () => undefined {
+export function assemble<fs extends ((this: undefined, a?: undefined) => (error?: Error) => void)[]>(...fs: fs): (a?: Intersect<Narrow<ParamNs<fs, 0, undefined>>>) => (error?: Error) => undefined;
+export function assemble<fs extends ((a?: undefined) => (error?: Error) => void)[]>(...fs: fs): (this: Context<fs>, a?: Intersect<Narrow<ParamNs<fs, 0, undefined>>>) => (error?: Error) => undefined;
+export function assemble<fs extends ((this: undefined, a?: unknown) => (error?: Error) => void)[]>(...fs: fs): (a: Intersect<Narrow<ParamNs<fs, 0, undefined>>>) => (error?: Error) => undefined;
+export function assemble<fs extends ((a?: unknown) => (error?: Error) => void)[]>(...fs: fs): (this: Context<fs>, a: Intersect<Narrow<ParamNs<fs, 0, undefined>>>) => (error?: Error) => undefined;
+export function assemble<fs extends ((a?: unknown) => (error?: Error) => void)[]>(...fs: fs): (this: Context<fs>, a: Intersect<Narrow<ParamNs<fs, 0, undefined>>>) => (error?: Error) => undefined {
   return function (a) {
-    const gs: (() => void)[] = Array(16);
+    const gs: ((error?: Error) => void)[] = Array(16);
     try {
       for (let i = 0; i < fs.length; ++i) {
         gs[i] = fs[i].call(this, a);
       }
-      return singleton(() => void cancel(gs));
+      return singleton((error?: Error) => void cancel(gs, error));
     }
     catch (reason) {
-      cancel(gs);
+      cancel(gs, reason instanceof Error ? reason : new Error('Spica: Arrow: assemble: Wrap the error value', { cause: reason }));
       throw reason;
     }
   };
 }
 
-function cancel(cancellers: readonly (() => void)[]): unknown[] {
+function cancel(cancellers: readonly ((error?: Error) => void)[], error?: Error): unknown[] {
   const reasons = [];
-  for (let i = 0, g: () => void; g = cancellers[i]; ++i) {
+  for (let i = 0, g: typeof cancellers[number]; g = cancellers[i]; ++i) {
     try {
-      g();
+      g(error);
     }
     catch (reason) {
       reasons.push(reason);
