@@ -4,12 +4,6 @@
 
 Supervisor, Coroutine, Channel, select, assemble, AtomicPromise, Cancellation, Cache, List, Queue, Stack, and some utils.
 
-## Install
-
-```
-$ npm i spica
-```
-
 ## APIs
 
 - global
