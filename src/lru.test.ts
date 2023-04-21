@@ -1,5 +1,5 @@
 import { LRU } from './lru';
-import LRUCache from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 import { xorshift } from './random';
 import zipfian from 'zipfian-integer';
 

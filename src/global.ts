@@ -1,4 +1,4 @@
-import './global.type.ts';
+import './global.type';
 
 const global: { undefined: undefined } & typeof globalThis = undefined
   || typeof globalThis !== 'undefined' && globalThis

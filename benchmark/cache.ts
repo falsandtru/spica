@@ -2,7 +2,7 @@ import { benchmark } from './benchmark';
 import { Clock } from '../src/clock';
 import { LRU } from '../src/lru';
 import { Cache } from '../src/cache';
-import LRUCache from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 import { xorshift } from '../src/random';
 import { captureTimers } from '../src/timer';
 
