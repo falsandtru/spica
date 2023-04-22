@@ -31,7 +31,7 @@ module.exports = env => {
     resolve: {
       extensions: ['.ts', '.js'],
     },
-    entry: glob.sync('./{src,test}/**/*.ts', { absolute: true }),
+    entry: glob.sync('./{src,test}/**/*.ts', { absolute: true }).sort(),
     output: {
       filename: 'index.js',
       path: path.resolve(__dirname, 'dist'),
