@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    // Bug: ES2022 breaks the class init order.
     "target": "ES2021",
     "lib": [
       "ES2022",
@@ -7,8 +8,8 @@
       "DOM.Iterable"
     ],
     "outDir": "dist",
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
     "sourceMap": true,
     "strict": true,
