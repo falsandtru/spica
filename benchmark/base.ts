@@ -46,7 +46,7 @@ describe('Benchmark:', function () {
 
     for (const size of [1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7]) {
       it(`Index        ${size.toLocaleString('en')}`, function (done) {
-        const data = new Index;
+        const data = new Index();
         for (let i = 0; i < size; ++i) data.pop();
         for (let i = 0; i < size; ++i) data.push(0);
         benchmark(`Index        ${size.toLocaleString('en')}`, () => (data.pop(), data.push(0)), done);
