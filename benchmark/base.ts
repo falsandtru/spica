@@ -201,7 +201,7 @@ describe('Benchmark:', function () {
       it(`IxList set ${size.toLocaleString('en')}`, function (done) {
         const data = new IxList(size);
         for (let i = 0; i < size; ++i) data.push(0);
-        benchmark(`IxList set ${size.toLocaleString('en')}`, () => data.set(size, 0), done);
+        benchmark(`IxList set ${size.toLocaleString('en')}`, () => data.set(size - 1, 0), done);
       });
     }
   });
