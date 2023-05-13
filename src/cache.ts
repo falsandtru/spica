@@ -141,9 +141,10 @@ export namespace Cache {
     // Range: 0-100
     readonly sample?: number;
     readonly sweep?: {
-      // Setting 20 is usually better with standard (non-skewed) workloads.
       readonly threshold?: number;
+      readonly ratio?: number;
       readonly window?: number;
+      readonly room?: number;
       readonly range?: number;
       readonly shift?: number;
     };
@@ -178,8 +179,10 @@ export class Cache<K, V> implements IterableDict<K, V> {
     this.sweeper = new Sweeper(
       this.LRU,
       settings.sweep!.threshold!,
+      settings.sweep!.ratio!,
       capacity,
       settings.sweep!.window!,
+      settings.sweep!.room!,
       settings.sweep!.range!,
       settings.sweep!.shift!);
     this.disposer = settings.disposer!;
@@ -197,7 +200,9 @@ export class Cache<K, V> implements IterableDict<K, V> {
     },
     sweep: {
       threshold: 10,
+      ratio: 50,
       window: 2,
+      room: 50,
       range: 1,
       shift: 2,
     },
@@ -575,7 +580,11 @@ export class Cache<K, V> implements IterableDict<K, V> {
     this.capacity = capacity;
     this.window = capacity * this.settings.window! / 100 >>> 0;
     this.resource = resource ?? this.settings.resource ?? capacity;
-    this.sweeper.resize(capacity, this.settings.sweep!.window!, this.settings.sweep!.range!);
+    this.sweeper.resize(
+      capacity,
+      this.settings.sweep!.window!,
+      this.settings.sweep!.room!,
+      this.settings.sweep!.range!);
     this.ensure(0);
   }
 }
@@ -585,44 +594,67 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
   constructor(
     private target: T,
     private readonly threshold: number,
+    private readonly ratio: number,
     capacity: number,
     private window: number,
+    private room: number,
     private range: number,
     private readonly shift: number,
   ) {
     this.threshold *= 100;
     this.window = round(capacity * window / 100) || 1;
+    this.room = round(capacity * room / 100) || 1;
     this.range = capacity * range / 100;
   }
-  private currHits = 0;
-  private currMisses = 0;
-  private prevHits = 0;
-  private prevMisses = 0;
-  private slide(): void {
-    this.prevHits = this.currHits;
-    this.prevMisses = this.currMisses;
-    this.currHits = 0;
-    this.currMisses = 0;
+  private currWindowHits = 0;
+  private currWindowMisses = 0;
+  private prevWindowHits = 0;
+  private prevWindowMisses = 0;
+  private slideWindow(): void {
+    this.prevWindowHits = this.currWindowHits;
+    this.prevWindowMisses = this.currWindowMisses;
+    this.currWindowHits = 0;
+    this.currWindowMisses = 0;
+  }
+  private currRoomHits = 0;
+  private currRoomMisses = 0;
+  private prevRoomHits = 0;
+  private prevRoomMisses = 0;
+  private slideRoom(): void {
+    this.prevRoomHits = this.currRoomHits;
+    this.prevRoomMisses = this.currRoomMisses;
+    this.currRoomHits = 0;
+    this.currRoomMisses = 0;
   }
   public hit(): void {
     this.active = undefined;
-    ++this.currHits + this.currMisses === this.window && this.slide();
+    ++this.currWindowHits + this.currWindowMisses === this.window && this.slideWindow();
+    ++this.currRoomHits + this.currRoomMisses === this.room && this.slideRoom();
     this.processing && !this.isActive() && this.reset();
   }
   public miss(): void {
     this.active = undefined;
-    this.currHits + ++this.currMisses === this.window && this.slide();
+    this.currWindowHits + ++this.currWindowMisses === this.window && this.slideWindow();
+    this.currRoomHits + ++this.currRoomMisses === this.room && this.slideRoom();
   }
   private active?: boolean;
   public isActive(): boolean {
-    if (this.prevHits === 0 && this.prevMisses === 0) return false;
-    return this.active ??= this.ratio() < this.threshold;
+    if (this.threshold === 0) return false;
+    if (this.prevWindowHits === 0 && this.prevWindowMisses === 0) return false;
+    return this.active ??= this.ratioWindow() < max(this.ratioRoom() * this.ratio / 100, this.threshold);
   }
-  private ratio(): number {
+  private ratioWindow(): number {
     return ratio(
       this.window,
-      [this.currHits, this.prevHits],
-      [this.currMisses, this.prevMisses],
+      [this.currWindowHits, this.prevWindowHits],
+      [this.currWindowMisses, this.prevWindowMisses],
+      0);
+  }
+  private ratioRoom(): number {
+    return ratio(
+      this.room,
+      [this.currRoomHits, this.prevRoomHits],
+      [this.currRoomMisses, this.prevRoomMisses],
       0);
   }
   private processing = false;
@@ -687,17 +719,21 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
     this.processing = true;
     this.reset();
     assert(!this.processing);
-    this.slide();
-    this.slide();
+    this.slideWindow();
+    this.slideWindow();
+    this.slideRoom();
+    this.slideRoom();
     assert(!this.isActive());
   }
   public replace(target: T): void {
     this.target = target;
   }
-  public resize(capacity: number, window: number, range: number): void {
+  public resize(capacity: number, window: number, room: number, range: number): void {
     this.window = round(capacity * window / 100) || 1;
+    this.room = round(capacity * room / 100) || 1;
     this.range = capacity * range / 100;
-    this.currHits + this.currMisses >= this.window && this.slide();
+    this.currWindowHits + this.currWindowMisses >= this.window && this.slideWindow();
+    this.currRoomHits + this.currRoomMisses >= this.room && this.slideRoom();
     this.active = undefined;
   }
 }
