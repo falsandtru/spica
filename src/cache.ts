@@ -578,13 +578,14 @@ export class Cache<K, V> implements IterableDict<K, V> {
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     this.partition = this.partition / this.capacity * capacity >>> 0;
     this.capacity = capacity;
-    this.window = capacity * this.settings.window! / 100 >>> 0;
-    this.resource = resource ?? this.settings.resource ?? capacity;
+    const { settings } = this;
+    this.window = capacity * settings.window! / 100 >>> 0;
+    this.resource = resource ?? settings.resource ?? capacity;
     this.sweeper.resize(
       capacity,
-      this.settings.sweep!.window!,
-      this.settings.sweep!.room!,
-      this.settings.sweep!.range!);
+      settings.sweep!.window!,
+      settings.sweep!.room!,
+      settings.sweep!.range!);
     this.ensure(0);
   }
 }
