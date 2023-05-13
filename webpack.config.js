@@ -76,7 +76,7 @@ module.exports = env => {
       return merge(config);
     case 'lint':
       return merge(config, {
-        entry: glob.sync('./!(node_modules)/**/*.ts', { absolute: true }),
+        entry: glob.sync('./!(node_modules)/**/*.ts', { absolute: true }).sort(),
         plugins: [
           new ESLintPlugin({
             extensions: ['ts'],
@@ -109,7 +109,7 @@ module.exports = env => {
     //    entry: Object.fromEntries(glob.sync('./src/*.ts', {
     //      absolute: true,
     //      ignore: './**/*.test.ts',
-    //    }).map(path => [path.match(/[\w.]+(?=\.)/)[0], path])),
+    //    }).map(path => [path.match(/[\w.]+(?=\.)/)[0], path])).sort(),
     //    output: {
     //      filename: '[name].js',
     //      path: path.resolve(__dirname),
