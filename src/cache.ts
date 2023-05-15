@@ -603,9 +603,7 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
     private readonly shift: number,
   ) {
     this.threshold *= 100;
-    this.window = round(capacity * window / 100) || 1;
-    this.room = round(capacity * room / 100) || 1;
-    this.range = capacity * range / 100;
+    this.resize(capacity, window, room, range);
   }
   private currWindowHits = 0;
   private currWindowMisses = 0;
