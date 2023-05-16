@@ -384,11 +384,11 @@ export class Cache<K, V> implements IterableDict<K, V> {
   }
   private replace(entry: Entry<K, V>): void {
     const { LRU, LFU } = this;
-    this.sweeper.hit();
     if (entry.partition === LRU) {
-      // For memoize.
-      if (entry === LRU.head) return;
       if (entry.region === 'LRU') {
+        // For memoize.
+        // Strict checks are ineffective for OLTP.
+        if (entry === LRU.head) return;
         entry.region = 'LFU';
       }
       else {
@@ -406,8 +406,6 @@ export class Cache<K, V> implements IterableDict<K, V> {
       entry.partition = LFU;
     }
     else {
-      // For memoize.
-      if (entry === LFU.head) return;
       if (entry.region === 'LFU') {
       }
       else {
@@ -420,6 +418,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
         --this.overlapLRU;
         assert(this.overlapLRU >= 0);
       }
+      if (entry === LFU.head) return;
       LFU.delete(entry);
       LFU.unshift(entry);
     }
@@ -525,6 +524,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
       this.evict$(entry, true);
       return;
     }
+    this.sweeper.hit();
     this.replace(entry);
     return entry.value;
   }
