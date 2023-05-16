@@ -200,7 +200,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
     },
     sweep: {
       threshold: 10,
-      ratio: 25,
+      ratio: 50,
       window: 2,
       room: 50,
       range: 1,
