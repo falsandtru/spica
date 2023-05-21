@@ -9,16 +9,17 @@ export class List<T> {
     private readonly Container: ArrayConstructor | Uint32ArrayConstructor = Array,
   ) {
     if (capacity <= 0) {
-      capacity = -capacity;
+      capacity = -capacity || 4;
       this.auto = true;
     }
+    assert(this.capacity > 0);
     if (capacity >= 2 ** 32) throw new Error(`Too large capacity`);
-    this.capacity ||= 4;
+    this.capacity = capacity;
     this.values = new this.Container(this.capacity) as T[];
     this.nexts = new Uint32Array(this.capacity);
     this.prevs = new Uint32Array(this.capacity);
   }
-  private readonly auto: boolean = false;
+  private auto = false;
   private values: T[];
   private nexts: Uint32Array;
   private prevs: Uint32Array;
@@ -67,6 +68,11 @@ export class List<T> {
     return index;
   }
   public resize(capacity: number): void {
+    if (capacity <= 0) {
+      capacity = -capacity || 4;
+      this.auto = true;
+    }
+    assert(this.capacity > 0);
     if (capacity > 2 ** 32) throw new Error(`Too large capacity`);
     if (capacity > this.nexts.length) {
       const size = max(capacity, min(this.capacity * 2, 2 ** 32));
