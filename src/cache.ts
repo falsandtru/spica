@@ -169,6 +169,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     this.window = capacity * settings.window! / 100 >>> 0;
     this.partition = capacity - this.window;
+    this.injection = 100 * this.declination;
     this.sample = settings.sample!;
     this.resource = settings.resource! ?? capacity;
     this.expiration = opts.age !== undefined;
@@ -232,9 +233,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
     assert(this.LRU.length + this.LFU.length === this.dict.size);
     //assert(this.dict.size <= this.capacity);
     assert(entry.next);
-    entry.partition === this.LRU
-      ? entry.region === 'LFU' && --this.overlapLFU
-      : entry.region === 'LRU' && --this.overlapLRU;
+    this.overlap(entry, true);
     assert(this.overlapLRU >= 0);
     assert(this.overlapLFU >= 0);
     if (entry.enode !== undefined) {
@@ -250,9 +249,10 @@ export class Cache<K, V> implements IterableDict<K, V> {
     callback && this.disposer?.(entry.value, entry.key);
   }
   private readonly sample: number;
-  private overlap(entry: Entry<K, V>): Entry<K, V> {
+  private overlap(entry: Entry<K, V>, eviction = false): Entry<K, V> {
     if (entry.partition === this.LRU) {
       if (entry.region === 'LRU') {
+        if (eviction) return entry;
         ++this.overlapLRU;
         assert(this.overlapLRU - 1 <= this.LFU.length);
       }
@@ -263,18 +263,23 @@ export class Cache<K, V> implements IterableDict<K, V> {
     }
     else {
       if (entry.region === 'LFU') {
+        if (eviction) return entry;
         ++this.overlapLFU;
         assert(this.overlapLFU - 1 <= this.LRU.length);
       }
       else {
         --this.overlapLRU;
         assert(this.overlapLRU >= 0);
+        if (this.overlapLRU * 100 < this.LFU.length * this.sample) {
+          this.declination = 1;
+        }
       }
     }
     return entry;
   }
   private readonly sweeper: Sweeper<List<Entry<K, V>>>;
-  private injection = 0;
+  private injection: number;
+  private declination = 1;
   // Update and deletion are reentrant but addition is not.
   private ensure(margin: number, target?: Entry<K, V>, capture = false): Entry<K, V> | undefined {
     let size = target?.size ?? 0;
@@ -282,7 +287,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
     const { LRU, LFU } = this;
     while (this.size + margin - size > this.resource) {
       assert(this.length >= 1 + +!!target);
-      this.injection = min(this.injection + this.sample, 100);
+      this.injection = min(this.injection + this.sample, 100 * this.declination);
       let victim = this.expirations?.peek()?.value;
       if (victim !== undefined && victim !== target && victim.expiration < now()) {
       }
@@ -311,16 +316,16 @@ export class Cache<K, V> implements IterableDict<K, V> {
             entry.partition = LRU;
           }
         }
-        assert(this.injection <= 100);
-        if (this.injection === 100 &&
-            LRU.length >= this.window &&
-            this.overlapLRU * 100 / min(LFU.length, this.partition) < this.sample) {
+        if (LRU.length >= this.window && this.injection === 100 * this.declination) {
           const entry = LRU.head!.prev!;
           if (entry.region === 'LRU') {
             LRU.delete(entry);
             LFU.unshift(this.overlap(entry));
             entry.partition = LFU;
             this.injection = 0;
+            this.declination = this.overlapLRU * 100 < LFU.length * this.sample
+              ? 1
+              : min(this.declination * 1.5, 10);
           }
         }
         if (this.sweeper.isActive()) {
@@ -392,8 +397,9 @@ export class Cache<K, V> implements IterableDict<K, V> {
         entry.region = 'LFU';
       }
       else {
+        assert(this.overlapLFU > 0);
         const delta = LRU.length > LFU.length && LRU.length >= this.capacity - this.partition
-          ? LRU.length / (LFU.length || 1) * (this.overlapLRU || 1) / this.overlapLFU | 0 || 1
+          ? LRU.length / (LFU.length || 1) * max(this.overlapLRU / this.overlapLFU, 1) | 0 || 1
           : 1;
         assert(delta > 0);
         this.partition = min(this.partition + delta, this.capacity - this.window);
@@ -409,14 +415,18 @@ export class Cache<K, V> implements IterableDict<K, V> {
       if (entry.region === 'LFU') {
       }
       else {
+        assert(this.overlapLRU > 0);
         const delta = LFU.length > LRU.length && LFU.length >= this.partition
-          ? LFU.length / (LRU.length || 1) * (this.overlapLFU || 1) / this.overlapLRU | 0 || 1
+          ? LFU.length / (LRU.length || 1) * max(this.overlapLFU / this.overlapLRU, 1) | 0 || 1
           : 1;
         assert(delta > 0);
         this.partition = max(this.partition - delta, 0);
         entry.region = 'LFU';
         --this.overlapLRU;
         assert(this.overlapLRU >= 0);
+        if (this.overlapLRU * 100 < this.LFU.length * this.sample) {
+          this.declination = 1;
+        }
       }
       if (entry === LFU.head) return;
       LFU.delete(entry);
@@ -545,9 +555,9 @@ export class Cache<K, V> implements IterableDict<K, V> {
   }
   public clear(): void {
     const { LRU, LFU } = this;
-    this.injection = 0;
     this.$size = 0;
     this.partition = this.capacity - this.window;
+    this.injection = 100 * this.declination;
     this.dict = new Map();
     this.LRU = new List();
     this.LFU = new List();

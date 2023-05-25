@@ -59,7 +59,7 @@ describe('Unit: lib/lru', () => {
       const isc = new LRUCache<number, 1>({ max: capacity });
 
       const trials = capacity * 1000;
-      const random = zipfian(1, capacity * 1e7, 0.8, xorshift.random(1));
+      const random = zipfian(1, capacity * 1e3, 0.8, xorshift.random(1));
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         const key = random();
@@ -80,7 +80,7 @@ describe('Unit: lib/lru', () => {
       const isc = new LRUCache<number, 1>({ max: capacity });
 
       const trials = capacity * 100;
-      const random = zipfian(1, capacity * 1e7, 0.8, xorshift.random(1));
+      const random = zipfian(1, capacity * 1e3, 0.8, xorshift.random(1));
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         const key = random();

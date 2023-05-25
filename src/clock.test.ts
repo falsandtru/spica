@@ -60,7 +60,7 @@ describe('Unit: lib/clock', () => {
       const clock = new Clock<number, number>(capacity);
 
       const trials = capacity * 1000;
-      const random = zipfian(1, capacity * 1e7, 0.8, xorshift.random(1));
+      const random = zipfian(1, capacity * 1e3, 0.8, xorshift.random(1));
       for (let i = 0; i < trials; ++i) {
         const key = random() * capacity * 10 | 0;
         if (clock.has(key)) {
@@ -112,7 +112,7 @@ describe('Unit: lib/clock', () => {
       const lru = new LRU<number, 1>(capacity);
 
       const trials = capacity * 1000;
-      const random = zipfian(1, capacity * 1e7, 0.8, xorshift.random(1));
+      const random = zipfian(1, capacity * 1e3, 0.8, xorshift.random(1));
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         const key = random();
@@ -135,7 +135,7 @@ describe('Unit: lib/clock', () => {
       const lru = new LRU<number, 1>(capacity);
 
       const trials = capacity * 100;
-      const random = zipfian(1, capacity * 1e7, 0.8, xorshift.random(1));
+      const random = zipfian(1, capacity * 1e3, 0.8, xorshift.random(1));
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         const key = random();
@@ -146,7 +146,7 @@ describe('Unit: lib/clock', () => {
       console.debug('LRU   hits', stats.lru);
       console.debug('Clock hits', stats.clock);
       console.debug('Clock / LRU hit ratio', `${stats.clock / stats.lru * 100 | 0}%`);
-      assert(stats.clock / stats.lru * 100 >>> 0 === 100);
+      assert(stats.clock / stats.lru * 100 >>> 0 === 105);
       assert(clock['values'].length === capacity);
     });
 
