@@ -179,11 +179,11 @@ export class Cache<K, V> implements IterableDict<K, V> {
     }
     this.sweeper = new Sweeper(
       this.LRU,
-      settings.sweep!.threshold!,
-      settings.sweep!.ratio!,
       capacity,
       settings.sweep!.window!,
       settings.sweep!.room!,
+      settings.sweep!.threshold!,
+      settings.sweep!.ratio!,
       settings.sweep!.range!,
       settings.sweep!.shift!);
     this.disposer = settings.disposer!;
@@ -606,11 +606,11 @@ export class Cache<K, V> implements IterableDict<K, V> {
 class Sweeper<T extends List<Entry<unknown, unknown>>> {
   constructor(
     private target: T,
-    private readonly threshold: number,
-    private readonly ratio: number,
     capacity: number,
     private window: number,
     private room: number,
+    private readonly threshold: number,
+    private readonly ratio: number,
     private range: number,
     private readonly shift: number,
   ) {
