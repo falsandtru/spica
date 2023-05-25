@@ -229,6 +229,42 @@ export class Cache<K, V> implements IterableDict<K, V> {
     return this.$size;
   }
   private readonly disposer?: (value: V, key: K) => void;
+  public resize(capacity: number, resource?: number): void {
+    if (capacity >>> 0 !== capacity) throw new Error(`Spica: Cache: Capacity must be integer.`);
+    if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
+    this.partition = this.partition / this.capacity * capacity >>> 0;
+    this.capacity = capacity;
+    const { settings } = this;
+    this.window = capacity * settings.window! / 100 >>> 0;
+    this.resource = resource ?? settings.resource ?? capacity;
+    this.sweeper.resize(
+      capacity,
+      settings.sweep!.window!,
+      settings.sweep!.room!,
+      settings.sweep!.range!);
+    this.ensure(0);
+  }
+  public clear(): void {
+    const { LRU, LFU } = this;
+    this.$size = 0;
+    this.partition = this.capacity - this.window;
+    this.injection = 100 * this.declination;
+    this.dict = new Map();
+    this.LRU = new List();
+    this.LFU = new List();
+    this.overlapLRU = 0;
+    this.overlapLFU = 0;
+    this.expirations?.clear();
+    this.sweeper.clear();
+    this.sweeper.replace(this.LRU);
+    if (!this.disposer || !this.settings.capture!.clear) return;
+    for (const { key, value } of LRU) {
+      this.disposer(value, key);
+    }
+    for (const { key, value } of LFU) {
+      this.disposer(value, key);
+    }
+  }
   private evict$(entry: Entry<K, V>, callback: boolean): void {
     assert(this.LRU.length + this.LFU.length === this.dict.size);
     //assert(this.dict.size <= this.capacity);
@@ -555,27 +591,6 @@ export class Cache<K, V> implements IterableDict<K, V> {
     this.evict$(entry, this.settings.capture!.delete === true);
     return true;
   }
-  public clear(): void {
-    const { LRU, LFU } = this;
-    this.$size = 0;
-    this.partition = this.capacity - this.window;
-    this.injection = 100 * this.declination;
-    this.dict = new Map();
-    this.LRU = new List();
-    this.LFU = new List();
-    this.overlapLRU = 0;
-    this.overlapLFU = 0;
-    this.expirations?.clear();
-    this.sweeper.clear();
-    this.sweeper.replace(this.LRU);
-    if (!this.disposer || !this.settings.capture!.clear) return;
-    for (const { key, value } of LRU) {
-      this.disposer(value, key);
-    }
-    for (const { key, value } of LFU) {
-      this.disposer(value, key);
-    }
-  }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
     for (const { key, value } of this.LRU) {
       yield [key, value];
@@ -584,21 +599,6 @@ export class Cache<K, V> implements IterableDict<K, V> {
       yield [key, value];
     }
     return;
-  }
-  public resize(capacity: number, resource?: number): void {
-    if (capacity >>> 0 !== capacity) throw new Error(`Spica: Cache: Capacity must be integer.`);
-    if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
-    this.partition = this.partition / this.capacity * capacity >>> 0;
-    this.capacity = capacity;
-    const { settings } = this;
-    this.window = capacity * settings.window! / 100 >>> 0;
-    this.resource = resource ?? settings.resource ?? capacity;
-    this.sweeper.resize(
-      capacity,
-      settings.sweep!.window!,
-      settings.sweep!.room!,
-      settings.sweep!.range!);
-    this.ensure(0);
   }
 }
 
@@ -616,6 +616,28 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
   ) {
     this.threshold *= 100;
     this.resize(capacity, window, room, range);
+  }
+  public replace(target: T): void {
+    this.target = target;
+  }
+  public resize(capacity: number, window: number, room: number, range: number): void {
+    this.window = round(capacity * window / 100) || 1;
+    this.room = round(capacity * room / 100) || 1;
+    this.range = capacity * range / 100;
+    this.currWindowHits + this.currWindowMisses >= this.window && this.slideWindow();
+    this.currRoomHits + this.currRoomMisses >= this.room && this.slideRoom();
+    this.active = undefined;
+  }
+  public clear(): void {
+    this.active = undefined;
+    this.processing = true;
+    this.reset();
+    assert(!this.processing);
+    this.slideWindow();
+    this.slideWindow();
+    this.slideRoom();
+    this.slideRoom();
+    assert(!this.isActive());
   }
   private currWindowHits = 0;
   private currWindowMisses = 0;
@@ -724,28 +746,6 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
     this.back = 0;
     this.advance = 0;
     assert(!this.active);
-  }
-  public clear(): void {
-    this.active = undefined;
-    this.processing = true;
-    this.reset();
-    assert(!this.processing);
-    this.slideWindow();
-    this.slideWindow();
-    this.slideRoom();
-    this.slideRoom();
-    assert(!this.isActive());
-  }
-  public replace(target: T): void {
-    this.target = target;
-  }
-  public resize(capacity: number, window: number, room: number, range: number): void {
-    this.window = round(capacity * window / 100) || 1;
-    this.room = round(capacity * room / 100) || 1;
-    this.range = capacity * range / 100;
-    this.currWindowHits + this.currWindowMisses >= this.window && this.slideWindow();
-    this.currRoomHits + this.currRoomMisses >= this.room && this.slideRoom();
-    this.active = undefined;
   }
 }
 
