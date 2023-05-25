@@ -103,7 +103,7 @@ class Entry<K, V> implements List.Node {
     public key: K,
     public value: V,
     public size: number,
-    public partition: List<Entry<K, V>>,
+    public partition: 'LRU' | 'LFU',
     public region: 'LRU' | 'LFU',
     public expiration: number,
   ) {
@@ -240,7 +240,9 @@ export class Cache<K, V> implements IterableDict<K, V> {
       this.expirations!.delete(entry.enode);
       entry.enode = undefined;
     }
-    entry.partition.delete(entry);
+    entry.partition === 'LRU'
+      ? this.LRU.delete(entry)
+      : this.LFU.delete(entry)
     assert(this.LRU.length + this.LFU.length === this.dict.size - 1);
     this.dict.delete(entry.key);
     assert(this.LRU.length + this.LFU.length === this.dict.size);
@@ -250,7 +252,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
   }
   private readonly sample: number;
   private overlap(entry: Entry<K, V>, eviction = false): Entry<K, V> {
-    if (entry.partition === this.LRU) {
+    if (entry.partition === 'LRU') {
       if (entry.region === 'LRU') {
         if (eviction) return entry;
         ++this.overlapLRU;
@@ -310,10 +312,10 @@ export class Cache<K, V> implements IterableDict<K, V> {
               : undefined;
           if (entry !== undefined) {
             assert(entry !== target);
-            assert(entry.partition === LFU);
+            assert(entry.partition === 'LFU');
             LFU.delete(entry);
             LRU.unshift(this.overlap(entry));
-            entry.partition = LRU;
+            entry.partition = 'LRU';
           }
         }
         if (LRU.length >= this.window && this.injection === 100 * this.declination) {
@@ -321,7 +323,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
           if (entry.region === 'LRU') {
             LRU.delete(entry);
             LFU.unshift(this.overlap(entry));
-            entry.partition = LFU;
+            entry.partition = 'LFU';
             this.injection = 0;
             this.declination = this.overlapLRU * 100 < LFU.length * this.sample
               ? 1
@@ -389,7 +391,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
   }
   private replace(entry: Entry<K, V>): void {
     const { LRU, LFU } = this;
-    if (entry.partition === LRU) {
+    if (entry.partition === 'LRU') {
       if (entry.region === 'LRU') {
         // For memoize.
         // Strict checks are ineffective for OLTP.
@@ -409,7 +411,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
       assert(this.LFU.length < this.capacity);
       LRU.delete(entry);
       LFU.unshift(entry);
-      entry.partition = LFU;
+      entry.partition = 'LFU';
     }
     else {
       if (entry.region === 'LFU') {
@@ -480,7 +482,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
       key,
       value,
       size,
-      LRU,
+      'LRU',
       'LRU',
       expiration,
     );
