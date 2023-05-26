@@ -104,7 +104,7 @@ class Entry<K, V> implements List.Node {
     public value: V,
     public size: number,
     public partition: 'LRU' | 'LFU',
-    public region: 'LRU' | 'LFU',
+    public affiliation: 'LRU' | 'LFU',
     public expiration: number,
   ) {
   }
@@ -289,7 +289,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
   private readonly sample: number;
   private overlap(entry: Entry<K, V>, eviction = false): Entry<K, V> {
     if (entry.partition === 'LRU') {
-      if (entry.region === 'LRU') {
+      if (entry.affiliation === 'LRU') {
         if (eviction) return entry;
         ++this.overlapLRU;
         assert(this.overlapLRU - 1 <= this.LFU.length);
@@ -300,7 +300,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
       }
     }
     else {
-      if (entry.region === 'LFU') {
+      if (entry.affiliation === 'LFU') {
         if (eviction) return entry;
         ++this.overlapLFU;
         assert(this.overlapLFU - 1 <= this.LRU.length);
@@ -356,7 +356,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
         }
         if (LRU.length >= this.window && this.injection === 100 * this.declination) {
           const entry = LRU.head!.prev!;
-          if (entry.region === 'LRU') {
+          if (entry.affiliation === 'LRU') {
             LRU.delete(entry);
             LFU.unshift(this.overlap(entry));
             entry.partition = 'LFU';
@@ -428,11 +428,11 @@ export class Cache<K, V> implements IterableDict<K, V> {
   private replace(entry: Entry<K, V>): void {
     const { LRU, LFU } = this;
     if (entry.partition === 'LRU') {
-      if (entry.region === 'LRU') {
+      if (entry.affiliation === 'LRU') {
         // For memoize.
         // Strict checks are ineffective for OLTP.
         if (entry === LRU.head) return;
-        entry.region = 'LFU';
+        entry.affiliation = 'LFU';
       }
       else {
         assert(this.overlapLFU > 0);
@@ -450,7 +450,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
       entry.partition = 'LFU';
     }
     else {
-      if (entry.region === 'LFU') {
+      if (entry.affiliation === 'LFU') {
       }
       else {
         assert(this.overlapLRU > 0);
@@ -459,7 +459,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
           : 1;
         assert(delta > 0);
         this.partition = max(this.partition - delta, 0);
-        entry.region = 'LFU';
+        entry.affiliation = 'LFU';
         --this.overlapLRU;
         assert(this.overlapLRU >= 0);
         if (this.overlapLRU * 100 < this.LFU.length * this.sample) {
@@ -498,13 +498,13 @@ export class Cache<K, V> implements IterableDict<K, V> {
     // Note that the key will be duplicate if the key is evicted and added again in disposing.
     if (victim !== undefined) {
       assert(victim === LRU.head!.prev);
-      victim.region === 'LFU' && --this.overlapLFU;
+      victim.affiliation === 'LFU' && --this.overlapLFU;
       assert(this.overlapLFU >= 0);
       this.dict.delete(victim.key);
       this.dict.set(key, victim);
       assert(this.LRU.length + this.LFU.length === this.dict.size);
       assert(this.dict.size <= this.capacity);
-      victim.region = 'LRU';
+      victim.affiliation = 'LRU';
       LRU.head = victim;
       this.update(victim, key, value, size, expiration);
       return true;
