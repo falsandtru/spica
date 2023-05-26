@@ -308,7 +308,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
       else {
         --this.overlapLRU;
         assert(this.overlapLRU >= 0);
-        if (this.overlapLRU * 100 < this.LFU.length * this.sample) {
+        if (this.declination !== 1 && this.overlapLRU * 100 < this.LFU.length * this.sample) {
           this.declination = 1;
         }
       }
@@ -462,7 +462,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
         entry.affiliation = 'LFU';
         --this.overlapLRU;
         assert(this.overlapLRU >= 0);
-        if (this.overlapLRU * 100 < this.LFU.length * this.sample) {
+        if (this.declination !== 1 && this.overlapLRU * 100 < this.LFU.length * this.sample) {
           this.declination = 1;
         }
       }
