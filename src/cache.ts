@@ -167,7 +167,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
     this.capacity = capacity = settings.capacity!;
     if (capacity >>> 0 !== capacity) throw new Error(`Spica: Cache: Capacity must be integer.`);
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
-    this.window = capacity * settings.window! / 100 >>> 0;
+    this.window = capacity * settings.window! / 100 >>> 0 || 1;
     this.partition = capacity - this.window;
     this.injection = 100 * this.declination;
     this.sample = settings.sample!;
@@ -235,7 +235,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
     this.partition = this.partition / this.capacity * capacity >>> 0;
     this.capacity = capacity;
     const { settings } = this;
-    this.window = capacity * settings.window! / 100 >>> 0;
+    this.window = capacity * settings.window! / 100 >>> 0 || 1;
     this.resource = resource ?? settings.resource ?? capacity;
     this.sweeper.resize(
       capacity,
