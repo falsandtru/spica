@@ -363,7 +363,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
             this.injection = 0;
             this.declination = this.overlapLRU * 100 < LFU.length * this.sample
               ? 1
-              : min(this.declination * 1.5, 10);
+              : min(this.declination * 1.5, 5);
           }
         }
         if (this.sweeper.isActive()) {
