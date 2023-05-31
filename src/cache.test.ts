@@ -599,6 +599,9 @@ describe('Unit: lib/cache', () => {
       assert(stats.dwc * 100 / stats.total >>> 0 === 39);
     });
 
+    // キャッシュサイズが相対的に小さい場合はサンプルの挿入とヒットによりアンロックされる。
+    // キャッシュサイズが相対的に大きい場合はウインドウ内でのヒットによりアンロックされる。
+
     it('ratio uneven 100 lock loop', function () {
       this.timeout(10 * 1e3);
 
