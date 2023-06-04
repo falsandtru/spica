@@ -100,7 +100,7 @@ describe('Unit: lib/clock', () => {
       console.debug('LRU   hits', stats.lru);
       console.debug('Clock hits', stats.clock);
       console.debug('Clock / LRU hit ratio', `${stats.clock / stats.lru * 100 | 0}%`);
-      assert(stats.clock / stats.lru * 100 >>> 0 === 99);
+      assert(stats.clock / stats.lru * 100 >>> 0 === 100);
       assert(clock['values'].length === capacity);
     });
 

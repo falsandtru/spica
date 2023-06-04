@@ -127,7 +127,7 @@ export function xorshift(seed: number = xorshift.seed()): () => number {
     let x = seed;
     x ^= x << 13;
     x ^= x >> 17;
-    x ^= x << 5;
+    x ^= x << 15;
     return seed = x >>> 0;
   };
 }
