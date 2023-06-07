@@ -153,6 +153,7 @@ describe('Unit: lib/promise', () => {
 
     it('promise', async () => {
       (): Promise<void> => AtomicPromise.resolve();
+      (): typeof Promise => AtomicPromise;
       assert(await Promise.resolve(AtomicPromise.resolve(0)) === 0);
       assert(await Promise.resolve(AtomicPromise.reject(1)).catch(r => ++r) === 2);
     });
