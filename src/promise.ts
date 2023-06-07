@@ -234,8 +234,16 @@ export class AtomicPromise<T = undefined> implements Promise<T>, AtomicPromiseLi
   }
 }
 
-type FulfillReaction = [Internal<unknown>, true, ((param: unknown) => unknown) | undefined | null];
-type RejectReaction = [Internal<unknown>, false, ((param: unknown) => unknown) | undefined | null];
+interface FulfillReaction {
+  readonly internal: Internal<unknown>;
+  readonly state: true;
+  readonly procedure: ((param: unknown) => unknown) | undefined | null;
+}
+interface RejectReaction {
+  readonly internal: Internal<unknown>;
+  readonly state: false;
+  readonly procedure: ((param: unknown) => unknown) | undefined | null;
+}
 
 export class Internal<T> {
   public status: Status<T> = { state: State.pending };
@@ -301,16 +309,16 @@ export class Internal<T> {
         if (rejectReactions.length !== 0) break;
         return call(internal, false, onrejected, status.reason);
     }
-    fulfillReactions.push([
+    fulfillReactions.push({
       internal,
-      true,
-      onfulfilled,
-    ]);
-    rejectReactions.push([
+      state: true,
+      procedure: onfulfilled,
+    });
+    rejectReactions.push({
       internal,
-      false,
-      onrejected,
-    ]);
+      state: false,
+      procedure: onrejected,
+    });
   }
   public resume(): void {
     const { status, fulfillReactions, rejectReactions } = this;
@@ -338,14 +346,10 @@ export class Internal<T> {
   }
 }
 
-function react(reactions: (FulfillReaction | RejectReaction)[], param: unknown): void {
+function react(reactions: readonly (FulfillReaction | RejectReaction)[], param: unknown): void {
   for (let i = 0; i < reactions.length; ++i) {
-    const reaction = reactions[i];
-    call(
-      reaction[0],
-      reaction[1],
-      reaction[2],
-      param);
+    const { internal, state, procedure } = reactions[i];
+    call(internal, state, procedure, param);
   }
 }
 
