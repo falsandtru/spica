@@ -33,7 +33,6 @@ export async function* select<T extends Channels>(
     !result.done && reqs.add(take(name, chan));
     yield { name, result } as Selection<T>;
   }
-  return;
 }
 
 type Request = Promise<readonly [Request, string, AsyncIterator<unknown, unknown, undefined>, IteratorResult<unknown, unknown>]>;

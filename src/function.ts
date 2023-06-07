@@ -27,6 +27,5 @@ export function fix<a>(f: (a: a) => a): (a: a) => a {
   };
 }
 
-// @ts-ignore
 export function noop(): undefined {
 }

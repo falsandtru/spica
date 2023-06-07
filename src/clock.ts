@@ -132,7 +132,6 @@ export class Clock<K, V> implements IterableDict<K, V> {
     for (const index of this.dict.values()) {
       yield [keys[index]!, values[index]! as V];
     }
-    return;
   }
 }
 

@@ -92,6 +92,5 @@ export class LRU<K, V> implements IterableDict<K, V> {
     for (const { key, value } of this.list) {
       yield [key, value];
     }
-    return;
   }
 }

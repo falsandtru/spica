@@ -60,7 +60,6 @@ export class Queue<T> {
     while (!this.isEmpty()) {
       yield this.pop()!;
     }
-    return;
   }
 }
 
@@ -162,7 +161,6 @@ export class PriorityQueue<T, P = T> {
     while (!this.isEmpty()) {
       yield this.pop()!;
     }
-    return;
   }
 }
 
@@ -237,6 +235,5 @@ export class MultiQueue<K, V> implements IterableDict<K, V> {
         yield [k, vs.pop()!];
       }
     }
-    return;
   }
 }

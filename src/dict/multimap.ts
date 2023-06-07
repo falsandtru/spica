@@ -76,6 +76,5 @@ export class MultiMap<K, V> implements IterableDict<K, V> {
         yield [k, vs.at(i)!];
       }
     }
-    return;
   }
 }

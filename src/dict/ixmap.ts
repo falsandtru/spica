@@ -47,6 +47,5 @@ export class IxMap<K, V> implements IterableDict<K, V> {
     for (const { 0: key, 1: index } of indexes) {
       yield [key, values[index]];
     }
-    return;
   }
 }

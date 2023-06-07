@@ -182,7 +182,6 @@ export class Ring<T> {
     for (let i = 0; i < this.$length; ++i) {
       yield this.at(i)!;
     }
-    return;
   }
 }
 

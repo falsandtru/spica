@@ -246,6 +246,5 @@ export class List<T> {
       yield this.values[index];
       index = this.nexts[index];
     }
-    return;
   }
 }

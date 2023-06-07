@@ -84,6 +84,5 @@ export class Channel<T = undefined> implements AsyncIterable<T> {
     catch (reason) {
       if (this.alive) throw reason;
     }
-    return;
   }
 }

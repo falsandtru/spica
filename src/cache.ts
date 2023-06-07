@@ -598,7 +598,6 @@ export class Cache<K, V> implements IterableDict<K, V> {
     for (const { key, value } of this.LFU) {
       yield [key, value];
     }
-    return;
   }
 }
 

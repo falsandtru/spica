@@ -27,6 +27,5 @@ export class Stack<T> {
     while (!this.isEmpty()) {
       yield this.pop()!;
     }
-    return;
   }
 }

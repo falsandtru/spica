@@ -45,7 +45,6 @@ export class List<N extends List.Node = List.Node> {
     for (let node = this.head; node !== undefined; node = node!.next) {
       yield node;
     }
-    return;
   }
   public flatMap<T>(f: (node: N) => ArrayLike<T>): T[] {
     const acc = [];
