@@ -1,9 +1,11 @@
 export function singleton<f extends (...args: unknown[]) => unknown>(f: f): f {
-  let result: [unknown];
+  let result: unknown;
+  assert(result === noop());
   return function (this: unknown, ...as) {
-    if (result) return result[0];
-    result = [f.call(this, ...as)];
-    return result[0];
+    if (f === noop) return result;
+    result = f.call(this, ...as);
+    f = noop as f;
+    return result;
   } as f;
 }
 
