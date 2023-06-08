@@ -16,16 +16,31 @@ export function memoize<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (..
 export function memoize<as extends [unknown, ...unknown[]], z, b extends number = number>(f: (...as: as) => z, identify: (...as: as) => b, memory: Record<number, z>): typeof f;
 export function memoize<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...as: as) => z, identify: Dict<b, z> | Record<number, z> | ((...as: as) => b) = (...as) => as[0] as b, memory?: Dict<b, z> | Record<number, z>): typeof f {
   if (typeof identify === 'object') return memoize(f, undefined, identify as Dict<b, z>);
-  return isArray(memory) || memory?.constructor === Object
-    ? memoizeRecord(f, identify, memory as z[])
-    : memoizeDict(f, identify, memory as Dict<b, z> ?? new Map());
+  switch (true) {
+    case isArray(memory):
+      return memoizeArray(f, identify, memory as z[]);
+    case memory?.constructor === Object:
+      return memoizeObject(f, identify, memory as Record<number, z>);
+    default:
+      return memoizeDict(f, identify, memory as Dict<b, z> ?? new Map());
+  }
 }
-function memoizeRecord<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...as: as) => z, identify: (...as: as) => b, memory: Record<number, z>): typeof f {
+function memoizeArray<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...as: as) => z, identify: (...as: as) => b, memory: z[]): typeof f {
+  return (...as) => {
+    const b = identify(...as) as number;
+    let z = memory[b];
+    if (z !== undefined) return z!;
+    z = f(...as);
+    memory[b] = z;
+    return z;
+  };
+}
+function memoizeObject<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...as: as) => z, identify: (...as: as) => b, memory: Record<number, z>): typeof f {
   let nullable = false;
   return (...as) => {
     const b = identify(...as) as number;
     let z = memory[b];
-    if (z !== undefined || nullable && memory[b] !== undefined) return z!;
+    if (z !== undefined || nullable && b in memory) return z!;
     z = f(...as);
     nullable ||= z === undefined;
     memory[b] = z;
