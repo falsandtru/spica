@@ -9,12 +9,6 @@ describe('Benchmark:', function () {
       const size = 1 << exp;
       const mask = size - 1;
 
-      it(`Map    ${size.toLocaleString('en')}`, function (done) {
-        const f = memoize(a => a, new Map());
-        let i = 0;
-        benchmark(`memoize Map    ${size.toLocaleString('en')}`, () => f(i = ++i & mask), done);
-      });
-
       it(`Array  ${size.toLocaleString('en')}`, function (done) {
         const f = memoize(a => a, []);
         let i = 0;
@@ -25,6 +19,12 @@ describe('Benchmark:', function () {
         const f = memoize(a => a, {});
         let i = 0;
         benchmark(`memoize Object ${size.toLocaleString('en')}`, () => f(i = ++i & mask), done);
+      });
+
+      it(`Map    ${size.toLocaleString('en')}`, function (done) {
+        const f = memoize(a => a, new Map());
+        let i = 0;
+        benchmark(`memoize Map    ${size.toLocaleString('en')}`, () => f(i = ++i & mask), done);
       });
 
       it(`Clock  ${size.toLocaleString('en')}`, function (done) {
