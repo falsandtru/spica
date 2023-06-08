@@ -25,7 +25,11 @@ export function memoize<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (..
       return memoizeDict(f, identify, memory as Dict<b, z> ?? new Map());
   }
 }
-function memoizeArray<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...as: as) => z, identify: (...as: as) => b, memory: z[]): typeof f {
+function memoizeArray<as extends [unknown, ...unknown[]], z, b = as[0]>(
+  f: (...as: as) => z,
+  identify: (...as: as) => b,
+  memory: z[],
+): typeof f {
   return (...as) => {
     const b = identify(...as) as number;
     let z = memory[b];
@@ -35,7 +39,11 @@ function memoizeArray<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...a
     return z;
   };
 }
-function memoizeObject<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...as: as) => z, identify: (...as: as) => b, memory: Record<number, z>): typeof f {
+function memoizeObject<as extends [unknown, ...unknown[]], z, b = as[0]>(
+  f: (...as: as) => z,
+  identify: (...as: as) => b,
+  memory: Record<number, z>,
+): typeof f {
   let nullable = false;
   return (...as) => {
     const b = identify(...as) as number;
@@ -47,7 +55,11 @@ function memoizeObject<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...
     return z;
   };
 }
-function memoizeDict<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...as: as) => z, identify: (...as: as) => b, memory: Dict<b, z>): typeof f {
+function memoizeDict<as extends [unknown, ...unknown[]], z, b = as[0]>(
+  f: (...as: as) => z,
+  identify: (...as: as) => b,
+  memory: Dict<b, z>,
+): typeof f {
   let nullable = false;
   return (...as) => {
     const b = identify(...as);
