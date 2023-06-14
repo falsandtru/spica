@@ -1,0 +1,41 @@
+{
+    "compilerOptions": {
+        // Bug: ES2022 breaks the class init order.
+        "target": "ES2021",
+        "lib": [
+            "ES2022",
+            "DOM",
+            "DOM.Iterable"
+        ],
+        "types": [
+            "mocha"
+            // power-assert is provided by global.test.d.ts
+        ],
+        "outDir": "dist",
+        "module": "ES2022",
+        "moduleResolution": "bundler",
+        "esModuleInterop": true,
+        "sourceMap": true,
+        "strict": true,
+        "declaration": true,
+        "declarationMap": true,
+        "strictFunctionTypes": false,
+        "noUnusedParameters": true,
+        "noUnusedLocals": true,
+        "noImplicitOverride": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "suppressImplicitAnyIndexErrors": true,
+        "ignoreDeprecations": "5.0",
+        "noFallthroughCasesInSwitch": true,
+        "noErrorTruncation": true,
+        "forceConsistentCasingInFileNames": true
+    },
+    "include": [
+        "*.ts",
+        "src/**/*.ts",
+    ],
+    "exclude": [
+        "node_modules",
+        "src/**/*.{test,spec}.ts",
+    ]
+}
