@@ -5,7 +5,12 @@
     //"plugin:@typescript-eslint/recommended"
   ],
   "parser": "@typescript-eslint/parser",
-  "parserOptions": { "project": ["./tsconfig.json"] },
+  "parserOptions": {
+    "project": [
+      "./tsconfig.json"
+    ],
+    "ecmaVersion": "latest"
+  },
   "plugins": [
     //"@typescript-eslint",
     "redos"
@@ -21,6 +26,15 @@
     ]
   },
   "ignorePatterns": [
-    "**/*.test.ts"
+    "**/*.test.ts",
+    "dist"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "./*.js"
+      ],
+      "parser": "espree"
+    }
   ]
 }
