@@ -3,6 +3,7 @@
   "version": "0.0.736",
   "description": "Supervisor, Coroutine, Channel, select, AtomicPromise, Cancellation, Cache, List, Queue, Stack, and some utils.",
   "private": true,
+  "type": "module",
   "homepage": "https://github.com/falsandtru/spica",
   "repository": {
     "type": "git",
@@ -89,7 +90,13 @@
     "test": "webpack --env mode=test && karma start --single-run --concurrency 1 --reporters dots,coverage",
     "lint": "webpack --env mode=lint",
     "bench": "webpack --env mode=bench && karma start --single-run --concurrency 1 --browsers Chrome_bench",
-    "dist": "webpack --env mode=dist"
+    "build": "rm -rf dist && tsc -p tsconfig.build.json"
+  },
+  "exports": {
+    "./*": {
+      "default": "./dist/*",
+      "types": "./dist/*.d.ts"
+    }
   },
   "author": "falsandtru",
   "license": "(Apache-2.0 AND MPL-2.0)"
