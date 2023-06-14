@@ -2,6 +2,9 @@
 coverage
 dist/**/*
 
+# Builds
+dist
+
 # node
 node_modules
 debug.log
