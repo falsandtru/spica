@@ -26,7 +26,8 @@
     "ignoreDeprecations": "5.0",
     "noFallthroughCasesInSwitch": true,
     "noErrorTruncation": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true
   },
   "include": [
     "*.ts",
