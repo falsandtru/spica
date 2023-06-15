@@ -8,4 +8,5 @@ declare namespace NS {
 
 declare global {
   const assert: typeof NS.assert;
+  const gc: () => void;
 }
