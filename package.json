@@ -52,6 +52,7 @@
     "LICENSE"
   ],
   "devDependencies": {
+    "@babel/cli": "^7.22.5",
     "@types/benchmark": "2.1.2",
     "@types/bluebird": "3.5.38",
     "@types/lru-cache": "7.10.9",
@@ -90,7 +91,7 @@
     "test": "webpack --env mode=test && karma start --single-run --concurrency 1 --reporters dots,coverage",
     "lint": "webpack --env mode=lint",
     "bench": "webpack --env mode=bench && karma start --single-run --concurrency 1 --browsers Chrome_bench",
-    "build": "rm -rf dist && tsc -p tsconfig.build.json"
+    "build": "rm -rf dist && tsc -p tsconfig.build.json && babel dist --plugins unassert --extensions .js --out-dir dist"
   },
   "exports": {
     "./*": {
