@@ -28,7 +28,8 @@
         "ignoreDeprecations": "5.0",
         "noFallthroughCasesInSwitch": true,
         "noErrorTruncation": true,
-        "forceConsistentCasingInFileNames": true
+        "forceConsistentCasingInFileNames": true,
+        "isolatedModules": true
     },
     "include": [
         "*.ts",
@@ -36,6 +37,6 @@
     ],
     "exclude": [
         "node_modules",
-        "src/**/*.{test,spec}.ts",
+        "src/**/*.test.ts",
     ]
 }
