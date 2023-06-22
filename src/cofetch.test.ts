@@ -10,8 +10,6 @@ describe('Unit: lib/cofetch', () => {
         assert(ev instanceof ProgressEvent);
         assert(['loadstart', 'progress', 'loadend'].includes(ev.type));
         types.push(ev.type);
-        if (ev.type !== 'loadend') continue;
-        for await (const _ of co) throw 1;
       }
       assert.deepStrictEqual([types[0], types.at(-1)], ['loadstart', 'loadend']);
       assert.deepStrictEqual(types.slice(1, -1), Array(types.length - 2).fill('progress'));
@@ -24,8 +22,6 @@ describe('Unit: lib/cofetch', () => {
       for await (const ev of co) {
         types.add(ev.type);
         co.cancel();
-        if (ev.type !== 'loadend') continue;
-        for await (const _ of co) throw 1;
       }
       assert.deepStrictEqual([...types], ['loadstart', 'loadend']);
       assert(await co instanceof XMLHttpRequest);
