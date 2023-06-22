@@ -66,7 +66,7 @@ describe('Unit: lib/coaggregator', () => {
           yield* [1];
           return 3;
         }),
-      ]);
+      ], rs => rs.reduce((a, b) => a + b));
       const gen = co[Symbol.asyncIterator]();
       assert.deepStrictEqual(
         await gen.next(),
@@ -89,10 +89,10 @@ describe('Unit: lib/coaggregator', () => {
       assert.deepStrictEqual(
         await gen.next(),
         {
-          value: 4,
+          value: 7,
           done: true
         });
-      assert(await co === 4);
+      assert(await co === 7);
     });
 
   });
