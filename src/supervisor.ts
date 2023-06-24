@@ -162,22 +162,22 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
         },
         state);
     }
-    if (typeof process === 'function') {
-      if (isGeneratorFunction(process)) {
-        let iter: Generator<R, R, P>;
-        return this.register(
-          name,
-          {
-            init: (state, kill) => (iter = process(state, kill), iter.next(), state),
-            main: (param, state, kill) => {
-              const { value: reply, done } = iter.next(param);
-              done && kill();
-              return [reply, state];
-            },
-            exit: noop,
+    if (isGeneratorFunction(process)) {
+      let iter: Generator<R, R, P>;
+      return this.register(
+        name,
+        {
+          init: (state, kill) => (iter = process(state, kill), iter.next(), state),
+          main: (param, state, kill) => {
+            const { value: reply, done } = iter.next(param);
+            done && kill();
+            return [reply, state];
           },
-          state);
-      }
+          exit: noop,
+        },
+        state);
+    }
+    if (typeof process === 'function') {
       return this.register(
         name,
         {
@@ -200,14 +200,6 @@ export abstract class Supervisor<N extends string, P = undefined, R = P, S = und
       () => { this.workers.get(name) === worker && void this.workers.delete(name); });
     this.workers.set(name, worker);
     return worker.terminate;
-
-    function isAsyncGeneratorFunction(process: Supervisor.Process<P, R, S>): process is Supervisor.Process.AsyncGeneratorFunction<P, R, S> {
-      return process[Symbol.toStringTag] === 'AsyncGeneratorFunction';
-    }
-
-    function isGeneratorFunction(process: Supervisor.Process<P, R, S>): process is Supervisor.Process.GeneratorFunction<P, R, S> {
-      return process[Symbol.toStringTag] === 'GeneratorFunction';
-    }
   }
   public call(name: N | ((names: Iterable<N>) => Iterable<N>), param: P, timeout?: number): AtomicPromise<R>;
   public call(name: N | ((names: Iterable<N>) => Iterable<N>), param: P, callback: Supervisor.Callback<R>, timeout?: number): void;
@@ -382,6 +374,14 @@ export namespace Supervisor {
       export type Loss<N extends string, P> = readonly [N | undefined, P];
     }
   }
+}
+
+function isAsyncGeneratorFunction<P, R, S>(process: Supervisor.Process<P, R, S>): process is Supervisor.Process.AsyncGeneratorFunction<P, R, S> {
+  return process[Symbol.toStringTag] === 'AsyncGeneratorFunction';
+}
+
+function isGeneratorFunction<P, R, S>(process: Supervisor.Process<P, R, S>): process is Supervisor.Process.GeneratorFunction<P, R, S> {
+  return process[Symbol.toStringTag] === 'GeneratorFunction';
 }
 
 class NamePool<N extends string> implements Iterable<N> {
