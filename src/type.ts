@@ -7,12 +7,10 @@ declare const Unique: unique symbol;
 
 export type Not<T extends boolean> = T extends true ? false : true;
 export type And<TS extends readonly unknown[]> =
-  TS extends readonly [] ? never :
   TS extends readonly [infer T1] ? T1 :
   TS extends readonly [infer T1, ...infer TS] ? [T1] extends [Falsy] ? T1 : And<TS> :
   never;
 export type Or<TS extends readonly unknown[]> =
-  TS extends readonly [] ? never :
   TS extends readonly [infer T1] ? T1 :
   TS extends readonly [infer T1, ...infer TS] ? [T1] extends [Falsy] ? Or<TS> : T1 :
   never;
@@ -58,7 +56,6 @@ type Narrow_<TS extends readonly unknown[], US extends TS[number][], VS extends 
   Narrow_<TS, [...US, T1], VS> :
   never;
 export type Intersect<TS extends readonly unknown[]> =
-  TS extends readonly [] ? never :
   TS extends readonly [infer T] ? T :
   TS extends readonly [infer T, ...infer TS] ? T & Intersect<TS> :
   never;
