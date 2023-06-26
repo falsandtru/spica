@@ -49,12 +49,13 @@ interface NondeterminateTypeMap {
   boolean: boolean;
 }
 
-export type Narrow<TS extends readonly unknown[]> = Narrow_<Filter<TS, [any, never]>, []>;
-type Narrow_<TS extends readonly unknown[], US extends TS[number][]> =
-  TS extends readonly [] ? [] :
+export type Narrow<TS extends readonly unknown[]> = Narrow_<TS, [], []>;
+type Narrow_<TS extends readonly unknown[], US extends TS[number][], VS extends TS[number][]> =
+  TS extends readonly [] ? [US, VS] extends [[infer U1, ...infer _], []] ? [U1] : VS :
   TS extends readonly [infer T1, ...infer TS] ?
-  [Extract<TS[number] | US[number], T1>] extends [never] ? [T1, ...Narrow_<TS, [T1, ...US]>] :
-  Narrow_<TS, [T1, ...US]> :
+  [T1] extends [never] ? TS extends [] ? VS : Narrow_<TS, US, VS> :
+  [Extract<TS[number] | US[number], T1>] extends [never] ? Narrow_<TS, [...US, T1], [...VS, T1]> :
+  Narrow_<TS, [...US, T1], VS> :
   never;
 export type Intersect<TS extends readonly unknown[]> =
   TS extends readonly [] ? never :

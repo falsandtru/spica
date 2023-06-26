@@ -201,8 +201,8 @@ describe('Unit: lib/type', () => {
   describe('Narrow', () => {
     it('', () => {
       assert((): true => true as TEq<Narrow<[]>, []>);
-      assert((): true => true as TEq<Narrow<[any]>, []>);
       assert((): true => true as TEq<Narrow<[never]>, []>);
+      assert((): true => true as TEq<Narrow<[any]>, [any]>);
       assert((): true => true as TEq<Narrow<[unknown]>, [unknown]>);
       assert((): true => true as TEq<Narrow<[void]>, [void]>);
       assert((): true => true as TEq<Narrow<[void, undefined]>, [undefined]>);
@@ -216,6 +216,7 @@ describe('Unit: lib/type', () => {
       assert((): true => true as TEq<Narrow<[0, number]>, [0]>);
       assert((): true => true as TEq<Narrow<[0, number]>, [0]>);
       assert((): true => true as TEq<Narrow<[0, string, number]>, [0, string]>);
+      assert((): true => true as TEq<Narrow<[number, number]>, [number]>);
       assert((): true => true as TEq<Narrow<[number, string, 0]>, [string, 0]>);
     });
 
