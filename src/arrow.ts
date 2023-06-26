@@ -2,7 +2,11 @@ import { Narrow, Intersect } from './type';
 import { singleton } from './function';
 
 type Function = (...args: unknown[]) => unknown;
-type ParamNs<FS extends readonly Function[], I extends number, E = never> = { [P in keyof FS]: FS[P] extends FS[number] ? Exclude<Parameters<FS[P]>[I], E> : FS[P]; };
+type ParamNs<FS extends readonly Function[], I extends number, E = never> =
+  FS extends readonly [] ? [] :
+  FS extends readonly [infer T1 extends Function, ...infer TS extends Function[]] ?
+  [Exclude<Parameters<T1>[I], E>, ...ParamNs<TS, I, E>] :
+  never;
 type Returns<FS extends readonly Function[]> = { [P in keyof FS]: FS[P] extends FS[number] ? ReturnType<FS[P]> : FS[P]; };
 type Context<FS extends readonly Function[]> = Intersect<Narrow<{ [P in keyof FS]: FS[P] extends (this: infer C, ...args: unknown[]) => unknown ? C : never; }>>;
 
