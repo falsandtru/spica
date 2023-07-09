@@ -1,6 +1,6 @@
 // UUID Version 4
 
-// 32: Closest power of 2 from the number of random values in an UUID.
+// 32: Closest power of 2 from the number of random values in a UUID.
 // 4: Number of bits required to represent a hex number.
 // 8: Number of 16 bit values required to create a UUID.
 
@@ -33,7 +33,7 @@ const gen = ((i, offset) => eval([
     offset ||= digit;
     switch (c) {
       case 'x':
-        return `+ HEX[buf${i++ >> 2} >> ${offset -= 4} & 15]`;
+        return `+ HEX[buf${i++ >> 2} >> ${offset -= 4} & 0x0f]`;
       case 'y':
         return `+ HEX[buf${i++ >> 2} >> ${offset -= 4} & 0x03 | 0x08]`;
       default:
