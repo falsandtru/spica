@@ -60,19 +60,27 @@ describe('Unit: lib/arrow', function () {
           () => () => 0,
           () => () => 1,
         )()(),
-        undefined);
+        [
+          { value: 0, done: true },
+          { value: 1, done: true },
+        ]);
       assert.deepStrictEqual(
         assemble(assemble(
           () => () => 0,
           () => () => 1,
         ))()(),
-        undefined);
+        [
+          { value: [{ value: 0, done: true }, { value: 1, done: true }], done: true },
+        ]);
       assert.deepStrictEqual(
         assemble(
           () => () => 0,
           (_: number) => (_?: Error) => 1,
         )(0)(new Error()),
-        undefined);
+        [
+          { value: 0, done: true },
+          { value: 1, done: true },
+        ]);
       assert.deepStrictEqual(
         assemble(
           () => () => 0,
@@ -86,7 +94,18 @@ describe('Unit: lib/arrow', function () {
           () => () => 8,
           () => () => 9,
         )()(),
-        undefined);
+        [
+          { value: 0, done: true },
+          { value: 1, done: true },
+          { value: 2, done: true },
+          { value: 3, done: true },
+          { value: 4, done: true },
+          { value: 5, done: true },
+          { value: 6, done: true },
+          { value: 7, done: true },
+          { value: 8, done: true },
+          { value: 9, done: true },
+        ]);
     });
 
   });
