@@ -20,16 +20,13 @@ export class Either<a, b> extends Monad<b> {
   public bind<c>(f: (b: b) => Either<a, c>): Either<a, c> {
     return new Either<a, c>(() => {
       const m: Either<a, b> = this.evaluate();
-      if (m instanceof Left) {
-        return m;
-      }
       if (m instanceof Right) {
         return f(m.extract());
       }
-      if (m instanceof Either) {
-        return m.bind(f);
+      if (m instanceof Left) {
+        return m;
       }
-      throw new TypeError(`Spica: Either: Invalid monad value: ${m}`);
+      return m.bind(f);
     });
   }
   public join<c>(this: Either<a, Either<a, c>>): Either<a, c> {

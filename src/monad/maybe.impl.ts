@@ -26,10 +26,7 @@ export class Maybe<a> extends MonadPlus<a> {
       if (m instanceof Nothing) {
         return m;
       }
-      if (m instanceof Maybe) {
-        return m.bind(f);
-      }
-      throw new TypeError(`Spica: Maybe: Invalid monad value: ${m}`);
+      return m.bind(f);
     });
   }
   public guard(cond: boolean): Maybe<a> {
