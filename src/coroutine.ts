@@ -304,7 +304,7 @@ class Port<T, R, S> {
       core.settings.capacity >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
       const iter = com.call(this[internal].co);
       let reply: R | T | undefined;
-      for (; ;) {
+      while (true) {
         const result = await iter.next(reply!);
         if (result.done) return await result.value;
         reply = (await this.ask(result.value)).value;

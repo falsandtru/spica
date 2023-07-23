@@ -49,7 +49,7 @@ export class Either<a, b> extends Monad<b> {
   public static do<a, b>(block: () => Iterator<Either<a, b>, Either<a, b>, b>): Either<a, b> {
     const iter = block();
     let value: b | undefined;
-    for (; ;) {
+    while (true) {
       const { value: m, done } = iter.next(value!);
       if (done) return m;
       if (m.extract(noop, a => [value = a]) === undefined) return m;
