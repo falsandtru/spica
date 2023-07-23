@@ -20,10 +20,12 @@ assert(dictAz.match(/^A.*Za.*z$/));
 
 export const rnd16 = cons(16);
 export const rnd32 = cons(32);
+export const rnd36 = cons(36);
 export const rnd62 = cons(62);
 export const rnd64 = cons(64);
 export const rnd0f = conv(rnd16, dict0_);
 export const rnd0v = conv(rnd32, dict0_);
+export const rnd0z = conv(rnd36, dict0_);
 export const rnd0Z = conv(rnd62, dict0_);
 export const rnd0_ = conv(rnd64, dict0_);
 export const rndAP = conv(rnd16, dictAz);
