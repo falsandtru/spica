@@ -8,8 +8,10 @@ type ParamNs<FS extends readonly Function[], I extends number, E = never> =
   [];
 type Context<FS extends readonly Function[]> = Intersect<Narrow<{ [P in keyof FS]: FS[P] extends (this: infer C, ...args: unknown[]) => unknown ? C : never; }>>;
 type Returns<FS extends readonly Function[]> = { [P in keyof FS]: FS[P] extends FS[number] ? ReturnType<FS[P]> : FS[P]; };
-type Result<T> = { value: T; done: true; } | { value: unknown; done: false; };
-type ReturnResults<FS extends readonly Function[]> = { [P in keyof FS]: FS[P] extends FS[number] ? Result<ReturnType<FS[P]>> : FS[P]; };
+type ReturnResults<FS extends readonly Function[]> = { readonly [P in keyof FS]: FS[P] extends FS[number] ? Result<ReturnType<FS[P]>> : FS[P]; };
+type Result<T> =
+  | { readonly value: T; readonly done: true; }
+  | { readonly value: unknown; readonly done: false; };
 
 export function bundle<fs extends ((this: undefined, a?: unknown) => unknown)[]>(...fs: fs): (...bs: ParamNs<fs, 0>) => Returns<fs>;
 export function bundle<fs extends ((a?: unknown) => unknown)[]>(...fs: fs): (this: Context<fs>, ...bs: ParamNs<fs, 0>) => Returns<fs>;
@@ -49,7 +51,7 @@ export function assemble<fs extends ((a?: unknown) => (error?: Error) => void)[]
   };
 }
 
-function cancel<T>(cancellers: readonly ((error?: Error) => T)[], error?: Error): Result<T>[] {
+function cancel<T>(cancellers: readonly ((error?: Error) => T)[], error?: Error): readonly Result<T>[] {
   const results: Result<T>[] = Array(cancellers.length);
   for (let i = 0, g: typeof cancellers[number]; g = cancellers[i]; ++i) {
     try {
