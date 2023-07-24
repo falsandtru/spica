@@ -35,9 +35,7 @@ export class Maybe<a> extends MonadPlus<a> {
     return this.bind(m => m);
   }
   public guard(cond: boolean): Maybe<a> {
-    return cond
-      ? this
-      : Maybe.mzero;
+    return cond ? this : Maybe.mzero;
   }
   public extract(): a;
   public extract<b>(nothing: () => b): a | b;

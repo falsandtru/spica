@@ -43,9 +43,7 @@ class Just<a> implements Maybe<a> {
     return this.value;
   }
   public guard(cond: boolean): Maybe<a> {
-    return cond
-      ? this
-      : Maybe.mzero;
+    return cond ? this : Maybe.mzero;
   }
   public extract(): a;
   public extract<b>(nothing: () => b): a | b;
