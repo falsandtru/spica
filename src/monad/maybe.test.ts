@@ -1,7 +1,7 @@
 import { Maybe, Just, Nothing } from './maybe';
 import { Sequence } from './sequence';
 
-describe('Unit: lib/maybe', () => {
+describe('Unit: lib/monad/maybe', () => {
   const Return = Maybe.Return;
 
   function throwError(msg: string): never {
@@ -142,15 +142,15 @@ describe('Unit: lib/maybe', () => {
       assert(Maybe.bind(Return(0))(n => Return(n + 1)).extract() === 1);
     });
 
+    it('join', () => {
+      assert(Return(Return(0)).join().extract() === 0);
+    });
+
     it('guard', () => {
       assert(Just(0).guard(true).extract(() => 1) === 0);
       assert(Just(0).guard(false).extract(() => 1) === 1);
       assert(Nothing.guard(true).extract(() => 1) === 1);
       assert(Nothing.guard(false).extract(() => 1) === 1);
-    });
-
-    it('join', () => {
-      assert(Return(Return(0)).join().extract() === 0);
     });
 
     it('sequence', async () => {

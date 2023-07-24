@@ -1,6 +1,6 @@
 import { Either, Left, Right } from './either';
 
-describe('Unit: lib/either', () => {
+describe('Unit: lib/monad/either', () => {
   const Return = Either.Return;
 
   function throwError(msg: string): never {
