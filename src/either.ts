@@ -82,11 +82,13 @@ class Left<a> implements Either<a, never> {
   }
 }
 
+type right<b> = Right<b>;
 function right<b>(b: b): Right<b>;
 function right<a, b>(b: b): Either<a, b>;
 function right<a, b>(b: b): Either<a, b> {
   return new Right(b);
 }
+type left<a> = Left<a>;
 function left<a>(value: a): Left<a> {
   return new Left(value);
 }

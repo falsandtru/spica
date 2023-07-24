@@ -91,9 +91,11 @@ class Nothing implements Maybe<never> {
   }
 }
 
+type just<a> = Just<a>;
 function just<a>(value: a): Just<a> {
   return new Just(value);
 }
+type nothing = Nothing;
 const nothing = new Nothing();
 
 export {

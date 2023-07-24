@@ -48,6 +48,14 @@ describe('Unit: lib/either', () => {
       assert(result === 'Right 1');
     });
 
+    it('Either', () => {
+      const result = Return(0)
+        .bind<number, number>(n => <Right<number> | Left<number> | Either<number, number>>Right(n).bind(n => <Right<number> | Left<number>>Right(n) || Left(0)))
+        .bind(n => <Right<number> | Left<number> | Either<number, number>>Right(n).bind(n => <Right<number> | Left<number>>Right(n) || Left(0)))
+        .extract(n => n + '');
+      assert(result === 0);
+    });
+
     it('either', () => {
       assert(Right(0).extract(() => -1, n => n + 1) === 1);
       assert(Left(0).extract(n => n -1, () => 0 + 1) === -1);
