@@ -88,7 +88,7 @@ export class Left<a> extends Either<a, never> {
     assert(f);
   }
   public override extract(): never;
-  public override extract<c>(transform: (a: a) => c): c;
+  public override extract<c>(left: (a: a) => c): c;
   public override extract<c>(left: (a: a) => c, right: (b: never) => c): c;
   public override extract<c>(left?: (a: a) => c): c {
     if (left !== undefined) return left(this.value);
@@ -107,7 +107,7 @@ export class Right<b> extends Either<never, b> {
     return new Either(() => f(this.extract()));
   }
   public override extract(): b;
-  public override extract<c>(transform: (a: never) => c): b;
+  public override extract<c>(left: (a: never) => c): b;
   public override extract<c>(left: (a: never) => c, right: (b: b) => c): c;
   public override extract<c>(left?: (a: never) => c, right?: (b: b) => c): b | c {
     if (right !== undefined) return right(this.value);
