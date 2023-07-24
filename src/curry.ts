@@ -39,7 +39,7 @@ export const curry: Curry = <Curry>(<z>(f: () => z) =>
 function curry_(f: (...xs: unknown[]) => unknown, arity: number, ...xs: unknown[]) {
   let g: typeof f;
   return xs.length < arity
-    ? (...ys: unknown[]) => curry_(g ??= xs.length && f.bind(undefined, ...xs) || f, arity - xs.length, ...ys)
+    ? (...ys: unknown[]) => curry_(g ??= xs.length ? f.bind(undefined, ...xs) : f, arity - xs.length, ...ys)
     : f(...xs);
 }
 
