@@ -88,13 +88,10 @@ export function cothrottle<T>(
   return async function* () {
     let start = now();
     for await (const value of routine()) {
-      if (resource - (now() - start) > 0) {
-        yield value;
-      }
-      else {
-        await scheduler();
-        start = now();
-      }
+      yield value;
+      if (resource - (now() - start) > 0) continue;
+      await scheduler();
+      start = now();
     }
   };
 }
