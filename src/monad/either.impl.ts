@@ -1,6 +1,7 @@
 import { Monad } from './monad';
 import { AtomicPromise } from '../promise';
 import { noop } from '../function';
+import { push } from '../array';
 
 export class Either<a, b> extends Monad<b> {
   constructor(thunk: () => Either<a, b>) {
@@ -71,11 +72,7 @@ export namespace Either {
   export function sequence<a, b>(fm: Either<a, b>[] | Either<a, PromiseLike<b>>): Either<a, b[]> | AtomicPromise<Either<a, b>> {
     return fm instanceof Either
       ? fm.extract(b => AtomicPromise.resolve(new Left(b)), a => AtomicPromise.resolve(a).then<Either<a, b>>(Return))
-      : fm.reduce((acc, m) =>
-          acc.bind(as =>
-            m.fmap(a =>
-              [...as, a]))
-        , Return([]));
+      : fm.reduce((acc, m) => acc.bind(as => m.fmap(a => push(as, [a]))), Return([]));
   }
 }
 

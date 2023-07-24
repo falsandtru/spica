@@ -1,5 +1,6 @@
 import { AtomicPromise } from './promise';
 import { curry } from './curry';
+import { push } from './array';
 
 export interface Either<a, b> {
   fmap<c>(f: (b: b) => c): Either<a, c>;
@@ -127,11 +128,7 @@ export namespace Either {
   export function sequence<a, b>(fm: Either<a, PromiseLike<b>>): AtomicPromise<Either<a, b>>;
   export function sequence<a, b>(fm: Either<a, b>[] | Either<a, PromiseLike<b>>): Either<a, b[]> | AtomicPromise<Either<a, b>> {
     return Array.isArray(fm)
-      ? fm.reduce((acc, m) =>
-          acc.bind(as =>
-            m.fmap(a =>
-              [...as, a]))
-          , Return([]))
+      ? fm.reduce((acc, m) => acc.bind(as => m.fmap(a => push(as, [a]))), Return([]))
       : fm.extract(b => AtomicPromise.resolve(new Left(b)), a => AtomicPromise.resolve(a).then<Either<a, b>>(Return));
   }
 }

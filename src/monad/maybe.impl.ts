@@ -1,6 +1,7 @@
 import { MonadPlus } from './monadplus';
 import { AtomicPromise } from '../promise';
 import { noop } from '../function';
+import { push } from '../array';
 
 export class Maybe<a> extends MonadPlus<a> {
   constructor(thunk: () => Maybe<a>) {
@@ -72,11 +73,7 @@ export namespace Maybe {
   export function sequence<a>(fm: Maybe<a>[] | Maybe<PromiseLike<a>>): Maybe<a[]> | AtomicPromise<Maybe<a>> {
     return fm instanceof Maybe
       ? fm.extract(() => AtomicPromise.resolve(mzero), a => AtomicPromise.resolve(a).then(Return))
-      : fm.reduce((acc, m) =>
-          acc.bind(as =>
-            m.fmap(a =>
-              [...as, a]))
-        , Return([]));
+      : fm.reduce((acc, m) => acc.bind(as => m.fmap(a => push(as, [a]))), Return([]));
   }
 }
 

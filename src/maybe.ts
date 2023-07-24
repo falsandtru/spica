@@ -1,5 +1,6 @@
 import { AtomicPromise } from './promise';
 import { curry } from './curry';
+import { push } from './array';
 
 export interface Maybe<a> {
   fmap<b>(f: (a: a) => b): Maybe<b>;
@@ -130,11 +131,7 @@ export namespace Maybe {
   export function sequence<a>(fm: Maybe<PromiseLike<a>>): AtomicPromise<Maybe<a>>;
   export function sequence<a>(fm: Maybe<a>[] | Maybe<PromiseLike<a>>): Maybe<a[]> | AtomicPromise<Maybe<a>> {
     return Array.isArray(fm)
-      ? fm.reduce((acc, m) =>
-          acc.bind(as =>
-            m.fmap(a =>
-              [...as, a]))
-        , Return([]))
+      ? fm.reduce((acc, m) => acc.bind(as => m.fmap(a => push(as, [a]))), Return([]))
       : fm.extract(() => AtomicPromise.resolve(mzero), a => AtomicPromise.resolve(a).then(Return));
   }
   export const mzero = nothing;
