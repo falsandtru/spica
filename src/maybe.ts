@@ -86,7 +86,7 @@ class Nothing implements Maybe<never> {
   public extract<b>(nothing: () => b, just: (a: never) => b): b;
   public extract<b>(nothing?: () => b): b {
     if (nothing !== undefined) return nothing();
-    throw new Error(`Spica: Maybe: Nothig value is extracted.`);
+    throw new Error(`Spica: Maybe: Nothing value is extracted.`);
     assert(just);
   }
 }
