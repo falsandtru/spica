@@ -8,7 +8,7 @@ export interface Either<a, b> {
   ap<b, c, d, z>(this: Either<a, (b: b, c: c, d: d) => z>, b: Either<a, b>): Either<a, (c: c, d: d) => z>;
   ap<b, c, d, e, z>(this: Either<a, (b: b, c: c, d: d, e: e) => z>, b: Either<a, b>): Either<a, (c: c, d: d, e: e) => z>;
   ap<b, c, d, e, f, z>(this: Either<a, (b: b, c: c, d: d, e: e, f: f) => z>, b: Either<a, b>): Either<a, (c: c, d: d, e: e, f: f) => z>;
-  bind<c>(f: (b: b) => Either<a, c> | Left<a> | Right<c>): Either<a, c>;
+  bind<c>(f: (b: b) => Either<a, c>): Either<a, c>;
   join<c>(this: Either<a, Either<a, c>>): Either<a, c>;
   extract(): b;
   extract<c>(left: (a: a) => c): b | c;
@@ -33,8 +33,8 @@ class Right<b> implements Either<never, b> {
   }
   public bind<c, a = never>(f: (b: b) => Left<a>): Left<a>;
   public bind<c, a = never>(f: (b: b) => Right<c>): Right<c>;
-  public bind<c, a>(f: (b: b) => Either<a, c> | Left<a> | Right<c>): Either<a, c>;
-  public bind<c, a>(f: (b: b) => Either<a, c> | Left<a> | Right<c>): Either<a, c> {
+  public bind<c, a>(f: (b: b) => Either<a, c>): Either<a, c>;
+  public bind<c, a>(f: (b: b) => Either<a, c>): Either<a, c> {
     return f(this.extract());
   }
   public join<c>(this: Either<never, Either<never, c>>): Either<never, c> {
@@ -67,7 +67,7 @@ class Left<a> implements Either<a, never> {
   public ap<b, z>(this: Either<a, (b: b) => z>, _: Either<a, b>): Either<a, z> {
     return this as Left<a>;
   }
-  public bind<c, _ = a>(f: (b: never) => Either<a, c> | Left<a> | Right<c>): Left<a> {
+  public bind<c, _ = a>(f: (b: never) => Either<a, c>): Left<a> {
     return this;
     assert(f);
   }
@@ -116,8 +116,8 @@ export namespace Either {
       : (aa: Either<a, b>) => ap(af, aa);
   }
   export const Return = pure;
-  export function bind<a, b, c>(m: Either<a, b>, f: (b: b) => Either<a, c> | Left<a> | Right<c>): Either<a, c>;
-  export function bind<a, b>(m: Either<a, b>): <c>(f: (b: b) => Either<a, c> | Left<a> | Right<c>) => Either<a, c>;
+  export function bind<a, b, c>(m: Either<a, b>, f: (b: b) => Either<a, c>): Either<a, c>;
+  export function bind<a, b>(m: Either<a, b>): <c>(f: (b: b) => Either<a, c>) => Either<a, c>;
   export function bind<a, b, c>(m: Either<a, b>, f?: (b: b) => Either<a, c>): Either<a, c> | (<c>(f: (b: b) => Either<a, c>) => Either<a, c>) {
     return f
       ? m.bind(f)

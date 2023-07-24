@@ -101,7 +101,7 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
   }
   public get either(): <R>(value: R) => Either<L, R> {
     return value =>
-      Right(value)
+      Right<L, typeof value>(value)
         .bind(value =>
           this.isCancelled()
             ? Left(this.state[0] as L)
