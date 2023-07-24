@@ -20,13 +20,14 @@ export class Either<a, b> extends Monad<b> {
   public bind<c>(f: (b: b) => Either<a, c>): Either<a, c> {
     return new Either<a, c>(() => {
       const m: Either<a, b> = this.evaluate();
-      if (m instanceof Right) {
-        return f(m.extract());
+      switch (m.constructor) {
+        case Right:
+          return f(m.extract());
+        case Left:
+          return m as Left<a>;
+        default:
+          return m.bind(f);
       }
-      if (m instanceof Left) {
-        return m;
-      }
-      return m.bind(f);
     });
   }
   public join<c>(this: Either<a, Either<a, c>>): Either<a, c> {

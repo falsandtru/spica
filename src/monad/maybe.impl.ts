@@ -20,13 +20,14 @@ export class Maybe<a> extends MonadPlus<a> {
   public bind<b>(f: (a: a) => Maybe<b>): Maybe<b> {
     return new Maybe<b>(() => {
       const m: Maybe<a> = this.evaluate();
-      if (m instanceof Just) {
-        return f(m.extract());
+      switch (m.constructor) {
+        case Just:
+          return f(m.extract());
+        case Nothing:
+          return m as Nothing;
+        default:
+          return m.bind(f);
       }
-      if (m instanceof Nothing) {
-        return m;
-      }
-      return m.bind(f);
     });
   }
   public guard(cond: boolean): Maybe<a> {
