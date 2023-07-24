@@ -44,7 +44,7 @@ class Just<a> implements Maybe<a> {
   public guard(cond: boolean): Maybe<a> {
     return cond
       ? this
-      : nothing;
+      : Maybe.mzero;
   }
   public extract(): a;
   public extract<b>(nothing: () => b): a | b;
@@ -135,9 +135,9 @@ export namespace Maybe {
             m.fmap(a =>
               [...as, a]))
         , Return([]))
-      : fm.extract(() => AtomicPromise.resolve(Maybe.mzero), a => AtomicPromise.resolve(a).then(Return));
+      : fm.extract(() => AtomicPromise.resolve(mzero), a => AtomicPromise.resolve(a).then(Return));
   }
-  export const mzero: Maybe<never> = nothing;
+  export const mzero = nothing;
   export function mplus<a>(ml: Maybe<a>, mr: Maybe<a>): Maybe<a> {
     return ml.extract(() => mr, () => ml);
   }

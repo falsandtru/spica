@@ -12,4 +12,4 @@ export function Just<a>(a: a): Maybe<a> {
   return new Monad.Just(a);
 }
 export type Nothing = Monad.Nothing;
-export const Nothing: Maybe<never> = Monad.Maybe.mzero;
+export const Nothing = Monad.Maybe.mzero;
