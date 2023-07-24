@@ -17,7 +17,7 @@ export class Either<a, b> extends Monad<b> {
   public ap<b, z>(this: Either<a, (b: b) => z>, b: Either<a, b>): Either<a, z> {
     return Either.ap(this, b);
   }
-  public bind<c>(f: (b: b) => Either<a, c>): Either<a, c> {
+  public bind<c>(f: (b: b) => Either<a, c> | Left<a> | Right<c>): Either<a, c> {
     return new Either<a, c>(() => {
       const m: Either<a, b> = this.evaluate();
       switch (m.constructor) {
@@ -64,8 +64,8 @@ export namespace Either {
   export declare function ap<a, b, c>(mf: Either<a, (b: b) => c>, ma: Either<a, b>): Either<a, c>;
   export declare function ap<a, b, c>(mf: Either<a, (b: b) => c>): (ma: Either<a, b>) => Either<a, c>;
   export const Return = pure;
-  export declare function bind<a, b, c>(m: Either<a, b>, f: (b: b) => Either<a, c>): Either<a, c>;
-  export declare function bind<a, b>(m: Either<a, b>): <c>(f: (b: b) => Either<a, c>) => Either<a, c>;
+  export declare function bind<a, b, c>(m: Either<a, b>, f: (b: b) => Either<a, c> | Left<a> | Right<c>): Either<a, c>;
+  export declare function bind<a, b>(m: Either<a, b>): <c>(f: (b: b) => Either<a, c> | Left<a> | Right<c>) => Either<a, c>;
   export function sequence<a, b>(fm: Either<a, b>[]): Either<a, b[]>;
   export function sequence<a, b>(fm: Either<a, PromiseLike<b>>): AtomicPromise<Either<a, b>>;
   export function sequence<a, b>(fm: Either<a, b>[] | Either<a, PromiseLike<b>>): Either<a, b[]> | AtomicPromise<Either<a, b>> {
@@ -83,7 +83,7 @@ export class Left<a> extends Either<a, never> {
   constructor(private value: a) {
     super(throwCallError);
   }
-  public override bind<b>(f: (b: never) => Either<a, b>): Left<a> {
+  public override bind<c>(f: (b: never) => Either<a, c> | Left<a> | Right<c>): Left<a> {
     return this;
     assert(f);
   }
@@ -101,7 +101,8 @@ export class Right<b> extends Either<never, b> {
     super(throwCallError);
   }
   public override bind<c, a = never>(f: (b: b) => Right<c>): Right<c>;
-  public override bind<c, a>(f: (b: b) => Either<a, c>): Either<a, c>;
+  public override bind<c, a = never>(f: (b: b) => Left<a>): Left<a>;
+  public override bind<c, a>(f: (b: b) => Either<a, c> | Left<a> | Right<c>): Either<a, c>;
   public override bind<c, a>(f: (b: b) => Either<a, c>): Either<a, c> {
     return new Either(() => f(this.extract()));
   }

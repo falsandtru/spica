@@ -8,11 +8,11 @@ export interface Either<a, b> {
   ap<b, c, d, z>(this: Either<a, (b: b, c: c, d: d) => z>, b: Either<a, b>): Either<a, (c: c, d: d) => z>;
   ap<b, c, d, e, z>(this: Either<a, (b: b, c: c, d: d, e: e) => z>, b: Either<a, b>): Either<a, (c: c, d: d, e: e) => z>;
   ap<b, c, d, e, f, z>(this: Either<a, (b: b, c: c, d: d, e: e, f: f) => z>, b: Either<a, b>): Either<a, (c: c, d: d, e: e, f: f) => z>;
-  bind<c>(f: (b: b) => Either<a, c>): Either<a, c>;
+  bind<c>(f: (b: b) => Either<a, c> | Left<a> | Right<c>): Either<a, c>;
   join<c>(this: Either<a, Either<a, c>>): Either<a, c>;
   extract(): b;
   extract<c>(left: (a: a) => c): b | c;
-  extract<c>(left: (a: a) => c, right: (b: b) => c): c;
+  extract<c, d>(left: (a: a) => c, right: (b: b) => d): c | d;
 }
 
 class Right<b> implements Either<never, b> {
@@ -31,17 +31,18 @@ class Right<b> implements Either<never, b> {
   public ap<b, z>(this: Either<never, (b: b) => z>, b: Either<never, b>): Either<never, z> {
     return Either.ap(this, b);
   }
+  public bind<c, a = never>(f: (b: b) => Left<a>): Left<a>;
   public bind<c, a = never>(f: (b: b) => Right<c>): Right<c>;
-  public bind<c, a>(f: (b: b) => Either<a, c>): Either<a, c>;
-  public bind<c, a>(f: (b: b) => Either<a, c>): Either<a, c> {
+  public bind<c, a>(f: (b: b) => Either<a, c> | Left<a> | Right<c>): Either<a, c>;
+  public bind<c, a>(f: (b: b) => Either<a, c> | Left<a> | Right<c>): Either<a, c> {
     return f(this.extract());
   }
   public join<c>(this: Either<never, Either<never, c>>): Either<never, c> {
     return this.bind(m => m);
   }
   public extract(): b;
-  public extract<c>(transform: (a: never) => c): b;
-  public extract<c>(left: (a: never) => c, right: (b: b) => c): c;
+  public extract<c>(left: (a: any) => c): b | c;
+  public extract<c, d>(left: (a: any) => c, right: (b: b) => d): c | d;
   public extract<c>(left?: (a: never) => c, right?: (b: b) => c): b | c {
     if (right !== undefined) return right(this.value);
     return this.value;
@@ -66,7 +67,7 @@ class Left<a> implements Either<a, never> {
   public ap<b, z>(this: Either<a, (b: b) => z>, _: Either<a, b>): Either<a, z> {
     return this as Left<a>;
   }
-  public bind<b>(f: (b: never) => Either<a, b>): Left<a> {
+  public bind<c, _ = a>(f: (b: never) => Either<a, c> | Left<a> | Right<c>): Left<a> {
     return this;
     assert(f);
   }
@@ -74,8 +75,8 @@ class Left<a> implements Either<a, never> {
     return this as Left<a>;
   }
   public extract(): never;
-  public extract<c>(transform: (a: a) => c): c;
-  public extract<c>(left: (a: a) => c, right: (b: never) => c): c;
+  public extract<c>(left: (a: a) => c): c;
+  public extract<c, d>(left: (a: a) => c, right: (b: any) => d): c | d;
   public extract<c>(left?: (a: a) => c): c {
     if (left !== undefined) return left(this.value);
     throw this.value;
@@ -115,8 +116,8 @@ export namespace Either {
       : (aa: Either<a, b>) => ap(af, aa);
   }
   export const Return = pure;
-  export function bind<a, b, c>(m: Either<a, b>, f: (b: b) => Either<a, c>): Either<a, c>;
-  export function bind<a, b>(m: Either<a, b>): <c>(f: (b: b) => Either<a, c>) => Either<a, c>;
+  export function bind<a, b, c>(m: Either<a, b>, f: (b: b) => Either<a, c> | Left<a> | Right<c>): Either<a, c>;
+  export function bind<a, b>(m: Either<a, b>): <c>(f: (b: b) => Either<a, c> | Left<a> | Right<c>) => Either<a, c>;
   export function bind<a, b, c>(m: Either<a, b>, f?: (b: b) => Either<a, c>): Either<a, c> | (<c>(f: (b: b) => Either<a, c>) => Either<a, c>) {
     return f
       ? m.bind(f)
@@ -127,10 +128,10 @@ export namespace Either {
   export function sequence<a, b>(fm: Either<a, b>[] | Either<a, PromiseLike<b>>): Either<a, b[]> | AtomicPromise<Either<a, b>> {
     return Array.isArray(fm)
       ? fm.reduce((acc, m) =>
-        acc.bind(as =>
-          m.fmap(a =>
-            [...as, a]))
-        , Return([]))
+          acc.bind(as =>
+            m.fmap(a =>
+              [...as, a]))
+          , Return([]))
       : fm.extract(b => AtomicPromise.resolve(new Left(b)), a => AtomicPromise.resolve(a).then<Either<a, b>>(Return));
   }
 }

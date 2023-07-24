@@ -12,7 +12,6 @@ export interface Maybe<a> {
   join<b>(this: Maybe<Maybe<b>>): Maybe<b>;
   guard(cond: boolean): Maybe<a>;
   extract(): a;
-  extract(nothing: () => a): a;
   extract<b>(nothing: () => b): a | b;
   extract<b>(nothing: () => b, just: (a: a) => b): b;
 }
@@ -34,6 +33,7 @@ class Just<a> implements Maybe<a> {
     return Maybe.ap(this, a);
   }
   public bind<b>(f: (a: a) => Just<b>): Just<b>;
+  public bind<b>(f: (a: a) => Nothing): Nothing;
   public bind<b>(f: (a: a) => Maybe<b>): Maybe<b>;
   public bind<b>(f: (a: a) => Maybe<b>): Maybe<b> {
     return f(this.value);
@@ -47,7 +47,6 @@ class Just<a> implements Maybe<a> {
       : nothing;
   }
   public extract(): a;
-  public extract(nothing: () => a): a;
   public extract<b>(nothing: () => b): a | b;
   public extract<b>(nothing: () => b, just: (a: a) => b): b;
   public extract<b>(nothing?: () => b, just?: (a: a) => b): a | b {
@@ -82,7 +81,7 @@ class Nothing implements Maybe<never> {
     assert(cond);
   }
   public extract(): never;
-  public extract<b>(transform: () => b): b;
+  public extract<b>(nothing: () => b): b;
   public extract<b>(nothing: () => b, just: (a: never) => b): b;
   public extract<b>(nothing?: () => b): b {
     if (nothing !== undefined) return nothing();
@@ -136,7 +135,7 @@ export namespace Maybe {
             m.fmap(a =>
               [...as, a]))
         , Return([]))
-      : fm.extract(() => AtomicPromise.resolve(Maybe.mzero), a => AtomicPromise.resolve(a).then(Return))
+      : fm.extract(() => AtomicPromise.resolve(Maybe.mzero), a => AtomicPromise.resolve(a).then(Return));
   }
   export const mzero: Maybe<never> = nothing;
   export function mplus<a>(ml: Maybe<a>, mr: Maybe<a>): Maybe<a> {

@@ -85,12 +85,13 @@ export class Just<a> extends Maybe<a> {
     super(throwCallError);
   }
   public override bind<b>(f: (a: a) => Just<b>): Just<b>;
+  public override bind<b>(f: (a: a) => Nothing): Nothing;
   public override bind<b>(f: (a: a) => Maybe<b>): Maybe<b>;
   public override bind<b>(f: (a: a) => Maybe<b>): Maybe<b> {
     return new Maybe(() => f(this.extract()));
   }
   public override extract(): a;
-  public override extract<b>(transform: () => b): a;
+  public override extract<b>(nothing: () => b): a;
   public override extract<b>(nothing: () => b, just: (a: a) => b): b;
   public override extract<b>(nothing?: () => b, just?: (a: a) => b): a | b {
     if (just !== undefined) return just(this.value);
@@ -108,7 +109,7 @@ export class Nothing extends Maybe<never> {
     assert(f);
   }
   public override extract(): never;
-  public override extract<b>(transform: () => b): b;
+  public override extract<b>(nothing: () => b): b;
   public override extract<b>(nothing: () => b, just: (a: never) => b): b;
   public override extract<b>(nothing?: () => b): b {
     if (nothing !== undefined) return nothing();
