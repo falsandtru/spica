@@ -6,12 +6,8 @@ export abstract class Monad<a> extends Applicative<a> {
 }
 export namespace Monad {
   export declare function Return<a>(a: a): Monad<a>;
-  export function bind<a, b>(m: Monad<a>, f: (a: a) => Monad<b>): Monad<b>;
-  export function bind<a>(m: Monad<a>): <b>(f: (a: a) => Monad<b>) => Monad<b>;
-  export function bind<a, b>(m: Monad<a>, f?: (a: a) => Monad<b>): Monad<b> | (<b>(f: (a: a) => Monad<b>) => Monad<b>) {
-    return f
-      ? m.bind(f)
-      : <b>(f: (a: a) => Monad<b>) => bind(m, f);
+  export function bind<a, b>(f: (a: a) => Monad<b>, m: Monad<a>): Monad<b> {
+    return m.bind(f);
   }
   export declare function sequence<a>(fm: Monad<a>[]): Monad<Iterable<a>>;
   //export declare function sequence<a>(fm: Monad<PromiseLike<a>>): AtomicPromise<Monad<a>>;

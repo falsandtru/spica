@@ -56,16 +56,14 @@ export class Maybe<a> extends MonadPlus<a> {
   }
 }
 export namespace Maybe {
-  export declare function fmap<a, b>(m: Maybe<a>, f: (a: a) => b): Maybe<b>;
-  export declare function fmap<a>(m: Maybe<a>): <b>(f: (a: a) => b) => Maybe<b>;
+  export declare function fmap<a, b>(f: (a: a) => b, m: Maybe<a>): Maybe<b>;
   export function pure<a>(a: a): Maybe<a> {
     return new Just(a);
   }
   export declare function ap<a, b>(mf: Maybe<(a: a) => b>, ma: Maybe<a>): Maybe<b>;
   export declare function ap<a, b>(mf: Maybe<(a: a) => b>): (ma: Maybe<a>) => Maybe<b>;
   export const Return = pure;
-  export declare function bind<a, b>(m: Maybe<a>, f: (a: a) => Maybe<b>): Maybe<b>;
-  export declare function bind<a>(m: Maybe<a>): <b>(f: (a: a) => Maybe<b>) => Maybe<b>;
+  export declare function bind<a, b>(f: (a: a) => Maybe<b>, m: Maybe<a>): Maybe<b>;
   export function sequence<a>(fm: Maybe<a>[]): Maybe<a[]>;
   export function sequence<a>(fm: Maybe<PromiseLike<a>>): AtomicPromise<Maybe<a>>;
   export function sequence<a>(fm: Maybe<a>[] | Maybe<PromiseLike<a>>): Maybe<a[]> | AtomicPromise<Maybe<a>> {

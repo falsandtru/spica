@@ -4,11 +4,7 @@ export abstract class Functor<a> extends Lazy<a> {
   abstract fmap<b>(f: (a: a) => b): Functor<b>;
 }
 export namespace Functor {
-  export function fmap<a, b>(m: Functor<a>, f: (a: a) => b): Functor<b>;
-  export function fmap<a>(m: Functor<a>): <b>(f: (a: a) => b) => Functor<b>;
-  export function fmap<a, b>(m: Functor<a>, f?: (a: a) => b): Functor<b> | (<b>(f: (a: a) => b) => Functor<b>) {
-    return f
-      ? m.fmap(f)
-      : <b>(f: (a: a) => b) => m.fmap(f);
+  export function fmap<a, b>(f: (a: a) => b, m: Functor<a>): Functor<b> {
+    return m.fmap(f);
   }
 }

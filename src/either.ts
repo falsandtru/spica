@@ -101,12 +101,8 @@ export {
 };
 
 export namespace Either {
-  export function fmap<a, b, c>(m: Either<a, b>, f: (b: b) => c): Either<a, c>;
-  export function fmap<a, b>(m: Either<a, b>): <c>(f: (b: b) => c) => Either<a, c>;
-  export function fmap<a, b, c>(m: Either<a, b>, f?: (b: b) => c): Either<a, c> | (<c>(f: (b: b) => c) => Either<a, c>) {
-    return f
-      ? m.fmap(f)
-      : <c>(f: (b: b) => c) => m.fmap(f);
+  export function fmap<a, b, c>(f: (b: b) => c, m: Either<a, b>): Either<a, c> {
+    return m.fmap(f);
   }
   export const pure = right;
   export function ap<a, b, c>(mf: Either<a, (b: b) => c>, ma: Either<a, b>): Either<a, c>;
@@ -117,12 +113,8 @@ export namespace Either {
       : (aa: Either<a, b>) => ap(af, aa);
   }
   export const Return = pure;
-  export function bind<a, b, c>(m: Either<a, b>, f: (b: b) => Either<a, c>): Either<a, c>;
-  export function bind<a, b>(m: Either<a, b>): <c>(f: (b: b) => Either<a, c>) => Either<a, c>;
-  export function bind<a, b, c>(m: Either<a, b>, f?: (b: b) => Either<a, c>): Either<a, c> | (<c>(f: (b: b) => Either<a, c>) => Either<a, c>) {
-    return f
-      ? m.bind(f)
-      : <c>(f: (b: b) => Either<a, c>) => bind(m, f);
+  export function bind<a, b, c>(f: (b: b) => Either<a, c>, m: Either<a, b>): Either<a, c> {
+    return m.bind(f);
   }
   export function sequence<a, b>(fm: Either<a, b>[]): Either<a, b[]>;
   export function sequence<a, b>(fm: Either<a, PromiseLike<b>>): AtomicPromise<Either<a, b>>;

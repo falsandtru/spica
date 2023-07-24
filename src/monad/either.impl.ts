@@ -55,8 +55,7 @@ export class Either<a, b> extends Monad<b> {
   }
 }
 export namespace Either {
-  export declare function fmap<a, b, c>(m: Either<a, b>, f: (b: b) => c): Either<a, c>;
-  export declare function fmap<a, b>(m: Either<a, b>): <c>(f: (b: b) => c) => Either<a, c>;
+  export declare function fmap<a, b, c>(f: (b: b) => c, m: Either<a, b>): Either<a, c>;
   export function pure<b>(b: b): Right<b>;
   export function pure<a, b>(b: b): Either<a, b>;
   export function pure<a, b>(b: b): Either<a, b> {
@@ -65,8 +64,7 @@ export namespace Either {
   export declare function ap<a, b, c>(mf: Either<a, (b: b) => c>, ma: Either<a, b>): Either<a, c>;
   export declare function ap<a, b, c>(mf: Either<a, (b: b) => c>): (ma: Either<a, b>) => Either<a, c>;
   export const Return = pure;
-  export declare function bind<a, b, c>(m: Either<a, b>, f: (b: b) => Either<a, c>): Either<a, c>;
-  export declare function bind<a, b>(m: Either<a, b>): <c>(f: (b: b) => Either<a, c>) => Either<a, c>;
+  export declare function bind<a, b, c>(f: (b: b) => Either<a, c>, m: Either<a, b>): Either<a, c>;
   export function sequence<a, b>(fm: Either<a, b>[]): Either<a, b[]>;
   export function sequence<a, b>(fm: Either<a, PromiseLike<b>>): AtomicPromise<Either<a, b>>;
   export function sequence<a, b>(fm: Either<a, b>[] | Either<a, PromiseLike<b>>): Either<a, b[]> | AtomicPromise<Either<a, b>> {

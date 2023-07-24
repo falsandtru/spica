@@ -58,8 +58,7 @@ describe('Unit: lib/maybe', () => {
 
   describe('Functor', () => {
     it('fmap', () => {
-      assert(Maybe.fmap(Return(0), n => n + 1).extract() === 1);
-      assert(Maybe.fmap(Return(0))(n => n + 1).extract() === 1);
+      assert(Maybe.fmap(n => n + 1, Return(0)).extract() === 1);
     });
 
     it('Functor law 1', () => {
@@ -123,8 +122,7 @@ describe('Unit: lib/maybe', () => {
 
   describe('Monad', () => {
     it('bind', () => {
-      assert(Maybe.bind(Return(0), n => Return(n + 1)).extract() === 1);
-      assert(Maybe.bind(Return(0))(n => Return(n + 1)).extract() === 1);
+      assert(Maybe.bind(n => Return(n + 1), Return(0)).extract() === 1);
     });
 
     it('join', () => {

@@ -56,8 +56,7 @@ describe('Unit: lib/monad/sequence', () => {
 
   describe('Functor', () => {
     it('fmap', () => {
-      assert.deepStrictEqual(Sequence.fmap(Sequence.Return(0), n => n + 1).extract(), [1]);
-      assert.deepStrictEqual(Sequence.fmap(Sequence.Return(0))(n => n + 1).extract(), [1]);
+      assert.deepStrictEqual(Sequence.fmap(n => n + 1, Sequence.Return(0)).extract(), [1]);
     });
 
     it('Functor law 1', () => {
@@ -133,8 +132,7 @@ describe('Unit: lib/monad/sequence', () => {
 
   describe('Monad', () => {
     it('bind', () => {
-      assert.deepStrictEqual(Sequence.bind(Sequence.Return(0), n => Sequence.Return(n + 1)).extract(), [1]);
-      assert.deepStrictEqual(Sequence.bind(Sequence.Return(0))(n => Sequence.Return(n + 1)).extract(), [1]);
+      assert.deepStrictEqual(Sequence.bind(n => Sequence.Return(n + 1), Sequence.Return(0)).extract(), [1]);
     });
 
     it('Monad law 1', () => {

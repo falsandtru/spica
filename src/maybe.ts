@@ -102,12 +102,8 @@ export {
 };
 
 export namespace Maybe {
-  export function fmap<a, b>(m: Maybe<a>, f: (a: a) => b): Maybe<b>;
-  export function fmap<a>(m: Maybe<a>): <b>(f: (a: a) => b) => Maybe<b>;
-  export function fmap<a, b>(m: Maybe<a>, f?: (a: a) => b): Maybe<b> | (<b>(f: (a: a) => b) => Maybe<b>) {
-    return f
-      ? m.fmap(f)
-      : <b>(f: (a: a) => b) => m.fmap(f);
+  export function fmap<a, b>(f: (a: a) => b, m: Maybe<a>): Maybe<b> {
+    return m.fmap(f);
   }
   export const pure = just;
   export function ap<a, b>(mf: Maybe<(a: a) => b>, ma: Maybe<a>): Maybe<b>;
@@ -118,12 +114,8 @@ export namespace Maybe {
       : (aa: Maybe<a>) => ap(af, aa);
   }
   export const Return = pure;
-  export function bind<a, b>(m: Maybe<a>, f: (a: a) => Maybe<b>): Maybe<b>;
-  export function bind<a>(m: Maybe<a>): <b>(f: (a: a) => Maybe<b>) => Maybe<b>;
-  export function bind<a, b>(m: Maybe<a>, f?: (a: a) => Maybe<b>): Maybe<b> | (<b>(f: (a: a) => Maybe<b>) => Maybe<b>) {
-    return f
-      ? m.bind(f)
-      : <b>(f: (a: a) => Maybe<b>) => bind(m, f);
+  export function bind<a, b>(f: (a: a) => Maybe<b>, m: Maybe<a>): Maybe<b> {
+    return m.bind(f);
   }
   export function sequence<a>(fm: Maybe<a>[]): Maybe<a[]>;
   export function sequence<a>(fm: Maybe<PromiseLike<a>>): AtomicPromise<Maybe<a>>;

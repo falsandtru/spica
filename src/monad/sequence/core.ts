@@ -32,14 +32,12 @@ export namespace Sequence {
   export declare function difference<a>(a: Sequence<a, unknown>, b: Sequence<a, unknown>, cmp: (l: a, r: a) => number): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
   export declare function union<a>(a: Sequence<a, unknown>, b: Sequence<a, unknown>, cmp: (l: a, r: a) => number): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
   export declare function intersect<a>(a: Sequence<a, unknown>, b: Sequence<a, unknown>, cmp: (l: a, r: a) => number): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
-  export declare function fmap<a, b>(m: Sequence<a, unknown>, f: (a: a) => b): Sequence<b, Sequence.Iterator<a>>;
-  export declare function fmap<a>(m: Sequence<a, unknown>): <b>(f: (a: a) => b) => Sequence<b, Sequence.Iterator<a>>;
+  export declare function fmap<a, b>(f: (a: a) => b, m: Sequence<a, unknown>): Sequence<b, Sequence.Iterator<a>>;
   export declare function pure<a>(a: a): Sequence<a, number>;
   export declare function ap<a, b>(mf: Sequence<(a: a) => b, unknown>, ma: Sequence<a, unknown>): Sequence<b, [Sequence.Iterator<Sequence<b, unknown>>, Sequence.Iterator<b>]>;
   export declare function ap<a, b>(mf: Sequence<(a: a) => b, unknown>): (ma: Sequence<a, unknown>) => Sequence<b, [Sequence.Iterator<Sequence<b, unknown>>, Sequence.Iterator<b>]>;
   export declare const Return: typeof pure;
-  export declare function bind<a, b>(m: Sequence<a, unknown>, f: (a: a) => Sequence<b, unknown>): Sequence<b, Sequence.Iterator<a>>;
-  export declare function bind<a>(m: Sequence<a, unknown>): <b>(f: (a: a) => Sequence<b, unknown>) => Sequence<b, Sequence.Iterator<a>>;
+  export declare function bind<a, b>(f: (a: a) => Sequence<b, unknown>, m: Sequence<a, unknown>): Sequence<b, Sequence.Iterator<a>>;
   export declare function sequence<b>(ms: Sequence<b, unknown>[]): Sequence<Sequence<b, [Sequence.Iterator<b>, Sequence.Iterator<b>]>, Sequence.Iterator<Sequence<b, [Sequence.Iterator<b>, Sequence.Iterator<b>]>>>;
   export declare const mempty: Sequence<never, never>;
   export declare function mappend<a>(l: Sequence<a, unknown>, r: Sequence<a, unknown>): Sequence<a, [Sequence.Iterator<a>, Sequence.Iterator<a>]>;
