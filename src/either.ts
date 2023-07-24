@@ -37,8 +37,8 @@ class Right<b> implements Either<never, b> {
   public bind<c, a>(f: (b: b) => Either<a, c>): Either<a, c> {
     return f(this.extract());
   }
-  public join<c>(this: Either<never, Either<never, c>>): Either<never, c> {
-    return this.bind(m => m);
+  public join<c>(this: Right<Either<never, c>>): Either<never, c> {
+    return this.value;
   }
   public extract(): b;
   public extract<c>(left: (a: any) => c): b | c;

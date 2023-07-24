@@ -38,8 +38,8 @@ class Just<a> implements Maybe<a> {
   public bind<b>(f: (a: a) => Maybe<b>): Maybe<b> {
     return f(this.value);
   }
-  public join<b>(this: Maybe<Maybe<b>>): Maybe<b> {
-    return this.bind(m => m);
+  public join<b>(this: Just<Maybe<b>>): Maybe<b> {
+    return this.value;
   }
   public guard(cond: boolean): Maybe<a> {
     return cond
