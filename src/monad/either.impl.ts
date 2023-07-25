@@ -76,24 +76,6 @@ export namespace Either {
   }
 }
 
-export class Left<a> extends Either<a, never> {
-  constructor(private value: a) {
-    super(throwCallError);
-  }
-  public override bind<c>(f: (b: never) => Either<a, c>): Left<a> {
-    return this;
-    assert(f);
-  }
-  public override extract(): never;
-  public override extract<c>(left: (a: a) => c): c;
-  public override extract<c>(left: (a: a) => c, right: (b: never) => c): c;
-  public override extract<c, d>(left: (a: a) => c, right: (b: never) => d): c;
-  public override extract<c>(left?: (a: a) => c): c {
-    if (left !== undefined) return left(this.value);
-    throw this.value;
-  }
-}
-
 export class Right<b> extends Either<never, b> {
   constructor(private readonly value: b) {
     super(throwCallError);
@@ -113,6 +95,24 @@ export class Right<b> extends Either<never, b> {
     if (right !== undefined) return right(this.value);
     return this.value;
     assert([left]);
+  }
+}
+
+export class Left<a> extends Either<a, never> {
+  constructor(private value: a) {
+    super(throwCallError);
+  }
+  public override bind<c>(f: (b: never) => Either<a, c>): Left<a> {
+    return this;
+    assert(f);
+  }
+  public override extract(): never;
+  public override extract<c>(left: (a: a) => c): c;
+  public override extract<c>(left: (a: a) => c, right: (b: never) => c): c;
+  public override extract<c, d>(left: (a: a) => c, right: (b: never) => d): c;
+  public override extract<c>(left?: (a: a) => c): c {
+    if (left !== undefined) return left(this.value);
+    throw this.value;
   }
 }
 
