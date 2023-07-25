@@ -1,6 +1,6 @@
 import { AtomicPromise, Internal, internal } from './promise';
-import { Maybe, Just, Nothing } from './monad/maybe';
-import { Either, Left, Right } from './monad/either';
+import { Maybe, Just, Nothing } from './maybe';
+import { Either, Left, Right } from './either';
 import { noop } from './function';
 import { causeAsyncException } from './exception';
 
