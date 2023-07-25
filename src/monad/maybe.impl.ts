@@ -41,7 +41,6 @@ export class Maybe<a> extends MonadPlus<a> {
   public extract(nothing: () => a): a;
   public extract<b>(nothing: () => b): a | b;
   public extract<b>(nothing: () => b, just: (a: a) => b): b;
-  public extract<b, c>(nothing: () => b, just: (a: a) => c): b | c;
   public extract<b>(nothing?: () => b, just?: (a: a) => b): a | b {
     return just === undefined
       ? this.evaluate().extract(nothing!)
@@ -89,7 +88,6 @@ export class Just<a> extends Maybe<a> {
   public override extract(nothing: () => a): a;
   public override extract<b>(nothing: () => b): a;
   public override extract<b>(nothing: () => b, just: (a: a) => b): b;
-  public override extract<b, c>(nothing: () => b, just: (a: a) => c): c;
   public override extract<b>(nothing?: () => b, just?: (a: a) => b): a | b {
     if (just !== undefined) return just(this.value);
     return this.value;
@@ -108,7 +106,6 @@ export class Nothing extends Maybe<never> {
   public override extract(): never;
   public override extract<b>(nothing: () => b): b;
   public override extract<b>(nothing: () => b, just: (a: never) => b): b;
-  public override extract<b, c>(nothing: () => b, just: (a: never) => c): b;
   public override extract<b>(nothing?: () => b): b {
     if (nothing !== undefined) return nothing();
     throw new Error(`Spica: Maybe: Nothing value is extracted.`);
