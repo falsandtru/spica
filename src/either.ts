@@ -12,7 +12,9 @@ export interface Either<a, b> {
   bind<c>(f: (b: b) => Either<a, c>): Either<a, c>;
   join<c>(this: Either<a, Either<a, c>>): Either<a, c>;
   extract(): b;
+  extract(left: (a: a) => b): b;
   extract<c>(left: (a: a) => c): b | c;
+  extract<c>(left: (a: a) => c, right: (b: b) => c): c;
   extract<c, d>(left: (a: a) => c, right: (b: b) => d): c | d;
 }
 
@@ -42,8 +44,10 @@ class Right<b> implements Either<never, b> {
     return this.value;
   }
   public extract(): b;
-  public extract<c>(left: (a: any) => c): b | c;
-  public extract<c, d>(left: (a: any) => c, right: (b: b) => d): c | d;
+  public extract(left: (a: any) => b): b;
+  public extract<c>(left: (a: any) => c): b;
+  public extract<c>(left: (a: any) => c, right: (b: b) => c): c;
+  public extract<c, d>(left: (a: any) => c, right: (b: b) => d): d;
   public extract<c>(left?: (a: never) => c, right?: (b: b) => c): b | c {
     if (right !== undefined) return right(this.value);
     return this.value;
@@ -77,7 +81,8 @@ class Left<a> implements Either<a, never> {
   }
   public extract(): never;
   public extract<c>(left: (a: a) => c): c;
-  public extract<c, d>(left: (a: a) => c, right: (b: any) => d): c | d;
+  public extract<c>(left: (a: a) => c, right: (b: any) => c): c;
+  public extract<c, d>(left: (a: a) => c, right: (b: any) => d): c;
   public extract<c>(left?: (a: a) => c): c {
     if (left !== undefined) return left(this.value);
     throw this.value;

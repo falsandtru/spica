@@ -13,6 +13,7 @@ export interface Maybe<a> {
   join<b>(this: Maybe<Maybe<b>>): Maybe<b>;
   guard(cond: boolean): Maybe<a>;
   extract(): a;
+  extract(nothing: () => a): a;
   extract<b>(nothing: () => b): a | b;
   extract<b>(nothing: () => b, just: (a: a) => b): b;
 }
@@ -46,6 +47,7 @@ class Just<a> implements Maybe<a> {
     return cond ? this : Maybe.mzero;
   }
   public extract(): a;
+  public extract(nothing: () => a): a;
   public extract<b>(nothing: () => b): a | b;
   public extract<b>(nothing: () => b, just: (a: a) => b): b;
   public extract<b>(nothing?: () => b, just?: (a: a) => b): a | b {

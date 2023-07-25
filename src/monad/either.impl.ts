@@ -35,8 +35,10 @@ export class Either<a, b> extends Monad<b> {
     return this.bind(m => m);
   }
   public extract(): b;
+  public extract(left: (a: a) => b): b;
   public extract<c>(left: (a: a) => c): b | c;
   public extract<c>(left: (a: a) => c, right: (b: b) => c): c;
+  public extract<c, d>(left: (a: a) => c, right: (b: b) => d): c | d;
   public extract<c>(left?: (a: a) => c, right?: (b: b) => c): b | c {
     return right === undefined
       ? this.evaluate().extract(left!)
@@ -85,6 +87,7 @@ export class Left<a> extends Either<a, never> {
   public override extract(): never;
   public override extract<c>(left: (a: a) => c): c;
   public override extract<c>(left: (a: a) => c, right: (b: never) => c): c;
+  public override extract<c, d>(left: (a: a) => c, right: (b: never) => d): c;
   public override extract<c>(left?: (a: a) => c): c {
     if (left !== undefined) return left(this.value);
     throw this.value;
@@ -102,8 +105,10 @@ export class Right<b> extends Either<never, b> {
     return new Either(() => f(this.extract()));
   }
   public override extract(): b;
+  public override extract(left: (a: never) => b): b;
   public override extract<c>(left: (a: never) => c): b;
   public override extract<c>(left: (a: never) => c, right: (b: b) => c): c;
+  public override extract<c, d>(left: (a: never) => c, right: (b: b) => d): d;
   public override extract<c>(left?: (a: never) => c, right?: (b: b) => c): b | c {
     if (right !== undefined) return right(this.value);
     return this.value;
