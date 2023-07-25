@@ -44,10 +44,10 @@ class Right<b> implements Either<never, b> {
     return this.value;
   }
   public extract(): b;
-  public extract(left: (a: any) => b): b;
-  public extract<c>(left: (a: any) => c): b;
-  public extract<c>(left: (a: any) => c, right: (b: b) => c): c;
-  public extract<c, d>(left: (a: any) => c, right: (b: b) => d): d;
+  public extract(left: (a: never) => b): b;
+  public extract<c>(left: (a: never) => c): b;
+  public extract<c>(left: (a: never) => c, right: (b: b) => c): c;
+  public extract<c, d>(left: (a: never) => c, right: (b: b) => d): d;
   public extract<c>(left?: (a: never) => c, right?: (b: b) => c): b | c {
     if (right !== undefined) return right(this.value);
     return this.value;
@@ -81,8 +81,8 @@ class Left<a> implements Either<a, never> {
   }
   public extract(): never;
   public extract<c>(left: (a: a) => c): c;
-  public extract<c>(left: (a: a) => c, right: (b: any) => c): c;
-  public extract<c, d>(left: (a: a) => c, right: (b: any) => d): c;
+  public extract<c>(left: (a: a) => c, right: (b: never) => c): c;
+  public extract<c, d>(left: (a: a) => c, right: (b: never) => d): c;
   public extract<c>(left?: (a: a) => c): c {
     if (left !== undefined) return left(this.value);
     throw this.value;
