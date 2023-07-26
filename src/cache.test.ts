@@ -711,7 +711,7 @@ describe('Unit: lib/cache', () => {
       for (let i = 0; i < trials; ++i) {
         const key = i % 2
           ? -i % capacity / 2 | 0
-          : random() * capacity * 2 | 0;
+          : random() * capacity * 9 | 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
@@ -725,8 +725,8 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 86);
-      assert(dwc['partition']! * 100 / capacity >>> 0 === 64);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 87);
+      assert(dwc['partition']! * 100 / capacity >>> 0 === 54);
     });
 
     it('ratio uneven 1,000', function () {
