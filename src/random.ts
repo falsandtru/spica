@@ -134,7 +134,7 @@ export function xorshift(seed: number = xorshift.seed()): () => number {
   };
 }
 export namespace xorshift {
-  const max = -1 >>> 0;
+  const max = ~0 >>> 0;
   assert(0 * max + 1 >>> 0 === 1);
   assert(0.9 * max + 1 >>> 0 >= 0);
   assert(0.9 * max + 1 >>> 0 <= max);
