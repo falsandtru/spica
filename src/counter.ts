@@ -3,29 +3,35 @@ assert(dict.length === 36);
 assert(dict[0] === '0');
 assert(dict.at(-1) === 'z');
 
-export function counter(radix: number = 10, pad: string = ''): () => string {
-  assert(radix <= 36);
-  let cnt0 = 0;
-  if (radix === 10) return format(pad, () => `${++cnt0}`);
-  let cnt1 = 0;
-  let str1 = '';
-  let cnt2 = 0;
-  let str2 = '';
-  return format(pad, () => {
-    const digit0 = dict[cnt0 = ++cnt0 % radix];
-    const digit1 = cnt0 ? str1 : str1 = dict[cnt1 = ++cnt1 % radix];
-    const digitN = cnt0 | cnt1 ? str2 : str2 = (++cnt2).toString(radix);
-    return `${digitN}${digit1}${digit0}`;
-  });
+export function counter(radix: number = 10, pad: string = '', numbers: string = dict): () => string {
+  assert(radix <= numbers.length);
+  return format(pad, counter$(radix, numbers));
+}
+
+function counter$(radix: number, numbers: string): () => string {
+  let cnt = 0;
+  if (radix === 10 && numbers.slice(0, 10) === dict.slice(0, 10)) return () => `${++cnt}`;
+  let carry: () => string;
+  let str = '';
+  return (): string => {
+    cnt = ++cnt % radix;
+    if (cnt !== 0) return `${str}${numbers[cnt]}`;
+    carry ??= counter$(radix, numbers);
+    str = carry();
+    return `${str}${numbers[cnt]}`;
+  };
 }
 
 function format(pad: string, counter: () => string): () => string {
-  return pad === ''
-    ? counter
-    : () => {
-        const count = counter();
-        return pad.length > count.length
-          ? `${pad.slice(0, pad.length - count.length)}${count}`
-          : count;
-      };
+  if (pad === '') return counter;
+  let len = 0;
+  let str = '';
+  return () => {
+    const count = counter();
+    assert(count.length > 0);
+    if (count.length === len) return `${str}${count}`;
+    len = count.length;
+    str = pad.length > len ? pad.slice(0, pad.length - len) : '';
+    return `${str}${count}`;
+  };
 }
