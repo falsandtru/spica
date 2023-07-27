@@ -1,7 +1,11 @@
-const dict = [...Array(36)].map((_, i) => i.toString(36)).join('');
-assert(dict.length === 36);
+const dict = [
+  ...[...Array(10)].map((_, i) => i),
+  ...[...Array(26)].map((_, i) => String.fromCharCode(0x61 + i)),
+  ...[...Array(26)].map((_, i) => String.fromCharCode(0x41 + i)),
+].join('');
+assert(dict.length === 62);
 assert(dict[0] === '0');
-assert(dict.at(-1) === 'z');
+assert(dict.at(-1) === 'Z');
 
 export function counter(radix: number = 10, pad: string = '', numbers: string = dict): () => string {
   assert(radix <= numbers.length);
