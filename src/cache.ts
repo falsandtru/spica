@@ -278,7 +278,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
     }
     entry.partition === 'LRU'
       ? this.LRU.delete(entry)
-      : this.LFU.delete(entry)
+      : this.LFU.delete(entry);
     assert(this.LRU.length + this.LFU.length === this.dict.size - 1);
     this.dict.delete(entry.key);
     assert(this.LRU.length + this.LFU.length === this.dict.size);
@@ -430,7 +430,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
     if (entry.partition === 'LRU') {
       if (entry.affiliation === 'LRU') {
         // For memoize.
-        // Strict checks are ineffective for OLTP.
+        // Strict checks are ineffective with OLTP.
         if (entry === LRU.head) return;
         entry.affiliation = 'LFU';
       }
