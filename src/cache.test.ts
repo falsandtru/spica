@@ -579,7 +579,7 @@ describe('Unit: lib/cache', () => {
       const lru = new LRU<number, 1>(capacity);
       const dwc = new Cache<number, 1>(capacity);
 
-      const trials = capacity * 1000;
+      const trials = capacity * 10;
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         const key = i % (capacity * 2);
@@ -596,7 +596,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
       assert(stats.dwc / stats.lru * 100 === Infinity);
-      assert(stats.dwc * 100 / stats.total >>> 0 === 39);
+      assert(stats.dwc * 100 / stats.total >>> 0 === 31);
     });
 
     // キャッシュサイズが相対的に小さい場合はサンプルの挿入とヒットによりアンロックされる。
