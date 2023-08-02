@@ -604,20 +604,17 @@ describe('Unit: lib/cache', () => {
     // キャッシュサイズが相対的に小さい場合はサンプルの挿入とヒットによりアンロックされる
     // 容量100でのテストは確率的および統計的にかなり悪条件
 
-    it('ratio uneven 100 lock loop', function () {
-      this.timeout(10 * 1e3);
-
-      const capacity = 100;
-      const lru = new LRU<number, 1>(capacity);
-      const dwc = new Cache<number, 1>(capacity);
-
-      const trials = capacity * 20;
-      const stats = new Stats();
-      // 統計汚染
+    // 統計汚染
+    function lock(
+      capacity: number,
+      lru: LRU<unknown, unknown>,
+      dwc: Cache<unknown, unknown>,
+    ): void {
       for (let i = 0; i < capacity * 100; ++i) {
         lru.set(Number.MIN_SAFE_INTEGER + i, 1);
         dwc.set(Number.MIN_SAFE_INTEGER + i, 1);
-        if (i + 1 === capacity) for (const { key } of [...dwc['LRU']].slice(dwc['window'])) {
+        if (i + 1 !== capacity) continue;
+        for (const { key } of [...dwc['LRU']].slice(dwc['window'])) {
           dwc.get(key);
         }
       }
@@ -625,6 +622,18 @@ describe('Unit: lib/cache', () => {
       assert(dwc['partition'] === capacity - dwc['window']);
       assert(dwc['declination'] === 5);
       dwc['injection'] = 0;
+    }
+
+    it('ratio uneven 100 lock loop', function () {
+      this.timeout(10 * 1e3);
+
+      const capacity = 100;
+      const lru = new LRU<number, 1>(capacity);
+      const dwc = new Cache<number, 1>(capacity);
+      lock(capacity, lru, dwc);
+
+      const trials = capacity * 20;
+      const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         const key = i % (capacity * 2);
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
@@ -651,24 +660,13 @@ describe('Unit: lib/cache', () => {
       const capacity = 100;
       const lru = new LRU<number, 1>(capacity);
       const dwc = new Cache<number, 1>(capacity);
+      lock(capacity, lru, dwc);
 
       // サンプルにヒットする確率の安定性に依存するため容量または試行回数の増加により改善される
       // 逆にサンプリングのジャミングが最も効果的に復元を阻害する
       const trials = capacity * 20;
       const random = zipfian(1, capacity * 1e2, 0.8, xorshift.random(1));
       const stats = new Stats();
-      // 統計汚染
-      for (let i = 0; i < capacity * 100; ++i) {
-        lru.set(Number.MIN_SAFE_INTEGER + i, 1);
-        dwc.set(Number.MIN_SAFE_INTEGER + i, 1);
-        if (i + 1 === capacity) for (const { key } of [...dwc['LRU']].slice(dwc['window'])) {
-          dwc.get(key);
-        }
-      }
-      assert(dwc['LFU'].length === capacity - dwc['window']);
-      assert(dwc['partition'] === capacity - dwc['window']);
-      assert(dwc['declination'] === 5);
-      dwc['injection'] = 0;
       for (let i = 0; i < trials; ++i) {
         const key = random();
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
@@ -694,22 +692,11 @@ describe('Unit: lib/cache', () => {
       const capacity = 100;
       const lru = new LRU<number, 1>(capacity);
       const dwc = new Cache<number, 1>(capacity);
+      lock(capacity, lru, dwc);
 
       const trials = capacity * 20;
       const random = xorshift.random(1);
       const stats = new Stats();
-      // 統計汚染
-      for (let i = 0; i < capacity * 100; ++i) {
-        lru.set(Number.MIN_SAFE_INTEGER + i, 1);
-        dwc.set(Number.MIN_SAFE_INTEGER + i, 1);
-        if (i + 1 === capacity) for (const { key } of [...dwc['LRU']].slice(dwc['window'])) {
-          dwc.get(key);
-        }
-      }
-      assert(dwc['LFU'].length === capacity - dwc['window']);
-      assert(dwc['partition'] === capacity - dwc['window']);
-      assert(dwc['declination'] === 5);
-      dwc['injection'] = 0;
       for (let i = 0; i < trials; ++i) {
         const key = i % 2
           ? -i % capacity / 2 - 1 | 0
