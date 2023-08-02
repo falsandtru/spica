@@ -407,7 +407,7 @@ describe('Unit: lib/cache', () => {
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         const key = random() < 0.4
-          ? random() * capacity * -1 | 0
+          ? random() * capacity * -1 - 1 | 0
           : random() * capacity * 10 | 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
@@ -436,7 +436,7 @@ describe('Unit: lib/cache', () => {
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         const key = random() < 0.4
-          ? random() * capacity * -1 | 0
+          ? random() * capacity * -1 - 1 | 0
           : random() * capacity * 10 + i * capacity / 100 | 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
@@ -496,7 +496,7 @@ describe('Unit: lib/cache', () => {
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         const key = random() < 0.4
-          ? random() * capacity * -1 | 0
+          ? random() * capacity * -1 - 1 | 0
           // LRU汚染
           : i;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
@@ -528,7 +528,7 @@ describe('Unit: lib/cache', () => {
         const key = i % 3
           // LFU汚染
           ? i % 3 - 1 ? i - i % 3 + 6 : i - i % 3
-          : random() * capacity / -1 | 0;
+          : random() * capacity / -1 - 1 | 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
@@ -541,7 +541,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 77);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 75);
     });
 
     it('ratio uneven 100 jump', function () {
@@ -667,7 +667,7 @@ describe('Unit: lib/cache', () => {
       dwc['injection'] = 0;
       for (let i = 0; i < trials; ++i) {
         const key = random() < 0.5
-          ? random() * capacity * -1 | 0
+          ? random() * capacity * -1 - 1 | 0
           : random() * capacity * 4 | 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
@@ -710,7 +710,7 @@ describe('Unit: lib/cache', () => {
       dwc['injection'] = 0;
       for (let i = 0; i < trials; ++i) {
         const key = i % 2
-          ? -i % capacity / 2 | 0
+          ? -i % capacity / 2 - 1 | 0
           : random() * capacity * 9 | 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
