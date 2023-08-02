@@ -599,8 +599,10 @@ describe('Unit: lib/cache', () => {
       assert(stats.dwc * 100 / stats.total >>> 0 === 31);
     });
 
-    // キャッシュサイズが相対的に小さい場合はサンプルの挿入とヒットによりアンロックされる。
-    // キャッシュサイズが相対的に大きい場合はウインドウ内でのヒットによりアンロックされる。
+    // レジリエンスのテスト(復元が順調に進んでいれば途上のヒット率は低くてよい)
+    // キャッシュサイズが相対的に大きい場合はウインドウ内でのヒットによりアンロックされる
+    // キャッシュサイズが相対的に小さい場合はサンプルの挿入とヒットによりアンロックされる
+    // 容量100でのテストは確率的および統計的にかなり悪条件
 
     it('ratio uneven 100 lock loop', function () {
       this.timeout(10 * 1e3);
@@ -650,8 +652,10 @@ describe('Unit: lib/cache', () => {
       const lru = new LRU<number, 1>(capacity);
       const dwc = new Cache<number, 1>(capacity);
 
+      // サンプルにヒットする確率の安定性に依存するため容量または試行回数の増加により改善される
+      // 逆にサンプリングのジャミングが最も効果的に復元を阻害する
       const trials = capacity * 20;
-      const random = xorshift.random(1);
+      const random = zipfian(1, capacity * 1e2, 0.8, xorshift.random(1));
       const stats = new Stats();
       // 統計汚染
       for (let i = 0; i < capacity * 100; ++i) {
@@ -666,9 +670,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['declination'] === 5);
       dwc['injection'] = 0;
       for (let i = 0; i < trials; ++i) {
-        const key = random() < 0.5
-          ? random() * capacity * -1 - 1 | 0
-          : random() * capacity * 4 | 0;
+        const key = random();
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
@@ -682,8 +684,8 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 112);
-      assert(dwc['partition']! * 100 / capacity >>> 0 === 55);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 40);
+      assert(dwc['partition']! * 100 / capacity >>> 0 === 49);
     });
 
     it('ratio uneven 100 lock HIR', function () {
@@ -711,7 +713,10 @@ describe('Unit: lib/cache', () => {
       for (let i = 0; i < trials; ++i) {
         const key = i % 2
           ? -i % capacity / 2 - 1 | 0
-          : random() * capacity * 9 | 0;
+          // 低ヒット率のLIRで高ヒット率のHIRの捕捉を妨害
+          : random() < 0.5
+            ? random() * capacity / 10 | 0
+            : i + capacity;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
@@ -725,8 +730,8 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 83);
-      assert(dwc['partition']! * 100 / capacity >>> 0 === 53);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 99);
+      assert(dwc['partition']! * 100 / capacity >>> 0 === 61);
     });
 
     it('ratio uneven 1,000', function () {
