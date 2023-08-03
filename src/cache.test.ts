@@ -552,11 +552,11 @@ describe('Unit: lib/cache', () => {
       const dwc = new Cache<number, 1>(capacity);
 
       const trials = capacity * 1000;
-      const random = xorshift.random(1);
+      const random = zipfian(1, capacity * 1e1, 0.8, xorshift.random(1));
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
-        // スキャン耐性が逆効果となる一度限りのアクセス
-        const key = random() * capacity + (i / capacity | 0) * capacity | 0;
+        // スキャン耐性と適応が逆効果となる一度限りのアクセス
+        const key = random() + (i / capacity | 0) * capacity * 1e1 | 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
@@ -569,7 +569,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 11);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 22);
     });
 
     it('ratio uneven 100 loop', function () {
@@ -623,6 +623,36 @@ describe('Unit: lib/cache', () => {
       assert(dwc['declination'] === 5);
       dwc['injection'] = 0;
     }
+
+    it('ratio uneven 100 lock jump', function () {
+      this.timeout(10 * 1e3);
+
+      const capacity = 100;
+      const lru = new LRU<number, 1>(capacity);
+      const dwc = new Cache<number, 1>(capacity);
+      lock(capacity, lru, dwc);
+
+      const trials = capacity * 1000;
+      const random = zipfian(1, capacity * 1e1, 0.8, xorshift.random(1));
+      const stats = new Stats();
+      for (let i = 0; i < trials; ++i) {
+        // スキャン耐性と適応が逆効果となる一度限りのアクセス
+        const key = random() + (i / capacity | 0) * capacity * 1e1 | 0;
+        stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
+        stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
+        stats.total += 1;
+        i + 1 === trials / 2 && stats.clear();
+      }
+      assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
+      assert(dwc['dict'].size <= capacity);
+      console.debug('Cache uneven 100 lock jump');
+      console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
+      console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
+      console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
+      console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
+      console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 21);
+    });
 
     it('ratio uneven 100 lock loop', function () {
       this.timeout(10 * 1e3);
