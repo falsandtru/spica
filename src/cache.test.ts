@@ -424,7 +424,7 @@ describe('Unit: lib/cache', () => {
       assert(stats.dwc / stats.lru * 100 >>> 0 === 205);
     });
 
-    it('ratio zipf 100 transitive distribution', function () {
+    it('ratio transitive distribution 100', function () {
       this.timeout(10 * 1e3);
 
       const capacity = 100;
@@ -445,7 +445,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
-      console.debug('Cache zipf 100 transitive distribution');
+      console.debug('Cache transitive distribution 100');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
@@ -454,7 +454,7 @@ describe('Unit: lib/cache', () => {
       assert(stats.dwc / stats.lru * 100 >>> 0 === 131);
     });
 
-    it('ratio zipf 100 transitive bias', function () {
+    it('ratio transitive bias 100', function () {
       this.timeout(10 * 1e3);
 
       const capacity = 100;
@@ -476,7 +476,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
-      console.debug('Cache zipf 100 transitive bias');
+      console.debug('Cache transitive bias 100');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
@@ -485,7 +485,7 @@ describe('Unit: lib/cache', () => {
       assert(stats.dwc / stats.lru * 100 >>> 0 === 170);
     });
 
-    it('ratio uneven 100 sequential', function () {
+    it('ratio sequential 100', function () {
       this.timeout(10 * 1e3);
 
       const capacity = 100;
@@ -506,7 +506,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
-      console.debug('Cache uneven 100 sequential');
+      console.debug('Cache sequential 100');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
@@ -515,7 +515,7 @@ describe('Unit: lib/cache', () => {
       assert(stats.dwc / stats.lru * 100 >>> 0 === 245);
     });
 
-    it('ratio uneven 100 adversarial', function () {
+    it('ratio adversarial 100', function () {
       this.timeout(10 * 1e3);
 
       const capacity = 100;
@@ -536,7 +536,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
-      console.debug('Cache uneven 100 adversarial');
+      console.debug('Cache adversarial 100');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
@@ -545,7 +545,7 @@ describe('Unit: lib/cache', () => {
       assert(stats.dwc / stats.lru * 100 >>> 0 === 75);
     });
 
-    it('ratio zipf 100 jump', function () {
+    it('ratio jump 100', function () {
       this.timeout(10 * 1e3);
 
       const capacity = 100;
@@ -564,7 +564,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
-      console.debug('Cache zipf 100 jump');
+      console.debug('Cache jump 100');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
@@ -573,7 +573,7 @@ describe('Unit: lib/cache', () => {
       assert(stats.dwc / stats.lru * 100 >>> 0 === 22);
     });
 
-    it('ratio uneven 100 loop', function () {
+    it('ratio loop 100', function () {
       this.timeout(10 * 1e3);
 
       const capacity = 100;
@@ -590,7 +590,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
-      console.debug('Cache uneven 100 loop');
+      console.debug('Cache loop 100');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
@@ -625,7 +625,7 @@ describe('Unit: lib/cache', () => {
       dwc['injection'] = 0;
     }
 
-    it('ratio zipf 100 lock jump', function () {
+    it('ratio lock jump 100', function () {
       this.timeout(10 * 1e3);
 
       const capacity = 100;
@@ -646,7 +646,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
-      console.debug('Cache zipf 100 lock jump');
+      console.debug('Cache lock jump 100');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
@@ -655,7 +655,7 @@ describe('Unit: lib/cache', () => {
       assert(stats.dwc / stats.lru * 100 >>> 0 === 21);
     });
 
-    it('ratio uneven 100 lock loop', function () {
+    it('ratio lock loop 100', function () {
       this.timeout(10 * 1e3);
 
       const capacity = 100;
@@ -674,7 +674,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
-      console.debug('Cache uneven 100 lock loop');
+      console.debug('Cache lock loop 100');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
@@ -685,7 +685,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['partition']! * 100 / capacity >>> 0 === 46);
     });
 
-    it('ratio zipf 100 lock LIR', function () {
+    it('ratio lock LIR 100', function () {
       this.timeout(10 * 1e3);
 
       const capacity = 100;
@@ -707,7 +707,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
-      console.debug('Cache zipf 100 lock LIR');
+      console.debug('Cache lock LIR 100');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
@@ -717,7 +717,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['partition']! * 100 / capacity >>> 0 === 49);
     });
 
-    it('ratio uneven 100 lock HIR', function () {
+    it('ratio lock HIR', function () {
       this.timeout(10 * 1e3);
 
       const capacity = 100;
@@ -742,7 +742,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
-      console.debug('Cache uneven 100 lock HIR');
+      console.debug('Cache lock HIR 100');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
