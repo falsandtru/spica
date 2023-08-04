@@ -544,7 +544,7 @@ describe('Unit: lib/cache', () => {
       assert(stats.dwc / stats.lru * 100 >>> 0 === 75);
     });
 
-    it('ratio uneven 100 jump', function () {
+    it('ratio zipf 100 jump', function () {
       this.timeout(10 * 1e3);
 
       const capacity = 100;
@@ -563,7 +563,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
-      console.debug('Cache uneven 100 jump');
+      console.debug('Cache zipf 100 jump');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
@@ -624,7 +624,7 @@ describe('Unit: lib/cache', () => {
       dwc['injection'] = 0;
     }
 
-    it('ratio uneven 100 lock jump', function () {
+    it('ratio zipf 100 lock jump', function () {
       this.timeout(10 * 1e3);
 
       const capacity = 100;
@@ -645,7 +645,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
-      console.debug('Cache uneven 100 lock jump');
+      console.debug('Cache zipf 100 lock jump');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
@@ -684,7 +684,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['partition']! * 100 / capacity >>> 0 === 46);
     });
 
-    it('ratio uneven 100 lock LIR', function () {
+    it('ratio zipf 100 lock LIR', function () {
       this.timeout(10 * 1e3);
 
       const capacity = 100;
@@ -706,7 +706,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
-      console.debug('Cache uneven 100 lock LIR');
+      console.debug('Cache zipf 100 lock LIR');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
