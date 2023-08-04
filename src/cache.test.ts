@@ -349,10 +349,10 @@ describe('Unit: lib/cache', () => {
       const dwc = new Cache<number, 1>(capacity);
 
       const trials = capacity * 1000;
-      const random = zipfian(1, capacity * 1e3, 0.8, xorshift.random(1));
+      const zipf = zipfian(1, capacity * 1e3, 0.8, xorshift.random(1));
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
-        const key = random();
+        const key = zipf();
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
@@ -552,11 +552,11 @@ describe('Unit: lib/cache', () => {
       const dwc = new Cache<number, 1>(capacity);
 
       const trials = capacity * 1000;
-      const random = zipfian(1, capacity * 1e1, 0.8, xorshift.random(1));
+      const zipf = zipfian(1, capacity * 1e1, 0.8, xorshift.random(1));
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         // スキャン耐性と適応が逆効果となる一度限りのアクセス
-        const key = random() + (i / capacity | 0) * capacity * 1e1 | 0;
+        const key = zipf() + (i / capacity | 0) * capacity * 1e1;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
@@ -633,11 +633,11 @@ describe('Unit: lib/cache', () => {
       lock(capacity, lru, dwc);
 
       const trials = capacity * 1000;
-      const random = zipfian(1, capacity * 1e1, 0.8, xorshift.random(1));
+      const zipf = zipfian(1, capacity * 1e1, 0.8, xorshift.random(1));
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         // スキャン耐性と適応が逆効果となる一度限りのアクセス
-        const key = random() + (i / capacity | 0) * capacity * 1e1 | 0;
+        const key = zipf() + (i / capacity | 0) * capacity * 1e1;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
@@ -695,10 +695,10 @@ describe('Unit: lib/cache', () => {
       // サンプルにヒットする確率の安定性に依存するため容量または試行回数の増加により改善される
       // 逆にサンプリングのジャミングが最も効果的に復元を阻害する
       const trials = capacity * 20;
-      const random = zipfian(1, capacity * 1e2, 0.8, xorshift.random(1));
+      const zipf = zipfian(1, capacity * 1e2, 0.8, xorshift.random(1));
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
-        const key = random();
+        const key = zipf();
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
