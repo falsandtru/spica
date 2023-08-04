@@ -579,10 +579,10 @@ describe('Unit: lib/cache', () => {
       const lru = new LRU<number, 1>(capacity);
       const dwc = new Cache<number, 1>(capacity);
 
-      const trials = capacity * 10;
+      const trials = capacity * 20;
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
-        const key = i % (capacity * 2);
+        const key = i % (capacity * 10);
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
@@ -596,7 +596,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
       assert(stats.dwc / stats.lru * 100 === Infinity);
-      assert(stats.dwc * 100 / stats.total >>> 0 === 31);
+      assert(stats.dwc * 100 / stats.total >>> 0 === 4);
     });
 
     // レジリエンスのテスト(復元が順調に進んでいれば途上のヒット率は低くてよい)
@@ -662,10 +662,10 @@ describe('Unit: lib/cache', () => {
       const dwc = new Cache<number, 1>(capacity);
       lock(capacity, lru, dwc);
 
-      const trials = capacity * 20;
+      const trials = capacity * 40;
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
-        const key = i % (capacity * 2);
+        const key = i % (capacity * 10);
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
@@ -680,8 +680,8 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
       assert(stats.dwc / stats.lru * 100 === Infinity);
-      assert(stats.dwc * 100 / stats.total >>> 0 === 33);
-      assert(dwc['partition']! * 100 / capacity >>> 0 === 66);
+      assert(stats.dwc * 100 / stats.total >>> 0 === 3);
+      assert(dwc['partition']! * 100 / capacity >>> 0 === 46);
     });
 
     it('ratio uneven 100 lock LIR', function () {
