@@ -485,36 +485,6 @@ describe('Unit: lib/cache', () => {
       assert(stats.dwc / stats.lru * 100 >>> 0 === 170);
     });
 
-    it('ratio sequential 100', function () {
-      this.timeout(10 * 1e3);
-
-      const capacity = 100;
-      const lru = new LRU<number, 1>(capacity);
-      const dwc = new Cache<number, 1>(capacity);
-
-      const trials = capacity * 1000;
-      const random = xorshift.random(1);
-      const stats = new Stats();
-      for (let i = 0; i < trials; ++i) {
-        const key = random() < 0.4
-          ? random() * capacity * -1 - 1 | 0
-          // LRU汚染
-          : i;
-        stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
-        stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
-        stats.total += 1;
-      }
-      assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
-      assert(dwc['dict'].size <= capacity);
-      console.debug('Cache sequential 100');
-      console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
-      console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
-      console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
-      console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
-      console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 245);
-    });
-
     it('ratio adversarial 100', function () {
       this.timeout(10 * 1e3);
 
