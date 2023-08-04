@@ -341,33 +341,6 @@ describe('Unit: lib/cache', () => {
       }
     }
 
-    it('ratio zipf 100', function () {
-      this.timeout(10 * 1e3);
-
-      const capacity = 100;
-      const lru = new LRU<number, 1>(capacity);
-      const dwc = new Cache<number, 1>(capacity);
-
-      const trials = capacity * 1000;
-      const zipf = zipfian(1, capacity * 1e3, 0.8, xorshift.random(1));
-      const stats = new Stats();
-      for (let i = 0; i < trials; ++i) {
-        const key = zipf();
-        stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
-        stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
-        stats.total += 1;
-      }
-      assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
-      assert(dwc['dict'].size <= capacity);
-      console.debug('Cache zipf 100');
-      console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
-      console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
-      console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
-      console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
-      console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 205);
-    });
-
     it('ratio even 100', function () {
       this.timeout(10 * 1e3);
 
@@ -422,6 +395,33 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
       assert(stats.dwc / stats.lru * 100 >>> 0 === 157);
+    });
+
+    it('ratio zipf 100', function () {
+      this.timeout(10 * 1e3);
+
+      const capacity = 100;
+      const lru = new LRU<number, 1>(capacity);
+      const dwc = new Cache<number, 1>(capacity);
+
+      const trials = capacity * 1000;
+      const zipf = zipfian(1, capacity * 1e3, 0.8, xorshift.random(1));
+      const stats = new Stats();
+      for (let i = 0; i < trials; ++i) {
+        const key = zipf();
+        stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
+        stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
+        stats.total += 1;
+      }
+      assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
+      assert(dwc['dict'].size <= capacity);
+      console.debug('Cache zipf 100');
+      console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
+      console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
+      console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
+      console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
+      console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 205);
     });
 
     it('ratio zipf 100 transitive distribution', function () {
