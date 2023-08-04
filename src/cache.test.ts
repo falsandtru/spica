@@ -424,7 +424,7 @@ describe('Unit: lib/cache', () => {
       assert(stats.dwc / stats.lru * 100 >>> 0 === 157);
     });
 
-    it('ratio uneven 100 transitive distribution', function () {
+    it('ratio zipf 100 transitive distribution', function () {
       this.timeout(10 * 1e3);
 
       const capacity = 100;
@@ -432,28 +432,29 @@ describe('Unit: lib/cache', () => {
       const dwc = new Cache<number, 1>(capacity);
 
       const trials = capacity * 1000;
+      const zipf = zipfian(1, capacity * 1e3, 0.8, xorshift.random(1));
       const random = xorshift.random(1);
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
-        const key = random() < 0.4
-          ? random() * capacity * -1 - 1 | 0
-          : random() * capacity * 10 + i * capacity / 100 | 0;
+        const key = random() < 0.5
+          ? zipf()
+          : -random() * capacity * 10 - i * capacity / 100 | 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
-      console.debug('Cache uneven 100 transitive distribution');
+      console.debug('Cache zipf 100 transitive distribution');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 165);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 131);
     });
 
-    it('ratio uneven 100 transitive bias', function () {
+    it('ratio zipf 100 transitive bias', function () {
       this.timeout(10 * 1e3);
 
       const capacity = 100;
@@ -461,27 +462,27 @@ describe('Unit: lib/cache', () => {
       const dwc = new Cache<number, 1>(capacity);
 
       const trials = capacity * 1000;
+      const zipf = zipfian(1, capacity * 1e3, 0.8, xorshift.random(1));
       const random = xorshift.random(1);
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         const key = random() < 0.5
           // 推移的偏りはこれを迅速に捕捉し続けるLRUと保持するLFUが必要であるため偏りの2倍の履歴が必要となる
-          //? random() * capacity * -1 - i / 2 * capacity / 100 | 0
-          ? random() * capacity / -4 - i / 2 * capacity / 400 | 0
-          : random() * capacity * 10 | 0;
+          ? zipf() + i / 2 * capacity * 1e3 / 100 | 0
+          : -random() * capacity * 10 | 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
-      console.debug('Cache uneven 100 transitive bias');
+      console.debug('Cache zipf 100 transitive bias');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 63);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 170);
     });
 
     it('ratio uneven 100 sequential', function () {
