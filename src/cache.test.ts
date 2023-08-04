@@ -523,13 +523,14 @@ describe('Unit: lib/cache', () => {
       const dwc = new Cache<number, 1>(capacity);
 
       const trials = capacity * 1000;
-      const random = xorshift.random(1);
+      const zipf = zipfian(1, capacity * 1e3, 0.8, xorshift.random(1));
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         const key = i % 3
           // LFU汚染
+          // 容量1000でほぼ完全に相殺
           ? i % 3 - 1 ? i - i % 3 + 6 : i - i % 3
-          : random() * capacity / -1 - 1 | 0;
+          : -zipf();
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
@@ -542,7 +543,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 75);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 14);
     });
 
     it('ratio jump 100', function () {
