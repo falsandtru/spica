@@ -130,7 +130,7 @@ export class Clock<K, V> implements IterableDict<K, V> {
     this.dict = new Map();
     this.keys = [];
     this.values = [];
-    this.refs = new Uint32Array(this.refs.length);
+    this.refs.fill(0);
     this.hand = 0;
     this.$length = 0;
   }
