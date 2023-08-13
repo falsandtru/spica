@@ -103,9 +103,9 @@ class Entry<K, V> implements List.Node {
     public key: K,
     public value: V,
     public size: number,
+    public expiration: number,
     public partition: 'LRU' | 'LFU',
     public affiliation: 'LRU' | 'LFU',
-    public expiration: number,
   ) {
   }
   public enode?: Heap.Node<Entry<K, V>, number> = undefined;
@@ -518,9 +518,9 @@ export class Cache<K, V> implements IterableDict<K, V> {
       key,
       value,
       size,
-      'LRU',
-      'LRU',
       expiration,
+      'LRU',
+      'LRU',
     );
     LRU.unshift(entry);
     this.dict.set(key, entry);
