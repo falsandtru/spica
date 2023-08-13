@@ -135,6 +135,7 @@ export class Clock<K, V> implements IterableDict<K, V> {
     this.refs.fill(0);
     this.hand = 0;
     this.$length = 0;
+    this.initial = 1;
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
     const { keys, values } = this;
