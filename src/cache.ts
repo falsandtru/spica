@@ -672,7 +672,6 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
   private active?: boolean;
   public isActive(): boolean {
     if (this.threshold === 0) return false;
-    if (this.prevWindowHits === 0 && this.prevWindowMisses === 0) return false;
     return this.active ??= this.ratioWindow() < max(this.ratioRoom() * this.ratio / 100, this.threshold);
   }
   private ratioWindow(): number {
