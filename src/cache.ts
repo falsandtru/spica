@@ -765,6 +765,7 @@ function ratio(
   const currRatio = currTotal * 100 / window - offset;
   if (currRatio <= 0) return prevRate * 100 | 0;
   const currRate = currHits && currHits * 100 / currTotal;
+  if (prevTotal === 0) return currRate * 100 | 0;
   const prevRatio = 100 - currRatio;
   return currRate * currRatio + prevRate * prevRatio | 0;
 }
@@ -800,9 +801,11 @@ assert(ratio(10, [1, 4], [4, 6], 0) === 3000);
 assert(ratio(10, [0, 4], [0, 6], 5) === 4000);
 assert(ratio(10, [1, 2], [4, 8], 5) === 2000);
 assert(ratio(10, [2, 2], [3, 8], 5) === 2900);
+assert(ratio(10, [2, 0], [3, 0], 0) === 4000);
 assert(ratio2(10, [4, 0], [6, 0], 0) === 4000);
 assert(ratio2(10, [0, 4], [0, 6], 0) === 4000);
 assert(ratio2(10, [1, 4], [4, 6], 0) === 3000);
 assert(ratio2(10, [0, 4], [0, 6], 5) === 4000);
 assert(ratio2(10, [1, 2], [4, 8], 5) === 2000);
 assert(ratio2(10, [2, 2], [3, 8], 5) === 2900);
+assert(ratio2(10, [2, 0], [3, 0], 0) === 4000);
