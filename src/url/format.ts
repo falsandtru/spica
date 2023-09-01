@@ -59,7 +59,7 @@ function encode(url: string): EncodedURL {
             ? str
             : encodeURIComponent(str)))
     // Use uppercase letters within percent-encoding triplets
-    .replace(/%[0-9A-F]{2}/ig, str => str.toUpperCase())
+    .replace(/%(?:[0-9][a-f]|[a-f][0-9a-fA-F]|[A-F][0-9a-f])/g, str => str.toUpperCase())
     .replace(/#.+/, url.slice(url.indexOf('#'))) as EncodedURL;
 }
 export { encode as _encode }
