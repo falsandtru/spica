@@ -45,16 +45,16 @@ function encode(url: string): EncodedURL
 function encode(url: string): EncodedURL {
   assert(url === url.trim());
   return url
-    // Percent-encoding
     .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]?|[\uDC00-\uDFFF]/g, str =>
       str.length === 2
         ? str
         : '')
-    .replace(/%(?![0-9A-F]{2})|[^%\[\]]+/ig, encodeURI)
+    // Percent-encoding
+    .replace(/%(?![0-9A-F]{2})|[^%\[\]\w]+/ig, encodeURI)
     .replace(/\?[^#]+/, query =>
       '?' +
       query.slice(1)
-        .replace(/%[0-9A-F]{2}|%|[^=&]+/ig, str =>
+        .replace(/%[0-9A-F]{2}|%|[^%=&]+/ig, str =>
           str[0] === '%' && str.length === 3
             ? str
             : encodeURIComponent(str)))
