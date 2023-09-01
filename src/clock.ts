@@ -54,7 +54,7 @@ export class Clock<K, V> implements IterableDict<K, V> {
   }
   public add(key: K, value: V): number {
     const { capacity, refs } = this;
-    for (let hand = this.hand, i = hand >>> DIGIT, r = hand & MASK; ;) {
+    for (let { hand } = this, i = hand >>> DIGIT, r = hand & MASK; ;) {
       assert(hand < capacity);
       assert(r < BASE);
       const b = refs[i];
