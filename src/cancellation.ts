@@ -37,7 +37,7 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
   }
   private state: State = State.alive;
   private reason: unknown = undefined;
-  private listeners: Listener<L>[] = [];
+  private handlers: Listener<L>[] = [];
   public readonly [internal] = new Internal<L>();
   public isAlive(): boolean {
     return this.state === State.alive;
@@ -49,12 +49,12 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
     return this.state === State.closed;
   }
   private register$(listener: Listener<L>): () => void {
-    const { listeners } = this;
-    if (!this.isAlive() && listeners.length === 0) {
+    const { handlers } = this;
+    if (!this.isAlive() && handlers.length === 0) {
       this.isCancelled() && handler(this.reason as L);
       return noop;
     }
-    listeners.push(handler);
+    handlers.push(handler);
     return () => void (listener = noop);
 
     function handler(reason: L): void {
@@ -73,11 +73,11 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
     if (!this.isAlive()) return;
     this.state = State.cancelled;
     this.reason = reason;
-    for (let { listeners } = this, i = 0; i < listeners.length; ++i) {
-      listeners[i](reason!);
+    for (let { handlers } = this, i = 0; i < handlers.length; ++i) {
+      handlers[i](reason!);
     }
-    this.listeners = [];
-    assert(Object.freeze(this.listeners));
+    this.handlers = [];
+    assert(Object.freeze(this.handlers));
     this[internal].resolve(reason!);
   }
   public get cancel(): (reason?: L) => void {
@@ -87,8 +87,8 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
     if (!this.isAlive()) return;
     this.state = State.closed;
     this.reason = reason;
-    this.listeners = [];
-    assert(Object.freeze(this.listeners));
+    this.handlers = [];
+    assert(Object.freeze(this.handlers));
     this[internal].resolve(AtomicPromise.reject(reason));
   }
   public get close(): (reason?: unknown) => void {
