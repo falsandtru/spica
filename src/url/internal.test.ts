@@ -1,6 +1,6 @@
-import { standardize, _encode as encode } from './format';
+import { standardize, encode } from './internal';
 
-describe('Unit: lib/url/domain/format', () => {
+describe('Unit: lib/url/internal', () => {
   describe('standardize', () => {
     it('primitive', () => {
       assert(typeof standardize('', location.href) === 'string');

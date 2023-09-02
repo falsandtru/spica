@@ -26,8 +26,8 @@ type URL<T> = Identity<T> & string;
 export type StandardURL = URL<Encoded & Absolute>;
 export type AbsoluteURL = URL<Absolute>;
 
-export function standardize(url: URL<unknown>, base?: string): void
-export function standardize(url: string, base?: string): StandardURL
+export function standardize(url: URL<unknown>, base?: string): void;
+export function standardize(url: string, base?: string): StandardURL;
 export function standardize(url: string, base?: string): StandardURL {
   const { origin, protocol, href } = new ReadonlyURL(url, base!);
   url = origin === 'null'
@@ -39,10 +39,10 @@ export function standardize(url: string, base?: string): StandardURL {
 
 type EncodedURL<T = Encoded> = URL<Encoded & T>;
 
-function encode(url: EncodedURL): void
-function encode<T>(url: URL<T>): EncodedURL<T>
-function encode(url: string): EncodedURL
-function encode(url: string): EncodedURL {
+export function encode(url: EncodedURL): void;
+export function encode<T>(url: URL<T>): EncodedURL<T>;
+export function encode(url: string): EncodedURL;
+export function encode(url: string): EncodedURL {
   assert(url === url.trim());
   url = url.replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, '');
   const { 1: base, 2: hash } = url
@@ -55,7 +55,6 @@ function encode(url: string): EncodedURL {
     + query.replace(/(?!^)(?:[^%=&]|%(?![0-9A-F]{2}))+/ig, encodeURIComponent)
     + hash as EncodedURL;
 }
-export { encode as _encode }
 
 
 type CachedURL<T extends string> = Partial<Mutable<global.URL>> & {

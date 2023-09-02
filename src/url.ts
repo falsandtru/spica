@@ -1,7 +1,7 @@
-import { AbsoluteURL, ReadonlyURL } from './url/format';
+import { AbsoluteURL, ReadonlyURL } from './url/internal';
 
-export { StandardURL, standardize } from './url/format';
-export { ReadonlyURL } from './url/format';
+export { StandardURL, standardize } from './url/internal';
+export { ReadonlyURL } from './url/internal';
 
 type Widen<T> = T extends `${infer _}` ? string : T;
 
