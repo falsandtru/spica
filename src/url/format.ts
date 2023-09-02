@@ -58,7 +58,7 @@ function encode(url: string): EncodedURL {
 export { encode as _encode }
 
 
-type SharedURL<T extends string> = Partial<Mutable<global.URL>> & {
+type CachedURL<T extends string> = Partial<Mutable<global.URL>> & {
   url: global.URL;
   href?: T;
   resource?: string;
@@ -71,7 +71,7 @@ export class ReadonlyURL<T extends string = string> implements Readonly<global.U
   // ref: https://github.com/falsandtru/pjax-api/issues/44#issuecomment-633915035
   // Bug: Error in dependents.
   // @ts-ignore
-  private static readonly get = memoize((url: string, base: string | undefined): SharedURL =>
+  private static readonly get = memoize((url: string, base: string | undefined): CachedURL =>
     ({ url: new global.URL(url, base) }),
     (url, base = '') => `${base.indexOf('\n') > -1 ? base.replace(/\n+/g, '') : base}\n${url}`,
     new Cache(10000));
@@ -101,78 +101,75 @@ export class ReadonlyURL<T extends string = string> implements Readonly<global.U
             }
         }
     }
-    this.share = ReadonlyURL.get(source, base);
-    this.params = undefined;
+    this.cache = ReadonlyURL.get(source, base);
     this.source = source;
     this.base = base;
   }
-  private readonly share: SharedURL<T>;
-  private params?: URLSearchParams;
+  private readonly cache: CachedURL<T>;
   public readonly source: string;
   public readonly base?: string;
   public get href(): T {
-    return this.share.href
-       ??= this.share.url.href as T;
+    return this.cache.href
+       ??= this.cache.url.href as T;
   }
   public get resource(): string {
-    return this.share.resource
+    return this.cache.resource
        ??= this.href.slice(0, -this.fragment.length - this.query.length || this.href.length) + this.search;
   }
   public get origin(): string {
-    return this.share.origin
-       ??= this.share.url.origin;
+    return this.cache.origin
+       ??= this.cache.url.origin;
   }
   public get protocol(): string {
-    return this.share.protocol
-       ??= this.share.url.protocol;
+    return this.cache.protocol
+       ??= this.cache.url.protocol;
   }
   public get username(): string {
-    return this.share.username
-       ??= this.share.url.username;
+    return this.cache.username
+       ??= this.cache.url.username;
   }
   public get password(): string {
-    return this.share.password
-       ??= this.share.url.password;
+    return this.cache.password
+       ??= this.cache.url.password;
   }
   public get host(): string {
-    return this.share.host
-       ??= this.share.url.host;
+    return this.cache.host
+       ??= this.cache.url.host;
   }
   public get hostname(): string {
-    return this.share.hostname
-       ??= this.share.url.hostname;
+    return this.cache.hostname
+       ??= this.cache.url.hostname;
   }
   public get port(): string {
-    return this.share.port
-       ??= this.share.url.port;
+    return this.cache.port
+       ??= this.cache.url.port;
   }
   public get path(): string {
-    return this.share.path
+    return this.cache.path
        ??= `${this.pathname}${this.search}`;
   }
   public get pathname(): string {
-    return this.share.pathname
-       ??= this.share.url.pathname;
+    return this.cache.pathname
+       ??= this.cache.url.pathname;
   }
   public get search(): string {
-    return this.share.search
-       ??= this.share.url.search;
+    return this.cache.search
+       ??= this.cache.url.search;
   }
   public get query(): string {
-    return this.share.query
+    return this.cache.query
        ??= this.search || this.href[this.href.length - this.fragment.length - 1] === '?' && '?' || '';
   }
   public get hash(): string {
-    return this.share.hash
-       ??= this.share.url.hash;
+    return this.cache.hash
+       ??= this.cache.url.hash;
   }
   public get fragment(): string {
-    return this.share.fragment
+    return this.cache.fragment
        ??= this.hash || this.href[this.href.length - 1] === '#' && '#' || '';
   }
   public get searchParams(): URLSearchParams {
-    return this.params
-       ??= new URLSearchParams(this.search);
+    return new URLSearchParams(this.search);
   }
   public toString(): string {
     return this.href;
