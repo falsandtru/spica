@@ -96,7 +96,7 @@ export class ReadonlyURL<T extends string = string> implements Readonly<global.U
               base = base.slice(0, i);
             }
             const j = base.indexOf('?');
-            if (i > -1 && source.indexOf('#') === -1) {
+            if (j > -1 && source.indexOf('#') === -1) {
               base = base.slice(0, j);
             }
         }
