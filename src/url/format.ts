@@ -62,6 +62,7 @@ type CachedURL<T extends string> = Partial<Mutable<global.URL>> & {
   url: global.URL;
   href?: T;
   resource?: string;
+  scheme?: string;
   path?: string;
   query?: string;
   fragment?: string;
@@ -119,6 +120,10 @@ export class ReadonlyURL<T extends string = string> implements Readonly<global.U
   public get origin(): string {
     return this.cache.origin
        ??= this.cache.url.origin;
+  }
+  public get scheme(): string {
+    return this.cache.scheme
+       ??= this.protocol.slice(0, -1);
   }
   public get protocol(): string {
     return this.cache.protocol

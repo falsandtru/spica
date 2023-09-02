@@ -48,7 +48,7 @@ export class URL<T extends string> implements Readonly<global.URL> {
     return this.url.origin as any;
   }
   public get scheme(): URL.Scheme {
-    return this.url.protocol.slice(0, -1) as any;
+    return this.url.scheme as any;
   }
   public get protocol(): URL.Protocol {
     return this.url.protocol as any;
