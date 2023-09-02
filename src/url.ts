@@ -14,10 +14,15 @@ export class URL<T extends string> implements Readonly<global.URL> {
     T extends `${infer _}` ? [string] :
     [T]);
   constructor(
-    public readonly source: string,
-    public readonly base?: string,
+    source: string,
+    base?: string,
   ) {
+    source = source.trim();
+    base = base?.trim();
     this.url = new ReadonlyURL(source, base!);
+    this.params = undefined;
+    this.source = source;
+    this.base = base;
     assert(this.url.href.endsWith(`${this.port}${this.pathname}${this.query}${this.fragment}`));
     assert(this.href === this.url.href);
     //assert(this.href.startsWith(this.resource));
@@ -28,7 +33,9 @@ export class URL<T extends string> implements Readonly<global.URL> {
     assert(this.port === this.url.port);
   }
   private readonly url: ReadonlyURL;
-  private params: URLSearchParams | undefined;
+  private params?: URLSearchParams;
+  public readonly source: string;
+  public readonly base?: string;
   public get href(): URL.Href<T> {
     return this.params?.toString().replace(/^(?=.)/, `${this.url.href.slice(0, -this.url.query.length - this.url.fragment.length || this.url.href.length)}?`).concat(this.fragment)
         ?? this.url.href as any;
