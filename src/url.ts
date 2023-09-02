@@ -94,10 +94,10 @@ export class URL<T extends string> implements Readonly<global.URL> {
        ??= new URLSearchParams(this.search);
   }
   public toString(): string {
-    return this.href;
+    return this.url.toString();
   }
   public toJSON(): string {
-    return this.href;
+    return this.url.toJSON();
   }
 }
 export namespace URL {
