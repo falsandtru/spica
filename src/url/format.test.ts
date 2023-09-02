@@ -44,11 +44,12 @@ describe('Unit: lib/url/domain/format', () => {
     });
 
     it('percent-encoding', () => {
-      assert(standardize('?a=b +c&%%3f#/?= +&%%3f#', location.href).endsWith(`?a=b%20%2Bc&%25%3F#/?=%20+&%%3f#`));
+      assert(standardize('?a=b+c&%%3f#/?=+&%%3f#', location.href).endsWith(`?a=b%2Bc&%25%3F#/?=+&%%3f#`));
     });
 
     it('multiple-encoding', () => {
       assert(standardize(standardize('/%%3f%3d', location.href) as string).endsWith('/%25%3F%3D'));
+      assert(standardize(standardize('?a b#a b', location.href) as string).endsWith(`?a%20b#a%20b`));
     });
 
   });

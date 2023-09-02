@@ -44,23 +44,16 @@ function encode<T>(url: URL<T>): EncodedURL<T>
 function encode(url: string): EncodedURL
 function encode(url: string): EncodedURL {
   assert(url === url.trim());
-  return url
-    .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]?|[\uDC00-\uDFFF]/g, str =>
-      str.length === 2
-        ? str
-        : '')
-    // Percent-encoding
-    .replace(/%(?![0-9A-F]{2})|[^%\[\]\w]+/ig, encodeURI)
-    .replace(/\?[^#]+/, query =>
-      '?' +
-      query.slice(1)
-        .replace(/%[0-9A-F]{2}|%|[^%=&]+/ig, str =>
-          str[0] === '%' && str.length === 3
-            ? str
-            : encodeURIComponent(str)))
-    // Use uppercase letters within percent-encoding triplets
-    .replace(/%(?:[0-9][a-f]|[a-f][0-9a-fA-F]|[A-F][0-9a-f])/g, str => str.toUpperCase())
-    .replace(/#.+/, url.slice(url.indexOf('#'))) as EncodedURL;
+  url = url.replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, '');
+  const { 1: base, 2: hash } = url
+    .match(/^([^#]*)(.*)$/s)!;
+  const { 1: path, 2: query } = base
+    .replace(/(?:%(?:[0-9][a-f]|[a-f][0-9a-fA-F]|[A-F][0-9a-f]))+/g, str => str.toUpperCase())
+    .match(/^([^?]*)(.*)$/s)!;
+  return ''
+    + path.replace(/(?:[^%[\]]|%(?![0-9A-F]{2}))+/ig, encodeURI)
+    + query.replace(/(?!^)(?:[^%=&]|%(?![0-9A-F]{2}))+/ig, encodeURIComponent)
+    + hash as EncodedURL;
 }
 export { encode as _encode }
 
