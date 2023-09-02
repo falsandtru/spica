@@ -1,4 +1,4 @@
-import { URL, StandardURL, standardize } from './url';
+import { URL, ReadonlyURL, StandardURL, standardize } from './url';
 
 describe('Unit: lib/url', () => {
   describe('URL', () => {
@@ -11,6 +11,11 @@ describe('Unit: lib/url', () => {
 
     const origin = protocol + '//' + hostname as `${typeof protocol}//${typeof hostname}`;
     assert(origin === 'https://example.com');
+
+    it('type', () => {
+      (): global.URL => new URL('', '');
+      (): global.URL => new ReadonlyURL('', '');
+    });
 
     it('relative', () => {
       // @ts-expect-error
