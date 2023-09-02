@@ -13,10 +13,7 @@ export class URL<T extends string> implements Readonly<global.URL> {
     T extends AbsoluteURL | `${string}:${string}` ? [string?] :
     T extends `${infer _}` ? [string] :
     [T]);
-  constructor(
-    source: string,
-    base?: string,
-  ) {
+  constructor(source: string, base?: string) {
     source = source.trim();
     base = base?.trim();
     this.url = new ReadonlyURL(source, base!);
