@@ -114,7 +114,7 @@ export class ReadonlyURL<T extends string = string> implements Readonly<global.U
   }
   public get resource(): string {
     return this.cache.resource
-       ??= this.href.slice(0, -this.fragment.length - this.query.length || this.href.length) + this.search;
+       ??= this.href.slice(0, this.href.search(/[?#]|$/)) + this.search;
   }
   public get origin(): string {
     return this.cache.origin
