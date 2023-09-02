@@ -58,8 +58,9 @@ function encode(url: string): EncodedURL {
 export { encode as _encode }
 
 
-type SharedURL = Partial<Mutable<global.URL>> & {
+type SharedURL<T extends string> = Partial<Mutable<global.URL>> & {
   url: global.URL;
+  href?: T;
   resource?: string;
   path?: string;
   query?: string;
@@ -105,12 +106,12 @@ export class ReadonlyURL<T extends string = string> implements Readonly<global.U
     this.source = source;
     this.base = base;
   }
-  private readonly share: SharedURL;
+  private readonly share: SharedURL<T>;
   private params?: URLSearchParams;
   public readonly source: string;
   public readonly base?: string;
   public get href(): T {
-    return (this.share.href as T)
+    return this.share.href
        ??= this.share.url.href as T;
   }
   public get resource(): string {
