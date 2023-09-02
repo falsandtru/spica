@@ -103,10 +103,12 @@ export class ReadonlyURL<T extends string = string> implements Readonly<global.U
         }
     }
     this.cache = ReadonlyURL.get(source, base);
+    this.params = undefined;
     this.source = source;
     this.base = base;
   }
   private readonly cache: CachedURL<T>;
+  private params?: ReadonlyURLSearchParams;
   public readonly source: string;
   public readonly base?: string;
   public get href(): T {
@@ -173,13 +175,35 @@ export class ReadonlyURL<T extends string = string> implements Readonly<global.U
     return this.cache.fragment
        ??= this.hash || this.href[this.href.length - 1] === '#' && '#' || '';
   }
-  public get searchParams(): URLSearchParams {
-    return new URLSearchParams(this.search);
+  public get searchParams(): ReadonlyURLSearchParams {
+    return this.params
+       ??= new ReadonlyURLSearchParams(this.search);
   }
   public toString(): string {
     return this.href;
   }
   public toJSON(): string {
     return this.href;
+  }
+}
+
+class ReadonlyURLSearchParams extends URLSearchParams {
+  public override append(name: string, value: string): never {
+    this.sort();
+    name;
+    value;
+  }
+  public override delete(name: string, value?: string): never {
+    this.sort();
+    name;
+    value;
+  }
+  public override set(name: string, value: string): never {
+    this.sort();
+    name;
+    value;
+  }
+  public override sort(): never {
+    throw new Error('Spica: URL: Cannot use mutable methods with ReadonlyURLSearchParams');
   }
 }
