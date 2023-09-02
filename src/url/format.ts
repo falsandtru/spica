@@ -29,10 +29,10 @@ export type AbsoluteURL = URL<Absolute>;
 export function standardize(url: URL<unknown>, base?: string): void
 export function standardize(url: string, base?: string): StandardURL
 export function standardize(url: string, base?: string): StandardURL {
-  const u = new ReadonlyURL(url, base!);
-  url = u.origin === 'null'
-    ? u.protocol.toLowerCase() + u.href.slice(u.protocol.length)
-    : u.origin.toLowerCase() + u.href.slice(u.origin.length);
+  const { origin, protocol, href } = new ReadonlyURL(url, base!);
+  url = origin === 'null'
+    ? protocol.toLowerCase() + href.slice(protocol.length)
+    : origin.toLowerCase() + href.slice(origin.length);
   return encode(url as AbsoluteURL);
 }
 
