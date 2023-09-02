@@ -78,10 +78,9 @@ export class ReadonlyURL<T extends string = string> implements Readonly<global.U
     T extends AbsoluteURL | `${string}:${string}` ? [string?] :
     T extends `${infer _}` ? [string] :
     [T]);
-  constructor(
-    public readonly source: string,
-    public readonly base?: string,
-  ) {
+  constructor(source: string, base?: string) {
+    source = source.trim();
+    base = base?.trim();
     switch (source.slice(0, source.lastIndexOf('://', 9) + 1).toLowerCase()) {
       case 'http:':
       case 'https:':
@@ -96,15 +95,20 @@ export class ReadonlyURL<T extends string = string> implements Readonly<global.U
               base = base.slice(0, i);
             }
             const j = base.indexOf('?');
-            if (j > -1 && source.indexOf('#') === -1) {
+            if (j > -1 && source !== '' && source[0] !== '#') {
               base = base.slice(0, j);
             }
         }
     }
     this.share = ReadonlyURL.get(source, base);
+    this.params = undefined;
+    this.source = source;
+    this.base = base;
   }
   private readonly share: SharedURL;
-  private params: URLSearchParams | undefined;
+  private params?: URLSearchParams;
+  public readonly source: string;
+  public readonly base?: string;
   public get href(): T {
     return (this.share.href as T)
        ??= this.share.url.href as T;
