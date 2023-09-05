@@ -7,7 +7,7 @@ import { noop } from './function';
 
 export interface CofetchOptions {
   method?: string;
-  headers?: Headers;
+  headers?: Record<string, string> | Headers;
   body?: Document | XMLHttpRequestBodyInit | null;
   responseType?: XMLHttpRequestResponseType;
   timeout?: number;
@@ -33,8 +33,9 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
       opts = { ...opts };
       opts.method = (opts.method || 'GET').toUpperCase();
       opts.headers = new Headers(opts.headers);
+      const { method, headers, cache } = opts;
       let state: 'load' | 'error' | 'abort' | 'timeout';
-      const key = `${opts.method}:${url}`;
+      const key = `${method}:${url}`;
       const xhr = new XMLHttpRequest();
       const listener = new Colistener<ProgressEvent>(listener => {
         xhr.addEventListener('loadstart', listener);
@@ -43,10 +44,10 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
         for (const type of ['load', 'error', 'abort', 'timeout'] as const) {
           xhr.addEventListener(type, () => state = type);
         }
-        if (['GET', 'PUT'].includes(opts.method!) &&
-            opts.cache && opts.cache.has(key) && memory.has(opts.cache.get(key)!) &&
-            Date.now() > memory.get(opts.cache.get(key)!)!.expiration) {
-          opts.headers!.set('If-None-Match', opts.cache.get(key)!.getResponseHeader('ETag')!);
+        if (['GET', 'PUT'].includes(method) &&
+            cache && cache.has(key) && memory.has(cache.get(key)!) &&
+            Date.now() > memory.get(cache.get(key)!)!.expiration) {
+          headers.set('If-None-Match', cache.get(key)!.getResponseHeader('ETag')!);
         }
         fetch(xhr, url, opts);
         this.cancellation.register(() => { xhr.readyState < 4 && xhr.abort(); });
@@ -61,8 +62,8 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
       assert(state! !== undefined);
       switch (state!) {
         case 'load':
-          if (opts.cache) {
-            switch (opts.method) {
+          if (cache) {
+            switch (method) {
               case 'GET':
               case 'PUT':
                 if (`${xhr.status}`.match(/^2..$/)) {
@@ -79,15 +80,15 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
                         ? Date.now() + +cc.get('max-age')! * 1000 || 0
                         : 0,
                     });
-                    opts.cache.set(key, xhr);
+                    cache.set(key, xhr);
                   }
                   else {
                     memory.delete(xhr);
-                    opts.cache.delete(key);
+                    cache.delete(key);
                   }
                 }
-                if (xhr.status === 304 && opts.cache.has(key)) {
-                  return opts.cache.get(key)!;
+                if (xhr.status === 304 && cache.has(key)) {
+                  return cache.get(key)!;
                 }
                 break;
             }
@@ -116,7 +117,7 @@ function fetch(xhr: XMLHttpRequest, url: string, opts: CofetchOptions): void {
       case 'cache':
         continue;
       case 'headers':
-        opts.headers?.forEach(([name, value]) =>
+        (opts.headers as Headers).forEach(([name, value]) =>
           void xhr.setRequestHeader(name, value));
         continue;
       default:
