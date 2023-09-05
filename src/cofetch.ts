@@ -62,36 +62,34 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
       assert(state! !== undefined);
       switch (state!) {
         case 'load':
-          if (cache) {
-            switch (method) {
-              case 'GET':
-              case 'PUT':
-                if (`${xhr.status}`.match(/^2..$/)) {
-                  const cc = new Map<string, string>(
-                    xhr.getResponseHeader('Cache-Control')
-                      // eslint-disable-next-line redos/no-vulnerable
-                      ? xhr.getResponseHeader('Cache-Control')!.trim().split(/\s*,\s*/)
-                          .filter(v => v.length > 0)
-                          .map(v => [...v.split('='), ''] as [string, string])
-                      : []);
-                  if (xhr.getResponseHeader('ETag') && !cc.has('no-store')) {
-                    memory.set(xhr, {
-                      expiration: cc.has('max-age') && !cc.has('no-cache')
-                        ? Date.now() + +cc.get('max-age')! * 1000 || 0
-                        : 0,
-                    });
-                    cache.set(key, xhr);
-                  }
-                  else {
-                    memory.delete(xhr);
-                    cache.delete(key);
-                  }
+          if (cache) switch (method) {
+            case 'GET':
+            case 'PUT':
+              if (`${xhr.status}`.match(/^2..$/)) {
+                const cc = new Map<string, string>(
+                  xhr.getResponseHeader('Cache-Control')
+                    // eslint-disable-next-line redos/no-vulnerable
+                    ? xhr.getResponseHeader('Cache-Control')!.trim().split(/\s*,\s*/)
+                        .filter(v => v.length > 0)
+                        .map(v => [...v.split('='), ''] as [string, string])
+                    : []);
+                if (xhr.getResponseHeader('ETag') && !cc.has('no-store')) {
+                  memory.set(xhr, {
+                    expiration: cc.has('max-age') && !cc.has('no-cache')
+                      ? Date.now() + +cc.get('max-age')! * 1000 || 0
+                      : 0,
+                  });
+                  cache.set(key, xhr);
                 }
-                if (xhr.status === 304 && cache.has(key)) {
-                  return cache.get(key)!;
+                else {
+                  memory.delete(xhr);
+                  cache.delete(key);
                 }
-                break;
-            }
+              }
+              if (xhr.status === 304 && cache.has(key)) {
+                return cache.get(key)!;
+              }
+              break;
           }
           return xhr;
         default:
