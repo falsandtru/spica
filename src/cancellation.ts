@@ -69,7 +69,7 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
   public get register(): (listener: Listener<L>) => () => void {
     return listener => this.register$(listener);
   }
-  private cancel$(reason?: L): void {
+  private cancel$(reason: L): void {
     if (!this.isAlive()) return;
     this.state = State.cancelled;
     this.reason = reason;
@@ -80,8 +80,8 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
     assert(Object.freeze(this.handlers));
     this[internal].resolve(reason!);
   }
-  public get cancel(): (reason?: L) => void {
-    return reason => this.cancel$(reason);
+  public get cancel(): Canceller<L>['cancel'] {
+    return reason => this.cancel$(reason!);
   }
   public close$(reason?: unknown): void {
     if (!this.isAlive()) return;
@@ -89,7 +89,7 @@ export class Cancellation<L = undefined> implements Canceller<L>, Cancellee<L>, 
     this.reason = reason;
     this.handlers = [];
     assert(Object.freeze(this.handlers));
-    this[internal].resolve(AtomicPromise.reject(reason));
+    this[internal].reject(reason);
   }
   public get close(): (reason?: unknown) => void {
     return reason => this.close$(reason);
