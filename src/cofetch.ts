@@ -47,6 +47,8 @@ class Cofetch extends Coroutine<XMLHttpRequest, ProgressEvent> {
         if (['GET', 'PUT'].includes(method) &&
             cache && cache.has(key) && memory.has(cache.get(key)!) &&
             Date.now() > memory.get(cache.get(key)!)!.expiration) {
+          // Bug
+          // @ts-ignore
           headers.set('If-None-Match', cache.get(key)!.getResponseHeader('ETag')!);
         }
         fetch(xhr, url, opts);
