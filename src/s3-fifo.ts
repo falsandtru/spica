@@ -16,7 +16,7 @@ export class S3FIFO<K, V> {
   constructor(
     private capacity: number,
   ) {
-    this.capS = capacity * 0.1 >>> 0 || 1;
+    this.capS = capacity * 0.1 >>> 0;
     this.capM = capacity - this.capS;
     this.fifoS = new Queue();
     this.fifoM = new Queue();
