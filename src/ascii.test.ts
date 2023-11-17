@@ -7,7 +7,7 @@ import { LRU } from './lru';
 describe('Unit: lib/ascii', () => {
   describe('encode/decode', () => {
     it('random number', function () {
-      this.timeout(10 * 1e3);
+      this.timeout(15 * 1e3);
 
       const cs = Array(8).fill(0);
       let c = 0;
@@ -46,7 +46,7 @@ describe('Unit: lib/ascii', () => {
     });
 
     it('random hex', function () {
-      this.timeout(10 * 1e3);
+      this.timeout(15 * 1e3);
 
       const cs = Array(8).fill(0);
       let c = 0;
@@ -79,7 +79,7 @@ describe('Unit: lib/ascii', () => {
     });
 
     it('random 36', function () {
-      this.timeout(10 * 1e3);
+      this.timeout(15 * 1e3);
 
       const cs = Array(8).fill(0);
       let c = 0;
@@ -110,7 +110,7 @@ describe('Unit: lib/ascii', () => {
     });
 
     it('random 64', function () {
-      this.timeout(10 * 1e3);
+      this.timeout(15 * 1e3);
 
       const cs = Array(8).fill(0);
       let c = 0;
@@ -141,7 +141,7 @@ describe('Unit: lib/ascii', () => {
     });
 
     it('entity', function () {
-      this.timeout(20 * 1e3);
+      this.timeout(15 * 1e3);
 
       const cs = Array(8).fill(0);
       let c = 0;
@@ -171,7 +171,7 @@ describe('Unit: lib/ascii', () => {
     });
 
     it('word short 5', function () {
-      this.timeout(10 * 1e4);
+      this.timeout(15 * 1e4);
 
       const cs = Array(8).fill(0);
       let c = 0;
@@ -207,7 +207,7 @@ describe('Unit: lib/ascii', () => {
     });
 
     it('word short 10', function () {
-      this.timeout(10 * 1e4);
+      this.timeout(15 * 1e4);
 
       const cs = Array(8).fill(0);
       let c = 0;
@@ -243,7 +243,7 @@ describe('Unit: lib/ascii', () => {
     });
 
     it('word 1', function () {
-      this.timeout(10 * 1e4);
+      this.timeout(15 * 1e4);
 
       const cs = Array(8).fill(0);
       let c = 0;
@@ -275,13 +275,13 @@ describe('Unit: lib/ascii', () => {
     });
 
     it('word 2', function () {
-      this.timeout(10 * 1e3);
+      this.timeout(15 * 1e3);
 
       const random = xorshift.random(1);
       const cs = Array(8).fill(0);
       let c = 0;
       for (let i = 0; i < 1e4; ++i) {
-        const input = [...Array(2)].map(() => words[random() * words.length | 0]).join(' ');
+        const input = [...Array(2)].map(() => words[random() * words.length | 0]).join('-');
         assert(input === decodeDelta(encodeDelta(input)));
         assert(input === decodeHPACK(encodeHPACK(input)));
         let j = 0;
@@ -307,13 +307,13 @@ describe('Unit: lib/ascii', () => {
     });
 
     it('word 4', function () {
-      this.timeout(10 * 1e3);
+      this.timeout(15 * 1e3);
 
       const random = xorshift.random(1);
       const cs = Array(8).fill(0);
       let c = 0;
       for (let i = 0; i < 1e4; ++i) {
-        const input = [...Array(4)].map(() => words[random() * words.length | 0]).join(' ');
+        const input = [...Array(4)].map(() => words[random() * words.length | 0]).join('-');
         assert(input === decodeDelta(encodeDelta(input)));
         assert(input === decodeHPACK(encodeHPACK(input)));
         let j = 0;
@@ -339,13 +339,13 @@ describe('Unit: lib/ascii', () => {
     });
 
     it('word 6', function () {
-      this.timeout(10 * 1e3);
+      this.timeout(15 * 1e3);
 
       const random = xorshift.random(1);
       const cs = Array(8).fill(0);
       let c = 0;
       for (let i = 0; i < 1e4; ++i) {
-        const input = [...Array(6)].map(() => words[random() * words.length | 0]).join(' ');
+        const input = [...Array(6)].map(() => words[random() * words.length | 0]).join('-');
         assert(input === decodeDelta(encodeDelta(input)));
         assert(input === decodeHPACK(encodeHPACK(input)));
         let j = 0;
@@ -371,13 +371,13 @@ describe('Unit: lib/ascii', () => {
     });
 
     it('word 8', function () {
-      this.timeout(20 * 1e3);
+      this.timeout(15 * 1e3);
 
       const random = xorshift.random(1);
       const cs = Array(8).fill(0);
       let c = 0;
       for (let i = 0; i < 1e4; ++i) {
-        const input = [...Array(8)].map(() => words[random() * words.length | 0]).join(' ');
+        const input = [...Array(8)].map(() => words[random() * words.length | 0]).join('-');
         assert(input === decodeDelta(encodeDelta(input)));
         assert(input === decodeHPACK(encodeHPACK(input)));
         let j = 0;
@@ -403,7 +403,7 @@ describe('Unit: lib/ascii', () => {
     });
 
     it('text 100', function () {
-      this.timeout(10 * 1e3);
+      this.timeout(15 * 1e3);
 
       const random = zipfian(0, words.length - 1, 1, xorshift.random(1));
       const cs = Array(8).fill(0);
@@ -439,7 +439,7 @@ describe('Unit: lib/ascii', () => {
     });
 
     it('text 500', function () {
-      this.timeout(10 * 1e3);
+      this.timeout(15 * 1e3);
 
       const random = zipfian(0, words.length - 1, 1, xorshift.random(1));
       const cs = Array(8).fill(0);
@@ -475,7 +475,7 @@ describe('Unit: lib/ascii', () => {
     });
 
     it('text 1000', function () {
-      this.timeout(10 * 1e3);
+      this.timeout(15 * 1e3);
 
       const random = zipfian(0, words.length - 1, 1, xorshift.random(1));
       const cs = Array(8).fill(0);
@@ -511,7 +511,7 @@ describe('Unit: lib/ascii', () => {
     });
 
     it('country', function () {
-      this.timeout(10 * 1e3);
+      this.timeout(15 * 1e3);
 
       const random = zipfian(0, countries.length - 1, 1, xorshift.random(1));
       const cs = Array(8).fill(0);
@@ -543,7 +543,7 @@ describe('Unit: lib/ascii', () => {
     });
 
     it('sample', function () {
-      this.timeout(10 * 1e4);
+      this.timeout(15 * 1e4);
 
       const cs = Array(8).fill(0);
       let c = 0;

@@ -46,6 +46,12 @@ SCSU:
 ASCII上位互換。
 ASCII文字は圧縮されない。
 
+HPACK:
+ASCII互換。
+最大37.5%圧縮。
+ハフマン符号の最も優れたASCIIコード用実装と思われるが単語や数値などの
+部分文字列の圧縮率はさほど効率的でないと思われる。
+
 lz-string:
 圧縮アルゴリズム。
 ASCII上位互換。
@@ -104,6 +110,10 @@ v7 セグメント遷移規則を学習
 v8 HEXモードを追加
 [0|0000000]: ASCII
 [1|0000000]: 4bit + 3bit delta (num: 0.4225; hex: 0.2959; word: 0.3305; country: 0.2749; text: 0.2600)
+
+v9 区切り文字を学習
+[0|0000000]: ASCII
+[1|0000000]: 4bit + 3bit delta (num: 0.4225; hex: 0.2955; word: 0.3282; country: 0.3047; text: 0.3293)
 
 */
 
@@ -174,15 +184,16 @@ function align(code: number, base: number, axis: number): number {
         // ^Case
         // CamelCase
         case Segment.Lower:
-          hexstate = 0;
+          hexstate = isHEX(decmap[code]);
           return axisL;
-        // 0HFC
+        // 0HDU
         case Segment.Number:
           hexstate = isHEX(decmap[code]);
           if (hexstate >>> 4) return axisH;
           return axisU;
         // _Case
         case Segment.Other:
+          hexstate = isHEX(code);
           return freq >>> 2 > (freq & 0b11)
             ? axisU
             : axisL;
@@ -190,7 +201,7 @@ function align(code: number, base: number, axis: number): number {
     case Segment.Lower:
       switch (segment(base)) {
         case Segment.Upper:
-          hexstate = 0;
+          hexstate = isHEX(decmap[code]);
           incFreq(Segment.Lower);
           return axisL;
         case Segment.Lower:
@@ -202,6 +213,7 @@ function align(code: number, base: number, axis: number): number {
           if (hexstate >>> 4) return axisH;
           return axisL;
         case Segment.Other:
+          hexstate = isHEX(code);
           return axisL;
       }
     case Segment.Number:
@@ -279,7 +291,9 @@ function isHEX(code: number): number {
   assert(hexstate >>> 8 === 0);
   if (code < 0x30) return 0;
   if (code < 0x3a) {
-    return hexstate & 0xf0 ? hexstate & hexstate << 4 | 0b111 : hexstate << 4 & 0xff | 0b111;
+    return hexstate & 0xf0
+      ? hexstate & hexstate << 4 | 0b111
+      : hexstate << 4 & 0xff | 0b111;
   }
   if (code < 0x41) return 0;
   if (code < 0x47) {
@@ -307,9 +321,42 @@ function decHEX(delta: number): number {
     ? encmap[0x61 - 10 + delta]
     : encmap[0x41 - 10 + delta];
 }
+const seps = new Uint8Array(' .:-,/_\t'.split('').map(c => encmap[c.charCodeAt(0)]));
+let sep = seps[0];
+function encCode(code: number, axis: number): number {
+  switch (axis) {
+    case axisU:
+    case axisL:
+      if (code === axis + 7) return axis + (1 << 7);
+      if (code === sep) return axis + 7;
+      break;
+    case axisN:
+      if (code === axis + 15) return axis + (1 << 7);
+      if (code === sep) return axis + 15;
+      break;
+  }
+  sep = seps.find(sep => sep === code) ?? sep;
+  return code;
+}
+function decDelta(delta: number, len: number, axis: number): number {
+  switch (axis) {
+    case axisU:
+    case axisL:
+      if (len === 3 && delta === 7) return sep - axis;
+      if (len === 4 && delta === 15) return sep - axis + offset(axis);
+      break;
+    case axisN:
+      if (delta === 15) return sep - axis;
+      break;
+  }
+  const code = axis + delta;
+  sep = seps.find(sep => sep === code) ?? sep;
+  return delta;
+}
 function clear(): void {
   freq = 0;
   hexstate = 0;
+  sep = seps[0];
 }
 
 export function encode(input: string): string {
@@ -329,7 +376,7 @@ export function encode(input: string): string {
       const comp = axis === axisH && isHEX(decmap[code]) >>> 4 !== 0;
       const delta = comp
         ? encHEX(decmap[code])
-        : code - axis + offset(axis);
+        : encCode(code, axis) - axis + offset(axis);
       if (delta >>> 4 || axis === axisH && !comp) {
         output += ASCII[code];
       }
@@ -339,17 +386,21 @@ export function encode(input: string): string {
       }
     }
     else {
+      const sep$ = sep;
       const dir = direction(base, axis);
       const comp = axis === axisH && isHEX(decmap[code]) >>> 4 !== 0;
       const delta = comp
         ? encHEX(decmap[code])
         : dir & 1
-          ? code - axis
+          ? encCode(code, axis) - axis
           : axis - code - 1;
       if (delta >>> 3 || axis === axisH && !comp ||
           dir >>> 31 === 0 &&
           (axis === axisU || axis === axisL) &&
           base < axis === code < axis) {
+        if (!comp && dir & 1) {
+          sep = sep$;
+        }
         output += ASCII[base];
         buffer = 0;
         i -= j;
@@ -380,6 +431,7 @@ export function decode(input: string): string {
     let code = input[i].charCodeAt(0);
     if (code <= 0x7f) {
       output += decode$(code);
+      sep = seps.find(sep => sep === code) ?? sep;
       axis = align(code, base, axis);
       base = code;
     }
@@ -387,7 +439,7 @@ export function decode(input: string): string {
       const delta = code;
       code = axis == axisH
         ? decHEX(delta >>> 3 & 0b1111)
-        : axis + (delta >>> 3 & 0b1111) - offset(axis);
+        : axis + decDelta(delta >>> 3 & 0b1111, 4, axis) - offset(axis);
       output += decode$(code);
       axis = align(code, base, axis);
       base = code;
@@ -395,7 +447,7 @@ export function decode(input: string): string {
       code = axis == axisH
         ? decHEX(delta & 0b111)
         : dir & 1
-          ? axis + (delta & 0b0111)
+          ? axis + decDelta(delta & 0b0111, 3, axis)
           : axis - (delta & 0b0111) - 1;
       output += decode$(code);
       axis = align(code, base, axis);

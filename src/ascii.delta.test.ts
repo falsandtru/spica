@@ -116,7 +116,7 @@ describe('Unit: lib/ascii.delta', () => {
       assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
 
-      input = '0HUC';
+      input = '0HUD';
       assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
 
@@ -124,7 +124,7 @@ describe('Unit: lib/ascii.delta', () => {
       assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
 
-      input = '0Caca';
+      input = '0Dada';
       assert(4 === encode(input).length);
       assert(input === decode(encode(input)));
 
@@ -152,8 +152,20 @@ describe('Unit: lib/ascii.delta', () => {
       assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
 
-      input = 'example.com';
-      assert(9 === encode(input).length);
+      input = '-f f';
+      assert(4 === encode(input).length);
+      assert(input === decode(encode(input)));
+
+      input = '0%0';
+      assert(3 === encode(input).length);
+      assert(input === decode(encode(input)));
+
+      input = '..  ';
+      assert(4 === encode(input).length);
+      assert(input === decode(encode(input)));
+
+      input = 's4-0dQh-';
+      assert(6 === encode(input).length);
       assert(input === decode(encode(input)));
     });
 
@@ -163,7 +175,7 @@ describe('Unit: lib/ascii.delta', () => {
       assert(input === decode(encode(input)));
       const random = xorshift.random(1);
       for (let i = 0; i < 1e4; ++i) {
-        const input = [...Array(random() * 32 | 0)]
+        const input = [...Array(random() * 32 + 1 | 0)]
           .reduce(acc => acc + String.fromCharCode(random() * 128 | 0), '');
         const output = encode(input);
         assert(output.length <= input.length);

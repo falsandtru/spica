@@ -40,7 +40,7 @@ describe('Unit: lib/ascii.hpack', () => {
       assert(input === decode(encode(input)));
       const random = xorshift.random(1);
       for (let i = 0; i < 1e4; ++i) {
-        const input = [...Array(random() * 32 | 0)]
+        const input = [...Array(random() * 32 + 1 | 0)]
           .reduce(acc => acc + String.fromCharCode(random() * 256 | 0), '');
         const output = encode(input);
         assert(input === decode(output));
