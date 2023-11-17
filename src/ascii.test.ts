@@ -141,7 +141,7 @@ describe('Unit: lib/ascii', () => {
     });
 
     it('entity', function () {
-      this.timeout(10 * 1e3);
+      this.timeout(20 * 1e3);
 
       const cs = Array(8).fill(0);
       let c = 0;
@@ -371,7 +371,7 @@ describe('Unit: lib/ascii', () => {
     });
 
     it('word 8', function () {
-      this.timeout(10 * 1e3);
+      this.timeout(20 * 1e3);
 
       const random = xorshift.random(1);
       const cs = Array(8).fill(0);

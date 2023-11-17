@@ -116,8 +116,20 @@ describe('Unit: lib/ascii.delta', () => {
       assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
 
-      input = '0DFC';
+      input = '0HUC';
       assert(3 === encode(input).length);
+      assert(input === decode(encode(input)));
+
+      input = '0FF7';
+      assert(3 === encode(input).length);
+      assert(input === decode(encode(input)));
+
+      input = '0Caca';
+      assert(4 === encode(input).length);
+      assert(input === decode(encode(input)));
+
+      input = '1a\x00a';
+      assert(4 === encode(input).length);
       assert(input === decode(encode(input)));
 
       input = ' Cas';

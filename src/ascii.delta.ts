@@ -99,7 +99,11 @@ v6 セグメント遷移規則を詳細化
 v7 セグメント遷移規則を学習
 [0|0000000]: ASCII
 [1|0000000]: 4bit + 3bit delta (word: 0.2994; country: 0.2749; text: 0.2600)
-[1|0000000]: 4bit + 3bit delta (word: 0.3305; country: 0.2749; text: 0.2600)
+[1|0000000]: 4bit + 3bit delta (num: 0.4225; hex: 0.1383; word: 0.3305; country: 0.2749; text: 0.2600)
+
+v8 HEXモードを追加
+[0|0000000]: ASCII
+[1|0000000]: 4bit + 3bit delta (num: 0.4225; hex: 0.2959; word: 0.3305; country: 0.2749; text: 0.2600)
 
 */
 
@@ -128,6 +132,7 @@ assert(ASCII.slice(0, 128).split('').every((c, i) => ASCII[decmap[encmap[i]]] ==
 const axisU = decmap.indexOf('I'.charCodeAt(0));
 const axisL = decmap.indexOf('i'.charCodeAt(0));
 const axisN = decmap.indexOf('0'.charCodeAt(0));
+const axisH = 0;
 const axisB = axisL;
 const code0 = encmap['0'.charCodeAt(0)];
 const codeA = encmap['V'.charCodeAt(0)];
@@ -156,37 +161,66 @@ function segment(code: number): Segment {
     return Segment.Other;
   }
 }
-function align(code: number, base: number): number {
+function align(code: number, base: number, axis: number): number {
   switch (segment(code)) {
     case Segment.Upper:
       switch (segment(base)) {
         // ABBR
         case Segment.Upper:
+          hexstate = isHEX(decmap[code]);
+          if (hexstate >>> 4 && axis === axisH) return axisH;
           incFreq(Segment.Upper);
           return axisU;
         // ^Case
         // CamelCase
         case Segment.Lower:
+          hexstate = 0;
           return axisL;
-        // 0DFC
+        // 0HFC
         case Segment.Number:
+          hexstate = isHEX(decmap[code]);
+          if (hexstate >>> 4) return axisH;
           return axisU;
         // _Case
         case Segment.Other:
-          return freq >> 2 > (freq & 0b11)
+          return freq >>> 2 > (freq & 0b11)
             ? axisU
             : axisL;
       }
     case Segment.Lower:
       switch (segment(base)) {
         case Segment.Upper:
+          hexstate = 0;
           incFreq(Segment.Lower);
           return axisL;
-        default:
+        case Segment.Lower:
+          hexstate = isHEX(decmap[code]);
+          if (hexstate >>> 4 && axis === axisH) return axisH;
+          return axisL;
+        case Segment.Number:
+          hexstate = isHEX(decmap[code]);
+          if (hexstate >>> 4) return axisH;
+          return axisL;
+        case Segment.Other:
           return axisL;
       }
     case Segment.Number:
-      return axisN;
+      switch (segment(base)) {
+        case Segment.Upper:
+          hexstate = isHEX(decmap[code]);
+          if (hexstate >>> 4) return axisH;
+          return axisN;
+        case Segment.Lower:
+          hexstate = isHEX(decmap[code]);
+          if (hexstate >>> 4) return axisH;
+          return axisN;
+        case Segment.Number:
+          hexstate = isHEX(decmap[code]);
+          if (hexstate >>> 4 && axis === axisH) return axisH;
+          return axisN;
+        case Segment.Other:
+          return axisN;
+      }
     case Segment.Other:
       switch (segment(base)) {
         // J.Doe
@@ -216,7 +250,12 @@ function direction(code: number, axis: number): number {
   return 1 | 1 << 31;
 }
 function offset(axis: number): number {
-  return axis !== axisN ? 0b1000 : 0;
+  switch (axis) {
+    case axisU:
+    case axisL:
+      return 0b1000;
+  }
+  return 0;
 }
 let freq = 0;
 function incFreq(segment: Segment.Upper | Segment.Lower): void {
@@ -224,19 +263,53 @@ function incFreq(segment: Segment.Upper | Segment.Lower): void {
   const maskL = 0b0011;
   if (segment === Segment.Upper) {
     if ((freq & maskU) === maskU) {
-      freq = freq >> 1 & 0b0101;
+      freq = freq >>> 1 & 0b0101;
     }
     freq += 0b0100;
   }
   else {
     if ((freq & maskL) === maskL) {
-      freq = freq >> 1 & 0b0101;
+      freq = freq >>> 1 & 0b0101;
     }
     freq += 0b0001;
   }
 }
+let hexstate = 0;
+function isHEX(code: number): number {
+  assert(hexstate >>> 8 === 0);
+  if (code < 0x30) return 0;
+  if (code < 0x3a) {
+    return hexstate & 0xf0 ? hexstate & hexstate << 4 | 0b111 : hexstate << 4 & 0xff | 0b111;
+  }
+  if (code < 0x41) return 0;
+  if (code < 0x47) {
+    return hexstate & 0xf0
+      ? (hexstate >>> 4 & hexstate) === 0b011 ? hexstate & hexstate << 4 | 0b011 : 0b011
+      : hexstate << 4 & 0xff | 0b011;
+  }
+  if (code < 0x61) return 0;
+  if (code < 0x67) {
+    return hexstate & 0xf0
+      ? (hexstate >>> 4 & hexstate) === 0b101 ? hexstate & hexstate << 4 | 0b101 : 0b101
+      : hexstate << 4 & 0xff | 0b101;
+  }
+  return 0;
+}
+function encHEX(code: number): number {
+  if (code < 0x3a) return code - 0x30;
+  if (code < 0x47) return code - 0x41 + 10;
+  if (code < 0x67) return code - 0x61 + 10;
+  throw 0;
+}
+function decHEX(delta: number): number {
+  if (delta < 10) return encmap[0x30 + delta];
+  return hexstate >>> 6 & hexstate >>> 2
+    ? encmap[0x61 - 10 + delta]
+    : encmap[0x41 - 10 + delta];
+}
 function clear(): void {
   freq = 0;
+  hexstate = 0;
 }
 
 export function encode(input: string): string {
@@ -247,14 +320,17 @@ export function encode(input: string): string {
   let buffer = 0;
   for (let i = 0, j = 0; i < input.length; ++i) {
     const code = encode$(input[i]);
-    assert(code >> 8 === 0);
+    assert(code >>> 8 === 0);
     if (j === 0) {
       if (i + 1 === input.length) {
         output += ASCII[code];
         break;
       }
-      const delta = code - axis + offset(axis);
-      if (delta >> 4) {
+      const comp = axis === axisH && isHEX(decmap[code]) >>> 4 !== 0;
+      const delta = comp
+        ? encHEX(decmap[code])
+        : code - axis + offset(axis);
+      if (delta >>> 4 || axis === axisH && !comp) {
         output += ASCII[code];
       }
       else {
@@ -264,11 +340,14 @@ export function encode(input: string): string {
     }
     else {
       const dir = direction(base, axis);
-      const delta = dir & 1
-        ? code - axis
-        : axis - code - 1;
-      if (delta >> 3 ||
-          dir >> 31 === 0 &&
+      const comp = axis === axisH && isHEX(decmap[code]) >>> 4 !== 0;
+      const delta = comp
+        ? encHEX(decmap[code])
+        : dir & 1
+          ? code - axis
+          : axis - code - 1;
+      if (delta >>> 3 || axis === axisH && !comp ||
+          dir >>> 31 === 0 &&
           (axis === axisU || axis === axisL) &&
           base < axis === code < axis) {
         output += ASCII[base];
@@ -284,7 +363,7 @@ export function encode(input: string): string {
       buffer = 0;
       j = 0;
     }
-    axis = align(code, base);
+    axis = align(code, base, axis);
     base = code;
   }
   assert(buffer === 0);
@@ -301,21 +380,25 @@ export function decode(input: string): string {
     let code = input[i].charCodeAt(0);
     if (code <= 0x7f) {
       output += decode$(code);
-      axis = align(code, base);
+      axis = align(code, base, axis);
       base = code;
     }
     else {
       const delta = code;
-      code = axis + (delta >> 3 & 0b1111) - offset(axis);
+      code = axis == axisH
+        ? decHEX(delta >>> 3 & 0b1111)
+        : axis + (delta >>> 3 & 0b1111) - offset(axis);
       output += decode$(code);
-      axis = align(code, base);
+      axis = align(code, base, axis);
       base = code;
       const dir = direction(base, axis);
-      code = dir & 1
-        ? axis + (delta & 0b0111)
-        : axis - (delta & 0b0111) - 1;
+      code = axis == axisH
+        ? decHEX(delta & 0b111)
+        : dir & 1
+          ? axis + (delta & 0b0111)
+          : axis - (delta & 0b0111) - 1;
       output += decode$(code);
-      axis = align(code, base);
+      axis = align(code, base, axis);
       base = code;
     }
   }
