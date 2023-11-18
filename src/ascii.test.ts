@@ -170,7 +170,7 @@ describe('Unit: lib/ascii', () => {
       console.debug('SimH3S0 comp. ratio entity', 1 - cs[j] / c, c / cs[j++]);
     });
 
-    it('word short 5', function () {
+    it('word 3-6', function () {
       this.timeout(15 * 1e4);
 
       const cs = Array(8).fill(0);
@@ -180,7 +180,7 @@ describe('Unit: lib/ascii', () => {
         let input = '';
         do {
           input = words[random()];
-        } while (input.length > 5);
+        } while (input.length < 3 || 6 < input.length);
         assert(input);
         assert(input === decodeDelta(encodeDelta(input)));
         assert(input === decodeHPACK(encodeHPACK(input)));
@@ -196,17 +196,17 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH3S0(input) / 8);
       }
       let j = 0;
-      console.debug('Delta   comp. ratio word short 5', 1 - cs[j] / c, c / cs[j++]);
-      console.debug('HPACK   comp. ratio word short 5', 1 - cs[j] / c, c / cs[j++]);
-      console.debug('SimH2E5 comp. ratio word short 5', 1 - cs[j] / c, c / cs[j++]);
-      console.debug('SimH3E5 comp. ratio word short 5', 1 - cs[j] / c, c / cs[j++]);
-      console.debug('SimH2S5 comp. ratio word short 5', 1 - cs[j] / c, c / cs[j++]);
-      console.debug('SimH3S5 comp. ratio word short 5', 1 - cs[j] / c, c / cs[j++]);
-      console.debug('SimH2S0 comp. ratio word short 5', 1 - cs[j] / c, c / cs[j++]);
-      console.debug('SimH3S0 comp. ratio word short 5', 1 - cs[j] / c, c / cs[j++]);
+      console.debug('Delta   comp. ratio word 3-6', 1 - cs[j] / c, c / cs[j++]);
+      console.debug('HPACK   comp. ratio word 3-6', 1 - cs[j] / c, c / cs[j++]);
+      console.debug('SimH2E5 comp. ratio word 3-6', 1 - cs[j] / c, c / cs[j++]);
+      console.debug('SimH3E5 comp. ratio word 3-6', 1 - cs[j] / c, c / cs[j++]);
+      console.debug('SimH2S5 comp. ratio word 3-6', 1 - cs[j] / c, c / cs[j++]);
+      console.debug('SimH3S5 comp. ratio word 3-6', 1 - cs[j] / c, c / cs[j++]);
+      console.debug('SimH2S0 comp. ratio word 3-6', 1 - cs[j] / c, c / cs[j++]);
+      console.debug('SimH3S0 comp. ratio word 3-6', 1 - cs[j] / c, c / cs[j++]);
     });
 
-    it('word short 10', function () {
+    it('word 5-10', function () {
       this.timeout(15 * 1e4);
 
       const cs = Array(8).fill(0);
@@ -216,7 +216,7 @@ describe('Unit: lib/ascii', () => {
         let input = '';
         do {
           input = words[random()];
-        } while (input.length > 10);
+        } while (input.length < 5 || 10 < input.length);
         assert(input);
         assert(input === decodeDelta(encodeDelta(input)));
         assert(input === decodeHPACK(encodeHPACK(input)));
@@ -232,14 +232,14 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH3S0(input) / 8);
       }
       let j = 0;
-      console.debug('Delta   comp. ratio word short 10', 1 - cs[j] / c, c / cs[j++]);
-      console.debug('HPACK   comp. ratio word short 10', 1 - cs[j] / c, c / cs[j++]);
-      console.debug('SimH2E5 comp. ratio word short 10', 1 - cs[j] / c, c / cs[j++]);
-      console.debug('SimH3E5 comp. ratio word short 10', 1 - cs[j] / c, c / cs[j++]);
-      console.debug('SimH2S5 comp. ratio word short 10', 1 - cs[j] / c, c / cs[j++]);
-      console.debug('SimH3S5 comp. ratio word short 10', 1 - cs[j] / c, c / cs[j++]);
-      console.debug('SimH2S0 comp. ratio word short 10', 1 - cs[j] / c, c / cs[j++]);
-      console.debug('SimH3S0 comp. ratio word short 10', 1 - cs[j] / c, c / cs[j++]);
+      console.debug('Delta   comp. ratio word 5-10', 1 - cs[j] / c, c / cs[j++]);
+      console.debug('HPACK   comp. ratio word 5-10', 1 - cs[j] / c, c / cs[j++]);
+      console.debug('SimH2E5 comp. ratio word 5-10', 1 - cs[j] / c, c / cs[j++]);
+      console.debug('SimH3E5 comp. ratio word 5-10', 1 - cs[j] / c, c / cs[j++]);
+      console.debug('SimH2S5 comp. ratio word 5-10', 1 - cs[j] / c, c / cs[j++]);
+      console.debug('SimH3S5 comp. ratio word 5-10', 1 - cs[j] / c, c / cs[j++]);
+      console.debug('SimH2S0 comp. ratio word 5-10', 1 - cs[j] / c, c / cs[j++]);
+      console.debug('SimH3S0 comp. ratio word 5-10', 1 - cs[j] / c, c / cs[j++]);
     });
 
     it('word 1', function () {

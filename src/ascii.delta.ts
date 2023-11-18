@@ -115,39 +115,53 @@ v9 区切り文字を学習
 [0|0000000]: ASCII
 [1|0000000]: 4bit + 3bit delta (num: 0.4225; hex: 0.2955; word: 0.3282; country: 0.3047; text: 0.3293)
 
+v10 頻度基準に変更
+[0|0000000]: ASCII
+[1|0000000]: 4bit + 3bit delta (num: 0.4225; hex: 0.3032; word: 0.3193; country: 0.3052; text: 0.3232)
+
 */
 
 const ASCII = [...Array(1 << 8)].reduce<string>((acc, _, i) => acc + String.fromCharCode(i), '');
-const encode$ = (char: string) => encmap[char.charCodeAt(0)];
-const decode$ = (code: number) => ASCII[decmap[code]];
-const decmap = new Uint8Array([
-  // control -> lower
-  ...[...Array(32)].map((_, i) => i),
-  // upper -> upper
-  ...'ZQJKXFYPAOEUIDHTNSLRCGBMWV'.split('').reverse().map(c => c.charCodeAt(0)),
-  // lower -> lower
-  ...'zqjkxfypaoeuidhtnslrcgbmwv'.split('').reverse().map(c => c.charCodeAt(0)),
-  // number -> number
-  ...'0123456789'.split('').map(c => c.charCodeAt(0)),
-  // symbol -> lower
-  ...` .,-/%+*!"#$&'()`.split('').map(c => c.charCodeAt(0)),
-  ...[...Array(7)].map((_, i) => 0x3a + i),
-  ...[...Array(6)].map((_, i) => 0x5b + i),
-  ...[...Array(5)].map((_, i) => 0x7b + i),
-]);
-const encmap = decmap.map((_, i) => decmap.indexOf(i));
-assert.deepStrictEqual([...encmap].sort(), ASCII.slice(0, 128).split('').map((_, i) => i).sort());
-assert.deepStrictEqual([...decmap].sort(), ASCII.slice(0, 128).split('').map((_, i) => i).sort());
-assert(ASCII.slice(0, 128).split('').every((c, i) => ASCII[decmap[encmap[i]]] === c));
-const axisU = decmap.indexOf('I'.charCodeAt(0));
-const axisL = decmap.indexOf('i'.charCodeAt(0));
-const axisN = decmap.indexOf('0'.charCodeAt(0));
+const encode$ = (char: string) => char.charCodeAt(0);
+const decode$ = (code: number) => ASCII[code];
+const decmapN = [
+  new Uint8Array('0123456789 .:-,/'.split('').map(c => c.charCodeAt(0))),
+] as const;
+const decmapH = [
+  new Uint8Array('0123456789ABCDEF'.split('').map(c => c.charCodeAt(0))),
+  new Uint8Array('0123456789abcdef'.split('').map(c => c.charCodeAt(0))),
+] as const;
+const decmapF = [
+  new Uint8Array('SCPADRMBTIEHFULG'.split('').map(c => c.charCodeAt(0))),
+  new Uint8Array('scpadrmbtiehfulg'.split('').map(c => c.charCodeAt(0))),
+] as const;
+const decmapL = [
+  new Uint8Array('DHTNSLRC YPAOEUI'.split('').map(c => c.charCodeAt(0))).reverse(),
+  new Uint8Array('dhtnslrc ypaoeui'.split('').map(c => c.charCodeAt(0))).reverse(),
+] as const;
+const decmapR = [
+  new Uint8Array('DHTNSLR CYPAOEUI'.split('').map(c => c.charCodeAt(0))),
+  new Uint8Array('dhtnslr cypaoeui'.split('').map(c => c.charCodeAt(0))),
+] as const;
+assert(decmapL[0][7] === decmapR[0][7]);
+const encmapH = Uint8Array.from(Array(128), (_, i) =>
+  i < 0x60 ? decmapH[0].indexOf(i) : decmapH[1].indexOf(i));
+const layout = 'ZQJKXFYPAOEUIDHTNSLRCGBMWV';
+const freqmap = [
+  ...[...Array(32)].map(() => decmapR),
+  ...[...Array(16)].map(() => decmapR),
+  ...'0123456789'.split('').map(() => [decmapN[0], decmapN[0]] as const),
+  ...`:;<=>?@`.split('').map(() => decmapR),
+  ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => layout.indexOf(c) < 13 ? decmapR : decmapL),
+  ...'[\\]^_`'.split('').map(() => decmapR),
+  ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => layout.indexOf(c) < 13 ? decmapR : decmapL),
+  ...'{|}~\x7f'.split('').map(() => decmapR),
+] as const;
+const axisU = 'A'.charCodeAt(0);
+const axisL = 'a'.charCodeAt(0);
+const axisN = '0'.charCodeAt(0);
 const axisH = 0;
 const axisB = axisL;
-const code0 = encmap['0'.charCodeAt(0)];
-const codeA = encmap['V'.charCodeAt(0)];
-const codea = encmap['v'.charCodeAt(0)];
-const codeS = encmap[' '.charCodeAt(0)];
 const enum Segment {
   Upper = 0,
   Lower = 1,
@@ -155,17 +169,14 @@ const enum Segment {
   Other = 3,
 }
 function segment(code: number): Segment {
-  if (code < codeA) {
-    return Segment.Other;
+  if ('0'.charCodeAt(0) <= code && code <= '9'.charCodeAt(0)) {
+    return Segment.Number;
   }
-  if (code < codea) {
+  if ('A'.charCodeAt(0) <= code && code <= 'Z'.charCodeAt(0)) {
     return Segment.Upper;
   }
-  if (code < code0) {
+  if ('a'.charCodeAt(0) <= code && code <= 'z'.charCodeAt(0)) {
     return Segment.Lower;
-  }
-  if (code < codeS) {
-    return Segment.Number;
   }
   else {
     return Segment.Other;
@@ -177,23 +188,24 @@ function align(code: number, base: number, axis: number): number {
       switch (segment(base)) {
         // ABBR
         case Segment.Upper:
-          hexstate = isHEX(decmap[code]);
+          hexstate = isHEX(code);
           if (hexstate >>> 4 && axis === axisH) return axisH;
           incFreq(Segment.Upper);
           return axisU;
         // ^Case
         // CamelCase
         case Segment.Lower:
-          hexstate = isHEX(decmap[code]);
+          hexstate = isHEX(code);
           return axisL;
         // 0HDU
         case Segment.Number:
-          hexstate = isHEX(decmap[code]);
+          hexstate = isHEX(code);
           if (hexstate >>> 4) return axisH;
           return axisU;
         // _Case
         case Segment.Other:
           hexstate = isHEX(code);
+          if (hexstate >>> 4) return axisH;
           return freq >>> 2 > (freq & 0b11)
             ? axisU
             : axisL;
@@ -201,73 +213,55 @@ function align(code: number, base: number, axis: number): number {
     case Segment.Lower:
       switch (segment(base)) {
         case Segment.Upper:
-          hexstate = isHEX(decmap[code]);
+          hexstate = isHEX(code);
           incFreq(Segment.Lower);
           return axisL;
         case Segment.Lower:
-          hexstate = isHEX(decmap[code]);
+          hexstate = isHEX(code);
           if (hexstate >>> 4 && axis === axisH) return axisH;
           return axisL;
         case Segment.Number:
-          hexstate = isHEX(decmap[code]);
+          hexstate = isHEX(code);
           if (hexstate >>> 4) return axisH;
           return axisL;
         case Segment.Other:
           hexstate = isHEX(code);
+          if (hexstate >>> 4) return axisH;
           return axisL;
       }
     case Segment.Number:
       switch (segment(base)) {
         case Segment.Upper:
-          hexstate = isHEX(decmap[code]);
+          hexstate = isHEX(code);
           if (hexstate >>> 4) return axisH;
           return axisN;
         case Segment.Lower:
-          hexstate = isHEX(decmap[code]);
+          hexstate = isHEX(code);
           if (hexstate >>> 4) return axisH;
           return axisN;
         case Segment.Number:
-          hexstate = isHEX(decmap[code]);
           if (hexstate >>> 4 && axis === axisH) return axisH;
           return axisN;
         case Segment.Other:
+          if (hexstate >>> 4) return axisH;
           return axisN;
       }
     case Segment.Other:
       switch (segment(base)) {
         // J.Doe
         case Segment.Upper:
-          return axisU;
+          return axis && axisU;
         // z and
         case Segment.Lower:
-          return axisL;
+          return axis && axisL;
         // 0.0
         case Segment.Number:
-          return axisN;
+          return axis && axisN;
         // , and
         case Segment.Other:
-          return axisL;
+          return axis;
       }
   }
-}
-function direction(code: number, axis: number): number {
-  switch (axis) {
-    case axisU:
-    case axisL:
-      if (code < codeA || code0 <= code) break;
-      return code < axis ? 1 : 0;
-    case axisN:
-      return 1;
-  }
-  return 1 | 1 << 31;
-}
-function offset(axis: number): number {
-  switch (axis) {
-    case axisU:
-    case axisL:
-      return 0b1000;
-  }
-  return 0;
 }
 let freq = 0;
 function incFreq(segment: Segment.Upper | Segment.Lower): void {
@@ -309,49 +303,49 @@ function isHEX(code: number): number {
   }
   return 0;
 }
-function encHEX(code: number): number {
-  if (code < 0x3a) return code - 0x30;
-  if (code < 0x47) return code - 0x41 + 10;
-  if (code < 0x67) return code - 0x61 + 10;
-  throw 0;
-}
-function decHEX(delta: number): number {
-  if (delta < 10) return encmap[0x30 + delta];
-  return hexstate >>> 6 & hexstate >>> 2
-    ? encmap[0x61 - 10 + delta]
-    : encmap[0x41 - 10 + delta];
-}
-const seps = new Uint8Array(' .:-,/_\t'.split('').map(c => encmap[c.charCodeAt(0)]));
+const seps = new Uint8Array(' .:-,/_\t'.split('').map(c => c.charCodeAt(0)));
 let sep = seps[0];
-function encCode(code: number, axis: number): number {
+function encCode(code: number, base: number, axis: number): number {
+  let delta = 1 << 7;
   switch (axis) {
     case axisU:
-    case axisL:
-      if (code === axis + 7) return axis + (1 << 7);
-      if (code === sep) return axis + 7;
+    case axisL: {
+      const map = freqmap[base];
+      if (map !== decmapF && code === sep) return 7;
+      if (code < axis || axis + 26 - 1 < code) break;
+      delta = map[axis === axisU ? 0 : 1].indexOf(code);
       break;
-    case axisN:
-      if (code === axis + 15) return axis + (1 << 7);
-      if (code === sep) return axis + 15;
+    }
+    case axisN: {
+      const map = freqmap[axis <= base && base < axis + 10 ? base : axis];
+      if (code < axis && axis + 10 - 1 < code) break;
+      delta = map[0].indexOf(code);
       break;
+    }
+  }
+  sep = seps.find(sep => sep === code) ?? sep;
+  return delta;
+}
+function decDelta(delta: number, base: number, axis: number): number {
+  let code: number;
+  switch (axis) {
+    case axisU:
+    case axisL: {
+      const map = freqmap[base];
+      if (map !== decmapF && delta === 7) return sep;
+      code = map[axis === axisU ? 0 : 1][delta];
+      break;
+    }
+    case axisN: {
+      const map = freqmap[axis <= base && base < axis + 10 ? base : axis];
+      code = map[0][delta];
+      break;
+    }
+    default:
+      throw 0;
   }
   sep = seps.find(sep => sep === code) ?? sep;
   return code;
-}
-function decDelta(delta: number, len: number, axis: number): number {
-  switch (axis) {
-    case axisU:
-    case axisL:
-      if (len === 3 && delta === 7) return sep - axis;
-      if (len === 4 && delta === 15) return sep - axis + offset(axis);
-      break;
-    case axisN:
-      if (delta === 15) return sep - axis;
-      break;
-  }
-  const code = axis + delta;
-  sep = seps.find(sep => sep === code) ?? sep;
-  return delta;
 }
 function clear(): void {
   freq = 0;
@@ -373,10 +367,10 @@ export function encode(input: string): string {
         output += ASCII[code];
         break;
       }
-      const comp = axis === axisH && isHEX(decmap[code]) >>> 4 !== 0;
+      const comp = axis === axisH && isHEX(code) >>> 4 !== 0;
       const delta = comp
-        ? encHEX(decmap[code])
-        : encCode(code, axis) - axis + offset(axis);
+        ? encmapH[code]
+        : encCode(code, base, axis);
       if (delta >>> 4 || axis === axisH && !comp) {
         output += ASCII[code];
       }
@@ -387,18 +381,12 @@ export function encode(input: string): string {
     }
     else {
       const sep$ = sep;
-      const dir = direction(base, axis);
-      const comp = axis === axisH && isHEX(decmap[code]) >>> 4 !== 0;
+      const comp = axis === axisH && isHEX(code) >>> 4 !== 0;
       const delta = comp
-        ? encHEX(decmap[code])
-        : dir & 1
-          ? encCode(code, axis) - axis
-          : axis - code - 1;
-      if (delta >>> 3 || axis === axisH && !comp ||
-          dir >>> 31 === 0 &&
-          (axis === axisU || axis === axisL) &&
-          base < axis === code < axis) {
-        if (!comp && dir & 1) {
+        ? encmapH[code]
+        : encCode(code, base, axis);
+      if (delta >>> 3 || axis === axisH && !comp) {
+        if (!comp) {
           sep = sep$;
         }
         output += ASCII[base];
@@ -427,6 +415,7 @@ export function decode(input: string): string {
   let output = '';
   let axis = axisB;
   let base = axis;
+  let caseH = 1;
   for (let i = 0; i < input.length; ++i) {
     let code = input[i].charCodeAt(0);
     if (code <= 0x7f) {
@@ -434,24 +423,24 @@ export function decode(input: string): string {
       sep = seps.find(sep => sep === code) ?? sep;
       axis = align(code, base, axis);
       base = code;
+      caseH = segment(base) <= Segment.Lower ? segment(base) : caseH;
     }
     else {
       const delta = code;
       code = axis == axisH
-        ? decHEX(delta >>> 3 & 0b1111)
-        : axis + decDelta(delta >>> 3 & 0b1111, 4, axis) - offset(axis);
+        ? decmapH[caseH][delta >>> 3 & 0b1111]
+        : decDelta(delta >>> 3 & 0b1111, base, axis);
       output += decode$(code);
       axis = align(code, base, axis);
       base = code;
-      const dir = direction(base, axis);
+      caseH = segment(base) <= Segment.Lower ? segment(base) : caseH;
       code = axis == axisH
-        ? decHEX(delta & 0b111)
-        : dir & 1
-          ? axis + decDelta(delta & 0b0111, 3, axis)
-          : axis - (delta & 0b0111) - 1;
+        ? decmapH[caseH][delta & 0b111]
+        : decDelta(delta & 0b0111, base, axis);
       output += decode$(code);
       axis = align(code, base, axis);
       base = code;
+      caseH = segment(base) <= Segment.Lower ? segment(base) : caseH;
     }
   }
   return output;
