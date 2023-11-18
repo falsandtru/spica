@@ -2,7 +2,7 @@ import { min } from './alias';
 
 const ASCII = [...Array(1 << 8)].reduce<string>((acc, _, i) => acc + String.fromCharCode(i), '');
 
-const HUFFMAN_CODES = [
+const HUFFMAN_CODES = new Uint32Array([
   0x1ff8,
   0x7fffd8,
   0xfffffe2,
@@ -260,9 +260,9 @@ const HUFFMAN_CODES = [
   0x7fffff0,
   0x3ffffee,
   0x3fffffff // EOS
-];
+]);
 
-const HUFFMAN_CODE_LENGTHS = [
+const HUFFMAN_CODE_LENGTHS = new Uint8Array([
   13, 23, 28, 28, 28, 28, 28, 28, 28, 24, 30, 28, 28, 30, 28, 28,
   28, 28, 28, 28, 28, 28, 30, 28, 28, 28, 28, 28, 28, 28, 28, 28,
    6, 10, 10, 12, 13,  6,  8, 11, 10, 10,  8, 11,  8,  6,  6,  6,
@@ -280,7 +280,14 @@ const HUFFMAN_CODE_LENGTHS = [
   20, 24, 20, 21, 22, 21, 21, 23, 22, 22, 25, 25, 24, 24, 26, 23,
   26, 27, 26, 26, 27, 27, 27, 27, 27, 28, 27, 27, 27, 27, 27, 26,
   30 // EOS
-];
+]);
+
+//[HUFFMAN_CODES[50], HUFFMAN_CODES[114]] = [HUFFMAN_CODES[114], HUFFMAN_CODES[50]];
+//[HUFFMAN_CODE_LENGTHS[50], HUFFMAN_CODE_LENGTHS[114]] = [HUFFMAN_CODE_LENGTHS[114], HUFFMAN_CODE_LENGTHS[50]];
+//[HUFFMAN_CODES[49], HUFFMAN_CODES[110]] = [HUFFMAN_CODES[110], HUFFMAN_CODES[49]];
+//[HUFFMAN_CODE_LENGTHS[49], HUFFMAN_CODE_LENGTHS[110]] = [HUFFMAN_CODE_LENGTHS[110], HUFFMAN_CODE_LENGTHS[49]];
+//[HUFFMAN_CODES[48], HUFFMAN_CODES[108]] = [HUFFMAN_CODES[108], HUFFMAN_CODES[48]];
+//[HUFFMAN_CODE_LENGTHS[48], HUFFMAN_CODE_LENGTHS[108]] = [HUFFMAN_CODE_LENGTHS[108], HUFFMAN_CODE_LENGTHS[48]];
 
 assert(HUFFMAN_CODES.length === HUFFMAN_CODE_LENGTHS.length);
 
@@ -313,11 +320,19 @@ HUFFMAN_CODES.forEach((_, i) => {
   }
 });
 
-export function encode(input: string): string {
+interface Options {
+  target: Uint8Array;
+  start: number;
+  next: number;
+  skip: number;
+}
+
+export function encode(input: string, opts?: Options, stats?: { length: number; }): string {
+  stats && (stats.length = 0);
   let output = '';
-  let buffer = 0;
-  let count = 0;
-  for (let i = 0; i < input.length; ++i) {
+  let buffer = opts ? 1 << 7 : 0;
+  let count = opts ? 1 : 0;
+  for (let i = opts?.start ?? 0; i < input.length; ++i) {
     const j = input.charCodeAt(i);
     const code = HUFFMAN_CODES[j];
     let len = HUFFMAN_CODE_LENGTHS[j];
@@ -331,8 +346,18 @@ export function encode(input: string): string {
       assert(count <= 8);
       len -= cnt;
       assert(len >= 0);
+      if (len === 0 && opts?.target[j] === 0) {
+        opts.next = opts.start;
+        opts.skip = i + 1;
+        if (output.length === 0) return '';
+        output += ASCII[buffer | 0xff >>> count];
+        if (output.length > i + 1 - opts.start) return '';
+        opts.next = i + 1;
+        return output;
+      }
       if (count !== 8) continue;
       output += ASCII[buffer];
+      stats && (stats.length += count);
       buffer = 0;
       count = 0;
     }
@@ -340,44 +365,65 @@ export function encode(input: string): string {
   if (count !== 0) {
     assert(count < 8);
     output += ASCII[buffer | 0xff >>> count];
+    stats && (stats.length += count);
+  }
+  if (opts) {
+    opts.next = opts.start;
+    opts.skip = input.length;
+    if (output.length > input.length - opts.start) return '';
+    opts.next = input.length;
   }
   return output;
 }
 
-export function decode(input: string): string {
+export function decode(input: string, opts?: Options): string {
   let output = '';
   let buffer = 0;
   let count = 0;
   let node: Tree[0];
-  for (let i = 0; i < input.length; ++i) {
+  for (let i = opts?.start ?? 0; i < input.length; ++i) {
     buffer <<= 8;
     buffer |= input.charCodeAt(i);
     count += 8;
     assert(count <= 32);
+    if (i === opts?.start) {
+      count -= 1;
+    }
     while (count !== 0) {
       if (node === undefined) {
         if (count < MIN) break;
         node = HUFFMAN_TABLE[buffer >> count - MIN & (1 << MIN) - 1];
         if (typeof node === 'string') {
+          if (opts?.target[node.charCodeAt(0)] === 0) {
+            output += node;
+            opts.next = i + 1;
+            return output;
+          }
           output += node;
           node = undefined;
         }
         count -= MIN;
-        continue;
       }
       else {
         assert(node = node as Tree);
         const b = buffer & 1 << count - 1 && 1;
         node = node[b];
-        assert(node !== undefined);
         if (node === EOS) return output;
         if (typeof node === 'string') {
+          if (opts?.target[node.charCodeAt(0)] === 0) {
+            output += node;
+            opts.next = i + 1;
+            return output;
+          }
           output += node;
           node = undefined;
         }
         --count;
       }
     }
+  }
+  if (opts) {
+    opts.next = input.length;
   }
   return output;
 }

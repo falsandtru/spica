@@ -1,3 +1,5 @@
+import { encode as encodeHPACK, decode as decodeHPACK } from './ascii.hpack';
+
 // Delta ASCII (Experimental)
 
 /*
@@ -15,7 +17,36 @@ ASCIIと完全に相互変換可能なため透過的に使用できる。
 5-10%以上削減できる可能性がある(個別に専用のエンコーディングを適用すべき場合も多い)。
 (NB-)IoTのパケットサイズは数十から数百バイト、最大512バイトのペイロード制限
 がある場合もあり圧縮エンコーディングはこのレンジの文字列の圧縮に適合する。
-Packed ASCIIでは8文字のタグが適用対象となっている。
+SQL ServerではSCSUが使われている。
+
+理論的観点から見ると汎用的な静的テーブルを使用するハフマン符号はランダム文字列も
+圧縮できるほど全体的かつ平均的に圧縮率を高めたことで反面最も圧縮頻度の高い単語、
+数値、識別子(HEX)などの部分的な圧縮率が低下していると考えられる(万能を追求しすぎて
+器用貧乏化した。そのうえ肥大化リスクもあるので逆に汎用エンコーディングとしては
+バランスが悪く使いにくいものとなった。ハフマン符号は個別の符号化では最適に近くとも
+個別の偏りの情報を持たない汎用的な非個別的符号化では個別の偏りに動的に適応する
+アルゴリズムより圧縮率が低くなりうることは自明である。DAは次の部分文字列と文字の
+2つの頻度情報を持つがハフマン符号は一般的かつ全体的な頻度情報しか持たないため
+基本的に部分文字列の規則性が高いほどDAに有利となる)。
+これは文字レベルの最適化と文字列レベルの最適化の違いと考えられハフマン符号は
+文字レベルの圧縮エンコーディング、DAは文字列レベルの圧縮エンコーディングと言える。
+圧縮率の比較結果は規則性の高い部分文字列の多い文字列の圧縮には文字列レベルの
+エンコーディングの方が文字レベルのエンコーディングより適していることを示している。
+DAが最終的に単語や数値等の部分文字列の多い文字列においてもハフマン符号の圧縮率を
+超えられなかったとしても部分文字列によってはランレングスや独自符号などハフマン符号より
+優れた圧縮方式が存在することから部分文字列ごとに最適な圧縮方式を適用し全体として複数の
+圧縮方式を組み合わせる複合方式の圧縮率がハフマン符号より高くなりうることは自明である。
+DAはこれを可能にする効率的な合成方法を開発したものでもある。
+複合方式は少なくとも大文字小文字の各文字列両方の圧縮において非常に短い文字列を除いて
+ハフマン符号より理論的に優れていることを容易に証明できる。すべての大文字小文字に
+5ビットの符号を割り当てることは単一の符号表しか持たないハフマン符号では不可能だが
+複数の符号表を複合できる複合方式では容易である。符号表が2つあれば符号表自体が
+1ビットの情報となるため符号のビット数を平均1ビット削減できる。この差は文字数に比例して
+拡大することはあっても縮小することはない。従ってこの場合に単一の静的テーブルを使用する
+ハフマン符号より複合方式の方が効率的で圧縮率が高いことが理論的に証明される。程度の差は
+あれど識別可能なすべての規則的文字列に同じことが当てはまり理想的なハフマン符号であっても
+この理論的非効率性を免れることはない。なお文字列内での符号表の変更はヘッダや文字数などの
+オーバーヘッドなしで可能である。
 
 */
 
@@ -44,7 +75,7 @@ ASCIIのサブセット(大文字＋数字＋記号)。
 
 SCSU:
 ASCII上位互換。
-ASCII文字は圧縮されない。
+ASCII文字はUTF-8からは圧縮されない。
 
 HPACK:
 ASCII互換。
@@ -119,43 +150,53 @@ v10 頻度基準に変更
 [0|0000000]: ASCII
 [1|0000000]: 4bit + 3bit delta (num: 0.4225; hex: 0.3032; word: 0.3193; country: 0.3052; text: 0.3232)
 
+v11 開始文字を設定
+[0|0000000]: ASCII
+[1|0000000]: 4bit + 3bit delta (num: 0.4225; hex: 0.3038; word: 0.3239; country: 0.3058; text: 0.3544)
+
 */
 
-const ASCII = [...Array(1 << 8)].reduce<string>((acc, _, i) => acc + String.fromCharCode(i), '');
-const encode$ = (char: string) => char.charCodeAt(0);
-const decode$ = (code: number) => ASCII[code];
-const decmapN = [
-  new Uint8Array('0123456789 .:-,/'.split('').map(c => c.charCodeAt(0))),
+const ASCII = [...Array(256)].reduce<string>((acc, _, i) => acc + String.fromCharCode(i), '');
+const tablesN = [
+  new Uint8Array(128).fill(~0),
+  ...Array(2).fill(new Uint8Array('0123456789 .:-,/'.split('').map(c => c.charCodeAt(0)))) as [Uint8Array, Uint8Array],
 ] as const;
-const decmapH = [
+tablesN.forEach((table, i, arr) => i && table.forEach((code, i) => arr[0][code] = i));
+const tablesH = [
+  new Uint8Array(128).fill(~0),
   new Uint8Array('0123456789ABCDEF'.split('').map(c => c.charCodeAt(0))),
   new Uint8Array('0123456789abcdef'.split('').map(c => c.charCodeAt(0))),
 ] as const;
-const decmapF = [
-  new Uint8Array('SCPADRMBTIEHFULG'.split('').map(c => c.charCodeAt(0))),
-  new Uint8Array('scpadrmbtiehfulg'.split('').map(c => c.charCodeAt(0))),
+tablesH.forEach((table, i, arr) => i && table.forEach((code, i) => arr[0][code] = i));
+const tablesF = [
+  new Uint8Array(128).fill(~0),
+  new Uint8Array('SCPADRM BTIEHFUL'.split('').map(c => c.charCodeAt(0))),
+  new Uint8Array('scpadrm btiehful'.split('').map(c => c.charCodeAt(0))),
 ] as const;
-const decmapL = [
+tablesF.forEach((table, i, arr) => i && table.forEach((code, i) => arr[0][code] = i));
+const tablesL = [
+  new Uint8Array(128).fill(~0),
   new Uint8Array('DHTNSLRC YPAOEUI'.split('').map(c => c.charCodeAt(0))).reverse(),
   new Uint8Array('dhtnslrc ypaoeui'.split('').map(c => c.charCodeAt(0))).reverse(),
 ] as const;
-const decmapR = [
+tablesL.forEach((table, i, arr) => i && table.forEach((code, i) => arr[0][code] = i));
+const tablesR = [
+  new Uint8Array(128).fill(~0),
   new Uint8Array('DHTNSLR CYPAOEUI'.split('').map(c => c.charCodeAt(0))),
   new Uint8Array('dhtnslr cypaoeui'.split('').map(c => c.charCodeAt(0))),
 ] as const;
-assert(decmapL[0][7] === decmapR[0][7]);
-const encmapH = Uint8Array.from(Array(128), (_, i) =>
-  i < 0x60 ? decmapH[0].indexOf(i) : decmapH[1].indexOf(i));
+tablesR.forEach((table, i, arr) => i && table.forEach((code, i) => arr[0][code] = i));
+assert(tablesL[0][7] === tablesR[0][7]);
 const layout = 'ZQJKXFYPAOEUIDHTNSLRCGBMWV';
-const freqmap = [
-  ...[...Array(32)].map(() => decmapR),
-  ...[...Array(16)].map(() => decmapR),
-  ...'0123456789'.split('').map(() => [decmapN[0], decmapN[0]] as const),
-  ...`:;<=>?@`.split('').map(() => decmapR),
-  ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => layout.indexOf(c) < 13 ? decmapR : decmapL),
-  ...'[\\]^_`'.split('').map(() => decmapR),
-  ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => layout.indexOf(c) < 13 ? decmapR : decmapL),
-  ...'{|}~\x7f'.split('').map(() => decmapR),
+const frequency = [
+  ...[...Array(32)].map(() => tablesF),
+  ...[...Array(16)].map(() => tablesF),
+  ...'0123456789'.split('').map(() => tablesN),
+  ...`:;<=>?@`.split('').map(() => tablesF),
+  ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => layout.indexOf(c) < 13 ? tablesR : tablesL),
+  ...'[\\]^_`'.split('').map(() => tablesF),
+  ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => layout.indexOf(c) < 13 ? tablesR : tablesL),
+  ...'{|}~\x7f'.split('').map(() => tablesF),
 ] as const;
 const axisU = 'A'.charCodeAt(0);
 const axisL = 'a'.charCodeAt(0);
@@ -169,13 +210,13 @@ const enum Segment {
   Other = 3,
 }
 function segment(code: number): Segment {
-  if ('0'.charCodeAt(0) <= code && code <= '9'.charCodeAt(0)) {
+  if (0x30 <= code && code <= 0x39) {
     return Segment.Number;
   }
-  if ('A'.charCodeAt(0) <= code && code <= 'Z'.charCodeAt(0)) {
+  if (0x41 <= code && code <= 0x5a) {
     return Segment.Upper;
   }
-  if ('a'.charCodeAt(0) <= code && code <= 'z'.charCodeAt(0)) {
+  if (0x61 <= code && code <= 0x7a) {
     return Segment.Lower;
   }
   else {
@@ -183,6 +224,7 @@ function segment(code: number): Segment {
   }
 }
 function align(code: number, base: number, axis: number): number {
+  randstate = false;
   switch (segment(code)) {
     case Segment.Upper:
       switch (segment(base)) {
@@ -192,16 +234,17 @@ function align(code: number, base: number, axis: number): number {
           if (hexstate >>> 4 && axis === axisH) return axisH;
           incFreq(Segment.Upper);
           return axisU;
-        // ^Case
         // CamelCase
         case Segment.Lower:
           hexstate = isHEX(code);
+          randstate = true;
           return axisL;
         // 0HDU
         case Segment.Number:
           hexstate = isHEX(code);
           if (hexstate >>> 4) return axisH;
           return axisU;
+        // ^Case
         // _Case
         case Segment.Other:
           hexstate = isHEX(code);
@@ -243,10 +286,12 @@ function align(code: number, base: number, axis: number): number {
           if (hexstate >>> 4 && axis === axisH) return axisH;
           return axisN;
         case Segment.Other:
+          hexstate = isHEX(code);
           if (hexstate >>> 4) return axisH;
           return axisN;
       }
     case Segment.Other:
+      hexstate = (hexstate >>> 4 & hexstate) > 1 && (code === 0x2d || code === 0x3a) ? hexstate : 0;
       switch (segment(base)) {
         // J.Doe
         case Segment.Upper:
@@ -303,27 +348,28 @@ function isHEX(code: number): number {
   }
   return 0;
 }
-const seps = new Uint8Array(' .:-,/_\t'.split('').map(c => c.charCodeAt(0)));
-let sep = seps[0];
+const seps = Uint8Array.from(Array(128), (_, i) =>
+  ' .:-,/_\t'.includes(String.fromCharCode(i)) ? i : 0);
+let sep = 0;
 function encCode(code: number, base: number, axis: number): number {
   let delta = 1 << 7;
   switch (axis) {
     case axisU:
     case axisL: {
-      const map = freqmap[base];
-      if (map !== decmapF && code === sep) return 7;
+      const tables = frequency[base];
+      if (tables !== tablesF && code === sep) return 7;
       if (code < axis || axis + 26 - 1 < code) break;
-      delta = map[axis === axisU ? 0 : 1].indexOf(code);
+      delta = tables[0][code];
       break;
     }
     case axisN: {
-      const map = freqmap[axis <= base && base < axis + 10 ? base : axis];
+      const tables = frequency[axis <= base && base < axis + 10 ? base : axis];
       if (code < axis && axis + 10 - 1 < code) break;
-      delta = map[0].indexOf(code);
+      delta = tables[0][code];
       break;
     }
   }
-  sep = seps.find(sep => sep === code) ?? sep;
+  sep = seps[code] || sep;
   return delta;
 }
 function decDelta(delta: number, base: number, axis: number): number {
@@ -331,47 +377,70 @@ function decDelta(delta: number, base: number, axis: number): number {
   switch (axis) {
     case axisU:
     case axisL: {
-      const map = freqmap[base];
-      if (map !== decmapF && delta === 7) return sep;
-      code = map[axis === axisU ? 0 : 1][delta];
+      const tables = frequency[base];
+      if (tables !== tablesF && delta === 7) return sep;
+      code = tables[axis === axisU ? 1 : 2][delta];
       break;
     }
     case axisN: {
-      const map = freqmap[axis <= base && base < axis + 10 ? base : axis];
-      code = map[0][delta];
+      const tables = frequency[axis <= base && base < axis + 10 ? base : axis];
+      code = tables[1][delta];
       break;
     }
     default:
       throw 0;
   }
-  sep = seps.find(sep => sep === code) ?? sep;
+  sep = seps[code] || sep;
   return code;
 }
+let randstate = false;
+// 乱数が改行で終端されると非常に非効率となるため=を含めず終端文字として使用することで軽減。
+// 1文字足すかクオートなどで囲んで改行回避したほうがかえって効率的。
+// 実際に改行で終端される場合は少ない。
+const random = Uint8Array.from(Array(128), (_, i) =>
+  +'1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%+-/_'
+    .includes(String.fromCharCode(i)));
 function clear(): void {
   freq = 0;
   hexstate = 0;
-  sep = seps[0];
+  randstate = false;
+  sep = 0x20;
+  opts.skip = 0;
 }
 
-export function encode(input: string): string {
+const opts = {
+  target: random,
+  start: 0,
+  next: 0,
+  skip: 0,
+};
+
+export function encode(input: string, huffman = true): string {
   clear();
   let output = '';
   let axis = axisB;
-  let base = axis;
+  let base = sep;
   let buffer = 0;
   for (let i = 0, j = 0; i < input.length; ++i) {
-    const code = encode$(input[i]);
+    const code = input.charCodeAt(i);
     assert(code >>> 8 === 0);
     if (j === 0) {
+      if (huffman && randstate && i >= opts.skip) {
+        opts.start = opts.skip = i;
+        output += encodeHPACK(input, opts);
+        i = opts.next === i ? i - 1 : opts.next - 1;
+        randstate = false;
+        continue;
+      }
       if (i + 1 === input.length) {
         output += ASCII[code];
         break;
       }
       const comp = axis === axisH && isHEX(code) >>> 4 !== 0;
       const delta = comp
-        ? encmapH[code]
+        ? tablesH[0][code]
         : encCode(code, base, axis);
-      if (delta >>> 4 || axis === axisH && !comp) {
+      if (delta >>> 4 || axis === axisH && !comp || i < opts.skip) {
         output += ASCII[code];
       }
       else {
@@ -383,7 +452,7 @@ export function encode(input: string): string {
       const sep$ = sep;
       const comp = axis === axisH && isHEX(code) >>> 4 !== 0;
       const delta = comp
-        ? encmapH[code]
+        ? tablesH[0][code]
         : encCode(code, base, axis);
       if (delta >>> 3 || axis === axisH && !comp) {
         if (!comp) {
@@ -404,44 +473,51 @@ export function encode(input: string): string {
     }
     axis = align(code, base, axis);
     base = code;
+    randstate &&= i !== 0;
   }
   assert(buffer === 0);
   assert(output.length <= input.length);
   return output;
 }
 
-export function decode(input: string): string {
+export function decode(input: string, huffman = true): string {
   clear();
   let output = '';
   let axis = axisB;
-  let base = axis;
-  let caseH = 1;
+  let base = sep;
+  let caseH = 2;
   for (let i = 0; i < input.length; ++i) {
-    let code = input[i].charCodeAt(0);
+    let code = input.charCodeAt(i);
+    assert(code >>> 8 === 0);
     if (code <= 0x7f) {
-      output += decode$(code);
-      sep = seps.find(sep => sep === code) ?? sep;
-      axis = align(code, base, axis);
-      base = code;
-      caseH = segment(base) <= Segment.Lower ? segment(base) : caseH;
+      output += ASCII[code];
+      sep = seps[code] || sep;
+    }
+    else if (huffman && randstate) {
+      opts.start = i;
+      output += decodeHPACK(input, opts);
+      i = opts.next - 1;
+      randstate = false;
+      continue;
     }
     else {
       const delta = code;
       code = axis == axisH
-        ? decmapH[caseH][delta >>> 3 & 0b1111]
+        ? tablesH[caseH][delta >>> 3 & 0b1111]
         : decDelta(delta >>> 3 & 0b1111, base, axis);
-      output += decode$(code);
+      output += ASCII[code];
       axis = align(code, base, axis);
       base = code;
-      caseH = segment(base) <= Segment.Lower ? segment(base) : caseH;
+      caseH = segment(base) <= Segment.Lower ? segment(base) + 1 : caseH;
       code = axis == axisH
-        ? decmapH[caseH][delta & 0b111]
+        ? tablesH[caseH][delta & 0b111]
         : decDelta(delta & 0b0111, base, axis);
-      output += decode$(code);
-      axis = align(code, base, axis);
-      base = code;
-      caseH = segment(base) <= Segment.Lower ? segment(base) : caseH;
+      output += ASCII[code];
     }
+    axis = align(code, base, axis);
+    base = code;
+    caseH = segment(base) <= Segment.Lower ? segment(base) + 1 : caseH;
+    randstate &&= i !== 0;
   }
   return output;
 }

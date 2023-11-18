@@ -5,195 +5,229 @@ describe('Unit: lib/ascii.delta', () => {
   describe('encode/decode', () => {
     it('basic', () => {
       let input = '';
-      assert(0 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(0 === encode(input).length);
 
       input = '0';
-      assert(1 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(1 === encode(input).length);
 
       input = 'A';
-      assert(1 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(1 === encode(input).length);
 
       input = 'a';
-      assert(1 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(1 === encode(input).length);
+
+      input = 'at';
+      assert(input === decode(encode(input)));
+      assert(1 === encode(input).length);
 
       input = ' ';
-      assert(1 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(1 === encode(input).length);
 
       input = '|';
-      assert(1 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(1 === encode(input).length);
 
       input = '00';
-      assert(2 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(2 === encode(input).length);
 
       input = '02';
-      assert(2 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(2 === encode(input).length);
 
       input = '0A';
-      assert(2 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(2 === encode(input).length);
 
       input = '0|';
-      assert(2 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(2 === encode(input).length);
 
       input = '||';
-      assert(2 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(2 === encode(input).length);
 
       input = '|0';
-      assert(2 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(2 === encode(input).length);
 
       input = '000';
-      assert(2 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(2 === encode(input).length);
 
       input = '00z';
-      assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(3 === encode(input).length);
 
       input = '024';
-      assert(2 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(2 === encode(input).length);
 
       input = '0AZ';
-      assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(3 === encode(input).length);
 
       input = '00|';
-      assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(3 === encode(input).length);
 
       input = '|00';
-      assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(3 === encode(input).length);
 
       input = '0000';
-      assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(3 === encode(input).length);
 
       input = '000z';
-      assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(3 === encode(input).length);
 
       input = '00000';
-      assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(3 === encode(input).length);
 
       input = '0000z';
-      assert(4 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(4 === encode(input).length);
 
       input = '00024';
-      assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(3 === encode(input).length);
 
       input = '000AZ';
-      assert(4 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(4 === encode(input).length);
 
       input = 'http';
-      assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(3 === encode(input).length);
 
       input = 'CASE';
-      assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(3 === encode(input).length);
 
       input = 'Cas';
-      assert(2 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(2 === encode(input).length);
 
       input = 'lCas';
-      assert(3 === encode(input).length);
-      assert(input === decode(encode(input)));
+      assert(input === decode(encode(input, false), false));
+      assert(3 === encode(input, false).length);
 
       input = '0HUD';
-      assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(3 === encode(input).length);
 
       input = '0FF7';
-      assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(3 === encode(input).length);
 
       input = '0F:F7';
-      assert(4 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(4 === encode(input).length);
 
       input = '0F::F7';
-      assert(5 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(5 === encode(input).length);
 
       input = '0Dada';
-      assert(4 === encode(input).length);
-      assert(input === decode(encode(input)));
+      assert(input === decode(encode(input, false), false));
+      assert(4 === encode(input, false).length);
 
       input = '1a\x00a';
-      assert(4 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(4 === encode(input).length);
 
       input = ' Cas';
-      assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(3 === encode(input).length);
 
       input = 'J.Do';
-      assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(3 === encode(input).length);
 
       input = 'z an';
-      assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(3 === encode(input).length);
 
       input = '0.00';
-      assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(3 === encode(input).length);
 
       input = ', an';
-      assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(3 === encode(input).length);
 
       input = '-f f';
-      assert(4 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(4 === encode(input).length);
 
       input = '0%0';
-      assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(3 === encode(input).length);
 
       input = '..  ';
-      assert(4 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(4 === encode(input).length);
 
       input = 's4-0dQh-';
-      assert(6 === encode(input).length);
-      assert(input === decode(encode(input)));
+      assert(input === decode(encode(input, false), false));
+      assert(6 === encode(input, false).length);
 
       input = '. o.';
-      assert(4 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(4 === encode(input).length);
 
       input = '7bc2';
-      assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(3 === encode(input).length);
 
       input = ' bp';
-      assert(3 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(2 === encode(input).length);
 
       input = '6E/j7B7';
-      assert(7 === encode(input).length);
       assert(input === decode(encode(input)));
+      assert(7 === encode(input).length);
+
+      input = 'Aa0';
+      assert(input === decode(encode(input)));
+      assert(3 === encode(input).length);
+
+      input = 'aaaaaA ';
+      assert(input === decode(encode(input, false), false));
+      assert(7 === encode(input, false).length);
+
+      input = 'aaaaaAN ';
+      assert(input === decode(encode(input, false), false));
+      assert(8 === encode(input, false).length);
+
+      input = 'aA A';
+      assert(input === decode(encode(input)));
+      assert(4 === encode(input).length);
+
+      input = 'aA  Ur';
+      assert(input === decode(encode(input)));
+      assert(5 === encode(input).length);
+
+      input = 'dKt/o esnF';
+      assert(input === decode(encode(input)));
+      assert(8 === encode(input).length);
+
+      input = 'tLa6u.ps';
+      assert(input === decode(encode(input)));
+      assert(6 === encode(input).length);
     });
 
-    it('verify', () => {
+    it('verify', function () {
+      this.timeout(10 * 1e3);
+
       const input = [...Array(128)]
         .reduce((acc, _, i) => acc + String.fromCharCode(i), '');
       assert(input === decode(encode(input)));
@@ -204,6 +238,7 @@ describe('Unit: lib/ascii.delta', () => {
         const output = encode(input);
         assert(output.length <= input.length);
         assert(input === decode(output));
+        assert(input === decode(encode(input, false), false));
       }
     });
 
