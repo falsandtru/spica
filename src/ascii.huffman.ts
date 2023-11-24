@@ -405,6 +405,9 @@ export function encode(input: string, stats?: { length: number; }): string {
   for (let i = 0; i < input.length; ++i) {
     const code = input.charCodeAt(i);
     const hidx = table[code];
+    const hcode = codes[hidx];
+    let hlen = lens[hidx];
+    table = alignEnc(code, base, table);
     switch (table) {
       case ENC_TABLE_NN:
         codes = HUFFMAN_NN_CODES;
@@ -431,9 +434,6 @@ export function encode(input: string, stats?: { length: number; }): string {
         codes = HUFFMAN_AU_CODES;
         lens = HUFFMAN_AU_LENS;
     }
-    const hcode = codes[hidx];
-    let hlen = lens[hidx];
-    table = alignEnc(code, base, table);
     base = code;
     while (hlen !== 0) {
       assert(count < 8);
