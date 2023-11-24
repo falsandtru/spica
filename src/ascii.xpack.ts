@@ -344,7 +344,7 @@ build(DEC_TABLE_AL, HUFFMAN_HP_CODES, HUFFMAN_HP_LENS, CHARSET_AL);
 const DEC_TABLE_64: (string | Tree)[] = [];
 build(DEC_TABLE_64, HUFFMAN_64_CODES, HUFFMAN_64_LENS, CHARSET_64);
 
-function build(table: (string | Tree)[], codes: Uint16Array | Uint32Array, lens: Uint8Array, charset: string) {
+function build(table: (string | Tree)[], codes: Uint16Array | Uint32Array, lens: Uint8Array, charset: string): void {
   assert(new Set(charset).size === 128 || charset.length === 256);
   for (let i = 0; i < codes.length; ++i) {
     const code = codes[i];
