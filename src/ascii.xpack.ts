@@ -283,37 +283,34 @@ const HUFFMAN_HP_LENS = new Uint8Array([
   30 // EOS
 ]);
 const HUFFMAN_64_CODES = new Uint16Array(128).map((_, i) => {
-  // 62|0b1111_100
-  // 63|0b1111_101
-  // 64|0b1111_1100_000
-  // 94|0b1111_1111_1100
-  // 95|0b1111_1111_1101
-  // 96|0b1111_1111_1110_0000
+  // 62|0b1111_1000
+  // 63|0b1111_1001
+  // 64|0b1111_1010
+  // 65|0b1111_1011
+  // 66|0b1111_1100_000
+  // 95|0b1111_1111_101
+  // 96|0b1111_1111_1100_000
   switch (true) {
     case i < 62:
       return i;
-    case i < 64:
-      return 0b1111_10 << 1 | i - 62;
-    case i < 94:
-      return 0b1111_11 << 5 | i - 64;
+    case i < 66:
+      return 0b1111_10 << 2 | i - 62;
     case i < 96:
-      return 0b1111_1111_11 << 2 | i - 94;
+      return 0b1111_11 << 5 | i - 66;
     default:
-      return 0b1111_1111_111 << 5 | i - 95;
+      return 0b1111_1111_11 << 5 | i - 96;
   }
 });
 const HUFFMAN_64_LENS = new Uint8Array(128).map((_, i) => {
   switch (true) {
     case i < 62:
       return 6;
-    case i < 64:
-      return 7;
-    case i < 94:
-      return 11;
+    case i < 66:
+      return 8;
     case i < 96:
-      return 12;
+      return 11;
     default:
-      return 16;
+      return 15;
   }
 });
 
@@ -321,7 +318,7 @@ const NUMBERS = '0123456789';
 const ALPHABETS_U = 'EISAROTNLCDUPMGHYBFVKWZXJQ'.split('').reduce<string>((acc, _, i) => acc + String.fromCharCode(0x41 + i), '');
 const ALPHABETS_L = 'eisarotnlcdupmghybfvkwzxjq'.split('').reduce<string>((acc, _, i) => acc + String.fromCharCode(0x61 + i), '');
 const SYMBOLS_2A = '~#!?$<>\\^`|\t';
-const SYMBOLS_1T = `/+= :%-.,;'"{}[]_&*@()\n`;
+const SYMBOLS_1T = `+/-_= :%.,;'"{}[]&*@()\n`;
 const CONTROLS = [...Array(32)].reduce<string>((acc, _, i) =>
   '\n\t'.includes(String.fromCharCode(i)) ? acc : acc + String.fromCharCode(i), '') + '\x7f';
 
@@ -432,7 +429,7 @@ function alignEnc(code: number, base: number, table: Uint8Array): Uint8Array {
           return table;
       }
     case Segment.Other:
-      if (table === ENC_TABLE_64 && (code === 0x2b || code === 0x2d || code === 0x2f || code === 0x3d || code === 0x5f)) return table;
+      if (table === ENC_TABLE_64 && (code === 0x2b || code === 0x2d || code === 0x2f || code === 0x5f)) return table;
       numstate = false;
       switch (segment(base)) {
         case Segment.Upper:
@@ -492,7 +489,7 @@ function alignDec(code: number, base: number, table: typeof DEC_TABLE_AL): typeo
           return table;
       }
     case Segment.Other:
-      if (table === DEC_TABLE_64 && (code === 0x2b || code === 0x2d || code === 0x2f || code === 0x3d || code === 0x5f)) return table;
+      if (table === DEC_TABLE_64 && (code === 0x2b || code === 0x2d || code === 0x2f || code === 0x5f)) return table;
       numstate = false;
       switch (segment(base)) {
         // J.Doe
