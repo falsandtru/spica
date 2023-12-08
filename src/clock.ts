@@ -31,10 +31,18 @@ export class Clock<K, V> implements IterableDict<K, V> {
     return this.$length;
   }
   private mark(index: number): void {
-    this.refs[index >>> DIGIT] |= 1 << (index & MASK);
+    const i = index >>> DIGIT;
+    const before = this.refs[i];
+    const after = before | 1 << (index & MASK);
+    if (after === before) return;
+    this.refs[i] = after;
   }
   private unmark(index: number): void {
-    this.refs[index >>> DIGIT] &= ~(1 << (index & MASK));
+    const i = index >>> DIGIT;
+    const before = this.refs[i];
+    const after = before & ~(1 << (index & MASK));
+    if (after === before) return;
+    this.refs[i] = after;
   }
   private initial: 1 | 0 = 1;
   private locate(hand: number, key: K, value: V): void {
