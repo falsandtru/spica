@@ -326,19 +326,19 @@ export function encode(input: string, stats?: { length: number; }): string {
   let buffer = 0;
   let count = 0;
   for (let i = 0; i < input.length; ++i) {
-    const j = input.charCodeAt(i);
-    const code = HUFFMAN_CODES[j];
-    let len = HUFFMAN_CODE_LENGTHS[j];
-    while (len !== 0) {
+    const code = input.charCodeAt(i);
+    const hcode = HUFFMAN_CODES[code];
+    let hlen = HUFFMAN_CODE_LENGTHS[code];
+    while (hlen !== 0) {
       assert(count < 8);
-      const cnt = min(len, 8 - count);
+      const cnt = min(hlen, 8 - count);
       assert(cnt > 0);
-      buffer |= (code >>> len - cnt & (1 << cnt) - 1) << 8 - count - cnt;
+      buffer |= (hcode >>> hlen - cnt & (1 << cnt) - 1) << 8 - count - cnt;
       assert(buffer >>> 8 === 0);
       count += cnt;
       assert(count <= 8);
-      len -= cnt;
-      assert(len >= 0);
+      hlen -= cnt;
+      assert(hlen >= 0);
       if (count !== 8) continue;
       output += ASCII[buffer];
       stats && (stats.length += count);
