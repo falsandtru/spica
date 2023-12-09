@@ -107,7 +107,7 @@ const SYMBOLS_1A = ` .:-'",;%/+={}[]_&*@()\n`;
 const SYMBOLS_2A = '~#!?$<>\\^`|\t';
 const SYMBOLS_1N = ` .:-%/+=,;'"{}[]_&*@()\n`;
 const SYMBOLS_1H = `:%- ./+=,;'"{}[]_&*@()\n`;
-const SYMBOLS_1T = `/+= :%-.,;'"{}[]_&*@()\n`;
+const SYMBOLS_1T = `+/-_= :%.,;'"{}[]&*@()\n`;
 const CONTROLS = [...Array(32)].reduce<string>((acc, _, i) =>
   '\n\t'.includes(String.fromCharCode(i)) ? acc : acc + String.fromCharCode(i), '') + '\x7f';
 
