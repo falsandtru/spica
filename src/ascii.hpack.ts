@@ -320,19 +320,12 @@ HUFFMAN_CODES.forEach((_, i) => {
   }
 });
 
-interface Options {
-  target: Uint8Array;
-  start: number;
-  next: number;
-  skip: number;
-}
-
-export function encode(input: string, opts?: Options, stats?: { length: number; }): string {
+export function encode(input: string, stats?: { length: number; }): string {
   stats && (stats.length = 0);
   let output = '';
-  let buffer = opts ? 1 << 7 : 0;
-  let count = opts ? 1 : 0;
-  for (let i = opts?.start ?? 0; i < input.length; ++i) {
+  let buffer = 0;
+  let count = 0;
+  for (let i = 0; i < input.length; ++i) {
     const j = input.charCodeAt(i);
     const code = HUFFMAN_CODES[j];
     let len = HUFFMAN_CODE_LENGTHS[j];
@@ -346,15 +339,6 @@ export function encode(input: string, opts?: Options, stats?: { length: number; 
       assert(count <= 8);
       len -= cnt;
       assert(len >= 0);
-      if (len === 0 && opts?.target[j] === 0) {
-        opts.next = opts.start;
-        opts.skip = i + 1;
-        if (output.length === 0) return '';
-        output += ASCII[buffer | 0xff >>> count];
-        if (output.length > i + 1 - opts.start) return '';
-        opts.next = i + 1;
-        return output;
-      }
       if (count !== 8) continue;
       output += ASCII[buffer];
       stats && (stats.length += count);
@@ -367,38 +351,24 @@ export function encode(input: string, opts?: Options, stats?: { length: number; 
     output += ASCII[buffer | 0xff >>> count];
     stats && (stats.length += count);
   }
-  if (opts) {
-    opts.next = opts.start;
-    opts.skip = input.length;
-    if (output.length > input.length - opts.start) return '';
-    opts.next = input.length;
-  }
   return output;
 }
 
-export function decode(input: string, opts?: Options): string {
+export function decode(input: string): string {
   let output = '';
   let buffer = 0;
   let count = 0;
   let node: Tree[0];
-  for (let i = opts?.start ?? 0; i < input.length; ++i) {
+  for (let i = 0; i < input.length; ++i) {
     buffer <<= 8;
     buffer |= input.charCodeAt(i);
     count += 8;
     assert(count <= 32);
-    if (i === opts?.start) {
-      count -= 1;
-    }
     while (count !== 0) {
       if (node === undefined) {
         if (count < MIN) break;
         node = HUFFMAN_TABLE[buffer >> count - MIN & (1 << MIN) - 1];
         if (typeof node === 'string') {
-          if (opts?.target[node.charCodeAt(0)] === 0) {
-            output += node;
-            opts.next = i + 1;
-            return output;
-          }
           output += node;
           node = undefined;
         }
@@ -410,20 +380,12 @@ export function decode(input: string, opts?: Options): string {
         node = node[b];
         if (node === EOS) return output;
         if (typeof node === 'string') {
-          if (opts?.target[node.charCodeAt(0)] === 0) {
-            output += node;
-            opts.next = i + 1;
-            return output;
-          }
           output += node;
           node = undefined;
         }
         --count;
       }
     }
-  }
-  if (opts) {
-    opts.next = input.length;
   }
   return output;
 }

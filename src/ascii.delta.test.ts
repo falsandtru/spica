@@ -218,11 +218,11 @@ describe('Unit: lib/ascii.delta', () => {
 
       input = 'dKt/o esnF';
       assert(input === decode(encode(input)));
-      assert(8 === encode(input).length);
+      assert(9 === encode(input).length);
 
       input = 'tLa6u.ps';
       assert(input === decode(encode(input)));
-      assert(6 === encode(input).length);
+      assert(7 === encode(input).length);
     });
 
     it('verify', function () {

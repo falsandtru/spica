@@ -1,4 +1,4 @@
-import { encode as encodeHPACK, decode as decodeHPACK } from './ascii.hpack';
+import { encode as encodeToken, decode as decodeToken } from './ascii.token';
 
 // Delta ASCII (Experimental)
 
@@ -440,7 +440,7 @@ export function encode(input: string, huffman = true): string {
     if (j === 0) {
       if (huffman && randstate && i >= opts.skip) {
         opts.start = opts.skip = i;
-        output += encodeHPACK(input, opts);
+        output += encodeToken(input, opts);
         i = opts.next === i ? i - 1 : opts.next - 1;
         randstate = false;
         continue;
@@ -509,7 +509,7 @@ export function decode(input: string, huffman = true): string {
     }
     else if (huffman && randstate) {
       opts.start = i;
-      output += decodeHPACK(input, opts);
+      output += decodeToken(input, opts);
       i = opts.next - 1;
       randstate = false;
       continue;

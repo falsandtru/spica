@@ -1,4 +1,4 @@
-import { encode as encodeDelta } from './ascii.delta';
+import { encode as encodeDelta, decode as decodeDelta } from './ascii.delta';
 import { encode as encodeHuffm } from './ascii.huffman';
 import { encode as encodeHPACK, decode as decodeHPACK } from './ascii.hpack';
 import { encode as encodeXPACK, decode as decodeXPACK } from './ascii.xpack';
@@ -678,10 +678,11 @@ CKa1yQEIj7bJAQiltskBCKmdygEI5tTKAQieicsBCJahywEIhaDNAQjwsc0BCNy9zQEI38TNAQi1xc0B
         //console.debug((encodeXPACK(input, stats), stats.length) - (encodeHPACK(input, void 0, stats), stats.length), input)
         assert(input === decodeXPACK(encodeXPACK(input)));
         assert(input === decodeHPACK(encodeHPACK(input)));
+        assert(input === decodeDelta(encodeDelta(input)));
         let j = 0;
         cs[j++] += input.length * 8;
         cs[j++] += encodeXPACK(input, stats) && stats.length;
-        cs[j++] += encodeHPACK(input, void 0, stats) && stats.length;
+        cs[j++] += encodeHPACK(input, stats) && stats.length;
         cs[j++] += encodeDelta(input).length * 8;
       }
       let j = 1;
@@ -764,10 +765,11 @@ X-Xss-Protection:
         //console.debug((encodeXPACK(input, stats), stats.length) - (encodeHPACK(input, void 0, stats), stats.length), input)
         assert(input === decodeXPACK(encodeXPACK(input)));
         assert(input === decodeHPACK(encodeHPACK(input)));
+        assert(input === decodeDelta(encodeDelta(input)));
         let j = 0;
         cs[j++] += input.length * 8;
         cs[j++] += encodeXPACK(input, stats) && stats.length;
-        cs[j++] += encodeHPACK(input, void 0, stats) && stats.length;
+        cs[j++] += encodeHPACK(input, stats) && stats.length;
         cs[j++] += encodeDelta(input).length * 8;
       }
       let j = 1;
