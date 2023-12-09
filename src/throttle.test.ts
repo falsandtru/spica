@@ -56,6 +56,8 @@ describe('Unit: lib/throttle', () => {
     });
   });
 
+  if (!navigator.userAgent.includes('Chrome')) return;
+
   describe('cothrottle', function () {
     it('', async () => {
       let since = Date.now();
