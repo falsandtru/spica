@@ -411,7 +411,7 @@ let randstate = false;
 // 1文字足すかクオートなどで囲んで改行回避したほうがかえって効率的。
 // 実際に改行で終端される場合は少ない。
 const random = Uint8Array.from(Array(128), (_, i) =>
-  +'1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%+-/_'
+  +'1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/-_%'
     .includes(String.fromCharCode(i)));
 function clear(): void {
   freq = 0;
