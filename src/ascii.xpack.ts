@@ -429,7 +429,7 @@ function alignEnc(code: number, base: number, table: Uint8Array): Uint8Array {
           return table;
       }
     case Segment.Other:
-      if (table === ENC_TABLE_64 && (code === 0x2b || code === 0x2d || code === 0x2f || code === 0x5f)) return table;
+      if (table === ENC_TABLE_64 && isContinuous(code)) return table;
       numstate = false;
       switch (segment(base)) {
         case Segment.Upper:
@@ -489,7 +489,7 @@ function alignDec(code: number, base: number, table: typeof DEC_TABLE_AL): typeo
           return table;
       }
     case Segment.Other:
-      if (table === DEC_TABLE_64 && (code === 0x2b || code === 0x2d || code === 0x2f || code === 0x5f)) return table;
+      if (table === DEC_TABLE_64 && isContinuous(code)) return table;
       numstate = false;
       switch (segment(base)) {
         // J.Doe
@@ -505,6 +505,17 @@ function alignDec(code: number, base: number, table: typeof DEC_TABLE_AL): typeo
         case Segment.Other:
           return table;
       }
+  }
+}
+function isContinuous(code: number): boolean {
+  switch (code) {
+    case 0x2b:
+    case 0x2d:
+    case 0x2f:
+    case 0x5f:
+      return true;
+    default:
+      return false;
   }
 }
 function clear(): void {

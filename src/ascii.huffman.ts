@@ -71,32 +71,34 @@ const HUFFMAN_HX_LENS = new Uint8Array(128).map((_, i) => {
   }
 });
 const HUFFMAN_64_CODES = new Uint16Array(128).map((_, i) => {
-  // 62|0b1111_100
-  // 63|0b1111_101
-  // 64|0b1111_1100
-  // 65|0b1111_1101
-  // 66|0b1111_1110_0000_0
+  // 62|0b1111_1000
+  // 63|0b1111_1001
+  // 64|0b1111_1010
+  // 65|0b1111_1011
+  // 66|0b1111_1100_000
+  // 95|0b1111_1111_101
+  // 96|0b1111_1111_1100_000
   switch (true) {
     case i < 62:
       return i;
-    case i < 64:
-      return 0b1111_10 << 1 | i - 62;
     case i < 66:
-      return 0b1111_11 << 2 | i - 64;
+      return 0b1111_10 << 2 | i - 62;
+    case i < 96:
+      return 0b1111_11 << 5 | i - 66;
     default:
-      return 0b1111_111 << 6 | i - 66;
+      return 0b1111_1111_11 << 5 | i - 96;
   }
 });
 const HUFFMAN_64_LENS = new Uint8Array(128).map((_, i) => {
   switch (true) {
     case i < 62:
       return 6;
-    case i < 64:
-      return 7;
     case i < 66:
       return 8;
+    case i < 96:
+      return 11;
     default:
-      return 13;
+      return 15;
   }
 });
 
@@ -259,7 +261,7 @@ function alignEnc(code: number, base: number, table: Uint8Array): Uint8Array {
       }
     case Segment.Other:
       hexstate = (hexstate >>> 4 & hexstate) > 1 && (code === 0x2d || code === 0x3a) ? hexstate : 0;
-      if (table === ENC_TABLE_64 && (code === 0x2b || code === 0x2f)) return table;
+      if (table === ENC_TABLE_64 && isContinuous(code)) return table;
       switch (segment(base)) {
         case Segment.Upper:
           if (hexstate >>> 4) return table;
@@ -344,7 +346,7 @@ function alignDec(code: number, base: number, table: typeof DEC_TABLE_NN): typeo
       }
     case Segment.Other:
       hexstate = (hexstate >>> 4 & hexstate) > 1 && (code === 0x2d || code === 0x3a) ? hexstate : 0;
-      if (table === DEC_TABLE_64 && (code === 0x2b || code === 0x2f)) return table;
+      if (table === DEC_TABLE_64 && isContinuous(code)) return table;
       switch (segment(base)) {
         // J.Doe
         case Segment.Upper:
@@ -387,6 +389,17 @@ function isHEX(code: number): number {
       : hexstate << 4 & 0xff | 0b101;
   }
   return 0;
+}
+function isContinuous(code: number): boolean {
+  switch (code) {
+    case 0x2b:
+    case 0x2d:
+    case 0x2f:
+    case 0x5f:
+      return true;
+    default:
+      return false;
+  }
 }
 function clear(): void {
   hexstate = 0;
