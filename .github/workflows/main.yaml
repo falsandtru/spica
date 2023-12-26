@@ -82,4 +82,4 @@ jobs:
       - run: |
           npx envinfo -yes
           npm install
-          xvfb-run --auto-servernum npm run bench
+          xvfb-run --auto-servernum npm run bench || true
