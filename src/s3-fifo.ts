@@ -34,8 +34,9 @@ export class S3FIFO<K, V> {
   public get size(): number {
     return this.fifoS.length + this.fifoM.length;
   }
-  private read(x: Node<K, V>) {
+  private read(x: Node<K, V>, counting = true): void {
     if (x.part !== 'G') {
+      if (!counting) return;
       x.freq = min(x.freq + 1, 3);
     }
     else {
@@ -122,7 +123,7 @@ export class S3FIFO<K, V> {
     }
     else {
       node.value = value;
-      this.read(node);
+      this.read(node, false);
     }
     assert(this.dict.size <= this.capacity + this.capM);
     assert(this.length <= this.capacity);
