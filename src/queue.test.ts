@@ -54,6 +54,28 @@ describe('Unit: lib/queue', () => {
       assert(queue.peek(-1) === 3);
     });
 
+    it('verify', () => {
+      for (const size of [
+        16 + 2048 * 0,
+        16 + 2048 * 1,
+        16 + 2048 * 2,
+        16 + 2048 * 3,
+      ]) {
+        const queue = new Queue();
+        for (let i = -2; i < 4; ++i) {
+          const len = size + i;
+          for (let i = 0; i < len; ++i) {
+            queue.push(queue.length);
+          }
+          assert(queue.length === len);
+          for (let i = 0; i < len; ++i) {
+            assert(queue.pop() === len - queue.length - 1);
+          }
+          assert(queue.length === 0);
+        }
+      }
+    });
+
   });
 
 });
