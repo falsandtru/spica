@@ -155,65 +155,63 @@ describe('Benchmark:', function () {
     //   Memory: 5.88 GB / 6.78 GB
     //
     for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
+      const bias = (rng: () => number) => () =>
+        rng() < 0.9
+          ? rng() * size * 1 | 0
+          : rng() * size * 9 + size | 0;
       it(`Clock simulation ${size.toLocaleString('en')}`, function (done) {
         const cache = new Clock<number, object>(size);
-        for (let i = 0; i < size; ++i) cache.set(i, {});
-        const random = xorshift.random(1);
+        const random = bias(xorshift.random(1));
+        for (let i = 0; i < size; ++i) cache.set(random(), {});
         benchmark(`Clock    simulation ${size.toLocaleString('en')}`, () => {
-          const key = random() < 0.9
-            ? random() * size * 1 | 0
-            : random() * size * 9 + size | 0;
+          const key = random();
           cache.get(key) ?? cache.add(key, {});
         }, done);
       });
 
       it(`ISC simulation ${size.toLocaleString('en')}`, function (done) {
         const cache = new LRUCache<number, object>({ max: size });
-        for (let i = 0; i < size; ++i) cache.set(i, {});
-        const random = xorshift.random(1);
+        const random = bias(xorshift.random(1));
+        for (let i = 0; i < size; ++i) cache.set(random(), {});
         benchmark(`ISCCache simulation ${size.toLocaleString('en')}`, () => {
-          const key = random() < 0.9
-            ? random() * size * 1 | 0
-            : random() * size * 9 + size | 0;
+          const key = random();
           cache.get(key) ?? cache.set(key, {});
         }, done);
       });
 
       it(`LRU simulation ${size.toLocaleString('en')}`, function (done) {
         const cache = new LRU<number, object>(size);
-        for (let i = 0; i < size; ++i) cache.set(i, {});
-        const random = xorshift.random(1);
+        const random = bias(xorshift.random(1));
+        for (let i = 0; i < size; ++i) cache.set(random(), {});
         benchmark(`LRUCache simulation ${size.toLocaleString('en')}`, () => {
-          const key = random() < 0.9
-            ? random() * size * 1 | 0
-            : random() * size * 9 + size | 0;
+          const key = random();
           cache.get(key) ?? cache.add(key, {});
         }, done);
       });
 
       it(`DWC simulation ${size.toLocaleString('en')}`, function (done) {
         const cache = new Cache<number, object>(size);
-        for (let i = 0; i < size; ++i) cache.set(i, {});
-        const random = xorshift.random(1);
+        const random = bias(xorshift.random(1));
+        for (let i = 0; i < size; ++i) cache.set(random(), {});
         benchmark(`DW-Cache simulation ${size.toLocaleString('en')}`, () => {
-          const key = random() < 0.9
-            ? random() * size * 1 | 0
-            : random() * size * 9 + size | 0;
+          const key = random();
           cache.get(key) ?? cache.add(key, {});
         }, done);
       });
     }
 
     for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
+      const bias = (rng: () => number) => () =>
+        rng() < 0.9
+          ? rng() * size * 1 | 0
+          : rng() * size * 9 + size | 0;
       it(`ISC simulation ${size.toLocaleString('en')} expire`, captureTimers(function (done) {
         const cache = new LRUCache<number, object>({ max: size, ttl: 1, ttlAutopurge: true });
         const age = (r => () => r() * 1e3 | 0)(xorshift.random(1));
-        for (let i = 0; i < size; ++i) cache.set(i, {}, { ttl: age() });
-        const random = xorshift.random(1);
+        const random = bias(xorshift.random(1));
+        for (let i = 0; i < size; ++i) cache.set(random(), {});
         benchmark(`ISCCache simulation ${size.toLocaleString('en')} expire`, () => {
-          const key = random() < 0.9
-            ? random() * size * 1 | 0
-            : random() * size * 9 + size | 0;
+          const key = random();
           cache.get(key) ?? cache.set(key, {}, { ttl: age() });
         }, done);
       }));
@@ -221,12 +219,10 @@ describe('Benchmark:', function () {
       it(`DWC simulation ${size.toLocaleString('en')} expire`, function (done) {
         const cache = new Cache<number, object>(size, { age: 1, eagerExpiration: true });
         const age = (r => () => r() * 1e3 | 0)(xorshift.random(1));
-        for (let i = 0; i < size; ++i) cache.set(i, {}, { age: age() });
-        const random = xorshift.random(1);
+        const random = bias(xorshift.random(1));
+        for (let i = 0; i < size; ++i) cache.set(random(), {});
         benchmark(`DW-Cache simulation ${size.toLocaleString('en')} expire`, () => {
-          const key = random() < 0.9
-            ? random() * size * 1 | 0
-            : random() * size * 9 + size | 0;
+          const key = random();
           cache.get(key) ?? cache.add(key, {}, { age: age() });
         }, done);
       });
