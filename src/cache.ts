@@ -625,10 +625,10 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
     this.range = capacity * range / 100;
     this.currWindowHits + this.currWindowMisses >= this.window && this.slideWindow();
     this.currRoomHits + this.currRoomMisses >= this.room && this.slideRoom();
-    this.active = undefined;
+    this.update();
   }
   public clear(): void {
-    this.active = undefined;
+    this.active = false;
     this.processing = true;
     this.reset();
     assert(!this.processing);
@@ -659,20 +659,26 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
     this.currRoomMisses = 0;
   }
   public hit(): void {
-    this.active = undefined;
     ++this.currWindowHits + this.currWindowMisses === this.window && this.slideWindow();
     ++this.currRoomHits + this.currRoomMisses === this.room && this.slideRoom();
+    this.update();
     this.processing && !this.isActive() && this.reset();
   }
   public miss(): void {
-    this.active = undefined;
     this.currWindowHits + ++this.currWindowMisses === this.window && this.slideWindow();
     this.currRoomHits + ++this.currRoomMisses === this.room && this.slideRoom();
+    this.update();
   }
-  private active?: boolean;
+  private active = false;
+  private update(): void {
+    if (this.threshold === 0) return;
+    const ratio = this.ratioWindow();
+    this.active =
+      ratio < this.threshold ||
+      ratio < this.ratioRoom() * this.ratio / 100;
+  }
   public isActive(): boolean {
-    if (this.threshold === 0) return false;
-    return this.active ??= this.ratioWindow() < max(this.ratioRoom() * this.ratio / 100, this.threshold);
+    return this.active;
   }
   private ratioWindow(): number {
     return ratio(
@@ -737,13 +743,13 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
     return lap;
   }
   private reset(): void {
-    if (!this.processing) return;
+    assert(this.processing);
+    assert(!this.active);
     this.processing = false;
     this.direction = true;
     this.initial = true;
     this.back = 0;
     this.advance = 0;
-    assert(!this.active);
   }
 }
 
