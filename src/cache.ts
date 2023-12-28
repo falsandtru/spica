@@ -195,7 +195,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
   }
   private readonly settings: Cache.Options<K, V> = {
     capacity: 0,
-    window: 2,
+    window: 1,
     sample: 1,
     age: Infinity,
     eagerExpiration: false,
@@ -204,9 +204,9 @@ export class Cache<K, V> implements IterableDict<K, V> {
       clear: true,
     },
     sweep: {
-      threshold: 10,
+      threshold: 20,
       ratio: 50,
-      window: 2,
+      window: 1,
       room: 50,
       range: 1,
       shift: 2,
@@ -610,23 +610,30 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
   constructor(
     private target: T,
     capacity: number,
-    private window: number,
+    private window$: number,
     private room: number,
     private readonly threshold: number,
     private readonly ratio: number,
-    private range: number,
+    private range$: number,
     private readonly shift: number,
   ) {
     this.threshold *= 100;
-    this.resize(capacity, window, room, range);
+    this.resize(capacity, window$, room, range$);
   }
   public replace(target: T): void {
     this.target = target;
   }
+  private get window(): number {
+    const n = this.target.length > this.window$ << 1 ? 2 : 1;
+    return max(this.window$, min(this.target.length >>> n, this.window$ << n + 1));
+  }
+  private get range(): number {
+    return max(this.range$, min(this.window >>> 1, this.target.length >>> 2));
+  }
   public resize(capacity: number, window: number, room: number, range: number): void {
-    this.window = round(capacity * window / 100) || 1;
+    this.window$ = round(capacity * window / 100) || 1;
     this.room = round(capacity * room / 100) || 1;
-    this.range = capacity * range / 100;
+    this.range$ = capacity * range / 100;
     this.currWindowHits + this.currWindowMisses >= this.window && this.slideWindow();
     this.currRoomHits + this.currRoomMisses >= this.room && this.slideRoom();
     this.update();
@@ -663,14 +670,14 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
     this.currRoomMisses = 0;
   }
   public hit(): void {
-    ++this.currWindowHits + this.currWindowMisses === this.window && this.slideWindow();
-    ++this.currRoomHits + this.currRoomMisses === this.room && this.slideRoom();
+    ++this.currWindowHits + this.currWindowMisses >= this.window && this.slideWindow();
+    ++this.currRoomHits + this.currRoomMisses >= this.room && this.slideRoom();
     this.update();
     this.processing && !this.isActive() && this.reset();
   }
   public miss(): void {
-    this.currWindowHits + ++this.currWindowMisses === this.window && this.slideWindow();
-    this.currRoomHits + ++this.currRoomMisses === this.room && this.slideRoom();
+    this.currWindowHits + ++this.currWindowMisses >= this.window && this.slideWindow();
+    this.currRoomHits + ++this.currRoomMisses >= this.room && this.slideRoom();
     this.update();
   }
   private active = false;
