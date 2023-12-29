@@ -173,7 +173,6 @@ export class Cache<K, V> implements IterableDict<K, V> {
     if (capacity >= 1 === false) throw new Error(`Spica: Cache: Capacity must be 1 or more.`);
     this.window = capacity * settings.window! / 100 >>> 0 || 1;
     this.partition = capacity - this.window;
-    this.injection = 100 * this.declination;
     this.sample = settings.sample!;
     this.resource = settings.resource! ?? capacity;
     this.expiration = opts.age !== undefined;
@@ -252,7 +251,8 @@ export class Cache<K, V> implements IterableDict<K, V> {
     const { LRU, LFU } = this;
     this.$size = 0;
     this.partition = this.capacity - this.window;
-    this.injection = 100 * this.declination;
+    this.injection = 100;
+    this.declination = 1;
     this.dict = new Map();
     this.LRU = new List();
     this.LFU = new List();
@@ -320,7 +320,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
     return entry;
   }
   private readonly sweeper: Sweeper<List<Entry<K, V>>>;
-  private injection: number;
+  private injection = 100;
   private declination = 1;
   // Update and deletion are reentrant but addition is not.
   private ensure(margin: number, target?: Entry<K, V>, capture = false): Entry<K, V> | undefined {
