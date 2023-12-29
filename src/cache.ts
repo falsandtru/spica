@@ -291,6 +291,9 @@ export class Cache<K, V> implements IterableDict<K, V> {
     callback && this.disposer?.(entry.value, entry.key);
   }
   private readonly sample: number;
+  private get overflow(): boolean {
+    return this.overlapLRU * 100 > this.LFU.length * this.sample;
+  }
   private overlap(entry: Entry<K, V>, eviction = false): Entry<K, V> {
     if (entry.partition === 'LRU') {
       if (entry.affiliation === 'LRU') {
@@ -312,7 +315,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
       else {
         --this.overlapLRU;
         assert(this.overlapLRU >= 0);
-        if (this.declination !== 1 && this.overlapLRU * 100 < this.LFU.length * this.sample) {
+        if (this.declination !== 1 && !this.overflow) {
           this.declination = 1;
         }
       }
@@ -365,9 +368,9 @@ export class Cache<K, V> implements IterableDict<K, V> {
             LFU.unshift(this.overlap(entry));
             entry.partition = 'LFU';
             this.injection = 0;
-            this.declination = this.overlapLRU * 100 < LFU.length * this.sample
+            this.declination = !this.overflow
               ? 1
-              : min(this.declination * 1.5, 5);
+              : min(this.declination << 1, this.capacity / LFU.length << 3, 10);
           }
         }
         if (this.sweeper.isActive()) {
@@ -466,7 +469,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
         entry.affiliation = 'LFU';
         --this.overlapLRU;
         assert(this.overlapLRU >= 0);
-        if (this.declination !== 1 && this.overlapLRU * 100 < this.LFU.length * this.sample) {
+        if (this.declination !== 1 && !this.overflow) {
           this.declination = 1;
         }
       }

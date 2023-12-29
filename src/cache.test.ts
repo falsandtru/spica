@@ -303,9 +303,9 @@ describe('Unit: lib/cache', () => {
       assert(!cache.has(194 - 1));
       assert(cache.has(194));
       assert(!cache.has(194 + 1));
-      assert(!cache.has(289 - 1));
-      assert(cache.has(289));
-      assert(!cache.has(289 + 1));
+      assert(!cache.has(298 - 1));
+      assert(cache.has(298));
+      assert(!cache.has(298 + 1));
     });
 
     it('verify', function () {
@@ -365,7 +365,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 97);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 99);
     });
 
     it('ratio uneven 100', function () {
@@ -421,7 +421,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 187);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 190);
     });
 
     it('ratio transitive distribution 100', function () {
@@ -451,7 +451,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 93);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 98);
     });
 
     it('ratio transitive bias 100', function () {
@@ -482,7 +482,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 160);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 169);
     });
 
     it('ratio adversarial 100', function () {
@@ -513,7 +513,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 25);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 27);
     });
 
     it('ratio jump 100', function () {
@@ -541,7 +541,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 18);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 19);
     });
 
     it('ratio loop 100', function () {
@@ -592,7 +592,7 @@ describe('Unit: lib/cache', () => {
       }
       assert(dwc['LFU'].length === capacity - dwc['window']);
       assert(dwc['partition'] === capacity - dwc['window']);
-      assert(dwc['declination'] === 5);
+      assert(dwc['declination'] === 8);
       dwc['injection'] = 0;
     }
 
@@ -623,7 +623,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 22);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 21);
     });
 
     it('ratio lock loop 100', function () {
@@ -666,7 +666,7 @@ describe('Unit: lib/cache', () => {
 
       // サンプルにヒットする確率の安定性に依存するため容量または試行回数の増加により改善される
       // 逆にサンプリングのジャミングが最も効果的に復元を阻害する
-      const trials = capacity * 20;
+      const trials = capacity * 40;
       const zipf = zipfian(1, capacity * 1e2, 0.8, xorshift.random(1));
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
@@ -684,7 +684,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 15);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 63);
       assert(dwc['partition']! * 100 / capacity >>> 0 === 99);
     });
 
@@ -719,8 +719,8 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 100);
-      assert(dwc['partition']! * 100 / capacity >>> 0 === 0);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 98);
+      assert(dwc['partition']! * 100 / capacity >>> 0 === 99);
     });
 
     it('ratio uneven 1,000', function () {
@@ -749,7 +749,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 161);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 160);
     });
 
   });
