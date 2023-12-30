@@ -345,6 +345,21 @@ export class Cache<K, V> implements IterableDict<K, V> {
       }
       else {
         assert(LRU.head!.prev);
+        if (LRU.length >= this.window && this.injection === 100 * this.declination) {
+          const entry = LRU.head!.prev!;
+          if (entry.affiliation === 'LRU') {
+            LRU.delete(entry);
+            LFU.unshift(this.overlap(entry));
+            entry.partition = 'LFU';
+            this.injection = 0;
+            this.declination = !this.overflow
+              ? 1
+              : min(this.declination << 1, this.capacity / LFU.length << 3, 10);
+          }
+        }
+        if (this.sweeper.isActive()) {
+          this.sweeper.sweep();
+        }
         if (LFU.length > this.partition) {
           assert(LFU.head!.prev);
           let entry = LFU.head!.prev;
@@ -360,21 +375,6 @@ export class Cache<K, V> implements IterableDict<K, V> {
             LRU.unshift(this.overlap(entry));
             entry.partition = 'LRU';
           }
-        }
-        if (LRU.length >= this.window && this.injection === 100 * this.declination) {
-          const entry = LRU.head!.prev!;
-          if (entry.affiliation === 'LRU') {
-            LRU.delete(entry);
-            LFU.unshift(this.overlap(entry));
-            entry.partition = 'LFU';
-            this.injection = 0;
-            this.declination = !this.overflow
-              ? 1
-              : min(this.declination << 1, this.capacity / LFU.length << 3, 10);
-          }
-        }
-        if (this.sweeper.isActive()) {
-          this.sweeper.sweep();
         }
         if (LRU.length !== 0) {
           victim = LRU.head!.prev!;
