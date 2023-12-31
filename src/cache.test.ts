@@ -688,7 +688,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['partition']! * 100 / capacity >>> 0 === 99);
     });
 
-    it('ratio lock HIR', function () {
+    it('ratio lock HIR 100', function () {
       this.timeout(10 * 1e3);
 
       const capacity = 100;
