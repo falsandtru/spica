@@ -1,4 +1,4 @@
-import { max, min, floor, round } from './alias';
+import { max, min, round } from './alias';
 import { now } from './chrono';
 import { IterableDict } from './dict';
 import { List } from './list';
@@ -118,7 +118,7 @@ class Entry<K, V> implements List.Node {
 }
 
 function segment(expiration: number): number {
-  return floor(expiration / 16);
+  return expiration >>> 4;
 }
 
 export namespace Cache {
