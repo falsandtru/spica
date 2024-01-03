@@ -27,7 +27,7 @@ describe('Benchmark:', function () {
     for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`Clock set ${size.toLocaleString('en')} 0%`, function (done) {
         const cache = new Clock<number, object>(size);
-        for (let i = 0; i < size; ++i) cache.set(~i, {});
+        for (let i = 0; i < Math.ceil(size / 32) * 32; ++i) cache.set(~i, {});
         const random = xorshift.random(1);
         let i = 0;
         benchmark(`Clock    set ${size.toLocaleString('en')} 0%`, () => cache.set(random() + ++i | 0, {}), done);
@@ -61,7 +61,7 @@ describe('Benchmark:', function () {
     for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`Clock set ${size.toLocaleString('en')} 100%`, function (done) {
         const cache = new Clock<number, object>(size);
-        for (let i = 0; i < size; ++i) cache.set(i, {});
+        for (let i = 0; i < Math.ceil(size / 32) * 32; ++i) cache.set(i, {});
         const random = xorshift.random(1);
         benchmark(`Clock    set ${size.toLocaleString('en')} 100%`, () => cache.set(random() * size | 0, {}), done);
       });
@@ -91,7 +91,7 @@ describe('Benchmark:', function () {
     for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`Clock get ${size.toLocaleString('en')} 0%`, function (done) {
         const cache = new Clock<number, object>(size);
-        for (let i = 0; i < size; ++i) cache.set(~i, {});
+        for (let i = 0; i < Math.ceil(size / 32) * 32; ++i) cache.set(~i, {});
         const random = xorshift.random(1);
         benchmark(`Clock    get ${size.toLocaleString('en')} 0%`, () => cache.get(random() * size | 0), done);
       });
@@ -121,7 +121,7 @@ describe('Benchmark:', function () {
     for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`Clock get ${size.toLocaleString('en')} 100%`, function (done) {
         const cache = new Clock<number, object>(size);
-        for (let i = 0; i < size; ++i) cache.set(i, {});
+        for (let i = 0; i < Math.ceil(size / 32) * 32; ++i) cache.set(i, {});
         const random = xorshift.random(1);
         benchmark(`Clock    get ${size.toLocaleString('en')} 100%`, () => cache.get(random() * size | 0), done);
       });
@@ -159,10 +159,10 @@ describe('Benchmark:', function () {
     //   Memory: 5.88 GB / 6.78 GB
     //
     for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
-      const bias = (rng: () => number) => () => rng() * size * 10 | 0;
+      const bias = (capacity: number, rng: () => number) => () => rng() * capacity * 10 | 0;
       it(`Clock simulation ${size.toLocaleString('en')} 10%`, function (done) {
         const cache = new Clock<number, object>(size);
-        const random = bias(xorshift.random(1));
+        const random = bias(Math.ceil(size / 32) * 32, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`Clock    simulation ${size.toLocaleString('en')} 10%`, () => {
           const key = random();
@@ -172,7 +172,7 @@ describe('Benchmark:', function () {
 
       it(`ISC simulation ${size.toLocaleString('en')} 10%`, function (done) {
         const cache = new LRUCache<number, object>({ max: size });
-        const random = bias(xorshift.random(1));
+        const random = bias(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`ISCCache simulation ${size.toLocaleString('en')} 10%`, () => {
           const key = random();
@@ -182,7 +182,7 @@ describe('Benchmark:', function () {
 
       it(`LRU simulation ${size.toLocaleString('en')} 10%`, function (done) {
         const cache = new LRU<number, object>(size);
-        const random = bias(xorshift.random(1));
+        const random = bias(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`LRUCache simulation ${size.toLocaleString('en')} 10%`, () => {
           const key = random();
@@ -192,7 +192,7 @@ describe('Benchmark:', function () {
 
       it(`DWC simulation ${size.toLocaleString('en')} 10%`, function (done) {
         const cache = new Cache<number, object>(size);
-        const random = bias(xorshift.random(1));
+        const random = bias(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`DW-Cache simulation ${size.toLocaleString('en')} 10%`, () => {
           const key = random();
@@ -202,10 +202,10 @@ describe('Benchmark:', function () {
     }
 
     for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
-      const bias = (rng: () => number) => () => rng() * size * 1.1 | 0;
+      const bias = (capacity: number, rng: () => number) => () => rng() * capacity * 1.1 | 0;
       it(`Clock simulation ${size.toLocaleString('en')} 90%`, function (done) {
         const cache = new Clock<number, object>(size);
-        const random = bias(xorshift.random(1));
+        const random = bias(Math.ceil(size / 32) * 32, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`Clock    simulation ${size.toLocaleString('en')} 90%`, () => {
           const key = random();
@@ -215,7 +215,7 @@ describe('Benchmark:', function () {
 
       it(`ISC simulation ${size.toLocaleString('en')} 90%`, function (done) {
         const cache = new LRUCache<number, object>({ max: size });
-        const random = bias(xorshift.random(1));
+        const random = bias(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`ISCCache simulation ${size.toLocaleString('en')} 90%`, () => {
           const key = random();
@@ -225,7 +225,7 @@ describe('Benchmark:', function () {
 
       it(`LRU simulation ${size.toLocaleString('en')} 90%`, function (done) {
         const cache = new LRU<number, object>(size);
-        const random = bias(xorshift.random(1));
+        const random = bias(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`LRUCache simulation ${size.toLocaleString('en')} 90%`, () => {
           const key = random();
@@ -235,7 +235,7 @@ describe('Benchmark:', function () {
 
       it(`DWC simulation ${size.toLocaleString('en')} 90%`, function (done) {
         const cache = new Cache<number, object>(size);
-        const random = bias(xorshift.random(1));
+        const random = bias(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`DW-Cache simulation ${size.toLocaleString('en')} 90%`, () => {
           const key = random();
@@ -245,26 +245,27 @@ describe('Benchmark:', function () {
     }
 
     for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
-      const bias = (rng: () => number) => () => rng() * size * 1.1 | 0;
+      const bias = (capacity: number, rng: () => number) => () => rng() * capacity * 1.1 | 0;
+      const age = 1000;
       it(`ISC simulation ${size.toLocaleString('en')} 90% expire`, captureTimers(function (done) {
-        const cache = new LRUCache<number, object>({ max: size, ttl: 1, ttlAutopurge: true });
-        const age = (r => () => r() * 1e3 | 0)(xorshift.random(1));
-        const random = bias(xorshift.random(1));
-        for (let i = 0; i < size * 10; ++i) cache.set(random(), {}, { ttl: age() });
+        const cache = new LRUCache<number, object>({ max: size, ttlAutopurge: true });
+        const random = bias(size, xorshift.random(1));
+        for (let i = 0; i < size * 9; ++i) cache.set(random(), {});
+        for (let i = 0; i < size * 1; ++i) cache.set(i, {}, { ttl: age });
         benchmark(`ISCCache simulation ${size.toLocaleString('en')} 90% expire`, () => {
           const key = random();
-          cache.get(key) ?? cache.set(key, {}, { ttl: age() });
+          cache.get(key) ?? cache.set(key, {}, { ttl: age });
         }, done);
       }));
 
       it(`DWC simulation ${size.toLocaleString('en')} 90% expire`, function (done) {
-        const cache = new Cache<number, object>(size, { age: 1, eagerExpiration: true });
-        const age = (r => () => r() * 1e3 | 0)(xorshift.random(1));
-        const random = bias(xorshift.random(1));
-        for (let i = 0; i < size * 10; ++i) cache.set(random(), {}, { age: age() });
+        const cache = new Cache<number, object>(size, { eagerExpiration: true });
+        const random = bias(size, xorshift.random(1));
+        for (let i = 0; i < size * 9; ++i) cache.set(random(), {});
+        for (let i = 0; i < size * 1; ++i) cache.set(i, {}, { age: age });
         benchmark(`DW-Cache simulation ${size.toLocaleString('en')} 90% expire`, () => {
           const key = random();
-          cache.get(key) ?? cache.add(key, {}, { age: age() });
+          cache.get(key) ?? cache.add(key, {}, { age: age });
         }, done);
       });
     }
