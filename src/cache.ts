@@ -676,7 +676,7 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
     ++this.currWindowHits + this.currWindowMisses >= this.window && this.slideWindow();
     ++this.currRoomHits + this.currRoomMisses >= this.room && this.slideRoom();
     this.update();
-    this.processing && !this.isActive() && this.reset();
+    this.processing && !this.active && this.reset();
   }
   public miss(): void {
     this.currWindowHits + ++this.currWindowMisses >= this.window && this.slideWindow();
