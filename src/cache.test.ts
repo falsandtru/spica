@@ -273,7 +273,7 @@ describe('Unit: lib/cache', () => {
     });
 
     it('age eager', async () => {
-      const cache = new Cache<number, number>(3, { age: Infinity, eagerExpiration: true, sweep: { threshold: 0 } });
+      const cache = new Cache<number, number>(3, { eagerExpiration: true, sweep: { threshold: 0 } });
 
       cache.put(0, 0, { age: 50 });
       cache.put(1, 1, { age: 1 });

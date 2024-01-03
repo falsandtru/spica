@@ -175,7 +175,6 @@ export class Cache<K, V> implements IterableDict<K, V> {
     this.partition = capacity - this.window;
     this.sample = settings.sample!;
     this.resource = settings.resource! ?? capacity;
-    this.expiration = opts.age !== undefined;
     this.age = settings.age!;
     if (settings.eagerExpiration) {
       this.expirations = new Heap(Heap.min, { stable: false });
@@ -219,7 +218,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
   private LFU = new List<Entry<K, V>>();
   private overlapLRU = 0;
   private overlapLFU = 0;
-  private readonly expiration: boolean;
+  private expiration = false;
   private readonly age: number;
   private readonly expirations?: Heap<Entry<K, V>, number>;
   public get length(): number {
@@ -258,6 +257,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
     this.LFU = new List();
     this.overlapLRU = 0;
     this.overlapLFU = 0;
+    this.expiration = false;
     this.expirations?.clear();
     this.sweeper.clear();
     this.sweeper.replace(this.LRU);
@@ -479,8 +479,13 @@ export class Cache<K, V> implements IterableDict<K, V> {
     }
   }
   private validate(size: number, age: number): boolean {
-    return 1 <= size && size <= this.resource
-        && 1 <= age;
+    if (1 <= age) {
+      this.expiration ||= age !== Infinity;
+    }
+    else {
+      return false;
+    }
+    return 1 <= size && size <= this.resource;
   }
   public evict(): [K, V] | undefined {
     const victim = this.LRU.last ?? this.LFU.last;
@@ -490,8 +495,9 @@ export class Cache<K, V> implements IterableDict<K, V> {
   }
   public add(key: K, value: V, opts?: { size?: number; age?: number; }, victim?: Entry<K, V>): boolean;
   public add(this: Cache<K, undefined>, key: K, value?: V, opts?: { size?: number; age?: number; }, victim?: Entry<K, V>): boolean;
-  public add(key: K, value: V, { size = 1, age = this.age }: { size?: number; age?: number; } = {}, victim?: Entry<K, V>): boolean {
-    if (!this.validate(size, age)) {
+  public add(key: K, value: V, opts?: { size?: number; age?: number; }, victim?: Entry<K, V>): boolean {
+    const { size = 1, age = this.age } = opts ?? {};
+    if (opts !== undefined && !this.validate(size, age)) {
       this.disposer?.(value, key);
       return false;
     }
@@ -541,8 +547,9 @@ export class Cache<K, V> implements IterableDict<K, V> {
   }
   public put(key: K, value: V, opts?: { size?: number; age?: number; }): boolean;
   public put(this: Cache<K, undefined>, key: K, value?: V, opts?: { size?: number; age?: number; }): boolean;
-  public put(key: K, value: V, { size = 1, age = this.age }: { size?: number; age?: number; } = {}): boolean {
-    if (!this.validate(size, age)) {
+  public put(key: K, value: V, opts?: { size?: number; age?: number; }): boolean {
+    const { size = 1, age = this.age } = opts ?? {};
+    if (opts !== undefined && !this.validate(size, age)) {
       this.disposer?.(value, key);
       return false;
     }
