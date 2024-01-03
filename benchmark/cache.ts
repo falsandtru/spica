@@ -250,7 +250,7 @@ describe('Benchmark:', function () {
         const cache = new LRUCache<number, object>({ max: size, ttl: 1, ttlAutopurge: true });
         const age = (r => () => r() * 1e3 | 0)(xorshift.random(1));
         const random = bias(xorshift.random(1));
-        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        for (let i = 0; i < size * 10; ++i) cache.set(random(), {}, { ttl: age() });
         benchmark(`ISCCache simulation ${size.toLocaleString('en')} 90% expire`, () => {
           const key = random();
           cache.get(key) ?? cache.set(key, {}, { ttl: age() });
@@ -261,7 +261,7 @@ describe('Benchmark:', function () {
         const cache = new Cache<number, object>(size, { age: 1, eagerExpiration: true });
         const age = (r => () => r() * 1e3 | 0)(xorshift.random(1));
         const random = bias(xorshift.random(1));
-        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        for (let i = 0; i < size * 10; ++i) cache.set(random(), {}, { age: age() });
         benchmark(`DW-Cache simulation ${size.toLocaleString('en')} 90% expire`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {}, { age: age() });
