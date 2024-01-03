@@ -1,8 +1,7 @@
-import { ceil, log2 } from './alias';
 import { IterableDict } from './dict';
 
 const BASE = 32;
-const DIGIT = log2(BASE);
+const DIGIT = Math.log2(BASE);
 assert(DIGIT === 5);
 const MASK = BASE - 1;
 assert((BASE & MASK) === 0);
@@ -15,7 +14,8 @@ export class Clock<K, V> implements IterableDict<K, V> {
   constructor(
     private readonly capacity: number,
   ) {
-    this.capacity = BASE * ceil(capacity / BASE);
+    this.capacity = ((capacity - 1 | MASK) >>> 0) + 1;
+    assert(this.capacity % BASE === 0);
     this.refs = new Uint32Array(this.capacity >>> DIGIT);
   }
   private dict = new Map<K, number>();
