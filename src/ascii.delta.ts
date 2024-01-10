@@ -370,7 +370,7 @@ function encCode(code: number, base: number, axis: number): number {
     case axisU:
     case axisL: {
       const tables = frequency[base];
-      if (tables !== tablesF && code === sep) return 7;
+      if (tables !== tablesH && code === sep) return 7;
       if (code < axis || axis + 26 - 1 < code) break;
       delta = tables[0][code];
       break;
@@ -391,7 +391,7 @@ function decDelta(delta: number, base: number, axis: number): number {
     case axisU:
     case axisL: {
       const tables = frequency[base];
-      if (tables !== tablesF && delta === 7) return sep;
+      if (tables !== tablesH && delta === 7) return sep;
       code = tables[axis === axisU ? 1 : 2][delta];
       break;
     }
