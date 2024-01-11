@@ -130,6 +130,34 @@ describe('Unit: lib/ascii', () => {
       console.debug('SimH2S0 comp. ratio random 64', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
     });
 
+    it('percent', function () {
+      this.timeout(20 * 1e3);
+
+      const cs = Array(16).fill(0);
+      for (let i = 0; i < 1e4; ++i) {
+        const input = rnd0f(8 << 1).toUpperCase().replace(/../g, '%$&');
+        let j = 0;
+        cs[j++] += input.length;
+        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHPACK(input).length;
+        cs[j++] += Math.ceil(simH2E5(input) / 8);
+        cs[j++] += Math.ceil(simH3E5(input) / 8);
+        cs[j++] += Math.ceil(simH2S5(input) / 8);
+        cs[j++] += Math.ceil(simH3S5(input) / 8);
+        cs[j++] += Math.ceil(simH2S0(input) / 8);
+      }
+      let j = 1;
+      console.debug('Huffman comp. ratio percent', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio percent', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('HPACK   comp. ratio percent', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('SimH2E5 comp. ratio percent', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('SimH3E5 comp. ratio percent', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('SimH2S5 comp. ratio percent', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('SimH3S5 comp. ratio percent', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('SimH2S0 comp. ratio percent', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+    });
+
     it('entity', function () {
       this.timeout(20 * 1e3);
 
