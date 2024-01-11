@@ -849,7 +849,7 @@ CKa1yQEIj7bJAQiltskBCKmdygEI5tTKAQieicsBCJahywEIhaDNAQjwsc0BCNy9zQEI38TNAQi1xc0B
       for (let i = 0; i < fields.length; ++i) {
         const input = fields[i];
         const stats = { length: 0 };
-        //console.debug((encodeXPACK(input, stats), stats.length) - (encodeHPACK(input, void 0, stats), stats.length), input)
+        //console.debug((encodeXPACK(input, stats), stats.length) - (encodeHPACK(input, stats), stats.length), input)
         assert(input === decodeXPACK(encodeXPACK(input)));
         assert(input === decodeHPACK(encodeHPACK(input)));
         assert(input === decodeDelta(encodeDelta(input)));
@@ -936,7 +936,7 @@ X-Xss-Protection:
       for (let i = 0; i < fields.length; ++i) {
         const input = fields[i];
         const stats = { length: 0 };
-        //console.debug((encodeXPACK(input, stats), stats.length) - (encodeHPACK(input, void 0, stats), stats.length), input)
+        //console.debug((encodeXPACK(input, stats), stats.length) - (encodeHPACK(input, stats), stats.length), input)
         assert(input === decodeXPACK(encodeXPACK(input)));
         assert(input === decodeHPACK(encodeHPACK(input)));
         assert(input === decodeDelta(encodeDelta(input)));
