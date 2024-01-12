@@ -441,7 +441,7 @@ export function encode(input: string, huffman = true): string {
       if (huffman && randstate && i >= opts.skip) {
         opts.start = opts.skip = i;
         output += encodeToken(input, opts);
-        i = opts.next === i ? i - 1 : opts.next - 1;
+        i = opts.next - 1;
         randstate = false;
         continue;
       }
