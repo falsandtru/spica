@@ -224,16 +224,19 @@ const enum Segment {
   Other = 3,
 }
 function segment(code: number): Segment {
-  if (0x30 <= code && code <= 0x39) {
-    return Segment.Number;
-  }
-  if (0x41 <= code && code <= 0x5a) {
-    return Segment.Upper;
-  }
-  if (0x61 <= code && code <= 0x7a) {
-    return Segment.Lower;
+  if (code < 0x61) {
+    if (code < 0x3a) {
+      if (code < 0x30) return Segment.Other;
+      return Segment.Number;
+    }
+    if (code < 0x5b) {
+      if (code < 0x41) return Segment.Other;
+      return Segment.Upper;
+    }
+    return Segment.Other;
   }
   else {
+    if (code < 0x7b) return Segment.Lower;
     return Segment.Other;
   }
 }
