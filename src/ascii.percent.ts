@@ -1,14 +1,7 @@
 const ASCII = [...Array(256)].reduce<string>((acc, _, i) => acc + String.fromCharCode(i), '');
 function isHEX(code: number): boolean {
-  if (code < 0x30) return false;
-  if (code < 0x3a) {
-    return true;
-  }
-  if (code < 0x41) return false;
-  if (code < 0x47) {
-    return true;
-  }
-  return false;
+  return 0x41 <= code && code < 0x47
+      || 0x30 <= code && code < 0x3a;
 }
 
 interface Options {
