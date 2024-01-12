@@ -251,12 +251,12 @@ function align(code: number, base: number, axis: number): number {
         // CamelCase
         case Segment.Lower:
           hexstate = isHEX(code);
-          randstate = true;
           return axisL;
-        // 0HDU
+        // 0FF7
         case Segment.Number:
           hexstate = isHEX(code);
           if (hexstate >>> 4) return axisH;
+          randstate = true;
           return axisU;
         // ^Case
         // _Case
@@ -280,6 +280,7 @@ function align(code: number, base: number, axis: number): number {
         case Segment.Number:
           hexstate = isHEX(code);
           if (hexstate >>> 4) return axisH;
+          randstate = true;
           return axisL;
         case Segment.Other:
           hexstate = isHEX(code);
