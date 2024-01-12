@@ -457,7 +457,7 @@ export function encode(input: string, huffman = true): string {
       }
       if (code === 0x25) {
         popts.start = i;
-        output += encodePercent(input, tablesH[0], popts) || '%';
+        output += '%' + encodePercent(input, tablesH[0], popts);
         i = popts.next === i ? i + 1 : popts.next;
         output += input[i] ?? '';
         base = input.charCodeAt(i);
@@ -526,9 +526,9 @@ export function decode(input: string, huffman = true): string {
     let code = input.charCodeAt(i);
     assert(code >>> 8 === 0);
     if (code === 0x25) {
-      popts.start = i;
+      popts.start = ++i;
       output += decodePercent(input, tablesH[1], popts) || '%';
-      i = popts.next === i ? i + 1 : popts.next;
+      i = popts.next;
       output += input[i] ?? '';
       base = output.charCodeAt(output.length - 1);
       reset();
