@@ -415,8 +415,8 @@ const random = Uint8Array.from(Array(128), (_, i) =>
   +'1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/-_'
     .includes(String.fromCharCode(i)));
 function reset(): void {
-  randstate = false;
   hexstate = 0;
+  randstate = false;
 }
 function clear(): void {
   reset();
