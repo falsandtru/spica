@@ -456,6 +456,7 @@ export function encode(input: string, huffman = true): string {
         output += encodePercent(input, tablesH[0], popts) || '%';
         i = popts.next === i ? i + 1 : popts.next;
         output += input[i] ?? '';
+        base = input.charCodeAt(i);
         reset();
         continue;
       }
@@ -463,6 +464,7 @@ export function encode(input: string, huffman = true): string {
         hopts.start = hopts.skip = i;
         output += encodeToken(input, hopts);
         i = hopts.next - 1;
+        base = input.charCodeAt(i);
         reset();
         continue;
       }
@@ -524,6 +526,7 @@ export function decode(input: string, huffman = true): string {
       output += decodePercent(input, tablesH[1], popts) || '%';
       i = popts.next === i ? i + 1 : popts.next;
       output += input[i] ?? '';
+      base = output.charCodeAt(output.length - 1);
       reset();
       continue;
     }
@@ -535,6 +538,7 @@ export function decode(input: string, huffman = true): string {
       hopts.start = i;
       output += decodeToken(input, hopts);
       i = hopts.next - 1;
+      base = output.charCodeAt(output.length - 1);
       reset();
       continue;
     }
