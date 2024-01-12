@@ -1,3 +1,4 @@
+import { encode as encodePercent, decode as decodePercent } from './ascii.percent';
 import { encode as encodeToken, decode as decodeToken } from './ascii.token';
 
 // Delta ASCII (Experimental)
@@ -418,10 +419,15 @@ function clear(): void {
   hexstate = 0;
   randstate = false;
   sep = 0x20;
-  opts.skip = 0;
+  hopts.skip = 0;
 }
 
-const opts = {
+const popts = {
+  start: 0,
+  next: 0,
+};
+
+const hopts = {
   target: random,
   start: 0,
   next: 0,
@@ -438,22 +444,30 @@ export function encode(input: string, huffman = true): string {
     const code = input.charCodeAt(i);
     assert(code >>> 8 === 0);
     if (j === 0) {
-      if (huffman && randstate && i >= opts.skip) {
-        opts.start = opts.skip = i;
-        output += encodeToken(input, opts);
-        i = opts.next - 1;
-        randstate = false;
-        continue;
-      }
       if (i + 1 === input.length) {
         output += ASCII[code];
         break;
+      }
+      if (code === 0x25) {
+        popts.start = i;
+        output += encodePercent(input, tablesH[0], popts) || '%';
+        i = popts.next === i ? i + 1 : popts.next;
+        output += input[i] ?? '';
+        randstate = false;
+        continue;
+      }
+      if (huffman && randstate && i >= hopts.skip) {
+        hopts.start = hopts.skip = i;
+        output += encodeToken(input, hopts);
+        i = hopts.next - 1;
+        randstate = false;
+        continue;
       }
       const comp = axis === axisH && isHEX(code) >>> 4 !== 0;
       const delta = comp
         ? tablesH[0][code]
         : encCode(code, base, axis);
-      if (delta >>> 4 || axis === axisH && !comp || i < opts.skip) {
+      if (delta >>> 4 || axis === axisH && !comp || i < hopts.skip) {
         output += ASCII[code];
       }
       else {
@@ -503,14 +517,22 @@ export function decode(input: string, huffman = true): string {
   for (let i = 0; i < input.length; ++i) {
     let code = input.charCodeAt(i);
     assert(code >>> 8 === 0);
-    if (code <= 0x7f) {
+    if (code === 0x25) {
+      popts.start = i;
+      output += decodePercent(input, tablesH[1], popts) || '%';
+      i = popts.next === i ? i + 1 : popts.next;
+      output += input[i] ?? '';
+      randstate = false;
+      continue;
+    }
+    else if (code <= 0x7f) {
       output += ASCII[code];
       sep = seps[code] || sep;
     }
     else if (huffman && randstate) {
-      opts.start = i;
-      output += decodeToken(input, opts);
-      i = opts.next - 1;
+      hopts.start = i;
+      output += decodeToken(input, hopts);
+      i = hopts.next - 1;
       randstate = false;
       continue;
     }
