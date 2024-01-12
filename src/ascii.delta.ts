@@ -414,10 +414,13 @@ let randstate = false;
 const random = Uint8Array.from(Array(128), (_, i) =>
   +'1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/-_%'
     .includes(String.fromCharCode(i)));
-function clear(): void {
-  freq = 0;
-  hexstate = 0;
+function reset(): void {
   randstate = false;
+  hexstate = 0;
+}
+function clear(): void {
+  reset();
+  freq = 0;
   sep = 0x20;
   hopts.skip = 0;
 }
@@ -453,14 +456,14 @@ export function encode(input: string, huffman = true): string {
         output += encodePercent(input, tablesH[0], popts) || '%';
         i = popts.next === i ? i + 1 : popts.next;
         output += input[i] ?? '';
-        randstate = false;
+        reset();
         continue;
       }
       if (huffman && randstate && i >= hopts.skip) {
         hopts.start = hopts.skip = i;
         output += encodeToken(input, hopts);
         i = hopts.next - 1;
-        randstate = false;
+        reset();
         continue;
       }
       const comp = axis === axisH && isHEX(code) >>> 4 !== 0;
@@ -501,7 +504,6 @@ export function encode(input: string, huffman = true): string {
     }
     axis = align(code, base, axis);
     base = code;
-    randstate &&= i !== 0;
   }
   assert(buffer === 0);
   assert(output.length <= input.length);
@@ -522,7 +524,7 @@ export function decode(input: string, huffman = true): string {
       output += decodePercent(input, tablesH[1], popts) || '%';
       i = popts.next === i ? i + 1 : popts.next;
       output += input[i] ?? '';
-      randstate = false;
+      reset();
       continue;
     }
     else if (code <= 0x7f) {
@@ -533,7 +535,7 @@ export function decode(input: string, huffman = true): string {
       hopts.start = i;
       output += decodeToken(input, hopts);
       i = hopts.next - 1;
-      randstate = false;
+      reset();
       continue;
     }
     else {
@@ -553,7 +555,6 @@ export function decode(input: string, huffman = true): string {
     axis = align(code, base, axis);
     base = code;
     caseH = segment(base) <= Segment.Lower ? segment(base) + 1 : caseH;
-    randstate &&= i !== 0;
   }
   return output;
 }
