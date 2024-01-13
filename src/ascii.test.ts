@@ -24,9 +24,9 @@ describe('Unit: lib/ascii', () => {
         assert(/^\d{32}$/.test(input));
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -34,9 +34,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio random number', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio random number', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio random number', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio random number', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio random number', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio random number', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio random number', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio random number', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -54,9 +54,9 @@ describe('Unit: lib/ascii', () => {
           : rnd0f(32).toLowerCase();
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -64,9 +64,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio random hex', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio random hex', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio random hex', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio random hex', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio random hex', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio random hex', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio random hex', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio random hex', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -82,9 +82,9 @@ describe('Unit: lib/ascii', () => {
         const input = rnd0z(128);
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -92,9 +92,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio random 36', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio random 36', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio random 36', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio random 36', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio random 36', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio random 36', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio random 36', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio random 36', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -110,9 +110,9 @@ describe('Unit: lib/ascii', () => {
         const input = rnd0S(128);
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -120,9 +120,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio random 64', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio random 64', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio random 64', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio random 64', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio random 64', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio random 64', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio random 64', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio random 64', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -138,9 +138,9 @@ describe('Unit: lib/ascii', () => {
         const input = rnd0f(8 << 1).toUpperCase().replace(/../g, '%$&');
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -148,9 +148,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio percent', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio percent', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio percent', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio percent', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio percent', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio percent', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio percent', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio percent', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -167,9 +167,9 @@ describe('Unit: lib/ascii', () => {
         const input = words[random()] + '-' + rnd0f(64);
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -177,9 +177,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio entity', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio entity', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio entity', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio entity', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio entity', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio entity', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio entity', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio entity', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -200,9 +200,9 @@ describe('Unit: lib/ascii', () => {
         assert(input);
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -210,9 +210,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio word 3-6', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio word 3-6', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio word 3-6', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio word 3-6', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio word 3-6', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio word 3-6', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio word 3-6', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio word 3-6', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -233,9 +233,9 @@ describe('Unit: lib/ascii', () => {
         assert(input);
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -243,9 +243,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio word 5-10', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio word 5-10', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio word 5-10', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio word 5-10', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio word 5-10', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio word 5-10', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio word 5-10', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio word 5-10', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -262,9 +262,9 @@ describe('Unit: lib/ascii', () => {
         const input = words[random() * words.length | 0];
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -272,9 +272,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio word 1', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio word 1', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio word 1', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio word 1', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio word 1', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio word 1', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio word 1', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio word 1', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -291,9 +291,9 @@ describe('Unit: lib/ascii', () => {
         const input = [...Array(2)].map(() => words[random() * words.length | 0]).join('-');
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -301,9 +301,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio word 2', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio word 2', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio word 2', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio word 2', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio word 2', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio word 2', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio word 2', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio word 2', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -320,9 +320,9 @@ describe('Unit: lib/ascii', () => {
         const input = [...Array(4)].map(() => words[random() * words.length | 0]).join('-');
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -330,9 +330,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio word 4', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio word 4', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio word 4', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio word 4', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio word 4', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio word 4', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio word 4', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio word 4', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -349,9 +349,9 @@ describe('Unit: lib/ascii', () => {
         const input = [...Array(8)].map(() => words[random() * words.length | 0]).join('-');
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -359,9 +359,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio word 8', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio word 8', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio word 8', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio word 8', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio word 8', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio word 8', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio word 8', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio word 8', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -378,9 +378,9 @@ describe('Unit: lib/ascii', () => {
         const input = words[random() * words.length | 0].toUpperCase();
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -388,9 +388,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio word 1 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio word 1 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio word 1 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio word 1 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio word 1 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio word 1 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio word 1 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio word 1 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -407,9 +407,9 @@ describe('Unit: lib/ascii', () => {
         const input = [...Array(2)].map(() => words[random() * words.length | 0]).join('-').toUpperCase();
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -417,9 +417,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio word 2 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio word 2 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio word 2 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio word 2 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio word 2 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio word 2 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio word 2 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio word 2 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -436,9 +436,9 @@ describe('Unit: lib/ascii', () => {
         const input = [...Array(4)].map(() => words[random() * words.length | 0]).join('-').toUpperCase();
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -446,9 +446,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio word 4 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio word 4 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio word 4 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio word 4 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio word 4 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio word 4 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio word 4 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio word 4 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -465,9 +465,9 @@ describe('Unit: lib/ascii', () => {
         const input = [...Array(8)].map(() => words[random() * words.length | 0]).join('-').toUpperCase();
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -475,9 +475,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio word 8 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio word 8 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio word 8 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio word 8 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio word 8 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio word 8 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio word 8 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio word 8 upper', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -498,9 +498,9 @@ describe('Unit: lib/ascii', () => {
         const input = capitalize(words[random() * words.length | 0]);
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -508,9 +508,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio word 1 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio word 1 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio word 1 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio word 1 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio word 1 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio word 1 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio word 1 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio word 1 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -527,9 +527,9 @@ describe('Unit: lib/ascii', () => {
         const input = [...Array(2)].map(() => capitalize(words[random() * words.length | 0])).join('');
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -537,9 +537,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio word 2 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio word 2 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio word 2 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio word 2 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio word 2 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio word 2 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio word 2 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio word 2 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -556,9 +556,9 @@ describe('Unit: lib/ascii', () => {
         const input = [...Array(4)].map(() => capitalize(words[random() * words.length | 0])).join('');
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -566,9 +566,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio word 4 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio word 4 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio word 4 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio word 4 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio word 4 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio word 4 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio word 4 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio word 4 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -585,9 +585,9 @@ describe('Unit: lib/ascii', () => {
         const input = [...Array(8)].map(() => capitalize(words[random() * words.length | 0])).join('');
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -595,9 +595,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio word 8 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio word 8 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio word 8 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio word 8 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio word 8 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio word 8 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio word 8 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio word 8 camel', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -618,9 +618,9 @@ describe('Unit: lib/ascii', () => {
         input = input.slice(1);
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -628,9 +628,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio text 100', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio text 100', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio text 100', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio text 100', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio text 100', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio text 100', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio text 100', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio text 100', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -651,9 +651,9 @@ describe('Unit: lib/ascii', () => {
         input = input.slice(1);
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -661,9 +661,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio text 500', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio text 500', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio text 500', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio text 500', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio text 500', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio text 500', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio text 500', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio text 500', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -684,9 +684,9 @@ describe('Unit: lib/ascii', () => {
         input = input.slice(1);
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -694,9 +694,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio text 1000', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio text 1000', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio text 1000', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio text 1000', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio text 1000', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio text 1000', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio text 1000', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio text 1000', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -713,9 +713,9 @@ describe('Unit: lib/ascii', () => {
         const input = countries[random()];
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -723,9 +723,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio country', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio country', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio country', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio country', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio country', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio country', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio country', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio country', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -741,9 +741,9 @@ describe('Unit: lib/ascii', () => {
       {
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -751,9 +751,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio sample', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio sample', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio sample', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio sample', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio sample', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio sample', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio sample', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio sample', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
@@ -769,9 +769,9 @@ describe('Unit: lib/ascii', () => {
       {
         let j = 0;
         cs[j++] += input.length;
-        cs[j++] += encodeHuffm(input).length;
-        cs[j++] += encodeDelta(input).length;
         cs[j++] += encodeHPACK(input).length;
+        cs[j++] += encodeDelta(input).length;
+        cs[j++] += encodeHuffm(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -779,9 +779,9 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += Math.ceil(simH2S0(input) / 8);
       }
       let j = 1;
-      console.debug('Huffman comp. ratio json', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
-      console.debug('Delta   comp. ratio json', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio json', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio json', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Huffman comp. ratio json', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2E5 comp. ratio json', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH3E5 comp. ratio json', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('SimH2S5 comp. ratio json', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
