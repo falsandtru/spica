@@ -2,6 +2,7 @@ import { min } from './alias';
 
 const ASCII = [...Array(256)].reduce<string>((acc, _, i) => acc + String.fromCharCode(i), '');
 
+// 関数に変換可能
 const HUFFMAN_64_CODES = new Uint16Array(128).map((_, i) => {
   // 62|0b1111_1000
   // 63|0b1111_1001

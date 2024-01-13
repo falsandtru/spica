@@ -203,6 +203,7 @@ const tablesR = [
 tablesR.forEach((table, i, arr) => i && table.forEach((code, i) => arr[0][code] = i));
 assert(tablesL[0][7] === tablesR[0][7]);
 const layout = 'ZQJKXFYPAOEUIDHTNSLRCGBMWV';
+// 4+3bitのインデクスに変換可能
 const frequency = [
   ...[...Array(32)].map(() => tablesF),
   ...[...Array(16)].map(() => tablesF),
