@@ -250,7 +250,7 @@ function align(code: number, base: number, axis: number): number {
         // ABBR
         case Segment.Upper:
           hexstate = isHEX(code);
-          if (hexstate >>> 4 && axis === axisH) return axisH;
+          if (hexstate >>> 4 !== 0 && axis === axisH) return axisH;
           incFreq(Segment.Upper);
           return axisU;
         // CamelCase
@@ -260,14 +260,14 @@ function align(code: number, base: number, axis: number): number {
         // 0FF7
         case Segment.Number:
           hexstate = isHEX(code);
-          if (hexstate >>> 4) return axisH;
+          if (hexstate >>> 4 !== 0) return axisH;
           randstate = true;
           return axisU;
         // ^Case
         // _Case
         case Segment.Other:
           hexstate = isHEX(code);
-          if (hexstate >>> 4) return axisH;
+          if (hexstate >>> 4 !== 0) return axisH;
           return freq >>> 2 > (freq & 0b11)
             ? axisU
             : axisL;
@@ -280,34 +280,34 @@ function align(code: number, base: number, axis: number): number {
           return axisL;
         case Segment.Lower:
           hexstate = isHEX(code);
-          if (hexstate >>> 4 && axis === axisH) return axisH;
+          if (hexstate >>> 4 !== 0 && axis === axisH) return axisH;
           return axisL;
         case Segment.Number:
           hexstate = isHEX(code);
-          if (hexstate >>> 4) return axisH;
+          if (hexstate >>> 4 !== 0) return axisH;
           randstate = true;
           return axisL;
         case Segment.Other:
           hexstate = isHEX(code);
-          if (hexstate >>> 4) return axisH;
+          if (hexstate >>> 4 !== 0) return axisH;
           return axisL;
       }
     case Segment.Number:
       switch (segment(base)) {
         case Segment.Upper:
           hexstate = isHEX(code);
-          if (hexstate >>> 4) return axisH;
+          if (hexstate >>> 4 !== 0) return axisH;
           return axisN;
         case Segment.Lower:
           hexstate = isHEX(code);
-          if (hexstate >>> 4) return axisH;
+          if (hexstate >>> 4 !== 0) return axisH;
           return axisN;
         case Segment.Number:
-          if (hexstate >>> 4 && axis === axisH) return axisH;
+          if (hexstate >>> 4 !== 0 && axis === axisH) return axisH;
           return axisN;
         case Segment.Other:
           hexstate = isHEX(code);
-          if (hexstate >>> 4) return axisH;
+          if (hexstate >>> 4 !== 0) return axisH;
           return axisN;
       }
     case Segment.Other:
