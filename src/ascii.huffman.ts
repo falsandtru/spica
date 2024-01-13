@@ -212,15 +212,15 @@ function alignEnc(code: number, base: number, table: Uint8Array): Uint8Array {
           return ENC_TABLE_AU;
         case Segment.Lower:
           hexstate = isHEX(code);
-          return ENC_TABLE_64;
+          return ENC_TABLE_AL;
         case Segment.Number:
           hexstate = isHEX(code);
           if (hexstate >>> 4) return ENC_TABLE_HU;
-          return ENC_TABLE_AU;
+          return ENC_TABLE_64;
         case Segment.Other:
           hexstate = isHEX(code);
           if (hexstate >>> 4) return ENC_TABLE_HU;
-          return ENC_TABLE_AL;
+          return ENC_TABLE_AU;
       }
     case Segment.Lower:
       if (table === ENC_TABLE_64) return table;
@@ -235,7 +235,7 @@ function alignEnc(code: number, base: number, table: Uint8Array): Uint8Array {
         case Segment.Number:
           hexstate = isHEX(code);
           if (hexstate >>> 4) return ENC_TABLE_HL;
-          return ENC_TABLE_AL;
+          return ENC_TABLE_64;
         case Segment.Other:
           hexstate = isHEX(code);
           if (hexstate >>> 4) return ENC_TABLE_HL;
@@ -294,18 +294,18 @@ function alignDec(code: number, base: number, table: typeof DEC_TABLE_NN): typeo
         // CamelCase
         case Segment.Lower:
           hexstate = isHEX(code);
-          return DEC_TABLE_64;
+          return DEC_TABLE_AL;
         // 0HDU
         case Segment.Number:
           hexstate = isHEX(code);
           if (hexstate >>> 4) return DEC_TABLE_HU;
-          return DEC_TABLE_AU;
+          return DEC_TABLE_64;
         // ^Case
         // _Case
         case Segment.Other:
           hexstate = isHEX(code);
           if (hexstate >>> 4) return DEC_TABLE_HU;
-          return DEC_TABLE_AL;
+          return DEC_TABLE_AU;
       }
     case Segment.Lower:
       if (table === DEC_TABLE_64) return table;
@@ -320,7 +320,7 @@ function alignDec(code: number, base: number, table: typeof DEC_TABLE_NN): typeo
         case Segment.Number:
           hexstate = isHEX(code);
           if (hexstate >>> 4) return DEC_TABLE_HL;
-          return DEC_TABLE_AL;
+          return DEC_TABLE_64;
         case Segment.Other:
           hexstate = isHEX(code);
           if (hexstate >>> 4) return DEC_TABLE_HL;
