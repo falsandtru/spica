@@ -1,7 +1,7 @@
 import { encode as encodePercent, decode as decodePercent } from './ascii.percent';
 import { encode as encodeToken, decode as decodeToken } from './ascii.token';
 
-// Delta ASCII (Experimental)
+// Delta ASCII (Unstable)
 
 /*
 ASCIIコード用デルタエンコーディングアルゴリズム。
