@@ -311,7 +311,7 @@ function align(code: number, base: number, axis: number): number {
           return axisN;
       }
     case Segment.Other:
-      hexstate = (hexstate >>> 4 & hexstate) > 1 && (code === 0x2d || code === 0x3a) ? hexstate : 0;
+      hexstate = hexstate >>> 4 !== 0 && (code === 0x2d || code === 0x3a) ? hexstate : 0;
       switch (segment(base)) {
         // J.Doe
         case Segment.Upper:

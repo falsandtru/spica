@@ -263,7 +263,7 @@ function alignEnc(code: number, base: number, table: Uint8Array): Uint8Array {
           return ENC_TABLE_NN;
       }
     case Segment.Other:
-      hexstate = (hexstate >>> 4 & hexstate) > 1 && (code === 0x2d || code === 0x3a) ? hexstate : 0;
+      hexstate = hexstate >>> 4 !== 0 && (code === 0x2d || code === 0x3a) ? hexstate : 0;
       if (table === ENC_TABLE_64 && isContinuous(code)) return table;
       switch (segment(base)) {
         case Segment.Upper:
@@ -348,7 +348,7 @@ function alignDec(code: number, base: number, table: typeof DEC_TABLE_NN): typeo
           return DEC_TABLE_NN;
       }
     case Segment.Other:
-      hexstate = (hexstate >>> 4 & hexstate) > 1 && (code === 0x2d || code === 0x3a) ? hexstate : 0;
+      hexstate = hexstate >>> 4 !== 0 && (code === 0x2d || code === 0x3a) ? hexstate : 0;
       if (table === DEC_TABLE_64 && isContinuous(code)) return table;
       switch (segment(base)) {
         // J.Doe
