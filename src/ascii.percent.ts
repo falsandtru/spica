@@ -1,5 +1,11 @@
 import { min } from './alias';
 
+/*
+ASCII文字のパーセントエンコーディングを避ければマルチバイト文字のみのエンコーディングとなるため
+常に2単位以上の圧縮となる。2単位での圧縮率でもデルタ25％、ハフマン33%となるためハフマンを採用。
+
+*/
+
 const ASCII = [...Array(256)].reduce<string>((acc, _, i) => acc + String.fromCharCode(i), '');
 function isHEX(code: number): boolean {
   return 0x41 <= code && code < 0x47
