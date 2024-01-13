@@ -367,7 +367,7 @@ function isHEX(code: number): number {
   return 0;
 }
 const seps = Uint8Array.from(Array(128), (_, i) =>
-  ' .:-,/_\t'.includes(String.fromCharCode(i)) ? i : 0);
+  ' .:-,/\t"_'.includes(String.fromCharCode(i)) ? i : 0);
 let sep = 0;
 function encCode(code: number, base: number, axis: number): number {
   let delta = 1 << 7;
