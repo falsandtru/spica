@@ -523,7 +523,7 @@ export function decode(input: string, huffman = true): string {
   let output = '';
   let axis = axisB;
   let base = sep;
-  let caseH = 2;
+  let hexcase = 0;
   for (let i = 0; i < input.length; ++i) {
     let code = input.charCodeAt(i);
     assert(code >>> 8 === 0);
@@ -550,21 +550,21 @@ export function decode(input: string, huffman = true): string {
     }
     else {
       const delta = code;
-      code = axis == axisH
-        ? tablesH[caseH][delta >>> 3 & 0b1111]
+      code = axis === axisH
+        ? tablesH[hexcase][delta >>> 3 & 0b1111]
         : decDelta(delta >>> 3 & 0b1111, base, axis);
       output += ASCII[code];
       axis = align(code, base, axis);
       base = code;
-      caseH = segment(base) <= Segment.Lower ? segment(base) + 1 : caseH;
-      code = axis == axisH
-        ? tablesH[caseH][delta & 0b111]
+      hexcase = hexstate >>> 5 & hexstate >>> 1 || hexcase;
+      code = axis === axisH
+        ? tablesH[hexcase][delta & 0b111]
         : decDelta(delta & 0b0111, base, axis);
       output += ASCII[code];
     }
     axis = align(code, base, axis);
     base = code;
-    caseH = segment(base) <= Segment.Lower ? segment(base) + 1 : caseH;
+    hexcase = hexstate >>> 5 & hexstate >>> 1 || hexcase;
   }
   return output;
 }
