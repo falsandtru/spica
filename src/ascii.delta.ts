@@ -171,6 +171,7 @@ v11 開始文字を設定
 */
 
 const ASCII = [...Array(256)].reduce<string>((acc, _, i) => acc + String.fromCharCode(i), '');
+
 const tablesN = [
   new Uint8Array(128).fill(~0),
   ...Array(2).fill(new Uint8Array('0123456789 .:-,/'.split('').map(c => c.charCodeAt(0)))) as [Uint8Array, Uint8Array],

@@ -7,6 +7,7 @@ ASCII文字のパーセントエンコーディングを避ければマルチバ
 */
 
 const ASCII = [...Array(256)].reduce<string>((acc, _, i) => acc + String.fromCharCode(i), '');
+
 function isHEX(code: number): boolean {
   return 0x41 <= code && code < 0x47
       || 0x30 <= code && code < 0x3a;
