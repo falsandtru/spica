@@ -20,11 +20,13 @@ const dictAz = [
 ].join('');
 assert(dictAz.length === 52);
 
+export const rnd10 = cons(10);
 export const rnd16 = cons(16);
 export const rnd32 = cons(32);
 export const rnd36 = cons(36);
 export const rnd62 = cons(62);
 export const rnd64 = cons(64);
+export const rnd09 = conv(rnd10, dict0_);
 export const rnd0f = conv(rnd16, dict0_);
 export const rnd0v = conv(rnd32, dict0_);
 export const rnd0z = conv(rnd36, dict0_);
@@ -85,8 +87,8 @@ function cons(size: number): () => number {
   };
 }
 
-function conv(rng: () => number, dict: string): (len?: number) => string {
-  return (len = 1) => {
+function conv($rng: () => number, dict: string): (len?: number, rng?: () => number) => string {
+  return (len = 1, rng = $rng) => {
     let acc = '';
     while (len--) {
       acc += dict[rng()];

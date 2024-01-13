@@ -2,7 +2,7 @@ import { encode as encodeDelta, decode as decodeDelta } from './ascii.delta';
 import { encode as encodeHuffm } from './ascii.huffman';
 import { encode as encodeHPACK, decode as decodeHPACK } from './ascii.hpack';
 import { encode as encodeXPACK, decode as decodeXPACK } from './ascii.xpack';
-import { rnd0f, rnd0z, rnd0S, xorshift } from './random';
+import { rnd09, rnd0f, rnd0z, rnd0S, xorshift } from './random';
 import zipfian from 'zipfian-integer';
 import { LRU } from './lru';
 
@@ -12,16 +12,9 @@ describe('Unit: lib/ascii', () => {
       this.timeout(20 * 1e3);
 
       const cs = Array(16).fill(0);
-      const random = xorshift.random(1);
-      const rnd = () => [
-        `${random() * 10 ** 8 >>> 0}`.padStart(8, '0'),
-        `${random() * 10 ** 8 >>> 0}`.padStart(8, '0'),
-        `${random() * 10 ** 8 >>> 0}`.padStart(8, '0'),
-        `${random() * 10 ** 8 >>> 0}`.padStart(8, '0'),
-      ].join('');
+      const random = ((rng) => () => rng() * 10 | 0)(xorshift.random(1));
       for (let i = 0; i < 1e4; ++i) {
-        const input = rnd();
-        assert(/^\d{32}$/.test(input));
+        const input = rnd09(32, random);
         let j = 0;
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
@@ -48,10 +41,11 @@ describe('Unit: lib/ascii', () => {
       this.timeout(20 * 1e3);
 
       const cs = Array(16).fill(0);
+      const random = ((rng) => () => rng() * 16 | 0)(xorshift.random(1));
       for (let i = 0; i < 1e4; ++i) {
         const input = i & 1
-          ? rnd0f(32).toUpperCase()
-          : rnd0f(32).toLowerCase();
+          ? rnd0f(32, random).toUpperCase()
+          : rnd0f(32, random).toLowerCase();
         let j = 0;
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
@@ -78,8 +72,9 @@ describe('Unit: lib/ascii', () => {
       this.timeout(20 * 1e3);
 
       const cs = Array(16).fill(0);
+      const random = ((rng) => () => rng() * 36 | 0)(xorshift.random(1));
       for (let i = 0; i < 1e3; ++i) {
-        const input = rnd0z(128);
+        const input = rnd0z(128, random);
         let j = 0;
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
@@ -106,8 +101,9 @@ describe('Unit: lib/ascii', () => {
       this.timeout(20 * 1e3);
 
       const cs = Array(16).fill(0);
+      const random = ((rng) => () => rng() * 64 | 0)(xorshift.random(1));
       for (let i = 0; i < 1e3; ++i) {
-        const input = rnd0S(128);
+        const input = rnd0S(128, random);
         let j = 0;
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
@@ -134,8 +130,9 @@ describe('Unit: lib/ascii', () => {
       this.timeout(20 * 1e3);
 
       const cs = Array(16).fill(0);
+      const random = ((rng) => () => rng() * 16 | 0)(xorshift.random(1));
       for (let i = 0; i < 1e4; ++i) {
-        const input = rnd0f(8 << 1).toUpperCase().replace(/../g, '%$&');
+        const input = rnd0f(8 << 1, random).toUpperCase().replace(/../g, '%$&');
         let j = 0;
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
