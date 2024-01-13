@@ -794,7 +794,7 @@ describe('Unit: lib/ascii', () => {
       this.timeout(20 * 1e4);
 
       const cs = Array(16).fill(0);
-      const input = `{"group":"gws","max_age":2592000,"endpoints":[{"url":"https://csp.withgoogle.com/csp/report-to/gws/other"}]}`;
+      const input = `{"time":"2022-11-08T15:28:26.000000000-05:00","level":"INFO","msg":"hello","count":3}`;
       {
         let j = 0;
         cs[j++] += input.length;
