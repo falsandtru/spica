@@ -1,5 +1,5 @@
 import { Heap } from './heap';
-import { pcg32 } from './random';
+import { xorshift } from './random';
 
 describe('Unit: lib/heap', () => {
   describe('Heap', () => {
@@ -209,11 +209,11 @@ describe('Unit: lib/heap', () => {
       ]);
     });
 
-    it('verify', async () => {
+    for (let i = 0; i < 10; ++i) it(`verify ${i}`, function () {
       const heap = new Heap<number>();
 
       const size = 1e4;
-      const random = pcg32.random(pcg32.seed(0n, 0n));
+      const random = xorshift.random(3 ** i);
       for (let i = 0; i < size; ++i) {
         const ord = random() * 1e6 | 0;
         heap.insert(ord, ord);

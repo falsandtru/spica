@@ -32,13 +32,13 @@ describe('Unit: lib/ascii.random', () => {
       assert(input === decode(encode(input)));
     });
 
-    it('verify', function () {
+    for (let i = 0; i < 10; ++i) it(`verify ${i}`, function () {
       this.timeout(10 * 1e3);
 
       const input = [...Array(128)]
         .reduce((acc, _, i) => acc + String.fromCharCode(i), '');
       assert(input === decode(encode(input)));
-      const random = xorshift.random(1);
+      const random = xorshift.random(3 ** i);
       for (let i = 0; i < 1e4; ++i) {
         const input = [...Array(random() * 32 + 1 | 0)]
           .reduce(acc => acc + String.fromCharCode(random() * 128 | 0), '');

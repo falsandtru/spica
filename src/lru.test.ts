@@ -5,14 +5,14 @@ import zipfian from 'zipfian-integer';
 
 describe('Unit: lib/lru', () => {
   describe('LRU', () => {
-    it('verify', function () {
+    for (let i = 0; i < 10; ++i) it(`verify ${i}`, function () {
       this.timeout(10 * 1e3);
 
       const capacity = 100;
       const cache = new LRU<number, number>(capacity);
 
       const trials = capacity * 1000;
-      const random = xorshift.random(1);
+      const random = xorshift.random(3 ** i);
       for (let i = 0; i < trials; ++i) {
         const key = random() * capacity * 10 | 0;
         if (cache.has(key)) {

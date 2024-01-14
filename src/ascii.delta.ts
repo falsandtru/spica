@@ -170,7 +170,7 @@ v11 開始文字を設定
 [1|0000000]: 4bit + 3bit delta (num: 0.4224; hex: 0.3041; word: 0.3239; country: 0.3058; text: 0.3544)
 
 v12 ランダム文字列とパーセントエンコーディングに対応
-num: 0.4224; hex: 0.3041; 36: 0.2358; 64: 0.2208; pct: 0.5833;
+num: 0.4224; hex: 0.3001; 36: 0.2357; 64: 0.2207; pct: 0.5833;
 lower: 0.3239; upper: 0.2063; camel: 0.2663; country: 0.3058; text: 0.3544; json: 0.2352;
 
 */
@@ -301,11 +301,11 @@ function align(code: number, base: number, axis: number): number {
       switch (segment(base)) {
         case Segment.Upper:
           hexstate = isHEX(code);
-          if (hexstate >>> 4 !== 0) return axisH;
+          if (hexstate >>> 4 !== 0 && axis === axisH) return axisH;
           return axisN;
         case Segment.Lower:
           hexstate = isHEX(code);
-          if (hexstate >>> 4 !== 0) return axisH;
+          if (hexstate >>> 4 !== 0 && axis === axisH) return axisH;
           return axisN;
         case Segment.Number:
           if (hexstate >>> 4 !== 0 && axis === axisH) return axisH;
@@ -355,19 +355,19 @@ function isHEX(code: number): number {
   assert(hexstate >>> 8 === 0);
   if (code < 0x30) return 0;
   if (code < 0x3a) {
-    return hexstate >>> 4 === 0
+    return hexstate >>> 4 === 0// && hexstate !== 0b111
       ? hexstate << 4 | 0b111
       : hexstate & hexstate << 4 | 0b111;
   }
   if (code < 0x41) return 0;
   if (code < 0x47) {
-    return hexstate >>> 4 === 0
+    return hexstate >>> 4 === 0// && hexstate !== 0b101
       ? hexstate << 4 | 0b011
       : (hexstate >>> 4 & hexstate) === 0b011 ? 0b011 << 4 | 0b011 : 0b011;
   }
   if (code < 0x61) return 0;
   if (code < 0x67) {
-    return hexstate >>> 4 === 0
+    return hexstate >>> 4 === 0// && hexstate !== 0b011
       ? hexstate << 4 | 0b101
       : (hexstate >>> 4 & hexstate) === 0b101 ? 0b101 << 4 | 0b101 : 0b101;
   }
