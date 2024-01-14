@@ -537,7 +537,7 @@ export function decode(input: string, huffman = true): string {
       output += decodePercent(input, tablesH[1], popts) || '%';
       i = popts.next;
       output += input[i] ?? '';
-      base = output.charCodeAt(output.length - 1);
+      base = input.charCodeAt(i);
       reset();
       continue;
     }
