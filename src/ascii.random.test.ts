@@ -1,7 +1,7 @@
-import { encode, decode } from './ascii.token';
+import { encode, decode } from './ascii.random';
 import { xorshift } from './random';
 
-describe('Unit: lib/ascii.token', () => {
+describe('Unit: lib/ascii.random', () => {
   describe('encode/decode', () => {
     it('basic', () => {
       let input = '';

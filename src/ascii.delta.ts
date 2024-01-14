@@ -1,5 +1,5 @@
+import { encode as encodeRandom, decode as decodeRandom } from './ascii.random';
 import { encode as encodePercent, decode as decodePercent } from './ascii.percent';
-import { encode as encodeToken, decode as decodeToken } from './ascii.token';
 
 // Delta ASCII (Unstable)
 
@@ -468,7 +468,7 @@ export function encode(input: string, huffman = true): string {
       }
       if (huffman && randstate && i >= hopts.skip) {
         hopts.start = hopts.skip = i;
-        output += encodeToken(input, hopts);
+        output += encodeRandom(input, hopts);
         i = hopts.next - 1;
         base = input.charCodeAt(i);
         reset();
@@ -542,7 +542,7 @@ export function decode(input: string, huffman = true): string {
     }
     else if (huffman && randstate) {
       hopts.start = i;
-      output += decodeToken(input, hopts);
+      output += decodeRandom(input, hopts);
       i = hopts.next - 1;
       base = output.charCodeAt(output.length - 1);
       reset();
