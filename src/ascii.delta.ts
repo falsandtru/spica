@@ -317,16 +317,17 @@ function align(code: number, base: number, axis: number): number {
       }
     case Segment.Other:
       hexstate = hexstate >>> 4 !== 0 && (code === 0x2d || code === 0x3a) ? hexstate : 0;
+      if (hexstate >>> 4 !== 0 && axis === axisH) return axisH;
       switch (segment(base)) {
         // J.Doe
         case Segment.Upper:
-          return axis && axisU;
+          return axisU;
         // z and
         case Segment.Lower:
-          return axis && axisL;
+          return axisL;
         // 0.0
         case Segment.Number:
-          return axis && axisN;
+          return axisN;
         // , and
         case Segment.Other:
           return axis;
