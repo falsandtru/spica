@@ -223,6 +223,10 @@ describe('Unit: lib/ascii.delta', () => {
       input = 'fE771';
       assert(input === decode(encode(input)));
       assert(input.length - 1 === encode(input).length);
+
+      input = 'Ec-635';
+      assert(input === decode(encode(input)));
+      assert(input.length - 1 === encode(input).length);
     });
 
     for (let i = 0; i < 10; ++i) it(`verify ${i}`, function () {

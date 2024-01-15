@@ -355,19 +355,19 @@ function isHEX(code: number): number {
   assert(hexstate >>> 8 === 0);
   if (code < 0x30) return 0;
   if (code < 0x3a) {
-    return hexstate >>> 4 === 0// && hexstate !== 0b111
+    return hexstate >>> 4 === 0 && hexstate !== 0b111
       ? hexstate << 4 | 0b111
       : hexstate & hexstate << 4 | 0b111;
   }
   if (code < 0x41) return 0;
   if (code < 0x47) {
-    return hexstate >>> 4 === 0// && hexstate !== 0b101
+    return hexstate >>> 4 === 0 && hexstate !== 0b101
       ? hexstate << 4 | 0b011
       : (hexstate >>> 4 & hexstate) === 0b011 ? 0b011 << 4 | 0b011 : 0b011;
   }
   if (code < 0x61) return 0;
   if (code < 0x67) {
-    return hexstate >>> 4 === 0// && hexstate !== 0b011
+    return hexstate >>> 4 === 0 && hexstate !== 0b011
       ? hexstate << 4 | 0b101
       : (hexstate >>> 4 & hexstate) === 0b101 ? 0b101 << 4 | 0b101 : 0b101;
   }
