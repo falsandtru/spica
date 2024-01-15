@@ -330,7 +330,7 @@ function align(code: number, base: number, axis: number): number {
           return axisN;
         // , and
         case Segment.Other:
-          return axis;
+          return axis || axisB;
       }
   }
 }
@@ -364,13 +364,17 @@ function isHEX(code: number): number {
   if (code < 0x47) {
     return hexstate >>> 4 === 0 && hexstate !== 0b101
       ? hexstate << 4 | 0b011
-      : (hexstate >>> 4 & hexstate) === 0b011 ? 0b011 << 4 | 0b011 : 0b011;
+      : (hexstate >>> 4 & hexstate) === 0b011
+        ? 0b011 << 4 | 0b011
+        : 0b011;
   }
   if (code < 0x61) return 0;
   if (code < 0x67) {
     return hexstate >>> 4 === 0 && hexstate !== 0b011
       ? hexstate << 4 | 0b101
-      : (hexstate >>> 4 & hexstate) === 0b101 ? 0b101 << 4 | 0b101 : 0b101;
+      : (hexstate >>> 4 & hexstate) === 0b101
+        ? 0b101 << 4 | 0b101
+        : 0b101;
   }
   return 0;
 }
@@ -476,8 +480,13 @@ export function encode(input: string, huffman = true): string {
         hopts.start = hopts.skip = i;
         output += encodeRandom(input, hopts);
         i = hopts.next - 1;
-        base = input.charCodeAt(i);
-        reset();
+        if (hopts.next === hopts.start) {
+          randstate = false;
+        }
+        else {
+          base = input.charCodeAt(i);
+          reset();
+        }
         continue;
       }
       const comp = axis === axisH && isHEX(code) >>> 4 !== 0;
@@ -550,27 +559,32 @@ export function decode(input: string, huffman = true): string {
       hopts.start = i;
       output += decodeRandom(input, hopts);
       i = hopts.next - 1;
-      base = output.charCodeAt(output.length - 1);
-      reset();
+      if (hopts.next === hopts.start) {
+        randstate = false;
+      }
+      else {
+        base = output.charCodeAt(output.length - 1);
+        reset();
+      }
       continue;
     }
     else {
       const delta = code;
-      code = axis === axisH
+      code = axis == axisH
         ? tablesH[hexcase][delta >>> 3 & 0b1111]
         : decDelta(delta >>> 3 & 0b1111, base, axis);
       output += ASCII[code];
       axis = align(code, base, axis);
       base = code;
-      hexcase = hexstate >>> 5 & hexstate >>> 1 || hexcase;
-      code = axis === axisH
+      hexcase = segment(code) <= Segment.Lower ? segment(code) + 1 : hexcase;
+      code = axis == axisH
         ? tablesH[hexcase][delta & 0b111]
         : decDelta(delta & 0b0111, base, axis);
       output += ASCII[code];
     }
     axis = align(code, base, axis);
     base = code;
-    hexcase = hexstate >>> 5 & hexstate >>> 1 || hexcase;
+    hexcase = segment(code) <= Segment.Lower ? segment(code) + 1 : hexcase;
   }
   return output;
 }
