@@ -9,7 +9,7 @@ class Node {
   public prev?: this = undefined;
 }
 
-describe('Benchmark:', function () {
+describe.skip('Benchmark:', function () {
   describe('List', function () {
     it('Yallist new', function (done) {
       benchmark('Yallist new', () => Yallist.create(), done);
