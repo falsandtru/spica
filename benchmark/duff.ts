@@ -28,6 +28,7 @@ describe('Benchmark:', function () {
       it(`duff array ${size.toLocaleString('en')}`, function (done) {
         const as = Array(size).fill(0);
         benchmark(`duff array ${size.toLocaleString('en')}`, () => duff(as.length, i => as[i]), done);
+        //benchmark(`duff array ${size.toLocaleString('en')}`, () => duffbk(as.length, i => as[i]), done);
       });
 
       it(`duffEach ${size.toLocaleString('en')}`, function (done) {
