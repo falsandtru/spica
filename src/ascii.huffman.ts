@@ -2,6 +2,12 @@ import { min } from './alias';
 
 // Contextual Huffman ASCII (Experimental)
 
+/*
+圧縮率は高いがフットプリントが非常に大きい。
+削減は不可能ではないが非常に煩雑で現実的ではない。
+
+*/
+
 const ASCII = [...Array(256)].reduce<string>((acc, _, i) => acc + String.fromCharCode(i), '');
 
 const HUFFMAN_NN_CODES = new Uint16Array(128).map((_, i) =>
