@@ -13,7 +13,7 @@ class Node<K, V> implements List.Node {
 
 export class LRU<K, V> implements IterableDict<K, V> {
   constructor(
-    private capacity: number,
+    private readonly capacity: number,
   ) {
   }
   private readonly dict = new Map<K, Node<K, V>>();
