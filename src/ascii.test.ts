@@ -948,6 +948,145 @@ X-Xss-Protection:
       console.debug('Delta   comp. ratio response', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
     });
 
+    it('header', function () {
+      this.timeout(20 * 1e4);
+
+      const cs = Array(16).fill(0);
+      const fields = `
+content-type: application/x-www-form-urlencoded
+content-type: image/jpeg
+content-type: text/plain;charset=utf-8
+content-type: image/png
+content-type: text/plain
+content-type: application/json
+content-type: application/x-www-form-urlencoded; charset=utf-8
+content-type: image/gif
+user-agent: mozilla/5.0 (x11; linux x86_64) applewebkit/537.36 (khtml, like gecko) chrome/64.0.3282.140 safari/537.36 ptst/180204.000209
+user-agent: mozilla/5.0 (x11; linux x86_64) applewebkit/537.36 (khtml, like gecko) chrome/64.0.3282.140 safari/537.36 ptst/180202.170209
+accept-encoding: gzip, deflate, br
+accept-encoding: gzip, deflate
+accept: image/webp,image/apng,image/*,*/*;q=0.8
+accept: */*
+server: nginx
+server: apache
+connection: keep-alive
+connection: keep-alive
+accept-language: en-us,en;q=0.9
+date:
+referer:
+content-length: 0
+content-length:
+cache-control: max-age=0
+cache-control: no-cache
+cache-control:
+last-modified:
+content-encoding: gzip
+content-encoding: br
+host:
+expires:
+accept-ranges: bytes
+cookie:
+etag:
+x-xss-protection: 1; mode=block
+x-xss-protection: 0
+status: 200
+vary: accept-encoding
+pragma: no-cache
+pragma: no-cache
+pragma: public
+set-cookie:
+access-control-allow-origin: *
+x-content-type-options: nosniff
+x-cache: hit
+x-cache: hit from cloudfront
+alt-svc: hq=":443"; ma=2592000; quic=51303431; quic=51303339; quic=51303338; quic=51303337; quic=51303335,quic=":443"; ma=2592000; v="41,39,38,37,35"
+alt-svc: hq="googleads.g.doubleclick.net:443"; ma=2592000; quic=51303431; quic=51303339; quic=51303338; quic=51303337; quic=51303335,quic="googleads.g.doubleclick.net:443"; ma=2592000; v="41,39,38,37,35",hq=":443"; ma=2592000; quic=51303431; quic=51303339; quic=51303338; quic=51303337; quic=51303335,quic=":443"; ma=2592000; v="41,39,38,37,35"
+x-powered-by: asp.net
+x-powered-by: plesklin
+p3p: policyref="https://googleads.g.doubleclick.net/pagead/gcn_p3p_.xml", cp="cura adma deva taio psao psdo our ind uni pur int dem sta pre com nav otc noi dsp cor"
+strict-transport-security: max-age=31536000
+strict-transport-security: max-age=10886400; includesubdomains; preload
+age:
+x-frame-options: sameorigin
+x-frame-options: deny
+timing-allow-origin: *
+keep-alive:
+expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+expect-ct: max-age=10, report-uri="http://reports.fb.com/expectct/"
+access-control-allow-methods: options
+access-control-allow-methods: get
+access-control-allow-methods: get, post, options
+location:
+access-control-expose-headers: content-length
+access-control-expose-headers: x-fb-debug, x-loader-length
+access-control-expose-headers: x-frontend
+via: 1.1 varnish
+origin: https://www.facebook.com
+cf-ray:
+transfer-encoding: chunked
+cf-cache-status: hit
+content-security-policy: default-src * data: blob:;script-src *.facebook.com *.fbcdn.net *.facebook.net *.google-analytics.com *.virtualearth.net *.google.com 127.0.0.1:* *.spotilocal.com:* 'unsafe-inline' 'unsafe-eval' fbstatic-a.akamaihd.net fbcdn-static-b-a.akamaihd.net *.atlassolutions.com blob: data: 'self';style-src data: blob: 'unsafe-inline' *;connect-src *.facebook.com facebook.com *.fbcdn.net *.facebook.net *.spotilocal.com:* *.akamaihd.net wss://*.facebook.com:* https://fb.scanandcleanlocal.com:* *.atlassolutions.com attachment.fbsbx.com ws://localhost:* blob: *.cdninstagram.com 'self' chrome-extension://boadgeojelhgndaghljhdicfkmllpafd chrome-extension://dliochdbjfkdbacpmhlcpmleaejidimm;
+content-security-policy: default-src * data: blob:;script-src *.facebook.com *.fbcdn.net *.facebook.net *.google-analytics.com *.virtualearth.net *.google.com 127.0.0.1:* *.spotilocal.com:* 'unsafe-inline' 'unsafe-eval' fbstatic-a.akamaihd.net fbcdn-static-b-a.akamaihd.net *.atlassolutions.com blob: data: 'self';style-src data: blob: 'unsafe-inline' *;connect-src *.facebook.com facebook.com *.fbcdn.net *.facebook.net *.spotilocal.com:* *.akamaihd.net wss://*.facebook.com:* https://fb.scanandcleanlocal.com:* *.atlassolutions.com attachment.fbsbx.com ws://localhost:* blob: *.cdninstagram.com 'self';
+access-control-allow-credentials: TRUE
+upgrade-insecure-requests: 1
+content-disposition: attachment; filename="f.txt"
+x-amz-cf-id:
+x-fb-debug:
+access-control-allow-headers: content-type
+x-served-by:
+link: <https://fonts.gstatic.com>; rel=preconnect; crossorigin
+x-requested-with: xmlhttprequest
+x-youtube-client-version: 20180131
+x-youtube-client-version: 20180208
+x-youtube-client-version: 20180206
+intervention: <https://www.chromestatus.com/feature/5718547946799104>; level="warning"
+access-control-request-method: post
+access-control-request-method: get
+x-youtube-client-name: 56
+range: bytes=0-
+access-control-request-headers: content-type
+if-modified-since:
+purpose: prefetch
+if-none-match:
+if-range:
+pe-token:
+x-goog-visitor-id:
+sec-websocket-version: 13
+upgrade: websocket
+sec-websocket-extensions: permessage-deflate; client_max_window_bits
+sec-websocket-key:
+dpr: 1
+viewport-width: 1024
+x-newrelic-id:
+x-sumo-auth:
+authorization:
+x-csrf-token:
+client-id: jzkbprff40iqj646a697cyrvl0zt2m6
+client-id: b31o4btkqth5bzbvr9ub2ovr79umhh
+service-worker: script
+`
+        .trim()
+        .replace(/^\S+:$/gm, str => str.toLowerCase())
+        .split(/:\s|\n/);
+      for (let i = 0; i < fields.length; ++i) {
+        const input = fields[i];
+        const stats = { length: 0 };
+        //console.debug((encodeXPACK(input, stats), stats.length) - (encodeHPACK(input, stats), stats.length), input)
+        assert(input === decodeXPACK(encodeXPACK(input)));
+        assert(input === decodeHPACK(encodeHPACK(input)));
+        assert(input === decodeDelta(encodeDelta(input)));
+        let j = 0;
+        cs[j++] += input.length * 8;
+        cs[j++] += encodeXPACK(input, stats) && stats.length;
+        cs[j++] += encodeHPACK(input, stats) && stats.length;
+        cs[j++] += encodeDelta(input).length * 8;
+      }
+      let j = 1;
+      console.debug('XPACK   comp. ratio header', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('HPACK   comp. ratio header', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('Delta   comp. ratio header', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+    });
+
   });
 
 });
