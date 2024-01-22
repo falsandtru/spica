@@ -178,6 +178,7 @@ export namespace pcg32 {
     return seed;
   }
   export function next(seed: Seed): number {
+    assert(seed[0] !== 0n || seed[1] !== 0n);
     const oldstate = seed[0];
     seed[0] = uint64n(oldstate * MULT + seed[1]);
     const xorshifted = uint32n(((oldstate >> 18n) ^ oldstate) >> 27n);
@@ -197,7 +198,7 @@ export namespace pcg32 {
       }
       cur_plus = uint64n((cur_mult + 1n) * cur_plus);
       cur_mult = uint64n(cur_mult * cur_mult);
-      delta /= 2n;
+      delta >>= 1n;
     }
     seed[0] = uint64n(acc_mult * seed[0] + acc_plus);
     return seed;
