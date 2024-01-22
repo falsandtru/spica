@@ -1,5 +1,6 @@
 import { Cache } from './cache';
 import { LRU } from './lru';
+import { TLRU } from './tlru';
 import { wait } from './timer';
 import { xorshift } from './random';
 import zipfian from 'zipfian-integer';
@@ -308,16 +309,16 @@ describe('Unit: lib/cache', () => {
       assert(!cache.has(298 + 1));
     });
 
-    for (let i = 0; i < 10; ++i) it(`verify ${i}`, function () {
+    for (let i = 0; i < 100; ++i) it(`verify ${i}`, function () {
       this.timeout(10 * 1e3);
 
-      const capacity = 100;
+      const capacity = 5;
       const cache = new Cache<number, number>(capacity);
 
       const trials = capacity * 1000;
-      const random = xorshift.random(3 ** i);
+      const random = xorshift.random(i + 1);
       for (let i = 0; i < trials; ++i) {
-        const key = random() * capacity * 10 | 0;
+        const key = random() * capacity * 2 | 0;
         if (cache.has(key)) {
           assert(cache.get(key) === ~key);
         }
@@ -333,10 +334,12 @@ describe('Unit: lib/cache', () => {
     class Stats {
       total = 0;
       lru = 0;
+      trc = 0;
       dwc = 0;
       clear() {
         this.total = 0;
         this.lru = 0;
+        this.trc = 0;
         this.dwc = 0;
       }
     }
@@ -346,6 +349,7 @@ describe('Unit: lib/cache', () => {
 
       const capacity = 100;
       const lru = new LRU<number, 1>(capacity);
+      const trc = new TLRU<number, 1>(capacity);
       const dwc = new Cache<number, 1>(capacity);
 
       const trials = capacity * 1000;
@@ -354,6 +358,7 @@ describe('Unit: lib/cache', () => {
       for (let i = 0; i < trials; ++i) {
         const key = random() * capacity * 10 | 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
+        stats.trc += trc.get(key) ?? +trc.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
       }
@@ -361,6 +366,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['dict'].size <= capacity);
       console.debug('Cache even 100');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
+      console.debug('TRC hit ratio', stats.trc * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
@@ -373,6 +379,7 @@ describe('Unit: lib/cache', () => {
 
       const capacity = 100;
       const lru = new LRU<number, 1>(capacity);
+      const trc = new TLRU<number, 1>(capacity);
       const dwc = new Cache<number, 1>(capacity);
 
       const trials = capacity * 1000;
@@ -383,6 +390,7 @@ describe('Unit: lib/cache', () => {
           ? random() * capacity * -1 - 1 | 0
           : random() * capacity * 10 | 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
+        stats.trc += trc.get(key) ?? +trc.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
       }
@@ -390,6 +398,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['dict'].size <= capacity);
       console.debug('Cache uneven 100');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
+      console.debug('TRC hit ratio', stats.trc * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
@@ -402,6 +411,7 @@ describe('Unit: lib/cache', () => {
 
       const capacity = 100;
       const lru = new LRU<number, 1>(capacity);
+      const trc = new TLRU<number, 1>(capacity);
       const dwc = new Cache<number, 1>(capacity);
 
       const trials = capacity * 1000;
@@ -410,6 +420,7 @@ describe('Unit: lib/cache', () => {
       for (let i = 0; i < trials; ++i) {
         const key = zipf();
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
+        stats.trc += trc.get(key) ?? +trc.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
       }
@@ -417,6 +428,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['dict'].size <= capacity);
       console.debug('Cache zipf 100');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
+      console.debug('TRC hit ratio', stats.trc * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
@@ -424,34 +436,34 @@ describe('Unit: lib/cache', () => {
       assert(stats.dwc / stats.lru * 100 >>> 0 === 155);
     });
 
-    it('ratio transitive distribution 100', function () {
+    it('ratio transitive 100', function () {
       this.timeout(10 * 1e3);
 
       const capacity = 100;
       const lru = new LRU<number, 1>(capacity);
+      const trc = new TLRU<number, 1>(capacity);
       const dwc = new Cache<number, 1>(capacity);
 
       const trials = capacity * 1000;
       const zipf = zipfian(1, capacity * 1e2, 0.8, xorshift.random(1));
-      const random = xorshift.random(1);
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
-        const key = i % 2
-          ? zipf()
-          : -random() * capacity * 10 - (i / 2 | 0) * capacity / 100 / 10 | 0;
+        const key = capacity * 1e2 - zipf() + i * capacity / 100 / 10 | 0
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
+        stats.trc += trc.get(key) ?? +trc.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
       }
       assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
       assert(dwc['dict'].size <= capacity);
-      console.debug('Cache transitive distribution 100');
+      console.debug('Cache transitive 100');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
+      console.debug('TRC hit ratio', stats.trc * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 133);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 48);
     });
 
     it('ratio transitive bias 100', function () {
@@ -459,6 +471,7 @@ describe('Unit: lib/cache', () => {
 
       const capacity = 100;
       const lru = new LRU<number, 1>(capacity);
+      const trc = new TLRU<number, 1>(capacity);
       const dwc = new Cache<number, 1>(capacity);
 
       const trials = capacity * 1000;
@@ -471,6 +484,7 @@ describe('Unit: lib/cache', () => {
           ? capacity * 1e2 - zipf() + (i / 2 | 0) * capacity / 100 / 10 | 0
           : -random() * capacity * 10 - 1 | 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
+        stats.trc += trc.get(key) ?? +trc.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
       }
@@ -478,6 +492,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['dict'].size <= capacity);
       console.debug('Cache transitive bias 100');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
+      console.debug('TRC hit ratio', stats.trc * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
@@ -485,11 +500,45 @@ describe('Unit: lib/cache', () => {
       assert(stats.dwc / stats.lru * 100 >>> 0 === 68);
     });
 
+    it('ratio transitive distribution 100', function () {
+      this.timeout(10 * 1e3);
+
+      const capacity = 100;
+      const lru = new LRU<number, 1>(capacity);
+      const trc = new TLRU<number, 1>(capacity);
+      const dwc = new Cache<number, 1>(capacity);
+
+      const trials = capacity * 1000;
+      const zipf = zipfian(1, capacity * 1e2, 0.8, xorshift.random(1));
+      const random = xorshift.random(1);
+      const stats = new Stats();
+      for (let i = 0; i < trials; ++i) {
+        const key = i % 2
+          ? zipf()
+          : -random() * capacity * 10 - (i / 2 | 0) * capacity / 100 / 10 | 0;
+        stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
+        stats.trc += trc.get(key) ?? +trc.set(key, 1) & 0;
+        stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
+        stats.total += 1;
+      }
+      assert(dwc['LRU'].length + dwc['LFU'].length === dwc['dict'].size);
+      assert(dwc['dict'].size <= capacity);
+      console.debug('Cache transitive distribution 100');
+      console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
+      console.debug('TRC hit ratio', stats.trc * 100 / stats.total);
+      console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
+      console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
+      console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
+      console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 133);
+    });
+
     it('ratio adversarial 100', function () {
       this.timeout(10 * 1e3);
 
       const capacity = 100;
       const lru = new LRU<number, 1>(capacity);
+      const trc = new TLRU<number, 1>(capacity);
       const dwc = new Cache<number, 1>(capacity);
 
       const trials = capacity * 100;
@@ -502,6 +551,7 @@ describe('Unit: lib/cache', () => {
           ? i % 3 - 2 ? i - i % 3 : i - i % 3 + 6
           : -zipf();
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
+        stats.trc += trc.get(key) ?? +trc.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
       }
@@ -509,6 +559,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['dict'].size <= capacity);
       console.debug('Cache adversarial 100');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
+      console.debug('TRC hit ratio', stats.trc * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
@@ -521,6 +572,7 @@ describe('Unit: lib/cache', () => {
 
       const capacity = 100;
       const lru = new LRU<number, 1>(capacity);
+      const trc = new TLRU<number, 1>(capacity);
       const dwc = new Cache<number, 1>(capacity);
 
       const trials = capacity * 100;
@@ -530,6 +582,7 @@ describe('Unit: lib/cache', () => {
         // スキャン耐性と適応が逆効果となる一度限りのアクセス
         const key = zipf() + (i / capacity | 0) * capacity * 1e2;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
+        stats.trc += trc.get(key) ?? +trc.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
       }
@@ -537,6 +590,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['dict'].size <= capacity);
       console.debug('Cache jump 100');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
+      console.debug('TRC hit ratio', stats.trc * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
@@ -549,6 +603,7 @@ describe('Unit: lib/cache', () => {
 
       const capacity = 100;
       const lru = new LRU<number, 1>(capacity);
+      const trc = new TLRU<number, 1>(capacity);
       const dwc = new Cache<number, 1>(capacity);
 
       const trials = capacity * 20;
@@ -556,6 +611,7 @@ describe('Unit: lib/cache', () => {
       for (let i = 0; i < trials; ++i) {
         const key = i % (capacity * 10);
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
+        stats.trc += trc.get(key) ?? +trc.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
         i + 1 === trials - capacity * 10 && stats.clear();
@@ -564,6 +620,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['dict'].size <= capacity);
       console.debug('Cache loop 100');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
+      console.debug('TRC hit ratio', stats.trc * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
@@ -580,18 +637,28 @@ describe('Unit: lib/cache', () => {
     function lock(
       capacity: number,
       lru: LRU<unknown, unknown>,
+      trc: TLRU<unknown, unknown>,
       dwc: Cache<unknown, unknown>,
     ): void {
       for (let i = 0; i < capacity * 100; ++i) {
         lru.set(Number.MIN_SAFE_INTEGER + i, 1);
+        trc.set(Number.MIN_SAFE_INTEGER + i, 1);
         dwc.set(Number.MIN_SAFE_INTEGER + i, 1);
+
+        lru.get(Number.MIN_SAFE_INTEGER + i - 1);
+        dwc.get(Number.MIN_SAFE_INTEGER + i + 1);
         if (i + 1 !== capacity) continue;
         for (const { key } of [...dwc['LRU']].slice(dwc['window'])) {
           dwc.get(key);
         }
       }
+      trc['handV'] = trc['list'].last;
+      trc['handG'] = trc['handV'];
+      trc['hits'] = capacity;
+      trc['misses'] = 0;
       assert(dwc['LFU'].length === capacity - dwc['window']);
       assert(dwc['partition'] === capacity - dwc['window']);
+      assert(dwc['sweeper'].isActive());
       assert(dwc['declination'] === 8);
       dwc['injection'] = 0;
     }
@@ -601,8 +668,9 @@ describe('Unit: lib/cache', () => {
 
       const capacity = 100;
       const lru = new LRU<number, 1>(capacity);
+      const trc = new TLRU<number, 1>(capacity);
       const dwc = new Cache<number, 1>(capacity);
-      lock(capacity, lru, dwc);
+      lock(capacity, lru, trc, dwc);
 
       const trials = capacity * 100;
       const zipf = zipfian(1, capacity * 1e2, 0.8, xorshift.random(1));
@@ -611,6 +679,7 @@ describe('Unit: lib/cache', () => {
         // スキャン耐性と適応が逆効果となる一度限りのアクセス
         const key = zipf() + (i / capacity | 0) * capacity * 1e2;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
+        stats.trc += trc.get(key) ?? +trc.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
         i + 1 === trials - capacity * 10 && stats.clear();
@@ -619,6 +688,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['dict'].size <= capacity);
       console.debug('Cache lock jump 100');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
+      console.debug('TRC hit ratio', stats.trc * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
@@ -631,14 +701,16 @@ describe('Unit: lib/cache', () => {
 
       const capacity = 100;
       const lru = new LRU<number, 1>(capacity);
+      const trc = new TLRU<number, 1>(capacity);
       const dwc = new Cache<number, 1>(capacity);
-      lock(capacity, lru, dwc);
+      lock(capacity, lru, trc, dwc);
 
       const trials = capacity * 40;
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         const key = i % (capacity * 10);
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
+        stats.trc += trc.get(key) ?? +trc.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
         i + 1 === trials - capacity * 10 && stats.clear();
@@ -647,6 +719,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['dict'].size <= capacity);
       console.debug('Cache lock loop 100');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
+      console.debug('TRC hit ratio', stats.trc * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
@@ -661,8 +734,9 @@ describe('Unit: lib/cache', () => {
 
       const capacity = 100;
       const lru = new LRU<number, 1>(capacity);
+      const trc = new TLRU<number, 1>(capacity);
       const dwc = new Cache<number, 1>(capacity);
-      lock(capacity, lru, dwc);
+      lock(capacity, lru, trc, dwc);
 
       // サンプルにヒットする確率の安定性に依存するため容量または試行回数の増加により改善される
       // 逆にサンプリングのジャミングが最も効果的に復元を阻害する
@@ -672,6 +746,7 @@ describe('Unit: lib/cache', () => {
       for (let i = 0; i < trials; ++i) {
         const key = zipf();
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
+        stats.trc += trc.get(key) ?? +trc.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
         i + 1 === trials - capacity * 10 && stats.clear();
@@ -680,6 +755,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['dict'].size <= capacity);
       console.debug('Cache lock LIR 100');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
+      console.debug('TRC hit ratio', stats.trc * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
@@ -693,19 +769,21 @@ describe('Unit: lib/cache', () => {
 
       const capacity = 100;
       const lru = new LRU<number, 1>(capacity);
+      const trc = new TLRU<number, 1>(capacity);
       const dwc = new Cache<number, 1>(capacity);
-      lock(capacity, lru, dwc);
+      lock(capacity, lru, trc, dwc);
 
       const trials = capacity * 40;
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         const key = i % 2
           // 高ヒット率のLIRで低ヒット率のHIRの捕捉を妨害
-          ? -(i / 2 | 0) % (capacity / 4 | 0) - 1 | 0
+          ? -i % (capacity / 4 | 0) - 1 | 0
           : i % 4
             ? i % (capacity / 2 | 0) | 0
             : i + capacity;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
+        stats.trc += trc.get(key) ?? +trc.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
         i + 1 === trials - capacity * 10 && stats.clear();
@@ -714,6 +792,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['dict'].size <= capacity);
       console.debug('Cache lock HIR 100');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
+      console.debug('TRC hit ratio', stats.trc * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
@@ -727,6 +806,7 @@ describe('Unit: lib/cache', () => {
 
       const capacity = 1000;
       const lru = new LRU<number, 1>(capacity);
+      const trc = new TLRU<number, 1>(capacity);
       const dwc = new Cache<number, 1>(capacity);
 
       const trials = capacity * 1000;
@@ -737,6 +817,7 @@ describe('Unit: lib/cache', () => {
           ? random() * capacity * -1 | 0
           : random() * capacity * 10 | 0;
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
+        stats.trc += trc.get(key) ?? +trc.set(key, 1) & 0;
         stats.dwc += dwc.get(key) ?? +dwc.set(key, 1) & 0;
         stats.total += 1;
       }
@@ -744,6 +825,7 @@ describe('Unit: lib/cache', () => {
       assert(dwc['dict'].size <= capacity);
       console.debug('Cache uneven 1,000');
       console.debug('LRU hit ratio', stats.lru * 100 / stats.total);
+      console.debug('TRC hit ratio', stats.trc * 100 / stats.total);
       console.debug('DWC hit ratio', stats.dwc * 100 / stats.total);
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);

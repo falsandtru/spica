@@ -1,6 +1,8 @@
 import { benchmark } from './benchmark';
 import { Clock } from '../src/clock';
 import { LRU } from '../src/lru';
+import { TLRU as TRCC } from '../src/tlru.clock';
+import { TLRU as TRCL } from '../src/tlru.lru';
 import { Cache } from '../src/cache';
 import { LRUCache } from 'lru-cache';
 import { xorshift } from '../src/random';
@@ -9,142 +11,208 @@ import { captureTimers } from '../src/timer';
 describe('Benchmark:', function () {
   describe('Cache', function () {
     it('Clock new', function (done) {
-      benchmark('Clock    new', () => new Clock(10000), done);
+      benchmark('Clock new', () => new Clock(10000), done);
     });
 
     it('ISC new', function (done) {
-      benchmark('ISCCache new', () => new LRUCache({ max: 10000 }), done);
+      benchmark('ISC   new', () => new LRUCache({ max: 10000 }), done);
     });
 
     it('LRU new', function (done) {
-      benchmark('LRUCache new', () => new LRU(10000), done);
+      benchmark('LRU   new', () => new LRU(10000), done);
+    });
+
+    it('TRC-C new', function (done) {
+      benchmark('TRC-C new', () => new TRCC(10000), done);
+    });
+
+    it('TRC-L new', function (done) {
+      benchmark('TRC-L new', () => new TRCL(10000), done);
     });
 
     it('DWC new', function (done) {
-      benchmark('DW-Cache new', () => new Cache(10000), done);
+      benchmark('DWC   new', () => new Cache(10000), done);
     });
 
     for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
-      it(`Clock set ${size.toLocaleString('en')} 0%`, function (done) {
+      it(`Clock set miss ${size.toLocaleString('en')}`, function (done) {
         const cache = new Clock<number, object>(size);
         for (let i = 0; i < Math.ceil(size / 32) * 32; ++i) cache.set(~i, {});
         const random = xorshift.random(1);
         let i = 0;
-        benchmark(`Clock    set ${size.toLocaleString('en')} 0%`, () => cache.set(random() + ++i | 0, {}), done);
+        benchmark(`Clock set miss ${size.toLocaleString('en')}`, () => cache.set(random() + ++i | 0, {}), done);
       });
 
-      it(`ISC set ${size.toLocaleString('en')} 0%`, function (done) {
+      it(`ISC set miss ${size.toLocaleString('en')}`, function (done) {
         const cache = new LRUCache<number, object>({ max: size });
         for (let i = 0; i < size; ++i) cache.set(~i, {});
         const random = xorshift.random(1);
         let i = 0;
-        benchmark(`ISCCache set ${size.toLocaleString('en')} 0%`, () => cache.set(random() + ++i | 0, {}), done);
+        benchmark(`ISC   set miss ${size.toLocaleString('en')}`, () => cache.set(random() + ++i | 0, {}), done);
       });
 
-      it(`LRU set ${size.toLocaleString('en')} 0%`, function (done) {
+      it(`LRU set miss ${size.toLocaleString('en')}`, function (done) {
         const cache = new LRU<number, object>(size);
         for (let i = 0; i < size; ++i) cache.set(~i, {});
         const random = xorshift.random(1);
         let i = 0;
-        benchmark(`LRUCache set ${size.toLocaleString('en')} 0%`, () => cache.set(random() + ++i | 0, {}), done);
+        benchmark(`LRU   set miss ${size.toLocaleString('en')}`, () => cache.set(random() + ++i | 0, {}), done);
       });
 
-      it(`DWC set ${size.toLocaleString('en')} 0%`, function (done) {
+      it(`TRC-C set miss ${size.toLocaleString('en')}`, function (done) {
+        const cache = new TRCC<number, object>(size);
+        for (let i = 0; i < size; ++i) cache.set(~i, {});
+        const random = xorshift.random(1);
+        let i = 0;
+        benchmark(`TRC-C set miss ${size.toLocaleString('en')}`, () => cache.set(random() + ++i | 0, {}), done);
+      });
+
+      it(`TRC-L set miss ${size.toLocaleString('en')}`, function (done) {
+        const cache = new TRCL<number, object>(size);
+        for (let i = 0; i < size; ++i) cache.set(~i, {});
+        const random = xorshift.random(1);
+        let i = 0;
+        benchmark(`TRC-L set miss ${size.toLocaleString('en')}`, () => cache.set(random() + ++i | 0, {}), done);
+      });
+
+      it(`DWC set miss ${size.toLocaleString('en')}`, function (done) {
         const cache = new Cache<number, object>(size);
         for (let i = 0; i < size; ++i) cache.set(~i, {});
         const random = xorshift.random(1);
         let i = 0;
-        benchmark(`DW-Cache set ${size.toLocaleString('en')} 0%`, () => cache.set(random() + ++i | 0, {}), done);
+        benchmark(`DWC   set miss ${size.toLocaleString('en')}`, () => cache.set(random() + ++i | 0, {}), done);
       });
     }
 
     for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
-      it(`Clock set ${size.toLocaleString('en')} 100%`, function (done) {
+      it(`Clock set hit ${size.toLocaleString('en')}`, function (done) {
         const cache = new Clock<number, object>(size);
         for (let i = 0; i < Math.ceil(size / 32) * 32; ++i) cache.set(i, {});
         const random = xorshift.random(1);
-        benchmark(`Clock    set ${size.toLocaleString('en')} 100%`, () => cache.set(random() * size | 0, {}), done);
+        benchmark(`Clock set hit ${size.toLocaleString('en')}`, () => cache.set(random() * size | 0, {}), done);
       });
 
-      it(`ISC set ${size.toLocaleString('en')} 100%`, function (done) {
+      it(`ISC set hit ${size.toLocaleString('en')}`, function (done) {
         const cache = new LRUCache<number, object>({ max: size });
         for (let i = 0; i < size; ++i) cache.set(i, {});
         const random = xorshift.random(1);
-        benchmark(`ISCCache set ${size.toLocaleString('en')} 100%`, () => cache.set(random() * size | 0, {}), done);
+        benchmark(`ISC   set hit ${size.toLocaleString('en')}`, () => cache.set(random() * size | 0, {}), done);
       });
 
-      it(`LRU set ${size.toLocaleString('en')} 100%`, function (done) {
+      it(`LRU set hit ${size.toLocaleString('en')}`, function (done) {
         const cache = new LRU<number, object>(size);
         for (let i = 0; i < size; ++i) cache.set(i, {});
         const random = xorshift.random(1);
-        benchmark(`LRUCache set ${size.toLocaleString('en')} 100%`, () => cache.set(random() * size | 0, {}), done);
+        benchmark(`LRU   set hit ${size.toLocaleString('en')}`, () => cache.set(random() * size | 0, {}), done);
       });
 
-      it(`DWC set ${size.toLocaleString('en')} 100%`, function (done) {
+      it(`TRC-C set hit ${size.toLocaleString('en')}`, function (done) {
+        const cache = new TRCC<number, object>(size);
+        for (let i = 0; i < size; ++i) cache.set(i, {});
+        const random = xorshift.random(1);
+        benchmark(`TRC-C set hit ${size.toLocaleString('en')}`, () => cache.set(random() * size | 0, {}), done);
+      });
+
+      it(`TRC-L set hit ${size.toLocaleString('en')}`, function (done) {
+        const cache = new TRCL<number, object>(size);
+        for (let i = 0; i < size; ++i) cache.set(i, {});
+        const random = xorshift.random(1);
+        benchmark(`TRC-L set hit ${size.toLocaleString('en')}`, () => cache.set(random() * size | 0, {}), done);
+      });
+
+      it(`DWC set hit ${size.toLocaleString('en')}`, function (done) {
         const cache = new Cache<number, object>(size);
         for (let i = 0; i < size; ++i) cache.set(i, {});
         const random = xorshift.random(1);
-        benchmark(`DW-Cache set ${size.toLocaleString('en')} 100%`, () => cache.set(random() * size | 0, {}), done);
+        benchmark(`DWC   set hit ${size.toLocaleString('en')}`, () => cache.set(random() * size | 0, {}), done);
       });
     }
 
     for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
-      it(`Clock get ${size.toLocaleString('en')} 0%`, function (done) {
+      it(`Clock get miss ${size.toLocaleString('en')}`, function (done) {
         const cache = new Clock<number, object>(size);
         for (let i = 0; i < Math.ceil(size / 32) * 32; ++i) cache.set(~i, {});
         const random = xorshift.random(1);
-        benchmark(`Clock    get ${size.toLocaleString('en')} 0%`, () => cache.get(random() * size | 0), done);
+        benchmark(`Clock get miss ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
       });
 
-      it(`ISC get ${size.toLocaleString('en')} 0%`, function (done) {
+      it(`ISC get miss ${size.toLocaleString('en')}`, function (done) {
         const cache = new LRUCache<number, object>({ max: size });
         for (let i = 0; i < size; ++i) cache.set(~i, {});
         const random = xorshift.random(1);
-        benchmark(`ISCCache get ${size.toLocaleString('en')} 0%`, () => cache.get(random() * size | 0), done);
+        benchmark(`ISC   get miss ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
       });
 
-      it(`LRU get ${size.toLocaleString('en')} 0%`, function (done) {
+      it(`LRU get miss ${size.toLocaleString('en')}`, function (done) {
         const cache = new LRU<number, object>(size);
         for (let i = 0; i < size; ++i) cache.set(~i, {});
         const random = xorshift.random(1);
-        benchmark(`LRUCache get ${size.toLocaleString('en')} 0%`, () => cache.get(random() * size | 0), done);
+        benchmark(`LRU   get miss ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
       });
 
-      it(`DWC get ${size.toLocaleString('en')} 0%`, function (done) {
+      it(`TRC-C get miss ${size.toLocaleString('en')}`, function (done) {
+        const cache = new TRCC<number, object>(size);
+        for (let i = 0; i < size; ++i) cache.set(~i, {});
+        const random = xorshift.random(1);
+        benchmark(`TRC-C get miss ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
+      });
+
+      it(`TRC-L get miss ${size.toLocaleString('en')}`, function (done) {
+        const cache = new TRCL<number, object>(size);
+        for (let i = 0; i < size; ++i) cache.set(~i, {});
+        const random = xorshift.random(1);
+        benchmark(`TRC-L get miss ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
+      });
+
+      it(`DWC get miss ${size.toLocaleString('en')}`, function (done) {
         const cache = new Cache<number, object>(size);
         for (let i = 0; i < size; ++i) cache.set(~i, {});
         const random = xorshift.random(1);
-        benchmark(`DW-Cache get ${size.toLocaleString('en')} 0%`, () => cache.get(random() * size | 0), done);
+        benchmark(`DWC   get miss ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
       });
     }
 
     for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
-      it(`Clock get ${size.toLocaleString('en')} 100%`, function (done) {
+      it(`Clock get hit ${size.toLocaleString('en')}`, function (done) {
         const cache = new Clock<number, object>(size);
         for (let i = 0; i < Math.ceil(size / 32) * 32; ++i) cache.set(i, {});
         const random = xorshift.random(1);
-        benchmark(`Clock    get ${size.toLocaleString('en')} 100%`, () => cache.get(random() * size | 0), done);
+        benchmark(`Clock get hit ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
       });
 
-      it(`ISC get ${size.toLocaleString('en')} 100%`, function (done) {
+      it(`ISC get hit ${size.toLocaleString('en')}`, function (done) {
         const cache = new LRUCache<number, object>({ max: size });
         for (let i = 0; i < size; ++i) cache.set(i, {});
         const random = xorshift.random(1);
-        benchmark(`ISCCache get ${size.toLocaleString('en')} 100%`, () => cache.get(random() * size | 0), done);
+        benchmark(`ISC   get hit ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
       });
 
-      it(`LRU get ${size.toLocaleString('en')} 100%`, function (done) {
+      it(`LRU get hit ${size.toLocaleString('en')}`, function (done) {
         const cache = new LRU<number, object>(size);
         for (let i = 0; i < size; ++i) cache.set(i, {});
         const random = xorshift.random(1);
-        benchmark(`LRUCache get ${size.toLocaleString('en')} 100%`, () => cache.get(random() * size | 0), done);
+        benchmark(`LRU   get hit ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
       });
 
-      it(`DWC get ${size.toLocaleString('en')} 100%`, function (done) {
+      it(`TRC-C get hit ${size.toLocaleString('en')}`, function (done) {
+        const cache = new TRCC<number, object>(size);
+        for (let i = 0; i < size; ++i) cache.set(i, {});
+        const random = xorshift.random(1);
+        benchmark(`TRC-C get hit ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
+      });
+
+      it(`TRC-L get hit ${size.toLocaleString('en')}`, function (done) {
+        const cache = new TRCL<number, object>(size);
+        for (let i = 0; i < size; ++i) cache.set(i, {});
+        const random = xorshift.random(1);
+        benchmark(`TRC-L get hit ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
+      });
+
+      it(`DWC get hit ${size.toLocaleString('en')}`, function (done) {
         const cache = new Cache<number, object>(size);
         for (let i = 0; i < size; ++i) cache.set(i, {});
         const random = xorshift.random(1);
-        benchmark(`DW-Cache get ${size.toLocaleString('en')} 100%`, () => cache.get(random() * size | 0), done);
+        benchmark(`DWC   get hit ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
       });
     }
 
@@ -164,7 +232,7 @@ describe('Benchmark:', function () {
         const cache = new Clock<number, object>(size);
         const random = bias(Math.ceil(size / 32) * 32, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
-        benchmark(`Clock    simulation ${size.toLocaleString('en')} 10%`, () => {
+        benchmark(`Clock simulation ${size.toLocaleString('en')} 10%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
         }, done);
@@ -174,7 +242,7 @@ describe('Benchmark:', function () {
         const cache = new LRUCache<number, object>({ max: size });
         const random = bias(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
-        benchmark(`ISCCache simulation ${size.toLocaleString('en')} 10%`, () => {
+        benchmark(`ISC   simulation ${size.toLocaleString('en')} 10%`, () => {
           const key = random();
           cache.get(key) ?? cache.set(key, {});
         }, done);
@@ -184,7 +252,27 @@ describe('Benchmark:', function () {
         const cache = new LRU<number, object>(size);
         const random = bias(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
-        benchmark(`LRUCache simulation ${size.toLocaleString('en')} 10%`, () => {
+        benchmark(`LRU   simulation ${size.toLocaleString('en')} 10%`, () => {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }, done);
+      });
+
+      it(`TRC-C simulation ${size.toLocaleString('en')} 10%`, function (done) {
+        const cache = new TRCC<number, object>(size);
+        const random = bias(size, xorshift.random(1));
+        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        benchmark(`TRC-C simulation ${size.toLocaleString('en')} 10%`, () => {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }, done);
+      });
+
+      it(`TRC-L simulation ${size.toLocaleString('en')} 10%`, function (done) {
+        const cache = new TRCL<number, object>(size);
+        const random = bias(size, xorshift.random(1));
+        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        benchmark(`TRC-L simulation ${size.toLocaleString('en')} 10%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
         }, done);
@@ -194,7 +282,7 @@ describe('Benchmark:', function () {
         const cache = new Cache<number, object>(size);
         const random = bias(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
-        benchmark(`DW-Cache simulation ${size.toLocaleString('en')} 10%`, () => {
+        benchmark(`DWC   simulation ${size.toLocaleString('en')} 10%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
         }, done);
@@ -207,7 +295,7 @@ describe('Benchmark:', function () {
         const cache = new Clock<number, object>(size);
         const random = bias(Math.ceil(size / 32) * 32, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
-        benchmark(`Clock    simulation ${size.toLocaleString('en')} 90%`, () => {
+        benchmark(`Clock simulation ${size.toLocaleString('en')} 90%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
         }, done);
@@ -217,7 +305,7 @@ describe('Benchmark:', function () {
         const cache = new LRUCache<number, object>({ max: size });
         const random = bias(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
-        benchmark(`ISCCache simulation ${size.toLocaleString('en')} 90%`, () => {
+        benchmark(`ISC   simulation ${size.toLocaleString('en')} 90%`, () => {
           const key = random();
           cache.get(key) ?? cache.set(key, {});
         }, done);
@@ -227,7 +315,27 @@ describe('Benchmark:', function () {
         const cache = new LRU<number, object>(size);
         const random = bias(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
-        benchmark(`LRUCache simulation ${size.toLocaleString('en')} 90%`, () => {
+        benchmark(`LRU   simulation ${size.toLocaleString('en')} 90%`, () => {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }, done);
+      });
+
+      it(`TRC-C simulation ${size.toLocaleString('en')} 90%`, function (done) {
+        const cache = new TRCC<number, object>(size);
+        const random = bias(size, xorshift.random(1));
+        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        benchmark(`TRC-C simulation ${size.toLocaleString('en')} 90%`, () => {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }, done);
+      });
+
+      it(`TRC-L simulation ${size.toLocaleString('en')} 90%`, function (done) {
+        const cache = new TRCL<number, object>(size);
+        const random = bias(size, xorshift.random(1));
+        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        benchmark(`TRC-L simulation ${size.toLocaleString('en')} 90%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
         }, done);
@@ -237,7 +345,7 @@ describe('Benchmark:', function () {
         const cache = new Cache<number, object>(size);
         const random = bias(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
-        benchmark(`DW-Cache simulation ${size.toLocaleString('en')} 90%`, () => {
+        benchmark(`DWC   simulation ${size.toLocaleString('en')} 90%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
         }, done);
@@ -252,7 +360,7 @@ describe('Benchmark:', function () {
         const random = bias(size, xorshift.random(1));
         for (let i = 0; i < size * 9; ++i) cache.set(random(), {});
         for (let i = 0; i < size * 1; ++i) cache.set(i, {}, { ttl: age });
-        benchmark(`ISCCache simulation ${size.toLocaleString('en')} 90% expire`, () => {
+        benchmark(`ISC   simulation ${size.toLocaleString('en')} 90% expire`, () => {
           const key = random();
           cache.get(key) ?? cache.set(key, {}, { ttl: age });
         }, done);
@@ -263,7 +371,7 @@ describe('Benchmark:', function () {
         const random = bias(size, xorshift.random(1));
         for (let i = 0; i < size * 9; ++i) cache.set(random(), {});
         for (let i = 0; i < size * 1; ++i) cache.set(i, {}, { age: age });
-        benchmark(`DW-Cache simulation ${size.toLocaleString('en')} 90% expire`, () => {
+        benchmark(`DWC   simulation ${size.toLocaleString('en')} 90% expire`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {}, { age: age });
         }, done);
