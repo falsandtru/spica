@@ -56,16 +56,15 @@ export class List<N extends List.Node = List.Node> {
     this.head = undefined;
   }
   public *[Symbol.iterator](): Iterator<N, undefined, undefined> {
-    let head = this.head;
-    for (let node = head; node !== undefined;) {
+    for (let node = this.head; node !== undefined;) {
       yield node;
       node = node.next;
-      if (node === head) return;
+      if (node === this.head) break;
     }
   }
   public flatMap<T>(f: (node: N) => ArrayLike<T>): T[] {
     const acc = [];
-    for (let head = this.head, node = head; node;) {
+    for (let node = this.head; node !== undefined;) {
       const as = f(node);
       switch (as.length) {
         case 0:
@@ -79,15 +78,15 @@ export class List<N extends List.Node = List.Node> {
           }
       }
       node = node.next;
-      if (node === head) break;
+      if (node === this.head) break;
     }
     return acc;
   }
   public find(f: (node: N) => unknown): N | undefined {
-    for (let head = this.head, node = head; node;) {
+    for (let node = this.head; node !== undefined;) {
       if (f(node)) return node;
       node = node.next;
-      if (node === head) break;
+      if (node === this.head) break;
     }
   }
 }

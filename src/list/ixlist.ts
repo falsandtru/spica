@@ -242,9 +242,10 @@ export class List<T> {
     return true;
   }
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
-    for (let index = this.head, i = 0; i < this.$length; ++i) {
+    for (let index = this.head; this.$length !== 0;) {
       yield this.values[index];
       index = this.nexts[index];
+      if (index === this.head) break;
     }
   }
 }
