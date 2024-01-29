@@ -836,7 +836,7 @@ assert(ratio2(10, [2, 0], [3, 0], 0) === 4000);
 class TLRU<T extends Entry<K, V>> {
   constructor(
     private readonly step: number = 1,
-    private readonly window: number = 100,
+    private readonly window: number = 0,
     //private readonly retrial: boolean = true,
   ) {
   }
@@ -863,11 +863,13 @@ class TLRU<T extends Entry<K, V>> {
     const { list } = this;
     if (this.count !== -1 &&
         this.handM === list.last &&
-        this.handG !== list.last && this.handG !== undefined &&
-        this.count <= list.length * (this.window - this.step) / 100) {
+        this.handG !== list.last && this.handG !== undefined) {
       if (this.count >= 0) {
         //this.count = -max(max(list.length - this.count, 0) * this.step / 100 | 0, 1) - 1;
-        this.count = -max(list.length * this.step / 100 | 0, 1) - 1;
+        this.count = -max(
+          list.length * this.window / 100 - this.count | 0,
+          list.length * this.step / 100 | 0,
+          1) - 1;
       }
       assert(this.count < 0);
     }

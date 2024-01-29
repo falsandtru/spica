@@ -16,7 +16,7 @@ export class TLRU<K, V> implements IterableDict<K, V> {
   constructor(
     private readonly capacity: number,
     private readonly step: number = 1,
-    private readonly window: number = 100,
+    private readonly window: number = 0,
     private readonly retrial: boolean = true,
   ) {
   }
@@ -35,13 +35,15 @@ export class TLRU<K, V> implements IterableDict<K, V> {
     const { list } = this;
     if (this.count !== -1 &&
         this.handM === list.last &&
-        this.handG !== list.last && this.handG !== undefined &&
-        this.count <= list.length * (this.window - this.step) / 100) {
+        this.handG !== list.last && this.handG !== undefined) {
       if (this.count >= 0) {
         // 先頭の次からなので1周-1
         assert(this.count < this.capacity);
         //this.count = -max(max(list.length - this.count, 0) * this.step / 100 | 0, 1) - 1;
-        this.count = -max(list.length * this.step / 100 | 0, 1) - 1;
+        this.count = -max(
+          list.length * this.window / 100 - this.count | 0,
+          list.length * this.step / 100 | 0,
+          1) - 1;
       }
       assert(this.count < 0);
     }
