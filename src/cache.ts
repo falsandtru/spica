@@ -108,10 +108,10 @@ class Entry<K, V> implements List.Node {
     public value: V,
     public size: number,
     public expiration: number,
-    public partition: 'LRU' | 'LFU',
-    public affiliation: 'LRU' | 'LFU',
   ) {
   }
+  public partition: 'LRU' | 'LFU' = 'LRU';
+  public affiliation: 'LRU' | 'LFU' = 'LRU';
   public enode?: Heap.Node<Entry<K, V>, number> = undefined;
   public next?: this = undefined;
   public prev?: this = undefined;
@@ -527,14 +527,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
     assert(LRU.length !== this.capacity);
     this.$size += size;
     assert(0 < this.size && this.size <= this.resource);
-    const entry = new Entry(
-      key,
-      value,
-      size,
-      expiration,
-      'LRU',
-      'LRU',
-    );
+    const entry = new Entry(key, value, size, expiration);
     LRU.unshift(entry);
     this.dict.set(key, entry);
     assert(this.LRU.length + this.LFU.length === this.dict.size);
