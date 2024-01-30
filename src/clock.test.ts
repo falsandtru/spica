@@ -56,13 +56,13 @@ describe('Unit: lib/clock', () => {
     for (let i = 0; i < 10; ++i) it(`verify ${i}`, function () {
       this.timeout(10 * 1e3);
 
-      const capacity = 96;
+      const capacity = 32 * 3;
       const clock = new Clock<number, number>(capacity);
 
       const trials = capacity * 1000;
-      const random = zipfian(1, capacity * 1e3, 0.8, xorshift.random(3 ** i));
+      const random = xorshift.random(i + 1);
       for (let i = 0; i < trials; ++i) {
-        const key = random() * capacity * 10 | 0;
+        const key = random() * capacity * 2 | 0;
         if (clock.has(key)) {
           assert(clock.get(key) === ~key);
         }

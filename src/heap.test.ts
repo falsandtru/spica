@@ -209,7 +209,7 @@ describe('Unit: lib/heap', () => {
       ]);
     });
 
-    for (let i = 0; i < 10; ++i) it(`verify ${i}`, function () {
+    for (let i = 0; i < 20; ++i) it(`verify ${i}`, function () {
       const heap = new Heap<number>();
 
       const size = 1e4;
