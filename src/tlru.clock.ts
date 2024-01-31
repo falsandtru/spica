@@ -140,7 +140,8 @@ export class TLRU<K, V> implements IterableDict<K, V> {
   }
   private escape(entry: Entry<K, V>): void {
     const { list } = this;
-    if (list.length <= 1) {
+    assert(list.length !== 0);
+    if (list.length === 1) {
       this.handV = undefined;
       this.handG = undefined;
       this.count = 0;
