@@ -867,8 +867,8 @@ class TLRU<T extends Entry<K, V>> {
       if (this.count >= 0) {
         //this.count = -max(max(list.length - this.count, 0) * this.step / 100 | 0, 1) - 1;
         this.count = -max(
-          list.length * this.window / 100 - this.count | 0,
           list.length * this.step / 100 | 0,
+          list.length * this.window / 100 - this.count | 0,
           1) - 1;
       }
       assert(this.count < 0);
