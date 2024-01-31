@@ -74,7 +74,9 @@ export class TLRU<K, V> implements IterableDict<K, V> {
       entry.key = key;
       entry.value = value;
     }
+    // 延命
     else {
+      assert(this.count < 0);
       const entry = list.last!;
       dict.delete(entry.key);
       dict.set(key, entry);
@@ -82,19 +84,15 @@ export class TLRU<K, V> implements IterableDict<K, V> {
       entry.value = value;
       this.escape(entry);
       list.delete(entry);
-      // 延命
       assert(this.handG !== undefined);
-      assert(this.count < 0);
       if (this.handG !== list.head) {
         list.insert(entry, this.handG);
-        this.handG = entry.prev;
       }
       else {
         list.unshift(entry);
-        this.handG = undefined;
-        this.count = 0;
       }
       this.handV = entry;
+      this.handG = entry.prev;
     }
     if(this.handV !== this.handG){
       this.handV = this.handV.prev;
