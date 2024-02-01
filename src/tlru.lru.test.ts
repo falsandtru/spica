@@ -49,7 +49,7 @@ describe('Unit: lib/tlru.lru', () => {
       console.debug('LRU hits', stats.lru);
       console.debug('TRC hits', stats.trc);
       console.debug('TRC / LRU hit ratio', `${stats.trc / stats.lru * 100 | 0}%`);
-      assert(stats.trc / stats.lru * 100 >>> 0 === 100);
+      assert(stats.trc / stats.lru * 100 >>> 0 === 99);
     });
 
     it('zipf 100', function () {
@@ -71,7 +71,7 @@ describe('Unit: lib/tlru.lru', () => {
       console.debug('LRU hits', stats.lru);
       console.debug('TRC hits', stats.trc);
       console.debug('TRC / LRU hit ratio', `${stats.trc / stats.lru * 100 | 0}%`);
-      assert(stats.trc / stats.lru * 100 >>> 0 === 165);
+      assert(stats.trc / stats.lru * 100 >>> 0 === 166);
     });
 
     it('zipf 1,000', function () {
@@ -93,7 +93,7 @@ describe('Unit: lib/tlru.lru', () => {
       console.debug('LRU hits', stats.lru);
       console.debug('TRC hits', stats.trc);
       console.debug('TRC / LRU hit ratio', `${stats.trc / stats.lru * 100 | 0}%`);
-      assert(stats.trc / stats.lru * 100 >>> 0 === 138);
+      assert(stats.trc / stats.lru * 100 >>> 0 === 141);
     });
 
   });

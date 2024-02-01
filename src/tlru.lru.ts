@@ -25,6 +25,7 @@ export class TLRU<K, V> implements IterableDict<K, V> {
   private handM?: Entry<K, V> = undefined;
   private handG?: Entry<K, V> = undefined;
   private count = 0;
+  private state = false;
   public get length(): number {
     return this.list.length;
   }
@@ -44,17 +45,11 @@ export class TLRU<K, V> implements IterableDict<K, V> {
           list.length * this.step / 100 | 0,
           list.length * this.window / 100 - this.count | 0,
           1) - 1;
+        assert(this.count < 0);
       }
-      assert(this.count < 0);
     }
     else {
-      if (this.handM === list.head) {
-        this.handG = undefined;
-      }
-      if (this.handG === list.last!) {
-        this.handG = this.handG.prev!;
-      }
-      this.handM = this.handG?.next;
+      this.handM = undefined;
       this.count = 0;
     }
   }
@@ -63,16 +58,20 @@ export class TLRU<K, V> implements IterableDict<K, V> {
     if (this.handM === list.last) {
       this.return();
     }
+    this.handM ??= this.handG;
     // 非延命
-    if (this.count < 0 && this.handG !== undefined && !this.retrial) {
-      const entry = this.handG;
+    if (this.count < 0 && !this.retrial) {
+      const entry = this.handG!;
       dict.delete(entry.key);
       dict.set(key, entry);
       entry.key = key;
       entry.value = value;
-      this.escape(entry);
+      this.handG = this.handG !== list.head
+        ? entry.prev
+        : undefined;
     }
-    else {
+    // 延命
+    else if (this.count < 0) {
       const entry = list.last!;
       dict.delete(entry.key);
       dict.set(key, entry);
@@ -80,28 +79,36 @@ export class TLRU<K, V> implements IterableDict<K, V> {
       entry.value = value;
       this.escape(entry);
       list.delete(entry);
-      // 延命
-      if (this.count < 0) {
-        assert(this.handM === list.last);
-        assert(this.handG !== undefined);
-        if (this.handG !== list.head) {
-          list.insert(entry, this.handG);
-          this.handG = entry.prev;
-        }
-        else {
-          list.unshift(entry);
-          this.handM = undefined;
-          this.handG = undefined;
-          this.count = 0;
-        }
+      if (this.handG !== list.head && this.handG !== undefined) {
+        list.insert(entry, this.handG);
       }
-      else if (this.handG !== undefined) {
+      else {
+        list.unshift(entry);
+      }
+      this.handG = this.handG !== list.head
+        ? entry.prev
+        : undefined;
+    }
+    else {
+      assert(this.count >= 0);
+      const entry = list.last!;
+      dict.delete(entry.key);
+      dict.set(key, entry);
+      entry.key = key;
+      entry.value = value;
+      this.escape(entry);
+      list.delete(entry);
+      if (this.handG !== list.head && this.handG !== undefined) {
         list.insert(entry, this.handG.next);
       }
       else {
         list.unshift(entry);
       }
     }
+    if (this.handM === this.handG && this.handM !== list.last && this.handM !== undefined) {
+      this.handM = this.handM.next;
+    }
+    assert(this.count >= 0 || this.handM === list.last);
     if (this.handM !== undefined) {
       ++this.count;
     }
@@ -115,16 +122,14 @@ export class TLRU<K, V> implements IterableDict<K, V> {
   }
   public add(key: K, value: V): boolean {
     const { dict, list } = this;
-    const entry = new Entry(key, value);
-    dict.set(key, entry);
-    if (this.handM === this.handG && this.handM !== list.last && this.handM !== undefined) {
-      this.handM = this.handM.next;
-    }
     if (list.length === this.capacity) {
+      this.state = true;
       this.replace(key, value);
     }
     else {
-      if (this.handG !== undefined) {
+      const entry = new Entry(key, value);
+      dict.set(key, entry);
+      if (this.state && this.handG !== list.head && this.handG !== undefined) {
         list.insert(entry, this.handG.next);
       }
       else {
@@ -176,12 +181,7 @@ export class TLRU<K, V> implements IterableDict<K, V> {
       list.delete(entry);
       list.unshift(entry);
     }
-    if (this.handG === undefined) {
-      assert(this.handM === undefined);
-      this.handM = entry.next;
-      this.handG = entry;
-      this.count = 1;
-    }
+    this.handG ??= entry;
     return entry.value;
   }
   public has(key: K): boolean {
@@ -203,6 +203,7 @@ export class TLRU<K, V> implements IterableDict<K, V> {
     this.handM = undefined;
     this.handG = undefined;
     this.count = 0;
+    this.state = false;
   }
   public *[Symbol.iterator](): Iterator<[K, V], undefined, undefined> {
     for (const { key, value } of this.list) {
