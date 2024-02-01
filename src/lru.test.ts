@@ -25,6 +25,20 @@ describe('Unit: lib/lru', () => {
       assert(cache.length === capacity);
     });
 
+    it('order', function () {
+      const capacity = 4;
+      const cache = new LRU<number, 1>(capacity);
+      for (let i = 0; i < capacity; ++i) {
+        cache.add(~i, 1);
+      }
+      for (const i of [1, 2, 3, 3, 2, 4]) {
+        cache.get(i) ?? cache.add(i, 1);
+      }
+      assert.deepStrictEqual(
+        [...cache].map(t => t[0]),
+        [4, 2, 3, 1]);
+    });
+
     class Stats {
       lru = 0;
       isc = 0;
