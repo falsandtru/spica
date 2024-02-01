@@ -837,7 +837,7 @@ class TLRU<T extends Entry<K, V>> {
   constructor(
     private readonly step: number = 1,
     private readonly window: number = 0,
-    //private readonly retrial: boolean = true,
+    private readonly retrial: boolean = true,
   ) {
   }
   public get head(): T | undefined {
@@ -846,11 +846,11 @@ class TLRU<T extends Entry<K, V>> {
   public set head(entry: T | undefined) {
     this.list.head = entry;
   }
-  public get last(): T | undefined {
-    return this.list.last;
+  public get victim(): T | undefined {
+    return this.handV ?? this.list.last;
   }
   private readonly list = new List<T>();
-  private handM?: T = undefined;
+  private handV?: T = undefined;
   private handG?: T = undefined;
   private count = 0;
   public get length(): number {
@@ -862,7 +862,7 @@ class TLRU<T extends Entry<K, V>> {
   private return(): void {
     const { list } = this;
     if (this.count !== -1 &&
-        this.handM === list.last &&
+        this.handV !== undefined &&
         this.handG !== list.last && this.handG !== undefined) {
       if (this.count >= 0) {
         //this.count = -max(max(list.length - this.count, 0) * this.step / 100 | 0, 1) - 1;
@@ -870,76 +870,78 @@ class TLRU<T extends Entry<K, V>> {
           list.length * this.step / 100 | 0,
           list.length * this.window / 100 - this.count | 0,
           1) - 1;
+        assert(this.count < 0);
       }
-      assert(this.count < 0);
+      else {
+        this.handG = this.handG.prev;
+      }
     }
     else {
-      if (this.handM === list.head) {
+      if (this.handV === list.head) {
         this.handG = undefined;
       }
-      if (this.handG === list.last!) {
-        this.handG = this.handG.prev!;
+      if (this.handG === list.last) {
+        this.handG = this.handG?.prev;
       }
-      this.handM = this.handG?.next;
+      this.handV = list.last;
       this.count = 0;
     }
   }
   public unshift(entry: T): void {
     const { list } = this;
-    if (this.handM === list.last && this.handM !== undefined) {
+    if (this.handV === this.handG || this.handV === list.last) {
       this.return();
     }
     list.unshift(entry);
     this.hit(entry);
   }
   public hit(entry: T): void {
-    if (this.handG === undefined) {
-      assert(this.handM === undefined);
-      this.handM = entry.next;
-      this.handG = entry;
-      this.count = 1;
-    }
+    this.handG ??= entry;
   }
   public add(entry: T): boolean {
     const { list } = this;
-    if (this.handM === list.last && this.handM !== undefined) {
+    if (this.handV === this.handG || this.handV === list.last) {
       this.return();
     }
-    if (this.handM === this.handG && this.handM !== list.last && this.handM !== undefined) {
-      this.handM = this.handM.next;
+    // 非延命
+    if (this.count >= 0 || !this.retrial) {
+      this.handV ??= list.last;
+      list.insert(entry, this.handV?.next);
+      this.handV ??= list.last!;
     }
-    if (this.count < 0 && this.handG !== undefined) {
+    // 延命
+    else {
+      assert(this.count < 0);
+      assert(this.handG !== undefined);
       if (this.handG !== list.head) {
-        list.insert(entry, this.handG.next);
-        this.handG = this.handG.prev;
+        list.insert(entry, this.handG);
       }
       else {
         list.unshift(entry);
-        this.handM = undefined;
-        this.handG = undefined;
-        this.count = 0;
       }
+      this.handV = entry;
+      this.handG = entry.prev;
     }
-    else if (this.handG !== undefined) {
-      list.insert(entry, this.handG.next);
+    if(this.handV !== this.handG){
+      this.handV = this.handV.prev;
     }
-    else {
-      list.unshift(entry);
-    }
+    assert(this.count >= 0 || this.handV === this.handG);
+    ++this.count;
     return true;
   }
   private escape(entry: T): void {
     const { list } = this;
-    if (list.length <= 1) {
-      this.handM = undefined;
+    assert(list.length !== 0);
+    if (list.length === 1) {
+      this.handV = undefined;
       this.handG = undefined;
       this.count = 0;
       return;
     }
-    if (entry === this.handM) {
-      this.handM = this.handM !== list.last
-        ? this.handM.next
-        : this.handM.prev;
+    if (entry === this.handV) {
+      this.handV = this.handV !== list.head
+        ? this.handV.prev
+        : this.handV.next;
     }
     if (entry === this.handG) {
       this.handG = this.handG !== list.head
@@ -952,12 +954,12 @@ class TLRU<T extends Entry<K, V>> {
     if (entry === undefined) return;
     this.escape(entry);
     list.delete(entry);
-    assert(entry !== this.handM);
+    assert(entry !== this.handV);
     assert(entry !== this.handG);
   }
   public clear(): void {
     this.list.clear();
-    this.handM = undefined;
+    this.handV = undefined;
     this.handG = undefined;
     this.count = 0;
   }
