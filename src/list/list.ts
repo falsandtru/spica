@@ -14,6 +14,7 @@ export class List<N extends List.Node = List.Node> {
     if (++this.length === 1) {
       return this.head = node.next = node.prev = node;
     }
+    assert(node !== before);
     const next = node.next = before ?? this.head!;
     const prev = node.prev = next.prev!;
     return next.prev = prev.next = node;
