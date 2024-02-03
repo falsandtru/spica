@@ -1,7 +1,7 @@
 import '../global';
 import { Mutable } from '../type';
 import { memoize } from '../memoize';
-import { Cache } from '../cache';
+import { TLRU } from '../tlru';
 
 declare class Absolute {
   private static readonly IDENTITY: unique symbol;
@@ -74,7 +74,7 @@ export class ReadonlyURL<T extends string = string> implements Readonly<global.U
   private static readonly get = memoize((url: string, base: string | undefined): CachedURL =>
     ({ url: new global.URL(url, base) }),
     (url, base = '') => `${base.indexOf('\n') > -1 ? base.replace(/\n+/g, '') : base}\n${url}`,
-    new Cache(10000));
+    new TLRU(10000));
   constructor(url: T, ...base:
     T extends AbsoluteURL | `${string}:${string}` ? [string?] :
     T extends `${infer _}` ? [string] :
