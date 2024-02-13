@@ -179,15 +179,17 @@ export class Cache<K, V> implements IterableDict<K, V> {
     if (settings.eagerExpiration) {
       this.expirations = new Heap(Heap.min, { stable: false });
     }
-    this.sweeper = new Sweeper(
-      this.LRU,
-      capacity,
-      settings.sweep!.window!,
-      settings.sweep!.room!,
-      settings.sweep!.threshold!,
-      settings.sweep!.ratio!,
-      settings.sweep!.range!,
-      settings.sweep!.shift!);
+    this.sweeper = settings.sweep?.threshold! > 0
+      ? new Sweeper(
+          this.LRU,
+          capacity,
+          settings.sweep!.window!,
+          settings.sweep!.room!,
+          settings.sweep!.threshold!,
+          settings.sweep!.ratio!,
+          settings.sweep!.range!,
+          settings.sweep!.shift!)
+      : undefined;
     this.disposer = settings.disposer!;
     assert(settings.resource === opts.resource);
   }
@@ -239,7 +241,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
     const { settings } = this;
     this.window = capacity * settings.window! / 100 >>> 0 || 1;
     this.resource = resource ?? settings.resource ?? capacity;
-    this.sweeper.resize(
+    this.sweeper?.resize(
       capacity,
       settings.sweep!.window!,
       settings.sweep!.room!,
@@ -259,8 +261,8 @@ export class Cache<K, V> implements IterableDict<K, V> {
     this.overlapLFU = 0;
     this.expiration = false;
     this.expirations?.clear();
-    this.sweeper.clear();
-    this.sweeper.replace(this.LRU);
+    this.sweeper?.clear();
+    this.sweeper?.replace(this.LRU);
     if (!this.disposer || !this.settings.capture!.clear) return;
     for (const { key, value } of LRU) {
       this.disposer(value, key);
@@ -322,7 +324,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
     }
     return entry;
   }
-  private readonly sweeper: Sweeper<List<Entry<K, V>>>;
+  private readonly sweeper?: Sweeper<List<Entry<K, V>>>;
   private injection = 100;
   private declination = 1;
   // Update and deletion are reentrant but addition is not.
@@ -357,7 +359,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
               : min(this.declination << 1, this.capacity / LFU.length << 3, 8);
           }
         }
-        if (this.sweeper.isActive()) {
+        if (this.sweeper?.isActive()) {
           this.sweeper.sweep();
         }
         if (LFU.length > this.partition) {
@@ -571,15 +573,15 @@ export class Cache<K, V> implements IterableDict<K, V> {
   public get(key: K): V | undefined {
     const entry = this.dict.get(key);
     if (entry === undefined) {
-      this.sweeper.miss();
+      this.sweeper?.miss();
       return;
     }
     if (this.expiration && entry.expiration !== Infinity && entry.expiration < now()) {
-      this.sweeper.miss();
+      this.sweeper?.miss();
       this.evict$(entry, true);
       return;
     }
-    this.sweeper.hit();
+    this.sweeper?.hit();
     this.replace(entry);
     return entry.value;
   }
@@ -685,7 +687,6 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
   }
   private active = false;
   private update(): void {
-    if (this.threshold === 0) return;
     const ratio = this.ratioWindow();
     this.active =
       ratio < this.threshold ||

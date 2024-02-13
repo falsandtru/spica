@@ -658,7 +658,7 @@ describe('Unit: lib/cache', () => {
       trc['misses'] = 0;
       assert(dwc['LFU'].length === capacity - dwc['window']);
       assert(dwc['partition'] === capacity - dwc['window']);
-      assert(dwc['sweeper'].isActive());
+      assert(dwc['sweeper']?.isActive());
       assert(dwc['declination'] === 8);
       dwc['injection'] = 0;
     }
