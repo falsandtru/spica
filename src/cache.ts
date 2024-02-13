@@ -155,12 +155,25 @@ export namespace Cache {
   }
 }
 export class Cache<K, V> implements IterableDict<K, V> {
+  constructor(capacity: number, sweep?: boolean);
   constructor(capacity: number, opts?: Cache.Options<K, V>);
   constructor(opts: Cache.Options<K, V>);
   constructor(
     capacity: number | Cache.Options<K, V>,
-    opts: Cache.Options<K, V> = {},
+    opts: boolean | Cache.Options<K, V> = {},
   ) {
+    switch (opts) {
+      case true:
+        opts = {};
+        break;
+      case false:
+        opts = {
+          sweep: {
+            threshold: 0,
+          },
+        };
+        break;
+    }
     if (typeof capacity === 'object') {
       opts = capacity;
       capacity = opts.capacity ?? 0;
