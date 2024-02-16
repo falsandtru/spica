@@ -5,11 +5,25 @@ import zipfian from 'zipfian-integer';
 
 describe('Unit: lib/tlru.lru', () => {
   describe('TLRU-LRU', () => {
+    it('order', function () {
+      const capacity = 4;
+      const cache = new TLRU<number, 1>(capacity);
+      for (let i = 0; i < capacity; ++i) {
+        cache.add(~i, 1);
+      }
+      for (const i of [1, 2, 3, 3, 2, 4]) {
+        cache.get(i) ?? cache.add(i, 1);
+      }
+      assert.deepStrictEqual(
+        [...cache].map(t => t[0]),
+        [2, 3, 4, 1]);
+    });
+
     for (let i = 0; i < 1000; ++i) it(`verify ${i}`, function () {
       this.timeout(10 * 1e3);
 
       const capacity = 4;
-      const cache = new TLRU<number, number>(capacity, i % 3, (i % 4 + 99) % 100);
+      const cache = new TLRU<number, number>(capacity, i % 3, (i % 4 + 99) % 100, i % 2 === 0);
 
       const trials = capacity * 1000;
       const random = xorshift.random(i + 1);
@@ -23,20 +37,6 @@ describe('Unit: lib/tlru.lru', () => {
         }
       }
       assert(cache.length === capacity);
-    });
-
-    it('order', function () {
-      const capacity = 4;
-      const cache = new TLRU<number, 1>(capacity);
-      for (let i = 0; i < capacity; ++i) {
-        cache.add(~i, 1);
-      }
-      for (const i of [1, 2, 3, 3, 2, 4]) {
-        cache.get(i) ?? cache.add(i, 1);
-      }
-      assert.deepStrictEqual(
-        [...cache].map(t => t[0]),
-        [2, 3, 4, 1]);
     });
 
     class Stats {
@@ -107,7 +107,7 @@ describe('Unit: lib/tlru.lru', () => {
       console.debug('LRU hits', stats.lru);
       console.debug('TRC hits', stats.trc);
       console.debug('TRC / LRU hit ratio', `${stats.trc / stats.lru * 100 | 0}%`);
-      assert(stats.trc / stats.lru * 100 >>> 0 === 141);
+      assert(stats.trc / stats.lru * 100 >>> 0 === 145);
     });
 
   });

@@ -849,7 +849,7 @@ assert(ratio2(10, [2, 0], [3, 0], 0) === 4000);
 // @ts-ignore
 class TLRU<T extends Entry<K, V>> {
   constructor(
-    private readonly step: number = 1,
+    private readonly step: number = 2,
     private readonly window: number = 0,
     private readonly retrial: boolean = true,
   ) {
@@ -875,28 +875,17 @@ class TLRU<T extends Entry<K, V>> {
   }
   private return(): void {
     const { list } = this;
-    if (this.count !== -1 &&
-        this.handV !== undefined &&
-        this.handG !== list.last && this.handG !== undefined) {
+    if (this.count !== -1 && this.handV === this.handG && this.handG !== undefined) {
       if (this.count >= 0) {
-        //this.count = -max(max(list.length - this.count, 0) * this.step / 100 | 0, 1) - 1;
         this.count = -max(
-          list.length * this.step / 100 | 0,
+          //list.length * this.step / 100 / max(this.count / list.length * this.step, 1) | 0,
+          (list.length - this.count) * this.step / 100 | 0,
           list.length * this.window / 100 - this.count | 0,
           1) - 1;
         assert(this.count < 0);
       }
-      else {
-        this.handG = this.handG.prev;
-      }
     }
     else {
-      if (this.handV === list.head) {
-        this.handG = undefined;
-      }
-      if (this.handG === list.last!) {
-        this.handG = this.handG.prev;
-      }
       this.handV = list.last;
       this.count = 0;
     }
@@ -914,12 +903,12 @@ class TLRU<T extends Entry<K, V>> {
   }
   public add(entry: T): boolean {
     const { list } = this;
-    if (this.handV === this.handG || this.handV === list.last) {
+    this.handV ??= list.last;
+    if (this.handV === this.handG || this.count === 0) {
       this.return();
     }
     // 非延命
     if (this.count >= 0 || !this.retrial) {
-      this.handV ??= list.last;
       list.insert(entry, this.handV?.next);
       this.handV ??= list.last!;
     }
@@ -934,13 +923,23 @@ class TLRU<T extends Entry<K, V>> {
         list.unshift(entry);
       }
       this.handV = entry;
-      this.handG = entry.prev;
+      this.handG = entry;
     }
-    if(this.handV !== this.handG){
+    if (this.count < 0 && this.handV === this.handG) {
+      this.handG = this.handG !== list.head
+        ? this.handG.prev
+        : undefined;
+    }
+    if (this.handV !== this.handG) {
       this.handV = this.handV.prev;
     }
+    if (this.handV !== list.last) {
+      ++this.count;
+    }
+    else {
+      this.count = 0;
+    }
     assert(this.count >= 0 || this.handV === this.handG);
-    ++this.count;
     return true;
   }
   private escape(entry: T): void {
@@ -953,14 +952,10 @@ class TLRU<T extends Entry<K, V>> {
       return;
     }
     if (entry === this.handV) {
-      this.handV = this.handV !== list.head
-        ? this.handV.prev
-        : this.handV.next;
+      this.handV = this.handV.prev;
     }
     if (entry === this.handG) {
-      this.handG = this.handG !== list.head
-        ? this.handG.prev
-        : this.handG.next;
+      this.handG = this.handG.prev;
     }
   }
   public delete(entry: T): void {

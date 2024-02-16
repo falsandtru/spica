@@ -15,7 +15,7 @@ class Entry<K, V> implements List.Node {
 export class TLRU<K, V> implements IterableDict<K, V> {
   constructor(
     private readonly capacity: number,
-    private readonly step: number = 1,
+    private readonly step: number = 2,
     private readonly window: number = 0,
     private readonly retrial: boolean = true,
   ) {
@@ -40,9 +40,9 @@ export class TLRU<K, V> implements IterableDict<K, V> {
       if (this.count >= 0) {
         // 先頭の次からなので1周-1
         assert(this.count < this.capacity);
-        //this.count = -max(max(list.length - this.count, 0) * this.step / 100 | 0, 1) - 1;
         this.count = -max(
-          list.length * this.step / 100 | 0,
+          //list.length * this.step / 100 / max(this.count / list.length * this.step, 1) | 0,
+          (list.length - this.count) * this.step / 100 | 0,
           list.length * this.window / 100 - this.count | 0,
           1) - 1;
         assert(this.count < 0);
