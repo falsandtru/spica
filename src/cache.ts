@@ -894,8 +894,8 @@ class TLRU<T extends Entry<K, V>> {
       if (this.handV === list.head) {
         this.handG = undefined;
       }
-      if (this.handG === list.last) {
-        this.handG = this.handG?.prev;
+      if (this.handG === list.last!) {
+        this.handG = this.handG.prev;
       }
       this.handV = list.last;
       this.count = 0;
