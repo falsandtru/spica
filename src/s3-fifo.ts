@@ -14,20 +14,15 @@ class Node<K, V> {
 
 export class S3FIFO<K, V> {
   constructor(
-    private capacity: number,
+    private readonly capacity: number,
   ) {
-    this.capS = capacity * 0.1 >>> 0;
-    this.capM = capacity - this.capS;
-    this.fifoS = new Queue();
-    this.fifoM = new Queue();
-    this.fifoG = new Queue();
   }
   private readonly dict = new Map<K, Node<K, V>>();
-  private readonly capS: number;
-  private readonly capM: number;
-  private readonly fifoS: Queue<Node<K, V>>;
-  private readonly fifoM: Queue<Node<K, V>>;
-  private readonly fifoG: Queue<Node<K, undefined>>;
+  private readonly capS = this.capacity * 0.1 >>> 0;
+  private readonly capM = this.capacity - this.capS;
+  private readonly fifoS = new Queue<Node<K, V>>();
+  private readonly fifoM = new Queue<Node<K, V>>();
+  private readonly fifoG = new Queue<Node<K, undefined>>();
   public get length(): number {
     return this.fifoS.length + this.fifoM.length;
   }
@@ -107,19 +102,12 @@ export class S3FIFO<K, V> {
       return;
     }
   }
-  public add(key: K, value: V): boolean {
-    const node = new Node(key, value);
-    this.insert(node);
-    this.dict.set(key, node);
-    assert(this.dict.size <= this.capacity + this.capM);
-    assert(this.length <= this.capacity);
-    assert(this.fifoG.length <= this.capM);
-    return true;
-  }
   public set(key: K, value: V): this {
     const node = this.dict.get(key);
     if (node === undefined) {
-      this.add(key, value);
+      const node = new Node(key, value);
+      this.insert(node);
+      this.dict.set(key, node);
     }
     else {
       node.value = value;
