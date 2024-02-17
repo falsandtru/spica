@@ -115,8 +115,8 @@ export class TLRU<K, V> implements IterableDict<K, V> {
   }
   public evict(): [K, V] | undefined {
     const { list } = this;
-    if (list.length === 0) return;
-    const entry = list.last!;
+    const entry = list.last;
+    if (entry === undefined) return;
     this.delete(entry.key);
     return [entry.key, entry.value];
   }
