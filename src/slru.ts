@@ -13,7 +13,7 @@ class Entry<K, V> implements List.Node {
 
 export class SLRU<K, V> {
   constructor(
-    private capacity: number,
+    private readonly capacity: number,
     private readonly partition = 80,
   ) {
   }
