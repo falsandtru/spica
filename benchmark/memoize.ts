@@ -1,6 +1,7 @@
 import { benchmark } from './benchmark';
 import { memoize, reduce } from '../src/memoize';
 import { Clock } from '../src/clock';
+import { TLRU } from '../src/tlru';
 import { Cache } from '../src/cache';
 
 describe('Benchmark:', function () {
@@ -31,6 +32,12 @@ describe('Benchmark:', function () {
         const f = memoize(a => a, new Clock(size));
         let i = 0;
         benchmark(`memoize Clock  ${size.toLocaleString('en')}`, () => f(i = ++i & mask), done);
+      });
+
+      it(`TLRU   ${size.toLocaleString('en')}`, function (done) {
+        const f = memoize(a => a, new TLRU(size));
+        let i = 0;
+        benchmark(`memoize TLRU   ${size.toLocaleString('en')}`, () => f(i = ++i & mask), done);
       });
 
       it(`Cache  ${size.toLocaleString('en')}`, function (done) {
