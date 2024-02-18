@@ -35,6 +35,7 @@ export class Queue<T> {
       ++this.count;
       if (tail.size !== size && tail !== this.head) {
         this.irregular = tail.size;
+        assert(this.irregular === initsize);
       }
     }
     this.tail.push(value);
@@ -46,6 +47,7 @@ export class Queue<T> {
       --this.count;
       this.head = head.next;
       if (this.head.size === this.irregular) {
+        assert(this.irregular === initsize);
         this.irregular = 0;
       }
     }
