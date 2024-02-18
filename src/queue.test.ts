@@ -56,13 +56,13 @@ describe('Unit: lib/queue', () => {
 
     it('verify', () => {
       for (const size of [
-        16 + 2048 * 0,
-        16 + 2048 * 1,
-        16 + 2048 * 2,
-        16 + 2048 * 3,
+        16 - 1 + (2048 - 1) * 0,
+        16 - 1 + (2048 - 1) * 1,
+        16 - 1 + (2048 - 1) * 2,
+        16 - 1 + (2048 - 1) * 3,
       ]) {
         const queue = new Queue();
-        for (let i = -2; i < 4; ++i) {
+        for (let i = -3; i < 4; ++i) {
           const len = size + i;
           for (let i = 0; i < len; ++i) {
             queue.push(queue.length);

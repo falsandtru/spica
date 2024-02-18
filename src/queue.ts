@@ -65,6 +65,7 @@ export class Queue<T> {
   }
 }
 
+// capacity = size - 1
 class FixedQueue<T> {
   constructor(
     public readonly size: number,
