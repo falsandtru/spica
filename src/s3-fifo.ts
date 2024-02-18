@@ -16,6 +16,7 @@ export class S3FIFO<K, V> {
   constructor(
     private readonly capacity: number,
   ) {
+    assert(capacity > 0);
   }
   private readonly capS = this.capacity * 0.1 >>> 0;
   private readonly capM = this.capacity - this.capS;

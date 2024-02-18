@@ -14,6 +14,7 @@ export class Clock<K, V> implements IterableDict<K, V> {
   constructor(
     private readonly capacity: number,
   ) {
+    assert(capacity > 0);
     this.capacity = ((capacity - 1 | MASK) >>> 0) + 1;
     assert(this.capacity % BASE === 0);
     this.refs = new Uint32Array(this.capacity >>> DIGIT);

@@ -19,6 +19,7 @@ export class TLRU<K, V> implements IterableDict<K, V> {
     private readonly window: number = 0,
     private readonly retrial: boolean = true,
   ) {
+    assert(capacity > 0);
   }
   private readonly dict = new Map<K, Entry<K, V>>();
   private readonly list = new List<Entry<K, V>>();
