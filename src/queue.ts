@@ -40,6 +40,7 @@ export class Queue<T> {
       else {
         this.tail = tail.next = new FixedQueue(size, tail.next);
       }
+      assert(this.tail.isEmpty());
       ++this.count;
       if (tail.size !== size && tail !== this.head) {
         this.irregular = tail.size;
@@ -52,11 +53,11 @@ export class Queue<T> {
     const head = this.head;
     const value = head.pop();
     if (head.isEmpty() && !head.next.isEmpty()) {
-      --this.count;
       this.head = head.next;
       if (!this.permanent) {
         head.next = head;
       }
+      --this.count;
       if (this.head.size === this.irregular) {
         assert(this.irregular === initsize);
         this.irregular = 0;
