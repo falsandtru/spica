@@ -60,8 +60,8 @@ describe('Unit: lib/queue', () => {
         16 - 1 + (2048 - 1) * 1,
         16 - 1 + (2048 - 1) * 2,
         16 - 1 + (2048 - 1) * 3,
-      ]) {
-        const queue = new Queue();
+      ]) for (const permanent of [false, true]) {
+        const queue = new Queue(permanent);
         for (let i = -3; i < 4; ++i) {
           const len = size + i;
           for (let i = 0; i < len; ++i) {

@@ -6,6 +6,10 @@ const size = 2048;
 const initsize = 16;
 
 export class Queue<T> {
+  constructor(
+    private readonly permanent: boolean = false,
+  ) {
+  }
   private head = new FixedQueue<T>(initsize);
   private tail = this.head;
   private count = 0;
@@ -29,6 +33,10 @@ export class Queue<T> {
       if (tail.next.isEmpty()) {
         this.tail = tail.next;
       }
+      else if (!this.permanent) {
+        this.tail = tail.next = new FixedQueue(size);
+        assert(this.tail.next !== this.head);
+      }
       else {
         this.tail = tail.next = new FixedQueue(size, tail.next);
       }
@@ -46,6 +54,9 @@ export class Queue<T> {
     if (head.isEmpty() && !head.next.isEmpty()) {
       --this.count;
       this.head = head.next;
+      if (!this.permanent) {
+        head.next = head;
+      }
       if (this.head.size === this.irregular) {
         assert(this.irregular === initsize);
         this.irregular = 0;
