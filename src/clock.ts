@@ -125,15 +125,13 @@ export class Clock<K, V> implements IterableDict<K, V> {
     const v = values[index] = values[hand];
     keys[hand] = undefined;
     values[hand] = empty;
-    if (index === hand || v === empty) {
-      this.unmark(index);
-      return true;
+    if (index !== hand && v !== empty) {
+      assert(this.dict.has(k!));
+      dict.set(k!, index);
+      (refs[hand >>> DIGIT] & 1 << (hand & MASK)) === 0
+        ? this.unmark(index)
+        : this.mark(index);
     }
-    assert(this.dict.has(k!));
-    dict.set(k!, index);
-    (refs[hand >>> DIGIT] & 1 << (hand & MASK)) === 0
-      ? this.unmark(index)
-      : this.mark(index);
     this.unmark(hand);
     return true;
   }
