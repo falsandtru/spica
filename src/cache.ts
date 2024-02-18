@@ -871,27 +871,20 @@ class TLRU<T extends Entry<K, V>> {
   public get size(): number {
     return this.list.length;
   }
-  private return(): void {
+  private extend(): void {
     const { list } = this;
-    if (this.count !== -1 && this.handV === this.handG && this.handG !== undefined) {
-      if (this.count >= 0) {
-        this.count = -max(
-          //list.length * this.step / 100 / max(this.count / list.length * this.step, 1) | 0,
-          (list.length - this.count) * this.step / 100 | 0,
-          list.length * this.window / 100 - this.count | 0,
-          1) - 1;
-        assert(this.count < 0);
-      }
-    }
-    else {
-      this.handV = list.last;
-      this.count = 0;
-    }
+    this.count = -max(
+      //list.length * this.step / 100 / max(this.count / list.length * this.step, 1) | 0,
+      (list.length - this.count) * this.step / 100 | 0,
+      list.length * this.window / 100 - this.count | 0,
+      this.step && 1);
+    assert(this.count <= 0);
   }
   public unshift(entry: T): void {
     const { list } = this;
-    if (this.handV === this.handG || this.handV === list.last) {
-      this.return();
+    this.handV ??= list.last;
+    if (this.handV === this.handG && this.count >= 0) {
+      this.extend();
     }
     list.unshift(entry);
     this.hit(entry);
@@ -902,8 +895,8 @@ class TLRU<T extends Entry<K, V>> {
   public add(entry: T): boolean {
     const { list } = this;
     this.handV ??= list.last;
-    if (this.handV === this.handG || this.count === 0) {
-      this.return();
+    if (this.handV === this.handG && this.count >= 0) {
+      this.extend();
     }
     // 非延命
     if (this.count >= 0 || !this.retrial) {
@@ -923,7 +916,9 @@ class TLRU<T extends Entry<K, V>> {
       this.handV = entry;
       this.handG = entry;
     }
-    if (this.count < 0 && this.handV === this.handG) {
+    if (this.count < 0) {
+      assert(this.handV === this.handG);
+      assert(this.handG = this.handG!);
       this.handG = this.handG !== list.head
         ? this.handG.prev
         : undefined;
@@ -931,11 +926,12 @@ class TLRU<T extends Entry<K, V>> {
     if (this.handV !== this.handG) {
       this.handV = this.handV.prev;
     }
-    if (this.handV !== list.last) {
-      ++this.count;
+    if (this.handV === list.last || this.count === -1) {
+      this.handV = list.last;
+      this.count = 0;
     }
     else {
-      this.count = 0;
+      ++this.count;
     }
     assert(this.count >= 0 || this.handV === this.handG);
     return true;
