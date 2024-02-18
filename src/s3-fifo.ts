@@ -17,9 +17,9 @@ export class S3FIFO<K, V> {
     private readonly capacity: number,
   ) {
   }
-  private readonly dict = new Map<K, Node<K, V>>();
   private readonly capS = this.capacity * 0.1 >>> 0;
   private readonly capM = this.capacity - this.capS;
+  private readonly dict = new Map<K, Node<K, V>>();
   private readonly fifoS = new Queue<Node<K, V>>();
   private readonly fifoM = new Queue<Node<K, V>>();
   private readonly fifoG = new Queue<Node<K, undefined>>();
@@ -61,7 +61,7 @@ export class S3FIFO<K, V> {
     }
   }
   private evictS(): void {
-    while (!this.fifoS.isEmpty()) {
+    while (this.fifoS.length > 0) {
       const t = this.fifoS.pop()!;
       if (t.freq > 1) {
         t.part = 'M';
@@ -83,7 +83,7 @@ export class S3FIFO<K, V> {
     }
   }
   private evictM(): void {
-    while (!this.fifoM.isEmpty()) {
+    while (this.fifoM.length > 0) {
       const t = this.fifoM.pop()!;
       if (t.freq > 0) {
         this.fifoM.push(t);
@@ -96,9 +96,11 @@ export class S3FIFO<K, V> {
     }
   }
   private evictG(): void {
-    while (!this.fifoG.isEmpty()) {
+    while (this.fifoG.length > 0) {
       const t = this.fifoG.pop()!;
-      this.dict.delete(t.key);
+      if (t.part === 'G') {
+        this.dict.delete(t.key);
+      }
       return;
     }
   }
