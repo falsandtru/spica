@@ -8,7 +8,7 @@ class Node<K, V> {
     public value: V,
   ) {
   }
-  public part: 'S' | 'M' | 'G' = 'S';
+  public resident = true;
   public freq = 0;
 }
 
@@ -31,7 +31,7 @@ export class S3FIFO<K, V> {
     return this.fifoS.length + this.fifoM.length;
   }
   private read(x: Node<K, V>, counting = true): void {
-    if (x.part !== 'G') {
+    if (x.resident) {
       if (!counting) return;
       x.freq = min(x.freq + 1, 3);
     }
@@ -44,13 +44,12 @@ export class S3FIFO<K, V> {
     if (this.length === this.capacity) {
       this.evict();
     }
-    if (x.part === 'G') {
-      x.part = 'M';
-      this.fifoM.push(x);
+    if (x.resident) {
+      this.fifoS.push(x);
     }
     else {
-      assert(x.part === 'S');
-      this.fifoS.push(x);
+      x.resident = true;
+      this.fifoM.push(x);
     }
   }
   private evict(): void {
@@ -65,14 +64,13 @@ export class S3FIFO<K, V> {
     while (this.fifoS.length > 0) {
       const t = this.fifoS.pop()!;
       if (t.freq > 1) {
-        t.part = 'M';
         this.fifoM.push(t);
         if (this.fifoM.length >= this.capM) {
           this.evictM();
         }
       }
       else {
-        t.part = 'G';
+        t.resident = false;
         // @ts-expect-error
         t.value = undefined;
         if (this.fifoG.length >= this.capM) {
@@ -99,7 +97,7 @@ export class S3FIFO<K, V> {
   private evictG(): void {
     while (this.fifoG.length > 0) {
       const t = this.fifoG.pop()!;
-      if (t.part === 'G') {
+      if (!t.resident) {
         this.dict.delete(t.key);
       }
       return;
@@ -124,18 +122,12 @@ export class S3FIFO<K, V> {
   public get(key: K): V | undefined {
     const { dict } = this;
     const node = dict.get(key);
-    if (node === undefined || node.part === 'G') return;
+    if (node === undefined || !node.resident) return;
     this.read(node);
     return node.value;
   }
   public has(key: K): boolean {
-    switch (this.dict.get(key)?.part) {
-      case 'S':
-      case 'M':
-        return true;
-      default:
-        return false;
-    }
+    return this.dict.get(key)?.resident === true;
   }
   public clear(): void {
     this.dict.clear();
