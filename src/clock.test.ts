@@ -56,7 +56,7 @@ describe('Unit: lib/clock', () => {
     for (let i = 0; i < 10; ++i) it(`verify ${i}`, function () {
       this.timeout(10 * 1e3);
 
-      const capacity = 32 * 3;
+      const capacity = 32 * (i % 3 + 1);
       const clock = new Clock<number, number>(capacity);
 
       const trials = capacity * 1000;
