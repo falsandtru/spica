@@ -185,8 +185,8 @@ export class Cache<K, V> implements IterableDict<K, V> {
     assert(capacity > 0);
     this.window = capacity * settings.window! / 100 >>> 0 || 1;
     this.partition = capacity - this.window;
-    this.sample = settings.sample!;
     this.resource = settings.resource! ?? capacity;
+    this.sample = settings.sample!;
     this.age = settings.age!;
     if (settings.eagerExpiration) {
       this.expirations = new Heap(Heap.min, { stable: false });
