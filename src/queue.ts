@@ -17,7 +17,7 @@ export class Queue<T> {
   public get length(): number {
     return this.count === 0
       ? this.head.length
-      : this.head.length + this.tail.length + (size - 1) * (this.count - 2) + (this.irregular || size) - 1;
+      : this.head.length + this.tail.length + size * (this.count - 2) + (this.irregular || size);
   }
   // Faster than queue.length > 0.
   public isEmpty(): boolean {
@@ -78,7 +78,6 @@ export class Queue<T> {
   }
 }
 
-// capacity = size - 1
 class FixedQueue<T> {
   constructor(
     public readonly size: number,
@@ -91,17 +90,19 @@ class FixedQueue<T> {
   private readonly mask = this.array.length - 1;
   private head = 0;
   private tail = 0;
+  // 1要素無駄にしフラグを使用しない場合と有意差がないため可読性とテスト性を優先しフラグを使用。
+  private empty = true;
   public next: FixedQueue<T>;
   public get length(): number {
     return this.tail >= this.head
-      ? this.tail - this.head
+      ? this.empty ? 0 : this.tail - this.head || this.size
       : this.array.length - this.head + this.tail;
   }
   public isEmpty(): boolean {
-    return this.tail === this.head;
+    return this.empty;
   }
   public isFull(): boolean {
-    return (this.tail + 1 & this.mask) === this.head;
+    return this.tail === this.head && !this.empty;
   }
   public peek(index: 0 | -1 = 0): T | undefined {
     return index === 0
@@ -111,12 +112,15 @@ class FixedQueue<T> {
   public push(value: T): void {
     this.array[this.tail] = value;
     this.tail = this.tail + 1 & this.mask;
+    this.empty = false;
   }
   public pop(): T | undefined {
-    if (this.isEmpty()) return;
+    if (this.empty) return;
     const value = this.array[this.head];
     this.array[this.head] = undefined;
     this.head = this.head + 1 & this.mask;
+    // isEmptyの前倒し
+    this.empty = this.tail === this.head;
     return value;
   }
 }
