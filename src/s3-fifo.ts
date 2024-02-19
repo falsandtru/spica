@@ -21,9 +21,9 @@ export class S3FIFO<K, V> {
   private readonly capS = this.capacity * 0.1 >>> 0;
   private readonly capM = this.capacity - this.capS;
   private readonly dict = new Map<K, Node<K, V>>();
-  private readonly fifoS = new Queue<Node<K, V>>(true);
-  private readonly fifoM = new Queue<Node<K, V>>(true);
-  private readonly fifoG = new Queue<Node<K, undefined>>(true);
+  private readonly fifoS = new Queue<Node<K, V>>();
+  private readonly fifoM = new Queue<Node<K, V>>();
+  private readonly fifoG = new Queue<Node<K, undefined>>();
   public get length(): number {
     return this.fifoS.length + this.fifoM.length;
   }
