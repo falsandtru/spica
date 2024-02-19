@@ -19,6 +19,7 @@ export class Queue<T> {
       ? this.head.length
       : this.head.length + this.tail.length + (size - 1) * (this.count - 2) + (this.irregular || size) - 1;
   }
+  // Faster than queue.length > 0.
   public isEmpty(): boolean {
     return this.head.isEmpty();
   }

@@ -27,7 +27,7 @@ export class Colistener<T, U = undefined> extends Coroutine<U, T> {
         await notifier;
         notifier = new AtomicFuture();
         notifiable = true;
-        while (queue.length > 0) {
+        while (!queue.isEmpty()) {
           yield queue.pop()!;
         }
       }

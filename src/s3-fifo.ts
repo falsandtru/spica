@@ -61,7 +61,7 @@ export class S3FIFO<K, V> {
     }
   }
   private evictS(): void {
-    while (this.fifoS.length > 0) {
+    while (!this.fifoS.isEmpty()) {
       const t = this.fifoS.pop()!;
       if (t.freq > 1) {
         this.fifoM.push(t);
@@ -82,7 +82,7 @@ export class S3FIFO<K, V> {
     }
   }
   private evictM(): void {
-    while (this.fifoM.length > 0) {
+    while (!this.fifoM.isEmpty()) {
       const t = this.fifoM.pop()!;
       if (t.freq > 0) {
         this.fifoM.push(t);
@@ -95,7 +95,7 @@ export class S3FIFO<K, V> {
     }
   }
   private evictG(): void {
-    while (this.fifoG.length > 0) {
+    while (!this.fifoG.isEmpty()) {
       const t = this.fifoG.pop()!;
       if (!t.resident) {
         this.dict.delete(t.key);
