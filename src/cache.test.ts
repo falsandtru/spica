@@ -645,7 +645,8 @@ describe('Unit: lib/cache', () => {
         trc.set(Number.MIN_SAFE_INTEGER + i, 1);
         dwc.set(Number.MIN_SAFE_INTEGER + i, 1);
 
-        lru.get(Number.MIN_SAFE_INTEGER + i - 1);
+        lru.get(Number.MIN_SAFE_INTEGER + i);
+        trc.get(Number.MIN_SAFE_INTEGER + i);
         dwc.get(Number.MIN_SAFE_INTEGER + i + 1);
         if (i + 1 !== capacity) continue;
         for (const { key } of [...dwc['LRU']].slice(dwc['window'])) {
