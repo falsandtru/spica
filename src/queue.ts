@@ -9,11 +9,10 @@ export class Queue<T> {
   private head = new FixedQueue<T>(initsize);
   private tail = this.head;
   private count = 0;
-  private irregular = 0;
   public get length(): number {
-    return this.count === 0
+    return this.head === this.tail
       ? this.head.length
-      : this.head.length + this.tail.length + size * (this.count - 2) + (this.irregular || size);
+      : this.head.length + this.count + this.tail.length;
   }
   // Faster than queue.length > 0.
   public isEmpty(): boolean {
@@ -34,32 +33,31 @@ export class Queue<T> {
         this.tail = tail.next = new FixedQueue(size, tail.next);
       }
       assert(this.tail.isEmpty());
-      ++this.count;
-      if (tail.size !== size && tail !== this.head) {
-        this.irregular = tail.size;
-        assert(this.irregular === initsize);
+      if (this.head !== tail) {
+        assert(this.head.next !== this.tail);
+        this.count += tail.size;
       }
     }
     this.tail.push(value);
   }
-  private prev?: FixedQueue<T> = undefined;
   public pop(): T | undefined {
     const head = this.head;
     const value = head.pop();
     if (head.isEmpty() && !head.next.isEmpty()) {
-      if (this.prev?.isEmpty()) {
-        this.head = this.prev.next = head.next;
-        head.next = head;
+      const tail = this.tail;
+      // 空になるごとの削除と再作成を避ける
+      if (tail.next !== head) {
+        assert(tail.next.next === head);
+        // 初期サイズの方を消す
+        tail.next.next = tail.next;
+        tail.next = head;
+        assert(head.size === size);
       }
-      else {
-        this.head = head.next;
-        this.prev = head;
-      }
-      assert(this.prev.next === this.head);
-      --this.count;
-      if (this.head.size === this.irregular) {
-        assert(this.irregular === initsize);
-        this.irregular = 0;
+      assert(this.tail.next.isEmpty());
+      this.head = head.next;
+      if (this.head !== tail) {
+        assert(this.head !== this.tail);
+        this.count -= head.next.size;
       }
     }
     return value;
@@ -67,7 +65,6 @@ export class Queue<T> {
   public clear(): void {
     this.head = this.tail = new FixedQueue(initsize);
     this.count = 0;
-    this.irregular = 0;
   }
   public *[Symbol.iterator](): Iterator<T, undefined, undefined> {
     while (!this.isEmpty()) {
