@@ -99,10 +99,10 @@ class FixedQueue<T> {
   public isFull(): boolean {
     return this.tail === this.head && !this.empty;
   }
-  public peek(index: 0 | -1 = 0): T | undefined {
-    return index === 0
-      ? this.array[this.head]
-      : this.array[this.tail - 1 & this.mask];
+  public peek(index: number = 0): T | undefined {
+    return index >= 0
+      ? this.array[this.head + index & this.mask]
+      : this.array[this.tail + index & this.mask];
   }
   public push(value: T): void {
     this.array[this.tail] = value;
