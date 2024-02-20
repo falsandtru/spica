@@ -636,9 +636,6 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
     this.threshold *= 100;
     this.resize(capacity, $window, room, $range);
   }
-  public replace(target: T): void {
-    this.target = target;
-  }
   private get window(): number {
     const n = this.target.length > this.$window << 1 ? 2 : 1;
     return max(this.$window, min(this.target.length >>> n, this.$window << n + 1));
@@ -664,6 +661,9 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
     this.slideRoom();
     this.slideRoom();
     assert(!this.isActive());
+  }
+  public replace(target: T): void {
+    this.target = target;
   }
   private currWindowHits = 0;
   private currWindowMisses = 0;
