@@ -687,13 +687,13 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
   }
   public hit(): void {
     ++this.currWindowHits + this.currWindowMisses >= this.window && this.slideWindow();
-    ++this.currRoomHits + this.currRoomMisses >= this.room && this.slideRoom();
+    !this.active && ++this.currRoomHits + this.currRoomMisses >= this.room && this.slideRoom();
     this.update();
     this.processing && !this.active && this.reset();
   }
   public miss(): void {
     this.currWindowHits + ++this.currWindowMisses >= this.window && this.slideWindow();
-    this.currRoomHits + ++this.currRoomMisses >= this.room && this.slideRoom();
+    !this.active && this.currRoomHits + ++this.currRoomMisses >= this.room && this.slideRoom();
     this.update();
   }
   private active = false;

@@ -726,7 +726,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
       assert(stats.dwc / stats.lru * 100 === Infinity);
-      assert(stats.dwc * 100 / stats.total >>> 0 === 9);
+      assert(stats.dwc * 100 / stats.total >>> 0 === 8);
       assert(dwc['partition']! * 100 / capacity >>> 0 === 0);
     });
 
@@ -761,7 +761,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 110);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 108);
       assert(dwc['partition']! * 100 / capacity >>> 0 === 99);
     });
 
