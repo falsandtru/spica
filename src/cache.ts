@@ -725,15 +725,13 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
   private initial = true;
   private back = 0;
   private advance = 0;
-  public sweep(): boolean {
+  public sweep(): -1 | 0 | 1 {
     const { target } = this;
-    let lap = false;
-    if (target.length === 0) return lap;
+    if (target.length === 0) return 1;
     this.processing ||= true;
     if (this.direction) {
       if (this.back < 1) {
         this.back += this.range;
-        lap = !this.initial && this.back >= 1;
       }
     }
     else {
@@ -750,9 +748,11 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
       if (this.initial) {
         this.initial = false;
         target.head = target.head!.next;
+        return 0;
       }
       else {
         target.head = target.head!.next!.next;
+        return -1;
       }
     }
     else if (this.advance >= 1) {
@@ -761,12 +761,13 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
       if (--this.advance < 1) {
         this.direction = true;
       }
+      return 1;
     }
     else {
       this.direction = !this.direction;
       target.head = target.head!.next;
+      return 0;
     }
-    return lap;
   }
   private reset(): void {
     assert(this.processing);
