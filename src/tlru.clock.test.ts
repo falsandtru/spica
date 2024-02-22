@@ -31,7 +31,7 @@ describe('Unit: lib/tlru.clock', () => {
         }
         assert.deepStrictEqual(
           [...cache].map(t => t[0]),
-          [3, 7, 2, 6]);
+          [3, 2, 6, 7]);
       }
       {
         const cache = new TLRU<number, 1>(4, 1, 0, false);

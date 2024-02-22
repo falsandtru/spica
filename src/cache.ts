@@ -899,7 +899,7 @@ class TLRU<T extends Entry<K, V>> {
       this.extend();
     }
     // 非延命
-    if (this.count >= 0 || !this.retrial) {
+    if (this.count >= 0 || this.handV === list.last || !this.retrial) {
       list.insert(entry, this.handV?.next);
       this.handV ??= list.last!;
     }

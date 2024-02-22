@@ -50,7 +50,7 @@ export class TLRU<K, V> implements IterableDict<K, V> {
       this.extend();
     }
     // 非延命
-    if (this.count >= 0 || !this.retrial) {
+    if (this.count >= 0 || this.handV === list.last || !this.retrial) {
       const entry = this.handV;
       dict.delete(entry.key);
       dict.set(key, entry);
