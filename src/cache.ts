@@ -1,4 +1,4 @@
-import { max, min, round } from './alias';
+import { max, min } from './alias';
 import { now } from './chrono';
 import { IterableDict } from './dict';
 import { List } from './list';
@@ -192,16 +192,13 @@ export class Cache<K, V> implements IterableDict<K, V> {
       this.expirations = new Heap(Heap.min, { stable: false });
     }
     this.sweeper = settings.sweep?.threshold! > 0
-      ? new Sweeper(
-          this.LRU,
-          capacity,
-          () => this.partition,
-          settings.sweep!.window!,
-          settings.sweep!.room!,
-          settings.sweep!.threshold!,
-          settings.sweep!.ratio!,
-          settings.sweep!.range!,
-          settings.sweep!.shift!)
+      ? new Sweeper(this.LRU, this as any, {
+          room: settings.sweep!.room!,
+          threshold: settings.sweep!.threshold!,
+          ratio: settings.sweep!.ratio!,
+          range: settings.sweep!.range!,
+          shift: settings.sweep!.shift!,
+        })
       : undefined;
     this.disposer = settings.disposer!;
     assert(settings.resource === opts.resource);
@@ -253,11 +250,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
     const { settings } = this;
     this.window = capacity * settings.window! / 100 >>> 0 || 1;
     this.resource = resource ?? settings.resource ?? capacity;
-    this.sweeper?.resize(
-      capacity,
-      settings.sweep!.window!,
-      settings.sweep!.room!,
-      settings.sweep!.range!);
+    this.sweeper?.resize();
     this.ensure(0);
   }
   public clear(): void {
@@ -626,36 +619,39 @@ export class Cache<K, V> implements IterableDict<K, V> {
 class Sweeper<T extends List<Entry<unknown, unknown>>> {
   constructor(
     private target: T,
-    private capacity: number,
-    private partition: () => number,
-    private $window: number,
-    private room: number,
-    private readonly threshold: number,
-    private readonly ratio: number,
-    private $range: number,
-    private readonly shift: number,
+    private readonly context: {
+      readonly capacity: number;
+      readonly window: number;
+      readonly partition: number;
+    },
+    private readonly config: {
+      readonly room: number;
+      readonly threshold: number;
+      readonly ratio: number;
+      readonly range: number;
+      readonly shift: number;
+    },
   ) {
-    this.threshold *= 100;
-    this.resize(capacity, $window, room, $range);
   }
   private get window(): number {
-    const n = this.target.length > this.$window << 1 ? 2 : 1;
-    return max(this.$window, min(this.target.length >>> n, this.$window << n + 1));
+    const { window } = this.context;
+    const n = this.target.length >= window << 1 ? 2 : 1;
+    return max(window, min(this.target.length >>> n, window << n + 1));
+  }
+  private get room(): number {
+    return this.context.capacity * this.config.room / 100 >>> 0 || 1;
   }
   private get range(): number {
-    return max(this.$range, min(this.window >>> 1, this.target.length >>> 2));
+    const range = this.context.capacity * this.config.range / 100;
+    return max(range, min(this.window >>> 1, this.target.length >>> 2));
   }
-  public resize(capacity: number, window: number, room: number, range: number): void {
-    this.capacity = capacity;
-    this.$window = round(capacity * window / 100) || 1;
-    this.room = round(capacity * room / 100) || 1;
-    this.$range = capacity * range / 100;
+  public resize(): void {
     this.currWindowHits + this.currWindowMisses >= this.window && this.slideWindow();
     this.currRoomHits + this.currRoomMisses >= this.room && this.slideRoom();
     this.update();
   }
   public clear(): void {
-    this.active = false;
+    this.active = true;
     this.processing = true;
     this.reset();
     assert(!this.processing);
@@ -699,12 +695,12 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
     !this.active && this.currRoomHits + ++this.currRoomMisses >= this.room && this.slideRoom();
     this.update();
   }
-  private active = false;
+  private active = true;
   private update(): void {
     const ratio = this.ratioWindow();
     this.active =
-      ratio < this.threshold ||
-      ratio < this.ratioRoom() * (this.partition() / this.capacity) * this.ratio / 100;
+      ratio < this.config.threshold * 100 ||
+      ratio < this.ratioRoom() * (this.context.partition / this.context.capacity) * this.config.ratio / 100;
   }
   public isActive(): boolean {
     return this.active;
@@ -725,7 +721,7 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
   }
   private processing = false;
   private direction = true;
-  private initial = true;
+  private initiation = true;
   private back = 0;
   private advance = 0;
   public sweep(): -1 | 0 | 1 {
@@ -739,7 +735,7 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
     }
     else {
       if (this.advance < 1) {
-        this.advance += this.range * (100 - this.shift) / 100;
+        this.advance += this.range * (100 - this.config.shift) / 100;
       }
     }
     assert(this.back > 0 || this.advance > 0);
@@ -748,8 +744,8 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
       if (--this.back < 1) {
         this.direction = false;
       }
-      if (this.initial) {
-        this.initial = false;
+      if (this.initiation) {
+        this.initiation = false;
         target.head = target.head!.next;
         return 0;
       }
@@ -760,7 +756,7 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
     }
     else if (this.advance >= 1) {
       assert(this.direction === false);
-      assert(!this.initial);
+      assert(!this.initiation);
       if (--this.advance < 1) {
         this.direction = true;
       }
@@ -777,7 +773,7 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
     assert(!this.active);
     this.processing = false;
     this.direction = true;
-    this.initial = true;
+    this.initiation = true;
     this.back = 0;
     this.advance = 0;
   }
