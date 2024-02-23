@@ -195,6 +195,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
       ? new Sweeper(
           this.LRU,
           capacity,
+          () => this.partition,
           settings.sweep!.window!,
           settings.sweep!.room!,
           settings.sweep!.threshold!,
@@ -217,7 +218,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
     },
     sweep: {
       threshold: 20,
-      ratio: 50,
+      ratio: 90,
       window: 1,
       room: 50,
       range: 1,
@@ -625,7 +626,8 @@ export class Cache<K, V> implements IterableDict<K, V> {
 class Sweeper<T extends List<Entry<unknown, unknown>>> {
   constructor(
     private target: T,
-    capacity: number,
+    private capacity: number,
+    private partition: () => number,
     private $window: number,
     private room: number,
     private readonly threshold: number,
@@ -644,6 +646,7 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
     return max(this.$range, min(this.window >>> 1, this.target.length >>> 2));
   }
   public resize(capacity: number, window: number, room: number, range: number): void {
+    this.capacity = capacity;
     this.$window = round(capacity * window / 100) || 1;
     this.room = round(capacity * room / 100) || 1;
     this.$range = capacity * range / 100;
@@ -701,7 +704,7 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
     const ratio = this.ratioWindow();
     this.active =
       ratio < this.threshold ||
-      ratio < this.ratioRoom() * this.ratio / 100;
+      ratio < this.ratioRoom() * (this.partition() / this.capacity) * this.ratio / 100;
   }
   public isActive(): boolean {
     return this.active;
