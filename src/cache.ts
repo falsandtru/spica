@@ -146,11 +146,11 @@ export namespace Cache {
     readonly sample?: number;
     readonly sweep?: {
       readonly threshold?: number;
-      readonly ratio?: number;
       readonly window?: number;
       readonly room?: number;
-      readonly range?: number;
-      readonly shift?: number;
+      readonly ground?: number;
+      readonly interval?: number;
+      readonly slide?: number;
     };
   }
 }
@@ -193,11 +193,11 @@ export class Cache<K, V> implements IterableDict<K, V> {
     }
     this.sweeper = settings.sweep?.threshold! > 0
       ? new Sweeper(this.LRU, this as any, {
-          room: settings.sweep!.room!,
           threshold: settings.sweep!.threshold!,
-          ratio: settings.sweep!.ratio!,
-          range: settings.sweep!.range!,
-          shift: settings.sweep!.shift!,
+          room: settings.sweep!.room!,
+          ground: settings.sweep!.ground!,
+          interval: settings.sweep!.interval!,
+          slide: settings.sweep!.slide!,
         })
       : undefined;
     this.disposer = settings.disposer!;
@@ -215,11 +215,11 @@ export class Cache<K, V> implements IterableDict<K, V> {
     },
     sweep: {
       threshold: 20,
-      ratio: 90,
       window: 1,
       room: 50,
-      range: 1,
-      shift: 2,
+      ground: 90,
+      interval: 1,
+      slide: 2,
     },
   };
   private capacity: number;
@@ -625,11 +625,11 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
       readonly partition: number;
     },
     private readonly config: {
-      readonly room: number;
       readonly threshold: number;
-      readonly ratio: number;
-      readonly range: number;
-      readonly shift: number;
+      readonly ground: number;
+      readonly room: number;
+      readonly interval: number;
+      readonly slide: number;
     },
   ) {
   }
@@ -641,9 +641,9 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
   private get room(): number {
     return this.context.capacity * this.config.room / 100 >>> 0 || 1;
   }
-  private get range(): number {
-    const range = this.context.capacity * this.config.range / 100;
-    return max(range, min(this.window >>> 1, this.target.length >>> 2));
+  private get interval(): number {
+    const interval = this.context.capacity * this.config.interval / 100;
+    return max(interval, min(this.window >>> 1, this.target.length >>> 2));
   }
   public resize(): void {
     this.currWindowHits + this.currWindowMisses >= this.window && this.slideWindow();
@@ -700,7 +700,7 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
     const ratio = this.ratioWindow();
     this.active =
       ratio < this.config.threshold * 100 ||
-      ratio < this.ratioRoom() * (this.context.partition / this.context.capacity) * this.config.ratio / 100;
+      ratio < this.ratioRoom() * (this.context.partition / this.context.capacity) * this.config.ground / 100;
   }
   public isActive(): boolean {
     return this.active;
@@ -730,12 +730,12 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
     this.processing ||= true;
     if (this.direction) {
       if (this.back < 1) {
-        this.back += this.range;
+        this.back += this.interval;
       }
     }
     else {
       if (this.advance < 1) {
-        this.advance += this.range * (100 - this.config.shift) / 100;
+        this.advance += this.interval * (100 - this.config.slide) / 100;
       }
     }
     assert(this.back > 0 || this.advance > 0);
