@@ -699,7 +699,7 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
     const ratio = this.ratioWindow();
     this.active =
       ratio < this.config.threshold * 100 ||
-      ratio < this.ratioRoom() * (this.context.partition / this.context.capacity) * this.config.ground / 100;
+      ratio < this.ratioRoom() * this.context.partition / this.context.capacity * this.config.ground / 100;
   }
   public isActive(): boolean {
     return this.active;
