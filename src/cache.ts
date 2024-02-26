@@ -633,9 +633,8 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
   ) {
   }
   private get window(): number {
-    const { window } = this.context;
-    const n = this.target.length >= window << 1 ? 2 : 1;
-    return max(window, min(this.target.length >>> n, window << n + 1));
+    const window = this.context.window;
+    return max(window, min(this.target.length >>> 2, window << 3));
   }
   private get interval(): number {
     const interval = this.context.capacity * this.config.interval / 100;
