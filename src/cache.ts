@@ -637,12 +637,12 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
     const n = this.target.length >= window << 1 ? 2 : 1;
     return max(window, min(this.target.length >>> n, window << n + 1));
   }
-  private get room(): number {
-    return this.context.capacity * this.config.room / 100 >>> 0 || 1;
-  }
   private get interval(): number {
     const interval = this.context.capacity * this.config.interval / 100;
     return max(interval, min(this.window >>> 1, this.target.length >>> 2));
+  }
+  private get room(): number {
+    return this.context.capacity * this.config.room / 100 >>> 0 || 1;
   }
   public resize(): void {
     this.currWindowHits + this.currWindowMisses >= this.window && this.slideWindow();
