@@ -657,6 +657,7 @@ describe('Unit: lib/cache', () => {
       trc['handG'] = trc['handV'];
       trc['hits'] = capacity;
       trc['misses'] = 0;
+      assert(dwc['LRU'].length === dwc['window']);
       assert(dwc['LFU'].length === capacity - dwc['window']);
       assert(dwc['partition'] === capacity - dwc['window']);
       assert(dwc['sweeper']?.isActive());
