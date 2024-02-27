@@ -14,8 +14,8 @@ describe('Benchmark:', function () {
       benchmark('Clock new', () => new Clock(10000), done);
     });
 
-    it('ISC new', function (done) {
-      benchmark('ISC   new', () => new LRUCache({ max: 10000 }), done);
+    it('ILRU new', function (done) {
+      benchmark('ILRU  new', () => new LRUCache({ max: 10000 }), done);
     });
 
     it('LRU new', function (done) {
@@ -43,12 +43,12 @@ describe('Benchmark:', function () {
         benchmark(`Clock set miss ${size.toLocaleString('en')}`, () => cache.set(random() + ++i | 0, {}), done);
       });
 
-      it(`ISC set miss ${size.toLocaleString('en')}`, function (done) {
+      it(`ILRU set miss ${size.toLocaleString('en')}`, function (done) {
         const cache = new LRUCache<number, object>({ max: size });
         for (let i = 0; i < size; ++i) cache.set(~i, {});
         const random = xorshift.random(1);
         let i = 0;
-        benchmark(`ISC   set miss ${size.toLocaleString('en')}`, () => cache.set(random() + ++i | 0, {}), done);
+        benchmark(`ILRU  set miss ${size.toLocaleString('en')}`, () => cache.set(random() + ++i | 0, {}), done);
       });
 
       it(`LRU set miss ${size.toLocaleString('en')}`, function (done) {
@@ -92,11 +92,11 @@ describe('Benchmark:', function () {
         benchmark(`Clock set hit ${size.toLocaleString('en')}`, () => cache.set(random() * size | 0, {}), done);
       });
 
-      it(`ISC set hit ${size.toLocaleString('en')}`, function (done) {
+      it(`ILRU set hit ${size.toLocaleString('en')}`, function (done) {
         const cache = new LRUCache<number, object>({ max: size });
         for (let i = 0; i < size; ++i) cache.set(i, {});
         const random = xorshift.random(1);
-        benchmark(`ISC   set hit ${size.toLocaleString('en')}`, () => cache.set(random() * size | 0, {}), done);
+        benchmark(`ILRU  set hit ${size.toLocaleString('en')}`, () => cache.set(random() * size | 0, {}), done);
       });
 
       it(`LRU set hit ${size.toLocaleString('en')}`, function (done) {
@@ -136,11 +136,11 @@ describe('Benchmark:', function () {
         benchmark(`Clock get miss ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
       });
 
-      it(`ISC get miss ${size.toLocaleString('en')}`, function (done) {
+      it(`ILRU get miss ${size.toLocaleString('en')}`, function (done) {
         const cache = new LRUCache<number, object>({ max: size });
         for (let i = 0; i < size; ++i) cache.set(~i, {});
         const random = xorshift.random(1);
-        benchmark(`ISC   get miss ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
+        benchmark(`ILRU  get miss ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
       });
 
       it(`LRU get miss ${size.toLocaleString('en')}`, function (done) {
@@ -180,11 +180,11 @@ describe('Benchmark:', function () {
         benchmark(`Clock get hit ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
       });
 
-      it(`ISC get hit ${size.toLocaleString('en')}`, function (done) {
+      it(`ILRU get hit ${size.toLocaleString('en')}`, function (done) {
         const cache = new LRUCache<number, object>({ max: size });
         for (let i = 0; i < size; ++i) cache.set(i, {});
         const random = xorshift.random(1);
-        benchmark(`ISC   get hit ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
+        benchmark(`ILRU  get hit ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
       });
 
       it(`LRU get hit ${size.toLocaleString('en')}`, function (done) {
@@ -238,11 +238,11 @@ describe('Benchmark:', function () {
         }, done);
       });
 
-      it(`ISC simulation ${size.toLocaleString('en')} 10%`, function (done) {
+      it(`ILRU simulation ${size.toLocaleString('en')} 10%`, function (done) {
         const cache = new LRUCache<number, object>({ max: size });
         const random = bias(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
-        benchmark(`ISC   simulation ${size.toLocaleString('en')} 10%`, () => {
+        benchmark(`ILRU  simulation ${size.toLocaleString('en')} 10%`, () => {
           const key = random();
           cache.get(key) ?? cache.set(key, {});
         }, done);
@@ -301,11 +301,11 @@ describe('Benchmark:', function () {
         }, done);
       });
 
-      it(`ISC simulation ${size.toLocaleString('en')} 50%`, function (done) {
+      it(`ILRU simulation ${size.toLocaleString('en')} 50%`, function (done) {
         const cache = new LRUCache<number, object>({ max: size });
         const random = bias(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
-        benchmark(`ISC   simulation ${size.toLocaleString('en')} 50%`, () => {
+        benchmark(`ILRU  simulation ${size.toLocaleString('en')} 50%`, () => {
           const key = random();
           cache.get(key) ?? cache.set(key, {});
         }, done);
@@ -364,11 +364,11 @@ describe('Benchmark:', function () {
         }, done);
       });
 
-      it(`ISC simulation ${size.toLocaleString('en')} 90%`, function (done) {
+      it(`ILRU simulation ${size.toLocaleString('en')} 90%`, function (done) {
         const cache = new LRUCache<number, object>({ max: size });
         const random = bias(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
-        benchmark(`ISC   simulation ${size.toLocaleString('en')} 90%`, () => {
+        benchmark(`ILRU  simulation ${size.toLocaleString('en')} 90%`, () => {
           const key = random();
           cache.get(key) ?? cache.set(key, {});
         }, done);
@@ -418,12 +418,12 @@ describe('Benchmark:', function () {
     for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
       const bias = (capacity: number, rng: () => number) => () => rng() * capacity * 1.1 | 0;
       const age = 1000;
-      it(`ISC simulation ${size.toLocaleString('en')} 90% expire`, captureTimers(function (done) {
+      it(`ILRU simulation ${size.toLocaleString('en')} 90% expire`, captureTimers(function (done) {
         const cache = new LRUCache<number, object>({ max: size, ttlAutopurge: true });
         const random = bias(size, xorshift.random(1));
         for (let i = 0; i < size * 9; ++i) cache.set(random(), {});
         for (let i = 0; i < size * 1; ++i) cache.set(i, {}, { ttl: age });
-        benchmark(`ISC   simulation ${size.toLocaleString('en')} 90% expire`, () => {
+        benchmark(`ILRU  simulation ${size.toLocaleString('en')} 90% expire`, () => {
           const key = random();
           cache.get(key) ?? cache.set(key, {}, { ttl: age });
         }, done);
