@@ -34,7 +34,7 @@ describe('Benchmark:', function () {
       benchmark('DWC   new', () => new Cache(10000), done);
     });
 
-    for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
+    for (const size of [1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`Clock set miss ${size.toLocaleString('en')}`, function (done) {
         const cache = new Clock<number, object>(size);
         for (let i = 0; i < Math.ceil(size / 32) * 32; ++i) cache.set(~i, {});
@@ -84,7 +84,7 @@ describe('Benchmark:', function () {
       });
     }
 
-    for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
+    for (const size of [1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`Clock set hit ${size.toLocaleString('en')}`, function (done) {
         const cache = new Clock<number, object>(size);
         for (let i = 0; i < Math.ceil(size / 32) * 32; ++i) cache.set(i, {});
@@ -128,7 +128,7 @@ describe('Benchmark:', function () {
       });
     }
 
-    for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
+    for (const size of [1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`Clock get miss ${size.toLocaleString('en')}`, function (done) {
         const cache = new Clock<number, object>(size);
         for (let i = 0; i < Math.ceil(size / 32) * 32; ++i) cache.set(~i, {});
@@ -172,7 +172,7 @@ describe('Benchmark:', function () {
       });
     }
 
-    for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
+    for (const size of [1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`Clock get hit ${size.toLocaleString('en')}`, function (done) {
         const cache = new Clock<number, object>(size);
         for (let i = 0; i < Math.ceil(size / 32) * 32; ++i) cache.set(i, {});
@@ -216,21 +216,15 @@ describe('Benchmark:', function () {
       });
     }
 
-    // 1e7はシミュだけ実行するとISCが単体でもGitHub Actionsの次の環境とエラーで落ちる。
-    // ベンチ全体を実行したときはなぜか落ちない。
-    //
-    // Error: Uncaught RangeError: Map maximum size exceeded (dist/index.js:16418)
-    //
-    // System:
-    //   OS: Linux 5.15 Ubuntu 20.04.5 LTS (Focal Fossa)
-    //   CPU: (2) x64 Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz
-    //   Memory: 5.88 GB / 6.78 GB
-    //
-    for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
-      const bias = (capacity: number, rng: () => number) => () => rng() * capacity * 10 | 0;
+    // 遅いZipfを速い疑似関数で代用し偏りを再現する。
+    // ILRUのリストをインデクスで置き換える高速化手法はZipfのような
+    // 最も典型的な偏りのアクセスパターンで50%以下の速度に低速化する場合がある。
+    for (const size of [1e2, 1e3, 1e4, 1e5, 1e6]) {
+      const pzipf = (capacity: number, rng: () => number) => () =>
+        Math.floor((rng() * capacity) ** 2 / (5 * capacity / 100 | 0));
       it(`Clock simulation ${size.toLocaleString('en')} 10%`, function (done) {
         const cache = new Clock<number, object>(size);
-        const random = bias(Math.ceil(size / 32) * 32, xorshift.random(1));
+        const random = pzipf(Math.ceil(size / 32) * 32, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`Clock simulation ${size.toLocaleString('en')} 10%`, () => {
           const key = random();
@@ -240,7 +234,7 @@ describe('Benchmark:', function () {
 
       it(`ILRU simulation ${size.toLocaleString('en')} 10%`, function (done) {
         const cache = new LRUCache<number, object>({ max: size });
-        const random = bias(size, xorshift.random(1));
+        const random = pzipf(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`ILRU  simulation ${size.toLocaleString('en')} 10%`, () => {
           const key = random();
@@ -250,7 +244,7 @@ describe('Benchmark:', function () {
 
       it(`LRU simulation ${size.toLocaleString('en')} 10%`, function (done) {
         const cache = new LRU<number, object>(size);
-        const random = bias(size, xorshift.random(1));
+        const random = pzipf(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`LRU   simulation ${size.toLocaleString('en')} 10%`, () => {
           const key = random();
@@ -260,7 +254,7 @@ describe('Benchmark:', function () {
 
       it(`TRC-C simulation ${size.toLocaleString('en')} 10%`, function (done) {
         const cache = new TRCC<number, object>(size);
-        const random = bias(size, xorshift.random(1));
+        const random = pzipf(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`TRC-C simulation ${size.toLocaleString('en')} 10%`, () => {
           const key = random();
@@ -270,7 +264,7 @@ describe('Benchmark:', function () {
 
       it(`TRC-L simulation ${size.toLocaleString('en')} 10%`, function (done) {
         const cache = new TRCL<number, object>(size);
-        const random = bias(size, xorshift.random(1));
+        const random = pzipf(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`TRC-L simulation ${size.toLocaleString('en')} 10%`, () => {
           const key = random();
@@ -280,7 +274,7 @@ describe('Benchmark:', function () {
 
       it(`DWC simulation ${size.toLocaleString('en')} 10%`, function (done) {
         const cache = new Cache<number, object>(size);
-        const random = bias(size, xorshift.random(1));
+        const random = pzipf(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`DWC   simulation ${size.toLocaleString('en')} 10%`, () => {
           const key = random();
@@ -289,11 +283,12 @@ describe('Benchmark:', function () {
       });
     }
 
-    for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
-      const bias = (capacity: number, rng: () => number) => () => rng() * capacity * 2 | 0;
+    for (const size of [1e2, 1e3, 1e4, 1e5, 1e6]) {
+      const pzipf = (capacity: number, rng: () => number) => () =>
+        Math.floor((rng() * capacity) ** 2 / (35 * capacity / 100 | 0));
       it(`Clock simulation ${size.toLocaleString('en')} 50%`, function (done) {
         const cache = new Clock<number, object>(size);
-        const random = bias(Math.ceil(size / 32) * 32, xorshift.random(1));
+        const random = pzipf(Math.ceil(size / 32) * 32, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`Clock simulation ${size.toLocaleString('en')} 50%`, () => {
           const key = random();
@@ -303,7 +298,7 @@ describe('Benchmark:', function () {
 
       it(`ILRU simulation ${size.toLocaleString('en')} 50%`, function (done) {
         const cache = new LRUCache<number, object>({ max: size });
-        const random = bias(size, xorshift.random(1));
+        const random = pzipf(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`ILRU  simulation ${size.toLocaleString('en')} 50%`, () => {
           const key = random();
@@ -313,7 +308,7 @@ describe('Benchmark:', function () {
 
       it(`LRU simulation ${size.toLocaleString('en')} 50%`, function (done) {
         const cache = new LRU<number, object>(size);
-        const random = bias(size, xorshift.random(1));
+        const random = pzipf(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`LRU   simulation ${size.toLocaleString('en')} 50%`, () => {
           const key = random();
@@ -323,7 +318,7 @@ describe('Benchmark:', function () {
 
       it(`TRC-C simulation ${size.toLocaleString('en')} 50%`, function (done) {
         const cache = new TRCC<number, object>(size);
-        const random = bias(size, xorshift.random(1));
+        const random = pzipf(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`TRC-C simulation ${size.toLocaleString('en')} 50%`, () => {
           const key = random();
@@ -333,7 +328,7 @@ describe('Benchmark:', function () {
 
       it(`TRC-L simulation ${size.toLocaleString('en')} 50%`, function (done) {
         const cache = new TRCL<number, object>(size);
-        const random = bias(size, xorshift.random(1));
+        const random = pzipf(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`TRC-L simulation ${size.toLocaleString('en')} 50%`, () => {
           const key = random();
@@ -343,7 +338,7 @@ describe('Benchmark:', function () {
 
       it(`DWC simulation ${size.toLocaleString('en')} 50%`, function (done) {
         const cache = new Cache<number, object>(size);
-        const random = bias(size, xorshift.random(1));
+        const random = pzipf(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`DWC   simulation ${size.toLocaleString('en')} 50%`, () => {
           const key = random();
@@ -352,11 +347,12 @@ describe('Benchmark:', function () {
       });
     }
 
-    for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
-      const bias = (capacity: number, rng: () => number) => () => rng() * capacity * 1.1 | 0;
+    for (const size of [1e2, 1e3, 1e4, 1e5, 1e6]) {
+      const pzipf = (capacity: number, rng: () => number) => () =>
+        Math.floor((rng() * capacity) ** 2 / (85 * capacity / 100 | 0));
       it(`Clock simulation ${size.toLocaleString('en')} 90%`, function (done) {
         const cache = new Clock<number, object>(size);
-        const random = bias(Math.ceil(size / 32) * 32, xorshift.random(1));
+        const random = pzipf(Math.ceil(size / 32) * 32, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`Clock simulation ${size.toLocaleString('en')} 90%`, () => {
           const key = random();
@@ -366,7 +362,7 @@ describe('Benchmark:', function () {
 
       it(`ILRU simulation ${size.toLocaleString('en')} 90%`, function (done) {
         const cache = new LRUCache<number, object>({ max: size });
-        const random = bias(size, xorshift.random(1));
+        const random = pzipf(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`ILRU  simulation ${size.toLocaleString('en')} 90%`, () => {
           const key = random();
@@ -376,7 +372,7 @@ describe('Benchmark:', function () {
 
       it(`LRU simulation ${size.toLocaleString('en')} 90%`, function (done) {
         const cache = new LRU<number, object>(size);
-        const random = bias(size, xorshift.random(1));
+        const random = pzipf(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`LRU   simulation ${size.toLocaleString('en')} 90%`, () => {
           const key = random();
@@ -386,7 +382,7 @@ describe('Benchmark:', function () {
 
       it(`TRC-C simulation ${size.toLocaleString('en')} 90%`, function (done) {
         const cache = new TRCC<number, object>(size);
-        const random = bias(size, xorshift.random(1));
+        const random = pzipf(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`TRC-C simulation ${size.toLocaleString('en')} 90%`, () => {
           const key = random();
@@ -396,7 +392,7 @@ describe('Benchmark:', function () {
 
       it(`TRC-L simulation ${size.toLocaleString('en')} 90%`, function (done) {
         const cache = new TRCL<number, object>(size);
-        const random = bias(size, xorshift.random(1));
+        const random = pzipf(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`TRC-L simulation ${size.toLocaleString('en')} 90%`, () => {
           const key = random();
@@ -406,7 +402,7 @@ describe('Benchmark:', function () {
 
       it(`DWC simulation ${size.toLocaleString('en')} 90%`, function (done) {
         const cache = new Cache<number, object>(size);
-        const random = bias(size, xorshift.random(1));
+        const random = pzipf(size, xorshift.random(1));
         for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
         benchmark(`DWC   simulation ${size.toLocaleString('en')} 90%`, () => {
           const key = random();
@@ -415,14 +411,15 @@ describe('Benchmark:', function () {
       });
     }
 
-    for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
-      const bias = (capacity: number, rng: () => number) => () => rng() * capacity * 1.1 | 0;
+    for (const size of [1e2, 1e3, 1e4, 1e5, 1e6]) {
+      const pzipf = (capacity: number, rng: () => number) => () =>
+        Math.floor((rng() * capacity) ** 2 / (85 * capacity / 100 | 0));
       const age = 1000;
       it(`ILRU simulation ${size.toLocaleString('en')} 90% expire`, captureTimers(function (done) {
         const cache = new LRUCache<number, object>({ max: size, ttlAutopurge: true });
-        const random = bias(size, xorshift.random(1));
+        const random = pzipf(size, xorshift.random(1));
         for (let i = 0; i < size * 9; ++i) cache.set(random(), {});
-        for (let i = 0; i < size * 1; ++i) cache.set(i, {}, { ttl: age });
+        for (let i = 0; i < size * 1; ++i) cache.set(random(), {}, { ttl: age });
         benchmark(`ILRU  simulation ${size.toLocaleString('en')} 90% expire`, () => {
           const key = random();
           cache.get(key) ?? cache.set(key, {}, { ttl: age });
@@ -431,9 +428,9 @@ describe('Benchmark:', function () {
 
       it(`DWC simulation ${size.toLocaleString('en')} 90% expire`, function (done) {
         const cache = new Cache<number, object>(size, { eagerExpiration: true });
-        const random = bias(size, xorshift.random(1));
+        const random = pzipf(size, xorshift.random(1));
         for (let i = 0; i < size * 9; ++i) cache.set(random(), {});
-        for (let i = 0; i < size * 1; ++i) cache.set(i, {}, { age: age });
+        for (let i = 0; i < size * 1; ++i) cache.set(random(), {}, { age: age });
         benchmark(`DWC   simulation ${size.toLocaleString('en')} 90% expire`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {}, { age: age });

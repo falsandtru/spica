@@ -79,7 +79,9 @@ https://github.com/ben-manes/caffeine/wiki/Efficiency
 /*
 # lru-cacheの最適化分析
 
-最適化前(@6)よりオブジェクト値において50-10%ほど高速化している。
+非常に高いヒット率では素朴な実装より高速化するがそれ以外の場合は低速化する。
+この最適化により素朴な実装より速くなる範囲が非常に狭く全体的には低速化している。
+巨大な配列を複数要するため空間オーバーヘッドも大きく消費メモリ基準では容量とヒット率が低下する。
 
 ## Map値の数値化
 
@@ -88,11 +90,8 @@ getは変わらないため読み取り主体の場合効果が低い。
 
 ## インデクスアクセス化
 
-個別の状態を個別のオブジェクトのプロパティに持たせると最適化されていないプロパティアクセスにより
-低速化するためすべての状態を状態別の配列に格納しインデクスアクセスに変換することで高速化している。
-DWCはこの最適化を行っても状態数の多さに比例して増加したオーバーヘッドに相殺され効果を得られない。
-状態をオブジェクトの代わりに配列に入れても最適化されずプロパティ・インデクスとも二段のアクセスは
-最適化されないと思われる。
+すべての状態を状態別の配列に格納しインデクスアクセスに変換することで高速化している。
+DWCはこの高速化を行っても状態数の多さに比例して増加したオーバーヘッドに相殺され効果を得られない。
 
 ## TypedArray
 
@@ -706,15 +705,19 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
   private ratioWindow(): number {
     return ratio(
       this.window,
-      [this.currWindowHits, this.prevWindowHits],
-      [this.currWindowMisses, this.prevWindowMisses],
+      this.currWindowHits,
+      this.prevWindowHits,
+      this.currWindowMisses,
+      this.prevWindowMisses,
       0);
   }
   private ratioRoom(): number {
     return ratio(
       this.room,
-      [this.currRoomHits, this.prevRoomHits],
-      [this.currRoomMisses, this.prevRoomMisses],
+      this.currRoomHits,
+      this.prevRoomHits,
+      this.currRoomMisses,
+      this.prevRoomMisses,
       0);
   }
   private processing = false;
@@ -779,16 +782,14 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
 
 function ratio(
   window: number,
-  targets: readonly [number, number],
-  remains: readonly [number, number],
+  currHits: number,
+  prevHits: number,
+  currMisses: number,
+  prevMisses: number,
   offset: number,
 ): number {
-  assert(targets.length === 2);
-  assert(targets.length === remains.length);
-  const currHits = targets[0];
-  const prevHits = targets[1];
-  const currTotal = currHits + remains[0];
-  const prevTotal = prevHits + remains[1];
+  const currTotal = currHits + currMisses;
+  const prevTotal = prevHits + prevMisses;
   assert(currTotal <= window);
   const prevRate = prevHits && prevHits * 100 / prevTotal;
   const currRatio = currTotal * 100 / window - offset;
@@ -824,13 +825,13 @@ function ratio2(
   }
   return hits * 10000 / total | 0;
 }
-assert(ratio(10, [4, 0], [6, 0], 0) === 4000);
-assert(ratio(10, [0, 4], [0, 6], 0) === 4000);
-assert(ratio(10, [1, 4], [4, 6], 0) === 3000);
-assert(ratio(10, [0, 4], [0, 6], 5) === 4000);
-assert(ratio(10, [1, 2], [4, 8], 5) === 2000);
-assert(ratio(10, [2, 2], [3, 8], 5) === 2900);
-assert(ratio(10, [2, 0], [3, 0], 0) === 4000);
+assert(ratio(10, 4, 0, 6, 0, 0) === 4000);
+assert(ratio(10, 0, 4, 0, 6, 0) === 4000);
+assert(ratio(10, 1, 4, 4, 6, 0) === 3000);
+assert(ratio(10, 0, 4, 0, 6, 5) === 4000);
+assert(ratio(10, 1, 2, 4, 8, 5) === 2000);
+assert(ratio(10, 2, 2, 3, 8, 5) === 2900);
+assert(ratio(10, 2, 0, 3, 0, 0) === 4000);
 assert(ratio2(10, [4, 0], [6, 0], 0) === 4000);
 assert(ratio2(10, [0, 4], [0, 6], 0) === 4000);
 assert(ratio2(10, [1, 4], [4, 6], 0) === 3000);
