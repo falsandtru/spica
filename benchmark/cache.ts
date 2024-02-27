@@ -290,6 +290,69 @@ describe('Benchmark:', function () {
     }
 
     for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
+      const bias = (capacity: number, rng: () => number) => () => rng() * capacity * 2 | 0;
+      it(`Clock simulation ${size.toLocaleString('en')} 50%`, function (done) {
+        const cache = new Clock<number, object>(size);
+        const random = bias(Math.ceil(size / 32) * 32, xorshift.random(1));
+        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        benchmark(`Clock simulation ${size.toLocaleString('en')} 50%`, () => {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }, done);
+      });
+
+      it(`ISC simulation ${size.toLocaleString('en')} 50%`, function (done) {
+        const cache = new LRUCache<number, object>({ max: size });
+        const random = bias(size, xorshift.random(1));
+        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        benchmark(`ISC   simulation ${size.toLocaleString('en')} 50%`, () => {
+          const key = random();
+          cache.get(key) ?? cache.set(key, {});
+        }, done);
+      });
+
+      it(`LRU simulation ${size.toLocaleString('en')} 50%`, function (done) {
+        const cache = new LRU<number, object>(size);
+        const random = bias(size, xorshift.random(1));
+        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        benchmark(`LRU   simulation ${size.toLocaleString('en')} 50%`, () => {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }, done);
+      });
+
+      it(`TRC-C simulation ${size.toLocaleString('en')} 50%`, function (done) {
+        const cache = new TRCC<number, object>(size);
+        const random = bias(size, xorshift.random(1));
+        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        benchmark(`TRC-C simulation ${size.toLocaleString('en')} 50%`, () => {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }, done);
+      });
+
+      it(`TRC-L simulation ${size.toLocaleString('en')} 50%`, function (done) {
+        const cache = new TRCL<number, object>(size);
+        const random = bias(size, xorshift.random(1));
+        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        benchmark(`TRC-L simulation ${size.toLocaleString('en')} 50%`, () => {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }, done);
+      });
+
+      it(`DWC simulation ${size.toLocaleString('en')} 50%`, function (done) {
+        const cache = new Cache<number, object>(size);
+        const random = bias(size, xorshift.random(1));
+        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        benchmark(`DWC   simulation ${size.toLocaleString('en')} 50%`, () => {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }, done);
+      });
+    }
+
+    for (const size of [1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
       const bias = (capacity: number, rng: () => number) => () => rng() * capacity * 1.1 | 0;
       it(`Clock simulation ${size.toLocaleString('en')} 90%`, function (done) {
         const cache = new Clock<number, object>(size);
