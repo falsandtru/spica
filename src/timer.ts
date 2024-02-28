@@ -34,7 +34,7 @@ function template(repeat: boolean, cancellers?: List<Node<() => void>>): Timer |
     }, timeout);
     const cancel = singleton(() => {
       clearTimeout(id);
-      node && cancellers?.delete(node);
+      cancellers && node && (node.next || node.prev || node === cancellers.head) && cancellers.delete(node);
       params && unhandler?.(params[0]);
     });
     const node = cancellers?.push(new Node(cancel));
@@ -45,7 +45,7 @@ function template(repeat: boolean, cancellers?: List<Node<() => void>>): Timer |
   }
   else {
     timer.clear = () => {
-      while (cancellers.length) {
+      while (cancellers.length !== 0) {
         cancellers.shift()!.value();
       }
     };

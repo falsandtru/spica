@@ -7,18 +7,15 @@ export class Stack<T> {
     return this.array.length === 0;
   }
   public peek(index: 0 | -1 = 0): T | undefined {
-    const { array } = this;
     return index === 0
-      ? array.at(-1)
-      : array[0];
+      ? this.array.at(-1)
+      : this.array[0];
   }
   public push(value: T): void {
     this.array.push(value);
   }
   public pop(): T | undefined {
-    const { array } = this;
-    if (array.length === 0) return;
-    return array.pop();
+    return this.array.pop();
   }
   public clear(): void {
     this.array = [];

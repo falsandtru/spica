@@ -62,7 +62,7 @@ describe('Benchmark:', function () {
         }, done);
       });
 
-      it.skip(`MultiMap set ${size.toLocaleString('en')}`, function (done) {
+      it(`MultiMap set ${size.toLocaleString('en')}`, function (done) {
         const dict = new MultiMap();
         let i = 0;
         benchmark(`MultiMap set ${size.toLocaleString('en')}`, () => {

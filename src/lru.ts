@@ -1,5 +1,5 @@
 import { IterableDict } from './dict';
-import { List } from './list';
+import { List } from './clist';
 
 class Node<K, V> implements List.Node {
   constructor(

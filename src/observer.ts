@@ -50,13 +50,13 @@ class ListenerNode<N extends readonly unknown[], D, R> {
       case this.monitors:
         this.mid = 0;
         for (let node = listeners.head, i = listeners.length; node && i--; node = node.next) {
-          (node.value.id as number) = ++this.mid;
+          node.value.id = ++this.mid;
         }
         return;
       case this.subscribers:
         this.sid = 0;
         for (let node = listeners.head, i = listeners.length; node && i--; node = node.next) {
-          (node.value.id as number) = ++this.sid;
+          node.value.id = ++this.sid;
         }
         return;
       default:
@@ -91,14 +91,14 @@ export type ListenerItem<N extends readonly unknown[], D, R> =
   | MonitorItem<N, D>
   | SubscriberItem<N, D, R>;
 interface MonitorItem<N extends readonly unknown[], D> {
-  readonly id: number;
+  id: number;
   readonly type: ListenerType.Monitor;
   readonly namespace: Readonly<N | Inits<N>>;
   readonly listener: Monitor<N, D>;
   readonly options: ObserverOptions;
 }
 interface SubscriberItem<N extends readonly unknown[], D, R> {
-  readonly id: number;
+  id: number;
   readonly type: ListenerType.Subscriber;
   readonly namespace: Readonly<N>;
   readonly listener: Subscriber<N, D, R>;
@@ -164,7 +164,8 @@ export class Observation<N extends readonly unknown[], D, R>
     if (subscriber) {
       const list = this.seek(namespace, SeekMode.Breakable)?.subscribers;
       const node = list?.find(node => node.value.listener === subscriber);
-      node?.next && list?.delete(node);
+      assert(node?.next || node?.prev || list?.head === node);
+      node && list?.delete(node);
     }
     else {
       void this.seek(namespace, SeekMode.Breakable)?.clear();
@@ -220,7 +221,7 @@ export class Observation<N extends readonly unknown[], D, R>
         catch (reason) {
           causeAsyncException(reason);
         }
-        node.next !== undefined && recents.push(node);
+        (node.next !== undefined || node.prev !== undefined || items.head === node) && recents.push(node);
         node = node.next ?? prev?.next ?? rollback(recents, item => item.next) ?? items.head;
         prev = node?.prev;
       }
@@ -244,7 +245,7 @@ export class Observation<N extends readonly unknown[], D, R>
         catch (reason) {
           causeAsyncException(reason);
         }
-        node.next !== undefined && recents.push(node);
+        (node.next !== undefined || node.prev !== undefined || items.head === node) && recents.push(node);
         node = node.next ?? prev?.next ?? rollback(recents, item => item.next) ?? items.head;
         prev = node?.prev;
       }

@@ -1,58 +1,48 @@
 // Memory-efficient flexible list.
 
-// LRUではclistの方が速い。
-
 export class List<N extends List.Node = List.Node> {
   public length = 0;
   public head?: N = undefined;
-  public last?: N = undefined;
   public get tail(): N | undefined {
     return this.head?.next;
   }
+  public get last(): N | undefined {
+    return this.head?.prev;
+  }
   public insert(node: N, before?: N): N {
-    assert(!node.next && !node.prev);
-    if (before === undefined) return this.push(node);
-    if (before === this.head) return this.unshift(node);
+    assert(!node.next);
     if (++this.length === 1) {
-      return this.head = this.last = node;
+      return this.head = node.next = node.prev = node;
     }
     assert(node !== before);
-    const next = node.next = before;
+    const next = node.next = before ?? this.head!;
     const prev = node.prev = next.prev!;
     return next.prev = prev.next = node;
   }
   public delete(node: N): N {
-    assert(node.next || node.prev || this.head === this.last);
+    assert(node.next);
     if (--this.length === 0) {
-      this.head = this.last = undefined;
+      this.head = undefined;
     }
     else {
       const { next, prev } = node;
-      prev === undefined
-        ? this.head = next
-        : prev.next = next;
-      next === undefined
-        ? this.last = prev
-        : next.prev = prev;
+      if (node === this.head) {
+        this.head = next;
+      }
+      // Error if not used.
+      prev!.next = next;
+      next!.prev = prev;
     }
     node.next = node.prev = undefined;
     return node;
   }
   public unshift(node: N): N {
-    assert(!node.next && !node.prev);
-    if (++this.length === 1) {
-      return this.head = this.last = node;
-    }
-    node.next = this.head;
-    return this.head = this.head!.prev = node;
+    assert(!node.next);
+    return this.head = this.insert(node, this.head);
   }
   public push(node: N): N {
-    assert(!node.next && !node.prev);
-    if (++this.length === 1) {
-      return this.head = this.last = node;
-    }
-    node.prev = this.last;
-    return this.last = this.last!.next = node;
+    assert(!node.next);
+    return this.insert(node, this.head);
   }
   public shift(): N | undefined {
     if (this.length === 0) return;
@@ -60,20 +50,22 @@ export class List<N extends List.Node = List.Node> {
   }
   public pop(): N | undefined {
     if (this.length === 0) return;
-    return this.delete(this.last!);
+    return this.delete(this.head!.prev!);
   }
   public clear(): void {
     this.length = 0;
-    this.head = this.last = undefined;
+    this.head = undefined;
   }
   public *[Symbol.iterator](): Iterator<N, undefined, undefined> {
-    for (let node = this.head; node !== undefined; node = node.next) {
+    for (let node = this.head; node !== undefined;) {
       yield node;
+      node = node.next;
+      if (node === this.head) break;
     }
   }
   public flatMap<T>(f: (node: N) => ArrayLike<T>): T[] {
     const acc = [];
-    for (let node = this.head; node !== undefined; node = node.next) {
+    for (let node = this.head; node !== undefined;) {
       const as = f(node);
       switch (as.length) {
         case 0:
@@ -86,12 +78,16 @@ export class List<N extends List.Node = List.Node> {
             acc.push(as[i]);
           }
       }
+      node = node.next;
+      if (node === this.head) break;
     }
     return acc;
   }
   public find(f: (node: N) => unknown): N | undefined {
-    for (let node = this.head; node !== undefined; node = node.next) {
+    for (let node = this.head; node !== undefined;) {
       if (f(node)) return node;
+      node = node.next;
+      if (node === this.head) break;
     }
   }
 }

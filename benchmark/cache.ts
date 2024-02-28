@@ -225,7 +225,10 @@ describe('Benchmark:', function () {
       it(`Clock simulation ${size.toLocaleString('en')} 10%`, function (done) {
         const cache = new Clock<number, object>(size);
         const random = pzipf(Math.ceil(size / 32) * 32, xorshift.random(1));
-        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        for (let i = 0; i < Math.ceil(size / 32) * 32 * 10; ++i) {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }
         benchmark(`Clock simulation ${size.toLocaleString('en')} 10%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
@@ -235,7 +238,10 @@ describe('Benchmark:', function () {
       it(`ILRU simulation ${size.toLocaleString('en')} 10%`, function (done) {
         const cache = new LRUCache<number, object>({ max: size });
         const random = pzipf(size, xorshift.random(1));
-        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        for (let i = 0; i < size * 8; ++i) {
+          const key = random();
+          cache.get(key) ?? cache.set(key, {});
+        }
         benchmark(`ILRU  simulation ${size.toLocaleString('en')} 10%`, () => {
           const key = random();
           cache.get(key) ?? cache.set(key, {});
@@ -245,7 +251,10 @@ describe('Benchmark:', function () {
       it(`LRU simulation ${size.toLocaleString('en')} 10%`, function (done) {
         const cache = new LRU<number, object>(size);
         const random = pzipf(size, xorshift.random(1));
-        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        for (let i = 0; i < size * 8; ++i) {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }
         benchmark(`LRU   simulation ${size.toLocaleString('en')} 10%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
@@ -255,7 +264,10 @@ describe('Benchmark:', function () {
       it(`TRC-C simulation ${size.toLocaleString('en')} 10%`, function (done) {
         const cache = new TRCC<number, object>(size);
         const random = pzipf(size, xorshift.random(1));
-        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        for (let i = 0; i < size * 8; ++i) {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }
         benchmark(`TRC-C simulation ${size.toLocaleString('en')} 10%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
@@ -265,7 +277,10 @@ describe('Benchmark:', function () {
       it(`TRC-L simulation ${size.toLocaleString('en')} 10%`, function (done) {
         const cache = new TRCL<number, object>(size);
         const random = pzipf(size, xorshift.random(1));
-        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        for (let i = 0; i < size * 8; ++i) {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }
         benchmark(`TRC-L simulation ${size.toLocaleString('en')} 10%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
@@ -275,7 +290,10 @@ describe('Benchmark:', function () {
       it(`DWC simulation ${size.toLocaleString('en')} 10%`, function (done) {
         const cache = new Cache<number, object>(size);
         const random = pzipf(size, xorshift.random(1));
-        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        for (let i = 0; i < size * 8; ++i) {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }
         benchmark(`DWC   simulation ${size.toLocaleString('en')} 10%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
@@ -289,7 +307,10 @@ describe('Benchmark:', function () {
       it(`Clock simulation ${size.toLocaleString('en')} 50%`, function (done) {
         const cache = new Clock<number, object>(size);
         const random = pzipf(Math.ceil(size / 32) * 32, xorshift.random(1));
-        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        for (let i = 0; i < Math.ceil(size / 32) * 32 * 10; ++i) {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }
         benchmark(`Clock simulation ${size.toLocaleString('en')} 50%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
@@ -299,7 +320,10 @@ describe('Benchmark:', function () {
       it(`ILRU simulation ${size.toLocaleString('en')} 50%`, function (done) {
         const cache = new LRUCache<number, object>({ max: size });
         const random = pzipf(size, xorshift.random(1));
-        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        for (let i = 0; i < size * 8; ++i) {
+          const key = random();
+          cache.get(key) ?? cache.set(key, {});
+        }
         benchmark(`ILRU  simulation ${size.toLocaleString('en')} 50%`, () => {
           const key = random();
           cache.get(key) ?? cache.set(key, {});
@@ -309,7 +333,10 @@ describe('Benchmark:', function () {
       it(`LRU simulation ${size.toLocaleString('en')} 50%`, function (done) {
         const cache = new LRU<number, object>(size);
         const random = pzipf(size, xorshift.random(1));
-        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        for (let i = 0; i < size * 8; ++i) {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }
         benchmark(`LRU   simulation ${size.toLocaleString('en')} 50%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
@@ -319,7 +346,10 @@ describe('Benchmark:', function () {
       it(`TRC-C simulation ${size.toLocaleString('en')} 50%`, function (done) {
         const cache = new TRCC<number, object>(size);
         const random = pzipf(size, xorshift.random(1));
-        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        for (let i = 0; i < size * 8; ++i) {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }
         benchmark(`TRC-C simulation ${size.toLocaleString('en')} 50%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
@@ -329,7 +359,10 @@ describe('Benchmark:', function () {
       it(`TRC-L simulation ${size.toLocaleString('en')} 50%`, function (done) {
         const cache = new TRCL<number, object>(size);
         const random = pzipf(size, xorshift.random(1));
-        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        for (let i = 0; i < size * 8; ++i) {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }
         benchmark(`TRC-L simulation ${size.toLocaleString('en')} 50%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
@@ -339,7 +372,10 @@ describe('Benchmark:', function () {
       it(`DWC simulation ${size.toLocaleString('en')} 50%`, function (done) {
         const cache = new Cache<number, object>(size);
         const random = pzipf(size, xorshift.random(1));
-        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        for (let i = 0; i < size * 8; ++i) {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }
         benchmark(`DWC   simulation ${size.toLocaleString('en')} 50%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
@@ -353,7 +389,10 @@ describe('Benchmark:', function () {
       it(`Clock simulation ${size.toLocaleString('en')} 90%`, function (done) {
         const cache = new Clock<number, object>(size);
         const random = pzipf(Math.ceil(size / 32) * 32, xorshift.random(1));
-        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        for (let i = 0; i < Math.ceil(size / 32) * 32 * 10; ++i) {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }
         benchmark(`Clock simulation ${size.toLocaleString('en')} 90%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
@@ -363,7 +402,10 @@ describe('Benchmark:', function () {
       it(`ILRU simulation ${size.toLocaleString('en')} 90%`, function (done) {
         const cache = new LRUCache<number, object>({ max: size });
         const random = pzipf(size, xorshift.random(1));
-        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        for (let i = 0; i < size * 8; ++i) {
+          const key = random();
+          cache.get(key) ?? cache.set(key, {});
+        }
         benchmark(`ILRU  simulation ${size.toLocaleString('en')} 90%`, () => {
           const key = random();
           cache.get(key) ?? cache.set(key, {});
@@ -373,7 +415,10 @@ describe('Benchmark:', function () {
       it(`LRU simulation ${size.toLocaleString('en')} 90%`, function (done) {
         const cache = new LRU<number, object>(size);
         const random = pzipf(size, xorshift.random(1));
-        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        for (let i = 0; i < size * 8; ++i) {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }
         benchmark(`LRU   simulation ${size.toLocaleString('en')} 90%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
@@ -383,7 +428,10 @@ describe('Benchmark:', function () {
       it(`TRC-C simulation ${size.toLocaleString('en')} 90%`, function (done) {
         const cache = new TRCC<number, object>(size);
         const random = pzipf(size, xorshift.random(1));
-        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        for (let i = 0; i < size * 8; ++i) {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }
         benchmark(`TRC-C simulation ${size.toLocaleString('en')} 90%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
@@ -393,7 +441,10 @@ describe('Benchmark:', function () {
       it(`TRC-L simulation ${size.toLocaleString('en')} 90%`, function (done) {
         const cache = new TRCL<number, object>(size);
         const random = pzipf(size, xorshift.random(1));
-        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        for (let i = 0; i < size * 8; ++i) {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }
         benchmark(`TRC-L simulation ${size.toLocaleString('en')} 90%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
@@ -403,7 +454,10 @@ describe('Benchmark:', function () {
       it(`DWC simulation ${size.toLocaleString('en')} 90%`, function (done) {
         const cache = new Cache<number, object>(size);
         const random = pzipf(size, xorshift.random(1));
-        for (let i = 0; i < size * 10; ++i) cache.set(random(), {});
+        for (let i = 0; i < size * 8; ++i) {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }
         benchmark(`DWC   simulation ${size.toLocaleString('en')} 90%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
@@ -418,8 +472,14 @@ describe('Benchmark:', function () {
       it(`ILRU simulation ${size.toLocaleString('en')} 90% expire`, captureTimers(function (done) {
         const cache = new LRUCache<number, object>({ max: size, ttlAutopurge: true });
         const random = pzipf(size, xorshift.random(1));
-        for (let i = 0; i < size * 9; ++i) cache.set(random(), {});
-        for (let i = 0; i < size * 1; ++i) cache.set(random(), {}, { ttl: age });
+        for (let i = 0; i < size * 7; ++i) {
+          const key = random();
+          cache.get(key) ?? cache.set(key, {});
+        }
+        for (let i = 0; i < size * 1; ++i) {
+          const key = random();
+          cache.get(key) ?? cache.set(key, {}, { ttl: age });
+        }
         benchmark(`ILRU  simulation ${size.toLocaleString('en')} 90% expire`, () => {
           const key = random();
           cache.get(key) ?? cache.set(key, {}, { ttl: age });
@@ -429,8 +489,14 @@ describe('Benchmark:', function () {
       it(`DWC simulation ${size.toLocaleString('en')} 90% expire`, function (done) {
         const cache = new Cache<number, object>(size, { eagerExpiration: true });
         const random = pzipf(size, xorshift.random(1));
-        for (let i = 0; i < size * 9; ++i) cache.set(random(), {});
-        for (let i = 0; i < size * 1; ++i) cache.set(random(), {}, { age: age });
+        for (let i = 0; i < size * 7; ++i) {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {});
+        }
+        for (let i = 0; i < size * 1; ++i) {
+          const key = random();
+          cache.get(key) ?? cache.add(key, {}, { age: age });
+        }
         benchmark(`DWC   simulation ${size.toLocaleString('en')} 90% expire`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {}, { age: age });

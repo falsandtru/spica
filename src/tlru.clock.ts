@@ -1,6 +1,6 @@
 import { max } from './alias';
 import { IterableDict } from './dict';
-import { List } from './list';
+import { List } from './clist';
 
 class Entry<K, V> implements List.Node {
   constructor(
@@ -169,6 +169,9 @@ export class TLRU<K, V> implements IterableDict<K, V> {
     const { dict, list } = this;
     const entry = dict.get(key);
     if (entry === undefined) return false;
+    if (entry === this.handG && entry === list.head) {
+      this.handG = undefined;
+    }
     this.escape(entry);
     list.delete(entry);
     assert(entry !== this.handV);

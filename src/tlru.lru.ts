@@ -1,6 +1,6 @@
 import { max } from './alias';
 import { IterableDict } from './dict';
-import { List } from './list';
+import { List } from './clist';
 
 class Entry<K, V> implements List.Node {
   constructor(

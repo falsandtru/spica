@@ -1,7 +1,7 @@
 import { max, min } from './alias';
 import { now } from './chrono';
 import { IterableDict } from './dict';
-import { List } from './list';
+import { List } from './clist';
 import { Heap } from './heap';
 import { extend } from './assign';
 
