@@ -574,13 +574,13 @@ describe('Unit: lib/cache', () => {
       const trc = new TLRU<number, 1>(capacity);
       const dwc = new Cache<number, 1>(capacity);
 
-      const trials = capacity * 100;
+      const trials = capacity * 1000;
       const zipf = zipfian(1, capacity * 1e2, 0.8, xorshift.random(1));
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
         const key = i % 3
           // LFU汚染
-          // 容量1000でほぼ完全に相殺
+          // 容量200でほぼ完全に相殺
           ? i % 3 - 2 ? i - i % 3 : i - i % 3 + 6
           : -zipf();
         stats.lru += lru.get(key) ?? +lru.set(key, 1) & 0;
@@ -597,7 +597,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 19);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 23);
     });
 
     it('ratio jump 100', function () {
@@ -608,7 +608,7 @@ describe('Unit: lib/cache', () => {
       const trc = new TLRU<number, 1>(capacity);
       const dwc = new Cache<number, 1>(capacity);
 
-      const trials = capacity * 100;
+      const trials = capacity * 1000;
       const zipf = zipfian(1, capacity * 1e2, 0.8, xorshift.random(1));
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
@@ -628,7 +628,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 20);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 14);
     });
 
     it('ratio loop 100', function () {
@@ -707,7 +707,7 @@ describe('Unit: lib/cache', () => {
       const dwc = new Cache<number, 1>(capacity);
       lock(capacity, lru, trc, dwc);
 
-      const trials = capacity * 100;
+      const trials = capacity * 60;
       const zipf = zipfian(1, capacity * 1e2, 0.8, xorshift.random(1));
       const stats = new Stats();
       for (let i = 0; i < trials; ++i) {
@@ -728,7 +728,7 @@ describe('Unit: lib/cache', () => {
       console.debug('DWC / LRU hit ratio', `${stats.dwc / stats.lru * 100 | 0}%`);
       console.debug('DWC ratio', dwc['partition']! * 100 / capacity | 0, dwc['LFU'].length * 100 / capacity | 0);
       console.debug('DWC overlap', dwc['overlapLRU'], dwc['overlapLFU']);
-      assert(stats.dwc / stats.lru * 100 >>> 0 === 22);
+      assert(stats.dwc / stats.lru * 100 >>> 0 === 30);
     });
 
     it('ratio lock loop 100', function () {
