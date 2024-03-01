@@ -441,9 +441,9 @@ export class Cache<K, V> implements IterableDict<K, V> {
     const { LRU, LFU } = this;
     if (entry.partition === 'LRU') {
       if (entry.affiliation === 'LRU') {
-        // For memoize.
-        // Strict checks are ineffective with OLTP.
-        if (entry === LRU.head) return;
+        // 消しても敵対的パターンへの耐性は下がらないがJumpパターンでの回復力が下がる。
+        // 消したほうがヒット率が上がりそうだがベンチマーク結果はほぼ変わらないので残しておく。
+        if (entry === LRU.head && this.sweeper?.isActive() !== true) return;
         entry.affiliation = 'LFU';
       }
       else {
