@@ -7,14 +7,23 @@ export class Maybe<a> extends MonadPlus<a> {
   constructor(thunk: () => Maybe<a>) {
     super(thunk);
   }
+  // Bug: TypeScript
+  // @ts-ignore-error
   public fmap<b>(f: (a: a) => b): Maybe<b> {
     return this.bind(a => new Just(f(a)));
   }
+  // Bug: TypeScript
+  // @ts-ignore-error
   public ap<a, z>(this: Maybe<(a: a) => z>, a: Maybe<a>): Maybe<z>;
+  // @ts-ignore-error
   public ap<a, b, z>(this: Maybe<(a: a, b: b) => z>, a: Maybe<a>): Maybe<(b: b) => z>;
+  // @ts-ignore-error
   public ap<a, b, c, z>(this: Maybe<(a: a, b: b, c: c) => z>, a: Maybe<a>): Maybe<(b: b, c: c) => z>;
+  // @ts-ignore-error
   public ap<a, b, c, d, z>(this: Maybe<(a: a, b: b, c: c, d: d) => z>, a: Maybe<a>): Maybe<(b: b, c: c, d: d) => z>;
+  // @ts-ignore-error
   public ap<a, b, c, d, e, z>(this: Maybe<(a: a, b: b, c: c, d: d, e: e) => z>, a: Maybe<a>): Maybe<(b: b, c: c, d: d, e: e) => z>;
+  // @ts-ignore-error
   public ap<a, z>(this: Maybe<(...as: any[]) => z>, a: Maybe<a>): Maybe<z> {
     return Maybe.ap(this, a);
   }
