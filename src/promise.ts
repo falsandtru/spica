@@ -377,7 +377,7 @@ function call(
 
 export function isPromiseLike(value: any): value is PromiseLike<any> {
   return value != null && typeof value === 'object'
-      && typeof value.then === 'function';
+      && 'then' in value && typeof value.then === 'function';
 }
 
 function isAtomicPromiseLike(value: any): value is AtomicPromiseLike<any> {
