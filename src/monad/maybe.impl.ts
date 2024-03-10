@@ -18,6 +18,8 @@ export class Maybe<a> extends MonadPlus<a> {
   public ap<a, z>(this: Maybe<(...as: any[]) => z>, a: Maybe<a>): Maybe<z> {
     return Maybe.ap(this, a);
   }
+  // Bug: TypeScript
+  // @ts-expect-error
   public bind<b>(f: (a: a) => Maybe<b>): Maybe<b> {
     return new Maybe<b>(() => {
       const m: Maybe<a> = this.evaluate();
@@ -31,6 +33,8 @@ export class Maybe<a> extends MonadPlus<a> {
       }
     });
   }
+  // Bug: TypeScript
+  // @ts-expect-error
   public join<b>(this: Maybe<Maybe<b>>): Maybe<b> {
     return this.bind(m => m);
   }

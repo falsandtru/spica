@@ -18,6 +18,8 @@ export class Either<a, b> extends Monad<b> {
   public ap<b, z>(this: Either<a, (b: b) => z>, b: Either<a, b>): Either<a, z> {
     return Either.ap(this, b);
   }
+  // Bug: TypeScript
+  // @ts-expect-error
   public bind<c>(f: (b: b) => Either<a, c>): Either<a, c> {
     return new Either<a, c>(() => {
       const m: Either<a, b> = this.evaluate();
@@ -31,6 +33,8 @@ export class Either<a, b> extends Monad<b> {
       }
     });
   }
+  // Bug: TypeScript
+  // @ts-expect-error
   public join<c>(this: Either<a, Either<a, c>>): Either<a, c> {
     return this.bind(m => m);
   }
