@@ -1,4 +1,3 @@
-import './global';
 import { DeepImmutable, DeepRequired } from './type';
 import { isFinite, ObjectAssign } from './alias';
 import { clock } from './chrono';
@@ -361,8 +360,8 @@ export namespace Supervisor {
       readonly exit: (reason: unknown, state: S) => void;
     };
     export type Function<P, R, S> = (param: P, state: S, kill: (reason?: unknown) => void) => Result<R, S> | PromiseLike<Result<R, S>>;
-    export type GeneratorFunction<P, R, S> = (state: S, kill: (reason?: unknown) => void) => global.Generator<R, R, P>;
-    export type AsyncGeneratorFunction<P, R, S> = (state: S, kill: (reason?: unknown) => void) => global.AsyncGenerator<R, R, P>;
+    export type GeneratorFunction<P, R, S> = (state: S, kill: (reason?: unknown) => void) => Generator<R, R, P>;
+    export type AsyncGeneratorFunction<P, R, S> = (state: S, kill: (reason?: unknown) => void) => AsyncGenerator<R, R, P>;
     export type Coroutine<P, R> = ICoroutine<R, R, P>;
     export type Result<R, S> = readonly [R, S];
   }
