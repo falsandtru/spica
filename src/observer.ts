@@ -129,7 +129,7 @@ export class Observation<N extends readonly unknown[], D, R>
     if (typeof monitor !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${monitor}`);
     const node = this.seek(namespace, SeekMode.Extensible);
     const monitors = node.monitors;
-    if (monitors.length === this.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
+    if (monitors.length === this.limit) throw new Error(`Spica: Observation: Exceeded max listener limit`);
     node.mid === MAX_SAFE_INTEGER && node.reset(monitors);
     const inode = monitors.push(new Node({
       id: ++node.mid,
@@ -144,7 +144,7 @@ export class Observation<N extends readonly unknown[], D, R>
     if (typeof subscriber !== 'function') throw new Error(`Spica: Observation: Invalid listener: ${subscriber}`);
     const node = this.seek(namespace, SeekMode.Extensible);
     const subscribers = node.subscribers;
-    if (subscribers.length === this.limit) throw new Error(`Spica: Observation: Exceeded max listener limit.`);
+    if (subscribers.length === this.limit) throw new Error(`Spica: Observation: Exceeded max listener limit`);
     node.sid === MAX_SAFE_INTEGER && node.reset(subscribers);
     const inode = subscribers.push(new Node({
       id: ++node.sid,
@@ -188,7 +188,7 @@ export class Observation<N extends readonly unknown[], D, R>
   public relay(source: Observer<N, D, unknown>): () => void {
     this.relaies ??= new WeakSet();
     assert(!this.relaies.has(source));
-    if (this.relaies.has(source)) throw new Error(`Spica: Observation: Relay source is already registered.`);
+    if (this.relaies.has(source)) throw new Error(`Spica: Observation: Relay source is already registered`);
     this.relaies.add(source);
     return source.monitor([] as Inits<N>, (data, namespace) =>
       void this.emit(namespace as N, data));

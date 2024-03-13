@@ -2,7 +2,7 @@ import { AtomicPromise } from './promise';
 import { AtomicFuture } from './future';
 import { Queue } from './queue';
 
-const fail = () => AtomicPromise.reject(new Error('Spica: Channel: Closed.'));
+const fail = () => AtomicPromise.reject(new Error('Spica: Channel: Closed'));
 
 export class Channel<T = undefined> implements AsyncIterable<T> {
   constructor(

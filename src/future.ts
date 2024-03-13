@@ -26,7 +26,7 @@ export class Future<T = undefined> extends Promise<T> {
       this[state].resolve(value);
     }
     else if (this.strict) {
-      throw new Error(`Spica: Future: Cannot rebind the value.`);
+      throw new Error(`Spica: Future: Cannot rebind the value`);
     }
     return this;
   }
@@ -48,7 +48,7 @@ export class AtomicFuture<T = undefined> implements AtomicPromise<T> {
       this[internal].resolve(value);
     }
     else if (this.strict) {
-      throw new Error(`Spica: AtomicFuture: Cannot rebind the value.`);
+      throw new Error(`Spica: AtomicFuture: Cannot rebind the value`);
     }
     return this;
   }

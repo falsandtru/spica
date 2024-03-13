@@ -118,5 +118,5 @@ export class Left<a> extends Either<a, never> {
 }
 
 function throwCallError(): never {
-  throw new Error(`Spica: Either: Invalid thunk call.`);
+  throw new Error(`Spica: Either: Invalid thunk call`);
 }

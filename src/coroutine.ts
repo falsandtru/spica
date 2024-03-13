@@ -105,7 +105,7 @@ export class Coroutine<T = unknown, R = T, S = unknown> implements AtomicPromise
           }
         }
         assert(!core.alive);
-        reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
+        reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled`)));
       }
       catch (reason) {
         reply(AtomicPromise.reject(reason));
@@ -218,7 +218,7 @@ class Internal<T, R, S> {
           // Don't block.
           const { 1: reply } = msgs.shift()!;
           try {
-            reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`)));
+            reply(AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled`)));
           }
           catch (reason) {
             causeAsyncException(reason);
@@ -265,8 +265,8 @@ class Port<T, R, S> {
   };
   public ask(msg: S): Promise<IteratorResult<R, T>> {
     const core = this[internal].co[internal];
-    if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
-    if (core.settings.capacity < 0) return AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`));
+    if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled`));
+    if (core.settings.capacity < 0) return AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed`));
     assert(core.sendBuffer instanceof Channel);
     core.settings.capacity >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
     const future = new AtomicFuture<IteratorResult<R, T>>();
@@ -280,7 +280,7 @@ class Port<T, R, S> {
   }
   public recv(): Promise<IteratorResult<R, T>> {
     const core = this[internal].co[internal];
-    if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
+    if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled`));
     ++core.reception;
     return Promise.resolve(core.recvBuffer.take())
       .then(result =>
@@ -290,8 +290,8 @@ class Port<T, R, S> {
   }
   public send(msg: S): Promise<undefined> {
     const core = this[internal].co[internal];
-    if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
-    if (core.settings.capacity < 0) return AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed.`));
+    if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled`));
+    if (core.settings.capacity < 0) return AtomicPromise.reject(new Error(`Spica: Coroutine: Overflowed`));
     assert(core.sendBuffer instanceof Channel);
     core.settings.capacity >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
     const future = new AtomicFuture<IteratorResult<R, T>>();
@@ -299,7 +299,7 @@ class Port<T, R, S> {
   }
   public connect<U>(com: (this: Coroutine<T, R, S>) => AsyncGenerator<S, U, R | T>): Promise<U> {
     const core = this[internal].co[internal];
-    if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled.`));
+    if (!core.alive) return AtomicPromise.reject(new Error(`Spica: Coroutine: Canceled`));
     return (async () => {
       core.settings.capacity >= 0 && core.reception === 0 && ++core.reception && core.recvBuffer.take();
       const iter = com.call(this[internal].co);
@@ -362,7 +362,7 @@ class BroadcastChannel<T> {
   }
 }
 namespace BroadcastChannel {
-  export const fail = () => AtomicPromise.reject(new Error('Spica: Channel: Closed.'));
+  export const fail = () => AtomicPromise.reject(new Error('Spica: Channel: Closed'));
   export class Internal<T> {
     public alive: boolean = true;
     public readonly consumers = new Queue<AtomicFuture<T>>();

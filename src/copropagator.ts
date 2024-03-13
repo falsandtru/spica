@@ -27,7 +27,7 @@ export class Copropagator<T = unknown, R = T, S = unknown> extends Coroutine<T, 
       AtomicPromise.all(cs).then(
         results =>
           results.length === 0
-            ? void this[Coroutine.terminate](new Error(`Spica: Copropagator: No result.`))
+            ? void this[Coroutine.terminate](new Error(`Spica: Copropagator: No result`))
             : void this[Coroutine.exit](reducer(results)),
         reason =>
           void this[Coroutine.terminate](reason));

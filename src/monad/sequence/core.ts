@@ -131,19 +131,19 @@ export namespace Sequence {
   export namespace Exception {
     export function invalidConsError(args: IArguments): TypeError {
       console.error(args, args.length, args[0], args[1]);
-      return new TypeError(`Spica: Sequence: Invalid parameters of cons.`);
+      return new TypeError(`Spica: Sequence: Invalid parameters of cons`);
     }
     export function invalidDataError(data: unknown[]): TypeError {
       console.error(data);
-      return new TypeError(`Spica: Sequence: Invalid data.`);
+      return new TypeError(`Spica: Sequence: Invalid data`);
     }
     export function invalidThunkError(thunk: Sequence.Thunk<unknown>): TypeError {
       console.error(thunk);
-      return new TypeError(`Spica: Sequence: Invalid thunk.`);
+      return new TypeError(`Spica: Sequence: Invalid thunk`);
     }
   }
 }
 
 function throwCallError(): never {
-  throw new Error(`Spica: Sequence: Invalid thunk call.`);
+  throw new Error(`Spica: Sequence: Invalid thunk call`);
 }
