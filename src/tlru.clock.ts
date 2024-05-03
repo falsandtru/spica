@@ -18,6 +18,8 @@ export class TLRU<K, V> implements IterableDict<K, V> {
     private readonly step: number = 2,
     private readonly window: number = 0,
     private readonly retrial: boolean = true,
+    // ヒットにより前方が増えるためstep=100では不足する。
+    private readonly pure: boolean = step >= 100,
   ) {
     assert(capacity > 0);
   }
@@ -111,7 +113,12 @@ export class TLRU<K, V> implements IterableDict<K, V> {
     else {
       const entry = new Entry(key, value);
       dict.set(key, entry);
-      if (this.handV !== undefined) {
+      if (this.pure && this.handG !== undefined) {
+        // 純粋なTLRUの検証用。
+        list.insert(entry, this.handG.next);
+      }
+      else if (this.handV !== undefined) {
+        // 基本的にこのほうがヒット率が高い。
         list.insert(entry, this.handV.next);
       }
       else {
