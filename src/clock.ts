@@ -69,7 +69,7 @@ export class Clock<K, V> implements IterableDict<K, V> {
       const b = refs[i];
       assert(~0 === 2 ** BASE - 1 >> 0);
       if (b >>> r === ~0 >>> r) {
-        hand = hand + BASE - r;
+        hand += BASE - r;
         refs[i] = 0;
         r = 0;
         if (hand < capacity) {
@@ -85,8 +85,8 @@ export class Clock<K, V> implements IterableDict<K, V> {
       assert(l < BASE);
       assert((b & 1 << l) === 0);
       if (l !== r) {
-        refs[i] = b & ~((1 << l) - 1 >>> r << r);
         hand += l - r;
+        refs[i] = b & ~((1 << l) - 1 >>> r << r);
       }
       assert(hand < capacity);
       this.locate(hand, key, value);
