@@ -17,12 +17,12 @@ export class Clock<K, V> implements IterableDict<K, V> {
     assert(capacity > 0);
     this.capacity = ((capacity - 1 | MASK) >>> 0) + 1;
     assert(this.capacity % BASE === 0);
-    this.refs = new Uint32Array(this.capacity >>> DIGIT);
+    this.refs = new Int32Array(this.capacity >>> DIGIT);
   }
   private dict = new Map<K, number>();
   private keys: (K | undefined)[] = [];
   private values: (V | undefined | empty)[] = [];
-  private refs: Uint32Array;
+  private refs: Int32Array;
   private hand = 0;
   private $length = 0;
   public get length(): number {
@@ -36,6 +36,7 @@ export class Clock<K, V> implements IterableDict<K, V> {
     const before = this.refs[i];
     const after = before | 1 << (index & MASK);
     if (after === before) return;
+    assert(after >>> 0 !== before >>> 0);
     this.refs[i] = after;
   }
   private unmark(index: number): void {
@@ -43,6 +44,7 @@ export class Clock<K, V> implements IterableDict<K, V> {
     const before = this.refs[i];
     const after = before & ~(1 << (index & MASK));
     if (after === before) return;
+    assert(after >>> 0 !== before >>> 0);
     this.refs[i] = after;
   }
   private initial: 1 | 0 = 1;
