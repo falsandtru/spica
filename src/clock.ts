@@ -70,7 +70,7 @@ export class Clock<K, V> implements IterableDict<K, V> {
       assert(~0 === 2 ** BASE - 1 >> 0);
       if (b >>> r === ~0 >>> r) {
         hand += BASE - r;
-        refs[i] = 0;
+        refs[i] = b & (1 << r) - 1;
         r = 0;
         if (hand < capacity) {
           ++i;
