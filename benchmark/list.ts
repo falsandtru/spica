@@ -2,7 +2,7 @@ import { benchmark } from './benchmark';
 import { List as IxList } from '../src/ixlist';
 import { List } from '../src/list';
 import { List as CList } from '../src/clist';
-import Yallist from 'yallist';
+import { Yallist } from 'yallist';
 
 class Node {
   constructor(public value: object) { }
