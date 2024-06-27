@@ -1,7 +1,7 @@
 import { benchmark } from './benchmark';
 import { clock } from '../src/chrono';
 
-describe('Benchmark:', function () {
+describe.skip('Benchmark:', function () {
   describe('Chrono', function () {
     for (const size of [1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6]) {
       it(`resolve ${size.toLocaleString('en')}`, function (done) {
