@@ -16,7 +16,7 @@ export class Clock<K, V> implements IterableDict<K, V> {
   // Capacity is rounded up to multiples of 32.
   constructor(
     private readonly capacity: number,
-    private readonly step: number = 8,
+    private readonly demotion: number = 8,
   ) {
     assert(capacity > 0);
     this.capacity = ((capacity - 1 | MASK) >>> 0) + 1;
@@ -29,7 +29,7 @@ export class Clock<K, V> implements IterableDict<K, V> {
   private refs: Int32Array;
   private hand = 0;
   private stock = 0;
-  private readonly threshold = 100 / this.step | 0;
+  private readonly threshold = 100 / this.demotion | 0;
   private $count = 0;
   public get count(): number {
     return this.$count;

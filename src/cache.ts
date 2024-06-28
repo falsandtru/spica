@@ -854,7 +854,7 @@ assert(ratio2(10, [2, 0], [3, 0], 0) === 4000);
 // @ts-ignore
 class TLRU<T extends Entry<K, V>> {
   constructor(
-    private readonly step: number = 2,
+    private readonly demotion: number = 2,
     private readonly window: number = 0,
     private readonly retrial: boolean = true,
   ) {
@@ -881,10 +881,10 @@ class TLRU<T extends Entry<K, V>> {
   private extend(): void {
     const { list } = this;
     this.count = -max(
-      //list.length * this.step / 100 / max(this.count / list.length * this.step, 1) | 0,
-      (list.length - this.count) * this.step / 100 | 0,
+      //list.length * this.demotion / 100 / max(this.count / list.length * this.demotion, 1) | 0,
+      (list.length - this.count) * this.demotion / 100 | 0,
       list.length * this.window / 100 - this.count | 0,
-      this.step && 1);
+      this.demotion && 1);
     assert(this.count <= 0);
   }
   public unshift(entry: T): void {
