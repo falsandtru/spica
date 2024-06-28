@@ -7,7 +7,7 @@ describe('Unit: lib/clock', () => {
   describe('Clock', () => {
     it('get/set', function () {
       const capacity = 96;
-      const clock = new Clock<number, number>(capacity - 1);
+      const clock = new Clock<number, number>(capacity - 1, 100);
       assert(clock['capacity'] === capacity);
 
       for (let i = 0; i < capacity * 2; ++i) {
@@ -123,7 +123,7 @@ describe('Unit: lib/clock', () => {
       console.debug('LRU   hits', stats.lru);
       console.debug('Clock hits', stats.clock);
       console.debug('Clock / LRU hit ratio', `${stats.clock / stats.lru * 100 | 0}%`);
-      assert(stats.clock / stats.lru * 100 >>> 0 === 108);
+      assert(stats.clock / stats.lru * 100 >>> 0 === 141);
       assert(clock['values'].length === capacity);
     });
 
@@ -146,7 +146,7 @@ describe('Unit: lib/clock', () => {
       console.debug('LRU   hits', stats.lru);
       console.debug('Clock hits', stats.clock);
       console.debug('Clock / LRU hit ratio', `${stats.clock / stats.lru * 100 | 0}%`);
-      assert(stats.clock / stats.lru * 100 >>> 0 === 105);
+      assert(stats.clock / stats.lru * 100 >>> 0 === 127);
       assert(clock['values'].length === capacity);
     });
 
