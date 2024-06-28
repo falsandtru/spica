@@ -371,7 +371,7 @@ describe('Benchmark:', function () {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
         }
-        benchmark(`TClock  simulation ${size.toLocaleString('en')} 50%`, () => {
+        benchmark(`TClock simulation ${size.toLocaleString('en')} 50%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
         }, done);
