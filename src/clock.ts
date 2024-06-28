@@ -1,7 +1,4 @@
-import { min } from './alias';
 import { IterableDict } from './dict';
-
-// True Clock
 
 const BASE = 32;
 const DIGIT = Math.log2(BASE);
@@ -16,7 +13,6 @@ export class Clock<K, V> implements IterableDict<K, V> {
   // Capacity is rounded up to multiples of 32.
   constructor(
     private readonly capacity: number,
-    private readonly demotion: number = 8,
   ) {
     assert(capacity > 0);
     this.capacity = ((capacity - 1 | MASK) >>> 0) + 1;
@@ -28,20 +24,6 @@ export class Clock<K, V> implements IterableDict<K, V> {
   private values: (V | undefined | empty)[] = [];
   private refs: Int32Array;
   private hand = 0;
-  private stock = 0;
-  private readonly threshold = 100 / this.demotion | 0;
-  private $count = 0;
-  public get count(): number {
-    return this.$count;
-  }
-  public set count(value) {
-    assert(value > 0);
-    this.$count = value;
-    if (value < this.threshold) return;
-    this.stock = min(this.stock + value / this.threshold | 0, this.capacity);
-    this.$count = min(value % this.threshold, this.capacity);
-    assert(this.$count >= 0);
-  }
   private $length = 0;
   public get length(): number {
     return this.$length;
@@ -90,11 +72,7 @@ export class Clock<K, V> implements IterableDict<K, V> {
       assert(~0 === 2 ** BASE - 1 >> 0);
       if (b >>> r === ~0 >>> r) {
         hand += BASE - r;
-        this.count += BASE - r;
-        if (this.stock > 0) {
-          refs[i] = b & (1 << r) - 1;
-          this.stock -= BASE - r;
-        }
+        refs[i] = b & (1 << r) - 1;
         r = 0;
         if (hand < capacity) {
           ++i;
@@ -110,11 +88,7 @@ export class Clock<K, V> implements IterableDict<K, V> {
       assert((b & 1 << l) === 0);
       if (l !== r) {
         hand += l - r;
-        this.count += l - r;
-        if (this.stock > 0) {
-          refs[i] = b & ~((1 << l) - 1 >>> r << r);
-          this.stock -= l - r;
-        }
+        refs[i] = b & ~((1 << l) - 1 >>> r << r);
       }
       assert(hand < capacity);
       this.locate(hand, key, value);
@@ -169,8 +143,6 @@ export class Clock<K, V> implements IterableDict<K, V> {
     this.values = [];
     this.refs.fill(0);
     this.hand = 0;
-    this.stock = 0;
-    this.$count = 0;
     this.$length = 0;
     this.initial = 1;
   }
