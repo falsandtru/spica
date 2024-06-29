@@ -2,8 +2,8 @@ import { benchmark } from './benchmark';
 import { Clock } from '../src/clock';
 import { TClock } from '../src/tclock';
 import { LRU } from '../src/lru';
-import { TLRU as TRCC } from '../src/tlru.clock';
-import { TLRU as TRCL } from '../src/tlru.lru';
+import { TLRU as TLRUC } from '../src/tlru.clock';
+import { TLRU as TLRUL } from '../src/tlru.lru';
 import { Cache } from '../src/cache';
 import { LRUCache } from 'lru-cache';
 import { xorshift } from '../src/random';
@@ -27,12 +27,12 @@ describe('Benchmark:', function () {
       benchmark('LRU    new', () => new LRU(10000), done);
     });
 
-    it('TRC-C new', function (done) {
-      benchmark('TRC-C  new', () => new TRCC(10000), done);
+    it('TLRU-C new', function (done) {
+      benchmark('TLRU-C new', () => new TLRUC(10000), done);
     });
 
-    it('TRC-L new', function (done) {
-      benchmark('TRC-L  new', () => new TRCL(10000), done);
+    it('TLRU-L new', function (done) {
+      benchmark('TLRU-L new', () => new TLRUL(10000), done);
     });
 
     it('DWC new', function (done) {
@@ -72,20 +72,20 @@ describe('Benchmark:', function () {
         benchmark(`LRU    set miss ${size.toLocaleString('en')}`, () => cache.set(random() + ++i | 0, {}), done);
       });
 
-      it(`TRC-C set miss ${size.toLocaleString('en')}`, function (done) {
-        const cache = new TRCC<number, object>(size);
+      it(`TLRU-C set miss ${size.toLocaleString('en')}`, function (done) {
+        const cache = new TLRUC<number, object>(size);
         for (let i = 0; i < size; ++i) cache.set(~i, {});
         const random = xorshift.random(1);
         let i = 0;
-        benchmark(`TRC-C  set miss ${size.toLocaleString('en')}`, () => cache.set(random() + ++i | 0, {}), done);
+        benchmark(`TLRU-C set miss ${size.toLocaleString('en')}`, () => cache.set(random() + ++i | 0, {}), done);
       });
 
-      it(`TRC-L set miss ${size.toLocaleString('en')}`, function (done) {
-        const cache = new TRCL<number, object>(size);
+      it(`TLRU-L set miss ${size.toLocaleString('en')}`, function (done) {
+        const cache = new TLRUL<number, object>(size);
         for (let i = 0; i < size; ++i) cache.set(~i, {});
         const random = xorshift.random(1);
         let i = 0;
-        benchmark(`TRC-L  set miss ${size.toLocaleString('en')}`, () => cache.set(random() + ++i | 0, {}), done);
+        benchmark(`TLRU-L set miss ${size.toLocaleString('en')}`, () => cache.set(random() + ++i | 0, {}), done);
       });
 
       it(`DWC set miss ${size.toLocaleString('en')}`, function (done) {
@@ -126,18 +126,18 @@ describe('Benchmark:', function () {
         benchmark(`LRU    set hit ${size.toLocaleString('en')}`, () => cache.set(random() * size | 0, {}), done);
       });
 
-      it(`TRC-C set hit ${size.toLocaleString('en')}`, function (done) {
-        const cache = new TRCC<number, object>(size);
+      it(`TLRU-C set hit ${size.toLocaleString('en')}`, function (done) {
+        const cache = new TLRUC<number, object>(size);
         for (let i = 0; i < size; ++i) cache.set(i, {});
         const random = xorshift.random(1);
-        benchmark(`TRC-C  set hit ${size.toLocaleString('en')}`, () => cache.set(random() * size | 0, {}), done);
+        benchmark(`TLRU-C set hit ${size.toLocaleString('en')}`, () => cache.set(random() * size | 0, {}), done);
       });
 
-      it(`TRC-L set hit ${size.toLocaleString('en')}`, function (done) {
-        const cache = new TRCL<number, object>(size);
+      it(`TLRU-L set hit ${size.toLocaleString('en')}`, function (done) {
+        const cache = new TLRUL<number, object>(size);
         for (let i = 0; i < size; ++i) cache.set(i, {});
         const random = xorshift.random(1);
-        benchmark(`TRC-L  set hit ${size.toLocaleString('en')}`, () => cache.set(random() * size | 0, {}), done);
+        benchmark(`TLRU-L set hit ${size.toLocaleString('en')}`, () => cache.set(random() * size | 0, {}), done);
       });
 
       it(`DWC set hit ${size.toLocaleString('en')}`, function (done) {
@@ -177,18 +177,18 @@ describe('Benchmark:', function () {
         benchmark(`LRU    get miss ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
       });
 
-      it(`TRC-C get miss ${size.toLocaleString('en')}`, function (done) {
-        const cache = new TRCC<number, object>(size);
+      it(`TLRU-C get miss ${size.toLocaleString('en')}`, function (done) {
+        const cache = new TLRUC<number, object>(size);
         for (let i = 0; i < size; ++i) cache.set(~i, {});
         const random = xorshift.random(1);
-        benchmark(`TRC-C  get miss ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
+        benchmark(`TLRU-C get miss ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
       });
 
-      it(`TRC-L get miss ${size.toLocaleString('en')}`, function (done) {
-        const cache = new TRCL<number, object>(size);
+      it(`TLRU-L get miss ${size.toLocaleString('en')}`, function (done) {
+        const cache = new TLRUL<number, object>(size);
         for (let i = 0; i < size; ++i) cache.set(~i, {});
         const random = xorshift.random(1);
-        benchmark(`TRC-L  get miss ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
+        benchmark(`TLRU-L get miss ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
       });
 
       it(`DWC get miss ${size.toLocaleString('en')}`, function (done) {
@@ -228,18 +228,18 @@ describe('Benchmark:', function () {
         benchmark(`LRU    get hit ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
       });
 
-      it(`TRC-C get hit ${size.toLocaleString('en')}`, function (done) {
-        const cache = new TRCC<number, object>(size);
+      it(`TLRU-C get hit ${size.toLocaleString('en')}`, function (done) {
+        const cache = new TLRUC<number, object>(size);
         for (let i = 0; i < size; ++i) cache.set(i, {});
         const random = xorshift.random(1);
-        benchmark(`TRC-C  get hit ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
+        benchmark(`TLRU-C get hit ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
       });
 
-      it(`TRC-L get hit ${size.toLocaleString('en')}`, function (done) {
-        const cache = new TRCL<number, object>(size);
+      it(`TLRU-L get hit ${size.toLocaleString('en')}`, function (done) {
+        const cache = new TLRUL<number, object>(size);
         for (let i = 0; i < size; ++i) cache.set(i, {});
         const random = xorshift.random(1);
-        benchmark(`TRC-L  get hit ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
+        benchmark(`TLRU-L get hit ${size.toLocaleString('en')}`, () => cache.get(random() * size | 0), done);
       });
 
       it(`DWC get hit ${size.toLocaleString('en')}`, function (done) {
@@ -308,27 +308,27 @@ describe('Benchmark:', function () {
         }, done);
       });
 
-      it(`TRC-C simulation ${size.toLocaleString('en')} 10%`, function (done) {
-        const cache = new TRCC<number, object>(size);
+      it(`TLRU-C simulation ${size.toLocaleString('en')} 10%`, function (done) {
+        const cache = new TLRUC<number, object>(size);
         const random = pzipf(size, xorshift.random(1));
         for (let i = 0; i < size * 8; ++i) {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
         }
-        benchmark(`TRC-C  simulation ${size.toLocaleString('en')} 10%`, () => {
+        benchmark(`TLRU-C simulation ${size.toLocaleString('en')} 10%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
         }, done);
       });
 
-      it(`TRC-L simulation ${size.toLocaleString('en')} 10%`, function (done) {
-        const cache = new TRCL<number, object>(size);
+      it(`TLRU-L simulation ${size.toLocaleString('en')} 10%`, function (done) {
+        const cache = new TLRUL<number, object>(size);
         const random = pzipf(size, xorshift.random(1));
         for (let i = 0; i < size * 8; ++i) {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
         }
-        benchmark(`TRC-L  simulation ${size.toLocaleString('en')} 10%`, () => {
+        benchmark(`TLRU-L simulation ${size.toLocaleString('en')} 10%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
         }, done);
@@ -403,27 +403,27 @@ describe('Benchmark:', function () {
         }, done);
       });
 
-      it(`TRC-C simulation ${size.toLocaleString('en')} 50%`, function (done) {
-        const cache = new TRCC<number, object>(size);
+      it(`TLRU-C simulation ${size.toLocaleString('en')} 50%`, function (done) {
+        const cache = new TLRUC<number, object>(size);
         const random = pzipf(size, xorshift.random(1));
         for (let i = 0; i < size * 8; ++i) {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
         }
-        benchmark(`TRC-C  simulation ${size.toLocaleString('en')} 50%`, () => {
+        benchmark(`TLRU-C simulation ${size.toLocaleString('en')} 50%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
         }, done);
       });
 
-      it(`TRC-L simulation ${size.toLocaleString('en')} 50%`, function (done) {
-        const cache = new TRCL<number, object>(size);
+      it(`TLRU-L simulation ${size.toLocaleString('en')} 50%`, function (done) {
+        const cache = new TLRUL<number, object>(size);
         const random = pzipf(size, xorshift.random(1));
         for (let i = 0; i < size * 8; ++i) {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
         }
-        benchmark(`TRC-L  simulation ${size.toLocaleString('en')} 50%`, () => {
+        benchmark(`TLRU-L simulation ${size.toLocaleString('en')} 50%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
         }, done);
@@ -498,27 +498,27 @@ describe('Benchmark:', function () {
         }, done);
       });
 
-      it(`TRC-C simulation ${size.toLocaleString('en')} 90%`, function (done) {
-        const cache = new TRCC<number, object>(size);
+      it(`TLRU-C simulation ${size.toLocaleString('en')} 90%`, function (done) {
+        const cache = new TLRUC<number, object>(size);
         const random = pzipf(size, xorshift.random(1));
         for (let i = 0; i < size * 8; ++i) {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
         }
-        benchmark(`TRC-C  simulation ${size.toLocaleString('en')} 90%`, () => {
+        benchmark(`TLRU-C simulation ${size.toLocaleString('en')} 90%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
         }, done);
       });
 
-      it(`TRC-L simulation ${size.toLocaleString('en')} 90%`, function (done) {
-        const cache = new TRCL<number, object>(size);
+      it(`TLRU-L simulation ${size.toLocaleString('en')} 90%`, function (done) {
+        const cache = new TLRUL<number, object>(size);
         const random = pzipf(size, xorshift.random(1));
         for (let i = 0; i < size * 8; ++i) {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
         }
-        benchmark(`TRC-L  simulation ${size.toLocaleString('en')} 90%`, () => {
+        benchmark(`TLRU-L simulation ${size.toLocaleString('en')} 90%`, () => {
           const key = random();
           cache.get(key) ?? cache.add(key, {});
         }, done);
