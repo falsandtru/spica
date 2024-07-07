@@ -461,8 +461,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
           : 0;
         assert(delta >= 0);
         this.partition = min(this.partition + delta, this.capacity - this.window);
-        --this.overlapLFU;
-        assert(this.overlapLFU >= 0);
+        this.overlap(entry);
       }
       assert(this.LFU.length < this.capacity);
       LRU.delete(entry);
@@ -479,12 +478,8 @@ export class Cache<K, V> implements IterableDict<K, V> {
           : 0;
         assert(delta >= 0);
         this.partition = max(this.partition - delta, 0);
+        this.overlap(entry);
         entry.affiliation = 'LFU';
-        --this.overlapLRU;
-        assert(this.overlapLRU >= 0);
-        if (this.declination !== 1 && !this.overflow) {
-          this.declination = 1;
-        }
       }
       if (entry === LFU.head) return;
       LFU.delete(entry);
