@@ -200,6 +200,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
     this.sweeper = settings.sweep?.threshold! > 0
       ? new Sweeper(this.LRU, this as any, {
           threshold: settings.sweep!.threshold!,
+          window: settings.sweep!.window!,
           room: settings.sweep!.room!,
           ground: settings.sweep!.ground!,
           interval: settings.sweep!.interval!,
@@ -622,12 +623,12 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
     private target: T,
     private readonly context: {
       readonly capacity: number;
-      readonly window: number;
       readonly partition: number;
     },
     private readonly config: {
       readonly threshold: number;
       readonly ground: number;
+      readonly window: number;
       readonly room: number;
       readonly interval: number;
       readonly slide: number;
@@ -635,7 +636,7 @@ class Sweeper<T extends List<Entry<unknown, unknown>>> {
   ) {
   }
   private get window(): number {
-    const window = this.context.window;
+    const window = this.context.capacity * this.config.window / 100 >>> 0 || 1;
     return max(window, min(this.target.length >>> 2, window << 3));
   }
   private get interval(): number {
