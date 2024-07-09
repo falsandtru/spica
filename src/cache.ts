@@ -367,7 +367,7 @@ export class Cache<K, V> implements IterableDict<K, V> {
             this.injection = 0;
             this.declination = !this.overflow
               ? 1
-              : min(this.declination << 1, 8);
+              : 8;
           }
         }
         if (this.sweeper?.isActive()) {
