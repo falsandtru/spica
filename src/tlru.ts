@@ -48,11 +48,17 @@ True LRU
 
   MRU |2 3 4 1| LRU
   Hit |1 1 0 0|
-        ^ ^ ^ Ideal recency.
+        ^ ^ ^ Ideal recency(Recency-complete).
 ```
 
+|Algorithm|Used-Used|Used-Unused|Unused-Unused|
+|:-------:|:-------:|:---------:|:-----------:|
+|LRU      |✓        |           |✓           |
+|Clock    |         |✓          |✓           |
+|True LRU |✓        |✓          |✓           |
+
 再利用距離と同様に未使用と使用済みの最近性には無限と有限の差があり差を埋める方法には
-様々な方法が考えられる。
+様々な方法が考えられこの調整可能性はTrue LRUとClockにのみ存在しLRUには存在しない。
 
 True LRUにおけるLRUからの大幅な改善はすべてのアルゴリズムの改善の過半が未使用のエントリを
 偶然削除したことによるものを独自の改善として混同および錯覚したものであり各アルゴリズムの
