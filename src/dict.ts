@@ -1,4 +1,6 @@
-import type { NonNull } from './type';
+// WARNING: Must not contain assertions here and in dependency modules!
+
+type NonNull = {};
 
 export interface Dict<K, V> {
   add?(key: K, value: V): NonNull;
