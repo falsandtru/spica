@@ -239,7 +239,6 @@ export function type(value: unknown): string {
       return 'Function';
     case 'object':
       if (value === null) return 'null';
-      assert(value = value as object);
       const tag: string = (value as object)[Symbol.toStringTag];
       if (tag) return tag;
       switch (ObjectGetPrototypeOf(value)) {
