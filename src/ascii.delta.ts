@@ -387,7 +387,12 @@ function encCode(code: number, base: number, axis: number): number {
     case axisU:
     case axisL: {
       const coders = frequency[base];
-      if (coders !== codersH && code === sep) return 7;
+      if (code === sep) switch (coders) {
+        case codersF:
+        case codersL:
+        case codersR:
+          return 7;
+      }
       if (code < axis || axis + 26 - 1 < code) break;
       delta = coders[0][code];
       break;
@@ -408,7 +413,12 @@ function decDelta(delta: number, base: number, axis: number): number {
     case axisU:
     case axisL: {
       const coders = frequency[base];
-      if (coders !== codersH && delta === 7) return sep;
+      if (delta === 7) switch (coders) {
+        case codersF:
+        case codersL:
+        case codersR:
+          return sep;
+      }
       code = coders[axis === axisU ? 1 : 2][delta];
       break;
     }
