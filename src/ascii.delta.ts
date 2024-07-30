@@ -173,6 +173,10 @@ v12 ランダム文字列とパーセントエンコーディングに対応
 num: 0.4224; hex: 0.3001; 36: 0.2357; 64: 0.2207; pct: 0.5833;
 lower: 0.3239; upper: 0.2063; camel: 0.2663; country: 0.3058; text: 0.3544; json: 0.2352;
 
+v13 開始文字を変更
+num: 0.4224; hex: 0.2999; 36: 0.2358; 64: 0.2207; pct: 0.5833;
+lower: 0.3251; upper: 0.2062; camel: 0.2662; country: 0.3058; text: 0.3534; json: 0.2352;
+
 */
 
 const ASCII = [...Array(256)].reduce<string>((acc, _, i) => acc + String.fromCharCode(i), '');
@@ -190,8 +194,8 @@ const codersH = [
 codersH.forEach((decs, i, [enc]) => i && decs.forEach((code, i) => enc[code] = i));
 const codersF = [
   new Uint8Array(128).fill(~0),
-  new Uint8Array('SCPADRM BTIEHFUL'.split('').map(c => c.charCodeAt(0))),
-  new Uint8Array('scpadrm btiehful'.split('').map(c => c.charCodeAt(0))),
+  new Uint8Array('SCPADRMNTIEHOULG'.split('').map(c => c.charCodeAt(0))),
+  new Uint8Array('scpadrmntiehoulg'.split('').map(c => c.charCodeAt(0))),
 ] as const;
 codersF.forEach((decs, i, [enc]) => i && decs.forEach((code, i) => enc[code] = i));
 const codersL = [
@@ -388,7 +392,6 @@ function encCode(code: number, base: number, axis: number): number {
     case axisL: {
       const coders = frequency[base];
       if (code === sep) switch (coders) {
-        case codersF:
         case codersL:
         case codersR:
           return 7;
@@ -414,7 +417,6 @@ function decDelta(delta: number, base: number, axis: number): number {
     case axisL: {
       const coders = frequency[base];
       if (delta === 7) switch (coders) {
-        case codersF:
         case codersL:
         case codersR:
           return sep;
