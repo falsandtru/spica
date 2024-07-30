@@ -177,47 +177,47 @@ lower: 0.3239; upper: 0.2063; camel: 0.2663; country: 0.3058; text: 0.3544; json
 
 const ASCII = [...Array(256)].reduce<string>((acc, _, i) => acc + String.fromCharCode(i), '');
 
-const tablesN = [
+const codersN = [
   new Uint8Array(128).fill(~0),
   ...Array(2).fill(new Uint8Array('0123456789 .:-,/'.split('').map(c => c.charCodeAt(0)))) as [Uint8Array, Uint8Array],
 ] as const;
-tablesN.forEach((table, i, arr) => i && table.forEach((code, i) => arr[0][code] = i));
-const tablesH = [
+codersN.forEach((decs, i, [enc]) => i && decs.forEach((code, i) => enc[code] = i));
+const codersH = [
   new Uint8Array(128).fill(~0),
   new Uint8Array('0123456789ABCDEF'.split('').map(c => c.charCodeAt(0))),
   new Uint8Array('0123456789abcdef'.split('').map(c => c.charCodeAt(0))),
 ] as const;
-tablesH.forEach((table, i, arr) => i && table.forEach((code, i) => arr[0][code] = i));
-const tablesF = [
+codersH.forEach((decs, i, [enc]) => i && decs.forEach((code, i) => enc[code] = i));
+const codersF = [
   new Uint8Array(128).fill(~0),
   new Uint8Array('SCPADRM BTIEHFUL'.split('').map(c => c.charCodeAt(0))),
   new Uint8Array('scpadrm btiehful'.split('').map(c => c.charCodeAt(0))),
 ] as const;
-tablesF.forEach((table, i, arr) => i && table.forEach((code, i) => arr[0][code] = i));
-const tablesL = [
+codersF.forEach((decs, i, [enc]) => i && decs.forEach((code, i) => enc[code] = i));
+const codersL = [
   new Uint8Array(128).fill(~0),
   new Uint8Array('DHTNSLRC YPAOEUI'.split('').map(c => c.charCodeAt(0))).reverse(),
   new Uint8Array('dhtnslrc ypaoeui'.split('').map(c => c.charCodeAt(0))).reverse(),
 ] as const;
-tablesL.forEach((table, i, arr) => i && table.forEach((code, i) => arr[0][code] = i));
-const tablesR = [
+codersL.forEach((decs, i, [enc]) => i && decs.forEach((code, i) => enc[code] = i));
+const codersR = [
   new Uint8Array(128).fill(~0),
   new Uint8Array('DHTNSLR CYPAOEUI'.split('').map(c => c.charCodeAt(0))),
   new Uint8Array('dhtnslr cypaoeui'.split('').map(c => c.charCodeAt(0))),
 ] as const;
-tablesR.forEach((table, i, arr) => i && table.forEach((code, i) => arr[0][code] = i));
-assert(tablesL[0][7] === tablesR[0][7]);
+codersR.forEach((decs, i, [enc]) => i && decs.forEach((code, i) => enc[code] = i));
+assert(codersL[0][7] === codersR[0][7]);
 const layout = 'ZQJKXFYPAOEUIDHTNSLRCGBMWV';
 // 4+3bitのインデクスに変換可能
 const frequency = [
-  ...[...Array(32)].map(() => tablesF),
-  ...[...Array(16)].map(() => tablesF),
-  ...'0123456789'.split('').map(() => tablesN),
-  ...`:;<=>?@`.split('').map(() => tablesF),
-  ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => layout.indexOf(c) < 13 ? tablesR : tablesL),
-  ...'[\\]^_`'.split('').map(() => tablesF),
-  ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => layout.indexOf(c) < 13 ? tablesR : tablesL),
-  ...'{|}~\x7f'.split('').map(() => tablesF),
+  ...[...Array(32)].map(() => codersF),
+  ...[...Array(16)].map(() => codersF),
+  ...'0123456789'.split('').map(() => codersN),
+  ...`:;<=>?@`.split('').map(() => codersF),
+  ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => layout.indexOf(c) < 13 ? codersR : codersL),
+  ...'[\\]^_`'.split('').map(() => codersF),
+  ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => layout.indexOf(c) < 13 ? codersR : codersL),
+  ...'{|}~\x7f'.split('').map(() => codersF),
 ] as const;
 const axisU = 'A'.charCodeAt(0);
 const axisL = 'a'.charCodeAt(0);
@@ -386,16 +386,16 @@ function encCode(code: number, base: number, axis: number): number {
   switch (axis) {
     case axisU:
     case axisL: {
-      const tables = frequency[base];
-      if (tables !== tablesH && code === sep) return 7;
+      const coders = frequency[base];
+      if (coders !== codersH && code === sep) return 7;
       if (code < axis || axis + 26 - 1 < code) break;
-      delta = tables[0][code];
+      delta = coders[0][code];
       break;
     }
     case axisN: {
-      const tables = frequency[axis <= base && base < axis + 10 ? base : axis];
+      const coders = frequency[axis <= base && base < axis + 10 ? base : axis];
       if (code < axis && axis + 10 - 1 < code) break;
-      delta = tables[0][code];
+      delta = coders[0][code];
       break;
     }
   }
@@ -407,14 +407,14 @@ function decDelta(delta: number, base: number, axis: number): number {
   switch (axis) {
     case axisU:
     case axisL: {
-      const tables = frequency[base];
-      if (tables !== tablesH && delta === 7) return sep;
-      code = tables[axis === axisU ? 1 : 2][delta];
+      const coders = frequency[base];
+      if (coders !== codersH && delta === 7) return sep;
+      code = coders[axis === axisU ? 1 : 2][delta];
       break;
     }
     case axisN: {
-      const tables = frequency[axis <= base && base < axis + 10 ? base : axis];
-      code = tables[1][delta];
+      const coders = frequency[axis <= base && base < axis + 10 ? base : axis];
+      code = coders[1][delta];
       break;
     }
     default:
@@ -469,7 +469,7 @@ export function encode(input: string, huffman = true): string {
       }
       if (code === 0x25) {
         popts.start = i;
-        output += '%' + encodePercent(input, tablesH[0], popts);
+        output += '%' + encodePercent(input, codersH[0], popts);
         i = popts.next === i ? i + 1 : popts.next;
         output += input[i] ?? '';
         base = input.charCodeAt(i);
@@ -491,7 +491,7 @@ export function encode(input: string, huffman = true): string {
       }
       const comp = axis === axisH && isHEX(code) >>> 4 !== 0;
       const delta = comp
-        ? tablesH[0][code]
+        ? codersH[0][code]
         : encCode(code, base, axis);
       if (delta >>> 4 || axis === axisH && !comp || i < hopts.skip) {
         output += ASCII[code];
@@ -505,7 +505,7 @@ export function encode(input: string, huffman = true): string {
       const sep$ = sep;
       const comp = axis === axisH && isHEX(code) >>> 4 !== 0;
       const delta = comp
-        ? tablesH[0][code]
+        ? codersH[0][code]
         : encCode(code, base, axis);
       if (delta >>> 3 || axis === axisH && !comp) {
         if (!comp) {
@@ -544,7 +544,7 @@ export function decode(input: string, huffman = true): string {
     assert(code >>> 8 === 0);
     if (code === 0x25) {
       popts.start = ++i;
-      output += decodePercent(input, tablesH[1], popts) || '%';
+      output += decodePercent(input, codersH[1], popts) || '%';
       i = popts.next;
       output += input[i] ?? '';
       base = input.charCodeAt(i);
@@ -571,14 +571,14 @@ export function decode(input: string, huffman = true): string {
     else {
       const delta = code;
       code = axis == axisH
-        ? tablesH[hexcase][delta >>> 3 & 0b1111]
+        ? codersH[hexcase][delta >>> 3 & 0b1111]
         : decDelta(delta >>> 3 & 0b1111, base, axis);
       output += ASCII[code];
       axis = align(code, base, axis);
       base = code;
       hexcase = segment(code) <= Segment.Lower ? segment(code) + 1 : hexcase;
       code = axis == axisH
-        ? tablesH[hexcase][delta & 0b111]
+        ? codersH[hexcase][delta & 0b111]
         : decDelta(delta & 0b0111, base, axis);
       output += ASCII[code];
     }
