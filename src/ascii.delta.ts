@@ -185,31 +185,31 @@ const codersN = [
   new Uint8Array(128).fill(~0),
   ...Array(2).fill(new Uint8Array('0123456789 .:-,/'.split('').map(c => c.charCodeAt(0)))) as [Uint8Array, Uint8Array],
 ] as const;
-codersN.forEach((decs, i, [enc]) => i && decs.forEach((code, i) => enc[code] = i));
+codersN.forEach((dec, i, [enc]) => i && dec.forEach((code, i) => enc[code] = i));
 const codersH = [
   new Uint8Array(128).fill(~0),
   new Uint8Array('0123456789ABCDEF'.split('').map(c => c.charCodeAt(0))),
   new Uint8Array('0123456789abcdef'.split('').map(c => c.charCodeAt(0))),
 ] as const;
-codersH.forEach((decs, i, [enc]) => i && decs.forEach((code, i) => enc[code] = i));
+codersH.forEach((dec, i, [enc]) => i && dec.forEach((code, i) => enc[code] = i));
 const codersF = [
   new Uint8Array(128).fill(~0),
   new Uint8Array('SCPADRMNTIEHOULG'.split('').map(c => c.charCodeAt(0))),
   new Uint8Array('scpadrmntiehoulg'.split('').map(c => c.charCodeAt(0))),
 ] as const;
-codersF.forEach((decs, i, [enc]) => i && decs.forEach((code, i) => enc[code] = i));
+codersF.forEach((dec, i, [enc]) => i && dec.forEach((code, i) => enc[code] = i));
 const codersL = [
   new Uint8Array(128).fill(~0),
   new Uint8Array('DHTNSLRC YPAOEUI'.split('').map(c => c.charCodeAt(0))).reverse(),
   new Uint8Array('dhtnslrc ypaoeui'.split('').map(c => c.charCodeAt(0))).reverse(),
 ] as const;
-codersL.forEach((decs, i, [enc]) => i && decs.forEach((code, i) => enc[code] = i));
+codersL.forEach((dec, i, [enc]) => i && dec.forEach((code, i) => enc[code] = i));
 const codersR = [
   new Uint8Array(128).fill(~0),
   new Uint8Array('DHTNSLR CYPAOEUI'.split('').map(c => c.charCodeAt(0))),
   new Uint8Array('dhtnslr cypaoeui'.split('').map(c => c.charCodeAt(0))),
 ] as const;
-codersR.forEach((decs, i, [enc]) => i && decs.forEach((code, i) => enc[code] = i));
+codersR.forEach((dec, i, [enc]) => i && dec.forEach((code, i) => enc[code] = i));
 assert(codersL[0][7] === codersR[0][7]);
 const layout = 'ZQJKXFYPAOEUIDHTNSLRCGBMWV';
 // 4+3bitのインデクスに変換可能
