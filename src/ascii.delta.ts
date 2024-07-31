@@ -183,7 +183,8 @@ const ASCII = [...Array(256)].reduce<string>((acc, _, i) => acc + String.fromCha
 
 const codersN = [
   new Uint8Array(128).fill(~0),
-  ...Array(2).fill(new Uint8Array('0123456789 .:-,/'.split('').map(c => c.charCodeAt(0)))) as [Uint8Array, Uint8Array],
+  new Uint8Array('0123456789 .:-,/'.split('').map(c => c.charCodeAt(0))),
+  new Uint8Array('0123456789 .:-,/'.split('').map(c => c.charCodeAt(0))),
 ] as const;
 codersN.forEach((dec, i, [enc]) => i && dec.forEach((code, i) => enc[code] = i));
 const codersH = [
@@ -211,18 +212,29 @@ const codersR = [
 ] as const;
 codersR.forEach((dec, i, [enc]) => i && dec.forEach((code, i) => enc[code] = i));
 assert(codersL[0][7] === codersR[0][7]);
-const layout = 'ZQJKXFYPAOEUIDHTNSLRCGBMWV';
-// 4+3bitのインデクスに変換可能
-const frequency = [
-  ...[...Array(32)].map(() => codersF),
-  ...[...Array(16)].map(() => codersF),
-  ...'0123456789'.split('').map(() => codersN),
-  ...`:;<=>?@`.split('').map(() => codersF),
-  ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => layout.indexOf(c) < 13 ? codersR : codersL),
-  ...'[\\]^_`'.split('').map(() => codersF),
-  ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => layout.indexOf(c) < 13 ? codersR : codersL),
-  ...'{|}~\x7f'.split('').map(() => codersF),
+const table = [
+  codersN,
+  codersF,
+  codersL,
+  codersR,
 ] as const;
+const Table = {
+  N: table.indexOf(codersN),
+  F: table.indexOf(codersF),
+  L: table.indexOf(codersL),
+  R: table.indexOf(codersR),
+} as const;
+const layout = 'ZQJKXFYPAOEUIDHTNSLRCGBMWV';
+const frequency = new Uint8Array([
+  ...new Uint8Array(32).map(() => Table.F),
+  ...new Uint8Array(16).map(() => Table.F),
+  ...'0123456789'.split('').map(() => Table.N),
+  ...`:;<=>?@`.split('').map(() => Table.F),
+  ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => layout.indexOf(c) < 13 ? Table.R : Table.L),
+  ...'[\\]^_`'.split('').map(() => Table.F),
+  ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => layout.indexOf(c) < 13 ? Table.R : Table.L),
+  ...'{|}~\x7f'.split('').map(() => Table.F),
+]);
 const axisU = 'A'.charCodeAt(0);
 const axisL = 'a'.charCodeAt(0);
 const axisN = '0'.charCodeAt(0);
@@ -390,7 +402,7 @@ function encCode(code: number, base: number, axis: number): number {
   switch (axis) {
     case axisU:
     case axisL: {
-      const coders = frequency[base];
+      const coders = table[frequency[base]];
       if (code === sep) switch (coders) {
         case codersL:
         case codersR:
@@ -401,7 +413,7 @@ function encCode(code: number, base: number, axis: number): number {
       break;
     }
     case axisN: {
-      const coders = frequency[axis <= base && base < axis + 10 ? base : axis];
+      const coders = table[frequency[axis <= base && base < axis + 10 ? base : axis]];
       if (code < axis && axis + 10 - 1 < code) break;
       delta = coders[0][code];
       break;
@@ -415,7 +427,7 @@ function decDelta(delta: number, base: number, axis: number): number {
   switch (axis) {
     case axisU:
     case axisL: {
-      const coders = frequency[base];
+      const coders = table[frequency[base]];
       if (delta === 7) switch (coders) {
         case codersL:
         case codersR:
@@ -425,7 +437,7 @@ function decDelta(delta: number, base: number, axis: number): number {
       break;
     }
     case axisN: {
-      const coders = frequency[axis <= base && base < axis + 10 ? base : axis];
+      const coders = table[frequency[axis <= base && base < axis + 10 ? base : axis]];
       code = coders[1][delta];
       break;
     }
