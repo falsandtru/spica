@@ -2,23 +2,23 @@ const bases = Object.freeze([...Array(7)].map((_, i) => 1 << i));
 assert.deepStrictEqual(bases, [1, 2, 4, 8, 16, 32, 64]);
 const masks = Object.freeze(bases.map(radix => radix - 1));
 
-const dict0S = [
+const table0S = [
   ...[...Array(36)].map((_, i) => i.toString(36)),
   ...[...Array(36)].map((_, i) => i.toString(36).toUpperCase()).slice(-26),
   '+', '/',
 ].join('');
-assert(dict0S.length === 64);
-const dict0_ = [
+assert(table0S.length === 64);
+const table0_ = [
   ...[...Array(36)].map((_, i) => i.toString(36)),
   ...[...Array(36)].map((_, i) => i.toString(36).toUpperCase()).slice(-26),
   '-', '_',
 ].join('');
-assert(dict0_.length === 64);
-const dictAz = [
+assert(table0_.length === 64);
+const tableAz = [
   ...[...Array(36)].map((_, i) => i.toString(36).toUpperCase()).slice(-26),
   ...[...Array(36)].map((_, i) => i.toString(36)).slice(-26),
 ].join('');
-assert(dictAz.length === 52);
+assert(tableAz.length === 52);
 
 export const rnd10 = cons(10);
 export const rnd16 = cons(16);
@@ -26,15 +26,15 @@ export const rnd32 = cons(32);
 export const rnd36 = cons(36);
 export const rnd62 = cons(62);
 export const rnd64 = cons(64);
-export const rnd09 = conv(rnd10, dict0_);
-export const rnd0f = conv(rnd16, dict0_);
-export const rnd0v = conv(rnd32, dict0_);
-export const rnd0z = conv(rnd36, dict0_);
-export const rnd0Z = conv(rnd62, dict0_);
-export const rnd0S = conv(rnd64, dict0S);
-export const rnd0_ = conv(rnd64, dict0_);
-export const rndAP = conv(rnd16, dictAz);
-export const rndAf = conv(rnd32, dictAz);
+export const rnd09 = conv(rnd10, table0_);
+export const rnd0f = conv(rnd16, table0_);
+export const rnd0v = conv(rnd32, table0_);
+export const rnd0z = conv(rnd36, table0_);
+export const rnd0Z = conv(rnd62, table0_);
+export const rnd0S = conv(rnd64, table0S);
+export const rnd0_ = conv(rnd64, table0_);
+export const rndAP = conv(rnd16, tableAz);
+export const rndAf = conv(rnd32, tableAz);
 
 export function unique(rng: (len: number) => string, len: number = 1, mem?: Set<string>): () => string {
   const independence = !mem;
@@ -87,11 +87,11 @@ function cons(size: number): () => number {
   };
 }
 
-function conv($rng: () => number, dict: string): (len?: number, rng?: () => number) => string {
+function conv($rng: () => number, table: string): (len?: number, rng?: () => number) => string {
   return (len = 1, rng = $rng) => {
     let acc = '';
     while (len--) {
-      acc += dict[rng()];
+      acc += table[rng()];
     }
     return acc;
   };
