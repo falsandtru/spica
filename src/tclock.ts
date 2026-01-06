@@ -184,7 +184,7 @@ export class TClock<K, V> implements IterableDict<K, V> {
 }
 
 function search(b: number, r: number): number {
-  assert(b >>> r !== ~0);
+  assert(b >>> r !== ~0 >>> r);
   for (let l = r; ; ++l) {
     if ((b & 1 << l) === 0) return l;
   }
