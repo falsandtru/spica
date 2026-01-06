@@ -7,7 +7,7 @@ describe('Unit: lib/tclock', () => {
   describe('TClock', () => {
     it('get/set', function () {
       const capacity = 96;
-      const clock = new TClock<number, number>(capacity - 1, 100);
+      const clock = new TClock<number, number>(capacity - 1, Infinity, 100);
       assert(clock['capacity'] === capacity);
 
       for (let i = 0; i < capacity * 2; ++i) {
@@ -51,6 +51,20 @@ describe('Unit: lib/tclock', () => {
       assert(clock.get(4) === 4);
       assert(clock.get(5) === undefined);
       assert(clock.length === 31);
+    });
+
+    it('limit', function () {
+      const capacity = 64;
+      const clock = new TClock<number, number>(capacity, 32);
+
+      for (let i = 0; i < capacity; ++i) {
+        clock.set(i, i);
+        clock.get(i);
+      }
+      clock.set(capacity, capacity);
+      assert(clock.has(31) === true);
+      assert(clock.has(32) === false);
+      assert(clock.has(33) === true);
     });
 
     for (let i = 0; i < 10; ++i) it(`verify ${i}`, function () {

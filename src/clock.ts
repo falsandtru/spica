@@ -13,6 +13,7 @@ export class Clock<K, V> implements IterableDict<K, V> {
   // Capacity is rounded up to multiples of 32.
   constructor(
     private readonly capacity: number,
+    private readonly limit: number = BASE * 10,
   ) {
     assert(capacity > 0);
     this.capacity = ((capacity - 1 | MASK) >>> 0) + 1;
@@ -64,13 +65,14 @@ export class Clock<K, V> implements IterableDict<K, V> {
       : hand;
   }
   public add(key: K, value: V): number {
-    const { capacity, refs } = this;
-    for (let { hand } = this, i = hand >>> DIGIT, r = hand & MASK; ;) {
+    const { capacity, limit, refs } = this;
+    for (let { hand } = this, i = hand >>> DIGIT, r = hand & MASK, c = 0; ;) {
       assert(hand < capacity);
       assert(r < BASE);
       const b = refs[i];
       assert(~0 === 2 ** BASE - 1 >> 0);
-      if (b >>> r === ~0 >>> r) {
+      if (b >>> r === ~0 >>> r && c < limit) {
+        c += BASE - r;
         hand += BASE - r;
         refs[i] = b & (1 << r) - 1;
         r = 0;
@@ -83,9 +85,9 @@ export class Clock<K, V> implements IterableDict<K, V> {
         }
         continue;
       }
-      const l = search(b, r);
+      const l = c < limit ? search(b, r) : r;
       assert(l < BASE);
-      assert((b & 1 << l) === 0);
+      assert((b & 1 << l) === 0 || c >= limit);
       if (l !== r) {
         hand += l - r;
         refs[i] = b & ~((1 << l) - 1 >>> r << r);

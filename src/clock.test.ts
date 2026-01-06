@@ -25,6 +25,20 @@ describe('Unit: lib/clock', () => {
       }
     });
 
+    it('limit', function () {
+      const capacity = 64;
+      const clock = new Clock<number, number>(capacity, 32);
+
+      for (let i = 0; i < capacity; ++i) {
+        clock.set(i, i);
+        clock.get(i);
+      }
+      clock.set(capacity, capacity);
+      assert(clock.has(31) === true);
+      assert(clock.has(32) === false);
+      assert(clock.has(33) === true);
+    });
+
     it('delete', function () {
       const capacity = 32;
       const clock = new Clock<number, number>(capacity);
