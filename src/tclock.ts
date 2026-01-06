@@ -88,12 +88,13 @@ export class TClock<K, V> implements IterableDict<K, V> {
       const b = refs[i];
       assert(~0 === 2 ** BASE - 1 >> 0);
       if (b >>> r === ~0 >>> r && c < limit) {
-        c += BASE - r;
-        hand += BASE - r;
-        this.count += BASE - r;
+        const d = BASE - r;
+        c += d;
+        hand += d;
+        this.count += d;
         if (this.stock > 0) {
           refs[i] = b & (1 << r) - 1;
-          this.stock -= BASE - r;
+          this.stock -= d;
         }
         r = 0;
         if (hand < capacity) {
