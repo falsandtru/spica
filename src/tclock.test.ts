@@ -160,7 +160,7 @@ describe('Unit: lib/tclock', () => {
       console.debug('LRU    hits', stats.lru);
       console.debug('TClock hits', stats.clock);
       console.debug('TClock / LRU hit ratio', `${stats.clock / stats.lru * 100 | 0}%`);
-      assert(stats.clock / stats.lru * 100 >>> 0 === 127);
+      assert(stats.clock / stats.lru * 100 >>> 0 === 126);
       assert(clock['values'].length === capacity);
     });
 

@@ -37,7 +37,7 @@ export class TClock<K, V> implements IterableDict<K, V> {
     assert(value > 0);
     this.$count = value;
     if (value < this.threshold) return;
-    this.stock = min(this.stock + value / this.threshold | 0, this.capacity);
+    this.stock = min(this.stock + value * this.demotion / 100, this.capacity);
     this.$count = min(value % this.threshold, this.capacity);
     assert(this.$count >= 0);
   }
