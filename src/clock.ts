@@ -13,6 +13,7 @@ export class Clock<K, V> implements IterableDict<K, V> {
   // Capacity is rounded up to multiples of 32.
   constructor(
     private readonly capacity: number,
+    // ヒット率99%で平均100bitの走査となるためこれを極端に超えない走査数に制限
     private readonly limit: number = BASE * 10,
   ) {
     assert(capacity > 0);
