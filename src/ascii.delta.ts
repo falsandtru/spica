@@ -494,11 +494,11 @@ export function encode(input: string, huffman = true): string {
         }
         continue;
       }
-      const comp = axis === axisH && isHEX(code) >>> 4 !== 0;
-      const delta = comp
+      const hex = axis === axisH && isHEX(code) >>> 4 !== 0;
+      const delta = hex
         ? codersH[0][code]
         : encCode(code, base, axis);
-      if (delta >>> 4 || axis === axisH && !comp || i < hopts.skip) {
+      if (delta >>> 4 || axis === axisH && !hex || i < hopts.skip) {
         output += ASCII[code];
       }
       else {
@@ -508,12 +508,12 @@ export function encode(input: string, huffman = true): string {
     }
     else {
       const sep$ = sep;
-      const comp = axis === axisH && isHEX(code) >>> 4 !== 0;
-      const delta = comp
+      const hex = axis === axisH && isHEX(code) >>> 4 !== 0;
+      const delta = hex
         ? codersH[0][code]
         : encCode(code, base, axis);
-      if (delta >>> 3 || axis === axisH && !comp) {
-        if (!comp) {
+      if (delta >>> 3 || axis === axisH && !hex) {
+        if (!hex) {
           sep = sep$;
         }
         output += ASCII[base];
@@ -543,7 +543,7 @@ export function decode(input: string, huffman = true): string {
   let output = '';
   let axis = axisB;
   let base = sep;
-  let hexcase = 0;
+  let hexcase = 1;
   for (let i = 0; i < input.length; ++i) {
     let code = input.charCodeAt(i);
     assert(code >>> 8 === 0);
@@ -575,14 +575,14 @@ export function decode(input: string, huffman = true): string {
     }
     else {
       const delta = code;
-      code = axis == axisH
+      code = axis === axisH
         ? codersH[hexcase][delta >>> 3 & 0b1111]
         : decDelta(delta >>> 3 & 0b1111, base, axis);
       output += ASCII[code];
       axis = align(code, base, axis);
       base = code;
       hexcase = segment(code) <= Segment.Lower ? segment(code) + 1 : hexcase;
-      code = axis == axisH
+      code = axis === axisH
         ? codersH[hexcase][delta & 0b111]
         : decDelta(delta & 0b0111, base, axis);
       output += ASCII[code];
