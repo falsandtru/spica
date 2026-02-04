@@ -1,7 +1,7 @@
-import { encode, decode } from './ascii.huffman';
+import { encode, decode } from './ascii.chuff';
 import { xorshift } from './random';
 
-describe('Unit: lib/ascii.huffman', () => {
+describe('Unit: lib/ascii.chuff', () => {
   describe('encode/decode', () => {
     it('basic', () => {
       let input = '';
