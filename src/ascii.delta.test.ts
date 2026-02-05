@@ -249,8 +249,8 @@ describe('Unit: lib/ascii.delta', () => {
           .reduce(acc => acc + String.fromCharCode(random() * 128 | 0), '');
         const output = encode(input);
         assert(output.length <= input.length);
-        assert(input === decode(output));
-        assert(input === decode(encode(input, false), false));
+        assert.deepStrictEqual(input, decode(output));
+        assert.deepStrictEqual(input, decode(encode(input, false), false));
       }
     });
 
