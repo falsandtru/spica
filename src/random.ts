@@ -26,15 +26,15 @@ export const rnd32 = cons(32);
 export const rnd36 = cons(36);
 export const rnd62 = cons(62);
 export const rnd64 = cons(64);
-export const rnd09 = conv(rnd10, table0_);
-export const rnd0f = conv(rnd16, table0_);
-export const rnd0v = conv(rnd32, table0_);
-export const rnd0z = conv(rnd36, table0_);
-export const rnd0Z = conv(rnd62, table0_);
-export const rnd0S = conv(rnd64, table0S);
-export const rnd0_ = conv(rnd64, table0_);
-export const rndAP = conv(rnd16, tableAz);
-export const rndAf = conv(rnd32, tableAz);
+export const rnd09 = conv(rnd10, table0_, 10);
+export const rnd0f = conv(rnd16, table0_, 16);
+export const rnd0v = conv(rnd32, table0_, 32);
+export const rnd0z = conv(rnd36, table0_, 36);
+export const rnd0Z = conv(rnd62, table0_, 62);
+export const rnd0S = conv(rnd64, table0S, 64);
+export const rnd0_ = conv(rnd64, table0_, 64);
+export const rndAP = conv(rnd16, tableAz, 16);
+export const rndAf = conv(rnd32, tableAz, 32);
 
 export function unique(rng: (len: number) => string, len: number = 1, mem?: Set<string>): () => string {
   const independence = !mem;
@@ -87,11 +87,13 @@ function cons(size: number): () => number {
   };
 }
 
-function conv($rng: () => number, table: string): (len?: number, rng?: () => number) => string {
+function conv($rng: () => number, table: string, size: number): (len?: number, rng?: () => number) => string {
   return (len = 1, rng = $rng) => {
     let acc = '';
     while (len--) {
-      acc += table[rng()];
+      const i = rng();
+      if (i >= size) throw new Error(`Spica: Random: Invalid rng`);
+      acc += table[i];
     }
     return acc;
   };

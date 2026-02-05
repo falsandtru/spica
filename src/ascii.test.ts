@@ -159,9 +159,10 @@ describe('Unit: lib/ascii', () => {
       this.timeout(20 * 1e3);
 
       const cs = Array(16).fill(0);
-      const random = zipfian(0, words.length - 1, 1, xorshift.random(1));
+      const zipf = zipfian(0, words.length - 1, 1, xorshift.random(1));
+      const random = ((rng) => () => rng() * 16 | 0)(xorshift.random(1));
       for (let i = 0; i < 1e4; ++i) {
-        const input = words[random()] + '-' + rnd0f(64);
+        const input = words[zipf()] + '-' + rnd0f(64, random);
         let j = 0;
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
