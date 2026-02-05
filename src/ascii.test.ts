@@ -1,5 +1,5 @@
 import { encode as encodeDelta, decode as decodeDelta } from './ascii.delta';
-import { encode as encodeHuffm } from './ascii.chuff';
+import { encode as encodeCHuff, decode as decodeCHuff } from './ascii.chuff';
 import { encode as encodeHPACK, decode as decodeHPACK } from './ascii.hpack';
 import { encode as encodeXPACK, decode as decodeXPACK } from './ascii.xpack';
 import { rnd09, rnd0f, rnd0z, rnd0S, xorshift } from './random';
@@ -19,7 +19,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -50,7 +50,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -79,7 +79,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -108,7 +108,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -137,7 +137,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -169,7 +169,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -202,7 +202,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -235,7 +235,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -264,7 +264,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -293,7 +293,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -322,7 +322,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -351,7 +351,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -380,7 +380,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -409,7 +409,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -438,7 +438,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -467,7 +467,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -500,7 +500,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -529,7 +529,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -558,7 +558,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -587,7 +587,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -620,7 +620,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -653,7 +653,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -686,7 +686,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -715,7 +715,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -743,7 +743,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -771,7 +771,7 @@ describe('Unit: lib/ascii', () => {
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
         cs[j++] += encodeDelta(input).length;
-        cs[j++] += encodeHuffm(input).length;
+        cs[j++] += encodeCHuff(input).length;
         cs[j++] += Math.ceil(simH2E5(input) / 8);
         cs[j++] += Math.ceil(simH3E5(input) / 8);
         cs[j++] += Math.ceil(simH2S5(input) / 8);
@@ -848,20 +848,23 @@ CKa1yQEIj7bJAQiltskBCKmdygEI5tTKAQieicsBCJahywEIhaDNAQjwsc0BCNy9zQEI38TNAQi1xc0B
       for (let i = 0; i < fields.length; ++i) {
         const input = fields[i];
         const stats = { length: 0 };
+        assert(input === decodeHPACK(encodeHPACK(input)));
         //console.debug((encodeXPACK(input, stats), stats.length) - (encodeHPACK(input, stats), stats.length), input)
         assert(input === decodeXPACK(encodeXPACK(input)));
-        assert(input === decodeHPACK(encodeHPACK(input)));
         assert(input === decodeDelta(encodeDelta(input)));
+        assert(input === decodeCHuff(encodeCHuff(input)));
         let j = 0;
         cs[j++] += input.length * 8;
-        cs[j++] += encodeXPACK(input, stats) && stats.length;
         cs[j++] += encodeHPACK(input, stats) && stats.length;
+        cs[j++] += encodeXPACK(input, stats) && stats.length;
         cs[j++] += encodeDelta(input).length * 8;
+        cs[j++] += encodeCHuff(input, stats) && stats.length;
       }
       let j = 1;
-      console.debug('XPACK   comp. ratio request', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio request', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('XPACK   comp. ratio request', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('Delta   comp. ratio request', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('CHuff   comp. ratio request', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
     });
 
     // www.google.com
@@ -935,20 +938,23 @@ X-Xss-Protection:
       for (let i = 0; i < fields.length; ++i) {
         const input = fields[i];
         const stats = { length: 0 };
+        assert(input === decodeHPACK(encodeHPACK(input)));
         //console.debug((encodeXPACK(input, stats), stats.length) - (encodeHPACK(input, stats), stats.length), input)
         assert(input === decodeXPACK(encodeXPACK(input)));
-        assert(input === decodeHPACK(encodeHPACK(input)));
         assert(input === decodeDelta(encodeDelta(input)));
+        assert(input === decodeCHuff(encodeCHuff(input)));
         let j = 0;
         cs[j++] += input.length * 8;
-        cs[j++] += encodeXPACK(input, stats) && stats.length;
         cs[j++] += encodeHPACK(input, stats) && stats.length;
+        cs[j++] += encodeXPACK(input, stats) && stats.length;
         cs[j++] += encodeDelta(input).length * 8;
+        cs[j++] += encodeCHuff(input, stats) && stats.length;
       }
       let j = 1;
-      console.debug('XPACK   comp. ratio response', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio response', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('XPACK   comp. ratio response', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('Delta   comp. ratio response', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('CHuff   comp. ratio response', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
     });
 
     it('header', function () {
@@ -1074,20 +1080,23 @@ service-worker: script
       for (let i = 0; i < fields.length; ++i) {
         const input = fields[i];
         const stats = { length: 0 };
+        assert(input === decodeHPACK(encodeHPACK(input)));
         //console.debug((encodeXPACK(input, stats), stats.length) - (encodeHPACK(input, stats), stats.length), input)
         assert(input === decodeXPACK(encodeXPACK(input)));
-        assert(input === decodeHPACK(encodeHPACK(input)));
         assert(input === decodeDelta(encodeDelta(input)));
+        assert(input === decodeCHuff(encodeCHuff(input)));
         let j = 0;
         cs[j++] += input.length * 8;
-        cs[j++] += encodeXPACK(input, stats) && stats.length;
         cs[j++] += encodeHPACK(input, stats) && stats.length;
+        cs[j++] += encodeXPACK(input, stats) && stats.length;
         cs[j++] += encodeDelta(input).length * 8;
+        cs[j++] += encodeCHuff(input, stats) && stats.length;
       }
       let j = 1;
-      console.debug('XPACK   comp. ratio header', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('HPACK   comp. ratio header', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('XPACK   comp. ratio header', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
       console.debug('Delta   comp. ratio header', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
+      console.debug('CHuff   comp. ratio header', 1 - cs[j] / cs[0], cs[0] / cs[j++]);
     });
 
   });
