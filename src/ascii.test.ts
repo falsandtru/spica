@@ -162,7 +162,9 @@ describe('Unit: lib/ascii', () => {
       const zipf = zipfian(0, words.length - 1, 1, xorshift.random(1));
       const random = ((rng) => () => rng() * 16 | 0)(xorshift.random(1));
       for (let i = 0; i < 1e4; ++i) {
-        const input = words[zipf()] + '-' + rnd0f(64, random);
+        const input = i & 1
+          ? words[zipf()] + '-' + rnd0f(64, random).toUpperCase()
+          : words[zipf()] + '-' + rnd0f(64, random).toLowerCase();
         let j = 0;
         cs[j++] += input.length;
         cs[j++] += encodeHPACK(input).length;
