@@ -211,76 +211,57 @@ function alignEnc(code: number, base: number, table: Uint8Array): Uint8Array {
   switch (segment(code)) {
     case Segment.Upper:
       if (table === ENC_TABLE_64) return table;
+      hexstate = isHEX(code);
+      if (hexstate >>> 4) return ENC_TABLE_HU;
       switch (segment(base)) {
         case Segment.Upper:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4 && table === ENC_TABLE_HU) return table;
           return ENC_TABLE_AU;
         case Segment.Lower:
-          hexstate = isHEX(code);
           return ENC_TABLE_AL;
         case Segment.Number:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4) return ENC_TABLE_HU;
           return ENC_TABLE_64;
         case Segment.Other:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4) return ENC_TABLE_HU;
           return ENC_TABLE_AU;
       }
     case Segment.Lower:
       if (table === ENC_TABLE_64) return table;
+      hexstate = isHEX(code);
+      if (hexstate >>> 4) return ENC_TABLE_HL;
       switch (segment(base)) {
         case Segment.Upper:
-          hexstate = isHEX(code);
           return ENC_TABLE_AL;
         case Segment.Lower:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4 && table === ENC_TABLE_HL) return table;
           return ENC_TABLE_AL;
         case Segment.Number:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4) return ENC_TABLE_HL;
           return ENC_TABLE_64;
         case Segment.Other:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4) return ENC_TABLE_HL;
           return ENC_TABLE_AL;
       }
     case Segment.Number:
       if (table === ENC_TABLE_64) return table;
+      hexstate = isHEX(code);
+      if ((hexstate >>> 4 & hexstate) === 0b011) return ENC_TABLE_HU;
+      if ((hexstate >>> 4 & hexstate) === 0b101) return ENC_TABLE_HL;
       switch (segment(base)) {
         case Segment.Upper:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4) return ENC_TABLE_HU;
           return ENC_TABLE_NN;
         case Segment.Lower:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4) return ENC_TABLE_HL;
           return ENC_TABLE_NN;
         case Segment.Number:
-          if (hexstate >>> 4 && table === ENC_TABLE_HU) return table;
-          if (hexstate >>> 4 && table === ENC_TABLE_HL) return table;
           return ENC_TABLE_NN;
         case Segment.Other:
-          hexstate = isHEX(code);
-          if ((hexstate >>> 4 & hexstate) === 0b011) return ENC_TABLE_HU;
-          if ((hexstate >>> 4 & hexstate) === 0b101) return ENC_TABLE_HL;
           return ENC_TABLE_NN;
       }
     case Segment.Other:
-      hexstate = hexstate >>> 4 !== 0 && (code === 0x2d || code === 0x3a) ? hexstate : 0;
       if (table === ENC_TABLE_64 && isContinuous(code)) return table;
+      hexstate = hexstate >>> 4 !== 0 && (code === 0x2d || code === 0x3a) ? hexstate : 0;
+      if (hexstate >>> 4) return table;
       switch (segment(base)) {
         case Segment.Upper:
-          if (hexstate >>> 4) return table;
           return ENC_TABLE_AU;
         case Segment.Lower:
-          if (hexstate >>> 4) return table;
           return ENC_TABLE_AL;
         case Segment.Number:
-          if ((hexstate >>> 4 & hexstate) === 0b011) return ENC_TABLE_HU;
-          if ((hexstate >>> 4 & hexstate) === 0b101) return ENC_TABLE_HL;
           return ENC_TABLE_NN;
         case Segment.Other:
           return ENC_TABLE_AS;
@@ -291,84 +272,65 @@ function alignDec(code: number, base: number, table: typeof DEC_TABLE_NN): typeo
   switch (segment(code)) {
     case Segment.Upper:
       if (table === DEC_TABLE_64) return table;
+      hexstate = isHEX(code);
+      if (hexstate >>> 4) return DEC_TABLE_HU;
       switch (segment(base)) {
         // ABBR
         case Segment.Upper:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4 && table === DEC_TABLE_HU) return table;
           return DEC_TABLE_AU;
         // CamelCase
         case Segment.Lower:
-          hexstate = isHEX(code);
           return DEC_TABLE_AL;
         // 0HDU
         case Segment.Number:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4) return DEC_TABLE_HU;
           return DEC_TABLE_64;
         // ^Case
         // _Case
         case Segment.Other:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4) return DEC_TABLE_HU;
           return DEC_TABLE_AU;
       }
     case Segment.Lower:
       if (table === DEC_TABLE_64) return table;
+      hexstate = isHEX(code);
+      if (hexstate >>> 4) return DEC_TABLE_HL;
       switch (segment(base)) {
         case Segment.Upper:
-          hexstate = isHEX(code);
           return DEC_TABLE_AL;
         case Segment.Lower:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4 && table === DEC_TABLE_HL) return table;
           return DEC_TABLE_AL;
         case Segment.Number:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4) return DEC_TABLE_HL;
           return DEC_TABLE_64;
         case Segment.Other:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4) return DEC_TABLE_HL;
           return DEC_TABLE_AL;
       }
     case Segment.Number:
       if (table === DEC_TABLE_64) return table;
+      hexstate = isHEX(code);
+      if ((hexstate >>> 4 & hexstate) === 0b011) return DEC_TABLE_HU;
+      if ((hexstate >>> 4 & hexstate) === 0b101) return DEC_TABLE_HL;
       switch (segment(base)) {
         case Segment.Upper:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4) return DEC_TABLE_HU;
           return DEC_TABLE_NN;
         case Segment.Lower:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4) return DEC_TABLE_HL;
           return DEC_TABLE_NN;
         case Segment.Number:
-          if (hexstate >>> 4 && table === DEC_TABLE_HU) return table;
-          if (hexstate >>> 4 && table === DEC_TABLE_HL) return table;
           return DEC_TABLE_NN;
         case Segment.Other:
-          hexstate = isHEX(code);
-          if ((hexstate >>> 4 & hexstate) === 0b011) return DEC_TABLE_HU;
-          if ((hexstate >>> 4 & hexstate) === 0b101) return DEC_TABLE_HL;
           return DEC_TABLE_NN;
       }
     case Segment.Other:
-      hexstate = hexstate >>> 4 !== 0 && (code === 0x2d || code === 0x3a) ? hexstate : 0;
       if (table === DEC_TABLE_64 && isContinuous(code)) return table;
+      hexstate = hexstate >>> 4 !== 0 && (code === 0x2d || code === 0x3a) ? hexstate : 0;
+      if (hexstate >>> 4) return table;
       switch (segment(base)) {
         // J.Doe
         case Segment.Upper:
-          if (hexstate >>> 4) return table;
           return DEC_TABLE_AU;
         // z and
         case Segment.Lower:
-          if (hexstate >>> 4) return table;
           return DEC_TABLE_AL;
         // 0.0
         case Segment.Number:
-          if ((hexstate >>> 4 & hexstate) === 0b011) return DEC_TABLE_HU;
-          if ((hexstate >>> 4 & hexstate) === 0b101) return DEC_TABLE_HL;
           return DEC_TABLE_NN;
         // , and
         case Segment.Other:
@@ -381,25 +343,24 @@ function isHEX(code: number): number {
   assert(hexstate >>> 8 === 0);
   if (code < 0x30) return 0;
   if (code < 0x3a) {
-    return hexstate >>> 4 !== 0
+    return hexstate === 0b111
+        || hexstate >>> 4 !== 0
       ? 0b111 | hexstate & hexstate << 4
       : 0b111 | hexstate << 4;
   }
   if (code < 0x41) return 0;
   if (code < 0x47) {
-    return hexstate >>> 4 !== 0
-      ? (hexstate >>> 4 & hexstate) === 0b011
-        ? 0b011 | hexstate & hexstate << 4
-        : 0b011
-      : 0b011 | hexstate << 4;
+    return hexstate === 0b111
+        || (hexstate >>> 4 & hexstate) === 0b011
+      ? 0b011 | 0b111 << 4
+      : 0b011;
   }
   if (code < 0x61) return 0;
   if (code < 0x67) {
-    return hexstate >>> 4 !== 0
-      ? (hexstate >>> 4 & hexstate) === 0b101
-        ? 0b101 | hexstate & hexstate << 4
-        : 0b101
-      : 0b101 | hexstate << 4;
+    return hexstate === 0b111
+        || (hexstate >>> 4 & hexstate) === 0b101
+      ? 0b101 | 0b111 << 4
+      : 0b101;
   }
   return 0;
 }

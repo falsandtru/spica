@@ -158,6 +158,10 @@ v13 開始文字を変更
 num: 0.4224; hex: 0.2999; 36: 0.2358; 64: 0.2207; pct: 0.5833;
 lower: 0.3251; upper: 0.2062; camel: 0.2662; country: 0.3058; text: 0.3534; json: 0.2352;
 
+v14 セグメント遷移規則を調整
+num: 0.4224; hex: 0.3039; 36: 0.2358; 64: 0.2207; pct: 0.5833;
+lower: 0.3251; upper: 0.2062; camel: 0.2662; country: 0.3058; text: 0.3534; json: 0.2352;
+
 */
 
 const ASCII = [...Array(256)].reduce<string>((acc, _, i) => acc + String.fromCharCode(i), '');
@@ -248,73 +252,58 @@ function align(code: number, base: number, axis: number): number {
   randstate = false;
   switch (segment(code)) {
     case Segment.Upper:
+      hexstate = isHEX(code);
+      if (hexstate >>> 4 !== 0) return axisH;
       switch (segment(base)) {
         // ABBR
         case Segment.Upper:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4 !== 0 && axis === axisH) return axisH;
           incFreq(Segment.Upper);
           return axisU;
         // CamelCase
         case Segment.Lower:
-          hexstate = isHEX(code);
           return axisL;
         // 0FF7
         case Segment.Number:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4 !== 0) return axisH;
           randstate = true;
           return axisU;
         // ^Case
         // _Case
         case Segment.Other:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4 !== 0) return axisH;
           return freq >>> 2 > (freq & 0b11)
             ? axisU
             : axisL;
       }
     case Segment.Lower:
+      hexstate = isHEX(code);
+      if (hexstate >>> 4 !== 0) return axisH;
       switch (segment(base)) {
         case Segment.Upper:
-          hexstate = isHEX(code);
           incFreq(Segment.Lower);
           return axisL;
         case Segment.Lower:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4 !== 0 && axis === axisH) return axisH;
           return axisL;
         case Segment.Number:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4 !== 0) return axisH;
           randstate = true;
           return axisL;
         case Segment.Other:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4 !== 0) return axisH;
           return axisL;
       }
     case Segment.Number:
+      hexstate = isHEX(code);
+      if (hexstate >>> 4 !== 0) return axisH;
       switch (segment(base)) {
         case Segment.Upper:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4 !== 0 && axis === axisH) return axisH;
           return axisN;
         case Segment.Lower:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4 !== 0 && axis === axisH) return axisH;
           return axisN;
         case Segment.Number:
-          if (hexstate >>> 4 !== 0 && axis === axisH) return axisH;
           return axisN;
         case Segment.Other:
-          hexstate = isHEX(code);
-          if (hexstate >>> 4 !== 0) return axisH;
           return axisN;
       }
     case Segment.Other:
       hexstate = hexstate >>> 4 !== 0 && (code === 0x2d || code === 0x3a) ? hexstate : 0;
-      if (hexstate >>> 4 !== 0 && axis === axisH) return axisH;
+      if (hexstate >>> 4 !== 0) return axisH;
       switch (segment(base)) {
         // J.Doe
         case Segment.Upper:
@@ -353,25 +342,24 @@ function isHEX(code: number): number {
   assert(hexstate >>> 8 === 0);
   if (code < 0x30) return 0;
   if (code < 0x3a) {
-    return hexstate >>> 4 === 0 && hexstate !== 0b111
-      ? hexstate << 4 | 0b111
-      : hexstate & hexstate << 4 | 0b111;
+    return hexstate === 0b111
+        || hexstate >>> 4 !== 0
+      ? 0b111 | hexstate & hexstate << 4
+      : 0b111 | hexstate << 4;
   }
   if (code < 0x41) return 0;
   if (code < 0x47) {
-    return hexstate >>> 4 === 0 && hexstate !== 0b101
-      ? hexstate << 4 | 0b011
-      : (hexstate >>> 4 & hexstate) === 0b011
-        ? 0b011 << 4 | 0b011
-        : 0b011;
+    return hexstate === 0b111
+        || (hexstate >>> 4 & hexstate) === 0b011
+      ? 0b011 | 0b111 << 4
+      : 0b011;
   }
   if (code < 0x61) return 0;
   if (code < 0x67) {
-    return hexstate >>> 4 === 0 && hexstate !== 0b011
-      ? hexstate << 4 | 0b101
-      : (hexstate >>> 4 & hexstate) === 0b101
-        ? 0b101 << 4 | 0b101
-        : 0b101;
+    return hexstate === 0b111
+        || (hexstate >>> 4 & hexstate) === 0b101
+      ? 0b101 | 0b111 << 4
+      : 0b101;
   }
   return 0;
 }
