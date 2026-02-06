@@ -120,15 +120,19 @@ describe('Unit: lib/ascii.delta', () => {
       assert(input === decode(encode(input, false), false));
       assert(input.length - 1 === encode(input, false).length);
 
-      input = '0FF7';
+      input = '0F00';
+      assert(input === decode(encode(input)));
+      assert(input.length - 0 === encode(input).length);
+
+      input = '0F000';
       assert(input === decode(encode(input)));
       assert(input.length - 1 === encode(input).length);
 
-      input = '0F:F7';
+      input = '0F:000';
       assert(input === decode(encode(input)));
       assert(input.length - 1 === encode(input).length);
 
-      input = '0F::F7';
+      input = '0F::000';
       assert(input === decode(encode(input)));
       assert(input.length - 1 === encode(input).length);
 
@@ -180,7 +184,7 @@ describe('Unit: lib/ascii.delta', () => {
       assert(input === decode(encode(input)));
       assert(input.length - 0 === encode(input).length);
 
-      input = '7bc2';
+      input = '7bc20';
       assert(input === decode(encode(input)));
       assert(input.length - 1 === encode(input).length);
 
@@ -216,7 +220,7 @@ describe('Unit: lib/ascii.delta', () => {
       assert(input === decode(encode(input)));
       assert(input.length - 1 === encode(input).length);
 
-      input = 'fE771';
+      input = 'fE7710';
       assert(input === decode(encode(input)));
       assert(input.length - 1 === encode(input).length);
 
@@ -230,7 +234,7 @@ describe('Unit: lib/ascii.delta', () => {
 
       input = 'A4e5:8:7';
       assert(input === decode(encode(input)));
-      assert(input.length - 0 === encode(input).length);
+      assert(input.length - 1 === encode(input).length);
 
       input = '2c2B0';
       assert(input === decode(encode(input)));
@@ -252,6 +256,7 @@ describe('Unit: lib/ascii.delta', () => {
         assert.deepStrictEqual(input, decode(output));
         assert.deepStrictEqual(input, decode(encode(input, false), false));
       }
+      //console.log('complete');
     });
 
   });

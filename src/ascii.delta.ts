@@ -158,8 +158,8 @@ v13 開始文字を変更
 num: 0.4224; hex: 0.2999; 36: 0.2358; 64: 0.2207; pct: 0.5833;
 lower: 0.3251; upper: 0.2062; camel: 0.2662; country: 0.3058; text: 0.3534; json: 0.2352;
 
-v14 セグメント遷移規則を調整
-num: 0.4224; hex: 0.3039; 36: 0.2358; 64: 0.2207; pct: 0.5833;
+v14 HEX文字列をランダム文字列に統合
+num: 0.4224; hex: 0.4292; 36: 0.2352; 64: 0.2203; pct: 0.5833;
 lower: 0.3251; upper: 0.2062; camel: 0.2662; country: 0.3058; text: 0.3534; json: 0.2352;
 
 */
@@ -248,6 +248,7 @@ function segment(code: number): Segment {
     return Segment.Other;
   }
 }
+let randstate = false;
 function align(code: number, base: number, axis: number): number {
   randstate = false;
   switch (segment(code)) {
@@ -416,13 +417,6 @@ function decDelta(delta: number, base: number, axis: number): number {
   sep = seps[code] || sep;
   return code;
 }
-let randstate = false;
-// 乱数が改行で終端されると非常に非効率となるため=を含めず終端文字として使用することで軽減。
-// 1文字足すかクオートなどで囲んで改行回避したほうがかえって効率的。
-// 実際に改行で終端される場合は少ない。
-const random = Uint8Array.from(Array(128), (_, i) =>
-  +'1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/-_'
-    .includes(String.fromCharCode(i)));
 function reset(): void {
   axis = axisB;
   hexstate = 0;
@@ -441,7 +435,6 @@ const popts = {
 };
 
 const hopts = {
-  target: random,
   start: 0,
   next: 0,
   skip: 0,
@@ -467,16 +460,24 @@ export function encode(input: string, huffman = true): string {
         output += '%' + encodePercent(input, codersH[0], popts);
         i = popts.next === i ? i + 1 : popts.next;
         output += input[i] ?? '';
+        axis = align(code, base, axis);
         base = input.charCodeAt(i);
-        reset();
         continue;
       }
-      if (huffman && randstate && i >= hopts.skip) {
+      const hex = axis === axisH && isHEX(code) >>> 4 !== 0;
+      if (huffman && (randstate || hex) && i >= hopts.skip) {
         hopts.start = hopts.skip = i;
-        output += encodeRandom(input, hopts);
+        output += encodeRandom(input, hex ? hexstate >>> 4 & hexstate : 0, hopts);
         i = hopts.next - 1;
         if (hopts.next === hopts.start) {
-          randstate = false;
+          // 同じ位置で異なる圧縮エンコードへリトライするとデコード不能になるためリトライさせない。
+          assert(hex && !randstate || randstate && !hex);
+          if (hex) {
+            axis = axisB;
+          }
+          else {
+            randstate = false;
+          }
         }
         else {
           base = input.charCodeAt(i);
@@ -484,7 +485,6 @@ export function encode(input: string, huffman = true): string {
         }
         continue;
       }
-      const hex = axis === axisH && isHEX(code) >>> 4 !== 0;
       const delta = hex
         ? codersH[0][code]
         : encCode(code, base, axis);
@@ -536,25 +536,31 @@ export function decode(input: string, huffman = true): string {
   for (let i = 0; i < input.length; ++i) {
     let code = input.charCodeAt(i);
     assert(code >>> 8 === 0);
+    const hex = axis === axisH;
     if (code === 0x25) {
       popts.start = ++i;
       output += decodePercent(input, codersH[1], popts) || '%';
       i = popts.next;
       output += input[i] ?? '';
+      axis = align(code, base, axis);
       base = input.charCodeAt(i);
-      reset();
       continue;
     }
     else if (code <= 0x7f) {
       output += ASCII[code];
       sep = seps[code] || sep;
     }
-    else if (huffman && randstate) {
+    else if (huffman && (randstate || hex)) {
       hopts.start = i;
-      output += decodeRandom(input, hopts);
+      output += decodeRandom(input, hex ? hexstate >>> 4 & hexstate : 0, hopts);
       i = hopts.next - 1;
       if (hopts.next === hopts.start) {
-        randstate = false;
+        if (hex) {
+          axis = axisB;
+        }
+        else {
+          randstate = false;
+        }
       }
       else {
         base = output.charCodeAt(output.length - 1);

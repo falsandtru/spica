@@ -51,17 +51,16 @@ const HUFFMAN_HX_CODES = new Uint16Array(128).map((_, i) => {
   // 15|0b1110_1
   // 16|0b1111_00
   // 17|0b1111_01
-  // 18|0b1111_10
-  // 19|0b1111_1100_0000_0
+  // 18|0b1111_1000_0000
   switch (true) {
     case i < 14:
       return i;
     case i < 16:
       return 0b1110 << 1 | i - 14;
-    case i < 19:
+    case i < 18:
       return 0b1111 << 2 | i - 16;
     default:
-      return 0b1111_11 << 7 | i - 19;
+      return 0b1111_1 << 7 | i - 18;
   }
 });
 const HUFFMAN_HX_LENS = new Uint8Array(128).map((_, i) => {
@@ -70,10 +69,10 @@ const HUFFMAN_HX_LENS = new Uint8Array(128).map((_, i) => {
       return 4;
     case i < 16:
       return 5;
-    case i < 19:
+    case i < 18:
       return 6;
     default:
-      return 13;
+      return 12;
   }
 });
 const HUFFMAN_64_CODES = new Uint16Array(128).map((_, i) => {
@@ -114,7 +113,7 @@ const ALPHABETS_L = 'eisarotnlcdupmghybfvkwzxjq'.split('').reduce<string>((acc, 
 const SYMBOLS_1A = ` .:-'",;%/+={}[]_&*@()\n`;
 const SYMBOLS_2A = '~#!?$<>\\^`|\t';
 const SYMBOLS_1N = ` .:-%/+=,;'"{}[]_&*@()\n`;
-const SYMBOLS_1H = `:%- ./+=,;'"{}[]_&*@()\n`;
+const SYMBOLS_1H = `-:% ./+=,;'"{}[]_&*@()\n`;
 const SYMBOLS_1T = `+/-_= :%.,;'"{}[]&*@()\n`;
 const CONTROLS = [...Array(32)].reduce<string>((acc, _, i) =>
   '\n\t'.includes(String.fromCharCode(i)) ? acc : acc + String.fromCharCode(i), '') + '\x7f';
@@ -131,10 +130,10 @@ const ENC_TABLE_AL = CHARSET_AL.split('')
 const CHARSET_AS = `${SYMBOLS_1A}${SYMBOLS_2A}${ALPHABETS_L}${ALPHABETS_U}${NUMBERS}${CONTROLS}`;
 const ENC_TABLE_AS = CHARSET_AS.split('')
   .reduce((table, c, i) => (table[c.charCodeAt(0)] = i, table), new Uint8Array(128));
-const CHARSET_HU = `${NUMBERS}${[...ALPHABETS_U].sort().join('')}${SYMBOLS_1H}${ALPHABETS_L}${SYMBOLS_2A}${CONTROLS}`;
+const CHARSET_HU = `${NUMBERS}${[...ALPHABETS_U].sort().join('').slice(0, 6)}${SYMBOLS_1H}${[...ALPHABETS_U].sort().join('').slice(6)}${ALPHABETS_L}${SYMBOLS_2A}${CONTROLS}`;
 const ENC_TABLE_HU = CHARSET_HU.split('')
   .reduce((table, c, i) => (table[c.charCodeAt(0)] = i, table), new Uint8Array(128));
-const CHARSET_HL = `${NUMBERS}${[...ALPHABETS_L].sort().join('')}${SYMBOLS_1H}${ALPHABETS_U}${SYMBOLS_2A}${CONTROLS}`;
+const CHARSET_HL = `${NUMBERS}${[...ALPHABETS_L].sort().join('').slice(0, 6)}${SYMBOLS_1H}${[...ALPHABETS_L].sort().join('').slice(6)}${ALPHABETS_U}${SYMBOLS_2A}${CONTROLS}`;
 const ENC_TABLE_HL = CHARSET_HL.split('')
   .reduce((table, c, i) => (table[c.charCodeAt(0)] = i, table), new Uint8Array(128));
 const CHARSET_64 = `${NUMBERS}${ALPHABETS_U}${ALPHABETS_L}${SYMBOLS_1T}${SYMBOLS_2A}${CONTROLS}`;
@@ -382,10 +381,10 @@ function clear(): void {
 export function encode(input: string, stats?: { length: number; }): string {
   clear();
   stats && (stats.length = 0);
-  let output = '';
   let table = ENC_TABLE_AL;
   let codes = HUFFMAN_AL_CODES;
   let lens = HUFFMAN_AL_LENS;
+  let output = '';
   let base = 0x20;
   let buffer = 0;
   let count = 0;
@@ -449,8 +448,8 @@ export function encode(input: string, stats?: { length: number; }): string {
 
 export function decode(input: string): string {
   clear();
-  let output = '';
   let table = DEC_TABLE_AL;
+  let output = '';
   let base = 0x20;
   let buffer = 0;
   let count = 0;
