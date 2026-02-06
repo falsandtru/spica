@@ -424,6 +424,7 @@ const random = Uint8Array.from(Array(128), (_, i) =>
   +'1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/-_'
     .includes(String.fromCharCode(i)));
 function reset(): void {
+  axis = axisB;
   hexstate = 0;
   randstate = false;
 }
@@ -446,10 +447,11 @@ const hopts = {
   skip: 0,
 };
 
+let axis = 0;
+
 export function encode(input: string, huffman = true): string {
   clear();
   let output = '';
-  let axis = axisB;
   let base = sep;
   let buffer = 0;
   for (let i = 0, j = 0; i < input.length; ++i) {
@@ -529,7 +531,6 @@ export function encode(input: string, huffman = true): string {
 export function decode(input: string, huffman = true): string {
   clear();
   let output = '';
-  let axis = axisB;
   let base = sep;
   let hexcase = 1;
   for (let i = 0; i < input.length; ++i) {
