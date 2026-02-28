@@ -1,7 +1,6 @@
 import { MAX_SAFE_INTEGER } from './alias';
 import { Inits } from './type';
 import { List } from './list';
-import { push } from './array';
 import { singleton } from './function';
 import { causeAsyncException } from './exception';
 
@@ -197,7 +196,9 @@ export class Observation<N extends readonly unknown[], D, R>
     const node = this.seek(namespace, SeekMode.Breakable);
     if (node === undefined) return [];
     return this.listenersBelow(node)
-      .reduce((acc, listeners) => push(acc, listeners.flatMap(node => [node.value])), []);
+      .reduce<ListenerItem<N, D, R>[]>((acc, listeners) =>
+        void listeners.foldl((_, node) => acc.push(node.value), 0) || acc
+      , []);
   }
   private drain(namespace: Readonly<N>, data: D, tracker?: (data: D, results: R[]) => void): void {
     let node = this.seek(namespace, SeekMode.Breakable);
