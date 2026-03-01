@@ -43,6 +43,7 @@ function memoizeArray<as extends [unknown, ...unknown[]], z, b = as[0]>(
 ): typeof f {
   return (...as) => {
     const b = identify(...as) as number;
+    if (!(b >= 0)) return f(...as);
     let z = memory[b];
     if (z !== undefined) return z!;
     z = f(...as);
@@ -58,6 +59,7 @@ function memoizeObject<as extends [unknown, ...unknown[]], z, b = as[0]>(
   let nullable = false;
   return (...as) => {
     const b = identify(...as) as number;
+    if (!(b >= 0)) return f(...as);
     let z = memory[b];
     if (z !== undefined || nullable && b in memory) return z!;
     z = f(...as);
