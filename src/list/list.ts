@@ -68,20 +68,21 @@ export class List<N extends List.Node = List.Node> {
     if (list.length === 0) return this;
     if (this.length === 0) {
       this.head = list.head;
-      this.length += list.length;
-      list.head = undefined;
-      list.length = 0;
+      this.last = list.last;
+      this.length = list.length;
+      list.clear();
       return this;
     }
     const head = list.head!;
     const last = list.last!;
-    const next = last.next = before ?? this.head!;
-    const prev = head.prev = next.prev!;
-    next.prev = last;
+    const next = last.next = before;
+    const prev = head.prev = before?.prev ?? this.last!;
+    next === undefined
+      ? this.last = last
+      : next.prev = last;
     prev.next = head;
     this.length += list.length;
-    list.length = 0;
-    list.head = undefined;
+    list.clear();
     return this;
   }
   public clear(): void {
@@ -113,7 +114,7 @@ export class List<N extends List.Node = List.Node> {
     return acc;
   }
   public foldr<T>(f: (node: N, acc: T) => T, acc: T): T {
-    for (let node = this.head?.prev; node && this.head;) {
+    for (let node = this.last; node && this.head;) {
       const prev = node.prev;
       acc = f(node, acc);
       node = prev;

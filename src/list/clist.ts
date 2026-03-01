@@ -58,7 +58,7 @@ export class List<N extends List.Node = List.Node> {
     if (list.length === 0) return this;
     if (this.length === 0) {
       this.head = list.head;
-      this.length += list.length;
+      this.length = list.length;
       list.head = undefined;
       list.length = 0;
       return this;
