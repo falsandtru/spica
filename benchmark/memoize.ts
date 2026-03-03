@@ -6,7 +6,7 @@ import { Cache } from '../src/cache';
 
 describe('Benchmark:', function () {
   describe('memoize', function () {
-    for (const exp of [7, 10, 12, 14, 16, 18, 20]) {
+    for (const exp of [2, 4, 5, 6, 7, 10, 12, 14, 16, 18, 20]) {
       const size = 1 << exp;
       const mask = size - 1;
 
