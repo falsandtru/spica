@@ -58,17 +58,30 @@ function memoizeArray<as extends [unknown, ...unknown[]], z, b = as[0]>(
 function cacheArray<as extends [unknown, ...unknown[]], z, b = as[0]>(
   f: (...as: as) => z,
   identify: (...as: as) => b,
-  memory: [b, z][],
+  memory: (z | [b, z])[],
   mask: number,
 ): typeof f {
+  const mask1 = mask >>>= 1;
+  const mask2 = mask;
+  const mem1 = memory;
+  const mem2 = [] as typeof memory;
   return (...as) => {
-    const b = identify(...as);
-    const c = <number>b & mask;
-    const t = memory[c];
-    if (t && t[0] === b) return t[1];
-    const z = f(...as);
-    memory[c] = [b, z];
-    return z;
+    const b = identify(...as) as number;
+    if (b <= mask1) {
+      let z = mem1[b];
+      if (z !== undefined) return z!;
+      z = f(...as);
+      mem1[b] = z;
+      return z;
+    }
+    else {
+      const i = b & mask2;
+      const t = mem2[i];
+      if (t && t[0] === b) return t[1];
+      const z = f(...as);
+      mem2[i] = [b as b, z];
+      return z;
+    }
   };
 }
 function memoizeObject<as extends [unknown, ...unknown[]], z, b = as[0]>(
@@ -90,17 +103,32 @@ function memoizeObject<as extends [unknown, ...unknown[]], z, b = as[0]>(
 function cacheObject<as extends [unknown, ...unknown[]], z, b = as[0]>(
   f: (...as: as) => z,
   identify: (...as: as) => b,
-  memory: Record<number, [b, z]>,
+  memory: Record<number, z | [b, z]>,
   mask: number,
 ): typeof f {
+  const mask1 = mask >>>= 1;
+  const mask2 = mask;
+  const mem1 = memory;
+  const mem2 = {} as typeof memory;
+  let nullable = false;
   return (...as) => {
-    const b = identify(...as);
-    const c = <number>b & mask;
-    const t = memory[c];
-    if (t && t[0] === b) return t[1];
-    const z = f(...as);
-    memory[c] = [b, z];
-    return z;
+    const b = identify(...as) as number;
+    if (b <= mask1) {
+      let z = mem1[b];
+      if (z !== undefined || nullable && b in mem1) return z!;
+      z = f(...as);
+      nullable ||= z === undefined;
+      mem1[b] = z;
+      return z;
+    }
+    else {
+      const i = b & mask2;
+      const t = mem2[i];
+      if (t && t[0] === b) return t[1];
+      const z = f(...as);
+      mem2[i] = [b as b, z];
+      return z;
+    }
   };
 }
 function memoizeDict<as extends [unknown, ...unknown[]], z, b = as[0]>(
