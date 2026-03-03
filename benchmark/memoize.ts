@@ -16,10 +16,22 @@ describe('Benchmark:', function () {
         benchmark(`memoize Array  ${size.toLocaleString('en')}`, () => f(i = ++i & mask), done);
       });
 
+      it(`ACache ${size.toLocaleString('en')}`, function (done) {
+        const f = memoize(a => a, [], mask);
+        let i = 0;
+        benchmark(`memoize ACache ${size.toLocaleString('en')}`, () => f(i = ++i & mask), done);
+      });
+
       it(`Object ${size.toLocaleString('en')}`, function (done) {
         const f = memoize(a => a, {});
         let i = 0;
         benchmark(`memoize Object ${size.toLocaleString('en')}`, () => f(i = ++i & mask), done);
+      });
+
+      it(`OCache ${size.toLocaleString('en')}`, function (done) {
+        const f = memoize(a => a, {}, mask);
+        let i = 0;
+        benchmark(`memoize OCache ${size.toLocaleString('en')}`, () => f(i = ++i & mask), done);
       });
 
       it(`Map    ${size.toLocaleString('en')}`, function (done) {

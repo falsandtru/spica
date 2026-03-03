@@ -30,6 +30,32 @@ describe('Unit: lib/memoize', () => {
       assert(f(0) === 1);
       assert(f(0) === 1);
     });
+
+    it('Array cache', () => {
+      let cnt = 0;
+      const f = memoize<number, number>(key => key + ++cnt, [], 2 ** 1 - 1);
+      assert(f(0) === 1);
+      assert(f(0) === 1);
+      assert(f(1) === 3);
+      assert(f(1) === 3);
+      assert(f(2) === 5);
+      assert(f(2) === 5);
+      assert(f(0) === 4);
+      assert(f(0) === 4);
+    });
+
+    it('Object cache', () => {
+      let cnt = 0;
+      const f = memoize<number, number>(key => key + ++cnt, {}, 2 ** 1 - 1);
+      assert(f(0) === 1);
+      assert(f(0) === 1);
+      assert(f(1) === 3);
+      assert(f(1) === 3);
+      assert(f(2) === 5);
+      assert(f(2) === 5);
+      assert(f(0) === 4);
+      assert(f(0) === 4);
+    });
   });
 
   describe('reduce', () => {

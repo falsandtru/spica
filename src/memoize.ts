@@ -10,28 +10,33 @@ interface Cache<K, V> {
 }
 
 export function memoize<f extends (...as: [unknown, ...unknown[]]) => unknown, b = Parameters<f>[0]>(f: f, memory?: Cache<b, ReturnType<f>>): f;
-export function memoize<f extends (...as: [number, ...unknown[]]) => unknown, b extends number = Parameters<f>[0]>(f: f, memory: Record<b, ReturnType<f>>): f;
+export function memoize<f extends (...as: [number, ...unknown[]]) => unknown, b extends number = Parameters<f>[0]>(f: f, memory: Record<b, ReturnType<f>>, mask?: number): f;
 export function memoize<f extends (...as: [unknown, ...unknown[]]) => unknown, b = Parameters<f>[0]>(f: f, identify: (...as: Parameters<f>) => b, memory?: Cache<b, ReturnType<f>>): f;
-export function memoize<f extends (...as: [unknown, ...unknown[]]) => unknown, b extends number = number>(f: f, identify: (...as: Parameters<f>) => b, memory: Record<b, ReturnType<f>>): f;
+export function memoize<f extends (...as: [unknown, ...unknown[]]) => unknown, b extends number = number>(f: f, identify: (...as: Parameters<f>) => b, memory: Record<b, ReturnType<f>>, mask?: number): f;
 export function memoize<a, z, b = a>(f: (a: a) => z, memory?: Cache<b, z>): typeof f;
-export function memoize<a extends number, z, b extends number = a>(f: (a: a) => z, memory: Record<b, z>): typeof f;
+export function memoize<a extends number, z, b extends number = a>(f: (a: a) => z, memory: Record<b, z>, mask?: number): typeof f;
 export function memoize<a, z, b = a>(f: (a: a) => z, identify: (a: a) => b, memory?: Cache<b, z>): typeof f;
-export function memoize<a, z, b extends number = number>(f: (a: a) => z, identify: (a: a) => b, memory: Record<b, z>): typeof f;
+export function memoize<a, z, b extends number = number>(f: (a: a) => z, identify: (a: a) => b, memory: Record<b, z>, mask?: number): typeof f;
 export function memoize<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...as: as) => z, memory?: Cache<b, z>): typeof f;
-export function memoize<as extends [number, ...unknown[]], z, b extends number = as[0]>(f: (...as: as) => z, memory: Record<b, z>): typeof f;
+export function memoize<as extends [number, ...unknown[]], z, b extends number = as[0]>(f: (...as: as) => z, memory: Record<b, z>, mask?: number): typeof f;
 export function memoize<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...as: as) => z, identify: (...as: as) => b, memory?: Cache<b, z>): typeof f;
-export function memoize<as extends [unknown, ...unknown[]], z, b extends number = number>(f: (...as: as) => z, identify: (...as: as) => b, memory: Record<b, z>): typeof f;
-export function memoize<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...as: as) => z, identify?: Cache<b, z> | Record<number, z> | ((...as: as) => b), memory?: Cache<b, z> | Record<number, z>): typeof f {
+export function memoize<as extends [unknown, ...unknown[]], z, b extends number = number>(f: (...as: as) => z, identify: (...as: as) => b, memory: Record<b, z>, mask?: number): typeof f;
+export function memoize<as extends [unknown, ...unknown[]], z, b = as[0]>(f: (...as: as) => z, identify?: Cache<b, z> | Record<number, z> | ((...as: as) => b), memory?: Cache<b, z> | Record<number, z> | number, mask?: number): typeof f {
   if (typeof identify === 'object') {
+    mask = memory as number;
     memory = identify;
     identify = undefined;
   }
   identify ??= (...as) => as[0] as b;
   switch (true) {
     case isArray(memory):
-      return memoizeArray(f, identify, memory as z[]);
+      return mask === undefined
+        ? memoizeArray(f, identify, memory as z[])
+        : cacheArray(f, identify, memory as [b, z][], mask);
     case memory?.constructor === Object:
-      return memoizeObject(f, identify, memory as Record<number, z>);
+      return mask === undefined
+        ? memoizeObject(f, identify, memory as Record<number, z>)
+        : cacheObject(f, identify, memory as Record<number, [b, z]>, mask);
     default:
       return memoizeDict(f, identify, memory as Cache<b, z> ?? new Map());
   }
@@ -43,11 +48,26 @@ function memoizeArray<as extends [unknown, ...unknown[]], z, b = as[0]>(
 ): typeof f {
   return (...as) => {
     const b = identify(...as) as number;
-    if (!(b >= 0)) return f(...as);
     let z = memory[b];
     if (z !== undefined) return z!;
     z = f(...as);
     memory[b] = z;
+    return z;
+  };
+}
+function cacheArray<as extends [unknown, ...unknown[]], z, b = as[0]>(
+  f: (...as: as) => z,
+  identify: (...as: as) => b,
+  memory: [b, z][],
+  mask: number,
+): typeof f {
+  return (...as) => {
+    const b = identify(...as);
+    const c = <number>b & mask;
+    const t = memory[c];
+    if (t && t[0] === b) return t[1];
+    const z = f(...as);
+    memory[c] = [b, z];
     return z;
   };
 }
@@ -59,12 +79,27 @@ function memoizeObject<as extends [unknown, ...unknown[]], z, b = as[0]>(
   let nullable = false;
   return (...as) => {
     const b = identify(...as) as number;
-    if (!(b >= 0)) return f(...as);
     let z = memory[b];
     if (z !== undefined || nullable && b in memory) return z!;
     z = f(...as);
     nullable ||= z === undefined;
     memory[b] = z;
+    return z;
+  };
+}
+function cacheObject<as extends [unknown, ...unknown[]], z, b = as[0]>(
+  f: (...as: as) => z,
+  identify: (...as: as) => b,
+  memory: Record<number, [b, z]>,
+  mask: number,
+): typeof f {
+  return (...as) => {
+    const b = identify(...as);
+    const c = <number>b & mask;
+    const t = memory[c];
+    if (t && t[0] === b) return t[1];
+    const z = f(...as);
+    memory[c] = [b, z];
     return z;
   };
 }
