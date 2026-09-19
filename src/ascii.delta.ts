@@ -163,8 +163,8 @@ num: 0.4224; hex: 0.4292; 36: 0.2352; 64: 0.2203; pct: 0.5833;
 lower: 0.3251; upper: 0.2062; camel: 0.2662; country: 0.3058; text: 0.3534; json: 0.2352;
 
 v15 テーブルを更新
-num: 0.4224; hex: 0.4293; 36: 0.2351; 64: 0.2203; pct: 0.5833;
-lower: 0.3248; upper: 0.2063; camel: 0.2663; country: 0.3058; text: 0.3734; json: 0.2352;
+num: 0.4224; hex: 0.4293; 36: 0.2352; 64: 0.2204; pct: 0.5833;
+lower: 0.3292; upper: 0.2118; camel: 0.2718; country: 0.3126; text: 0.3785; json: 0.2470;
 
 */
 
@@ -190,14 +190,14 @@ const codersF = [
 codersF.forEach((dec, i, [enc]) => i && dec.forEach((code, i) => enc[code] = i));
 const codersL = [
   new Uint8Array(128).fill(~0),
-  new Uint8Array('TNSHRDLC EAOIUYP'.split('').map(c => c.charCodeAt(0))).reverse(),
-  new Uint8Array('tnshrdlc eaoiuyp'.split('').map(c => c.charCodeAt(0))).reverse(),
+  new Uint8Array('TNSHRDLC EAOIUYG'.split('').map(c => c.charCodeAt(0))).reverse(),
+  new Uint8Array('tnshrdlc eaoiuyg'.split('').map(c => c.charCodeAt(0))).reverse(),
 ] as const;
 codersL.forEach((dec, i, [enc]) => i && dec.forEach((code, i) => enc[code] = i));
 const codersR = [
   new Uint8Array(128).fill(~0),
-  new Uint8Array('TNSHRDL CEAOIUYP'.split('').map(c => c.charCodeAt(0))),
-  new Uint8Array('tnshrdl ceaoiuyp'.split('').map(c => c.charCodeAt(0))),
+  new Uint8Array('TNSHRDL CEAOIUYG'.split('').map(c => c.charCodeAt(0))),
+  new Uint8Array('tnshrdl ceaoiuyg'.split('').map(c => c.charCodeAt(0))),
 ] as const;
 codersR.forEach((dec, i, [enc]) => i && dec.forEach((code, i) => enc[code] = i));
 assert(codersL[0][7] === codersR[0][7]);
