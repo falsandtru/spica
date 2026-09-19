@@ -190,14 +190,14 @@ const codersF = [
 codersF.forEach((dec, i, [enc]) => i && dec.forEach((code, i) => enc[code] = i));
 const codersL = [
   new Uint8Array(128).fill(~0),
-  new Uint8Array('DHTNSLRC YPAOEUI'.split('').map(c => c.charCodeAt(0))).reverse(),
-  new Uint8Array('dhtnslrc ypaoeui'.split('').map(c => c.charCodeAt(0))).reverse(),
+  new Uint8Array('TNSHRDLC EAOIUYP'.split('').map(c => c.charCodeAt(0))).reverse(),
+  new Uint8Array('tnshrdlc eaoiuyp'.split('').map(c => c.charCodeAt(0))).reverse(),
 ] as const;
 codersL.forEach((dec, i, [enc]) => i && dec.forEach((code, i) => enc[code] = i));
 const codersR = [
   new Uint8Array(128).fill(~0),
-  new Uint8Array('DHTNSLR CYPAOEUI'.split('').map(c => c.charCodeAt(0))),
-  new Uint8Array('dhtnslr cypaoeui'.split('').map(c => c.charCodeAt(0))),
+  new Uint8Array('TNSHRDL CEAOIUYP'.split('').map(c => c.charCodeAt(0))),
+  new Uint8Array('tnshrdl ceaoiuyp'.split('').map(c => c.charCodeAt(0))),
 ] as const;
 codersR.forEach((dec, i, [enc]) => i && dec.forEach((code, i) => enc[code] = i));
 assert(codersL[0][7] === codersR[0][7]);
