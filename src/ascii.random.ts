@@ -65,8 +65,8 @@ const HUFFMAN_64_LENS = new Uint8Array(128).map((_, i) => {
 });
 
 const NUMBERS = '0123456789';
-const ALPHABETS_U = 'EISAROTNLCDUPMGHYBFVKWZXJQ'.split('').reduce<string>((acc, _, i) => acc + String.fromCharCode(0x41 + i), '');
-const ALPHABETS_L = 'eisarotnlcdupmghybfvkwzxjq'.split('').reduce<string>((acc, _, i) => acc + String.fromCharCode(0x61 + i), '');
+const ALPHABETS_U = 'ETAOINSHRDLCUMWFGYPBVKJXQZ'.split('').reduce<string>((acc, _, i) => acc + String.fromCharCode(0x41 + i), '');
+const ALPHABETS_L = 'etaoinshrdlcumwfgypbvkjxqz'.split('').reduce<string>((acc, _, i) => acc + String.fromCharCode(0x61 + i), '');
 const SYMBOLS_2A = '~#!?$<>\\^`|\t';
 const SYMBOLS_1H = `-:% ./+=,;'"{}[]_&*@()\n`;
 const SYMBOLS_1T = `+/-_= :%.,;'"{}[]&*@()\n`;
