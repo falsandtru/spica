@@ -162,6 +162,10 @@ v14 HEX文字列をランダム文字列に統合
 num: 0.4224; hex: 0.4292; 36: 0.2352; 64: 0.2203; pct: 0.5833;
 lower: 0.3251; upper: 0.2062; camel: 0.2662; country: 0.3058; text: 0.3534; json: 0.2352;
 
+v15 テーブルを更新
+num: 0.4224; hex: 0.4293; 36: 0.2351; 64: 0.2203; pct: 0.5833;
+lower: 0.3248; upper: 0.2063; camel: 0.2663; country: 0.3058; text: 0.3734; json: 0.2352;
+
 */
 
 const ASCII = [...Array(256)].reduce<string>((acc, _, i) => acc + String.fromCharCode(i), '');
@@ -180,8 +184,8 @@ const codersH = [
 codersH.forEach((dec, i, [enc]) => i && dec.forEach((code, i) => enc[code] = i));
 const codersF = [
   new Uint8Array(128).fill(~0),
-  new Uint8Array('SCPADRMNTIEHOULG'.split('').map(c => c.charCodeAt(0))),
-  new Uint8Array('scpadrmntiehoulg'.split('').map(c => c.charCodeAt(0))),
+  new Uint8Array('TAOSWIHCBFMPERDL'.split('').map(c => c.charCodeAt(0))),
+  new Uint8Array('taoswihcbfmperdl'.split('').map(c => c.charCodeAt(0))),
 ] as const;
 codersF.forEach((dec, i, [enc]) => i && dec.forEach((code, i) => enc[code] = i));
 const codersL = [
